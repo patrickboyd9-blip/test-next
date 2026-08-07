@@ -2,6 +2,7 @@ import { getCommandCenterSnapshot } from "@/lib/command-center/data"
 import type { CommandCenterUserState } from "@/lib/command-center/types"
 import { WelcomeSection } from "@/components/command-center/WelcomeSection"
 import { EmptyState } from "@/components/command-center/EmptyState"
+import { CampaignConfidenceSection } from "@/components/command-center/CampaignConfidenceSection"
 import { MailStatusSection } from "@/components/command-center/MailStatusSection"
 import { AIStrategistSection } from "@/components/command-center/AIStrategistSection"
 import { MetricsStrip } from "@/components/command-center/MetricsStrip"
@@ -43,16 +44,22 @@ export default async function CommandCenterPage({ searchParams }: CommandCenterP
         </Reveal>
       ) : (
         <>
-          <Reveal delay={0.1} className="grid gap-4 lg:grid-cols-2">
+          {snapshot.confidence && (
+            <Reveal delay={0.1}>
+              <CampaignConfidenceSection confidence={snapshot.confidence} />
+            </Reveal>
+          )}
+
+          <Reveal delay={0.2} className="grid gap-4 lg:grid-cols-2">
             {snapshot.mailStatus && <MailStatusSection mailStatus={snapshot.mailStatus} />}
             <AIStrategistSection recommendations={snapshot.recommendations} />
           </Reveal>
 
-          <Reveal delay={0.2}>
+          <Reveal delay={0.3}>
             <MetricsStrip metrics={snapshot.metrics} />
           </Reveal>
 
-          <Reveal delay={0.3}>
+          <Reveal delay={0.4}>
             <OpportunitiesSection opportunities={snapshot.opportunities} />
           </Reveal>
         </>

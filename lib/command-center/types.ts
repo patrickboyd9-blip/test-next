@@ -1,6 +1,17 @@
 export type CommandCenterUserState = "new" | "active" | "power"
 
-export type BusinessHealthStatus = "healthy" | "needs_attention" | "action_recommended"
+export type ConfidenceLevel = "on_track" | "needs_attention" | "at_risk"
+
+/**
+ * Interpretation, not a raw metric: how likely the campaign is to hit the
+ * customer's own Primary Success Metric (calls, QR scans, deliveries, etc).
+ */
+export interface CampaignConfidence {
+  level: ConfidenceLevel
+  primaryMetricLabel: string
+  headline: string
+  evidence: string
+}
 
 export interface MailStatusSummary {
   delivered: number
@@ -42,7 +53,7 @@ export interface CommandCenterSnapshot {
   greetingName: string
   businessName: string
   summary: string
-  healthStatus: BusinessHealthStatus | null
+  confidence: CampaignConfidence | null
   mailStatus: MailStatusSummary | null
   metrics: BusinessMetric[]
   recommendations: Recommendation[]

@@ -6,7 +6,7 @@ const newUserSnapshot: CommandCenterSnapshot = {
   businessName: "Jordan's Plumbing",
   summary:
     "Welcome to Modern Mail. Once you launch your first campaign, this is where you'll see how it's performing and what to do next.",
-  healthStatus: null,
+  confidence: null,
   mailStatus: null,
   metrics: [],
   recommendations: [],
@@ -19,7 +19,13 @@ const activeUserSnapshot: CommandCenterSnapshot = {
   businessName: "Jordan's Plumbing",
   summary:
     "Your Spring Tune-Up campaign is in motion — 128 postcards delivered, 42 on the way, and 6 more scheduled this week. Overall, things are on track.",
-  healthStatus: "healthy",
+  confidence: {
+    level: "on_track",
+    primaryMetricLabel: "Phone calls",
+    headline: "On track to hit your call goal this month",
+    evidence:
+      "Spring Tune-Up has generated 37 calls from 128 delivered postcards — a 29% response rate, well above your typical campaign.",
+  },
   mailStatus: {
     delivered: 128,
     inTransit: 42,
@@ -52,7 +58,13 @@ const powerUserSnapshot: CommandCenterSnapshot = {
   businessName: "Jordan's Plumbing",
   summary:
     "Across your 4 active campaigns, response rates are up 9% this month, but Water Heater Special is underperforming — it needs a look before its next batch goes out.",
-  healthStatus: "needs_attention",
+  confidence: {
+    level: "needs_attention",
+    primaryMetricLabel: "Phone calls",
+    headline: "Water Heater Special is pulling your confidence down",
+    evidence:
+      "Across your 4 campaigns, calls are up 9% this month — but Water Heater Special's call rate is 40% below the rest, and 80 more postcards go out Monday before you've made a change.",
+  },
   mailStatus: {
     delivered: 512,
     inTransit: 96,

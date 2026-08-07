@@ -52,3 +52,54 @@ A customer should understand the state of their business within 10 seconds.
 A customer should know exactly what action to take next.
 
 A customer should never wonder where to click.
+
+## Founder Review #1 – Design Discoveries
+This section captures product decisions made during founder design reviews before implementation. These discoveries should be treated as requirements for future iterations of the Command Center.
+
+### 1. The page should answer the user's question immediately.
+
+The Command Center should no longer begin with a generic greeting.
+
+Instead, it should immediately answer the question:
+
+> "How's my mail doing?"
+
+The purpose of the page is to answer the customer's primary question before presenting analytics.
+
+
+### 2. Campaign Confidence replaces generic Business Health.
+
+"Business Health" is too subjective because every customer defines success differently.
+
+Campaign Confidence measures how likely Modern Mail believes the campaign is to achieve the customer's Primary Success Metric.
+
+Examples:
+
+- HR → Successful delivery
+- HVAC → Phone calls
+- Restaurant → QR scans
+- Realtor → Landing page visits
+
+The UI remains the same while the confidence model adapts to each customer's business objective.
+
+
+### 3. The screen should tell a story.
+
+The information hierarchy should become:
+
+1. How's my mail doing?
+2. Campaign Confidence
+3. Mail Status
+4. AI Strategist
+5. Supporting metrics
+
+The page should feel like guidance, not reporting.
+
+### 4. The Command Center is a decision engine.
+
+Customers should never have to interpret raw metrics.
+
+Modern Mail should interpret campaign performance and communicate confidence, evidence, and recommended actions in plain English.
+
+Every section should help customers decide what to do next.
+
