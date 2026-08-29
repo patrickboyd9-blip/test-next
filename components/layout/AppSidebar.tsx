@@ -36,7 +36,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { label: "Command Center", href: "/app", icon: LayoutDashboard },
-  { label: "Campaigns", href: "/app/campaigns", icon: Megaphone, soon: true },
+  { label: "Campaigns", href: "/app/campaigns/new", icon: Megaphone },
   { label: "Audience", href: "/app/audience", icon: Users, soon: true },
   { label: "Templates", href: "/app/templates", icon: LayoutTemplate, soon: true },
   { label: "AI Creator", href: "/app/ai-creator", icon: Sparkles, soon: true },

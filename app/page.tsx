@@ -1,5 +1,10 @@
-import Hero from "../components/Hero";
-const stars = Array.from({ length: 75 });
+import Link from "next/link";
+
+const stars = Array.from({ length: 75 }, (_, index) => ({
+  id: index,
+  left: (index * 37) % 100,
+  top: (index * 53) % 100,
+}));
 export default function Home() {
   return (
 
@@ -28,17 +33,17 @@ export default function Home() {
   <p className="mt-6 text-xl text-gray-400">
     A modern platform for launching, tracking, and optimizing direct mail campaigns.
   </p>
-  <button className="mt-10 rounded-full bg-blue-500 px-8 py-4 text-white font-semibold hover:scale-105 transition hover:bg-blue-400 hover:shadow-2xl">
+  <Link href="/app/campaigns/new" className="mt-10 rounded-full bg-blue-500 px-8 py-4 text-white font-semibold hover:scale-105 transition hover:bg-blue-400 hover:shadow-2xl">
 Get Started
-  </button>
+  </Link>
   <div>
-  {stars.map((star, index) => (
+  {stars.map((star) => (
     <span
-  key={index}
+  key={star.id}
   style={{
     position: "absolute",
-    left: `${Math.random() * 100}%`,
-    top: `${Math.random() * 100}%`,
+    left: `${star.left}%`,
+    top: `${star.top}%`,
   }}
 >
   ✦

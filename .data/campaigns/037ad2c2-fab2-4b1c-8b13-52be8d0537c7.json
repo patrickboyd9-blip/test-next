@@ -1,0 +1,81 @@
+{
+  "id": "037ad2c2-fab2-4b1c-8b13-52be8d0537c7",
+  "ownerId": "jordan@jordansplumbing.com",
+  "status": "draft",
+  "brief": {
+    "audience": {
+      "description": "residents of a specific neighborhood",
+      "quantity": 1000
+    },
+    "goal": "Get new customers in the door (drive foot traffic/visits to a clothing store), and drive online purchases via QR code",
+    "businessInfo": {
+      "name": "clothing store"
+    },
+    "desiredRecipientAction": "Visit the store in person, and/or scan a QR code to visit the website and make a purchase",
+    "primarySuccessMetric": {
+      "type": "physical_visit",
+      "description": "In-store visits from neighborhood residents receiving the postcard"
+    },
+    "supportingMetrics": [
+      "qr_scan",
+      "purchase"
+    ]
+  },
+  "creative": {
+    "directions": [],
+    "revisions": []
+  },
+  "transcript": [
+    {
+      "id": "3f9b6000-71fd-4aa7-b6dd-d2079fd663d7",
+      "role": "customer",
+      "content": "I want to send 1,000 postcards to this neighborhood.",
+      "createdAt": "2026-08-29T06:49:23.003Z"
+    },
+    {
+      "id": "f3ea61db-2c4b-4ab1-ad17-9dc789ad395b",
+      "role": "assistant",
+      "content": "Nice, a 1,000-postcard neighborhood drop is a great way to build local awareness. Let's nail down the purpose first: what's the main goal of this campaign — something like getting new customers in the door, promoting a specific offer, announcing something new, or building brand awareness?",
+      "createdAt": "2026-08-29T06:49:25.738Z"
+    },
+    {
+      "id": "ee1d50ec-e477-459f-9b97-d04830471e76",
+      "role": "customer",
+      "content": "getting new customers in the door",
+      "createdAt": "2026-08-29T06:49:36.384Z"
+    },
+    {
+      "id": "310098eb-e2f3-4d8e-881b-3208144bdc85",
+      "role": "assistant",
+      "content": "Got it — driving new customers through the door is a great focus for a neighborhood mailer. What kind of business is this for, and what would you like recipients to actually do when they get the postcard — call you, visit your location, scan a QR code, redeem a coupon, something else?",
+      "createdAt": "2026-08-29T06:49:39.418Z"
+    },
+    {
+      "id": "c5fa028e-d415-4012-9433-1f051032dc91",
+      "role": "customer",
+      "content": "this is for a clothing store",
+      "createdAt": "2026-08-29T06:49:47.011Z"
+    },
+    {
+      "id": "d3f79d36-ef2b-463f-b8de-2890f210bff6",
+      "role": "assistant",
+      "content": "Great, a clothing store — that's a fun one to design for. Now, what would you like the postcard to actually get people to do: visit the store in person, bring in a coupon, scan a QR code for an online offer, or something else?",
+      "createdAt": "2026-08-29T06:49:49.604Z"
+    },
+    {
+      "id": "ac656b47-0061-4525-ad55-67cb0b0314a7",
+      "role": "customer",
+      "content": "i want them to come visit the store and scan the QR code to drive traffic to my site and make a purchase",
+      "createdAt": "2026-08-29T06:50:11.762Z"
+    },
+    {
+      "id": "0455d52f-c408-4a2e-af84-1d944188efe7",
+      "role": "assistant",
+      "content": "Perfect — so this postcard has two goals: getting people into your store, and driving traffic to your site via QR code for purchases. That's a great combo.\\n\\nA few things I'll need to make this work: what's the store's name, address, and website (or the page you want the QR code to link to)? And is there an offer or incentive — like a discount or a free gift — that would give people a reason to come in or scan the code?",
+      "createdAt": "2026-08-29T06:50:16.501Z"
+    }
+  ],
+  "readyForBriefReview": false,
+  "createdAt": "2026-08-29T06:49:15.117Z",
+  "updatedAt": "2026-08-29T06:50:16.502Z"
+}

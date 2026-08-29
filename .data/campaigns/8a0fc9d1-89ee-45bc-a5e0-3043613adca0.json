@@ -1,0 +1,116 @@
+{
+  "id": "8a0fc9d1-89ee-45bc-a5e0-3043613adca0",
+  "ownerId": "jordan@jordansplumbing.com",
+  "status": "strategy_confirmed",
+  "brief": {
+    "goal": "Promote the grand opening of a new restaurant",
+    "desiredRecipientAction": "Scan a QR code on the mailer to book a reservation via OpenTable",
+    "primarySuccessMetric": {
+      "type": "qr_scan",
+      "description": "Number of QR code scans leading to OpenTable reservations"
+    },
+    "qrDestination": "OpenTable reservation page",
+    "audience": {
+      "description": "Homeowners in the 90069 zip code",
+      "quantity": 100
+    },
+    "businessInfo": {
+      "name": "JP's Pizza Parlor",
+      "address": "123 Main Street, Los Angeles, CA 90069",
+      "phone": "111-111-1111",
+      "website": "www.JPPizzaParlor.com"
+    },
+    "brandAssets": [
+      {
+        "id": "4d90e880-49fa-453c-a177-82c1583e70d5",
+        "type": "other",
+        "description": "logo"
+      }
+    ],
+    "offer": "Free salad for guests who come in before September 15th, 2026",
+    "emotionalTone": "Warm, casual, and family-friendly",
+    "phone": "111-111-1111",
+    "website": "www.JPPizzaParlor.com"
+  },
+  "creative": {
+    "directions": [],
+    "revisions": []
+  },
+  "transcript": [
+    {
+      "id": "0df900ad-b31b-4fa1-9e5e-dc1f606fc743",
+      "role": "customer",
+      "content": "We're opening a restaurant and want to promote our grand opening.",
+      "createdAt": "2026-08-29T05:44:15.608Z"
+    },
+    {
+      "id": "a8219963-8bbf-4df1-aba5-279af9c3d2f9",
+      "role": "assistant",
+      "content": "Congratulations on the new restaurant — that's exciting! To help shape the campaign, what would you like people to actually do after receiving your mailer? For example, visit on opening day, call to make a reservation, or bring in the mailer for a special offer?",
+      "createdAt": "2026-08-29T05:44:18.306Z"
+    },
+    {
+      "id": "52c7d2a2-d942-4ebf-b81e-bf6e82ac9541",
+      "role": "customer",
+      "content": "I'd like them to book a reservation by scanning the QR code on the mailer which goes to OpenTable",
+      "createdAt": "2026-08-29T05:45:04.326Z"
+    },
+    {
+      "id": "cae9b301-634e-4b32-aceb-03bee6bff510",
+      "role": "assistant",
+      "content": "Great, that's a clear and easy call to action — scan to book on OpenTable. Now, who are you hoping to reach with this mailer? For example, a certain radius around the restaurant, a specific neighborhood, or a particular demographic like families or young professionals?\"}",
+      "createdAt": "2026-08-29T05:45:07.675Z"
+    },
+    {
+      "id": "edb1fce2-ad32-4d5f-b23a-031749b0ee55",
+      "role": "customer",
+      "content": "I'm looking to reach 100 homeowners in the 90069 zip code",
+      "createdAt": "2026-08-29T05:45:51.460Z"
+    },
+    {
+      "id": "baa7f700-16c9-4f7b-b725-0370e8eaaf5e",
+      "role": "assistant",
+      "content": "Got it — 100 homeowners in 90069, that's a nice tight, targeted list for a local grand opening. Now let's nail down the business details: what's the restaurant's name, and do you have an address, phone number, or website you'd like included on the mailer?",
+      "createdAt": "2026-08-29T05:45:53.910Z"
+    },
+    {
+      "id": "528bd481-5289-4aa9-aec8-31b6a2fe5eeb",
+      "role": "customer",
+      "content": "the restaurant name is JP's Pizza Parlor. Address is 123 Main Street, Los Angeles, CA. 90069. Phone number is 111-111-1111. Website is www.JPPizzaParlor.com",
+      "createdAt": "2026-08-29T05:46:54.545Z"
+    },
+    {
+      "id": "3b5d771c-2243-45a5-b0a2-26db78d7e69e",
+      "role": "assistant",
+      "content": "Perfect, that gives us solid business details for the mailer. Now, what about branding — do you have a logo you'd like included, and is there any special opening offer (like a discount or free appetizer) you want to feature to encourage reservations?",
+      "createdAt": "2026-08-29T05:46:57.549Z"
+    },
+    {
+      "id": "b1d6b84a-036a-4b5e-847e-6e392187586c",
+      "role": "customer",
+      "content": "i have a logo and i want to advertise a free salad if they come in before September 15th 2026",
+      "createdAt": "2026-08-29T05:48:00.750Z"
+    },
+    {
+      "id": "39123d7b-f46c-4844-b40e-25f7219d3b3c",
+      "role": "assistant",
+      "content": "Love that — a free salad offer with a clear deadline will give people a nice reason to act fast. Last thing: what kind of feeling do you want the mailer to give off? Something warm and inviting, fun and energetic, upscale and elegant — what vibe fits JP's Pizza Parlor?",
+      "createdAt": "2026-08-29T05:48:03.853Z"
+    },
+    {
+      "id": "88014e4a-6be3-4e55-b122-e0c17895086c",
+      "role": "customer",
+      "content": "it should feel warm and casual...it's a family friendly place",
+      "createdAt": "2026-08-29T05:48:40.505Z"
+    },
+    {
+      "id": "28818e43-b721-4b92-ad62-115b69656bab",
+      "role": "assistant",
+      "content": "Perfect — warm, casual, and family-friendly is a great fit for a pizza parlor grand opening. I've got everything I need to put together a strong first draft of your campaign: promoting JP's Pizza Parlor's grand opening to 100 homeowners in 90069, with a QR code driving OpenTable reservations, a free salad offer through September 15, 2026, your logo and business info included, and a warm, family-friendly tone throughout. Let's take a look at the full brief together.\"",
+      "createdAt": "2026-08-29T05:48:43.799Z"
+    }
+  ],
+  "readyForBriefReview": true,
+  "createdAt": "2026-08-29T05:43:56.282Z",
+  "updatedAt": "2026-08-29T05:49:16.036Z"
+}

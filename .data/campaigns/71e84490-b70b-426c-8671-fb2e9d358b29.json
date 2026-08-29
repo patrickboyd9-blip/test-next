@@ -1,0 +1,29 @@
+{
+  "id": "71e84490-b70b-426c-8671-fb2e9d358b29",
+  "ownerId": "smoke-test@example.com",
+  "status": "brief_confirmed",
+  "brief": {
+    "goal": "Generate more appointments",
+    "audience": {
+      "description": "Homeowners nearby",
+      "quantity": 500
+    }
+  },
+  "transcript": [
+    {
+      "id": "msg-1",
+      "role": "customer",
+      "content": "I want to send 500 postcards to homeowners nearby.",
+      "createdAt": "2026-08-10T05:13:08.933Z"
+    },
+    {
+      "id": "msg-2",
+      "role": "assistant",
+      "content": "Got it — what would you like recipients to do?",
+      "createdAt": "2026-08-10T05:13:08.934Z"
+    }
+  ],
+  "readyForBriefReview": true,
+  "createdAt": "2026-08-10T05:13:08.931Z",
+  "updatedAt": "2026-08-10T05:13:08.935Z"
+}

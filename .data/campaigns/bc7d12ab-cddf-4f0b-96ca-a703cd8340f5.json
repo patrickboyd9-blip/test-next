@@ -1,0 +1,333 @@
+{
+  "id": "bc7d12ab-cddf-4f0b-96ca-a703cd8340f5",
+  "ownerId": "jordan@jordansplumbing.com",
+  "status": "creative_ready",
+  "brief": {
+    "goal": "Drive local customers to visit the taco shop using a discount offer",
+    "audience": {
+      "description": "Local residents within walking distance and within a 15-minute drive of the taco shop"
+    },
+    "brandAssets": [
+      {
+        "id": "370dbd10-4bd3-4683-874f-627844602356",
+        "type": "other",
+        "description": "logo"
+      },
+      {
+        "id": "75e062a6-90ea-4a15-b944-218aeb38150f",
+        "type": "other",
+        "description": "product images"
+      },
+      {
+        "id": "ef77940f-f48f-47df-91c6-a7527a5a1e1e",
+        "type": "other",
+        "description": "QR code (trackable)"
+      },
+      {
+        "id": "fba67cf4-f2cf-4054-89be-2e98fd98ac0a",
+        "type": "other",
+        "description": "small map showing location"
+      }
+    ],
+    "primarySuccessMetric": {
+      "type": "qr_scan",
+      "description": "Track QR code scans leading to coupon redemption as the primary measure of campaign response"
+    },
+    "offer": "15% off",
+    "qrDestination": "Redeemable coupon page where customers can claim the 15% off discount",
+    "desiredRecipientAction": "Scan the QR code to redeem a 15% off coupon",
+    "supportingMetrics": [
+      "coupon_redemption"
+    ],
+    "businessInfo": {
+      "name": "Taco Del Mar",
+      "website": "https://tacodelmar.com/",
+      "address": "725 Pike Street Suite #5, Seattle, WA 98101",
+      "phone": "313-701-2242"
+    },
+    "emotionalTone": "Vibrant, festive, and fun",
+    "website": "https://tacodelmar.com/"
+  },
+  "creative": {
+    "directions": [
+      {
+        "id": "dir-trusted-local",
+        "name": "Trusted Local Expert",
+        "recommended": true,
+        "designedToDrive": "Track QR code scans leading to coupon redemption as the primary measure of campaign response",
+        "rationale": "Clean, professional layout that leads with your 15% off offer and puts the booking QR front and center. Best for homeowners who need confidence before calling a contractor they haven't used.",
+        "tags": [
+          "Offer-led",
+          "QR-forward",
+          "Professional"
+        ],
+        "createdAt": "2026-01-01T00:00:00.000Z",
+        "spec": {
+          "format": "postcard_4x6",
+          "layoutVariant": "trust_first",
+          "headline": "Taco Del Mar",
+          "subheadline": "Your neighbors trust us for fast, reliable HVAC service",
+          "body": "15% off. Licensed, insured, and locally owned since 2008.",
+          "callToAction": "Scan to book online",
+          "offer": "15% off",
+          "phone": "313-701-2242",
+          "website": "https://tacodelmar.com/",
+          "qrDestination": "https://tacodelmar.com/",
+          "visualDirection": "Professional technician at work, warm and trustworthy",
+          "tone": "Vibrant, festive, and fun",
+          "palette": [
+            "#1e3a5f",
+            "#4a90a4",
+            "#f5f5f0"
+          ],
+          "imagery": "stock_hvac",
+          "backLayout": "standard_address"
+        }
+      },
+      {
+        "id": "dir-bold-offer",
+        "name": "Bold Seasonal Offer",
+        "recommended": false,
+        "designedToDrive": "Track QR code scans leading to coupon redemption as the primary measure of campaign response",
+        "oneLineDifference": "Leads with urgency and a time-limited offer — best if you want immediate response.",
+        "rationale": "High-contrast offer banner grabs attention in the mailbox. The QR code and phone number share equal weight for customers ready to act now.",
+        "tags": [
+          "Urgency-led",
+          "Offer-forward",
+          "High contrast"
+        ],
+        "createdAt": "2026-01-01T00:00:00.000Z",
+        "spec": {
+          "format": "postcard_4x6",
+          "layoutVariant": "urgency_banner",
+          "headline": "BEAT THE HEAT",
+          "subheadline": "15% OFF",
+          "body": "Taco Del Mar — same-day appointments available. Scan or call today.",
+          "callToAction": "Book now",
+          "offer": "15% off",
+          "phone": "313-701-2242",
+          "website": "https://tacodelmar.com/",
+          "qrDestination": "https://tacodelmar.com/",
+          "visualDirection": "Bold seasonal urgency, strong offer hierarchy",
+          "tone": "Urgent, energetic, action-oriented",
+          "palette": [
+            "#c0392b",
+            "#1a1a2e",
+            "#ffffff"
+          ],
+          "imagery": "stock_hvac",
+          "backLayout": "standard_address"
+        }
+      },
+      {
+        "id": "dir-neighborhood",
+        "name": "Neighborhood Welcome",
+        "recommended": false,
+        "designedToDrive": "Track QR code scans leading to coupon redemption as the primary measure of campaign response",
+        "oneLineDifference": "Warm, neighborhood-focused tone — best if you want to feel like a trusted local business.",
+        "rationale": "Friendly, community-first messaging with softer visuals. The booking path is clear without feeling sales-heavy — ideal for first-time outreach.",
+        "tags": [
+          "Community-led",
+          "Warm tone",
+          "Soft sell"
+        ],
+        "createdAt": "2026-01-01T00:00:00.000Z",
+        "spec": {
+          "format": "postcard_4x6",
+          "layoutVariant": "photo_led",
+          "headline": "Keeping Irvine comfortable",
+          "subheadline": "From your neighbors at Taco Del Mar",
+          "body": "15% off. We're proud to serve your neighborhood — book your appointment in seconds.",
+          "callToAction": "Scan to schedule",
+          "offer": "15% off",
+          "phone": "313-701-2242",
+          "website": "https://tacodelmar.com/",
+          "qrDestination": "https://tacodelmar.com/",
+          "visualDirection": "Warm neighborhood photography, approachable and local",
+          "tone": "Warm, welcoming, community-focused",
+          "palette": [
+            "#2d6a4f",
+            "#95d5b2",
+            "#fefae0"
+          ],
+          "imagery": "stock_hvac",
+          "backLayout": "standard_address"
+        }
+      }
+    ],
+    "recommendation": {
+      "directionId": "dir-trusted-local",
+      "headline": "★ Our recommendation",
+      "rationale": "Clean, professional layout that leads with your 15% off offer and puts the booking QR front and center. Best for homeowners who need confidence before calling a contractor they haven't used."
+    },
+    "recommendedDirectionId": "dir-trusted-local",
+    "selectedDirectionId": "dir-trusted-local",
+    "revisions": [
+      {
+        "id": "3aa268b0-1fa4-4cb5-aab6-1428edfe2b65",
+        "directionId": "dir-trusted-local",
+        "version": 1,
+        "spec": {
+          "format": "postcard_4x6",
+          "layoutVariant": "trust_first",
+          "headline": "Taco Del Mar",
+          "subheadline": "Your neighbors trust us for fast, reliable HVAC service",
+          "body": "15% off. Licensed, insured, and locally owned since 2008.",
+          "callToAction": "Scan to book online",
+          "offer": "15% off",
+          "phone": "313-701-2242",
+          "website": "https://tacodelmar.com/",
+          "qrDestination": "https://tacodelmar.com/",
+          "visualDirection": "Professional technician at work, warm and trustworthy",
+          "tone": "Vibrant, festive, and fun",
+          "palette": [
+            "#1e3a5f",
+            "#4a90a4",
+            "#f5f5f0"
+          ],
+          "imagery": "stock_hvac",
+          "backLayout": "standard_address"
+        },
+        "customerPrompt": "Original concept",
+        "studioResponse": "",
+        "type": "refinement",
+        "createdAt": "2026-08-29T06:30:10.613Z"
+      },
+      {
+        "id": "b8a26f27-58f8-4f98-a3ee-0e0f98e940c4",
+        "directionId": "dir-bold-offer",
+        "version": 1,
+        "spec": {
+          "format": "postcard_4x6",
+          "layoutVariant": "urgency_banner",
+          "headline": "BEAT THE HEAT",
+          "subheadline": "15% OFF",
+          "body": "Taco Del Mar — same-day appointments available. Scan or call today.",
+          "callToAction": "Book now",
+          "offer": "15% off",
+          "phone": "313-701-2242",
+          "website": "https://tacodelmar.com/",
+          "qrDestination": "https://tacodelmar.com/",
+          "visualDirection": "Bold seasonal urgency, strong offer hierarchy",
+          "tone": "Urgent, energetic, action-oriented",
+          "palette": [
+            "#c0392b",
+            "#1a1a2e",
+            "#ffffff"
+          ],
+          "imagery": "stock_hvac",
+          "backLayout": "standard_address"
+        },
+        "customerPrompt": "Original concept",
+        "studioResponse": "",
+        "type": "refinement",
+        "createdAt": "2026-08-29T06:30:10.613Z"
+      },
+      {
+        "id": "6c42b9c5-64cc-452d-ab29-7ec1c2269469",
+        "directionId": "dir-neighborhood",
+        "version": 1,
+        "spec": {
+          "format": "postcard_4x6",
+          "layoutVariant": "photo_led",
+          "headline": "Keeping Irvine comfortable",
+          "subheadline": "From your neighbors at Taco Del Mar",
+          "body": "15% off. We're proud to serve your neighborhood — book your appointment in seconds.",
+          "callToAction": "Scan to schedule",
+          "offer": "15% off",
+          "phone": "313-701-2242",
+          "website": "https://tacodelmar.com/",
+          "qrDestination": "https://tacodelmar.com/",
+          "visualDirection": "Warm neighborhood photography, approachable and local",
+          "tone": "Warm, welcoming, community-focused",
+          "palette": [
+            "#2d6a4f",
+            "#95d5b2",
+            "#fefae0"
+          ],
+          "imagery": "stock_hvac",
+          "backLayout": "standard_address"
+        },
+        "customerPrompt": "Original concept",
+        "studioResponse": "",
+        "type": "refinement",
+        "createdAt": "2026-08-29T06:30:10.613Z"
+      }
+    ],
+    "activeSpec": {
+      "format": "postcard_4x6",
+      "layoutVariant": "trust_first",
+      "headline": "Taco Del Mar",
+      "subheadline": "Your neighbors trust us for fast, reliable HVAC service",
+      "body": "15% off. Licensed, insured, and locally owned since 2008.",
+      "callToAction": "Scan to book online",
+      "offer": "15% off",
+      "phone": "313-701-2242",
+      "website": "https://tacodelmar.com/",
+      "qrDestination": "https://tacodelmar.com/",
+      "visualDirection": "Professional technician at work, warm and trustworthy",
+      "tone": "Vibrant, festive, and fun",
+      "palette": [
+        "#1e3a5f",
+        "#4a90a4",
+        "#f5f5f0"
+      ],
+      "imagery": "stock_hvac",
+      "backLayout": "standard_address"
+    },
+    "activeRevisionId": "3aa268b0-1fa4-4cb5-aab6-1428edfe2b65"
+  },
+  "transcript": [
+    {
+      "id": "95ecbf49-f710-444c-86be-150b94db2751",
+      "role": "customer",
+      "content": "I'm looking to do a discount campaign for my local taco shop. this should be sent to customers who are walking distance and within 15 min driving time. I want the mailer to feature product images, my logo, a QR code that allows me to track scans, and a small map that shows where I am located.",
+      "createdAt": "2026-08-29T05:55:35.614Z"
+    },
+    {
+      "id": "f816bd29-3f26-4577-af29-1c1a7c79654f",
+      "role": "assistant",
+      "content": "Love this — a taco shop discount mailer with a trackable QR code is a great combo. A couple things to nail down before I put together the first draft:\\n\\nFirst, what's the actual discount or offer you want to feature (like \\\"$2 off any combo\\\" or \\\"Buy One Get One Free\\\")? And when someone scans that QR code, where should it take them — your online menu, an ordering page, a coupon redemption screen?\"",
+      "createdAt": "2026-08-29T05:55:40.756Z"
+    },
+    {
+      "id": "f7c3cfe5-07ce-49bc-8efb-5e4e519ccf0b",
+      "role": "customer",
+      "content": "i want to offer a 15% OFF discount, and the QR code should take them to a redeemable coupon site where they can obtain the 15% OFF.",
+      "createdAt": "2026-08-29T05:56:57.149Z"
+    },
+    {
+      "id": "976feeff-d935-4c7e-b1e1-8f9694fa6bb1",
+      "role": "assistant",
+      "content": "Perfect, that gives the mailer a clear call to action: scan for 15% off. Now let's nail down your business details so we can build out the map and contact info — what's your taco shop's name and address, and do you have a website or social handle you'd like included too?",
+      "createdAt": "2026-08-29T05:57:01.591Z"
+    },
+    {
+      "id": "bf0bff8d-cf17-4aa1-a7e2-b17bb5b189fb",
+      "role": "customer",
+      "content": "https://tacodelmar.com/ Here's my website, the name is Taco Del Mar. address is \n725 Pike Street Suite #5\nSeattle, WA 98101",
+      "createdAt": "2026-08-29T05:59:09.867Z"
+    },
+    {
+      "id": "1cd6dbe2-2ab0-4afc-af76-b3ebafdec24c",
+      "role": "assistant",
+      "content": "Got it — Taco Del Mar at 725 Pike Street Suite #5, Seattle, WA 98101, with tacodelmar.com. That'll anchor the map and contact info nicely.\\n\\nLast couple pieces: do you want a phone number listed on the mailer for people to call, and what kind of feeling do you want this piece to give off — fun and vibrant, warm and inviting, bold and punchy? That'll help set the tone for the design and copy.",
+      "createdAt": "2026-08-29T05:59:13.686Z"
+    },
+    {
+      "id": "b6ba7c5f-ab30-4da4-adc4-cd7f506bfb1b",
+      "role": "customer",
+      "content": "yes 3137012242. and vibrant, festive, fun for the mailer",
+      "createdAt": "2026-08-29T05:59:42.528Z"
+    },
+    {
+      "id": "77141bca-0084-430f-a27d-01434a0d41cb",
+      "role": "assistant",
+      "content": "Awesome — that's everything I need. Here's the shape of your campaign: a vibrant, festive, fun mailer for Taco Del Mar promoting 15% off, sent to residents within walking distance and a 15-minute drive of 725 Pike Street Suite #5, Seattle. It'll feature your logo, mouthwatering product images, a small location map, and a trackable QR code linking to a redeemable coupon page — plus your phone number, 313-701-2242, and website for good measure. I'll pull this together into a full campaign brief for you to review now.",
+      "createdAt": "2026-08-29T05:59:46.379Z"
+    }
+  ],
+  "readyForBriefReview": true,
+  "createdAt": "2026-08-29T05:52:49.729Z",
+  "updatedAt": "2026-08-29T06:30:10.613Z"
+}

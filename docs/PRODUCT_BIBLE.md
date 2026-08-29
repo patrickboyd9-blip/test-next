@@ -93,6 +93,7 @@ Our goal is that every customer eventually says:
 > "I can't imagine managing physical outreach any other way."
 
 Every feature, workflow, and design decision should move us closer to earning that response.
+
 Modern Mail exists to replace uncertainty with confidence.
 
 Every screen, recommendation, and workflow should leave customers feeling more confident than when they arrived.
@@ -211,11 +212,37 @@ They should simply accomplish what they came to do.
 
 Design beautiful physical outreach using AI or upload your own creative.
 
+Modern Mail should understand the customer's campaign before creating the creative.
+
+Customers should be able to describe what they want in their own words. Modern Mail should use the customer's goal, desired recipient action, target audience, brand information, required creative assets, and desired emotional response to develop multiple creative directions.
+
+Creative should be iterative, not one-shot.
+
+Modern Mail should generate multiple initial creative directions, allow the customer to select one, and then refine that direction through natural-language instructions while preserving the campaign's underlying goals, audience, brand requirements, and success metric.
+
+Customers should be able to make changes such as:
+
+- "Change the border from red to green."
+- "Make the headline bigger."
+- "Replace the muffin with a friendly baker making dough."
+- "Make this feel warmer and more welcoming."
+- "Move my phone number to the bottom right."
+
+The customer should not need to learn a traditional design tool to make meaningful changes.
+
 ---
 
 ### Audience
 
 Import, build, organize, and manage mailing audiences.
+
+Modern Mail should understand the customer's intended target audience before building the actual mailing audience.
+
+The target audience is the customer's desired audience definition—for example:
+
+> "Homeowners in these ZIP codes, preferably higher-income households."
+
+Modern Mail can then translate that audience definition into an actual mailing audience using available data sources.
 
 ---
 
@@ -247,12 +274,24 @@ The AI should:
 
 - Interview customers
 - Understand business goals
-- Build campaigns
+- Understand the desired recipient action
+- Ask only the questions necessary to understand the campaign
+- Build campaign briefs
 - Recommend audiences
 - Generate copy
+- Generate creative concepts
 - Improve existing campaigns
+- Interpret campaign performance
 - Learn from campaign performance
 - Recommend the next best action
+
+The customer's previous answer should determine what Modern Mail asks next.
+
+Modern Mail should not overwhelm customers with a rigid series of questions or forms.
+
+The customer describes the campaign.
+
+Modern Mail figures out the configuration.
 
 Customers should never feel like they're using ChatGPT.
 
@@ -279,6 +318,7 @@ Examples include:
 - Coupon redemptions
 - Booked appointments
 - Website visits
+- Purchases
 - Donations
 - Form submissions
 - Event registrations
@@ -287,9 +327,17 @@ Examples include:
 
 Every campaign has a **Primary Success Metric**.
 
-The Command Center, AI Strategist, analytics, and recommendations should always revolve around that metric.
+A campaign may also have supporting metrics that provide additional context.
+
+The Command Center, AI Strategist, analytics, and recommendations should always revolve around the customer's Primary Success Metric.
 
 Modern Mail should adapt to the customer's business—not force every business into the same definition of success.
+
+Not every campaign needs a traditional conversion metric.
+
+For example, an employee birthday campaign may simply be successful when the package is delivered.
+
+---
 
 ## Command Center Philosophy
 
@@ -323,6 +371,7 @@ The Command Center should immediately answer:
 
 Customers should never have to search for answers.
 
+The Command Center should interpret campaign performance relative to the customer's Primary Success Metric rather than presenting metrics without context.
 
 ---
 
@@ -374,6 +423,8 @@ Success looks like:
 
 Create beautiful physical outreach with AI or upload an existing design.
 
+Customers can describe their campaign in natural language, answer progressive follow-up questions, receive multiple creative concepts, select a direction, and refine it through natural-language instructions.
+
 ### Audience
 
 Import, manage, or generate mailing lists.
@@ -410,11 +461,31 @@ AI learns about the business
 
 ↓
 
-Creates first campaign
+Describes what they want to accomplish
 
 ↓
 
-Imports audience
+Modern Mail asks progressive follow-up questions
+
+↓
+
+Modern Mail understands the campaign goal, success metric, audience, brand requirements, and creative direction
+
+↓
+
+Modern Mail generates creative concepts
+
+↓
+
+Customer selects and refines a design
+
+↓
+
+Imports or builds audience
+
+↓
+
+Reviews campaign
 
 ↓
 
@@ -441,6 +512,7 @@ Modern Mail is successful when...
 - Customers launch their first campaign in under five minutes.
 - Customers understand campaign performance without training.
 - Customers trust AI recommendations.
+- Customers can create effective campaigns without learning complex marketing or design software.
 - Customers replace multiple tools with Modern Mail.
 - Customers say:
 
@@ -471,3 +543,6 @@ Our long-term goal is to become the default platform businesses use whenever the
 - The interface should feel premium, calm, and trustworthy.
 - Every animation should communicate purpose.
 - Complexity belongs to us, not the customer.
+- Creative should be designed around the desired customer outcome.
+- Customers should be able to refine AI-generated creative without restarting their campaign.
+- Modern Mail should never force every campaign into the same definition of success.

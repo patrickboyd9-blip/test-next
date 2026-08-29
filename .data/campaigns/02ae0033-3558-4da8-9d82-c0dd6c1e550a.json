@@ -1,0 +1,63 @@
+{
+  "id": "02ae0033-3558-4da8-9d82-c0dd6c1e550a",
+  "ownerId": "jordan@jordansplumbing.com",
+  "status": "quantity_confirmed",
+  "brief": {
+    "goal": "Promote grand opening of Sunrise Coffee",
+    "audience": {
+      "description": "Residents within a 2-mile radius of the shop in downtown Austin",
+      "quantity": 800
+    },
+    "desiredRecipientAction": "Scan a QR code to redeem a free coffee coupon",
+    "primarySuccessMetric": {
+      "type": "qr_scan",
+      "description": "Number of QR code scans redeeming the free coffee coupon"
+    },
+    "businessInfo": {
+      "name": "Sunrise Coffee",
+      "website": "sunrisecoffee.com",
+      "address": "45 Sunrise Ave, Austin, TX",
+      "phone": "512-555-0199"
+    },
+    "offer": "Free coffee coupon via QR code scan",
+    "qrDestination": "sunrisecoffee.com/coupon",
+    "brandAssets": [
+      {
+        "id": "04c83a01-4aa6-452c-bf4f-35e685d17baa",
+        "type": "other",
+        "description": "QR code linking to coupon"
+      }
+    ],
+    "emotionalTone": "Warm and inviting",
+    "otherRequirements": "No logo needed on the postcard"
+  },
+  "transcript": [
+    {
+      "id": "e31e90cd-3b79-42fe-9823-fa7b0f2dbbe6",
+      "role": "customer",
+      "content": "I own a coffee shop and want to send 500 postcards to residents near my shop to promote our grand opening. I want people to scan a QR code for a free coffee coupon. My shop is called Sunrise Coffee, website sunrisecoffee.com. Keep it warm and inviting, no logo needed.",
+      "createdAt": "2026-08-11T02:50:39.789Z"
+    },
+    {
+      "id": "f7d83bd1-1cfa-4c85-aaa2-88b149fe400c",
+      "role": "assistant",
+      "content": "Love this concept — a grand opening postcard with a free coffee QR coupon is a great way to drive foot traffic right out of the gate. Quick question: where should that QR code actually send people — a specific coupon landing page on your site, or something like a Google/Apple Wallet pass or a simple \"show this at checkout\" image? And do you have your shop's address and phone number you'd like printed on the postcard so people can find you easily?",
+      "createdAt": "2026-08-11T02:50:47.172Z"
+    },
+    {
+      "id": "772719ac-a5ec-4b76-8ead-75c55e246efc",
+      "role": "customer",
+      "content": "sunrisecoffee.com/coupon is the landing page. Address is 45 Sunrise Ave, Austin, TX. Phone is 512-555-0199.",
+      "createdAt": "2026-08-11T02:51:06.455Z"
+    },
+    {
+      "id": "34025b8f-6242-4ce3-8f97-9a2546376d9b",
+      "role": "assistant",
+      "content": "Perfect, that gives me everything I need for a strong first draft: a warm, inviting postcard for Sunrise Coffee's grand opening, sent to 500 nearby residents, featuring a QR code linking to sunrisecoffee.com/coupon for a free coffee redemption, plus your address and phone number, and no logo. Let's move on to reviewing the full brief together.",
+      "createdAt": "2026-08-11T02:51:11.299Z"
+    }
+  ],
+  "readyForBriefReview": true,
+  "createdAt": "2026-08-11T02:50:28.209Z",
+  "updatedAt": "2026-08-11T03:52:29.389Z"
+}

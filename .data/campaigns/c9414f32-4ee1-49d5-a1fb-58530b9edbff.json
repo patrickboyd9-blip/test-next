@@ -1,0 +1,104 @@
+{
+  "id": "c9414f32-4ee1-49d5-a1fb-58530b9edbff",
+  "ownerId": "jordan@jordansplumbing.com",
+  "status": "audience_confirmed",
+  "brief": {
+    "goal": "Generate appointment bookings for HVAC services",
+    "audience": {
+      "description": "Homeowners in a few local ZIP codes",
+      "quantity": 1000
+    },
+    "desiredRecipientAction": "Scan a QR code to fill out a form on the website, or call the phone number, to book an appointment",
+    "primarySuccessMetric": {
+      "type": "appointment",
+      "description": "Appointments booked via QR code form submissions or phone calls"
+    },
+    "supportingMetrics": [
+      "qr_scan",
+      "phone_call"
+    ],
+    "brandAssets": [
+      {
+        "id": "e5d60312-b401-4a99-b9f3-b25ef2d15856",
+        "type": "other",
+        "description": "logo"
+      },
+      {
+        "id": "051b2432-12e4-452a-8f33-4e8b175bf606",
+        "type": "other",
+        "description": "QR code"
+      },
+      {
+        "id": "fe793492-9458-46f1-a057-b211e68c136f",
+        "type": "other",
+        "description": "phone number"
+      },
+      {
+        "id": "4caae11b-961d-4cb0-9fdf-08e0adffefaa",
+        "type": "other",
+        "description": "business address"
+      }
+    ],
+    "businessInfo": {
+      "name": "Cool Air HVAC",
+      "address": "123 Main Street, Irvine, CA 92618",
+      "website": "https://example.com/book"
+    },
+    "qrDestination": "https://example.com/book",
+    "offer": "20% off first-time service call",
+    "emotionalTone": "Warm and trustworthy, yet professional and modern — conveying reliability as a local company homeowners can trust"
+  },
+  "transcript": [
+    {
+      "id": "4a538092-d415-4788-a893-7eab85ccd045",
+      "role": "customer",
+      "content": "I own an HVAC company and want to send 1,000 mailers to homeowners in a few local ZIP codes. I want the mailer to generate appointments. I'd like a QR code that takes people to a form on my website, and I also want my phone number on the mailer so people can call us.",
+      "createdAt": "2026-08-11T02:01:31.133Z"
+    },
+    {
+      "id": "ac15ba73-b70a-4816-9cbc-2d44b325f5a6",
+      "role": "assistant",
+      "content": "Got it — an HVAC mailer aimed at booking appointments, sent to 1,000 homeowners in a few local ZIP codes, with a QR code linking to your website form and your phone number as a backup contact method. \n\nA couple quick things to nail down the details: what's your business name (and do you want your address on the mailer too), and what's the specific website URL the QR code should point to?",
+      "createdAt": "2026-08-11T02:01:37.710Z"
+    },
+    {
+      "id": "94bb8138-7fe7-4b24-b220-ae651087dd10",
+      "role": "customer",
+      "content": "The business is Cool Air HVAC. Our address is 123 Main Street, Irvine, CA 92618. The website URL is https://example.com/book",
+      "createdAt": "2026-08-11T02:03:15.093Z"
+    },
+    {
+      "id": "e7848ce7-7c4d-4248-9166-dfb2d04ec4b2",
+      "role": "assistant",
+      "content": "Perfect, that gives us the core business details. Do you have a logo you'd like included on the mailer, and is there any special offer or discount you want to feature (like a seasonal tune-up discount or a percentage off a service) to give people extra incentive to book?",
+      "createdAt": "2026-08-11T02:03:20.370Z"
+    },
+    {
+      "id": "52e2c51b-93c2-4da9-8afd-7635b9d810ac",
+      "role": "customer",
+      "content": "Yes, include our logo. Offer 20% off a first-time service call.",
+      "createdAt": "2026-08-11T02:04:39.655Z"
+    },
+    {
+      "id": "11e86cb8-5936-460a-ba6a-677463ae4ff5",
+      "role": "assistant",
+      "content": "Great, a 20% off first-time service call is a strong hook to drive bookings. Last thing — what kind of feeling do you want the mailer to give off? For example, should it feel urgent and deal-focused, warm and trustworthy, or professional and reliable?",
+      "createdAt": "2026-08-11T02:04:44.578Z"
+    },
+    {
+      "id": "a965ad7a-60c8-45b2-bea3-e9c57016733b",
+      "role": "customer",
+      "content": "Warm and trustworthy, but still professional and modern. I want homeowners to feel like we're a reliable local company they can trust.",
+      "createdAt": "2026-08-11T02:05:39.690Z"
+    },
+    {
+      "id": "4da5428f-1ca2-4897-b34c-90cae8bd8ef2",
+      "role": "assistant",
+      "content": "That's a great direction — warm and trustworthy with a modern, professional polish will resonate well with homeowners choosing a local HVAC provider. I think we've got everything needed for a strong first draft: 1,000 mailers to homeowners in your local ZIP codes, driving appointment bookings via QR code (linking to your booking form) or phone call, featuring Cool Air HVAC's logo, address, and a 20% off first-time service offer, with a warm, trustworthy, professional tone. Ready for me to put together the campaign brief for your review?",
+      "createdAt": "2026-08-11T02:05:45.109Z"
+    }
+  ],
+  "readyForBriefReview": true,
+  "createdAt": "2026-08-11T02:00:54.004Z",
+  "updatedAt": "2026-08-11T02:33:32.243Z"
+}

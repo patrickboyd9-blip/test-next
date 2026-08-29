@@ -1,0 +1,38 @@
+{
+  "id": "edc68ffb-1dc4-4c40-89e9-1d7046630158",
+  "ownerId": "jordan@jordansplumbing.com",
+  "status": "brief_confirmed",
+  "brief": {
+    "goal": "Generate more appointments for HVAC tune-ups",
+    "desiredRecipientAction": "Book an appointment by scanning the QR code",
+    "primarySuccessMetric": {
+      "type": "other",
+      "description": "Phone calls"
+    },
+    "emotionalTone": "Trustworthy and reassuring",
+    "audience": {
+      "description": "Homeowners in Irvine",
+      "quantity": 1000
+    },
+    "businessInfo": {
+      "name": "ABC Air"
+    }
+  },
+  "transcript": [
+    {
+      "id": "3bcfbf4f-094e-4965-bade-55b547b64cf0",
+      "role": "customer",
+      "content": "I own an HVAC company and want to send 1,000 mailers to homeowners in Irvine.",
+      "createdAt": "2026-08-10T05:25:32.535Z"
+    },
+    {
+      "id": "26b8a767-054f-42f2-bc53-f258996facb3",
+      "role": "system",
+      "content": "Modern Mail's conversation engine isn't connected yet, so I can't respond intelligently to what you've written. You can fill in the campaign brief manually below in the meantime.",
+      "createdAt": "2026-08-10T05:25:32.585Z"
+    }
+  ],
+  "readyForBriefReview": true,
+  "createdAt": "2026-08-10T05:22:26.741Z",
+  "updatedAt": "2026-08-10T05:27:43.543Z"
+}

@@ -56,6 +56,54 @@ A customer should never wonder where to click.
 ## Founder Review #1 – Design Discoveries
 This section captures product decisions made during founder design reviews before implementation. These discoveries should be treated as requirements for future iterations of the Command Center.
 
+## Founder Review #2 – Campaign Confidence
+
+Campaign Confidence is the signature UI component of Modern Mail.
+
+It is not a KPI, scorecard, or dashboard metric.
+
+Its purpose is to answer one question in under one second:
+
+> "Is my campaign on track to accomplish its goal?"
+Campaign Confidence should be based on the customer's Primary Success Metric rather than a universal definition of success.
+
+Examples:
+
+- HR → Successful deliveries
+- HVAC → Phone calls
+- Restaurant → QR scans
+- Real Estate → Landing page visits
+
+The component should communicate confidence through both visual design and plain-English explanations.
+
+### Design Principles
+
+- Campaign Confidence is the visual centerpiece of the Command Center.
+- It should be recognizable throughout the product.
+- It should communicate status before the user reads any text.
+- It should explain *why* Modern Mail has high, moderate, or low confidence.
+- It should encourage confidence, not anxiety.
+
+### Visual Direction
+
+The component should center around a minimal Confidence Ring.
+
+The ring should represent confidence levels rather than a numeric percentage.
+
+Preferred levels:
+
+- High
+- Moderate
+- Low
+
+The center of the ring should display the confidence level instead of a score.
+
+Below the ring, Modern Mail explains why it reached that conclusion in plain English.
+
+Campaign Confidence represents Modern Mail's interpretation of campaign performance—not raw analytics.
+
+
+
 ### 1. The page should answer the user's question immediately.
 
 The Command Center should no longer begin with a generic greeting.

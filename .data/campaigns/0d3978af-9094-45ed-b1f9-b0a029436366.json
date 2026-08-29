@@ -1,0 +1,54 @@
+{
+  "id": "0d3978af-9094-45ed-b1f9-b0a029436366",
+  "ownerId": "jordan@jordansplumbing.com",
+  "status": "quantity_confirmed",
+  "brief": {
+    "goal": "Promote a new pastry line at Flour Power bakery",
+    "audience": {
+      "description": "Nearby residents",
+      "quantity": 300
+    },
+    "desiredRecipientAction": "Call to place an order",
+    "primarySuccessMetric": {
+      "type": "phone_call",
+      "description": "Number of calls received to place pastry orders"
+    },
+    "businessInfo": {
+      "name": "Flour Power",
+      "phone": "555-867-5309",
+      "website": "flourpower.com"
+    },
+    "emotionalTone": "Fun and playful",
+    "offer": "Mention this postcard for a free cookie with any order",
+    "brandAssets": []
+  },
+  "transcript": [
+    {
+      "id": "5ca92f8a-338e-48a8-8c9c-4559813cdcf6",
+      "role": "customer",
+      "content": "I run a small bakery called Flour Power and want to send 300 postcards to nearby residents to promote a new pastry line. I want people to call 555-867-5309 to place an order. Keep it fun and playful. Website is flourpower.com.",
+      "createdAt": "2026-08-11T03:53:46.543Z"
+    },
+    {
+      "id": "f7572e5a-f55e-4df6-9aae-b80c016af784",
+      "role": "assistant",
+      "content": "Love this — Flour Power's new pastry line sounds like a fun campaign to build around! A couple quick things to round it out: do you want your logo and/or photos of the pastries featured on the postcard, and is there any kind of offer or discount you'd like to include to give people a reason to call right away?",
+      "createdAt": "2026-08-11T03:53:51.307Z"
+    },
+    {
+      "id": "158331f1-7a93-4d72-b3bd-b07620605b8b",
+      "role": "customer",
+      "content": "No logo or photos needed. Offer: mention this postcard for a free cookie with any order.",
+      "createdAt": "2026-08-11T03:54:01.287Z"
+    },
+    {
+      "id": "8242fb04-e08d-4bb8-bf02-2fb8e623e8fc",
+      "role": "assistant",
+      "content": "Perfect, that free cookie offer is a great little hook to get the phone ringing. I think I've got everything I need to put together a strong first draft: promoting Flour Power's new pastry line to 300 nearby residents via postcard, driving calls to 555-867-5309 with a free cookie offer, in a fun and playful tone, pointing to flourpower.com. Ready for me to pull together the campaign brief for your review?",
+      "createdAt": "2026-08-11T03:54:05.580Z"
+    }
+  ],
+  "readyForBriefReview": true,
+  "createdAt": "2026-08-11T03:53:25.475Z",
+  "updatedAt": "2026-08-11T03:54:59.338Z"
+}

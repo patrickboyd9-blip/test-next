@@ -1,0 +1,23 @@
+{
+  "id": "d7693939-9bf9-4b2a-ae46-963d12c594a5",
+  "ownerId": "jordan@jordansplumbing.com",
+  "status": "draft",
+  "brief": {},
+  "transcript": [
+    {
+      "id": "db1d2449-a957-43de-b097-3ea2e41c3ca2",
+      "role": "customer",
+      "content": "I want to send 1,000 mailers to HVAC customers",
+      "createdAt": "2026-08-10T05:51:50.657Z"
+    },
+    {
+      "id": "16c1d774-ae75-42a3-b119-5b1be6bad4ed",
+      "role": "system",
+      "content": "Modern Mail's conversation engine isn't connected yet, so I can't respond intelligently to what you've written. You can fill in the campaign brief manually below in the meantime.",
+      "createdAt": "2026-08-10T05:51:50.663Z"
+    }
+  ],
+  "readyForBriefReview": false,
+  "createdAt": "2026-08-10T05:51:40.898Z",
+  "updatedAt": "2026-08-10T05:51:50.664Z"
+}
