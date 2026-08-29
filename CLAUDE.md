@@ -8,7 +8,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Product context lives in `docs/`:
 - `docs/PRODUCT_BIBLE.md` — mission, vision, product principles, personas, and non-negotiables. It defines what the product should and shouldn't do (e.g. "not a print shop", "every workflow launchable in under five minutes").
-- `docs/prd/CommandCenter.md` — PRD for the "Command Center" (the app's home screen once built), which must answer "what happened / what is happening / what should I do next" within 10 seconds of login. Add further PRDs to `docs/prd/` as new features are specified.
+- `docs/UX_MANIFESTO.md` — UX bar: calm, premium, minimal, fast; how motion, copy, and layout should feel.
+- `docs/ENGINEERING_PRINCIPLES.md` — how we build: quality, milestones, definition of done, regression discipline.
+- `docs/RELEASE_CHECKLIST.MD` — mandatory verification before every milestone release (lint, build, dev, browser, git).
+- `docs/prd/` — feature PRDs (e.g. `CommandCenter.md`). Read the relevant PRD before implementing a feature.
 
 ## Product & Engineering Philosophy
 
@@ -26,6 +29,10 @@ These rules govern *how* to work in this repo, not just what's in it. They apply
 10. **The UI should feel premium, calm, trustworthy, and modern.** This is a design bar for every screen, not just the landing page.
 11. **AI is a first-class part of the product — not an afterthought.** When building features, consider how AI fits into the workflow (per the Product Bible's AI Strategy) rather than bolting it on later.
 12. **Every implementation should reinforce that Modern Mail is the operating system for physical outreach** — unifying create/audience/launch/measure/optimize into one workspace, not a point tool.
+13. **Follow all governing docs before shipping.** Read `PRODUCT_BIBLE.md`, `UX_MANIFESTO.md`, `ENGINEERING_PRINCIPLES.md`, the relevant milestone PRD, and complete `RELEASE_CHECKLIST.MD` — never skip validation.
+14. **Never leave the application in a broken state.** If lint or build fails, fix it before ending the session.
+15. **Explain dependency changes before making them.** State why a version pin or new package is needed; then verify with a clean install, build, and dev smoke test.
+16. **Every milestone ends with:** `npm run lint`, `npm run build`, `npm run dev`, browser verification of `/` and `/app` (plus new feature paths), and a `git status` review.
 
 ## Commands
 

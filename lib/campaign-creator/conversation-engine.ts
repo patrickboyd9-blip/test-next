@@ -1,4 +1,5 @@
 import type { ConversationEngine } from "./conversation-engine-types"
+import { AnthropicConversationEngine } from "./anthropic-conversation-engine"
 
 export type {
   ConversationEngine,
@@ -34,10 +35,6 @@ export function getConversationEngine(): ConversationEngine {
   }
 
   if (!cachedEngine) {
-    // Lazy load keeps @anthropic-ai/sdk out of unrelated server-action compile graphs.
-    // eslint-disable-next-line @typescript-eslint/no-require-imports -- sync provider boundary
-    const { AnthropicConversationEngine } =
-      require("./anthropic-conversation-engine") as typeof import("./anthropic-conversation-engine")
     cachedEngine = new AnthropicConversationEngine(apiKey)
   }
 
