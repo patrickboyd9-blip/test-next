@@ -40,6 +40,23 @@ export function getActiveSpec(
   return direction?.spec
 }
 
+/** Approved spec snapshot, with fallback for records saved before v0.3.0 finalization. */
+export function getApprovedSpec(creative: CampaignCreative): CreativeSpec | undefined {
+  if (creative.approvedSpec) return creative.approvedSpec
+
+  if (!creative.approvedRevisionId) return undefined
+
+  const approvedRevision = creative.revisions.find(
+    (revision) => revision.id === creative.approvedRevisionId
+  )
+  if (approvedRevision) return approvedRevision.spec
+
+  const directionId = creative.selectedDirectionId
+  if (!directionId) return undefined
+
+  return getActiveSpec(creative, directionId)
+}
+
 export function getActiveVersion(
   creative: CampaignCreative,
   directionId: string

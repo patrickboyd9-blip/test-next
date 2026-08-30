@@ -185,6 +185,8 @@ export interface CampaignCreative {
   selectedDirectionId?: string
   revisions: CreativeRevision[]
   approvedRevisionId?: string
+  /** Spec snapshot frozen at approval — source of truth for print/mail handoff. */
+  approvedSpec?: CreativeSpec
   /** Current rendered spec for the selected direction. */
   activeSpec?: CreativeSpec
   activeRevisionId?: string

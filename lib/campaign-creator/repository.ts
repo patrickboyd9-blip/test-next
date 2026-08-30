@@ -3,11 +3,12 @@ import { mkdir, readFile, writeFile } from "fs/promises"
 import path from "path"
 
 import { normalizeCampaignStatus } from "./campaign-status"
-import { getActiveRevision, getActiveSpec } from "./creative-state"
+import { getActiveRevision, getActiveSpec, getApprovedSpec } from "./creative-state"
 import { cloneSpec } from "./spec-diff"
 import type {
   Campaign,
   CampaignBrief,
+  CampaignCreative,
   ConversationMessage,
   CreativeDirection,
   CreativeRecommendation,
@@ -43,20 +44,90 @@ export interface CampaignRepository {
 
 const DATA_DIR = path.join(process.cwd(), ".data", "campaigns")
 
+function backfillDirectionRevisions(
+  directions: CreativeDirection[],
+  revisions: CreativeRevision[]
+): CreativeRevision[] {
+  const next = [...revisions]
+
+  for (const direction of directions) {
+    const hasOriginalRevision = next.some(
+      (revision) =>
+        revision.directionId === direction.id &&
+        revision.version === 1 &&
+        revision.type !== "conflict"
+    )
+
+    if (hasOriginalRevision) continue
+
+    next.push({
+      id: randomUUID(),
+      directionId: direction.id,
+      version: 1,
+      spec: cloneSpec(direction.spec),
+      customerPrompt: "Original concept",
+      studioResponse: "",
+      type: "refinement",
+      createdAt: direction.createdAt,
+    })
+  }
+
+  return next
+}
+
+function normalizeCreative(raw: CampaignCreative | undefined): CampaignCreative {
+  const base = raw ?? createEmptyCampaignCreative()
+  const directions = base.directions ?? []
+  const normalizedRevisions = backfillDirectionRevisions(
+    directions,
+    (base.revisions ?? []).map((revision) => ({
+      ...revision,
+      version: revision.type === "conflict" ? null : (revision.version ?? 1),
+      type: revision.type ?? "refinement",
+    }))
+  )
+
+  const creative: CampaignCreative = {
+    ...base,
+    directions,
+    revisions: normalizedRevisions,
+  }
+
+  if (creative.approvedRevisionId && !creative.approvedSpec) {
+    const approvedSpec = getApprovedSpec(creative)
+    if (approvedSpec) {
+      creative.approvedSpec = cloneSpec(approvedSpec)
+    }
+  }
+
+  if (
+    creative.selectedDirectionId &&
+    !creative.activeSpec
+  ) {
+    const activeSpec = getActiveSpec(creative, creative.selectedDirectionId)
+    if (activeSpec) {
+      creative.activeSpec = cloneSpec(activeSpec)
+    }
+  }
+
+  if (
+    creative.selectedDirectionId &&
+    !creative.activeRevisionId
+  ) {
+    const activeRevision = getActiveRevision(creative, creative.selectedDirectionId)
+    if (activeRevision) {
+      creative.activeRevisionId = activeRevision.id
+    }
+  }
+
+  return creative
+}
+
 function normalizeCampaign(raw: Campaign): Campaign {
-  const creative = raw.creative ?? createEmptyCampaignCreative()
   return {
     ...raw,
     status: normalizeCampaignStatus(raw.status),
-    creative: {
-      ...creative,
-      revisions: (creative.revisions ?? []).map((revision) => ({
-        ...revision,
-        version:
-          revision.type === "conflict" ? null : (revision.version ?? 1),
-        type: revision.type ?? "refinement",
-      })),
-    },
+    creative: normalizeCreative(raw.creative),
   }
 }
 
@@ -234,7 +305,12 @@ class FileCampaignRepository implements CampaignRepository {
     const activeRevision = getActiveRevision(campaign.creative, directionId)
     if (!activeRevision) throw new Error("No active revision to approve")
 
+    const activeSpec =
+      campaign.creative.activeSpec ?? getActiveSpec(campaign.creative, directionId)
+    if (!activeSpec) throw new Error("No active spec to approve")
+
     campaign.creative.approvedRevisionId = activeRevision.id
+    campaign.creative.approvedSpec = cloneSpec(activeSpec)
     campaign.status = "creative_approved"
     campaign.updatedAt = new Date().toISOString()
     return this.write(campaign)
@@ -243,6 +319,7 @@ class FileCampaignRepository implements CampaignRepository {
   async unapproveCreative(id: string): Promise<Campaign> {
     const campaign = await this.require(id)
     campaign.creative.approvedRevisionId = undefined
+    campaign.creative.approvedSpec = undefined
     campaign.status = "creative_ready"
     campaign.updatedAt = new Date().toISOString()
     return this.write(campaign)

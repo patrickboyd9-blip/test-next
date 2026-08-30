@@ -3,7 +3,7 @@
 import { useState } from "react"
 
 import { isAtOrPastStatus } from "@/lib/campaign-creator/campaign-status"
-import { getActiveSpec } from "@/lib/campaign-creator/creative-state"
+import { getApprovedSpec } from "@/lib/campaign-creator/creative-state"
 import {
   confirmCampaignStrategy,
   confirmCampaignAudience,
@@ -141,11 +141,7 @@ export function CampaignCreatorView({ initialCampaign }: CampaignCreatorViewProp
   const approvedDirection = campaign.creative.directions.find(
     (d) => d.id === selectedDirectionId
   )
-  const approvedSpec =
-    campaign.creative.activeSpec ??
-    (selectedDirectionId
-      ? getActiveSpec(campaign.creative, selectedDirectionId)
-      : undefined)
+  const approvedSpec = getApprovedSpec(campaign.creative)
 
   const interviewContent = (
     <>

@@ -60,6 +60,44 @@ export function ApprovalModal({
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [open, onKeepRefining])
 
+  useEffect(() => {
+    if (!open) return
+
+    const dialog = dialogRef.current
+    if (!dialog) return
+
+    const focusableSelector =
+      'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+
+    function handleTabKey(e: KeyboardEvent) {
+      if (e.key !== "Tab") return
+
+      const el = dialogRef.current
+      if (!el) return
+
+      const focusables = Array.from(
+        el.querySelectorAll<HTMLElement>(focusableSelector)
+      ).filter((element) => element.offsetParent !== null)
+
+      if (focusables.length === 0) return
+
+      const first = focusables[0]
+      const last = focusables[focusables.length - 1]
+      const active = document.activeElement
+
+      if (e.shiftKey && active === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+
+    dialog.addEventListener("keydown", handleTabKey)
+    return () => dialog.removeEventListener("keydown", handleTabKey)
+  }, [open])
+
   return (
     <AnimatePresence>
       {open && (

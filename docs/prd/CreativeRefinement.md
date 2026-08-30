@@ -17,6 +17,8 @@
 
 **Scope:** Milestone 2B / **v0.3.0** — refinement UX, revision history, change highlighting, conflict handling, approval flow, undo/restore. Mock refinement engine only. **No Anthropic integration** (deferred to v0.4.0).
 
+**Ship history:** Most v0.3.0 UI and mock engine code landed in the `v0.2.0` git tag ahead of the formal milestone split. **v0.3.0 finalization** adds `approvedSpec` persistence, legacy campaign migration, approval modal focus trap, and roadmap reconciliation.
+
 **Out of scope for v0.3.0:** Audience activation, AI generation, logo upload, payment, Command Center.
 
 ---
@@ -66,9 +68,9 @@ v0.3.0 ships a **mock refinement engine** that applies deterministic spec mutati
 | **Approve creative** (interstitial) | `creative_approved`, persistent header, Studio UI collapses to header + audience placeholder message |
 | **Keep refining** (interstitial) | Return to refinement room, no state loss |
 
-### What changes in Focus view (v0.3.0 delta from v0.2.0)
+### What changed in Focus view (v0.3.0 delta from early Studio)
 
-v0.2.0 Focus is view-only. v0.3.0 adds:
+Early Studio focus was view-only. v0.3.0 adds:
 
 - Primary CTA: **Start refining →**
 - Secondary CTA: **Approve as-is**

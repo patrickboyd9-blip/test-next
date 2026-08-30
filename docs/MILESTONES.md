@@ -11,8 +11,8 @@ This document formalizes the product roadmap as versioned milestones. Each miles
 | Version | Name | Status | Scope summary |
 |---|---|---|---|
 | **v0.1.0** | Campaign Creator Foundation | ✅ Shipped | Status model, creative domain types, engine interfaces, Interview/Studio layout modes, progress indicator, stage ordering |
-| **v0.2.0** | Creative Studio Foundation | ✅ Shipped | Generation narrative, mock directions, lead reveal, compare, focus — presentation shell, no AI |
-| **v0.3.0** | Creative Refinement | 🔜 Next | Refinement UX, revision history, change highlighting, conflict handling, approval flow, mock refinement engine |
+| **v0.2.0** | Creative Studio Foundation | ✅ Shipped | Generation narrative, mock directions, lead reveal, compare, focus, template previews — see note below |
+| **v0.3.0** | Creative Refinement | ✅ Shipped | Refinement UX, revision history, highlighting, conflict handling, approval flow, mock engine, repository persistence |
 | **v0.4.0** | AI Creative Engine | Planned | Anthropic-backed generation + refinement; swaps mock engine for real provider |
 | **v0.5.0** | Audience Selection | Planned | Post-creative audience confirmation, list upload, quantity handoff |
 | **v0.6.0** | Data Provider Integration (Data Axle) | Planned | Real audience data, estimates, segmentation |
@@ -56,11 +56,15 @@ This document formalizes the product roadmap as versioned milestones. Each miles
 - Lead-first reveal, compare view, focus view
 - Template-rendered `PostcardPreview`
 - PRD motion: breathing stage, reveal choreography, hover states, reduced motion
+- Repository persistence of creative directions (introduced with Studio initialization)
 
-### Does not ship
-- Refinement, revision history, approval
-- Repository persistence of creative state
-- AI / Anthropic integration
+### Note on scope
+The `v0.2.0` git tag also includes early Creative Refinement UI and mock engine work that was originally planned for v0.3.0. That code shipped ahead of the milestone split; **v0.3.0 finalization** (below) closes the remaining persistence, migration, accessibility, and documentation gaps.
+
+### Does not ship (deferred to v0.3.0 finalization or later)
+- `approvedSpec` snapshot persistence (v0.3.0 finalization)
+- Legacy campaign read-time migration (v0.3.0 finalization)
+- AI / Anthropic integration (v0.4.0)
 
 ### PRD / docs
 - [`docs/prd/CreativeStudio.md`](prd/CreativeStudio.md)
@@ -72,7 +76,7 @@ This document formalizes the product roadmap as versioned milestones. Each miles
 
 ---
 
-## v0.3.0 — Creative Refinement 🔜
+## v0.3.0 — Creative Refinement ✅
 
 **Question answered:** *Can I shape this without learning design software — and am I confident enough to approve it?*
 
@@ -84,15 +88,24 @@ This document formalizes the product roadmap as versioned milestones. Each miles
 - Approval interstitial + `creative_approved` status
 - Persistent creative header post-approval
 - Focus view CTAs: Start refining, Approve as-is
-- Client + repository persistence of revisions and approved spec
+- Client + repository persistence of revisions, `approvedRevisionId`, and `approvedSpec`
+- Legacy campaign migration on read (v1 revision backfill)
+- Approval modal keyboard focus trap
+
+### v0.3.0 finalization (this release)
+- Persist `approvedSpec` at approval time
+- Read-time migration for campaigns missing revision stacks
+- Approval modal focus trap (Tab cycle, Escape → Keep refining)
+- Roadmap / PRD reconciliation with actual ship history
 
 ### Does not ship
 - Anthropic / LLM refinement (deferred to v0.4.0)
-- Audience stage activation (requires v0.5.0 polish; header may preview handoff)
-- Image generation, logo upload
+- Regeneration ("None of these feel right") (deferred to v0.4.0)
+- Logo upload inline (deferred to v0.4.0)
+- Image generation
 
 ### PRD / docs
-- [`docs/prd/CreativeRefinement.md`](prd/CreativeRefinement.md) *(design review — pending approval)*
+- [`docs/prd/CreativeRefinement.md`](prd/CreativeRefinement.md)
 
 ---
 
