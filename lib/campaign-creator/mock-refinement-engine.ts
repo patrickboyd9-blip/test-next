@@ -6,6 +6,13 @@ import {
   cloneSpec,
 } from "./spec-diff"
 import { metricUsesPhone, metricUsesQr } from "./creative-state"
+import {
+  conflictCopyAmbiguous,
+  conflictCopyOffer,
+  conflictCopyPhone,
+  conflictCopyQr,
+  conflictCopyUnrecognized,
+} from "./studio-copy"
 
 export interface RefinementInput {
   brief: CampaignBrief
@@ -32,8 +39,7 @@ export function applyMockRefinement(input: RefinementInput): RefinementOutcome {
     return {
       kind: "conflict",
       conflictType: "unrecognized",
-      studioResponse:
-        "I can adjust the headline, colors, phone placement, or QR prominence. What would you like to change?",
+      studioResponse: conflictCopyUnrecognized(),
     }
   }
 
@@ -44,17 +50,15 @@ export function applyMockRefinement(input: RefinementInput): RefinementOutcome {
     return {
       kind: "conflict",
       conflictType: "ambiguous",
-      studioResponse: "Better how — bolder, warmer, or more focused on the offer?",
+      studioResponse: conflictCopyAmbiguous(),
     }
   }
 
   if (/\b(remove|delete|hide)\b.*\b(qr|code)\b/.test(prompt) && metricUsesQr(input.brief)) {
-    const metric =
-      input.brief.primarySuccessMetric?.description ?? "appointment bookings"
     return {
       kind: "conflict",
       conflictType: "qr",
-      studioResponse: `I'd recommend keeping the QR code — ${metric} is your primary success metric, and the QR is the fastest path there. I can make it smaller or move it if it's competing visually. What would you prefer?`,
+      studioResponse: conflictCopyQr(input.brief),
     }
   }
 
@@ -65,8 +69,7 @@ export function applyMockRefinement(input: RefinementInput): RefinementOutcome {
     return {
       kind: "conflict",
       conflictType: "phone",
-      studioResponse:
-        "Phone calls are how you'll measure success for this campaign, so I'd keep your number visible. I can make it smaller or move it — what works better for you?",
+      studioResponse: conflictCopyPhone(),
     }
   }
 
@@ -74,8 +77,7 @@ export function applyMockRefinement(input: RefinementInput): RefinementOutcome {
     return {
       kind: "conflict",
       conflictType: "offer",
-      studioResponse:
-        "Your offer is a core part of this campaign's goal. I'd keep it visible — want me to make it bigger, smaller, or move it instead?",
+      studioResponse: conflictCopyOffer(),
     }
   }
 
@@ -131,8 +133,7 @@ export function applyMockRefinement(input: RefinementInput): RefinementOutcome {
     return {
       kind: "conflict",
       conflictType: "unrecognized",
-      studioResponse:
-        "I can adjust the headline, colors, phone placement, or QR prominence. What would you like to change?",
+      studioResponse: conflictCopyUnrecognized(),
     }
   }
 
