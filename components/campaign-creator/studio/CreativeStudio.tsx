@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState, type ReactNode } from "react"
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 
 import {
   applyRefinement,
@@ -66,6 +66,7 @@ export function CreativeStudio({
   const [isInitializing, setIsInitializing] = useState(false)
   const [isApproving, setIsApproving] = useState(false)
   const [approvalSettled, setApprovalSettled] = useState(false)
+  const generationStartedRef = useRef(false)
 
   const directions = hasPersistedDirections
     ? campaign.creative.directions
@@ -87,12 +88,16 @@ export function CreativeStudio({
     onProgressStatusChange?.("generating_creative")
 
     const timer = window.setTimeout(async () => {
+      if (generationStartedRef.current) return
+      generationStartedRef.current = true
       setIsInitializing(true)
       try {
         const updated = await initializeStudioCreative(campaign.id)
         onCampaignUpdate(updated)
         onProgressStatusChange?.("creative_ready")
         setSubPhase("lead")
+      } catch (error) {
+        console.error("Creative generation failed:", error)
       } finally {
         setIsInitializing(false)
       }

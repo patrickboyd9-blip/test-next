@@ -12,11 +12,7 @@ import {
   ConversationEngineNotConfiguredError,
   getConversationEngine,
 } from "./conversation-engine"
-import { applyMockRefinement } from "./mock-refinement-engine"
-import {
-  getMockCreativeDirections,
-  getMockRecommendation,
-} from "./mock-creative-data"
+import { getCreativeEngine } from "./creative-engine-provider"
 import { getCampaignRepository } from "./repository"
 import { buildSpecDiff, cloneSpec } from "./spec-diff"
 import type { Campaign, CampaignBrief, CreativeRevision } from "./types"
@@ -118,9 +114,14 @@ export async function initializeStudioCreative(campaignId: string): Promise<Camp
   const campaign = await repository.getCampaign(campaignId)
   if (!campaign) throw new Error(`Campaign ${campaignId} not found`)
 
-  const directions = getMockCreativeDirections(campaign.brief)
-  const recommendation = getMockRecommendation(directions)
-  return repository.initializeStudioCreative(campaignId, directions, recommendation)
+  const result = await getCreativeEngine().generateDirections({
+    brief: campaign.brief,
+  })
+  return repository.initializeStudioCreative(
+    campaignId,
+    result.directions,
+    result.recommendation
+  )
 }
 
 export async function selectCreativeDirection(
@@ -143,45 +144,31 @@ export async function applyRefinement(
   const directionId = campaign.creative.selectedDirectionId
   if (!directionId) throw new Error("No direction selected")
 
+  const direction = campaign.creative.directions.find((item) => item.id === directionId)
+  if (!direction) throw new Error("Selected direction not found")
+
   const currentSpec =
     campaign.creative.activeSpec ?? getActiveSpec(campaign.creative, directionId)
   if (!currentSpec) throw new Error("No active spec")
 
-  const outcome = applyMockRefinement({
+  const result = await getCreativeEngine().refineDirection({
     brief: campaign.brief,
-    currentSpec,
+    direction: { ...direction, spec: currentSpec },
+    revisions: campaign.creative.revisions,
     prompt: trimmed,
   })
 
   const now = new Date().toISOString()
-
-  if (outcome.kind === "conflict") {
-    const revision: CreativeRevision = {
-      id: randomUUID(),
-      directionId,
-      version: null,
-      spec: cloneSpec(currentSpec),
-      customerPrompt: trimmed,
-      studioResponse: outcome.studioResponse,
-      type: "conflict",
-      createdAt: now,
-    }
-    return repository.appendRevision(campaignId, revision, currentSpec)
-  }
-
-  const version = getNextVersion(campaign.creative, directionId)
   const revision: CreativeRevision = {
+    ...result.revision,
     id: randomUUID(),
-    directionId,
-    version,
-    spec: outcome.spec,
-    customerPrompt: trimmed,
-    studioResponse: outcome.studioResponse,
-    type: "refinement",
-    specDiff: outcome.specDiff,
     createdAt: now,
+    version:
+      result.revision.type === "conflict"
+        ? null
+        : getNextVersion(campaign.creative, directionId),
   }
-  return repository.appendRevision(campaignId, revision, outcome.spec)
+  return repository.appendRevision(campaignId, revision, result.spec)
 }
 
 export async function restoreRevision(
