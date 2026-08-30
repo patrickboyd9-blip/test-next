@@ -1,11 +1,11 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 
 import {
   applyRefinement,
   approveCreative,
-  initializeStudioCreative,
+  generateStudioCreative,
   restoreRevision,
   selectCreativeDirection,
 } from "@/lib/campaign-creator/actions"
@@ -64,9 +64,11 @@ export function CreativeStudio({
   )
   const selectedId = campaign.creative.selectedDirectionId ?? localSelectedId
   const [isInitializing, setIsInitializing] = useState(false)
+  const [generationFailed, setGenerationFailed] = useState(false)
   const [isApproving, setIsApproving] = useState(false)
   const [approvalSettled, setApprovalSettled] = useState(false)
   const generationStartedRef = useRef(false)
+  const generationRequestIdRef = useRef(0)
 
   const directions = hasPersistedDirections
     ? campaign.creative.directions
@@ -82,35 +84,42 @@ export function CreativeStudio({
     getActiveSpec(campaign.creative, selectedId) ??
     selectedDirection.spec
 
-  useEffect(() => {
-    if (hasPersistedDirections || isInitializing) return
-
+  const runGeneration = useCallback(async () => {
+    const requestId = ++generationRequestIdRef.current
+    generationStartedRef.current = true
+    setGenerationFailed(false)
+    setIsInitializing(true)
     onProgressStatusChange?.("generating_creative")
 
-    const timer = window.setTimeout(async () => {
-      if (generationStartedRef.current) return
-      generationStartedRef.current = true
-      setIsInitializing(true)
-      try {
-        const updated = await initializeStudioCreative(campaign.id)
-        onCampaignUpdate(updated)
-        onProgressStatusChange?.("creative_ready")
-        setSubPhase("lead")
-      } catch (error) {
-        console.error("Creative generation failed:", error)
-      } finally {
+    try {
+      const updated = await generateStudioCreative(campaign.id)
+      if (requestId !== generationRequestIdRef.current) return
+      onCampaignUpdate(updated)
+      onProgressStatusChange?.("creative_ready")
+      setSubPhase("lead")
+    } catch (error) {
+      console.error("Creative generation failed:", error)
+      if (requestId !== generationRequestIdRef.current) return
+      setGenerationFailed(true)
+    } finally {
+      if (requestId === generationRequestIdRef.current) {
         setIsInitializing(false)
       }
-    }, STUDIO_GENERATION.totalDurationMs)
+    }
+  }, [campaign.id, onCampaignUpdate, onProgressStatusChange])
 
-    return () => window.clearTimeout(timer)
-  }, [
-    campaign.id,
-    hasPersistedDirections,
-    isInitializing,
-    onCampaignUpdate,
-    onProgressStatusChange,
-  ])
+  useEffect(() => {
+    if (hasPersistedDirections || generationStartedRef.current) return
+    void runGeneration()
+  }, [campaign.id, hasPersistedDirections, runGeneration])
+
+  useEffect(() => {
+    if (hasPersistedDirections || generationFailed || !isInitializing) return
+    const timeout = window.setTimeout(() => {
+      setGenerationFailed(true)
+    }, STUDIO_GENERATION.failThresholdMs)
+    return () => window.clearTimeout(timeout)
+  }, [hasPersistedDirections, generationFailed, isInitializing])
 
   async function handleSelectDirection(directionId: string) {
     setLocalSelectedId(directionId)
@@ -177,8 +186,20 @@ export function CreativeStudio({
     return null
   }
 
-  if (!hasPersistedDirections && (subPhase === "generating" || isInitializing)) {
-    return <GenerationView brief={campaign.brief} />
+  if (
+    !hasPersistedDirections &&
+    (subPhase === "generating" || isInitializing || generationFailed)
+  ) {
+    return (
+      <GenerationView
+        brief={campaign.brief}
+        failed={generationFailed}
+        onRetry={() => {
+          generationStartedRef.current = false
+          void runGeneration()
+        }}
+      />
+    )
   }
 
   let body: ReactNode = null

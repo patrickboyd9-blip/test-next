@@ -3,28 +3,56 @@
 import { useEffect, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 
+import { Button } from "@/components/ui/button"
 import type { CampaignBrief } from "@/lib/campaign-creator/types"
 import { STUDIO_GENERATION } from "@/lib/campaign-creator/studio-config"
-import { buildGenerationNarrativeLines } from "@/lib/campaign-creator/studio-narrative"
+import {
+  GENERATION_FAILED_LINE,
+  GENERATION_RETRY_LABEL,
+  GENERATION_SECOND_SLOW_LINE,
+  GENERATION_SLOW_LINE,
+  buildGenerationNarrativeLines,
+} from "@/lib/campaign-creator/studio-narrative"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
 import { StudioComposerShell } from "./StudioComposerShell"
 
 interface GenerationViewProps {
   brief: CampaignBrief
+  failed?: boolean
+  onRetry?: () => void
 }
 
-export function GenerationView({ brief }: GenerationViewProps) {
+export function GenerationView({ brief, failed = false, onRetry }: GenerationViewProps) {
   const reducedMotion = useReducedMotion()
   const lines = buildGenerationNarrativeLines(brief)
   const [lineIndex, setLineIndex] = useState(0)
+  const [elapsedMs, setElapsedMs] = useState(0)
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    if (failed) return
+    const interval = window.setInterval(() => {
       setLineIndex((current) => (current + 1) % lines.length)
     }, STUDIO_GENERATION.narrativeIntervalMs)
-    return () => clearInterval(interval)
-  }, [lines.length])
+    return () => window.clearInterval(interval)
+  }, [failed, lines.length])
+
+  useEffect(() => {
+    if (failed) return
+    const startedAt = Date.now()
+    const interval = window.setInterval(() => {
+      setElapsedMs(Date.now() - startedAt)
+    }, 250)
+    return () => window.clearInterval(interval)
+  }, [failed])
+
+  const displayedLine = failed
+    ? GENERATION_FAILED_LINE
+    : elapsedMs >= STUDIO_GENERATION.secondSlowThresholdMs
+      ? GENERATION_SECOND_SLOW_LINE
+      : elapsedMs >= STUDIO_GENERATION.slowThresholdMs
+        ? GENERATION_SLOW_LINE
+        : lines[lineIndex]
 
   const breathingAnimation = reducedMotion
     ? {}
@@ -37,12 +65,12 @@ export function GenerationView({ brief }: GenerationViewProps) {
     <div className="flex flex-col gap-8">
       <div
         className="relative flex min-h-[280px] flex-1 items-center justify-center md:min-h-[360px]"
-        aria-live="polite"
-        aria-busy="true"
+        aria-live={failed ? "assertive" : "polite"}
+        aria-busy={!failed}
       >
         <motion.div
           className="absolute inset-0 flex items-center justify-center"
-          {...breathingAnimation}
+          {...(failed ? {} : breathingAnimation)}
         >
           <div
             className="size-48 rounded-full md:size-64"
@@ -72,19 +100,25 @@ export function GenerationView({ brief }: GenerationViewProps) {
         </svg>
       </div>
 
-      <div className="mx-auto min-h-[1.5rem] w-full max-w-[480px] text-center">
+      <div className="mx-auto flex min-h-[1.5rem] w-full max-w-[480px] flex-col items-center gap-4 text-center">
         <AnimatePresence mode="wait">
           <motion.p
-            key={lineIndex}
+            key={displayedLine}
             initial={reducedMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={reducedMotion ? undefined : { opacity: 0 }}
             transition={{ duration: reducedMotion ? 0 : 0.2 }}
             className="text-sm text-muted-foreground"
+            role="status"
           >
-            {lines[lineIndex]}
+            {displayedLine}
           </motion.p>
         </AnimatePresence>
+        {failed && onRetry && (
+          <Button autoFocus onClick={onRetry}>
+            {GENERATION_RETRY_LABEL}
+          </Button>
+        )}
       </div>
 
       <StudioComposerShell />
