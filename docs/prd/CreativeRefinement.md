@@ -530,10 +530,15 @@ Update `CreativeStudio` orchestrator for new sub-phases.
 
 ### Deferred to v0.4.0
 
+See [`docs/prd/AICreativeEngine.md`](AICreativeEngine.md).
+
 - Anthropic refinement + generation
 - LLM studio-voice (templates suffice in v0.3.0)
 - Regeneration ("None of these feel right")
-- Logo upload on "Add my logo" chip
+
+### Deferred past v0.4.0
+
+- Logo file upload on "Add my logo" chip (v0.4.0 leaves existing UI disabled)
 
 ### Non-goals
 

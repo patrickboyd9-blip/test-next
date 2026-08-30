@@ -13,7 +13,7 @@ This document formalizes the product roadmap as versioned milestones. Each miles
 | **v0.1.0** | Campaign Creator Foundation | ✅ Shipped | Status model, creative domain types, engine interfaces, Interview/Studio layout modes, progress indicator, stage ordering |
 | **v0.2.0** | Creative Studio Foundation | ✅ Shipped | Generation narrative, mock directions, lead reveal, compare, focus, template previews — see note below |
 | **v0.3.0** | Creative Refinement | ✅ Shipped | Refinement UX, revision history, highlighting, conflict handling, approval flow, mock engine, repository persistence |
-| **v0.4.0** | AI Creative Engine | Planned | Anthropic-backed generation + refinement; swaps mock engine for real provider |
+| **v0.4.0** | AI Creative Engine | Planned | Anthropic-backed generation + refinement; swaps mock engine for real provider; mock fallback without API key |
 | **v0.5.0** | Audience Selection | Planned | Post-creative audience confirmation, list upload, quantity handoff |
 | **v0.6.0** | Data Provider Integration (Data Axle) | Planned | Real audience data, estimates, segmentation |
 | **v0.7.0** | Production Partner Integration (Click2Mail) | Planned | Print/mail fulfillment pipeline |
@@ -101,7 +101,7 @@ The `v0.2.0` git tag also includes early Creative Refinement UI and mock engine 
 ### Does not ship
 - Anthropic / LLM refinement (deferred to v0.4.0)
 - Regeneration ("None of these feel right") (deferred to v0.4.0)
-- Logo upload inline (deferred to v0.4.0)
+- Logo upload inline (deferred past v0.4.0)
 - Image generation
 
 ### PRD / docs
@@ -118,10 +118,21 @@ The `v0.2.0` git tag also includes early Creative Refinement UI and mock engine 
 - AI-generated directions from confirmed strategy brief
 - AI-powered refinement with structured output (spec mutations + studio copy)
 - Regeneration flow ("None of these feel right")
-- Generation narration optionally LLM-enriched
+- Mock engine fallback when `ANTHROPIC_API_KEY` is not configured
+- Generation slow / fail / retry; persist `generating_creative`
 
 ### Does not ship
 - Real audience/fulfillment integrations
+- Logo file upload (later milestone — leave existing UI disabled)
+- Image generation
+- LLM-enriched generation narration (deferred; keep brief templates)
+
+### Founder decisions (2026-08-29)
+- Logo upload is out of scope for v0.4.0
+- Keep mock fallback when no API key is configured
+
+### PRD / docs
+- [`docs/prd/AICreativeEngine.md`](prd/AICreativeEngine.md)
 
 ---
 
