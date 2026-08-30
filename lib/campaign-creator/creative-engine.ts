@@ -46,52 +46,9 @@ export interface CreativeEngine {
   regenerateDirections(input: RegenerateDirectionsInput): Promise<GenerateDirectionsResult>
 }
 
-export class CreativeEngineNotConfiguredError extends Error {
-  constructor() {
-    super(
-      "No CreativeEngine implementation is configured. A provider must be " +
-        "connected behind this interface before Modern Mail can generate creative " +
-        "directions for customers."
-    )
-    this.name = "CreativeEngineNotConfiguredError"
-  }
-}
-
 /**
- * Placeholder engine — throws until a real provider is wired in Milestone 2.
- * Callers depend only on the CreativeEngine interface above.
- */
-export class PlaceholderCreativeEngine implements CreativeEngine {
-  async generateDirections(): Promise<GenerateDirectionsResult> {
-    throw new CreativeEngineNotConfiguredError()
-  }
-
-  async refineDirection(): Promise<RefineDirectionResult> {
-    throw new CreativeEngineNotConfiguredError()
-  }
-
-  async regenerateDirections(): Promise<GenerateDirectionsResult> {
-    throw new CreativeEngineNotConfiguredError()
-  }
-}
-
-let cachedEngine: CreativeEngine | null = null
-
-/**
- * Provider boundary for creative generation and refinement.
- * Returns PlaceholderCreativeEngine until ANTHROPIC_API_KEY (or another provider)
- * is connected in a future milestone.
- */
-export function getCreativeEngine(): CreativeEngine {
-  if (!cachedEngine) {
-    cachedEngine = new PlaceholderCreativeEngine()
-  }
-  return cachedEngine
-}
-
-/**
- * Apply generation output onto campaign creative state — keeps repository/actions
- * thin when Milestone 2 connects a real engine.
+ * Apply generation output onto campaign creative state.
+ * Provider-agnostic — works for mock or Anthropic results.
  */
 export function applyGeneratedDirections(
   creative: CampaignCreative,
