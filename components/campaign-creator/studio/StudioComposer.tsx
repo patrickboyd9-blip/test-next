@@ -4,6 +4,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
+import { REFINEMENT_APPLYING_LINE } from "@/lib/campaign-creator/studio-copy"
 import type { CampaignBrief } from "@/lib/campaign-creator/types"
 import { cn } from "@/lib/utils"
 
@@ -111,7 +112,7 @@ export function StudioComposer({
         />
         {isApplying && (
           <p className="text-xs text-muted-foreground" aria-live="polite">
-            Applying your change…
+            {REFINEMENT_APPLYING_LINE}
           </p>
         )}
         {showLengthWarn && (

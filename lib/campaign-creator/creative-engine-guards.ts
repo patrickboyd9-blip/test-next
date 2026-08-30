@@ -87,6 +87,35 @@ export function detectAmbiguousPrompt(prompt: string): boolean {
   return isVague
 }
 
+/** Intent-level conflicts that must not wait on the model. */
+export function detectPromptConflict(
+  brief: CampaignBrief,
+  prompt: string
+): RequiredElementConflict | "ambiguous" | null {
+  if (detectAmbiguousPrompt(prompt)) return "ambiguous"
+
+  const normalized = prompt.trim().toLowerCase()
+  if (
+    /\b(remove|delete|hide)\b.*\b(qr|code)\b/.test(normalized) &&
+    metricUsesQr(brief)
+  ) {
+    return "qr"
+  }
+  if (
+    /\b(remove|delete|hide)\b.*\b(phone|number)\b/.test(normalized) &&
+    metricUsesPhone(brief)
+  ) {
+    return "phone"
+  }
+  if (
+    /\b(remove|delete|hide)\b.*\b(offer|discount)\b/.test(normalized) &&
+    Boolean(brief.offer)
+  ) {
+    return "offer"
+  }
+  return null
+}
+
 export function applyFaithfulness(brief: CampaignBrief, spec: CreativeSpec): CreativeSpec {
   const next = cloneSpec(spec)
   const phone = brief.phone ?? brief.businessInfo?.phone
@@ -191,12 +220,13 @@ export function finalizeRefinement(input: {
   const prompt = input.prompt.trim()
   const currentSpec = cloneSpec(input.currentSpec)
 
-  if (detectAmbiguousPrompt(prompt)) {
+  const promptConflict = detectPromptConflict(input.brief, prompt)
+  if (promptConflict) {
     return buildConflictResult(
       input.directionId,
       currentSpec,
       prompt,
-      conflictMessage("ambiguous", input.brief)
+      conflictMessage(promptConflict, input.brief)
     )
   }
 

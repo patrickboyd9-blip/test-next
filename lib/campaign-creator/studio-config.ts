@@ -17,3 +17,10 @@ export const STUDIO_GENERATION = {
   /** PRD: fail the generation wait at 45s. */
   failThresholdMs: 45_000,
 } as const
+
+export const STUDIO_REFINEMENT = {
+  /** PRD: keep “Applying your change…” visible through 8s. */
+  applyingThresholdMs: 8_000,
+  /** PRD: inline slow-network copy at 20s; spec unchanged; customer may retry. */
+  slowNetworkMs: 20_000,
+} as const

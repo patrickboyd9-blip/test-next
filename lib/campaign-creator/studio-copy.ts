@@ -30,3 +30,8 @@ export function conflictCopyGeneric(brief: CampaignBrief): string {
 }
 
 export const RECOMMENDATION_HEADLINE = "★ Our recommendation"
+
+export const REFINEMENT_APPLYING_LINE = "Applying your change…"
+
+export const REFINEMENT_SLOW_NETWORK_LINE =
+  "Having trouble applying that change. Check your connection and try again."

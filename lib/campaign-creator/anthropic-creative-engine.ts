@@ -11,6 +11,7 @@ import type {
 import {
   CreativeGenerationInvalidError,
   currentSpecFromInput,
+  detectPromptConflict,
   finalizeRefinement,
   normalizeGenerationResult,
 } from "./creative-engine-guards"
@@ -162,6 +163,16 @@ export class AnthropicCreativeEngine implements CreativeEngine {
 
   async refineDirection(input: RefineDirectionInput): Promise<RefineDirectionResult> {
     const currentSpec = currentSpecFromInput(input)
+    if (detectPromptConflict(input.brief, input.prompt)) {
+      return finalizeRefinement({
+        brief: input.brief,
+        directionId: input.direction.id,
+        currentSpec,
+        prompt: input.prompt,
+        proposed: { outcome: "conflict" },
+      })
+    }
+
     const raw = await this.requestRefinement(input, currentSpec)
     return finalizeRefinement({
       brief: input.brief,

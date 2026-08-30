@@ -1,10 +1,12 @@
 "use client"
 
-import { useCallback, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 
 import { Button } from "@/components/ui/button"
 import { getActiveVersion } from "@/lib/campaign-creator/creative-state"
+import { STUDIO_REFINEMENT } from "@/lib/campaign-creator/studio-config"
+import { REFINEMENT_SLOW_NETWORK_LINE } from "@/lib/campaign-creator/studio-copy"
 import type { Campaign, CreativeDirection, CreativeSpec } from "@/lib/campaign-creator/types"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
@@ -49,6 +51,8 @@ export function RefinementView({
   const [isShimmering, setIsShimmering] = useState(false)
   const applyLockRef = useRef(false)
   const lastAppliedRef = useRef(0)
+  const applyRequestIdRef = useRef(0)
+  const slowTimerRef = useRef<number | null>(null)
 
   const version = getActiveVersion(campaign.creative, direction.id)
 
@@ -71,6 +75,17 @@ export function RefinementView({
     [clearHighlight, reducedMotion]
   )
 
+  function clearSlowTimer() {
+    if (slowTimerRef.current !== null) {
+      window.clearTimeout(slowTimerRef.current)
+      slowTimerRef.current = null
+    }
+  }
+
+  useEffect(() => {
+    return () => clearSlowTimer()
+  }, [])
+
   async function handleApply() {
     const prompt = composerValue.trim()
     if (!prompt || isApplying || applyLockRef.current) return
@@ -78,14 +93,28 @@ export function RefinementView({
     const now = Date.now()
     if (now - lastAppliedRef.current < 300) return
 
+    const requestId = ++applyRequestIdRef.current
+    const previousPrompt = composerValue
+
     applyLockRef.current = true
     setIsApplying(true)
     setStudioResponse(null)
 
-    const previousPrompt = composerValue
+    slowTimerRef.current = window.setTimeout(() => {
+      if (requestId !== applyRequestIdRef.current) return
+      setIsApplying(false)
+      applyLockRef.current = false
+      setStudioResponse(REFINEMENT_SLOW_NETWORK_LINE)
+      setResponseAssertive(true)
+      setComposerValue(previousPrompt)
+    }, STUDIO_REFINEMENT.slowNetworkMs)
 
     try {
       const result = await onApplyRefinement(prompt)
+      if (requestId !== applyRequestIdRef.current) return
+
+      clearSlowTimer()
+      setIsApplying(false)
 
       if (result.studioResponse) {
         setStudioResponse(result.studioResponse)
@@ -103,14 +132,16 @@ export function RefinementView({
 
       lastAppliedRef.current = Date.now()
     } catch {
-      setStudioResponse("Something went wrong applying that change. Please try again.")
+      if (requestId !== applyRequestIdRef.current) return
+      clearSlowTimer()
+      setIsApplying(false)
+      setStudioResponse(REFINEMENT_SLOW_NETWORK_LINE)
       setResponseAssertive(true)
       setComposerValue(previousPrompt)
     } finally {
-      setIsApplying(false)
-      window.setTimeout(() => {
+      if (requestId === applyRequestIdRef.current) {
         applyLockRef.current = false
-      }, 300)
+      }
     }
   }
 
