@@ -110,18 +110,43 @@ export async function confirmCampaignQuantity(campaignId: string): Promise<Campa
   return repository.confirmQuantity(campaignId)
 }
 
-export async function initializeStudioCreative(campaignId: string): Promise<Campaign> {
-  const campaign = await repository.getCampaign(campaignId)
-  if (!campaign) throw new Error(`Campaign ${campaignId} not found`)
+const generationLocks = new Map<string, Promise<Campaign>>()
 
-  const result = await getCreativeEngine().generateDirections({
-    brief: campaign.brief,
-  })
-  return repository.initializeStudioCreative(
-    campaignId,
-    result.directions,
-    result.recommendation
-  )
+export async function generateStudioCreative(campaignId: string): Promise<Campaign> {
+  const inFlight = generationLocks.get(campaignId)
+  if (inFlight) return inFlight
+
+  const work = (async () => {
+    const campaign = await repository.getCampaign(campaignId)
+    if (!campaign) throw new Error(`Campaign ${campaignId} not found`)
+    if (campaign.creative.directions.length > 0) return campaign
+
+    await repository.markGeneratingCreative(campaignId)
+
+    const latest = await repository.getCampaign(campaignId)
+    if (!latest) throw new Error(`Campaign ${campaignId} not found`)
+
+    const result = await getCreativeEngine().generateDirections({
+      brief: latest.brief,
+    })
+    return repository.initializeStudioCreative(
+      campaignId,
+      result.directions,
+      result.recommendation
+    )
+  })()
+
+  generationLocks.set(campaignId, work)
+  try {
+    return await work
+  } finally {
+    generationLocks.delete(campaignId)
+  }
+}
+
+/** @deprecated Prefer generateStudioCreative — kept for in-flight callers. */
+export async function initializeStudioCreative(campaignId: string): Promise<Campaign> {
+  return generateStudioCreative(campaignId)
 }
 
 export async function selectCreativeDirection(

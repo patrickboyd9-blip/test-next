@@ -1,16 +1,19 @@
 /**
- * Creative Studio timing — switch fast dev iteration vs PRD production pacing
- * via NEXT_PUBLIC_STUDIO_FAST_GENERATION=true or NODE_ENV=development.
+ * Creative Studio timing. Narrative cadence can run faster in development.
+ * Slow / fail thresholds stay at PRD values so recovery copy is testable
+ * against a real provider, not a fake wait.
  */
-const useFastGeneration =
+const useFastNarrative =
   process.env.NEXT_PUBLIC_STUDIO_FAST_GENERATION === "true" ||
   process.env.NODE_ENV === "development"
 
 export const STUDIO_GENERATION = {
-  /** Total simulated generation before lead reveal. PRD: ~6–8s production. */
-  totalDurationMs: useFastGeneration ? 1000 : 7000,
   /** Interval between narrative line crossfades. PRD: 2.5s production. */
-  narrativeIntervalMs: useFastGeneration ? 250 : 2500,
-  /** When to show slow-state copy (unused in 2A shell — reserved for 2B). */
-  slowThresholdMs: useFastGeneration ? 800 : 15000,
+  narrativeIntervalMs: useFastNarrative ? 250 : 2500,
+  /** PRD: slow narration at 15s. */
+  slowThresholdMs: 15_000,
+  /** PRD: second slow line at 30s. */
+  secondSlowThresholdMs: 30_000,
+  /** PRD: fail the generation wait at 45s. */
+  failThresholdMs: 45_000,
 } as const

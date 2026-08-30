@@ -24,6 +24,7 @@ export interface CampaignRepository {
   updateBrief(id: string, patch: Partial<CampaignBrief>): Promise<Campaign>
   setReadyForBriefReview(id: string, ready: boolean): Promise<Campaign>
   confirmStrategy(id: string): Promise<Campaign>
+  markGeneratingCreative(id: string): Promise<Campaign>
   confirmAudience(id: string): Promise<Campaign>
   confirmQuantity(id: string): Promise<Campaign>
   initializeStudioCreative(
@@ -212,6 +213,15 @@ class FileCampaignRepository implements CampaignRepository {
   async confirmStrategy(id: string): Promise<Campaign> {
     const campaign = await this.require(id)
     campaign.status = "strategy_confirmed"
+    campaign.updatedAt = new Date().toISOString()
+    return this.write(campaign)
+  }
+
+  async markGeneratingCreative(id: string): Promise<Campaign> {
+    const campaign = await this.require(id)
+    if (campaign.creative.directions.length > 0) return campaign
+    if (campaign.status === "generating_creative") return campaign
+    campaign.status = "generating_creative"
     campaign.updatedAt = new Date().toISOString()
     return this.write(campaign)
   }
