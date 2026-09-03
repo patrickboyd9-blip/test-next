@@ -1,0 +1,92 @@
+2026-09-03T02:14:16.188386Z  INFO tailwindcss_oxide::scanner: Provided sources:
+2026-09-03T02:14:16.188985Z  INFO tailwindcss_oxide::scanner: Source: PublicSourceEntry { base: "/Volumes/JP SSD/Development/test-next/app", pattern: "./", negated: false }
+2026-09-03T02:14:16.189184Z  INFO tailwindcss_oxide::scanner: Source: PublicSourceEntry { base: "/Volumes/JP SSD/Development/test-next/app", pattern: "../components", negated: false }
+2026-09-03T02:14:16.189186Z  INFO tailwindcss_oxide::scanner: Source: PublicSourceEntry { base: "/Volumes/JP SSD/Development/test-next/app", pattern: "../hooks", negated: false }
+2026-09-03T02:14:16.194386Z  INFO tailwindcss_oxide::scanner: Optimized sources:
+2026-09-03T02:14:16.194391Z  INFO tailwindcss_oxide::scanner: Source: Auto { base: "/Volumes/JP SSD/Development/test-next/app" }
+2026-09-03T02:14:16.194394Z  INFO tailwindcss_oxide::scanner: Source: Auto { base: "/Volumes/JP SSD/Development/test-next/components" }
+2026-09-03T02:14:16.194396Z  INFO tailwindcss_oxide::scanner: Source: Auto { base: "/Volumes/JP SSD/Development/test-next/hooks" }
+2026-09-03T02:14:16.195306Z  INFO discover_sources: tailwindcss_oxide::scanner: enter
+2026-09-03T02:14:16.195493Z  INFO discover_sources:walk_synchronous: tailwindcss_oxide::scanner: enter
+2026-09-03T02:14:16.197148Z  INFO discover_sources:walk_synchronous: tailwindcss_oxide::scanner: exit
+2026-09-03T02:14:16.197498Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/app/app/campaigns/[id]/page.tsx"
+2026-09-03T02:14:16.197528Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/command-center/CampaignConfidenceSection.tsx"
+2026-09-03T02:14:16.197533Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/command-center/Reveal.tsx"
+2026-09-03T02:14:16.197543Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/hooks/use-reduced-motion.ts"
+2026-09-03T02:14:16.197549Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/campaign-creator/Composer.tsx"
+2026-09-03T02:14:16.197573Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/command-center/MetricsStrip.tsx"
+2026-09-03T02:14:16.197598Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/campaign-creator/ConversationThread.tsx"
+2026-09-03T02:14:16.197603Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/command-center/EmptyState.tsx"
+2026-09-03T02:14:16.197585Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/command-center/StateSwitcher.tsx"
+2026-09-03T02:14:16.197582Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/campaign-creator/studio/ConceptCard.tsx"
+2026-09-03T02:14:16.197612Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/command-center/MetricTile.tsx"
+2026-09-03T02:14:16.197637Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/command-center/WelcomeSection.tsx"
+2026-09-03T02:14:16.197620Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/campaign-creator/MessageBubble.tsx"
+2026-09-03T02:14:16.197600Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/campaign-creator/AudienceStage.tsx"
+2026-09-03T02:14:16.197624Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/command-center/MailStatusSection.tsx"
+2026-09-03T02:14:16.197614Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/campaign-creator/studio/RevisionHistoryPanel.tsx"
+2026-09-03T02:14:16.197667Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/campaign-creator/OpeningPrompt.tsx"
+2026-09-03T02:14:16.197625Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/app/app/campaigns/new/page.tsx"
+2026-09-03T02:14:16.197644Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/campaign-creator/studio/CreativeStudio.tsx"
+2026-09-03T02:14:16.197645Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/ui/card.tsx"
+2026-09-03T02:14:16.197652Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/command-center/OpportunitiesSection.tsx"
+2026-09-03T02:14:16.197705Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/app/app/layout.tsx"
+2026-09-03T02:14:16.197652Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/Hero.tsx"
+2026-09-03T02:14:16.197673Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/campaign-creator/BriefSummaryCard.tsx"
+2026-09-03T02:14:16.197677Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/campaign-creator/CampaignCreatorLayout.tsx"
+2026-09-03T02:14:16.197682Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/campaign-creator/studio/SpecDiffHighlight.tsx"
+2026-09-03T02:14:16.197730Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/layout/AppSidebar.tsx"
+2026-09-03T02:14:16.197683Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/campaign-creator/QuantityTrackingStage.tsx"
+2026-09-03T02:14:16.197713Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/ui/input.tsx"
+2026-09-03T02:14:16.197716Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/command-center/RecommendationCard.tsx"
+2026-09-03T02:14:16.197751Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/ui/badge.tsx"
+2026-09-03T02:14:16.197615Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/app/app/page.tsx"
+2026-09-03T02:14:16.197765Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/ui/textarea.tsx"
+2026-09-03T02:14:16.197736Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/campaign-creator/studio/StudioComposer.tsx"
+2026-09-03T02:14:16.197739Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/campaign-creator/CampaignCreatorView.tsx"
+2026-09-03T02:14:16.197776Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/app/layout.tsx"
+2026-09-03T02:14:16.197743Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/campaign-creator/studio/StrategyTags.tsx"
+2026-09-03T02:14:16.197783Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/campaign-creator/studio/StudioComposerShell.tsx"
+2026-09-03T02:14:16.197786Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/campaign-creator/CampaignProgress.tsx"
+2026-09-03T02:14:16.197756Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/campaign-creator/studio/ApprovalModal.tsx"
+2026-09-03T02:14:16.197766Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/ui/button.tsx"
+2026-09-03T02:14:16.197802Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/campaign-creator/CollapsedConversation.tsx"
+2026-09-03T02:14:16.197780Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/ui/tooltip.tsx"
+2026-09-03T02:14:16.197814Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/hooks/use-mobile.ts"
+2026-09-03T02:14:16.197820Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/campaign-creator/studio/CompareView.tsx"
+2026-09-03T02:14:16.197800Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/command-center/AIStrategistSection.tsx"
+2026-09-03T02:14:16.197792Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/app/page.tsx"
+2026-09-03T02:14:16.197833Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/campaign-creator/studio/LeadRevealView.tsx"
+2026-09-03T02:14:16.197722Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/ui/sidebar.tsx"
+2026-09-03T02:14:16.197820Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/command-center/AnimatedNumber.tsx"
+2026-09-03T02:14:16.197852Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/campaign-creator/studio/PersistentCreativeHeader.tsx"
+2026-09-03T02:14:16.197821Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/ui/skeleton.tsx"
+2026-09-03T02:14:16.197870Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/ui/sheet.tsx"
+2026-09-03T02:14:16.197760Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/ui/separator.tsx"
+2026-09-03T02:14:16.197848Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/campaign-creator/studio/PostcardPreview.tsx"
+2026-09-03T02:14:16.197854Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/campaign-creator/studio/RefinementView.tsx"
+2026-09-03T02:14:16.197709Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/campaign-creator/studio/FocusView.tsx"
+2026-09-03T02:14:16.197839Z  INFO tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/components/campaign-creator/studio/GenerationView.tsx"
+2026-09-03T02:14:16.198081Z  INFO discover_sources: tailwindcss_oxide::scanner: exit
+2026-09-03T02:14:16.198085Z  INFO extract_candidates: tailwindcss_oxide::scanner: enter
+2026-09-03T02:14:16.198086Z  INFO extract_candidates:parse_all_blobs: tailwindcss_oxide::scanner: enter
+2026-09-03T02:14:16.198088Z  INFO extract_candidates:parse_all_blobs:extract: tailwindcss_oxide::scanner: enter
+2026-09-03T02:14:16.198781Z  INFO extract_candidates:parse_all_blobs:extract: tailwindcss_oxide::scanner: exit
+2026-09-03T02:14:16.198787Z  INFO extract_candidates:parse_all_blobs: tailwindcss_oxide::scanner: exit
+2026-09-03T02:14:16.198789Z  INFO extract_candidates:read_all_files: tailwindcss_oxide::scanner: enter
+2026-09-03T02:14:16.198790Z  INFO extract_candidates:read_all_files: tailwindcss_oxide::scanner: Reading 1 file(s)
+2026-09-03T02:14:16.198809Z  INFO extract_candidates:read_all_files: tailwindcss_oxide::scanner: Reading "/Volumes/JP SSD/Development/test-next/app/globals.css"
+2026-09-03T02:14:16.198811Z  INFO extract_candidates:read_all_files: tailwindcss_oxide::scanner: exit
+2026-09-03T02:14:16.198813Z  INFO extract_candidates:extract_css_variables: tailwindcss_oxide::scanner: enter
+2026-09-03T02:14:16.198814Z  INFO extract_candidates:extract_css_variables:extract: tailwindcss_oxide::scanner: enter
+2026-09-03T02:14:16.198922Z  INFO extract_candidates:extract_css_variables:extract: tailwindcss_oxide::scanner: exit
+2026-09-03T02:14:16.198926Z  INFO extract_candidates:extract_css_variables: tailwindcss_oxide::scanner: exit
+2026-09-03T02:14:16.199083Z  INFO extract_candidates: tailwindcss_oxide::scanner: exit
+2026-09-03T02:14:16.199425Z  INFO get_files: tailwindcss_oxide::scanner: enter
+2026-09-03T02:14:16.199428Z  INFO get_files:discover_sources: tailwindcss_oxide::scanner: enter
+2026-09-03T02:14:16.199429Z  INFO get_files:discover_sources: tailwindcss_oxide::scanner: exit
+2026-09-03T02:14:16.199603Z  INFO get_files: tailwindcss_oxide::scanner: exit
+2026-09-03T02:14:16.199675Z  INFO get_globs: tailwindcss_oxide::scanner: enter
+2026-09-03T02:14:16.199677Z  INFO get_globs:discover_sources: tailwindcss_oxide::scanner: enter
+2026-09-03T02:14:16.199682Z  INFO get_globs:discover_sources: tailwindcss_oxide::scanner: exit
+2026-09-03T02:14:16.200203Z  INFO get_globs: tailwindcss_oxide::scanner: exit

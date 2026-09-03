@@ -1,5 +1,5 @@
 import type { ConversationEngine } from "./conversation-engine-types"
-import { requireDecodedLocal } from "./opaque-cjs"
+
 
 export type {
   ConversationEngine,
@@ -24,11 +24,8 @@ type AnthropicConversationModule = {
   AnthropicConversationEngine: new (apiKey: string) => ConversationEngine
 }
 
-function loadAnthropicConversationEngine(): AnthropicConversationModule {
-  // YW50aHJvcGljLWNvbnZlcnNhdGlvbi1lbmdpbmU= → anthropic-conversation-engine
-  return requireDecodedLocal(
-    "YW50aHJvcGljLWNvbnZlcnNhdGlvbi1lbmdpbmU="
-  ) as AnthropicConversationModule
+async function loadAnthropicConversationEngine() {
+  return await import("./anthropic-conversation-engine")
 }
 
 /**
@@ -40,15 +37,17 @@ function loadAnthropicConversationEngine(): AnthropicConversationModule {
  * The Anthropic SDK is required only on the first live turn. A static import
  * evaluates the SDK while Next is compiling `/` and hangs the request.
  */
-export function getConversationEngine(): ConversationEngine {
+export async function getConversationEngine(): Promise<ConversationEngine> {
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) {
     throw new ConversationEngineNotConfiguredError()
   }
 
   if (!cachedEngine) {
-    const { AnthropicConversationEngine } = loadAnthropicConversationEngine()
-    cachedEngine = new AnthropicConversationEngine(apiKey)
+    const { AnthropicConversationEngine } =
+    await loadAnthropicConversationEngine()
+  
+  cachedEngine = new AnthropicConversationEngine(apiKey)
   }
 
   return cachedEngine

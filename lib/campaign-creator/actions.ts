@@ -45,7 +45,7 @@ export async function sendCampaignMessage(
   if (!campaign) throw new Error(`Campaign ${campaignId} not found`)
 
   try {
-    const engine = getConversationEngine()
+    const engine = await getConversationEngine()
     const result = await engine.nextTurn({
       brief: campaign.brief,
       transcript: campaign.transcript,
