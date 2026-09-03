@@ -1,13 +1,12 @@
 import { randomUUID } from "crypto"
 
-import Anthropic from "@anthropic-ai/sdk"
-
 import type {
   ConversationEngine,
   ConversationTurnInput,
   ConversationTurnResult,
 } from "./conversation-engine-types"
 import type { CampaignBrief, PrimarySuccessMetricType } from "./types"
+import { createAnthropicClient, type AnthropicToolUseBlock } from "./load-anthropic-sdk"
 
 const MODEL = "claude-sonnet-5"
 const MAX_TOKENS = 1024
@@ -34,7 +33,7 @@ const UPDATE_BRIEF_TOOL_NAME = "update_campaign_brief"
  * tool guarantees a predictable, parseable shape every turn — never freeform
  * text we'd have to guess-parse into a Campaign Brief.
  */
-const updateBriefTool: Anthropic.Tool = {
+const updateBriefTool = {
   name: UPDATE_BRIEF_TOOL_NAME,
   description:
     "Record your reply to the customer and any new or corrected understanding of their campaign.",
@@ -161,7 +160,7 @@ ${JSON.stringify(brief, null, 2)}`
 
 function toAnthropicMessages(
   transcript: ConversationTurnInput["transcript"]
-): Anthropic.MessageParam[] {
+): Array<{ role: "user" | "assistant"; content: string }> {
   return transcript
     .filter((message) => message.role === "customer" || message.role === "assistant")
     .map((message) => ({
@@ -221,10 +220,10 @@ function coerceBrandAssets(raw: unknown): CampaignBrief["brandAssets"] | undefin
 }
 
 export class AnthropicConversationEngine implements ConversationEngine {
-  private client: Anthropic
+  private client: ReturnType<typeof createAnthropicClient>
 
   constructor(apiKey: string) {
-    this.client = new Anthropic({ apiKey })
+    this.client = createAnthropicClient(apiKey)
   }
 
   async nextTurn(input: ConversationTurnInput): Promise<ConversationTurnResult> {
@@ -238,7 +237,7 @@ export class AnthropicConversationEngine implements ConversationEngine {
     })
 
     const toolUse = response.content.find(
-      (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
+      (block): block is AnthropicToolUseBlock => block.type === "tool_use"
     )
 
     if (!toolUse) {

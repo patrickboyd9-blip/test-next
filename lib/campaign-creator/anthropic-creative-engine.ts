@@ -1,5 +1,3 @@
-import Anthropic from "@anthropic-ai/sdk"
-
 import type {
   CreativeEngine,
   GenerateDirectionsInput,
@@ -24,6 +22,7 @@ import {
   buildRegenerateSystemPrompt,
   buildRegenerateUserMessage,
 } from "./prompts"
+import { createAnthropicClient, type AnthropicToolUseBlock } from "./load-anthropic-sdk"
 import type {
   CreativeDirection,
   CreativeSpec,
@@ -70,7 +69,7 @@ const specToolProperties = {
   },
 } as const
 
-const generateDirectionsTool: Anthropic.Tool = {
+const generateDirectionsTool = {
   name: GENERATE_TOOL_NAME,
   description:
     "Propose exactly three distinct postcard directions from the campaign brief.",
@@ -119,7 +118,7 @@ const generateDirectionsTool: Anthropic.Tool = {
   },
 }
 
-const refineDirectionTool: Anthropic.Tool = {
+const refineDirectionTool = {
   name: REFINE_TOOL_NAME,
   description:
     "Apply a natural-language refinement or return a conflict without changing the spec.",
@@ -140,14 +139,14 @@ const refineDirectionTool: Anthropic.Tool = {
 }
 
 /**
- * Anthropic-backed CreativeEngine. The only creative-engine file that may
- * import the Anthropic SDK. Callers go through getCreativeEngine().
+ * Anthropic-backed CreativeEngine. The SDK is loaded at runtime only —
+ * see load-anthropic-sdk.ts. Callers go through getCreativeEngine().
  */
 export class AnthropicCreativeEngine implements CreativeEngine {
-  private client: Anthropic
+  private client: ReturnType<typeof createAnthropicClient>
 
   constructor(apiKey: string) {
-    this.client = new Anthropic({ apiKey })
+    this.client = createAnthropicClient(apiKey)
   }
 
   async generateDirections(
@@ -231,7 +230,7 @@ export class AnthropicCreativeEngine implements CreativeEngine {
     })
 
     const toolUse = response.content.find(
-      (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
+      (block): block is AnthropicToolUseBlock => block.type === "tool_use"
     )
     if (!toolUse) {
       throw new Error("Creative engine did not return structured directions.")
@@ -269,7 +268,7 @@ export class AnthropicCreativeEngine implements CreativeEngine {
     })
 
     const toolUse = response.content.find(
-      (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
+      (block): block is AnthropicToolUseBlock => block.type === "tool_use"
     )
     if (!toolUse) {
       throw new Error("Creative engine did not return a structured refinement.")

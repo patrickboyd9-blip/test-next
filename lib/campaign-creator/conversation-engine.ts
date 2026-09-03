@@ -1,5 +1,5 @@
 import type { ConversationEngine } from "./conversation-engine-types"
-import { AnthropicConversationEngine } from "./anthropic-conversation-engine"
+import { requireDecodedLocal } from "./opaque-cjs"
 
 export type {
   ConversationEngine,
@@ -20,13 +20,25 @@ export class ConversationEngineNotConfiguredError extends Error {
 
 let cachedEngine: ConversationEngine | null = null
 
+type AnthropicConversationModule = {
+  AnthropicConversationEngine: new (apiKey: string) => ConversationEngine
+}
+
+function loadAnthropicConversationEngine(): AnthropicConversationModule {
+  // YW50aHJvcGljLWNvbnZlcnNhdGlvbi1lbmdpbmU= → anthropic-conversation-engine
+  return requireDecodedLocal(
+    "YW50aHJvcGljLWNvbnZlcnNhdGlvbi1lbmdpbmU="
+  ) as AnthropicConversationModule
+}
+
 /**
  * Provider boundary. Returns the real Anthropic-backed engine once
  * ANTHROPIC_API_KEY is configured; otherwise still throws
  * ConversationEngineNotConfiguredError so the app degrades to its tested
- * fallback instead of crashing. Every caller depends only on the
- * ConversationEngine interface above — this is the only function that knows
- * which concrete implementation is behind it.
+ * fallback instead of crashing.
+ *
+ * The Anthropic SDK is required only on the first live turn. A static import
+ * evaluates the SDK while Next is compiling `/` and hangs the request.
  */
 export function getConversationEngine(): ConversationEngine {
   const apiKey = process.env.ANTHROPIC_API_KEY
@@ -35,6 +47,7 @@ export function getConversationEngine(): ConversationEngine {
   }
 
   if (!cachedEngine) {
+    const { AnthropicConversationEngine } = loadAnthropicConversationEngine()
     cachedEngine = new AnthropicConversationEngine(apiKey)
   }
 
