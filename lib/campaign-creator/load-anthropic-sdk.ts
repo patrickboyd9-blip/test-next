@@ -2,14 +2,12 @@ import "server-only"
 
 import Anthropic from "@anthropic-ai/sdk"
 
-export type AnthropicToolUseBlock = {
-  type: "tool_use"
-  input: unknown
-}
+export type AnthropicToolUseBlock = Extract<
+  Anthropic.ContentBlock,
+  { type: "tool_use" }
+>
 
-export type AnthropicMessage = {
-  content: Array<{ type: string; input?: unknown }>
-}
+export type AnthropicMessage = Anthropic.Message
 
 export type AnthropicMessagesClient = Anthropic
 

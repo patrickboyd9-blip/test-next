@@ -1,12 +1,24 @@
 import { randomUUID } from "crypto"
 
+import Anthropic from "@anthropic-ai/sdk"
+
+import { buildCampaignPrompt } from "../campaign-strategy/prompt-builder"
+
 import type {
   ConversationEngine,
   ConversationTurnInput,
   ConversationTurnResult,
 } from "./conversation-engine-types"
-import type { CampaignBrief, PrimarySuccessMetricType } from "./types"
-import { createAnthropicClient, type AnthropicToolUseBlock } from "./load-anthropic-sdk"
+
+import type {
+  CampaignBrief,
+  PrimarySuccessMetricType,
+} from "./types"
+
+import {
+  createAnthropicClient,
+  type AnthropicToolUseBlock,
+} from "./load-anthropic-sdk"
 
 const MODEL = "claude-sonnet-5"
 const MAX_TOKENS = 1024
@@ -33,7 +45,7 @@ const UPDATE_BRIEF_TOOL_NAME = "update_campaign_brief"
  * tool guarantees a predictable, parseable shape every turn — never freeform
  * text we'd have to guess-parse into a Campaign Brief.
  */
-const updateBriefTool = {
+const updateBriefTool: Anthropic.Tool = {
   name: UPDATE_BRIEF_TOOL_NAME,
   description:
     "Record your reply to the customer and any new or corrected understanding of their campaign.",
@@ -112,7 +124,7 @@ const updateBriefTool = {
     },
     required: ["reply", "readyForBriefReview", "brief"],
   },
-}
+} as const
 
 function buildSystemPrompt(brief: CampaignBrief): string {
   return `You are Modern Mail's Campaign Creator — a knowledgeable marketing strategist \
@@ -230,7 +242,7 @@ export class AnthropicConversationEngine implements ConversationEngine {
     const response = await this.client.messages.create({
       model: MODEL,
       max_tokens: MAX_TOKENS,
-      system: buildSystemPrompt(input.brief),
+      system: buildCampaignPrompt(input.brief),
       messages: toAnthropicMessages(input.transcript),
       tools: [updateBriefTool],
       tool_choice: { type: "tool", name: UPDATE_BRIEF_TOOL_NAME },
