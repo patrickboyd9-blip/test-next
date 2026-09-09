@@ -12,6 +12,8 @@ export interface CampaignIssue {
 }
 
 export interface CampaignEvaluation {
+  score: number
+  confidence: "high" | "medium" | "low"
   missingInformation: string[]
   issues: CampaignIssue[]
 }

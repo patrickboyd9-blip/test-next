@@ -26,11 +26,40 @@ export function evaluateCampaign(
       issues.push(issue)
     }
   }
+  const score = Math.max(
+    0,
+    100 -
+      issues.reduce(
+        (total, issue) =>
+          total +
+          (issue.severity === "critical"
+            ? 25
+            : issue.severity === "warning"
+            ? 10
+            : 5),
+        0
+      )
+  )
+  issues.sort((a, b) => {
+    const priority = {
+      critical: 3,
+      warning: 2,
+      good: 1,
+    }
+  
+    return priority[b.severity] - priority[a.severity]
+  })
   return {
+    score,
+    confidence:
+      score >= 85
+        ? "high"
+        : score >= 60
+        ? "medium"
+        : "low",
     missingInformation: issues
       .filter((issue) => issue.severity === "critical")
       .map((issue) => issue.title),
-  
     issues,
   }
-  }
+}
