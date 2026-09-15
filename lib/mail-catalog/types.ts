@@ -7,9 +7,15 @@
  *
  * This module must not contain Click2Mail (or any vendor) identifiers,
  * job options, or pricing.
+ *
+ * Catalog versions are immutable. Changing a mail piece means adding a new
+ * version (e.g. postcard_5x8 v2), never editing an existing version.
  */
 
 export type MailPieceCatalogId = "postcard_5x8"
+
+/** Published immutable versions. Grows as new versions are added; never reused. */
+export type MailPieceCatalogVersion = 1
 
 export type MailPieceFamily = "postcard"
 
@@ -58,6 +64,7 @@ export interface MailPieceCatalogProvenance {
 
 export interface MailPieceCatalogEntry {
   id: MailPieceCatalogId
+  version: MailPieceCatalogVersion
   family: MailPieceFamily
   displayName: string
   /** Why this format is a meaningful customer-facing strategy choice. */

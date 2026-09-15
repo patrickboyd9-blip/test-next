@@ -1,15 +1,18 @@
 import type { MailPieceCatalogEntry } from "../types"
 
 /**
- * Modern Mail's first catalogued mail piece: a 5×8 postcard.
+ * 5×8 Postcard, catalog version 1. Immutable.
  *
  * Facts below are limited to what docs/CLICK2MAIL_DUE_DILIGENCE.md
  * establishes for this product, plus vendor-neutral mailed-postcard
  * canvas intent. Click2Mail SKUs, paper, coating, mail class, pricing,
  * production windows, and unverified inch measurements are omitted.
+ *
+ * Future changes ship as POSTCARD_5X8_V2, not edits to this object.
  */
-export const POSTCARD_5X8: MailPieceCatalogEntry = {
+export const POSTCARD_5X8_V1: MailPieceCatalogEntry = {
   id: "postcard_5x8",
+  version: 1,
   family: "postcard",
   displayName: "5×8 Postcard",
   strategicRationale:
