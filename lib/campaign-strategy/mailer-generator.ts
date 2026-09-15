@@ -1,3 +1,4 @@
+import { getMailPiece } from "@/lib/mail-catalog/catalog"
 import type { CampaignBrief } from "../campaign-creator/types"
 
 import type { GeneratedMailer } from "./mailer-types"
@@ -8,6 +9,10 @@ export function generateMailerSkeleton(
   brief: CampaignBrief
 ): GeneratedMailer {
   const strategy = generateCampaignStrategy(brief)
+  const recommendedPiece = getMailPiece(
+    strategy.formatRecommendation.catalogId,
+    strategy.formatRecommendation.catalogVersion
+  )
 
   return {
     headline:
@@ -41,7 +46,7 @@ export function generateMailerSkeleton(
     ],
 
     layoutNotes: [
-      `Recommended format: ${strategy.mailFormat}`,
+      `Recommended format: ${recommendedPiece.displayName}`,
       "Keep headline dominant.",
       "Use a clear visual hierarchy.",
     ],

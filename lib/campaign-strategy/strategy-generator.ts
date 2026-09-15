@@ -1,17 +1,15 @@
+import { getMailPiece } from "@/lib/mail-catalog/catalog"
 import type { CampaignBrief } from "../campaign-creator/types"
 import type { CampaignStrategy } from "./strategy-types"
 
 import { generateRecommendations } from "./recommendation-engine"
-import { findIndustryPlaybook } from "./playbooks"
 
 export function generateCampaignStrategy(
   brief: CampaignBrief
 ): CampaignStrategy {
   const recommendationResult = generateRecommendations(brief)
 
-  const searchableText = JSON.stringify(brief)
-
-  const playbook = findIndustryPlaybook(searchableText)
+  const catalogPiece = getMailPiece("postcard_5x8", 1)
 
   return {
     audience:
@@ -22,10 +20,13 @@ export function generateCampaignStrategy(
       brief.offer ??
       "A compelling offer should be developed for this campaign.",
 
-    mailFormat:
-      playbook
-        ? "Recommended by industry playbook."
-        : "6x11 Oversized Postcard",
+    formatRecommendation: {
+      catalogId: catalogPiece.id,
+      catalogVersion: catalogPiece.version,
+      source: "catalog_default",
+      rationale:
+        "This is the currently catalogued default mail piece. It is the only physical format Modern Mail can produce today, not a claim that it is the best format for every campaign.",
+    },
 
     cadence: "Three mailings over 30 days",
 
@@ -36,12 +37,12 @@ export function generateCampaignStrategy(
     callToAction:
       "Call today or scan the QR code to schedule your appointment.",
 
-      successMetrics: [
-        String(brief.primarySuccessMetric ?? "Phone calls"),
-        "Appointments booked",
-        "Cost per acquisition",
-        "Return on investment",
-      ],
+    successMetrics: [
+      String(brief.primarySuccessMetric ?? "Phone calls"),
+      "Appointments booked",
+      "Cost per acquisition",
+      "Return on investment",
+    ],
 
     assumptions:
       recommendationResult.evaluation.confidence === "low"
