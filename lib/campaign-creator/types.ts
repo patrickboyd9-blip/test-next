@@ -1,3 +1,8 @@
+import type {
+  MailPieceCatalogId,
+  MailPieceCatalogVersion,
+} from "@/lib/mail-catalog/types"
+
 export type CampaignStatus =
   | "draft"
   | "strategy_confirmed"
@@ -192,6 +197,21 @@ export interface CampaignCreative {
   activeRevisionId?: string
 }
 
+/**
+ * Campaign-specific physical mail-piece decision.
+ * Catalog versions remain the source of physical/production constraints.
+ */
+export interface MailPieceSpec {
+  recommendedCatalogId: MailPieceCatalogId
+  recommendedCatalogVersion: MailPieceCatalogVersion
+  selectedCatalogId: MailPieceCatalogId
+  selectedCatalogVersion: MailPieceCatalogVersion
+  customerOverride: boolean
+  decidedAt: string
+  /** Campaign owner at confirmation — existing ownerId, not a new user model. */
+  decidedBy: string
+}
+
 export interface Campaign {
   id: string
   ownerId: string
@@ -199,6 +219,8 @@ export interface Campaign {
   brief: CampaignBrief
   creative: CampaignCreative
   transcript: ConversationMessage[]
+  /** Set at Confirm strategy. Absent on campaigns confirmed before this field existed. */
+  mailPieceSpec?: MailPieceSpec
   /** Internal signal only — never surfaced to the customer as a score. */
   readyForBriefReview: boolean
   createdAt: string

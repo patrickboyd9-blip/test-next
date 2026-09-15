@@ -2,6 +2,8 @@ import { randomUUID } from "crypto"
 import { mkdir, readFile, writeFile } from "fs/promises"
 import path from "path"
 
+import { getMailPiece } from "@/lib/mail-catalog/catalog"
+
 import { normalizeCampaignStatus } from "./campaign-status"
 import { getActiveRevision, getActiveSpec, getApprovedSpec } from "./creative-state"
 import { cloneSpec } from "./spec-diff"
@@ -212,8 +214,24 @@ class FileCampaignRepository implements CampaignRepository {
 
   async confirmStrategy(id: string): Promise<Campaign> {
     const campaign = await this.require(id)
+    const now = new Date().toISOString()
+
+    if (!campaign.mailPieceSpec) {
+      // Beta: only postcard_5x8 v1 exists. Not a product rule that 5×8 is always recommended.
+      const catalogPiece = getMailPiece("postcard_5x8", 1)
+      campaign.mailPieceSpec = {
+        recommendedCatalogId: catalogPiece.id,
+        recommendedCatalogVersion: catalogPiece.version,
+        selectedCatalogId: catalogPiece.id,
+        selectedCatalogVersion: catalogPiece.version,
+        customerOverride: false,
+        decidedAt: now,
+        decidedBy: campaign.ownerId,
+      }
+    }
+
     campaign.status = "strategy_confirmed"
-    campaign.updatedAt = new Date().toISOString()
+    campaign.updatedAt = now
     return this.write(campaign)
   }
 
