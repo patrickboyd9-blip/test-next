@@ -318,3 +318,72 @@ Overrides that the catalog does not declare as variable are invalid, even if a c
 Beta scope: use an immutable catalog-version reference. Do not build a separate resolved production snapshot yet. A future production/audit layer may persist resolved constraints when a production artifact is created or submitted, but that is not the primary source of truth for `MailPieceSpec`.
 
 This decision does not implement `MailPieceSpec`, change the catalog module, or change `Campaign`. Those remain later implementation steps.
+
+---
+
+## ADR-003: `MailPieceSpec` Records Recommendation and Final Selection Separately
+
+### Status
+
+Accepted
+
+### Decision
+
+`MailPieceSpec` will distinguish between Modern Mail's recommended mail-piece selection and the customer's final selection.
+
+The recommendation and final selection are separate campaign-specific decisions.
+
+Example:
+
+- Modern Mail recommendation → 6×11 Postcard
+- Customer selection → 5×8 Postcard
+
+`MailPieceSpec` records both where applicable.
+
+The final selected catalog entry **and** immutable catalog version are authoritative for the physical mail piece that the campaign will actually create.
+
+Customer accepts recommendation:
+
+```
+MailPieceSpec
+    ├── recommended: 5×8 Postcard
+    ├── selected: 5×8 Postcard v1
+    └── customer override: no
+```
+
+Customer overrides recommendation:
+
+```
+MailPieceSpec
+    ├── recommended: 6×11 Postcard
+    ├── selected: 5×8 Postcard v1
+    └── customer override: yes
+```
+
+### Rationale
+
+Recommendation and selection are different business events.
+
+Preserving both allows Modern Mail to:
+
+- measure recommendation acceptance and overrides
+- understand why recommendations succeed or fail
+- improve future recommendation logic using accumulated evidence
+- distinguish Modern Mail's recommendation from customer preference
+- maintain an auditable record of how the physical format was chosen
+
+### Boundary
+
+The recommendation does not belong in the Mail Piece Catalog.
+
+The catalog defines what Modern Mail supports.
+
+Strategy produces a recommendation for a specific campaign.
+
+`MailPieceSpec` records the campaign-specific recommendation and final selection.
+
+### Consequences
+
+The selected catalog entry and version — not the recommendation — determine what the campaign produces.
+
+A recommendation may name a catalogued piece without being the production source of truth. Implementation of `MailPieceSpec`, the catalog, and `Campaign` remains a later step.
