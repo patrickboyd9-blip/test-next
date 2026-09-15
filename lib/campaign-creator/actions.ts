@@ -157,7 +157,8 @@ export async function generateStudioCreative(campaignId: string): Promise<Campai
     const latest = await repository.getCampaign(campaignId)
     if (!latest) throw new Error(`Campaign ${campaignId} not found`)
 
-    const result = await getCreativeEngine().generateDirections({
+    const engine = await getCreativeEngine()
+    const result = await engine.generateDirections({
       brief: latest.brief,
     })
     return repository.initializeStudioCreative(
@@ -207,7 +208,8 @@ export async function applyRefinement(
     campaign.creative.activeSpec ?? getActiveSpec(campaign.creative, directionId)
   if (!currentSpec) throw new Error("No active spec")
 
-  const result = await getCreativeEngine().refineDirection({
+  const engine = await getCreativeEngine()
+  const result = await engine.refineDirection({
     brief: campaign.brief,
     direction: { ...direction, spec: currentSpec },
     revisions: campaign.creative.revisions,

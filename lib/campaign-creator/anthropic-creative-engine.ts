@@ -278,12 +278,32 @@ export class AnthropicCreativeEngine implements CreativeEngine {
   }
 }
 
+function coerceJson(value: unknown): unknown {
+  if (typeof value !== "string") return value
+  const trimmed = value.trim()
+  if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) return value
+  try {
+    return JSON.parse(trimmed)
+  } catch {
+    return value
+  }
+}
+
 function parseGeneratedDirections(raw: unknown): CreativeDirection[] {
-  if (!isRecord(raw) || !Array.isArray(raw.directions)) {
+  const parsed = coerceJson(raw)
+  if (!isRecord(parsed)) {
     throw new CreativeGenerationInvalidError(["tool output is missing directions"])
   }
 
-  return raw.directions.map((item, index) => {
+  let directions = coerceJson(parsed.directions)
+  if (isRecord(directions) && !Array.isArray(directions)) {
+    directions = coerceJson(directions.directions)
+  }
+  if (!Array.isArray(directions)) {
+    throw new CreativeGenerationInvalidError(["tool output is missing directions"])
+  }
+
+  return directions.map((item, index) => {
     if (!isRecord(item)) {
       throw new CreativeGenerationInvalidError([`direction ${index + 1} is not an object`])
     }

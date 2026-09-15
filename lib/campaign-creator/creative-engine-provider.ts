@@ -1,6 +1,5 @@
 import type { CreativeEngine } from "./creative-engine"
 import { MockCreativeEngine } from "./mock-creative-engine"
-import { requireDecodedLocal } from "./opaque-cjs"
 
 let cached: { kind: "anthropic" | "mock"; engine: CreativeEngine } | null = null
 
@@ -10,19 +9,8 @@ function resolveKind(): "anthropic" | "mock" {
   return "mock"
 }
 
-type AnthropicEngineModule = {
-  AnthropicCreativeEngine: new (apiKey: string) => CreativeEngine
-}
-
-/**
- * Load behind a constructed path so Turbopack/webpack do not trace
- * anthropic-creative-engine.ts (and the SDK) while compiling `/`.
- */
-function loadAnthropicEngine(): AnthropicEngineModule {
-  // YW50aHJvcGljLWNyZWF0aXZlLWVuZ2luZQ== → anthropic-creative-engine
-  return requireDecodedLocal(
-    "YW50aHJvcGljLWNyZWF0aXZlLWVuZ2luZQ=="
-  ) as AnthropicEngineModule
+async function loadAnthropicEngine() {
+  return await import("./anthropic-creative-engine")
 }
 
 /**
@@ -31,14 +19,19 @@ function loadAnthropicEngine(): AnthropicEngineModule {
  *
  * Anthropic when ANTHROPIC_API_KEY is set (unless CREATIVE_ENGINE=mock).
  * Mock otherwise.
+ *
+ * The Anthropic SDK is required only on first live generation. A static
+ * import evaluates the SDK while Next is compiling `/` and hangs the request.
+ * Load the engine with a literal dynamic import so Turbopack can resolve it
+ * without tracing the SDK into `/`.
  */
-export function getCreativeEngine(): CreativeEngine {
+export async function getCreativeEngine(): Promise<CreativeEngine> {
   const kind = resolveKind()
   if (cached?.kind === kind) return cached.engine
 
   let engine: CreativeEngine
   if (kind === "anthropic" && process.env.ANTHROPIC_API_KEY) {
-    const { AnthropicCreativeEngine } = loadAnthropicEngine()
+    const { AnthropicCreativeEngine } = await loadAnthropicEngine()
     engine = new AnthropicCreativeEngine(process.env.ANTHROPIC_API_KEY)
   } else {
     engine = new MockCreativeEngine()
