@@ -16,10 +16,12 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import type { CampaignBrief, CampaignStatus } from "@/lib/campaign-creator/types"
+import type { MailPieceFormatRecommendationView } from "@/lib/campaign-creator/actions"
 
 interface BriefSummaryCardProps {
   brief: CampaignBrief
   status: CampaignStatus
+  formatRecommendation?: MailPieceFormatRecommendationView
   onFieldChange: (patch: Partial<CampaignBrief>) => void
   onConfirm: () => void
   isConfirming?: boolean
@@ -91,9 +93,24 @@ export function Field({ label, value, onCommit, readOnly, multiline, placeholder
   )
 }
 
+function FormatRecommendationSection({
+  recommendation,
+}: {
+  recommendation: MailPieceFormatRecommendationView
+}) {
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="text-xs text-muted-foreground">We recommend</span>
+      <span className="text-sm font-medium">{recommendation.displayName}</span>
+      <p className="text-sm text-muted-foreground">{recommendation.rationale}</p>
+    </div>
+  )
+}
+
 export function BriefSummaryCard({
   brief,
   status,
+  formatRecommendation,
   onFieldChange,
   onConfirm,
   isConfirming,
@@ -298,6 +315,13 @@ export function BriefSummaryCard({
             onCommit={(value) => onFieldChange({ otherRequirements: value })}
           />
         </div>
+
+        {formatRecommendation && (
+          <>
+            <Separator />
+            <FormatRecommendationSection recommendation={formatRecommendation} />
+          </>
+        )}
       </CardContent>
       {!readOnly && (
         <CardFooter className="justify-end">

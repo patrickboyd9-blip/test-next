@@ -16,6 +16,12 @@ import { getCreativeEngine } from "./creative-engine-provider"
 import { getCampaignRepository } from "./repository"
 import { buildSpecDiff, cloneSpec } from "./spec-diff"
 import type { Campaign, CampaignBrief, CreativeRevision } from "./types"
+import type {
+  MailPieceCatalogId,
+  MailPieceCatalogVersion,
+} from "@/lib/mail-catalog/types"
+import { getMailPiece } from "@/lib/mail-catalog/catalog"
+import { generateCampaignStrategy } from "@/lib/campaign-strategy/strategy-generator"
 
 const repository = getCampaignRepository()
 
@@ -25,6 +31,31 @@ export async function createDraftCampaign(): Promise<Campaign> {
 
 export async function getCampaign(campaignId: string): Promise<Campaign | null> {
   return repository.getCampaign(campaignId)
+}
+
+export interface MailPieceFormatRecommendationView {
+  catalogId: MailPieceCatalogId
+  catalogVersion: MailPieceCatalogVersion
+  displayName: string
+  rationale: string
+}
+
+/** Read-only. Does not persist Strategy or change Campaign. */
+export async function getMailPieceFormatRecommendation(
+  brief: CampaignBrief
+): Promise<MailPieceFormatRecommendationView> {
+  const { formatRecommendation } = generateCampaignStrategy(brief)
+  const catalogPiece = getMailPiece(
+    formatRecommendation.catalogId,
+    formatRecommendation.catalogVersion
+  )
+
+  return {
+    catalogId: catalogPiece.id,
+    catalogVersion: catalogPiece.version,
+    displayName: catalogPiece.displayName,
+    rationale: formatRecommendation.rationale,
+  }
 }
 
 export async function sendCampaignMessage(

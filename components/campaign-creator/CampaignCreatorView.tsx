@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { isAtOrPastStatus } from "@/lib/campaign-creator/campaign-status"
 import { getApprovedSpec } from "@/lib/campaign-creator/creative-state"
@@ -8,9 +8,11 @@ import {
   confirmCampaignStrategy,
   confirmCampaignAudience,
   confirmCampaignQuantity,
+  getMailPieceFormatRecommendation,
   sendCampaignMessage,
   updateCampaignBrief,
   unapproveCreative,
+  type MailPieceFormatRecommendationView,
 } from "@/lib/campaign-creator/actions"
 import type { Campaign, CampaignBrief, CampaignStatus, ConversationMessage } from "@/lib/campaign-creator/types"
 
@@ -41,6 +43,8 @@ export function CampaignCreatorView({ initialCampaign }: CampaignCreatorViewProp
   const [studioProgressStatus, setStudioProgressStatus] = useState<CampaignStatus | undefined>()
   const [showApprovedHandoff, setShowApprovedHandoff] = useState(false)
   const [resumeInRefinement, setResumeInRefinement] = useState(false)
+  const [formatRecommendation, setFormatRecommendation] =
+    useState<MailPieceFormatRecommendationView | null>(null)
 
   async function handleSend() {
     const text = composerValue.trim()
@@ -135,6 +139,26 @@ export function CampaignCreatorView({ initialCampaign }: CampaignCreatorViewProp
   const showAudience = isAtOrPastStatus(campaign.status, "creative_approved")
   const showQuantityTracking = isAtOrPastStatus(campaign.status, "audience_confirmed")
 
+  useEffect(() => {
+    if (!showStrategySummary) {
+      setFormatRecommendation(null)
+      return
+    }
+
+    let cancelled = false
+    void getMailPieceFormatRecommendation(campaign.brief)
+      .then((recommendation) => {
+        if (!cancelled) setFormatRecommendation(recommendation)
+      })
+      .catch((error) => {
+        console.error("Failed to load mail-piece format recommendation:", error)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [showStrategySummary, campaign.brief])
+
   const progressStatus = studioProgressStatus ?? campaign.status
 
   const selectedDirectionId = campaign.creative.selectedDirectionId
@@ -164,6 +188,7 @@ export function CampaignCreatorView({ initialCampaign }: CampaignCreatorViewProp
         <BriefSummaryCard
           brief={campaign.brief}
           status={campaign.status}
+          formatRecommendation={formatRecommendation ?? undefined}
           onFieldChange={handleFieldChange}
           onConfirm={handleConfirmStrategy}
           isConfirming={isConfirmingStrategy}
