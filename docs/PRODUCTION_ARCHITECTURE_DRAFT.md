@@ -387,3 +387,92 @@ Strategy produces a recommendation for a specific campaign.
 The selected catalog entry and version — not the recommendation — determine what the campaign produces.
 
 A recommendation may name a catalogued piece without being the production source of truth. Implementation of `MailPieceSpec`, the catalog, and `Campaign` remains a later step.
+
+---
+
+## ADR-004: `MailPieceSpec` Is Created at Strategy Confirmation
+
+### Status
+
+Accepted
+
+### Decision
+
+`MailPieceSpec` will be created and persisted as part of the existing **Confirm strategy** action while the Campaign is still in the `draft` state.
+
+The existing Campaign lifecycle will **not** gain a new state or a separate `MailPieceSpec` lifecycle.
+
+The flow is:
+
+```
+Campaign: draft
+        │
+        ▼
+Customer reviews campaign brief + mail-piece recommendation
+        │
+        ▼
+Customer accepts or overrides recommendation
+        │
+        ▼
+Confirm strategy
+        │
+        ├── persist MailPieceSpec
+        │       └── selected catalog entry + immutable catalog version
+        │
+        └── status → strategy_confirmed
+                        │
+                        ▼
+                  existing Studio auto-start
+                        │
+                        ▼
+                     Creative
+```
+
+### Rationale
+
+The existing application does not currently have a customer gate between `strategy_confirmed` and `generating_creative`.
+
+`strategy_confirmed` is a brief transition state. The existing confirm action causes Studio to mount and creative generation to begin automatically.
+
+Therefore, inserting `MailPieceSpec` creation after `strategy_confirmed` would either create a race condition or require an unnecessary new lifecycle state.
+
+The natural insertion point is the existing `confirmStrategy()` action.
+
+This preserves the current Campaign state machine while ensuring that the physical mail-piece decision exists before Creative generation begins.
+
+### Authority
+
+Once strategy confirmation completes, the selected `MailPieceSpec` becomes the authoritative physical mail-piece decision for Creative.
+
+Creative must consume the selected `MailPieceSpec` / catalog version rather than independently guessing or hardcoding a physical format.
+
+### Relationship
+
+- **Strategy** produces the campaign-specific recommendation.
+- **Customer** accepts or overrides the recommendation.
+- **`MailPieceSpec`** records the recommendation, final selection, selected immutable catalog version, and applicable campaign-specific decisions.
+- **Creative** consumes the selected `MailPieceSpec`.
+
+### Constraints
+
+- Do not create a new Campaign state.
+- Do not create a parallel `MailPieceSpec` lifecycle.
+- Do not duplicate Campaign state.
+- Do not make Creative responsible for choosing physical format.
+- Do not make Click2Mail responsible for the domain decision.
+- The selected catalog entry/version remains authoritative for physical constraints.
+- Existing `strategy_confirmed` → `generating_creative` behavior remains intact.
+
+### Implementation prerequisite
+
+The Mail Piece Catalog must have immutable versioning before `MailPieceSpec` can reference it.
+
+### Initial beta condition
+
+If only one catalogued mail piece exists, the initial recommendation and selection may resolve to the same catalog entry/version. This is an implementation condition, not a permanent rule that makes the catalogued piece the universal recommendation.
+
+### Consequences
+
+`confirmStrategy()` is the persistence point for `MailPieceSpec`. Creative generation continues to auto-start after `strategy_confirmed`; it must read the already-persisted selection rather than choosing a format.
+
+This decision does not implement `MailPieceSpec`, catalog versioning, or Campaign changes. Those remain later implementation steps.
