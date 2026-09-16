@@ -1,3 +1,4 @@
+import type { CreativeCanvas } from "./creative-canvas"
 import type {
   CampaignBrief,
   CampaignCreative,
@@ -9,6 +10,7 @@ import type {
 
 export interface GenerateDirectionsInput {
   brief: CampaignBrief
+  canvas: CreativeCanvas
 }
 
 export interface GenerateDirectionsResult {
@@ -19,6 +21,7 @@ export interface GenerateDirectionsResult {
 
 export interface RefineDirectionInput {
   brief: CampaignBrief
+  canvas: CreativeCanvas
   direction: CreativeDirection
   revisions: CreativeRevision[]
   prompt: string
@@ -36,6 +39,7 @@ export interface RefineDirectionResult {
 
 export interface RegenerateDirectionsInput {
   brief: CampaignBrief
+  canvas: CreativeCanvas
   feedback: string
   previousDirections: CreativeDirection[]
 }

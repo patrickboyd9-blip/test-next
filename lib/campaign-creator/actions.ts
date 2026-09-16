@@ -12,10 +12,11 @@ import {
   ConversationEngineNotConfiguredError,
   getConversationEngine,
 } from "./conversation-engine"
+import { toCreativeCanvas } from "./creative-canvas"
 import { getCreativeEngine } from "./creative-engine-provider"
 import { getCampaignRepository } from "./repository"
 import { buildSpecDiff, cloneSpec } from "./spec-diff"
-import type { Campaign, CampaignBrief, CreativeRevision } from "./types"
+import type { Campaign, CampaignBrief, CreativeRevision, MailPieceSpec } from "./types"
 import type {
   MailPieceCatalogId,
   MailPieceCatalogVersion,
@@ -24,6 +25,24 @@ import { getMailPiece } from "@/lib/mail-catalog/catalog"
 import { generateCampaignStrategy } from "@/lib/campaign-strategy/strategy-generator"
 
 const repository = getCampaignRepository()
+
+function requireCreativeCanvas(
+  mailPieceSpec: MailPieceSpec | undefined,
+  campaignId: string
+) {
+  if (!mailPieceSpec) {
+    throw new Error(
+      `Campaign ${campaignId} is missing a mail piece spec. Confirm strategy before generating or refining creative.`
+    )
+  }
+
+  return toCreativeCanvas(
+    getMailPiece(
+      mailPieceSpec.selectedCatalogId,
+      mailPieceSpec.selectedCatalogVersion
+    )
+  )
+}
 
 export async function createDraftCampaign(): Promise<Campaign> {
   return repository.createCampaign(mockCurrentUser.email)
@@ -151,15 +170,18 @@ export async function generateStudioCreative(campaignId: string): Promise<Campai
     const campaign = await repository.getCampaign(campaignId)
     if (!campaign) throw new Error(`Campaign ${campaignId} not found`)
     if (campaign.creative.directions.length > 0) return campaign
+    requireCreativeCanvas(campaign.mailPieceSpec, campaignId)
 
     await repository.markGeneratingCreative(campaignId)
 
     const latest = await repository.getCampaign(campaignId)
     if (!latest) throw new Error(`Campaign ${campaignId} not found`)
 
+    const canvas = requireCreativeCanvas(latest.mailPieceSpec, campaignId)
     const engine = await getCreativeEngine()
     const result = await engine.generateDirections({
       brief: latest.brief,
+      canvas,
     })
     return repository.initializeStudioCreative(
       campaignId,
@@ -208,9 +230,11 @@ export async function applyRefinement(
     campaign.creative.activeSpec ?? getActiveSpec(campaign.creative, directionId)
   if (!currentSpec) throw new Error("No active spec")
 
+  const canvas = requireCreativeCanvas(campaign.mailPieceSpec, campaignId)
   const engine = await getCreativeEngine()
   const result = await engine.refineDirection({
     brief: campaign.brief,
+    canvas,
     direction: { ...direction, spec: currentSpec },
     revisions: campaign.creative.revisions,
     prompt: trimmed,

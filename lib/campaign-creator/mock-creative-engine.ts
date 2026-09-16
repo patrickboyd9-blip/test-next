@@ -66,7 +66,10 @@ export class MockCreativeEngine implements CreativeEngine {
   async regenerateDirections(
     input: RegenerateDirectionsInput
   ): Promise<GenerateDirectionsResult> {
-    return normalizeMockGeneration({ brief: input.brief })
+    return normalizeMockGeneration({
+      brief: input.brief,
+      canvas: input.canvas,
+    })
   }
 }
 
