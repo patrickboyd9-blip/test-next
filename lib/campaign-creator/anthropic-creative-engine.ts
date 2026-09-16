@@ -38,7 +38,6 @@ const GENERATE_TOOL_NAME = "propose_creative_directions"
 const REFINE_TOOL_NAME = "apply_creative_refinement"
 
 const specToolProperties = {
-  format: { type: "string", enum: ["postcard_4x6"] },
   layoutVariant: {
     type: "string",
     enum: ["offer_hero", "trust_first", "urgency_banner", "photo_led", "minimal_cta"],
@@ -58,7 +57,6 @@ const specToolProperties = {
     type: "string",
     enum: ["stock_hvac", "stock_restaurant", "stock_generic_local", "logo_primary", "none"],
   },
-  backLayout: { type: "string", enum: ["standard_address"] },
   layoutHints: {
     type: "object",
     properties: {
@@ -97,7 +95,6 @@ const generateDirectionsTool = {
               type: "object",
               properties: specToolProperties,
               required: [
-                "format",
                 "layoutVariant",
                 "headline",
                 "body",
@@ -106,7 +103,6 @@ const generateDirectionsTool = {
                 "tone",
                 "palette",
                 "imagery",
-                "backLayout",
               ],
             },
           },
@@ -154,8 +150,8 @@ export class AnthropicCreativeEngine implements CreativeEngine {
   ): Promise<GenerateDirectionsResult> {
     return this.generateWithRetry(input.brief, () =>
       this.requestDirections({
-        system: buildGenerateSystemPrompt(),
-        user: buildGenerateUserMessage(input.brief),
+        system: buildGenerateSystemPrompt(input.canvas),
+        user: buildGenerateUserMessage(input.brief, input.canvas),
       })
     )
   }
@@ -187,7 +183,7 @@ export class AnthropicCreativeEngine implements CreativeEngine {
   ): Promise<GenerateDirectionsResult> {
     return this.generateWithRetry(input.brief, () =>
       this.requestDirections({
-        system: buildRegenerateSystemPrompt(),
+        system: buildRegenerateSystemPrompt(input.canvas),
         user: buildRegenerateUserMessage(input),
       })
     )
@@ -250,12 +246,13 @@ export class AnthropicCreativeEngine implements CreativeEngine {
     const response = await this.client.messages.create({
       model: MODEL,
       max_tokens: REFINE_MAX_TOKENS,
-      system: buildRefineSystemPrompt(),
+      system: buildRefineSystemPrompt(input.canvas),
       messages: [
         {
           role: "user",
           content: buildRefineUserMessage({
             brief: input.brief,
+            canvas: input.canvas,
             direction: input.direction,
             currentSpec,
             revisions: input.revisions,
@@ -352,7 +349,6 @@ function parseSpec(raw: unknown): CreativeSpec | undefined {
   if (!isRecord(raw)) return undefined
 
   const spec: CreativeSpec = {
-    format: raw.format === "postcard_4x6" ? "postcard_4x6" : undefined,
     layoutVariant: isLayoutVariant(raw.layoutVariant) ? raw.layoutVariant : undefined,
     headline: asOptionalString(raw.headline),
     subheadline: asOptionalString(raw.subheadline),
@@ -368,7 +364,6 @@ function parseSpec(raw: unknown): CreativeSpec | undefined {
       ? raw.palette.filter((color): color is string => typeof color === "string")
       : undefined,
     imagery: isImageryKey(raw.imagery) ? raw.imagery : undefined,
-    backLayout: raw.backLayout === "standard_address" ? "standard_address" : undefined,
   }
 
   if (isRecord(raw.layoutHints)) {

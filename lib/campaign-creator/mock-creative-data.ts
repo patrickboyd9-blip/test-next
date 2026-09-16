@@ -32,7 +32,6 @@ export function getMockCreativeDirections(
       tags: ["Offer-led", "QR-forward", "Professional"],
       createdAt: MOCK_CREATED_AT,
       spec: {
-        format: "postcard_4x6",
         layoutVariant: "trust_first",
         headline: `${business}`,
         subheadline: "Your neighbors trust us for fast, reliable HVAC service",
@@ -46,7 +45,6 @@ export function getMockCreativeDirections(
         tone: brief.emotionalTone ?? "Trustworthy, professional, local",
         palette: ["#1e3a5f", "#4a90a4", "#f5f5f0"],
         imagery: "stock_hvac",
-        backLayout: "standard_address",
       },
     },
     {
@@ -61,7 +59,6 @@ export function getMockCreativeDirections(
       tags: ["Urgency-led", "Offer-forward", "High contrast"],
       createdAt: MOCK_CREATED_AT,
       spec: {
-        format: "postcard_4x6",
         layoutVariant: "urgency_banner",
         headline: "BEAT THE HEAT",
         subheadline: `${offer.toUpperCase()}`,
@@ -75,7 +72,6 @@ export function getMockCreativeDirections(
         tone: "Urgent, energetic, action-oriented",
         palette: ["#c0392b", "#1a1a2e", "#ffffff"],
         imagery: "stock_hvac",
-        backLayout: "standard_address",
       },
     },
     {
@@ -90,7 +86,6 @@ export function getMockCreativeDirections(
       tags: ["Community-led", "Warm tone", "Soft sell"],
       createdAt: MOCK_CREATED_AT,
       spec: {
-        format: "postcard_4x6",
         layoutVariant: "photo_led",
         headline: "Keeping Irvine comfortable",
         subheadline: `From your neighbors at ${business}`,
@@ -104,7 +99,6 @@ export function getMockCreativeDirections(
         tone: "Warm, welcoming, community-focused",
         palette: ["#2d6a4f", "#95d5b2", "#fefae0"],
         imagery: "stock_hvac",
-        backLayout: "standard_address",
       },
     },
   ]

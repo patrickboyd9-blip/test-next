@@ -128,8 +128,8 @@ export function applyFaithfulness(brief: CampaignBrief, spec: CreativeSpec): Cre
   if (qr && !next.qrDestination?.trim()) next.qrDestination = qr
   if (brief.emotionalTone && !next.tone) next.tone = brief.emotionalTone
 
-  next.format = "postcard_4x6"
-  next.backLayout = "standard_address"
+  delete next.format
+  delete next.backLayout
   return next
 }
 
@@ -461,10 +461,6 @@ function validateDirection(
     reasons.push(`${label} is missing oneLineDifference`)
   }
 
-  if (spec.format !== "postcard_4x6") reasons.push(`${label} format must be postcard_4x6`)
-  if (spec.backLayout !== "standard_address") {
-    reasons.push(`${label} backLayout must be standard_address`)
-  }
   if (!spec.headline?.trim()) reasons.push(`${label} is missing a headline`)
   if (!spec.body?.trim()) reasons.push(`${label} is missing body copy`)
   if (!spec.callToAction?.trim()) reasons.push(`${label} is missing a call to action`)

@@ -3,6 +3,8 @@
  * Customer-visible sanitization lives in creative-engine-guards — this file
  * is what the model is told, not what we display.
  */
+import type { CreativeCanvas } from "../creative-canvas"
+
 export const CREATIVE_VOICE_RULES = `You are Modern Mail — a senior marketing strategist and creative director helping a local business with physical outreach.
 
 You speak in Presentation mode when proposing creative directions and Collaboration mode when refining. You are a teammate, not a chatbot.
@@ -16,8 +18,6 @@ Keep rationale to two sentences, in plain English a fourth grader can follow.
 The customer describes. You figure out the configuration.`
 
 export const SPEC_FIELD_RULES = `CreativeSpec rules:
-- format is always postcard_4x6
-- backLayout is always standard_address
 - headline: max 8 words
 - subheadline: max 12 words (optional)
 - body: max 40 words
@@ -28,4 +28,23 @@ export const SPEC_FIELD_RULES = `CreativeSpec rules:
   Choose imagery from the business/industry in the brief. Do not invent photographs.
 - Include offer, phone, website, and qrDestination only when those values appear on the brief. Copy them exactly. Do not fabricate them.
 - visualDirection: one sentence describing the imagery approach
-- tone: from the brief, or a safe inference from the goal`
+- tone: from the brief, or a safe inference from the goal
+- Do not emit physical format, catalog identity, dimensions, bleed, or reserved-zone geometry`
+
+export function buildCreativeCanvasPromptContext(canvas: CreativeCanvas): string {
+  const roles = canvas.reservedRegionRoles.join(", ")
+  const faces = canvas.faces.join(", ")
+  const bleed = canvas.fullBleedExpected
+    ? "yes — design to the trimmed edge"
+    : "no"
+
+  return `Physical canvas (authoritative platform context — not yours to choose or change):
+- Mail piece: ${canvas.displayName} (${canvas.family})
+- Finished trim size: ${canvas.trimSizeInches.shortInches} inches by ${canvas.trimSizeInches.longInches} inches (size pair only; do not assume which edge is width versus height)
+- Faces: ${faces}
+- Address/postage face: ${canvas.addressFace}
+- Reserved roles on the address face (names only): ${roles}
+- Print to trimmed edge: ${bleed}
+
+Design for this canvas. Do not choose a different mail piece. Do not emit catalog id, catalog version, physical format, dimensions, bleed, safe-area, or reserved-zone geometry. Structured output is creative expression only.`
+}

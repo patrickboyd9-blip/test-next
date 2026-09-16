@@ -1,11 +1,18 @@
+import type { CreativeCanvas } from "../creative-canvas"
 import type { CampaignBrief } from "../types"
 
-import { CREATIVE_VOICE_RULES, SPEC_FIELD_RULES } from "./shared"
+import {
+  CREATIVE_VOICE_RULES,
+  SPEC_FIELD_RULES,
+  buildCreativeCanvasPromptContext,
+} from "./shared"
 
-export function buildGenerateSystemPrompt(): string {
+export function buildGenerateSystemPrompt(canvas: CreativeCanvas): string {
   return `${CREATIVE_VOICE_RULES}
 
-You are proposing three distinct creative directions for a 4×6 postcard.
+You are proposing three distinct creative directions for the supplied physical canvas.
+
+${buildCreativeCanvasPromptContext(canvas)}
 
 ${SPEC_FIELD_RULES}
 
@@ -22,8 +29,13 @@ Generation constraints:
 - Recommend the direction that best serves the Primary Success Metric, and say why in the rationale`
 }
 
-export function buildGenerateUserMessage(brief: CampaignBrief): string {
-  return `Create three postcard directions from this confirmed campaign brief.
+export function buildGenerateUserMessage(
+  brief: CampaignBrief,
+  canvas: CreativeCanvas
+): string {
+  return `Create three creative directions for the supplied canvas from this confirmed campaign brief.
+
+${buildCreativeCanvasPromptContext(canvas)}
 
 Campaign brief (JSON):
 ${JSON.stringify(brief, null, 2)}

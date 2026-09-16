@@ -1,11 +1,18 @@
+import type { CreativeCanvas } from "../creative-canvas"
 import type { CampaignBrief, CreativeDirection } from "../types"
 
-import { CREATIVE_VOICE_RULES, SPEC_FIELD_RULES } from "./shared"
+import {
+  CREATIVE_VOICE_RULES,
+  SPEC_FIELD_RULES,
+  buildCreativeCanvasPromptContext,
+} from "./shared"
 
-export function buildRegenerateSystemPrompt(): string {
+export function buildRegenerateSystemPrompt(canvas: CreativeCanvas): string {
   return `${CREATIVE_VOICE_RULES}
 
-The customer rejected the previous three directions. Propose three genuinely new ones.
+The customer rejected the previous three directions. Propose three genuinely new ones for the supplied physical canvas.
+
+${buildCreativeCanvasPromptContext(canvas)}
 
 ${SPEC_FIELD_RULES}
 
@@ -19,6 +26,7 @@ Regeneration constraints (same as generation):
 
 export function buildRegenerateUserMessage(input: {
   brief: CampaignBrief
+  canvas: CreativeCanvas
   feedback: string
   previousDirections: CreativeDirection[]
 }): string {
@@ -30,7 +38,9 @@ export function buildRegenerateUserMessage(input: {
     headline: direction.spec.headline,
   }))
 
-  return `The previous directions did not land. Create three new ones.
+  return `The previous directions did not land. Create three new ones for the supplied canvas.
+
+${buildCreativeCanvasPromptContext(input.canvas)}
 
 Customer feedback:
 ${input.feedback}
