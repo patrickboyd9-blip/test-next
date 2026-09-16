@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { getActiveVersion } from "@/lib/campaign-creator/creative-state"
 import { STUDIO_REFINEMENT } from "@/lib/campaign-creator/studio-config"
 import { REFINEMENT_SLOW_NETWORK_LINE } from "@/lib/campaign-creator/studio-copy"
+import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import type { Campaign, CreativeDirection, CreativeSpec } from "@/lib/campaign-creator/types"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
@@ -15,6 +16,7 @@ import { RevisionHistoryPanel } from "./RevisionHistoryPanel"
 import { StudioComposer } from "./StudioComposer"
 
 interface RefinementViewProps {
+  canvas: CreativeCanvas
   campaign: Campaign
   direction: CreativeDirection
   activeSpec: CreativeSpec
@@ -32,6 +34,7 @@ export interface CampaignUpdateResult {
 }
 
 export function RefinementView({
+  canvas,
   campaign,
   direction,
   activeSpec,
@@ -184,6 +187,7 @@ export function RefinementView({
         >
           <div className="flex flex-col items-center gap-2">
             <PostcardPreview
+              canvas={canvas}
               spec={activeSpec}
               side={side}
               size="hero"

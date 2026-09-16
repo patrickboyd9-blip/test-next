@@ -4,6 +4,7 @@ import { motion } from "framer-motion"
 
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import type { CreativeDirection } from "@/lib/campaign-creator/types"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
@@ -12,6 +13,7 @@ import { PostcardPreview, type PostcardPreviewSize } from "./PostcardPreview"
 export type ConceptCardVariant = "hero" | "compact" | "strip"
 
 interface ConceptCardProps {
+  canvas: CreativeCanvas
   direction: CreativeDirection
   variant?: ConceptCardVariant
   isRecommended?: boolean
@@ -21,6 +23,7 @@ interface ConceptCardProps {
 }
 
 export function ConceptCard({
+  canvas,
   direction,
   variant = "compact",
   isRecommended,
@@ -63,6 +66,7 @@ export function ConceptCard({
       )}
       <div className={cn(variant === "strip" && "opacity-60 saturate-[0.6] group-hover:saturate-100 group-hover:opacity-100 transition-all")}>
         <PostcardPreview
+          canvas={canvas}
           spec={direction.spec}
           size={size}
           enableHoverTilt={variant !== "strip"}

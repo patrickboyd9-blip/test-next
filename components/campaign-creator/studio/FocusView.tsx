@@ -4,6 +4,7 @@ import { useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 
 import { Button } from "@/components/ui/button"
+import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import type { CreativeDirection, CreativeSpec } from "@/lib/campaign-creator/types"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
@@ -12,6 +13,7 @@ import { PostcardPreview, PostcardSideToggle } from "./PostcardPreview"
 import { StrategyTags } from "./StrategyTags"
 
 interface FocusViewProps {
+  canvas: CreativeCanvas
   direction: CreativeDirection
   spec: CreativeSpec
   otherDirections: CreativeDirection[]
@@ -30,6 +32,7 @@ function buildFocusCaption(direction: CreativeDirection): string {
 }
 
 export function FocusView({
+  canvas,
   direction,
   spec,
   otherDirections,
@@ -61,6 +64,7 @@ export function FocusView({
           className="flex flex-col items-center gap-2"
         >
           <PostcardPreview
+            canvas={canvas}
             spec={spec}
             side={side}
             size="hero"
@@ -101,6 +105,7 @@ export function FocusView({
           {otherDirections.map((other) => (
             <ConceptCard
               key={other.id}
+              canvas={canvas}
               direction={other}
               variant="strip"
               onSelect={() => onSwitch(other.id)}

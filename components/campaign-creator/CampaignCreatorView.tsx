@@ -1,8 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 
 import { isAtOrPastStatus } from "@/lib/campaign-creator/campaign-status"
+import { toCreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import { getApprovedSpec } from "@/lib/campaign-creator/creative-state"
 import {
   confirmCampaignStrategy,
@@ -15,6 +16,7 @@ import {
   type MailPieceFormatRecommendationView,
 } from "@/lib/campaign-creator/actions"
 import type { Campaign, CampaignBrief, CampaignStatus, ConversationMessage } from "@/lib/campaign-creator/types"
+import { getMailPiece } from "@/lib/mail-catalog/catalog"
 
 import { AudienceStage } from "./AudienceStage"
 import { BriefSummaryCard } from "./BriefSummaryCard"
@@ -26,6 +28,14 @@ import { OpeningPrompt } from "./OpeningPrompt"
 import { QuantityTrackingStage } from "./QuantityTrackingStage"
 import { CreativeStudio } from "./studio/CreativeStudio"
 import { PersistentCreativeHeader } from "./studio/PersistentCreativeHeader"
+
+function resolveStudioCanvas(campaign: Campaign) {
+  const mailPieceSpec = campaign.mailPieceSpec
+  if (!mailPieceSpec) return null
+  return toCreativeCanvas(
+    getMailPiece(mailPieceSpec.selectedCatalogId, mailPieceSpec.selectedCatalogVersion)
+  )
+}
 
 interface CampaignCreatorViewProps {
   initialCampaign: Campaign
@@ -161,6 +171,8 @@ export function CampaignCreatorView({ initialCampaign }: CampaignCreatorViewProp
 
   const progressStatus = studioProgressStatus ?? campaign.status
 
+  const canvas = useMemo(() => resolveStudioCanvas(campaign), [campaign])
+
   const selectedDirectionId = campaign.creative.selectedDirectionId
   const approvedDirection = campaign.creative.directions.find(
     (d) => d.id === selectedDirectionId
@@ -203,6 +215,7 @@ export function CampaignCreatorView({ initialCampaign }: CampaignCreatorViewProp
 
       {isCreativeApproved && approvedDirection && approvedSpec && (
         <PersistentCreativeHeader
+          canvas={canvas}
           direction={approvedDirection}
           spec={approvedSpec}
           onEditCreative={handleEditCreative}
@@ -220,6 +233,7 @@ export function CampaignCreatorView({ initialCampaign }: CampaignCreatorViewProp
         <CreativeStudio
           key={resumeInRefinement ? "refine-resume" : "studio"}
           campaign={campaign}
+          canvas={canvas}
           onCampaignUpdate={handleCampaignUpdate}
           onProgressStatusChange={setStudioProgressStatus}
           initialSubPhase={resumeInRefinement ? "refine" : undefined}

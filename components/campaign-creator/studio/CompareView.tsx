@@ -2,12 +2,14 @@
 
 import { motion } from "framer-motion"
 
+import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import type { CreativeDirection } from "@/lib/campaign-creator/types"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
 import { ConceptCard } from "./ConceptCard"
 
 interface CompareViewProps {
+  canvas: CreativeCanvas
   directions: CreativeDirection[]
   recommendedId: string
   onSelect: (directionId: string) => void
@@ -15,6 +17,7 @@ interface CompareViewProps {
 }
 
 export function CompareView({
+  canvas,
   directions,
   recommendedId,
   onSelect,
@@ -48,6 +51,7 @@ export function CompareView({
             {...(direction.id === recommendedId ? leadScale : {})}
           >
             <ConceptCard
+              canvas={canvas}
               direction={direction}
               variant="compact"
               isRecommended={direction.id === recommendedId}

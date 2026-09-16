@@ -4,11 +4,13 @@ import { useState } from "react"
 import { Check } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import type { CreativeDirection, CreativeSpec } from "@/lib/campaign-creator/types"
 
 import { PostcardPreview } from "./PostcardPreview"
 
 interface PersistentCreativeHeaderProps {
+  canvas: CreativeCanvas | null
   direction: CreativeDirection
   spec: CreativeSpec
   onEditCreative: () => void
@@ -16,6 +18,7 @@ interface PersistentCreativeHeaderProps {
 }
 
 export function PersistentCreativeHeader({
+  canvas,
   direction,
   spec,
   onEditCreative,
@@ -36,12 +39,15 @@ export function PersistentCreativeHeader({
     <div className="sticky top-0 z-20 -mx-4 mb-6 border-b border-border bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:-mx-6 md:px-6">
       <div className="flex min-h-16 items-center gap-4">
         <div className="h-14 w-[84px] shrink-0 overflow-hidden rounded-md shadow-sm">
-          <PostcardPreview
-            spec={spec}
-            size="thumbnail"
-            enableHoverTilt={false}
-            className="!max-w-none !h-full !aspect-auto"
-          />
+          {canvas ? (
+            <PostcardPreview
+              canvas={canvas}
+              spec={spec}
+              size="thumbnail"
+              enableHoverTilt={false}
+              className="!max-w-none !h-full !aspect-auto"
+            />
+          ) : null}
         </div>
 
         <div className="min-w-0 flex-1">

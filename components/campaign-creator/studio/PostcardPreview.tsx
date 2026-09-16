@@ -3,6 +3,7 @@
 import { motion } from "framer-motion"
 
 import { cn } from "@/lib/utils"
+import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import type { CreativeSpec } from "@/lib/campaign-creator/types"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
@@ -11,6 +12,7 @@ import { ShimmerOverlay, SpecDiffHighlight } from "./SpecDiffHighlight"
 export type PostcardPreviewSize = "hero" | "medium" | "thumbnail"
 
 interface PostcardPreviewProps {
+  canvas: CreativeCanvas
   spec: CreativeSpec
   side?: "front" | "back"
   size?: PostcardPreviewSize
@@ -28,6 +30,7 @@ const SIZE_CLASSES: Record<PostcardPreviewSize, string> = {
 }
 
 export function PostcardPreview({
+  canvas,
   spec,
   side = "front",
   size = "hero",
@@ -37,6 +40,7 @@ export function PostcardPreview({
   isShimmering = false,
   ariaLabel,
 }: PostcardPreviewProps) {
+  void canvas
   const reducedMotion = useReducedMotion()
   const [primary, secondary, accent] = spec.palette ?? ["#1e3a5f", "#4a90a4", "#f5f5f0"]
   const layout = spec.layoutVariant ?? "trust_first"

@@ -9,6 +9,7 @@ import {
   restoreRevision,
   selectCreativeDirection,
 } from "@/lib/campaign-creator/actions"
+import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import { getActiveSpec } from "@/lib/campaign-creator/creative-state"
 import {
   getLeadDirection,
@@ -34,6 +35,7 @@ export type StudioSubPhase =
 
 interface CreativeStudioProps {
   campaign: Campaign
+  canvas: CreativeCanvas | null
   onCampaignUpdate: (campaign: Campaign) => void
   onProgressStatusChange?: (status: CampaignStatus) => void
   initialSubPhase?: StudioSubPhase
@@ -41,6 +43,7 @@ interface CreativeStudioProps {
 
 export function CreativeStudio({
   campaign,
+  canvas,
   onCampaignUpdate,
   onProgressStatusChange,
   initialSubPhase,
@@ -202,11 +205,20 @@ export function CreativeStudio({
     )
   }
 
+  if (!canvas) {
+    return (
+      <p className="text-sm text-muted-foreground" role="status">
+        This campaign is missing a mail piece selection, so the preview can&apos;t be shown.
+      </p>
+    )
+  }
+
   let body: ReactNode = null
 
   if (subPhase === "lead") {
     body = (
       <LeadRevealView
+        canvas={canvas}
         direction={leadDirection}
         onContinue={async () => {
           await handleSelectDirection(leadDirection.id)
@@ -218,6 +230,7 @@ export function CreativeStudio({
   } else if (subPhase === "compare") {
     body = (
       <CompareView
+        canvas={canvas}
         directions={directions}
         recommendedId={leadDirection.id}
         onSelect={async (id) => {
@@ -231,6 +244,7 @@ export function CreativeStudio({
     body = (
       <RefinementView
         key={selectedId}
+        canvas={canvas}
         campaign={campaign}
         direction={selectedDirection}
         activeSpec={activeSpec}
@@ -243,6 +257,7 @@ export function CreativeStudio({
   } else {
     body = (
       <FocusView
+        canvas={canvas}
         direction={selectedDirection}
         spec={activeSpec}
         otherDirections={otherDirections}
@@ -262,6 +277,7 @@ export function CreativeStudio({
       {subPhase === "approval" && (
         <ApprovalModal
           open
+          canvas={canvas}
           spec={activeSpec}
           brief={campaign.brief}
           directionName={selectedDirection.name}
