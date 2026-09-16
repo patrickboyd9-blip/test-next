@@ -29,6 +29,13 @@ const SIZE_CLASSES: Record<PostcardPreviewSize, string> = {
   thumbnail: "w-full h-full min-h-[100px]",
 }
 
+/**
+ * ADR-006 Studio viewing convention for the 5×8 postcard: 8:5 landscape.
+ * Presentation only — not catalog orientation, not production width×height.
+ * Do not derive this from canvas.trimSizeInches.
+ */
+const STUDIO_VIEWING_ASPECT_CLASS = "aspect-[8/5]"
+
 export function PostcardPreview({
   canvas,
   spec,
@@ -73,7 +80,8 @@ export function PostcardPreview({
   return (
     <motion.div
       className={cn(
-        "relative aspect-[3/2] overflow-hidden rounded-lg shadow-lg sm:shadow-lg",
+        "relative overflow-hidden rounded-lg shadow-lg sm:shadow-lg",
+        STUDIO_VIEWING_ASPECT_CLASS,
         SIZE_CLASSES[size],
         size === "thumbnail" && "shadow-md",
         className
