@@ -735,3 +735,114 @@ ADR-004 remains in force: `MailPieceSpec` is persisted at Confirm strategy, and 
 This ADR adds the missing observation layer: Creative consumes `CreativeCanvas` derived from the already-selected catalog version, not `MailPieceSpec` or `MailPieceCatalogEntry` directly.
 
 Implementation of `CreativeCanvas`, `toCreativeCanvas()`, engine input wiring, prompt/guard updates, and renderer consumption remain later steps. This decision does not change application code, catalog types, `MailPieceSpec`, or `CreativeSpec`.
+
+---
+
+## ADR-006: Studio Uses an 8:5 Landscape Viewing Convention for the 5×8 Postcard
+
+### Status
+
+Accepted
+
+### Decision
+
+> **Studio viewing orientation is a presentation convention and is not a statement of physical production orientation.**
+
+For the currently selected catalog piece (`postcard_5x8` version 1), Creative Studio may present the mailer using a deliberate **8:5 landscape** viewing convention.
+
+This convention exists so Studio has a consistent visual canvas. It is **not** catalog data, **not** physical orientation, and **not** production geometry.
+
+The layers remain:
+
+```
+Catalog (authoritative physical dimensions)
+        │
+        │  shortInches = 5, longInches = 8
+        │  physical orientation = unresolved in catalog v1
+        ▼
+CreativeCanvas
+        │
+        │  derived projection of the selected catalog version
+        │  trim pair only; not width×height
+        ▼
+Creative Engine
+        │
+        │  receives CreativeCanvas constraints
+        ▼
+Studio preview renderer
+        │
+        │  may apply the 8:5 landscape viewing convention
+        │  for presentation only
+        ▼
+Production renderer
+        │
+        │  uses authoritative catalog / production geometry
+        │  must not consume the Studio convention as physical truth
+        ▼
+Production artifact
+```
+
+### Physical orientation vs Studio viewing orientation
+
+**Physical orientation** is which finished edge is width and which is height on the manufactured mail piece. Catalog v1 does not establish that fact. ADR-005 remains in force: do not infer or invent physical orientation, and do not add an orientation field to catalog v1 or `CreativeCanvas` as a placeholder.
+
+**Studio viewing orientation** is how Studio frames the piece on screen so the customer and Creative share a consistent preview. For the 5×8 postcard, that convention is **8:5 landscape**: the known long/short edge ratio (`8 / 5`) shown with the longer edge horizontal in the UI.
+
+The known 5×8 dimensions establish an **edge ratio**, not physical width versus height. Representing that ratio as 8:5 in Studio does **not** mean the catalog has decided that the physical piece is 8 inches wide and 5 inches tall.
+
+### Why this decision is needed
+
+Studio currently still presents previews at **3:2**, which is the aspect of a **4×6** postcard (6×4 landscape). That 3:2 frame was a legacy assumption tied to `CreativeSpec.format = postcard_4x6`. It is no longer an appropriate generic Studio representation of the selected 5×8 catalog piece.
+
+Without a documented convention, the next renderer step would either:
+
+- keep 3:2 and continue showing the wrong edge ratio, or
+- silently treat `aspect-[8/5]` or `aspect-[5/8]` as catalog orientation
+
+Neither is acceptable. The platform needs an explicit, presentation-only decision.
+
+### Why 8:5
+
+- Catalog v1 records `shortInches = 5` and `longInches = 8`. The unordered edge ratio is **8:5**.
+- 8:5 is that ratio shown as a landscape Studio frame. It is not a claim that production width is 8 inches.
+- 3:2 (1.5) is the 4×6 ratio. 8:5 (1.6) is the 5×8 ratio. Continuing to drive the 5×8 Studio representation from 3:2 would preserve a superseded physical product, not a viewing convention.
+- A single documented convention gives Creative and the customer a consistent visual canvas without waiting for unresolved production orientation.
+
+### What this does not change
+
+- The catalog remains the authoritative source for physical dimensions and, when it exists, physical orientation.
+- `CreativeCanvas` remains a derived projection of the selected catalog version. It continues to carry the honest trim pair, not width×height, and not this viewing convention.
+- `MailPieceSpec`, `CreativeSpec`, `MailFormat`, and catalog v1 types are unchanged.
+- Production and print rendering must derive geometry from authoritative catalog/production data. They must **not** read the Studio 8:5 convention as physical orientation, bleed, safe area, or reserved-zone geometry.
+- If a later catalog version or production spec sheet establishes authoritative physical orientation, that fact may affect production rendering. It does not automatically rewrite this Studio convention, and this convention must not be back-interpreted as that physical fact.
+- Changing the Studio convention later is a product/UI decision. It does not redefine the physical mail piece.
+
+### Implications for renderers
+
+**Current Studio preview renderer**
+
+May, in a later implementation step, present the 5×8 postcard using the 8:5 landscape convention. Until that step, remaining 3:2 preview geometry is leftover 4×6 UI, not catalog truth.
+
+The preview renderer must not:
+
+- write orientation onto `CreativeCanvas`, `CreativeSpec`, or the catalog
+- treat 8:5 as bleed, safe-area, or reserved-region geometry
+- treat 8:5 as the production width×height assignment
+
+**Future production renderer**
+
+Uses authoritative catalog/production geometry only. If physical orientation is still unresolved at production time, that remains a catalog/production gap — it is not filled by this Studio convention.
+
+### Rationale
+
+ADR-005 forbids inventing catalog orientation. It also assigns **preview aspect** to the renderer. Those statements are compatible only if preview aspect is allowed to be a **presentation convention** that is explicitly not physical truth.
+
+This ADR records that convention so the Studio preview can stop using 3:2 for a 5×8 piece without smuggling orientation into the catalog.
+
+### Consequences
+
+ADR-005 remains in force: catalog v1 does not establish physical orientation; `CreativeCanvas` must not grow placeholder orientation, bleed, or geometry fields.
+
+This ADR adds a Studio-only presentation rule: **8:5 landscape for the 5×8 postcard preview.**
+
+Implementation of that convention in `PostcardPreview` and related Studio surfaces remains a later step. This decision does not change application code, catalog types, `CreativeCanvas`, `MailPieceSpec`, `CreativeSpec`, prompts, or PRDs.
