@@ -476,3 +476,262 @@ If only one catalogued mail piece exists, the initial recommendation and selecti
 `confirmStrategy()` is the persistence point for `MailPieceSpec`. Creative generation continues to auto-start after `strategy_confirmed`; it must read the already-persisted selection rather than choosing a format.
 
 This decision does not implement `MailPieceSpec`, catalog versioning, or Campaign changes. Those remain later implementation steps.
+
+---
+
+## ADR-005: Introduce `CreativeCanvas` as the Creative-Facing Catalog Projection
+
+### Status
+
+Accepted
+
+### Decision
+
+The Creative Engine must not receive a `MailPieceCatalogEntry`, and must not look up the catalog itself.
+
+Creative receives a derived, ephemeral, creative-facing projection called `CreativeCanvas`.
+
+The principle is:
+
+> The Creative Engine receives the minimum physical/canvas knowledge necessary to make good creative decisions, without becoming coupled to the production catalog or fulfillment provider.
+
+The authoritative flow is:
+
+```
+Mail Piece Catalog
+        │
+        ▼
+MailPieceSpec
+        │
+        ▼
+Resolve immutable catalog version
+        │
+        ▼
+CreativeCanvas
+        │
+        ▼
+Creative Engine
+        │
+        ▼
+CreativeSpec
+        │
+        ▼
+Renderer
+        │
+        ▼
+Production Artifact
+        │
+        ▼
+Provider Adapter
+```
+
+`CreativeCanvas` is **not**:
+
+- the `MailPieceCatalogEntry`
+- `MailPieceSpec`
+- `CreativeSpec`
+- a persisted domain object
+- a production/preflight specification
+
+It is derived server-side from the campaign's selected catalog version:
+
+```
+MailPieceSpec.selectedCatalogId + selectedCatalogVersion
+        │
+        ▼
+getMailPiece()
+        │
+        ▼
+toCreativeCanvas(entry)
+        │
+        ▼
+Creative Engine input
+```
+
+The same `CreativeCanvas` is input context for initial generation, refinement, and regeneration. The engine does not independently reach into the catalog.
+
+The proposed TypeScript shape is:
+
+```ts
+export interface CreativeCanvas {
+  /** Identity metadata only. Creative must not choose or mutate these. */
+  catalogId: MailPieceCatalogId
+  catalogVersion: MailPieceCatalogVersion
+  family: MailPieceFamily
+  displayName: string
+
+  /** Honest trim pair. Not width×height; orientation is unknown in catalog v1. */
+  trimSizeInches: MailPieceTrimSize
+
+  faces: readonly MailPieceFace[]
+  addressFace: MailPieceFace
+  reservedRegionRoles: readonly ReservedRegionRole[]
+
+  /** Design-to-trim-edge intent. Numeric bleed is not in catalog v1. */
+  fullBleedExpected: boolean
+}
+```
+
+This shape reuses existing catalog primitive types (`MailPieceCatalogId`, `MailPieceCatalogVersion`, `MailPieceFamily`, `MailPieceTrimSize`, `MailPieceFace`, `ReservedRegionRole`). It does not embed `MailPieceCatalogEntry`, `MailPiecePhysicalSpec`, or `MailPieceCreativeCanvas` as nested objects, so later production fields on those catalog types do not automatically leak into Creative.
+
+### Why this boundary exists
+
+Creative needs enough physical knowledge to make meaningful creative decisions. For the current 5×8 catalog version, that includes:
+
+- the selected piece is a 5×8 postcard
+- it has front and back faces
+- which face is the address face
+- certain reserved roles exist on that face
+- the piece is expected to print to the trimmed edge
+
+Creative must **not** become responsible for:
+
+- choosing the physical mail piece
+- redefining dimensions
+- inventing production geometry
+- choosing vendor-specific production options
+- rendering print geometry
+
+### Field ownership
+
+**Catalog owns** (authoritative source; `CreativeCanvas` only projects a subset):
+
+- catalog identity/version
+- family
+- display name
+- physical trim size
+- faces
+- address face
+- reserved region roles
+- full-bleed expectation
+
+**`MailPieceSpec` owns:**
+
+- campaign recommendation
+- campaign selection
+- customer override
+- decision metadata (`decidedAt`, `decidedBy`)
+
+**`CreativeCanvas` owns none of these authoritatively.** It is only the derived projection of the **selected** catalog version. Recommendation, override, and decision metadata stay on `MailPieceSpec` and are not copied onto the canvas.
+
+**`CreativeSpec` owns** creative expression:
+
+- headline
+- subhead
+- body
+- CTA
+- offer messaging
+- tone
+- palette
+- imagery
+- `layoutVariant`
+- `layoutHints`
+- other creative expression
+
+**Renderer owns:**
+
+- projecting `CreativeSpec` onto the physical canvas
+- preview aspect
+- template geometry
+- reserved-zone rendering
+- future bleed/safe-area geometry
+- production rendering
+
+**Provider / production layer owns:**
+
+- provider-specific IDs
+- production options
+- pricing
+- postage
+- turnaround
+- API/job details
+- print/PDF/preflight concerns
+
+### AI boundary
+
+The AI receives `CreativeCanvas` as deterministic context. It may reason about the canvas. It must **not** emit or redefine:
+
+- `catalogId`
+- `catalogVersion`
+- physical dimensions
+- physical format
+- bleed
+- safe-area geometry
+- reserved-zone geometry
+
+Valid reasoning:
+
+> Because this is a two-sided 5×8 postcard and the back contains reserved address/postage roles, the primary offer and CTA should remain on the front.
+
+Invalid decision:
+
+> This should be a 6×11 postcard.
+
+The tool/schema output remains creative expression (`CreativeSpec` content). Canvas identity and physical constraints are platform data, not model output.
+
+### Creative vs renderer
+
+Creative decides **what** should be expressed on the physical canvas.
+
+Renderer decides **how** that expression is physically rendered onto the canvas.
+
+Creative may reason about physical constraints at a conceptual level.
+
+Renderer owns actual physical layout geometry.
+
+The renderer receives `CreativeCanvas` plus `CreativeSpec`. It derives physical rendering behavior from the canvas/catalog projection, not from `CreativeSpec.format`.
+
+The Creative Engine is not responsible for rendering.
+
+### Missing catalog data must not be invented
+
+Catalog v1 (`postcard_5x8` version 1) does **not** currently establish authoritative values for:
+
+- orientation (which edge is width vs height)
+- numeric bleed
+- safe-area dimensions
+- usable creative area
+- reserved-zone rectangles
+- address-panel geometry
+- resolution
+- color space
+
+Those remain deferred until authoritative production information exists.
+
+Do not add placeholder values to `CreativeCanvas`.
+
+Until the catalog contains authoritative orientation/geometry, the renderer must not pretend that those values are known.
+
+### Legacy `CreativeSpec` physical fields
+
+The current `CreativeSpec.format = postcard_4x6` and `backLayout = standard_address` are legacy physical assumptions.
+
+They are **not** the authoritative source of physical product identity going forward.
+
+Do **not** expand `MailFormat` to include `postcard_5x8` as a workaround.
+
+The selected `MailPieceSpec` / catalog version is authoritative. `CreativeCanvas` is how Creative and the renderer observe that decision without duplicating it onto `CreativeSpec`.
+
+Do not add trim, bleed, reserved zones, faces, or catalog id/version to `CreativeSpec`.
+
+### Rationale
+
+Without this projection, Creative either hardcodes a physical format (today: 4×6) or imports the catalog entry and becomes coupled to production metadata as the catalog grows.
+
+`CreativeCanvas` prevents:
+
+- production catalog leakage into the AI layer
+- duplication of physical truth onto `CreativeSpec`
+- the AI redefining the selected physical product
+- provider coupling
+- future catalog growth from forcing Creative Engine changes
+
+It creates a path where the catalog can become richer (numeric bleed, reserved-zone geometry, production options) without exposing that metadata to Creative. Production and the renderer may consume additional catalog facts later; the engine still receives only this minimum canvas.
+
+### Consequences
+
+ADR-004 remains in force: `MailPieceSpec` is persisted at Confirm strategy, and Creative must not choose the physical piece.
+
+This ADR adds the missing observation layer: Creative consumes `CreativeCanvas` derived from the already-selected catalog version, not `MailPieceSpec` or `MailPieceCatalogEntry` directly.
+
+Implementation of `CreativeCanvas`, `toCreativeCanvas()`, engine input wiring, prompt/guard updates, and renderer consumption remain later steps. This decision does not change application code, catalog types, `MailPieceSpec`, or `CreativeSpec`.
