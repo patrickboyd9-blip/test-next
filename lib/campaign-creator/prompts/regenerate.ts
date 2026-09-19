@@ -1,18 +1,25 @@
 import type { CreativeCanvas } from "../creative-canvas"
+import type { CreativeIntelligenceContext } from "../creative-intelligence"
 import type { CampaignBrief, CreativeDirection } from "../types"
 
 import {
   CREATIVE_VOICE_RULES,
   SPEC_FIELD_RULES,
   buildCreativeCanvasPromptContext,
+  buildCreativeIntelligencePromptSection,
 } from "./shared"
 
-export function buildRegenerateSystemPrompt(canvas: CreativeCanvas): string {
+export function buildRegenerateSystemPrompt(
+  canvas: CreativeCanvas,
+  intelligence: CreativeIntelligenceContext
+): string {
   return `${CREATIVE_VOICE_RULES}
 
 The customer rejected the previous three directions. Propose three genuinely new ones for the supplied physical canvas.
 
 ${buildCreativeCanvasPromptContext(canvas)}
+
+${buildCreativeIntelligencePromptSection(intelligence)}
 
 ${SPEC_FIELD_RULES}
 

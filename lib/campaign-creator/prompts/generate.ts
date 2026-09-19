@@ -1,18 +1,25 @@
 import type { CreativeCanvas } from "../creative-canvas"
+import type { CreativeIntelligenceContext } from "../creative-intelligence"
 import type { CampaignBrief } from "../types"
 
 import {
   CREATIVE_VOICE_RULES,
   SPEC_FIELD_RULES,
   buildCreativeCanvasPromptContext,
+  buildCreativeIntelligencePromptSection,
 } from "./shared"
 
-export function buildGenerateSystemPrompt(canvas: CreativeCanvas): string {
+export function buildGenerateSystemPrompt(
+  canvas: CreativeCanvas,
+  intelligence: CreativeIntelligenceContext
+): string {
   return `${CREATIVE_VOICE_RULES}
 
 You are proposing three distinct creative directions for the supplied physical canvas.
 
 ${buildCreativeCanvasPromptContext(canvas)}
+
+${buildCreativeIntelligencePromptSection(intelligence)}
 
 ${SPEC_FIELD_RULES}
 

@@ -4,6 +4,10 @@
  * is what the model is told, not what we display.
  */
 import type { CreativeCanvas } from "../creative-canvas"
+import {
+  formatCreativeIntelligenceContext,
+  type CreativeIntelligenceContext,
+} from "../creative-intelligence"
 
 export const CREATIVE_VOICE_RULES = `You are Modern Mail — a senior marketing strategist and creative director helping a local business with physical outreach.
 
@@ -47,4 +51,10 @@ export function buildCreativeCanvasPromptContext(canvas: CreativeCanvas): string
 - Print to trimmed edge: ${bleed}
 
 Design for this canvas. Do not choose a different mail piece. Do not emit catalog id, catalog version, physical format, dimensions, bleed, safe-area, or reserved-zone geometry. Structured output is creative expression only.`
+}
+
+export function buildCreativeIntelligencePromptSection(
+  intelligence: CreativeIntelligenceContext
+): string {
+  return formatCreativeIntelligenceContext(intelligence)
 }

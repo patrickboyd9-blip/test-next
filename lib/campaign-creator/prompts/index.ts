@@ -3,6 +3,7 @@ export {
   CREATIVE_VOICE_RULES,
   SPEC_FIELD_RULES,
   buildCreativeCanvasPromptContext,
+  buildCreativeIntelligencePromptSection,
 } from "./shared"
 export { buildGenerateSystemPrompt, buildGenerateUserMessage } from "./generate"
 export { buildRefineSystemPrompt, buildRefineUserMessage } from "./refine"

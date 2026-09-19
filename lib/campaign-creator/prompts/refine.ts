@@ -1,4 +1,5 @@
 import type { CreativeCanvas } from "../creative-canvas"
+import type { CreativeIntelligenceContext } from "../creative-intelligence"
 import type {
   CampaignBrief,
   CreativeDirection,
@@ -10,14 +11,20 @@ import {
   CREATIVE_VOICE_RULES,
   SPEC_FIELD_RULES,
   buildCreativeCanvasPromptContext,
+  buildCreativeIntelligencePromptSection,
 } from "./shared"
 
-export function buildRefineSystemPrompt(canvas: CreativeCanvas): string {
+export function buildRefineSystemPrompt(
+  canvas: CreativeCanvas,
+  intelligence: CreativeIntelligenceContext
+): string {
   return `${CREATIVE_VOICE_RULES}
 
 The customer is refining one selected direction in natural language. You are in Collaboration mode.
 
 ${buildCreativeCanvasPromptContext(canvas)}
+
+${buildCreativeIntelligencePromptSection(intelligence)}
 
 ${SPEC_FIELD_RULES}
 

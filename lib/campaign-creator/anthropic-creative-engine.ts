@@ -13,6 +13,7 @@ import {
   finalizeRefinement,
   normalizeGenerationResult,
 } from "./creative-engine-guards"
+import { buildCreativeIntelligenceContext } from "./creative-intelligence"
 import {
   CREATIVE_PROMPT_VERSION,
   buildGenerateSystemPrompt,
@@ -148,9 +149,10 @@ export class AnthropicCreativeEngine implements CreativeEngine {
   async generateDirections(
     input: GenerateDirectionsInput
   ): Promise<GenerateDirectionsResult> {
+    const intelligence = buildCreativeIntelligenceContext(input.brief)
     return this.generateWithRetry(input.brief, () =>
       this.requestDirections({
-        system: buildGenerateSystemPrompt(input.canvas),
+        system: buildGenerateSystemPrompt(input.canvas, intelligence),
         user: buildGenerateUserMessage(input.brief, input.canvas),
       })
     )
@@ -181,9 +183,10 @@ export class AnthropicCreativeEngine implements CreativeEngine {
   async regenerateDirections(
     input: RegenerateDirectionsInput
   ): Promise<GenerateDirectionsResult> {
+    const intelligence = buildCreativeIntelligenceContext(input.brief)
     return this.generateWithRetry(input.brief, () =>
       this.requestDirections({
-        system: buildRegenerateSystemPrompt(input.canvas),
+        system: buildRegenerateSystemPrompt(input.canvas, intelligence),
         user: buildRegenerateUserMessage(input),
       })
     )
@@ -246,7 +249,10 @@ export class AnthropicCreativeEngine implements CreativeEngine {
     const response = await this.client.messages.create({
       model: MODEL,
       max_tokens: REFINE_MAX_TOKENS,
-      system: buildRefineSystemPrompt(input.canvas),
+      system: buildRefineSystemPrompt(
+        input.canvas,
+        buildCreativeIntelligenceContext(input.brief)
+      ),
       messages: [
         {
           role: "user",
