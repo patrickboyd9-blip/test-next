@@ -2,8 +2,6 @@ import { randomUUID } from "crypto"
 
 import Anthropic from "@anthropic-ai/sdk"
 
-import { buildCampaignPrompt } from "../campaign-strategy/prompt-builder"
-
 import type {
   ConversationEngine,
   ConversationTurnInput,
@@ -56,8 +54,10 @@ const updateBriefTool: Anthropic.Tool = {
         type: "string",
         description:
           "Your natural-language reply to the customer for this turn — plain English, " +
-          "one focused question, an acknowledgment, or a transition into summarizing " +
-          "once ready. Never mention tools, schemas, or that you are an AI model.",
+          "one focused decision or question, an acknowledgment, or a transition into " +
+          "summarizing once ready. One customer decision per turn. Examples or options " +
+          "may clarify that same decision; never bundle independent decisions. Never " +
+          "mention tools, schemas, or that you are an AI model.",
       },
       readyForBriefReview: {
         type: "boolean",
@@ -134,8 +134,13 @@ real conversation, not administering a form.
 Each turn:
 1. Read what the customer has told you and what you already know (the Campaign Brief \
 below).
-2. Ask the single most useful next question — never ask about something you already \
-know, and never ask about something irrelevant to this campaign.
+2. Ask for only ONE customer decision or fact — the single most useful next one. The \
+previous answer determines that next decision. Never ask about something you already \
+know, and never ask about something irrelevant to this campaign. Examples or \
+alternatives that clarify that SAME decision are fine (e.g. neighborhood, ZIP, or type \
+of homeowner). Do not bundle independent brief fields or decisions into one turn. In \
+particular, do not combine audience identity with audience quantity, offer with mailing \
+quantity, audience with CTA, or creative preference with budget.
 3. Update the Campaign Brief with anything new or corrected the customer just told you.
 4. Reply in plain, warm, confident English, like a strategist — never like a chatbot, \
 and never mention tools, schemas, or that you are an AI.
@@ -242,7 +247,7 @@ export class AnthropicConversationEngine implements ConversationEngine {
     const response = await this.client.messages.create({
       model: MODEL,
       max_tokens: MAX_TOKENS,
-      system: buildCampaignPrompt(input.brief),
+      system: buildSystemPrompt(input.brief),
       messages: toAnthropicMessages(input.transcript),
       tools: [updateBriefTool],
       tool_choice: { type: "tool", name: UPDATE_BRIEF_TOOL_NAME },
