@@ -2423,6 +2423,195 @@ No application code is changed by accepting this ADR.
 
 ---
 
+## ADR-018: Campaign-Owned Intended Recipient Set
+
+### Status
+
+Accepted
+
+### Context
+
+ADR-008 places address lists with **Campaign / audience / launch**, not on `ProductionDocument`, catalog, or `MailPiece`. ADR-011 / ADR-012: audience and quantity are not `ProductionDocument` inputs or creation triggers. ADR-015: Launch is the customer's explicit commitment that Modern Mail may manufacture the current `MailPiece`. ADR-016: Launch eligibility is a use-time guard requiring a current `MailPiece`; it does not promote quantity or mailing-list existence into eligibility. An actual mailing list still does not exist in campaign code.
+
+The implemented audience concept is only `CampaignBrief.audience?: AudienceDefinition` (`lib/campaign-creator/types.ts`):
+
+```
+description: string
+quantity?: number
+```
+
+`docs/CAMPAIGN_CREATOR.md` and `docs/PRODUCT_BIBLE.md` already distinguish **audience definition** from an **actual mailing audience**. `applyAudienceConfirmation` and `applyQuantityConfirmation` (`repository.ts`) require a current `MailPiece` and write status only. They do not snapshot the definition or create recipients. `brief.audience.quantity` is optional desired/intended quantity, not an acquired or validated count. `quantity_confirmed` is a workflow position (ADR-016). `applyLaunch` requires a current `MailPiece` and `quantity_confirmed`; it does not require a list.
+
+There is no recipient record, mailing-list object, customer list upload, Data Axle / Sales Genie integration, audience-provider abstraction, or Click2Mail adapter.
+
+Click2Mail's Address List (`POST /addressLists`, mappings, `addressId`, CASS processing) is a provider-specific fulfillment representation (`docs/CLICK2MAIL_DUE_DILIGENCE.md`). It is not a universal schema Modern Mail should adopt. Data Axle / Sales Genie is an acquisition provider, also hidden from the customer (`docs/AI_SYSTEM.md`).
+
+Product intent (`docs/CAMPAIGN_CREATOR.md` Audience; `docs/MILESTONES.md` v0.5 / v0.6): the customer may provide a list **or** Modern Mail may obtain matching records from a data provider. Both must feel like Modern Mail. Fulfillment must eventually receive a consistent Modern Mail-owned representation of intended recipients.
+
+The Draft Launch PRD (`docs/prd/Launch.md`) leaves unresolved whether a built list is a prerequisite to write `launched` or only to provider submit. This ADR does not resolve that gate.
+
+### Decision
+
+> **Modern Mail will have a campaign-owned, provider-neutral intended recipient set (the concrete mailing audience) as the convergence point between `AudienceDefinition` and fulfillment. Customer-provided lists and Modern Mail audience acquisition both populate or replace that set. Click2Mail's Address List remains an adapter output. No new `CampaignStatus` is introduced. Launch eligibility (ADR-016) is unchanged.**
+
+Conceptual shape:
+
+```
+AudienceDefinition          "Who do I want to target?"
+        │
+        ▼
+acquisition path A          customer-provided mailing list
+acquisition path B          Modern Mail acquisition (Data Axle / Sales Genie, hidden)
+        │
+        ▼
+intended recipient set      "Who are the concrete recipients we intend to mail?"
+        │                   campaign-owned, provider-neutral
+        ▼
+fulfillment adapter
+        │
+        ▼
+provider Address List       Click2Mail or a future fulfillment provider
+```
+
+`AudienceDefinition` remains the targeting intent on the brief. The intended recipient set is who Modern Mail currently intends to mail. Acquisition / source is how that set was filled or replaced (provenance), not a second customer-facing domain object and not a new `CampaignStatus`.
+
+The intended recipient set is distinct from:
+
+- `AudienceDefinition`
+- Data Axle / Sales Genie provider data
+- Click2Mail Address List
+- `MailPieceSpec`
+- `MailPiece`
+- `CreativeSpec`
+- `ProductionDocument`
+
+This ADR records the conceptual role and architectural home. It does not implement a type, persist recipients, or add upload / Data Axle / Click2Mail code.
+
+### Fulfillment boundary
+
+The fulfillment adapter transforms the Modern Mail intended recipient set into the provider-specific mailing-list representation required by Click2Mail or a future fulfillment provider.
+
+Click2Mail-specific concepts remain adapter / provider concerns, including:
+
+- `addressMappingId`
+- `addressId`
+- Click2Mail list IDs
+- Click2Mail XML field names
+- CASS provider status codes
+- Click2Mail readiness status
+- provider-specific validation / filter behavior
+
+The Modern Mail recipient concept must not be shaped around a Click2Mail mapping. CASS / NCOA **ownership** and validation policy remain unresolved; vendor codes stay in the adapter even if Modern Mail later records its own deliverable-count facts.
+
+### Campaign ownership
+
+The concept is campaign-owned. It belongs conceptually with **Campaign / audience / launch** (ADR-008), not production.
+
+It must **not** be placed on:
+
+- `MailPieceSpec`
+- `MailPiece`
+- `CreativeSpec`
+- Mail Piece Catalog
+- `ProductionDocument`
+
+`ProductionDocument` remains the vendor-neutral manufacturable interpretation of the approved `MailPiece` (ADR-008, ADR-011). It must not contain audience or recipient data. Binding a provider document to a provider address list is a fulfillment-adapter concern, not `deriveProductionDocument`.
+
+Account-level reusable audiences / lists are **not** decided here. They may later **fill** a campaign's intended recipient set; they are not a substitute for the campaign-owned concept.
+
+### Campaign status
+
+This decision does **not** create a new `CampaignStatus`. The existing lifecycle is unchanged.
+
+- `audience_confirmed` continues to mean the customer completed confirmation of the **audience definition**.
+- `quantity_confirmed` continues to mean the customer completed the quantity / tracking workflow step.
+- `quantity_confirmed` does **not** mean an actual mailing list or intended recipient set exists.
+- `applyLaunch` and ADR-016 remain unchanged.
+
+Whether the intended recipient set must exist **before** `launched` or **only before** fulfillment / provider submission remains **unresolved**. Do not treat this ADR as adding list existence to Launch eligibility.
+
+### Quantity distinction
+
+The system may eventually distinguish:
+
+- desired quantity
+- acquired recipient count
+- valid / deliverable recipient count
+- final mailing quantity
+
+Only desired quantity currently exists, as optional `brief.audience.quantity`. This ADR does **not** define fields for the other counts, freeze quantity at confirm, or decide which count a future commercial calculation uses.
+
+Desired quantity remaining on `AudienceDefinition` while a smaller concrete set is acquired (for example, 5,000 requested and 4,327 returned) is a domain distinction, not a redefinition of `quantity_confirmed`.
+
+### What this decision does not change
+
+- `AudienceDefinition` shape and meaning
+- `confirmAudience` / `confirmQuantity` write preconditions (ADR-017)
+- MailPiece creation / freeze (`applyCreativeApproval`)
+- ProductionDocument derivation and exclusions (ADR-008, ADR-011, ADR-012)
+- Production commitment (ADR-015)
+- Launch eligibility (ADR-016)
+- Incomplete MailPiece recovery (ADR-017)
+
+### Invariants
+
+1. Audience definition and intended recipient set are distinct concepts.
+2. Customer-provided lists and Modern Mail acquisition converge on the same campaign-owned intended recipient set.
+3. That set is provider-neutral; Click2Mail Address List is an adapter output, not the Modern Mail schema.
+4. The intended recipient set is not placed on `MailPieceSpec`, `MailPiece`, `CreativeSpec`, catalog, or `ProductionDocument`.
+5. No new `CampaignStatus` is introduced for list preparation, acquisition, or validation.
+6. `quantity_confirmed` remains a workflow position, not proof that a recipient set exists.
+7. `applyLaunch` / ADR-016 are not extended by this ADR.
+8. This ADR does not implement types, persistence, upload, Data Axle, or Click2Mail.
+
+### Consequences
+
+Fulfillment has a named Modern Mail object to adapt. Upload and Data Axle are acquisition paths, not customer-visible vendors and not competing list schemas.
+
+Campaign code still has only `AudienceDefinition`. The intended recipient set is an accepted architectural boundary, not a TypeScript type in this change.
+
+### Explicitly unresolved
+
+- recipient / address field schema
+- persistence model
+- database representation
+- mutable current set vs immutable snapshot vs versioned set
+- acquisition implementation
+- Data Axle integration
+- customer upload implementation
+- address validation ownership
+- CASS / NCOA ownership
+- duplicate handling
+- invalid-address handling
+- exact quantity semantics beyond the distinctions above
+- whether the list must exist before `launched`
+- whether the list must exist only before provider submission
+- pricing relationship (which count, if any)
+- account-level reusable audiences / lists
+- Click2Mail mapping selection
+- Click2Mail readiness status 3 vs 5
+- maximum recipient limits
+
+### Source grounding
+
+| Claim | Source | Kind |
+|---|---|---|
+| Definition ≠ actual mailing audience | `docs/PRODUCT_BIBLE.md` Audience; `docs/CAMPAIGN_CREATOR.md` §3 | Established |
+| Address lists belong with Campaign / audience / launch, not PD | ADR-008 | Established |
+| Audience / quantity are not PD inputs or triggers | ADR-011; ADR-012 | Established |
+| Launch = manufacture authorization of current MailPiece; no new status for lists | ADR-015 | Established |
+| Launch eligibility does not require a list; `quantity_confirmed` is not list-ready | ADR-016; `docs/prd/Launch.md` Mailing list | Established |
+| `AudienceDefinition` is description + optional quantity only | `lib/campaign-creator/types.ts` | Established implementation |
+| Confirm audience / quantity do not create a list | `applyAudienceConfirmation`; `applyQuantityConfirmation` | Established implementation |
+| `applyLaunch` requires MailPiece + `quantity_confirmed` only | `repository.ts`; ADR-016 | Established implementation |
+| Click2Mail Address List is provider-specific; mappings are not a universal schema | `docs/CLICK2MAIL_DUE_DILIGENCE.md` | Established diligence |
+| Hide data providers from the customer | `docs/AI_SYSTEM.md` | Established |
+| Customer upload **or** MM-sourced records | `docs/CAMPAIGN_CREATOR.md` Audience; `docs/MILESTONES.md` v0.5 / v0.6 | Established product intent |
+| Campaign-owned intended recipient set as convergence point; not implemented here | this ADR | **This ADR** |
+| List vs `launched` vs provider submit; schema; persistence; CASS ownership | Launch PRD; this ADR | Unresolved |
+
+---
+
 # Beta Product Decisions
 
 This section records product-scope defaults for the initial Modern Mail beta. These are not architectural ADRs and do not change the domain model above.
