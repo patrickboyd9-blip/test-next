@@ -2116,6 +2116,149 @@ No application code changes by accepting this ADR.
 
 ---
 
+## ADR-016: Launch Eligibility
+
+### Status
+
+Accepted
+
+### Context
+
+ADR-015 defines the production commitment boundary as the customer’s explicit launch/commit after post-quantity final review. `launched` records that commitment. No new Campaign status is added for review, ProductionDocument, or vendor jobs.
+
+The Draft Launch PRD (`docs/prd/Launch.md`) places Launch Review immediately after `quantity_confirmed`, on that same status, as a confidence surface — not a hidden validation state.
+
+The implemented campaign journey still ends at `quantity_confirmed`. `confirmQuantity` (and `confirmAudience`) write status only. They do not require a current `MailPiece`, audience description, quantity value, Primary Success Metric, or tracking fields.
+
+`quantity_confirmed` is therefore a workflow/progress position. Treating it as Launch-completeness would redefine that status.
+
+Existing domain checks that do not add status or persist readiness:
+
+- `applyCreativeApproval` throws if direction, revision, spec, or `MailPieceSpec` is missing
+- `requireCreativeCanvas` throws at generate/refine if `MailPieceSpec` is missing
+- `deriveProductionDocument` throws at use time if derivation inputs are missing, and must not run before commitment (ADR-015)
+
+`readyForBriefReview` is a persisted interview flag on `draft`. It is not a model for Launch eligibility.
+
+This ADR chooses how Launch enforces what it must enforce **without** a new status, a readiness snapshot, or a completeness checklist that pretends unresolved product decisions are solved.
+
+### Decision
+
+> **Launch eligibility is a pure, non-persisted, use-time evaluation. `quantity_confirmed` remains a workflow position. A current `MailPiece` is required to successfully commit Launch. No new CampaignStatus is introduced.**
+
+Conceptual shape:
+
+```
+Campaign
+        → Launch Review          (still quantity_confirmed)
+        → explicit Launch action
+        → Launch eligibility evaluation / guard
+        → launched
+        → production path
+```
+
+The evaluator reads current campaign state. It does not mutate Campaign, persist readiness, create a status, create a `ProductionDocument`, call fulfillment, or resolve payment, mailing-list, pricing, or provider questions.
+
+Function name, module, error type, and implementation shape are later implementation decisions. The check is a deterministic throw-at-use (or equivalent use-time) domain guard, consistent with `applyCreativeApproval`, `requireCreativeCanvas`, and `deriveProductionDocument`.
+
+### `quantity_confirmed` vs Launch Review vs Launch Commitment
+
+`quantity_confirmed` remains “the customer completed the quantity step.” It is not a general completeness invariant.
+
+**Launch Review**
+
+- After `quantity_confirmed`
+- Remains on `quantity_confirmed`
+- No new CampaignStatus
+- Shows the customer what they are committing to
+- May surface missing or incomplete information
+- Does not authorize manufacture
+- Does not create a `ProductionDocument`
+
+**Launch Commitment**
+
+- Requires an explicit customer Launch action
+- Must pass the Launch eligibility guard
+- Requires a current `MailPiece`
+- Records the existing `launched` status
+- Opens the production path
+- Does not mean payment-provider success, vendor submission, printing, mailing, or delivery
+
+AI cannot perform the commitment (`docs/AI_SYSTEM.md`).
+
+### Hard requirement: current MailPiece
+
+A campaign cannot successfully cross the Launch commitment boundary without a current `MailPiece`.
+
+ADR-015 defines commitment as authorization to manufacture the current `MailPiece`. There is no manufacturable object if `campaign.mailPiece` is absent.
+
+This is a consequence of that model, not a new production field, renderer, or provider rule.
+
+Audience description, quantity value, Primary Success Metric, and tracking remain optional on the campaign today. Total cost has no implementation. An actual mailing list does not exist in the campaign domain. This ADR does **not** promote those into eligibility rules.
+
+The Launch PRD requires total cost to be **visible** before commitment; pricing mechanics remain unresolved and are not eligibility rules here.
+
+### Explicitly unresolved
+
+Do not treat these as Launch eligibility requirements in this ADR:
+
+- whether an actual mailing list is required before `launched`
+- payment-success vs `launched` write sequencing
+- pricing mechanics / how total cost is calculated
+- ProductionDocument persistence timing
+- provider submission timing
+- payment processor
+- failure/rollback semantics
+- renderer / PDF implementation
+
+### Invariants
+
+1. `quantity_confirmed` remains a workflow position, not a Launch-completeness guarantee.
+2. Launch Review does not create a new CampaignStatus.
+3. Launch Review does not authorize manufacture.
+4. A campaign cannot successfully cross the Launch commitment boundary without a current `MailPiece`.
+5. Launch eligibility is evaluated at use time and is not persisted as a separate readiness state.
+6. Launch eligibility must not silently resolve the currently unresolved payment, mailing-list, pricing, ProductionDocument, or provider questions.
+7. Only explicit customer commitment can authorize manufacture; AI cannot perform the commitment.
+8. ProductionDocument remains downstream of the commitment boundary.
+
+### Consequences
+
+`quantity_confirmed` is not redefined. Existing campaigns can remain at that status without implying MailPiece, quantity value, or list completeness.
+
+No new status is needed: review is a surface on `quantity_confirmed`; commitment still writes existing `launched`.
+
+No readiness snapshot is needed: live campaign state is the input; a stored flag would drift from `mailPiece` / brief.
+
+Launch Review can remain a confidence surface and can show gaps. Manufacture authorization happens only at explicit commitment, where the guard requires a current `MailPiece`.
+
+This ADR does not implement Launch UI, the eligibility function, payment, pricing, lists, renderer, PDF, Click2Mail, or ProductionDocument persistence.
+
+No application code is changed by accepting this ADR.
+
+### Source grounding
+
+| Claim | Source | Kind |
+|---|---|---|
+| Commitment = explicit launch/commit; `launched` records it; PD after that path opens | ADR-015 | Established |
+| Manufacture authorization is of the current `MailPiece` | ADR-015 | Established |
+| No new CampaignStatus for review, PD, payment, or vendor jobs | ADR-015; `docs/prd/Launch.md` | Established |
+| Launch Review after `quantity_confirmed`, on that status; no review status | `docs/prd/Launch.md` | Established (Draft PRD) |
+| AI must not launch, print, or spend without explicit confirmation | `docs/AI_SYSTEM.md` | Established |
+| `confirmQuantity` / `confirmAudience` write status only | `repository.ts` | Established implementation |
+| `approveCreative` freeze vs audience/quantity status-only confirms | `mail-piece.ts`; readiness audit | Established implementation |
+| Throw-at-use domain guards exist; no Launch eligibility evaluator | `applyCreativeApproval`; `requireCreativeCanvas`; `deriveProductionDocument` | Established implementation |
+| `readyForBriefReview` is a persisted draft flag, not Launch eligibility | `types.ts`; conversation engine | Established implementation |
+| Current MailPiece required to commit Launch | this ADR, as consequence of ADR-015 | **This ADR** |
+| Eligibility is pure / use-time / non-persisted; `quantity_confirmed` not completeness | this ADR | **This ADR** |
+| Mailing list vs `launched` | `docs/prd/Launch.md`; ADR-015 | Unresolved |
+| Payment success vs `launched` write | ADR-015; Launch PRD | Unresolved |
+| Pricing mechanics / total cost calculation | Launch PRD | Unresolved |
+| ProductionDocument persist timing; provider submit timing | ADR-015 | Unresolved |
+| Payment processor; failure/rollback; renderer/PDF | Launch PRD; ADR-012 | Unresolved |
+
+---
+
 # Beta Product Decisions
 
 This section records product-scope defaults for the initial Modern Mail beta. These are not architectural ADRs and do not change the domain model above.
