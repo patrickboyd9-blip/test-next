@@ -264,6 +264,29 @@ export interface MailPiece {
   spec: CreativeSpec
 }
 
+/**
+ * Closed physical-face authorship for one ProductionDocument.
+ * Not a generic pages array. Not MailPieceSpec.addressFaceAuthorship.
+ */
+export interface ProductionDocumentFaces {
+  front: AddressFaceAuthorship
+  back: AddressFaceAuthorship
+}
+
+/**
+ * Vendor-neutral manufacturable interpretation of one immutable MailPiece.
+ * Derived at production, not at approval. Not a PDF, canvas, or vendor job.
+ */
+export interface ProductionDocument {
+  id: string
+  mailPieceId: string
+  mailPieceVersion: number
+  catalogId: MailPieceCatalogId
+  catalogVersion: MailPieceCatalogVersion
+  faces: ProductionDocumentFaces
+  derivedAt: string
+}
+
 export interface Campaign {
   id: string
   ownerId: string
