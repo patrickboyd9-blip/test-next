@@ -2702,6 +2702,289 @@ Campaign code still has only `AudienceDefinition`. This change is documentation 
 
 ---
 
+## ADR-020: Intended Recipient Set Member Semantics
+
+### Status
+
+Accepted
+
+### Context
+
+ADR-018 established a campaign-owned, provider-neutral **intended recipient set** as the convergence point between `AudienceDefinition` and fulfillment. ADR-019 placed that set as a **campaign-owned sibling artifact**, conceptually parallel to `campaign.mailPiece`, not nested in `CampaignBrief.audience`.
+
+Neither ADR defined what **one member** of the set is. The implemented campaign domain still has only `AudienceDefinition` (`description` + optional `quantity`). There is no recipient type, upload, Data Axle integration, or Click2Mail adapter.
+
+Product docs distinguish targeting intent from an actual mailing audience (`docs/PRODUCT_BIBLE.md` Audience; `docs/CAMPAIGN_CREATOR.md` §3). The Launch PRD states you cannot physically mail without **addresses**. Campaign Creator allows a customer-provided list or a Modern Mail–sourced list. Click2Mail's Address List and mapping schemas are provider-specific (`docs/CLICK2MAIL_DUE_DILIGENCE.md`); their required/optional field matrix is not verified and must not become the Modern Mail member.
+
+Implemented beta creative is **one** `MailPiece` / one `CreativeSpec` for the campaign (`lib/campaign-creator/types.ts`; `applyCreativeApproval`). That is a one-to-many creative: the same approved mailer, many destinations. Product vision mentions personalized campaigns and consumer, employee, and B2B examples; those do not specify a recipient-identity type or a merge-data model for beta.
+
+`brief.audience.quantity` is desired/intended quantity only. Confirm audience/quantity and `applyLaunch` do not create members (ADR-016, ADR-018).
+
+The risk is inventing a person/household/business schema, copying CSV or Click2Mail columns, or treating desired quantity as the member count.
+
+### Decision
+
+> **An Intended Recipient Set member is a concrete intended mail-to destination anchored by a physical mailing address. It is not a person type, household type, business type, CSV row, Data Axle record, Click2Mail mapping row, brief audience entry, or production object. This ADR does not define a field schema.**
+
+The member is a destination Modern Mail currently intends to mail as part of the campaign.
+
+The only information-level statement is: **a physical mailing address is the anchor of that destination.**
+
+This does **not** name address lines, city, state, ZIP, country, or any other field. Those remain future decisions.
+
+The member is **not** defined as:
+
+- a `CampaignBrief.audience` entry
+- `brief.audience.quantity`
+- a CSV row
+- a Data Axle record
+- a Click2Mail Address List row
+- a production object
+- a person type
+- a household type
+- a business type
+- a named contact type
+
+The repository does **not** provide enough evidence to decide whether a member should also be modeled as a person, household, business, contact, organization, or another identity. Do not invent a recipient-type abstraction or polymorphism. Do not imply that names or organizations are required.
+
+This ADR records **member semantics** only. It does not add a TypeScript type, a `Campaign` field, persistence, or acquisition code.
+
+### Boundaries / non-goals
+
+**Not a field schema.** Do not treat this ADR as defining first name, last name, organization, address lines, city, state, ZIP, country, recipient ID, provider ID, source ID, validation status, or CASS status.
+
+**Quantity.** `brief.audience.quantity` remains desired/intended quantity. It is not the number of Intended Recipient Set members, the acquired count, the validated count, the deliverable count, or the final mailing count. The set's cardinality may later be relevant; this ADR does not introduce a second persisted quantity field.
+
+**Customer upload.** A customer file may have many columns. The uploaded file is not the canonical domain object. CSV shape does not define the member.
+
+**Data Axle.** Data Axle may expose record IDs, demographics, targeting attributes, and other provider data. Those do not define the canonical member. Data Axle is an acquisition source, not the recipient model. There is no Data Axle field-level diligence in this repository.
+
+**Click2Mail.** Address Lists, mapping IDs, XML field names, CASS/readiness states, and provider identifiers remain adapter/provider concerns. Click2Mail's mapping schema must not define the member.
+
+**Production.** Members do not belong on `MailPiece`, `MailPieceSpec`, `CreativeSpec`, `CreativeCanvas`, `ProductionDocument`, or the mail catalog. Production interprets the approved creative / physical piece. Recipient data stays on the campaign / audience / fulfillment side (ADR-008, ADR-018, ADR-019).
+
+**Personalization.** This ADR does not establish a personalization or merge-data model. Current beta creative uses one approved `MailPiece` for the campaign. Recipient names, custom fields, household data, and per-recipient creative remain future possibilities and are not required by this decision.
+
+**Lifecycle.** This ADR does not decide when the set first exists; whether it must exist before `launched` or only before provider submit; mutability, versioning, or snapshotting; Campaign JSON vs another store; validation / CASS / NCOA; duplicate handling; pricing; or account-level reusable audiences.
+
+### Consequences
+
+A later implementation must treat each member as a mail-to destination whose anchor is a physical mailing address — extractable from upload or Data Axle, adaptable to a provider list — without making source formats or Click2Mail mappings the domain model.
+
+Identity richer than “mail-to anchored by address” stays undecided. Desired quantity stays on the brief.
+
+Campaign code still has only `AudienceDefinition`. This change is documentation only.
+
+### Open questions / unresolved decisions
+
+- Address component field list
+- Whether name or organization is present, optional, or omitted
+- Person vs household vs business vs contact identity
+- Recipient / provider / source identifiers
+- Validation / CASS / NCOA ownership and member-level status
+- Duplicate / invalid handling
+- Persistence, mutability, versioning, snapshotting
+- When the set first exists vs `launched` vs provider submit
+- Stored count fields beyond set cardinality
+- Pricing
+- Account-level reusable audiences
+- Click2Mail mapping selection
+- Personalization / merge-data model
+
+### Source grounding
+
+| Claim | Source | Kind |
+|---|---|---|
+| Intended recipient set is campaign-owned and provider-neutral | ADR-018 | Established |
+| Set is a sibling of `mailPiece`, not inside `brief.audience` | ADR-019 | Established |
+| Definition ≠ actual mailing audience | `docs/PRODUCT_BIBLE.md` Audience; `docs/CAMPAIGN_CREATOR.md` §3 | Established |
+| Cannot physically mail without addresses | `docs/prd/Launch.md` Mailing list | Established |
+| Customer upload or MM-sourced list | `docs/CAMPAIGN_CREATOR.md` Audience; `docs/MILESTONES.md` v0.5 / v0.6 | Established product intent |
+| One `MailPiece` / one `CreativeSpec` per approval | `types.ts`; `applyCreativeApproval` | Established implementation |
+| `brief.audience.quantity` is desired quantity only | quantity audit; ADR-018 | Established |
+| Click2Mail mappings are provider-specific; not a universal schema | `docs/CLICK2MAIL_DUE_DILIGENCE.md` | Established diligence |
+| Members do not belong on production objects | ADR-008; ADR-018; ADR-019 | Established |
+| Member = mail-to destination anchored by a physical mailing address; no field schema | this ADR | **This ADR** |
+| Recipient identity type; name/org required; address field list; launch-vs-submit | this ADR; Launch PRD | Unresolved |
+
+---
+
+## ADR-021: Intended Recipient Set First-Existence Rule
+
+### Status
+
+Accepted
+
+### Context
+
+ADR-018 established a campaign-owned, provider-neutral **intended recipient set** as the convergence point between `AudienceDefinition` and fulfillment. ADR-019 placed that set as a **campaign-owned sibling artifact**, conceptually parallel to `campaign.mailPiece`, not nested in `CampaignBrief.audience`. ADR-020 established that one member is a concrete intended mail-to destination anchored by a physical mailing address. The address component schema remains unresolved.
+
+The implemented campaign domain still has only `CampaignBrief.audience?: AudienceDefinition` (`lib/campaign-creator/types.ts`): targeting `description` plus optional desired `quantity`. There is no recipient type, upload, Data Axle integration, or Click2Mail adapter.
+
+Existing statuses do **not** create the set:
+
+- `audience_confirmed` confirms the **audience definition** (`applyAudienceConfirmation` writes status only; requires a current `MailPiece`).
+- `quantity_confirmed` completes the **quantity / tracking workflow step** (`applyQuantityConfirmation` writes status only). `brief.audience.quantity` remains desired/intended quantity, not an acquired or final mailing count.
+- `launched` records the customer's **commitment / authorization to manufacture** the current `MailPiece` (`applyLaunch`; ADR-015, ADR-016).
+
+ADR-018 forbids a new `CampaignStatus` for list preparation, acquisition, or validation. Launch eligibility (ADR-016) and `applyLaunch` remain unchanged and do not require a recipient set. The Launch PRD (`docs/prd/Launch.md`) leaves unresolved whether a built list is a prerequisite to write `launched` or only to provider submit.
+
+The remaining first-existence question was whether the set appears when an acquisition path supplies concrete destinations, or only after a **separate customer approval of acquired records**.
+
+Product language already treats **choosing / describing who to target** as customer intent and **building the concrete mailing audience** as Modern Mail platform work (`docs/PRODUCT_BIBLE.md` Audience; `docs/CAMPAIGN_CREATOR.md` §3 and Audience handoff; `docs/PROJECT_BLUEPRINT.md` Data Axle executes Strategy Engine targeting; `docs/FOUNDER_MANIFESTO.md`: the customer should never need to understand mailing lists). Campaign Creator shows an audience **summary** and desired-quantity confirmation when Modern Mail sources the audience; v0.5 / v0.6 ship estimates and reachable counts, not a record-selection step (`docs/MILESTONES.md`). There is no documented product decision that customers inspect individual acquired records and separately approve them before those records become the campaign's intended recipients.
+
+Inventing a second "promote acquired records to intended recipients" event would add a customer decision the current product architecture does not support.
+
+### Decision
+
+> **The Intended Recipient Set first exists when an acquisition path (customer-provided list or Modern Mail / Data Axle) first supplies concrete mail-to destinations for the campaign. Those destinations are the campaign’s intended recipients. Confirmation of AudienceDefinition, quantity confirmation, audience estimates or reachable counts, Launch Review, `launched`, and provider submission do not create the set. First existence does not require a separate customer approval of acquired records, and it does not introduce a new CampaignStatus.**
+
+Customer targeting intent is already expressed as `AudienceDefinition` (and desired quantity, and any later spend approval to acquire). When an acquisition path first supplies concrete mail-to destinations, those destinations **are** the intended set. There is no documented promotion step from a staged candidate list to an intended set.
+
+This ADR records **first existence** only. It does not add a TypeScript type, a `Campaign` field, a `CampaignStatus`, persistence, upload, Data Axle, or Click2Mail code.
+
+### Lifecycle placement
+
+```text
+AudienceDefinition
+    ↓
+audience_confirmed
+    ↓
+Modern Mail acquisition path
+    ↓
+Concrete mail-to destinations acquired
+    ↓
+Intended Recipient Set FIRST EXISTS
+    ↓
+[future lifecycle decisions remain unresolved]
+    ↓
+Launch / fulfillment
+```
+
+The current status machine does **not** represent the acquisition event. First existence is not bound to a `CampaignStatus`.
+
+Also:
+
+- `quantity_confirmed` does **not** create the set.
+- Launch Review does **not** create the set (it remains on `quantity_confirmed`; “who” is a confidence summary).
+- `launched` does **not** create the set.
+- Provider submission does **not** create the Modern Mail set. A provider Address List is an adapter output that consumes / adapts the set downstream.
+
+This ADR does **not** establish whether the set must exist before Launch Review, before `launched`, or before provider submission. Those remain separate unresolved decisions (Launch PRD; ADR-016; ADR-018).
+
+### Customer-provided list
+
+When a customer provides their own mailing list, that acquisition event supplies the concrete destinations. First existence is that receipt.
+
+The product does not currently specify a separate:
+
+- staging object
+- preview / approval step
+- record-selection step
+- promotion-to-intended step
+
+This ADR does not design any of those.
+
+### Modern Mail / Data Axle acquisition
+
+When Modern Mail / Data Axle acquires concrete mail-to destinations from the customer's confirmed targeting intent, those destinations become the Intended Recipient Set at first acquisition.
+
+A count or estimate such as “We've found 2,847 households” does **not** create the set. Reachable counts, geography summaries, and attribute summaries do **not** create the set (`docs/CAMPAIGN_CREATOR.md` Audience; `docs/MILESTONES.md` v0.5 estimate / v0.6 reachable counts). Concrete mail-to destinations are required for first existence (ADR-020).
+
+Data Axle remains an acquisition source, not the canonical domain model. This ADR does not introduce Data Axle-specific fields. There is no Data Axle field-level diligence file in this repository.
+
+### Customer agency
+
+**Customer decides:**
+
+- who they want to target (`AudienceDefinition`)
+- desired quantity (`brief.audience.quantity`)
+- creative (approval → current `MailPiece`)
+- campaign commitment (`launched`)
+
+**Modern Mail handles:**
+
+- translating confirmed targeting intent into a concrete mailing audience
+- acquisition of concrete destinations
+
+There is no separate customer decision called “approve these individual acquired recipients as my intended recipients.” This ADR does not invent one.
+
+`docs/AI_SYSTEM.md` requires explicit confirmation before **spending** on list acquisition and before launch. That is a spend / commit gate, not a first-existence event and not a staged-to-intended promotion.
+
+### Boundaries / non-goals
+
+This ADR does **not** decide:
+
+- mutable vs immutable
+- replace vs supplement
+- re-upload behavior
+- second Data Axle acquisition behavior
+- versioning / history
+- snapshotting
+- validation / CASS / NCOA
+- address schema
+- launch eligibility
+- provider-submit gating
+- pricing
+- list-acquisition cost timing
+- account-level reusable audiences
+- a new `CampaignStatus`
+- staging / preview UX
+- recipient review UX
+- desired quantity's relationship to actual recipient count
+
+Do not treat first existence as resolving any of those.
+
+### Consequences
+
+The architecture now distinguishes:
+
+- **targeting intent** — `AudienceDefinition` (and desired quantity)
+- **acquisition of concrete destinations** — customer-provided list or Modern Mail / Data Axle
+- **the resulting Intended Recipient Set** — those destinations, at first acquisition
+
+without a new `CampaignStatus` or a second customer approval of acquired records.
+
+This ADR establishes **only** the first-existence event. It does not define what happens to the set afterward.
+
+Campaign code still has only `AudienceDefinition`. This change is documentation only.
+
+### Open questions / unresolved decisions
+
+- Mutable vs immutable; replace vs supplement
+- Re-upload; second Data Axle acquisition
+- Versioning / history / snapshotting
+- Validation / CASS / NCOA
+- Address component schema
+- Whether the set must exist before Launch Review, before `launched`, or only before provider submit
+- Launch eligibility (ADR-016 unchanged)
+- Pricing; list-acquisition cost timing
+- Account-level reusable audiences
+- Staging / preview / recipient-review UX
+- Desired quantity vs actual recipient count
+
+### Source grounding
+
+| Claim | Source | Kind |
+|---|---|---|
+| Intended recipient set is campaign-owned and provider-neutral | ADR-018 | Established |
+| Set is a sibling of `mailPiece`, not inside `brief.audience` | ADR-019 | Established |
+| Member = mail-to destination anchored by a physical mailing address | ADR-020 | Established |
+| Definition ≠ actual mailing audience | `docs/PRODUCT_BIBLE.md` Audience; `docs/CAMPAIGN_CREATOR.md` §3 | Established |
+| Customer confirms definition; MM translates / builds the actual audience | `docs/PRODUCT_BIBLE.md`; `docs/CAMPAIGN_CREATOR.md` Audience | Established |
+| Customer should not need to understand mailing lists | `docs/FOUNDER_MANIFESTO.md` | Established |
+| Data Axle executes Strategy Engine targeting | `docs/PROJECT_BLUEPRINT.md` Data Axle | Established |
+| MM-sourced path shows a count/summary; customer confirms desired quantity | `docs/CAMPAIGN_CREATOR.md` Audience | Established |
+| v0.5 estimate; v0.6 reachable counts / summaries, not record selection | `docs/MILESTONES.md` | Established product intent |
+| Confirm audience / quantity and `applyLaunch` do not create the set | `repository.ts`; ADR-016; ADR-018 | Established implementation |
+| No new `CampaignStatus` for acquisition | ADR-018 | Established |
+| Spend on list acquisition requires customer confirmation | `docs/AI_SYSTEM.md` | Established; not a first-existence rule |
+| List vs `launched` vs provider submit | `docs/prd/Launch.md`; ADR-016; ADR-018 | Unresolved |
+| First existence = first concrete destinations from an acquisition path | this ADR | **This ADR** |
+| Mutability, versioning, launch gate, schema, pricing | ADR-018; ADR-019; this ADR | Unresolved |
+
+---
+
 # Beta Product Decisions
 
 This section records product-scope defaults for the initial Modern Mail beta. These are not architectural ADRs and do not change the domain model above.
