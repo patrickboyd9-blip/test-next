@@ -2612,6 +2612,96 @@ Campaign code still has only `AudienceDefinition`. The intended recipient set is
 
 ---
 
+## ADR-019: Intended Recipient Set as Campaign-Owned Sibling
+
+### Status
+
+Accepted
+
+### Context
+
+ADR-018 established the **intended recipient set**: a campaign-owned, provider-neutral concrete mailing audience. It is the convergence point between `AudienceDefinition` and fulfillment. Customer-provided lists and Modern Mail acquisition (Data Axle / Sales Genie) populate or replace that set. Click2Mail's Address List remains an adapter output. No type, persistence, or acquisition path was implemented.
+
+The implemented audience concept remains only `CampaignBrief.audience?: AudienceDefinition` (`lib/campaign-creator/types.ts`): `description` plus optional `quantity`. That object answers targeting intent. `quantity` is desired/intended count, not an acquired or final mailing count. Confirm audience / quantity and `applyLaunch` do not create a recipient set (ADR-016, ADR-018).
+
+ADR-018 forbade placing recipient data on `MailPieceSpec`, `MailPiece`, `CreativeSpec`, catalog, or `ProductionDocument`. It did not record **where on the campaign side** the intended recipient set lives relative to `CampaignBrief.audience`.
+
+The risk in the current repository is extending `AudienceDefinition` (or nesting a list under `brief.audience`) because that is the only audience-shaped object that exists. That would collapse two domain questions and overload `quantity`.
+
+`campaign.mailPiece` already shows the sibling pattern: a campaign-owned artifact that is not nested inside `CampaignCreative` / `CreativeSpec`.
+
+### Decision
+
+> **The intended recipient set is a campaign-owned sibling artifact, conceptually parallel to `campaign.mailPiece`. It is not a field or nested object inside `CampaignBrief.audience` / `AudienceDefinition`.**
+
+`AudienceDefinition` remains targeting intent. The intended recipient set remains who Modern Mail currently intends to mail. This ADR records **architectural home** only. It does not add a TypeScript type, a `Campaign` field, a `CampaignStatus`, or persistence.
+
+### Architectural placement
+
+| Concept | Answers | Home |
+|---|---|---|
+| `CampaignBrief.audience` / `AudienceDefinition` | Who does the customer want to target? | Brief. Existing `description` and optional desired `quantity`. Unchanged. |
+| Intended recipient set | Who are the concrete recipients we intend to mail? | Campaign-owned sibling, parallel to `campaign.mailPiece`. Not inside the brief. |
+
+Acquisition (customer upload or Modern Mail / Data Axle) populates or replaces the sibling set. The fulfillment adapter later consumes that Modern Mail-owned set and emits a provider-specific list.
+
+This decision does **not** choose whether a future implementation is a field on `Campaign` JSON, a related record, or another storage shape. It only forbids nesting the set inside `AudienceDefinition` / `CampaignBrief.audience`.
+
+### Why sibling placement matters
+
+- Definition and concrete recipients answer different questions.
+- Keeping the set off `AudienceDefinition` prevents desired `quantity` from being confused with acquired, valid, or final mailing quantity.
+- Upload and Data Axle share one campaign-owned home instead of competing extensions of the brief.
+- Fulfillment can consume a Modern Mail representation without making Click2Mail (or another provider) the system of record.
+- Commercial / acquisition facts stay off production objects (`MailPiece`, `ProductionDocument`, catalog).
+
+### Boundaries / invariants
+
+1. Do not extend `CampaignBrief.audience` / `AudienceDefinition` to contain the intended recipient set.
+2. `AudienceDefinition` keeps its current meaning: targeting description and optional desired quantity.
+3. Do not put recipient data on `MailPieceSpec`, `MailPiece`, `CreativeSpec`, the Mail Piece Catalog, or `ProductionDocument`.
+4. Do not create a new `CampaignStatus` for the recipient set.
+5. Do not change `applyLaunch` or ADR-016.
+6. The set remains provider-neutral; provider mappings stay in the adapter (ADR-018).
+7. This ADR does not implement the set.
+
+### Consequences
+
+A later implementation must introduce the intended recipient set **beside** the brief, not inside it — the same kind of separation as `mailPiece` versus `creative`. Existing confirm-* writes and Launch eligibility stay as they are until a later decision says otherwise.
+
+Campaign code still has only `AudienceDefinition`. This change is documentation only.
+
+### Explicitly unresolved
+
+- recipient / address fields
+- persistence model
+- mutable current set vs immutable snapshot vs versioned set
+- acquisition lifecycle
+- Data Axle integration
+- customer upload implementation
+- address validation / CASS / NCOA ownership
+- duplicate / invalid-address handling
+- desired / acquired / valid / final quantity semantics beyond the existing distinction
+- whether the set must exist before `launched` or only before provider submission
+- pricing / commercial treatment
+- account-level reusable audiences
+- provider-specific mappings
+- Click2Mail implementation
+
+### Source grounding
+
+| Claim | Source | Kind |
+|---|---|---|
+| Intended recipient set is campaign-owned, provider-neutral, distinct from `AudienceDefinition` | ADR-018 | Established |
+| Address lists belong with Campaign / audience / launch, not PD | ADR-008 | Established |
+| Launch eligibility unchanged; no list required to write `launched` | ADR-016; ADR-018 | Established |
+| `AudienceDefinition` is description + optional quantity only | `lib/campaign-creator/types.ts` | Established implementation |
+| `mailPiece` is a campaign-owned sibling, not nested in `CreativeSpec` | `Campaign` in `types.ts`; ADR-012 | Established pattern |
+| Intended recipient set is a sibling of `mailPiece`, not nested in `brief.audience` | this ADR | **This ADR** |
+| Schema, persistence, mutability, launch-vs-submit gate, pricing | ADR-018; Launch PRD | Unresolved |
+
+---
+
 # Beta Product Decisions
 
 This section records product-scope defaults for the initial Modern Mail beta. These are not architectural ADRs and do not change the domain model above.
