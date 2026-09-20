@@ -77,7 +77,7 @@ test("general principles are typed with a valid epistemic kind", () => {
   const general = principlesFor(context)
 
   assert.equal(general.length, CREATIVE_DIRECT_MAIL_PRINCIPLES.length)
-  assert.equal(general.length, 11)
+  assert.equal(general.length, 12)
   assert.deepEqual(
     general.map((principle) => principle.id),
     CREATIVE_DIRECT_MAIL_PRINCIPLES.map((principle) => principle.id)
@@ -130,12 +130,53 @@ test("roofing and HVAC briefs receive the home-services principle slice", () => 
   }
 })
 
+test("research-derived imagery principles are observed_pattern and do not duplicate consequence", () => {
+  const roofing = buildCreativeIntelligenceContext(roofingBrief)
+  const restaurant = buildCreativeIntelligenceContext(restaurantBrief)
+
+  const consequence = HOME_SERVICES_PRINCIPLES.filter(
+    (principle) => principle.id === "hs-consequence-imagery"
+  )
+  assert.equal(consequence.length, 1)
+  assert.equal(consequence[0].kind, "observed_pattern")
+  assert.equal(consequence[0].appliesTo?.join(","), "imagery")
+  assert.match(consequence[0].statement, /Name that role only/)
+
+  const crew = roofing.principles.find((principle) => principle.id === "hs-crew-imagery")
+  assert.ok(crew)
+  assert.equal(crew.kind, "observed_pattern")
+  assert.equal(crew.verticalCluster, "home-services")
+  assert.deepEqual(crew.appliesTo, ["imagery", "trust"])
+  assert.match(crew.statement, /imageryRole crew/)
+  assert.match(crew.statement, /Name the role only/)
+  assert.equal(
+    restaurant.principles.some((principle) => principle.id === "hs-crew-imagery"),
+    false
+  )
+
+  const recipientProperty = restaurant.principles.find(
+    (principle) => principle.id === "dm-recipient-property-not-neighborhood"
+  )
+  assert.ok(recipientProperty)
+  assert.equal(recipientProperty.kind, "observed_pattern")
+  assert.equal(recipientProperty.verticalCluster, undefined)
+  assert.deepEqual(recipientProperty.appliesTo, ["imagery"])
+  assert.match(recipientProperty.statement, /not generic neighborhood stock/)
+  assert.match(recipientProperty.statement, /imageryRole neighborhood/)
+
+  const formatted = formatCreativeIntelligenceContext(roofing)
+  assert.equal((formatted.match(/\[hs-consequence-imagery\]/g) ?? []).length, 1)
+  assert.doesNotMatch(formatted, /MMR-\d+/)
+  assert.doesNotMatch(formatted, /https?:\/\//i)
+  assert.doesNotMatch(formatted, /\.jpg\b/i)
+})
+
 test("non-home-services brief does not receive the home-services slice", () => {
   const context = buildCreativeIntelligenceContext(restaurantBrief)
 
   assert.equal(principlesFor(context, "home-services").length, 0)
   assert.equal(principlesFor(context, "plumbing").length, 0)
-  assert.equal(principlesFor(context).length, 11)
+  assert.equal(principlesFor(context).length, 12)
 })
 
 test("plumbing-specific behavior remains correctly scoped", () => {
@@ -201,6 +242,15 @@ test("principle formatting preserves epistemic labels in the prompt context", ()
     assert.doesNotMatch(text, /5–10%/)
     assert.doesNotMatch(text, /1,204%/)
     assert.doesNotMatch(text, /ridge vents/i)
+    assert.doesNotMatch(text, /MMR-\d+/)
+    assert.doesNotMatch(text, /https?:\/\//i)
+    assert.doesNotMatch(text, /postcardmania/i)
+    assert.doesNotMatch(text, /whosmailingwhat/i)
+    assert.doesNotMatch(text, /source_url/i)
+    assert.match(text, /\[hs-consequence-imagery\]/)
+    assert.match(text, /\[hs-crew-imagery\]/)
+    assert.match(text, /\[dm-recipient-property-not-neighborhood\]/)
+    assert.match(text, /kind=observed_pattern/)
   }
 
   const restaurantSection = formatCreativeIntelligenceContext(
@@ -208,6 +258,8 @@ test("principle formatting preserves epistemic labels in the prompt context", ()
   )
   assert.match(restaurantSection, /not in the home-services cluster/)
   assert.doesNotMatch(restaurantSection, /\[hs-offer-classes\]/)
+  assert.doesNotMatch(restaurantSection, /\[hs-crew-imagery\]/)
+  assert.match(restaurantSection, /\[dm-recipient-property-not-neighborhood\]/)
 })
 
 function validDirection(

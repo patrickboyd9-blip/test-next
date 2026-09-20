@@ -116,6 +116,13 @@ export const CREATIVE_DIRECT_MAIL_PRINCIPLES: readonly CreativePrinciple[] = [
     statement:
       "Every design choice should support the single objective. Drop what does not.",
   },
+  {
+    id: "dm-recipient-property-not-neighborhood",
+    kind: "observed_pattern",
+    appliesTo: ["imagery"],
+    statement:
+      "Recipient-specific property imagery — a photograph of that recipient's own house or lot — is a personalization pattern, not generic neighborhood stock. imageryRole neighborhood means a local or community setting, not an address-level picture. Do not invent recipient-property imagery the brief does not support.",
+  },
 ]
 
 /**
@@ -146,6 +153,14 @@ export const HOME_SERVICES_PRINCIPLES: readonly CreativePrinciple[] = [
     appliesTo: ["trust", "cta"],
     statement:
       "Home-service mailers commonly place trust or proof near the response path. Use only credentials, reviews, years, or guarantees that already appear on the brief.",
+  },
+  {
+    id: "hs-crew-imagery",
+    kind: "observed_pattern",
+    verticalCluster: "home-services",
+    appliesTo: ["imagery", "trust"],
+    statement:
+      "Work or crew photography is a recurring visual trust or proof role in home-service mailers. When credibility is the creative job, imageryRole crew is an appropriate name for that role. Name the role only; do not invent a team, job-site, or customer-property photograph the brief does not support.",
   },
   {
     id: "hs-front-back",
