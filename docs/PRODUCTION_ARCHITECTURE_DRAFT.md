@@ -1396,6 +1396,117 @@ This decision does not change application code, catalog types, `MailPieceSpec` T
 
 ---
 
+## ADR-011: ProductionDocument Is a Face-Authorship Interpretation of One MailPiece
+
+### Status
+
+Accepted
+
+### Decision
+
+> **`ProductionDocument` is the vendor-neutral manufacturable interpretation of one immutable `MailPiece`. It records identity, the source MailPiece, the catalog version already on that MailPiece, and which physical faces Modern Mail authored versus which fulfillment generates. It is not CreativeSpec, not the catalog, not a PDF, and not a vendor job.**
+
+A `ProductionDocument` is derived from:
+
+- one `MailPiece`
+- that campaign’s `MailPieceSpec.addressFaceAuthorship`
+- the Mail Piece Catalog version referenced by that MailPiece (`MailPiece.catalogId` / `MailPiece.catalogVersion`)
+
+It does not choose a catalog version, authorship, or creative expression. Those are already decided.
+
+### Conceptual contents
+
+The document contains:
+
+1. Its own identity.
+2. The source MailPiece identity and MailPiece version.
+3. The catalog id and catalog version already recorded on that MailPiece.
+4. A closed per-face production interpretation for this catalogued piece’s physical faces (`front`, `back`): each face is either customer-authored or fulfillment-generated.
+
+It does not contain a TypeScript field list in this ADR beyond that conceptual set. Implementation remains a later step.
+
+### Why this shape
+
+ADR-008 named the object and forbade treating MailPiece, CreativeSpec, CreativeCanvas, Studio preview, PDF, or a vendor upload as manufacturable.
+
+ADR-009 made physical faces and address-face authorship distinct. Without a per-face interpretation, `ProductionDocument` cannot say whether Modern Mail authored the mailing face.
+
+ADR-010 placed the authorship *decision* on `MailPieceSpec`. This ADR places the authorship *interpretation* on `ProductionDocument`. Those are different facts:
+
+- `MailPieceSpec.addressFaceAuthorship` is the campaign decision (`"customer"` | `"fulfillment"`).
+- `ProductionDocument` records the consequence on each physical face.
+
+Do **not** copy `addressFaceAuthorship` onto `ProductionDocument` as a second decision field.
+Do **not** copy `recommendedCatalogId`, `customerOverride`, `decidedAt`, or `decidedBy`.
+Do **not** copy `CreativeSpec`.
+Do **not** copy catalog inches.
+
+Beta (`addressFaceAuthorship = "fulfillment"`):
+
+- `front` is customer-authored.
+- `back` exists physically and is fulfillment-generated.
+- Modern Mail must not invent or render fulfillment mailing-face geometry.
+
+A later `"customer"` campaign uses the same document shape with `back` customer-authored. Catalog keep-out then applies to that face. Catalog identity does not change.
+
+### Physical faces are not an arbitrary page list
+
+`postcard_5x8` version 1 has a closed face pair. The document interprets those faces. It is not a generic multi-page document model for letters, booklets, or PDF page arrays.
+
+Serialized files (PDF pages, proofs) are downstream artifacts, not this object’s structure.
+
+### Physical truth
+
+The catalog version referenced by the MailPiece remains authoritative for trim, orientation, artwork canvas, bleed, image-extension minimum, safe inset, keep-out, origin, reserved roles, full-bleed expectation, physical faces, and address-face identity.
+
+The production renderer, when designed, reads those facts from that catalog version. Keep-out applies only when the address face is customer-authored.
+
+This ADR does **not** persist a resolved geometry snapshot. ADR-002 / ADR-008 left that open as a future audit layer.
+
+### Creative content
+
+Approved creative remains on `MailPiece.spec`. The document references the MailPiece. It does not become a second CreativeSpec and does not store preview image paths, crops, or Studio layout.
+
+### Artifacts and fulfillment
+
+A print-ready PDF, proof image, or upload payload may later be derived from a `ProductionDocument`. Those files are not the document.
+
+Provider adapters translate this interpretation plus catalog product into vendor requests. Click2Mail `layout` / `documentClass` strings, job IDs, and postage SKUs stay adapter-owned.
+
+### Invariants
+
+1. A `ProductionDocument` is derived from exactly one immutable `MailPiece`.
+2. Its catalog id/version must equal that MailPiece’s catalog id/version.
+3. It must not mutate. A new MailPiece version implies a new derivation.
+4. Every interpreted face is a catalog physical face for that version. There are no invented faces.
+5. When address-face authorship is `"fulfillment"`, the address face is fulfillment-generated and must not carry invented mailing-face geometry or a customer-authored keep-out page.
+6. When address-face authorship is `"customer"`, the address face is customer-authored and catalog keep-out applies.
+7. Click2Mail layout/template names are not fields on this object.
+8. PDF bytes, Studio preview, CreativeCanvas, and CreativeSpec are not this object.
+
+### Consequences
+
+A future renderer can ask: which physical faces do I author from this MailPiece and this catalog version? A future adapter can map those two interpretations without leaking vendor types upward.
+
+No Campaign lifecycle state is added. Existence of this shape does not implement a renderer, PDF, persistence, or Click2Mail.
+
+No application code, catalog, MailPiece, MailPieceSpec, CreativeSpec, CreativeCanvas, or Studio is changed by accepting this ADR.
+
+### What this decision does NOT decide
+
+- TypeScript implementation or persistence (on Campaign or elsewhere)
+- When a ProductionDocument is created (approval vs later production)
+- Whether approval snapshots authorship onto MailPiece
+- Resolved geometry snapshot vs catalog reference-only (reference-only remains the rule here; snapshot remains a future audit question)
+- Serialized artifact storage, PDF library, fonts, DPI, color
+- Return-address content ownership
+- Exact indicia / return-address typography boxes
+- Click2Mail `layout` / `documentClass` mapping
+- Launch, audience lists, quantity, postage
+- Any catalogued mail piece besides `postcard_5x8` v1
+
+---
+
 # Beta Product Decisions
 
 This section records product-scope defaults for the initial Modern Mail beta. These are not architectural ADRs and do not change the domain model above.
