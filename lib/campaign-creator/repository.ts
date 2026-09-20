@@ -43,6 +43,22 @@ export function applyQuantityConfirmation(campaign: Campaign, now: string): void
 }
 
 /**
+ * Records the customer's explicit Launch commitment.
+ * Requires a current MailPiece and quantity_confirmed. Does not create or
+ * repair a MailPiece, derive a ProductionDocument, or call fulfillment.
+ */
+export function applyLaunch(campaign: Campaign, now: string): void {
+  requireCurrentMailPiece(campaign)
+  if (campaign.status !== "quantity_confirmed") {
+    throw new Error(
+      `Campaign ${campaign.id} cannot be launched until quantity is confirmed.`
+    )
+  }
+  campaign.status = "launched"
+  campaign.updatedAt = now
+}
+
+/**
  * Status-only recovery when a current MailPiece is missing but Studio can
  * render persisted directions. Does not unapprove, generate, or mint a MailPiece.
  */
@@ -70,6 +86,7 @@ export interface CampaignRepository {
   markGeneratingCreative(id: string): Promise<Campaign>
   confirmAudience(id: string): Promise<Campaign>
   confirmQuantity(id: string): Promise<Campaign>
+  launch(id: string): Promise<Campaign>
   recoverMissingMailPiece(id: string): Promise<Campaign>
   initializeStudioCreative(
     id: string,
@@ -278,6 +295,12 @@ class FileCampaignRepository implements CampaignRepository {
   async confirmQuantity(id: string): Promise<Campaign> {
     const campaign = await this.require(id)
     applyQuantityConfirmation(campaign, new Date().toISOString())
+    return this.write(campaign)
+  }
+
+  async launch(id: string): Promise<Campaign> {
+    const campaign = await this.require(id)
+    applyLaunch(campaign, new Date().toISOString())
     return this.write(campaign)
   }
 

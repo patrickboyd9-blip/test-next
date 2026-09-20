@@ -160,6 +160,10 @@ export async function confirmCampaignQuantity(campaignId: string): Promise<Campa
   return repository.confirmQuantity(campaignId)
 }
 
+export async function launchCampaign(campaignId: string): Promise<Campaign> {
+  return repository.launch(campaignId)
+}
+
 const generationLocks = new Map<string, Promise<Campaign>>()
 
 export async function generateStudioCreative(campaignId: string): Promise<Campaign> {
