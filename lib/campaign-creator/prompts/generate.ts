@@ -30,10 +30,10 @@ Generation constraints:
 - All 3 must have genuinely different messaging angles (not paraphrases)
 - Direction name: 2–4 editorial words (e.g. "Trusted Local Expert"), not a layout description
 - tags: exactly 3 strategic tags per direction
-- rationale: 2 sentences max, tied to the goal, audience, and Primary Success Metric
+- rationale: 2 sentences max, tied to the goal, audience, and Primary Success Metric. Explain why the concept is strategically different. Do not claim conversion, bookings, lift, ROI, or that a direction will outperform
 - designedToDrive: customer-language Primary Success Metric from the brief
 - oneLineDifference: required for the two non-lead directions (≤ 80 characters); omit or leave empty on the lead
-- Recommend the direction that best serves the Primary Success Metric, and say why in the rationale`
+- Recommend the direction that best serves the Primary Success Metric, and say why in the rationale without performance claims`
 }
 
 export function buildGenerateUserMessage(

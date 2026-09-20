@@ -3,12 +3,18 @@ import { test } from "node:test"
 
 import type { CreativeCanvas } from "./creative-canvas"
 import {
-  CREATIVE_DIRECT_MAIL_HEURISTICS,
+  rationaleHasUnsupportedPerformanceClaim,
+  validateGenerationSet,
+} from "./creative-engine-guards"
+import {
+  CREATIVE_DIRECT_MAIL_PRINCIPLES,
+  CREATIVE_PRINCIPLE_KINDS,
+  HOME_SERVICES_PRINCIPLES,
   buildCreativeIntelligenceContext,
   formatCreativeIntelligenceContext,
 } from "./creative-intelligence"
 import { buildGenerateSystemPrompt } from "./prompts/generate"
-import type { CampaignBrief } from "./types"
+import type { CampaignBrief, CreativeDirection } from "./types"
 
 const hvacBrief: CampaignBrief = {
   goal: "Book more service appointments",
@@ -16,6 +22,22 @@ const hvacBrief: CampaignBrief = {
   businessInfo: { name: "ABC Air Conditioning" },
   offer: "15% off your first service call",
   primarySuccessMetric: { type: "appointment", description: "Appointment bookings" },
+}
+
+const roofingBrief: CampaignBrief = {
+  goal: "Book more roof inspections",
+  audience: { description: "Homeowners after recent storms" },
+  businessInfo: { name: "Summit Roofing" },
+  offer: "Free roof inspection",
+  primarySuccessMetric: { type: "appointment", description: "Inspection bookings" },
+}
+
+const restaurantBrief: CampaignBrief = {
+  goal: "Fill more weekend tables",
+  audience: { description: "Nearby diners" },
+  businessInfo: { name: "Harbor Pizza" },
+  offer: "Free garlic knots with any large pizza",
+  primarySuccessMetric: { type: "coupon_redemption", description: "Coupon redemptions" },
 }
 
 const plumbingBriefWithoutOffer: CampaignBrief = {
@@ -41,20 +63,88 @@ const canvas: CreativeCanvas = {
   fullBleedExpected: true,
 }
 
-test("non-plumbing brief includes direct-mail heuristics and no industry heuristics", () => {
-  const context = buildCreativeIntelligenceContext(hvacBrief)
+function principlesFor(
+  context: ReturnType<typeof buildCreativeIntelligenceContext>,
+  vertical?: string
+) {
+  return context.principles.filter((principle) =>
+    vertical ? principle.verticalCluster === vertical : !principle.verticalCluster
+  )
+}
 
-  assert.deepEqual([...context.directMailHeuristics], [...CREATIVE_DIRECT_MAIL_HEURISTICS])
-  assert.equal(context.industryHeuristics.length, 0)
-  assert.equal(context.directMailHeuristics.length > 0, true)
+test("general principles are typed with a valid epistemic kind", () => {
+  const context = buildCreativeIntelligenceContext(restaurantBrief)
+  const general = principlesFor(context)
+
+  assert.equal(general.length, CREATIVE_DIRECT_MAIL_PRINCIPLES.length)
+  assert.equal(general.length, 11)
+  assert.deepEqual(
+    general.map((principle) => principle.id),
+    CREATIVE_DIRECT_MAIL_PRINCIPLES.map((principle) => principle.id)
+  )
+
+  for (const principle of general) {
+    assert.equal(typeof principle.id, "string")
+    assert.equal(principle.id.length > 0, true)
+    assert.equal(typeof principle.statement, "string")
+    assert.equal(principle.statement.length > 0, true)
+    assert.equal(
+      (CREATIVE_PRINCIPLE_KINDS as readonly string[]).includes(principle.kind),
+      true
+    )
+    assert.equal(principle.verticalCluster, undefined)
+  }
 })
 
-test("plumbing brief includes only creative-relevant industry heuristics", () => {
-  const context = buildCreativeIntelligenceContext(plumbingBriefWithoutOffer)
-  const joined = context.industryHeuristics.join("\n")
+test("urgency principle no longer contains unsupported performance language", () => {
+  const urgency = CREATIVE_DIRECT_MAIL_PRINCIPLES.find(
+    (principle) => principle.id === "dm-urgency-frame"
+  )
 
-  assert.deepEqual([...context.directMailHeuristics], [...CREATIVE_DIRECT_MAIL_HEURISTICS])
-  assert.equal(context.industryHeuristics.length > 0, true)
+  assert.ok(urgency)
+  assert.equal(urgency.kind, "heuristic")
+  assert.doesNotMatch(urgency.statement, /outperform/i)
+  assert.doesNotMatch(urgency.statement, /roi/i)
+  assert.doesNotMatch(urgency.statement, /convert/i)
+  assert.doesNotMatch(urgency.statement, /lift/i)
+  assert.equal(rationaleHasUnsupportedPerformanceClaim(urgency.statement), false)
+  assert.match(urgency.statement, /appropriate creative frame/i)
+})
+
+test("roofing and HVAC briefs receive the home-services principle slice", () => {
+  for (const brief of [roofingBrief, hvacBrief]) {
+    const context = buildCreativeIntelligenceContext(brief)
+    const homeServices = principlesFor(context, "home-services")
+
+    assert.equal(homeServices.length, HOME_SERVICES_PRINCIPLES.length)
+    assert.deepEqual(
+      homeServices.map((principle) => principle.id),
+      HOME_SERVICES_PRINCIPLES.map((principle) => principle.id)
+    )
+    assert.equal(
+      homeServices.every((principle) => principle.verticalCluster === "home-services"),
+      true
+    )
+    assert.equal(principlesFor(context, "plumbing").length, 0)
+    assert.match(homeServices.map((principle) => principle.id).join(" "), /hs-offer-classes/)
+  }
+})
+
+test("non-home-services brief does not receive the home-services slice", () => {
+  const context = buildCreativeIntelligenceContext(restaurantBrief)
+
+  assert.equal(principlesFor(context, "home-services").length, 0)
+  assert.equal(principlesFor(context, "plumbing").length, 0)
+  assert.equal(principlesFor(context).length, 11)
+})
+
+test("plumbing-specific behavior remains correctly scoped", () => {
+  const withoutOffer = buildCreativeIntelligenceContext(plumbingBriefWithoutOffer)
+  const plumbing = principlesFor(withoutOffer, "plumbing")
+  const joined = plumbing.map((principle) => principle.statement).join("\n")
+
+  assert.equal(principlesFor(withoutOffer, "home-services").length > 0, true)
+  assert.equal(plumbing.length > 0, true)
   assert.match(joined, /homeowner's problem/i)
   assert.match(joined, /one clear offer/i)
   assert.match(joined, /one clear action/i)
@@ -69,32 +159,136 @@ test("plumbing brief includes only creative-relevant industry heuristics", () =>
   assert.doesNotMatch(joined, /targeting renters/i)
   assert.doesNotMatch(joined, /generate service calls/i)
   assert.doesNotMatch(joined, /build neighborhood awareness/i)
-})
+  assert.equal(
+    plumbing.every((principle) => principle.verticalCluster === "plumbing"),
+    true
+  )
 
-test("plumbing brief with an offer omits industry offer examples", () => {
-  const context = buildCreativeIntelligenceContext({
+  const withOffer = buildCreativeIntelligenceContext({
     ...plumbingBriefWithoutOffer,
     offer: "Free camera inspection this week",
   })
-  const joined = context.industryHeuristics.join("\n")
+  const withOfferJoined = principlesFor(withOffer, "plumbing")
+    .map((principle) => principle.statement)
+    .join("\n")
 
-  assert.doesNotMatch(joined, /free inspection, discounted drain cleaning/i)
-  assert.match(joined, /one clear offer/i)
+  assert.doesNotMatch(withOfferJoined, /free inspection, discounted drain cleaning/i)
+  assert.match(withOfferJoined, /one clear offer/i)
 })
 
-test("prompt labels heuristics as not measured performance data", () => {
-  const context = buildCreativeIntelligenceContext(hvacBrief)
+test("principle formatting preserves epistemic labels in the prompt context", () => {
+  const context = buildCreativeIntelligenceContext(roofingBrief)
   const section = formatCreativeIntelligenceContext(context)
   const system = buildGenerateSystemPrompt(canvas, context)
 
   for (const text of [section, system]) {
+    assert.match(text, /\[dm-one-objective\]/)
+    assert.match(text, /\[dm-urgency-frame\]/)
+    assert.match(text, /\[hs-offer-classes\]/)
+    assert.match(text, /kind=heuristic/)
+    assert.match(text, /kind=observed_pattern/)
+    assert.match(text, /kind=unknown/)
+    assert.match(text, /vertical=home-services/)
+    assert.match(text, /appliesTo=offer,urgency/)
     assert.match(text, /NOT measured performance data/)
-    assert.match(text, /Modern Mail heuristics/)
+    assert.match(text, /NOT Modern Mail performance evidence/)
+    assert.match(text, /guidance, not campaign facts/)
     assert.match(text, /Campaign facts/)
     assert.match(text, /Physical constraints/)
-    assert.match(text, /Do not blindly follow every heuristic/)
+    assert.match(text, /Do not blindly follow every principle/)
     assert.doesNotMatch(text, /highest-performing/)
     assert.doesNotMatch(text, /CampaignEvaluation/)
     assert.doesNotMatch(text, /5–10%/)
+    assert.doesNotMatch(text, /1,204%/)
+    assert.doesNotMatch(text, /ridge vents/i)
   }
+
+  const restaurantSection = formatCreativeIntelligenceContext(
+    buildCreativeIntelligenceContext(restaurantBrief)
+  )
+  assert.match(restaurantSection, /not in the home-services cluster/)
+  assert.doesNotMatch(restaurantSection, /\[hs-offer-classes\]/)
+})
+
+function validDirection(
+  index: number,
+  overrides: Partial<CreativeDirection> = {}
+): CreativeDirection {
+  const layouts = ["offer_hero", "trust_first", "urgency_banner"] as const
+  const headlines = ["Free Inspection Now", "Storm Season Alert", "Trusted Neighborhood"]
+  const rationales = [
+    "Puts trust before the sale and makes the offer easy to understand.",
+    "Uses urgency as the framing when the brief already has a season.",
+    "Creates a clear next step for nearby homeowners.",
+  ]
+
+  return {
+    id: `dir-${index}`,
+    name: headlines[index] ?? `Direction ${index + 1}`,
+    rationale: rationales[index] ?? `Strategic frame ${index + 1}.`,
+    designedToDrive: "Inspection bookings",
+    tags: ["Trust", "Local", "Offer"],
+    recommended: index === 0,
+    oneLineDifference: index === 0 ? undefined : `Different frame ${index}`,
+    createdAt: "2026-09-19T00:00:00.000Z",
+    spec: {
+      layoutVariant: layouts[index],
+      headline: headlines[index],
+      body: "Licensed local crew ready to inspect.",
+      callToAction: "Call to book",
+      visualDirection: "Neighborhood photography",
+      tone: "Trustworthy",
+      palette: ["#1e3a5f", "#4a90a4", "#f5f5f0"],
+      imagery: "stock_generic_local",
+      offer: "Free roof inspection",
+    },
+    ...overrides,
+  }
+}
+
+test("unsupported causal performance language in a rationale is rejected", () => {
+  const claims = [
+    "This will outperform the other two concepts.",
+    "This will convert better with storm-season homeowners.",
+    "Guaranteed bookings from the free inspection.",
+    "Expect a 20% lift in appointments from this frame.",
+    "This card has a 1,204% ROI in similar markets.",
+  ]
+
+  for (const rationale of claims) {
+    assert.equal(rationaleHasUnsupportedPerformanceClaim(rationale), true, rationale)
+
+    const reasons = validateGenerationSet(roofingBrief, [
+      validDirection(0, { rationale }),
+      validDirection(1),
+      validDirection(2),
+    ])
+
+    assert.equal(
+      reasons.some((reason) => reason.includes("unsupported performance claim")),
+      true,
+      rationale
+    )
+  }
+})
+
+test("normal strategic rationale language is accepted", () => {
+  const allowed = [
+    "Creates a clear next step.",
+    "Makes the offer easy to understand.",
+    "Uses urgency as the framing.",
+    "Puts trust before the sale.",
+  ]
+
+  for (const rationale of allowed) {
+    assert.equal(rationaleHasUnsupportedPerformanceClaim(rationale), false, rationale)
+  }
+
+  const reasons = validateGenerationSet(roofingBrief, [
+    validDirection(0, { rationale: allowed[3] }),
+    validDirection(1, { rationale: allowed[2] }),
+    validDirection(2, { rationale: allowed[0] }),
+  ])
+
+  assert.deepEqual(reasons, [])
 })

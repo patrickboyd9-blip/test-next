@@ -72,6 +72,31 @@ export function containsBannedPhrasing(text: string): boolean {
   return BANNED_PHRASING.some((pattern) => pattern.test(text))
 }
 
+/**
+ * Rejects unsupported causal performance claims in CreativeDirection.rationale.
+ * Strategic framing language is allowed.
+ */
+const UNSUPPORTED_PERFORMANCE_CLAIMS: RegExp[] = [
+  /\bguaranteed?\s+(conversion|conversions|bookings?|results?|lift|roi|response)\b/i,
+  /\bguaranteed?\s+to\s+(convert|book|outperform|increase|lift)\b/i,
+  /\b(will|won't|would)\s+(outperform|convert|book)\b/i,
+  /\b(will|won't|would)\s+convert\s+better\b/i,
+  /\b(outperform|outperforms|outperformed|outperforming)\b/i,
+  /\bconvert(?:s|ed|ing)?\s+better\b/i,
+  /\bbetter\s+conversion\b/i,
+  /\b(higher|greater|better)\s+(response|conversion|roi|lift)\b/i,
+  /\b\d+(?:\.\d+)?\s*%\s*(lift|increase|higher|more|roi|response|conversion|bookings?)\b/i,
+  /\b(?:lift|increase)\s+of\s+\d+/i,
+  /\b\d+(?:\.\d+)?x\s+(more|better|higher|lift|response|conversion|bookings?)\b/i,
+  /\b(?:roi|return on investment)\b/i,
+  /\bwill\s+drive\s+(?:more\s+)?(?:bookings?|conversions?|sales|calls|results)\b/i,
+  /\bwill\s+(?:generate|produce|deliver)\s+(?:more\s+)?(?:bookings?|conversions?|sales|roi|lift)\b/i,
+]
+
+export function rationaleHasUnsupportedPerformanceClaim(text: string): boolean {
+  return UNSUPPORTED_PERFORMANCE_CLAIMS.some((pattern) => pattern.test(text))
+}
+
 export function sanitizeStudioResponse(text: string, fallback: string): string {
   const trimmed = text.trim()
   if (!trimmed || containsBannedPhrasing(trimmed)) return fallback
@@ -453,7 +478,13 @@ function validateDirection(
   if (wordCount(direction.name) < 2 || wordCount(direction.name) > 4) {
     reasons.push(`${label} name must be 2–4 words`)
   }
-  if (!direction.rationale.trim()) reasons.push(`${label} is missing a rationale`)
+  if (!direction.rationale.trim()) {
+    reasons.push(`${label} is missing a rationale`)
+  } else if (rationaleHasUnsupportedPerformanceClaim(direction.rationale)) {
+    reasons.push(
+      `${label} rationale makes an unsupported performance claim (conversion, bookings, lift, ROI, or outperformance). Explain the strategic difference only; do not claim measured or predicted results.`
+    )
+  }
   if ((direction.tags ?? []).length !== 3) {
     reasons.push(`${label} must have exactly 3 tags`)
   }
