@@ -22,6 +22,7 @@ interface QuantityTrackingStageProps {
   onFieldChange: (patch: Partial<CampaignBrief>) => void
   onConfirm: () => void
   isConfirming?: boolean
+  hideConfirm?: boolean
 }
 
 export function QuantityTrackingStage({
@@ -30,6 +31,7 @@ export function QuantityTrackingStage({
   onFieldChange,
   onConfirm,
   isConfirming,
+  hideConfirm,
 }: QuantityTrackingStageProps) {
   const readOnly = status !== "audience_confirmed"
   const isConfirmed = isAtOrPastStatus(status, "quantity_confirmed")
@@ -90,7 +92,7 @@ export function QuantityTrackingStage({
           onCommit={(value) => onFieldChange({ website: value })}
         />
       </CardContent>
-      {!readOnly && (
+      {!readOnly && !hideConfirm && (
         <CardFooter className="justify-end">
           <Button onClick={onConfirm} disabled={isConfirming}>
             {isConfirming ? "Confirming…" : "Confirm quantity & tracking"}

@@ -10,6 +10,7 @@ import {
   confirmCampaignAudience,
   confirmCampaignQuantity,
   getMailPieceFormatRecommendation,
+  recoverMissingMailPiece,
   sendCampaignMessage,
   updateCampaignBrief,
   unapproveCreative,
@@ -17,6 +18,15 @@ import {
 } from "@/lib/campaign-creator/actions"
 import type { Campaign, CampaignBrief, CampaignStatus, ConversationMessage } from "@/lib/campaign-creator/types"
 import { getMailPiece } from "@/lib/mail-catalog/catalog"
+
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 
 import { AudienceStage } from "./AudienceStage"
 import { BriefSummaryCard } from "./BriefSummaryCard"
@@ -37,6 +47,11 @@ function resolveStudioCanvas(campaign: Campaign) {
   )
 }
 
+function isMissingCurrentMailPieceError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : ""
+  return /missing a current mail piece/i.test(message)
+}
+
 interface CampaignCreatorViewProps {
   initialCampaign: Campaign
 }
@@ -53,6 +68,8 @@ export function CampaignCreatorView({ initialCampaign }: CampaignCreatorViewProp
   const [studioProgressStatus, setStudioProgressStatus] = useState<CampaignStatus | undefined>()
   const [showApprovedHandoff, setShowApprovedHandoff] = useState(false)
   const [resumeInRefinement, setResumeInRefinement] = useState(false)
+  const [isRecoveringMailPiece, setIsRecoveringMailPiece] = useState(false)
+  const [recoveryFromFailedConfirm, setRecoveryFromFailedConfirm] = useState(false)
   const [formatRecommendation, setFormatRecommendation] =
     useState<MailPieceFormatRecommendationView | null>(null)
 
@@ -90,22 +107,60 @@ export function CampaignCreatorView({ initialCampaign }: CampaignCreatorViewProp
   }
 
   async function handleConfirmAudience() {
+    if (!campaign.mailPiece && campaign.creative.directions.length > 0) {
+      return
+    }
+
     setIsConfirmingAudience(true)
     try {
       const updated = await confirmCampaignAudience(campaign.id)
       setCampaign(updated)
+    } catch (error) {
+      if (
+        isMissingCurrentMailPieceError(error) &&
+        campaign.creative.directions.length > 0
+      ) {
+        setRecoveryFromFailedConfirm(true)
+        return
+      }
+      throw error
     } finally {
       setIsConfirmingAudience(false)
     }
   }
 
   async function handleConfirmQuantity() {
+    if (!campaign.mailPiece && campaign.creative.directions.length > 0) {
+      return
+    }
+
     setIsConfirmingQuantity(true)
     try {
       const updated = await confirmCampaignQuantity(campaign.id)
       setCampaign(updated)
+    } catch (error) {
+      if (
+        isMissingCurrentMailPieceError(error) &&
+        campaign.creative.directions.length > 0
+      ) {
+        setRecoveryFromFailedConfirm(true)
+        return
+      }
+      throw error
     } finally {
       setIsConfirmingQuantity(false)
+    }
+  }
+
+  async function handleRecoverMissingMailPiece() {
+    setIsRecoveringMailPiece(true)
+    try {
+      const updated = await recoverMissingMailPiece(campaign.id)
+      setCampaign(updated)
+      setShowApprovedHandoff(false)
+      setRecoveryFromFailedConfirm(false)
+    } finally {
+      setIsRecoveringMailPiece(false)
     }
   }
 
@@ -148,6 +203,12 @@ export function CampaignCreatorView({ initialCampaign }: CampaignCreatorViewProp
   const isCreativeApproved = campaign.status === "creative_approved"
   const showAudience = isAtOrPastStatus(campaign.status, "creative_approved")
   const showQuantityTracking = isAtOrPastStatus(campaign.status, "audience_confirmed")
+  const hasPersistedCreative = campaign.creative.directions.length > 0
+  const atAudienceOrQuantityConfirm =
+    campaign.status === "creative_approved" || campaign.status === "audience_confirmed"
+  const showMailPieceRecovery =
+    hasPersistedCreative &&
+    ((atAudienceOrQuantityConfirm && !campaign.mailPiece) || recoveryFromFailedConfirm)
 
   useEffect(() => {
     if (!showStrategySummary) {
@@ -213,7 +274,7 @@ export function CampaignCreatorView({ initialCampaign }: CampaignCreatorViewProp
     <>
       <CollapsedConversation messages={campaign.transcript} />
 
-      {isCreativeApproved && approvedDirection && approvedSpec && (
+      {isCreativeApproved && Boolean(campaign.mailPiece) && approvedDirection && approvedSpec && (
         <PersistentCreativeHeader
           canvas={canvas}
           direction={approvedDirection}
@@ -223,7 +284,7 @@ export function CampaignCreatorView({ initialCampaign }: CampaignCreatorViewProp
         />
       )}
 
-      {showApprovedHandoff && isCreativeApproved && (
+      {showApprovedHandoff && isCreativeApproved && Boolean(campaign.mailPiece) && (
         <p className="mb-6 text-sm text-muted-foreground" role="status" aria-live="polite">
           Creative approved — audience confirmation comes next.
         </p>
@@ -240,6 +301,26 @@ export function CampaignCreatorView({ initialCampaign }: CampaignCreatorViewProp
         />
       )}
 
+      {showMailPieceRecovery && (
+        <Card role="status" aria-live="polite">
+          <CardHeader>
+            <CardTitle>Your mailer needs one more review</CardTitle>
+            <CardDescription>
+              Review and approve your creative before continuing. Audience and quantity
+              stay as you left them.
+            </CardDescription>
+          </CardHeader>
+          <CardFooter className="justify-end">
+            <Button
+              onClick={() => void handleRecoverMissingMailPiece()}
+              disabled={isRecoveringMailPiece}
+            >
+              {isRecoveringMailPiece ? "Opening studio…" : "Review & Approve"}
+            </Button>
+          </CardFooter>
+        </Card>
+      )}
+
       {showAudience && (
         <AudienceStage
           audience={campaign.brief.audience}
@@ -247,6 +328,7 @@ export function CampaignCreatorView({ initialCampaign }: CampaignCreatorViewProp
           onFieldChange={handleFieldChange}
           onConfirm={handleConfirmAudience}
           isConfirming={isConfirmingAudience}
+          hideConfirm={showMailPieceRecovery}
         />
       )}
 
@@ -257,6 +339,7 @@ export function CampaignCreatorView({ initialCampaign }: CampaignCreatorViewProp
           onFieldChange={handleFieldChange}
           onConfirm={handleConfirmQuantity}
           isConfirming={isConfirmingQuantity}
+          hideConfirm={showMailPieceRecovery}
         />
       )}
     </>

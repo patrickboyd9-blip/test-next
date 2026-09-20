@@ -2259,6 +2259,170 @@ No application code is changed by accepting this ADR.
 
 ---
 
+## ADR-017: Incomplete MailPiece Recovery
+
+### Status
+
+Accepted
+
+### Context
+
+ADR-008 / ADR-012: `MailPiece` is the immutable approved artifact, created at the existing **Approve creative** event (`applyCreativeApproval`). Historical versions live in `mailPieceVersions`. Only `campaign.mailPiece` is current. ADR-014 derives `ProductionDocument` from that current MailPiece. ADR-015 authorizes manufacture of that current MailPiece at explicit Launch commitment. ADR-016 requires a current MailPiece at that commitment and forbids Launch from creating, persisting, or repairing one.
+
+Normal modern campaigns obtain a current MailPiece at creative approval, then confirm audience and quantity.
+
+Legacy and incomplete campaigns may still load without a current MailPiece. The repository tolerates that on read and does not backfill MailPiece, `MailPieceSpec`, or authorship (`types.ts`; mail-piece tests). `quantity_confirmed` remains a workflow position (ADR-016), so that status can exist without a current MailPiece.
+
+The remaining questions are: which existing workflow writes require a current MailPiece, and what Modern Mail does when a campaign is **at a workflow point that requires a current MailPiece and does not have one**.
+
+This ADR records those write preconditions and the recovery behavior. It does not implement them.
+
+### Decision
+
+> **`confirmAudience` and `confirmQuantity` require a current `campaign.mailPiece` as a write precondition. When a campaign lacks a current `MailPiece` at a workflow point that requires one, Modern Mail must not silently create or repair a MailPiece. The customer receives an explicit recovery path back to Creative Studio. Recovery writes `creative_ready`. The existing Approve creative action remains the only MailPiece freeze.**
+
+Conceptual shape:
+
+```
+incomplete / legacy campaign
+        → explicit recovery action
+        → creative_ready
+        → Creative Studio
+        → explicit Approve creative
+        → creative_approved + new current MailPiece
+        → audience confirmation
+        → quantity confirmation
+        → Launch
+```
+
+`applyCreativeApproval` remains the sole creation/freeze boundary. Recovery does not mint a MailPiece from `approvedSpec`, revisions, or `mailPieceVersions`. Launch does not mint a MailPiece. Load/normalize does not mint a MailPiece. The confirm-* guards do not mint, repair, migrate, or approve a MailPiece.
+
+### Confirm-audience / confirm-quantity write preconditions
+
+Both existing post-approval workflow writes require a current MailPiece:
+
+- `confirmAudience` requires `campaign.mailPiece`
+- `confirmQuantity` requires `campaign.mailPiece`
+
+These are **write preconditions only**. They do not redefine either status:
+
+- `audience_confirmed` remains “the customer completed the audience step”
+- `quantity_confirmed` remains “the customer completed the quantity step”
+- neither becomes a completeness or Launch-readiness invariant
+
+Audience is intentionally downstream of creative approval: it decides who receives the approved mailer. Quantity confirmation is also downstream of that freeze. Guarding **both** closes the application-level bypass where `confirmQuantity` could otherwise be invoked with no MailPiece.
+
+Already-persisted campaigns in these statuses are not migrated or repaired. If a loaded campaign lacks a current MailPiece at a guarded write, ADR-017 recovery applies (explicit return to Studio, then Approve creative).
+
+Function names, error types, and implementation shape of the guards remain implementation decisions. The architectural requirement is that those two writes must not succeed without a current MailPiece.
+
+### Customer experience principle
+
+Recovery is a customer action: review the creative and approve it again.
+
+Customer-facing recovery must not expose implementation concepts such as MailPiece, missing artifact, legacy state, internal campaign state, or repository validation.
+
+Exact copy and components are not decided here.
+
+### Normal modern workflow
+
+A campaign that took the current approval path already has a current MailPiece after **Approve creative**. That customer must not be sent through this recovery.
+
+Audience and quantity confirmation, Launch review, and Launch commitment proceed as already specified. This ADR does not change those meanings.
+
+### Legacy / incomplete recovery
+
+Older or incomplete campaigns may load without a current MailPiece. They remain loadable. They are not silently migrated or repaired.
+
+If such a campaign encounters a workflow point that requires a current MailPiece, Modern Mail offers an **explicit** recovery path into Creative Studio rather than manufacturing from leftover snapshots or blocking with no way forward.
+
+Recovery:
+
+- returns the campaign to `creative_ready`
+- does not preserve `creative_approved` (or a later status) while asking the customer to approve again
+- does not create a new CampaignStatus
+- does not create a `ProductionDocument`
+- does not reconstruct a MailPiece automatically
+- leaves historical `mailPieceVersions` intact (history is not launchable)
+
+The customer then uses the existing Studio approval boundary. Re-approval creates a **new** immutable MailPiece version and does not mutate historical versions. After that freeze, audience confirmation, quantity confirmation, and Launch proceed on the normal path.
+
+Do not keep `creative_approved` and also ask for another approval. That state would mean “already approved” and “awaiting approval” at once.
+
+`creative_ready` is used because it already means: creative exists to review; it is not the frozen approved artifact; **Approve creative** is required before continuing. That is the same semantic landing as the existing Edit creative / unapprove path, without introducing a second freeze mechanism.
+
+Function name, error type, and whether recovery reuses the existing unapprove write or a dedicated recovery write are implementation decisions. The customer-visible state after recovery must be `creative_ready`, not a new status, and not `creative_approved`.
+
+### Why Launch eligibility remains independent
+
+ADR-016 still applies. The confirm-* write preconditions stop **new** application writes of `audience_confirmed` / `quantity_confirmed` without a current MailPiece. Already-persisted campaigns may still be `quantity_confirmed` with no current MailPiece until the customer recovers. Launch eligibility remains a use-time check and still must not create or repair a MailPiece.
+
+This recovery ADR does not redefine `quantity_confirmed` as Launch-completeness. Recovery may **leave** that status for `creative_ready`; that does not change what `quantity_confirmed` means for campaigns that remain on it.
+
+### What this decision does not change
+
+- MailPiece creation remains `applyCreativeApproval` only
+- MailPiece immutability and versioning
+- ProductionDocument derivation and commitment timing (ADR-012–015)
+- Launch eligibility (ADR-016)
+- meaning of `audience_confirmed` / `quantity_confirmed`
+- no silent JSON migration
+
+### Invariants
+
+1. `applyCreativeApproval` is the only MailPiece creation/freeze boundary.
+2. Launch must not create, repair, or silently approve a MailPiece.
+3. Load must not silently migrate or repair a missing current MailPiece.
+4. Missing current MailPiece at a requiring workflow point yields an explicit recovery path, not an automatic MailPiece.
+5. Recovery writes `creative_ready` and must not leave the campaign `creative_approved` while another approval is required.
+6. Re-approval creates a new current MailPiece version and does not mutate historical versions.
+7. Recovery must not expose MailPiece / legacy / internal-state concepts in customer-facing language.
+8. `quantity_confirmed` remains a workflow position, not a Launch-completeness guarantee.
+9. Launch eligibility remains an independent use-time check requiring a current MailPiece.
+10. No second approval or MailPiece-creation mechanism is introduced.
+11. `confirmAudience` and `confirmQuantity` require a current MailPiece as a write precondition; they do not change what those statuses mean.
+
+### Consequences
+
+Incomplete campaigns are not quietly made manufacturable. The customer re-enters Studio and re-asserts the freeze that manufacture depends on.
+
+Normal campaigns never see this path.
+
+Returning to `creative_ready` rewinds workflow position (audience/quantity must be confirmed again after re-approval). That is the cost of a clear approved-vs-not-approved state.
+
+This ADR does not implement the confirm-* guards, recovery UI, Launch, payment, lists, renderer, PDF, Click2Mail, or ProductionDocument persistence.
+
+No application code is changed by accepting this ADR.
+
+### Explicitly unresolved
+
+- exact UI copy and component structure
+- exact error type and repository function names
+- Launch implementation
+- ProductionDocument persistence timing
+- payment, mailing-list, provider, renderer/PDF, Click2Mail
+- migration of existing campaign JSON
+- automatic reconstruction of MailPieces from `approvedSpec`, revisions, or history (this ADR forbids relying on that as recovery)
+
+### Source grounding
+
+| Claim | Source | Kind |
+|---|---|---|
+| MailPiece is the immutable approved artifact; created at `approveCreative` | ADR-008; ADR-012 | Established |
+| Only current MailPiece is manufacturable; history is not scanned | ADR-014; ADR-015; Launch PRD | Established |
+| Launch eligibility requires current MailPiece; evaluator must not create one | ADR-016 | Established |
+| `quantity_confirmed` is a workflow position, not completeness | ADR-016 | Established |
+| `applyCreativeApproval` is the only MailPiece writer; unapprove clears current, keeps history, writes `creative_ready` | `mail-piece.ts` | Established implementation |
+| Legacy campaigns without MailPiece remain loadable; not backfilled | `types.ts`; mail-piece tests | Established implementation |
+| Studio occupies through `creative_approved`; Edit creative returns to `creative_ready` | `docs/prd/CreativeStudio.md` | Established |
+| Load/Launch must not silently repair; recovery is explicit return to Studio then Approve creative | this ADR | **This ADR** |
+| Recovery writes `creative_ready`; does not preserve `creative_approved` while re-approval is required | this ADR | **This ADR** |
+| `confirmAudience` and `confirmQuantity` require current MailPiece as write preconditions; statuses unchanged | this ADR | **This ADR** |
+| UI copy, error types, function names | — | Unresolved |
+| Payment, lists, PD persist timing, provider, renderer/PDF | ADR-015; ADR-016; Launch PRD | Unresolved |
+
+---
+
 # Beta Product Decisions
 
 This section records product-scope defaults for the initial Modern Mail beta. These are not architectural ADRs and do not change the domain model above.

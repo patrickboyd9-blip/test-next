@@ -22,6 +22,44 @@ import type {
 } from "./types"
 import { createEmptyCampaignCreative } from "./types"
 
+function requireCurrentMailPiece(campaign: Campaign): void {
+  if (!campaign.mailPiece) {
+    throw new Error(`Campaign ${campaign.id} is missing a current mail piece.`)
+  }
+}
+
+/** Write precondition for confirmAudience. Does not create or repair a MailPiece. */
+export function applyAudienceConfirmation(campaign: Campaign, now: string): void {
+  requireCurrentMailPiece(campaign)
+  campaign.status = "audience_confirmed"
+  campaign.updatedAt = now
+}
+
+/** Write precondition for confirmQuantity. Does not create or repair a MailPiece. */
+export function applyQuantityConfirmation(campaign: Campaign, now: string): void {
+  requireCurrentMailPiece(campaign)
+  campaign.status = "quantity_confirmed"
+  campaign.updatedAt = now
+}
+
+/**
+ * Status-only recovery when a current MailPiece is missing but Studio can
+ * render persisted directions. Does not unapprove, generate, or mint a MailPiece.
+ */
+export function applyRecoverMissingMailPiece(campaign: Campaign, now: string): void {
+  if (campaign.mailPiece) {
+    throw new Error(`Campaign ${campaign.id} already has a current mail piece.`)
+  }
+  if (campaign.creative.directions.length === 0) {
+    throw new Error(
+      `Campaign ${campaign.id} does not have persisted creative to review.`
+    )
+  }
+
+  campaign.status = "creative_ready"
+  campaign.updatedAt = now
+}
+
 export interface CampaignRepository {
   createCampaign(ownerId: string): Promise<Campaign>
   getCampaign(id: string): Promise<Campaign | null>
@@ -32,6 +70,7 @@ export interface CampaignRepository {
   markGeneratingCreative(id: string): Promise<Campaign>
   confirmAudience(id: string): Promise<Campaign>
   confirmQuantity(id: string): Promise<Campaign>
+  recoverMissingMailPiece(id: string): Promise<Campaign>
   initializeStudioCreative(
     id: string,
     directions: CreativeDirection[],
@@ -232,15 +271,19 @@ class FileCampaignRepository implements CampaignRepository {
 
   async confirmAudience(id: string): Promise<Campaign> {
     const campaign = await this.require(id)
-    campaign.status = "audience_confirmed"
-    campaign.updatedAt = new Date().toISOString()
+    applyAudienceConfirmation(campaign, new Date().toISOString())
     return this.write(campaign)
   }
 
   async confirmQuantity(id: string): Promise<Campaign> {
     const campaign = await this.require(id)
-    campaign.status = "quantity_confirmed"
-    campaign.updatedAt = new Date().toISOString()
+    applyQuantityConfirmation(campaign, new Date().toISOString())
+    return this.write(campaign)
+  }
+
+  async recoverMissingMailPiece(id: string): Promise<Campaign> {
+    const campaign = await this.require(id)
+    applyRecoverMissingMailPiece(campaign, new Date().toISOString())
     return this.write(campaign)
   }
 

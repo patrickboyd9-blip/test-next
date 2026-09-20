@@ -295,3 +295,9 @@ export async function approveCreative(campaignId: string): Promise<Campaign> {
 export async function unapproveCreative(campaignId: string): Promise<Campaign> {
   return repository.unapproveCreative(campaignId)
 }
+
+export async function recoverMissingMailPiece(
+  campaignId: string
+): Promise<Campaign> {
+  return repository.recoverMissingMailPiece(campaignId)
+}

@@ -21,6 +21,7 @@ interface AudienceStageProps {
   onFieldChange: (patch: Partial<CampaignBrief>) => void
   onConfirm: () => void
   isConfirming?: boolean
+  hideConfirm?: boolean
 }
 
 export function AudienceStage({
@@ -29,6 +30,7 @@ export function AudienceStage({
   onFieldChange,
   onConfirm,
   isConfirming,
+  hideConfirm,
 }: AudienceStageProps) {
   const readOnly = status !== "creative_approved"
   const isConfirmed = isAtOrPastStatus(status, "audience_confirmed")
@@ -75,7 +77,7 @@ export function AudienceStage({
           }
         />
       </CardContent>
-      {!readOnly && (
+      {!readOnly && !hideConfirm && (
         <CardFooter className="justify-end">
           <Button onClick={onConfirm} disabled={isConfirming}>
             {isConfirming ? "Confirming…" : "Confirm audience"}
