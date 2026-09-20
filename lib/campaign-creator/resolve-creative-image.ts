@@ -1,6 +1,8 @@
+import {
+  BETA_IMAGERY_LIBRARY,
+  type CuratedImageryAsset,
+} from "./beta-imagery-library"
 import type { ImageryKey, ImageryRole } from "./types"
-
-const GENERIC_LOCAL_PATH = "/creative-studio/imagery/stock_generic_local.jpg"
 
 /**
  * Preview-facing result of asset resolution. Not a CreativeSpec field.
@@ -11,44 +13,48 @@ export interface ResolvedImage {
   showMonogram: boolean
 }
 
+const EMPTY_IMAGE: ResolvedImage = { src: null, showMonogram: false }
+const MONOGRAM_IMAGE: ResolvedImage = { src: null, showMonogram: true }
+
+function availableAssetForRole(
+  role: ImageryRole
+): CuratedImageryAsset | undefined {
+  return BETA_IMAGERY_LIBRARY.find(
+    (asset) => asset.eligibleRole === role && Boolean(asset.previewSrc)
+  )
+}
+
+function fromLibrary(role: ImageryRole): ResolvedImage {
+  const src = availableAssetForRole(role)?.previewSrc ?? null
+  return { src, showMonogram: false }
+}
+
 /**
- * Maps imageryRole to a real available asset. Paths do not belong on CreativeSpec.
+ * Maps imageryRole to an eligible curated asset. Paths do not belong on CreativeSpec.
  *
  * imageryRole, when present, is the semantic instruction. ImageryKey is only the
  * legacy fallback for older specs that have no role.
  *
- * The library currently has one curated photograph (generic local/neighborhood).
- * There is no consequence or crew asset. Do not invent one or reuse the neighborhood
- * photo as if it depicted damage or a work crew.
+ * Cluster is not consulted. Layout and leadJob are not consulted.
+ * Missing roles resolve empty rather than substituting another role's photo.
  */
 export function resolveCreativeImage(
   imagery: ImageryKey | undefined,
   imageryRole?: ImageryRole
 ): ResolvedImage {
-  if (imageryRole === "none") return { src: null, showMonogram: false }
-  if (imageryRole === "logo") return { src: null, showMonogram: true }
-  if (imageryRole === "neighborhood") {
-    return { src: GENERIC_LOCAL_PATH, showMonogram: false }
-  }
-  if (imageryRole === "consequence") {
-    // No consequence photograph is available. Render without an image rather than
-    // pretending the neighborhood stock photo is damage/problem imagery.
-    return { src: null, showMonogram: false }
-  }
-  if (imageryRole === "crew") {
-    // No crew/team photograph is available. Do not fabricate one.
-    return { src: null, showMonogram: false }
-  }
+  if (imageryRole === "none") return EMPTY_IMAGE
+  if (imageryRole === "logo") return MONOGRAM_IMAGE
+  if (imageryRole) return fromLibrary(imageryRole)
 
   switch (imagery) {
     case "stock_generic_local":
     case "stock_hvac":
     case "stock_restaurant":
-      return { src: GENERIC_LOCAL_PATH, showMonogram: false }
+      return fromLibrary("neighborhood")
     case "logo_primary":
-      return { src: null, showMonogram: true }
+      return MONOGRAM_IMAGE
     case "none":
     default:
-      return { src: null, showMonogram: false }
+      return EMPTY_IMAGE
   }
 }

@@ -1,0 +1,36 @@
+import type { ImageryRole } from "./types"
+
+export const IMAGERY_SOURCE_CLASSES = ["curated"] as const
+export type ImagerySourceClass = (typeof IMAGERY_SOURCE_CLASSES)[number]
+
+export const IMAGERY_CLUSTERS = ["generic", "home-services"] as const
+export type ImageryCluster = (typeof IMAGERY_CLUSTERS)[number]
+
+/**
+ * Curated beta imagery definition. Not a CreativeSpec field, not a DAM record.
+ * previewSrc is present only when a real Studio file exists.
+ */
+export interface CuratedImageryAsset {
+  id: string
+  eligibleRole: ImageryRole
+  cluster?: ImageryCluster
+  sourceClass: ImagerySourceClass
+  commercialPrintOk: boolean
+  attribution?: string
+  previewSrc?: string
+}
+
+/**
+ * Beta library. Crew and consequence remain undefined until real files exist.
+ * Cluster is eligibility metadata only — not a creative decision.
+ */
+export const BETA_IMAGERY_LIBRARY: readonly CuratedImageryAsset[] = [
+  {
+    id: "neighborhood-generic-local",
+    eligibleRole: "neighborhood",
+    cluster: "generic",
+    sourceClass: "curated",
+    commercialPrintOk: true,
+    previewSrc: "/creative-studio/imagery/stock_generic_local.jpg",
+  },
+]
