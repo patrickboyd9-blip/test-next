@@ -1190,3 +1190,206 @@ No application code, catalog, canvas, Studio, or provider module is changed by a
 - Any new projection besides the object already named in the production draft
 
 No additional abstraction is introduced. `Renderer`, `Production Provider`, and `Vendor Adapter` remain the existing draft names and remain unimplemented.
+
+---
+
+## ADR-009: 5×8 Production Faces Are Physical Faces; Address-Face Authorship Is Campaign-Level
+
+### Status
+
+Accepted
+
+### Decision
+
+> **A mailed 5×8 postcard always has two physical faces. The address/mailing face is first-class even when Modern Mail does not generate its contents. “Single-sided” vs “double-sided” at the Modern Mail level means whether the customer authors that address face, not a Click2Mail layout name.**
+
+For `postcard_5x8` version 1:
+
+- **Physical faces** are catalog truth: `front` and `back`, with `addressFace = back`.
+- A **production face** is one physical side of the manufactured piece.
+- A **customer-authored production page** is a production face Modern Mail is responsible for rendering into a `ProductionDocument`.
+- The manufactured piece has two production faces. Modern Mail authors one page or two, depending on **address-face authorship**.
+
+Vendor template names (`Single Sided Postcard`, `Double Sided Postcard`) and any `layout` / `documentClass` strings are fulfillment-adapter concerns. They are not Modern Mail domain types.
+
+### Why this model
+
+The catalog already records two faces and an address face. Research shows two customer-file patterns on the same physical product: one customer-authored page with a fulfillment-generated mailing face, or two customer-authored pages whose address face includes a reserved keep-out.
+
+Those are not two catalog products. Catalog v1 already says they are not catalog architecture. They are a **permitted campaign-level variation** on one catalogued piece (ADR-002).
+
+Studio’s 8:5 preview and `CreativeCanvas` do not define production pages (ADR-006, ADR-007). `ProductionDocument` cannot be specified as pages until this distinction exists (ADR-008).
+
+### What constitutes a production face / page
+
+| Term | Meaning |
+|---|---|
+| Physical face | A side of the finished 5×8 (`front` or `back`). Catalog-owned. |
+| Address / mailing face | The physical face that carries postal address, postage, and barcode roles. For this catalog version: `back`. First-class even if Modern Mail does not draw it. |
+| Customer-authored production page | A physical face whose artwork Modern Mail produces. Subject to catalog geometry (trim, bleed, safe inset, and keep-out when that face is the customer-authored address face). |
+| Fulfillment-generated address face | The address face exists physically; Modern Mail does not author a production page for it and does not invent its coordinates. |
+
+A `ProductionDocument` for this product is the manufacturable interpretation of the MailPiece under that catalog version **and** under the campaign’s address-face authorship. This ADR does not define the TypeScript shape of that document.
+
+### Address / mailing face is first-class
+
+A mailed 5×8 always has an address/mailing face.
+
+Creative, Studio, and production may all *observe* that a reserved mailing face exists (roles on `CreativeCanvas`; keep-out on the catalog for the customer-authored case).
+
+Modern Mail does **not** have to generate every ink on that face. Fulfillment may print delivery address, barcode, postage, and (where the vendor does so) return address in the reserved region.
+
+When Modern Mail **does** author the address face, catalog keep-out is mandatory: customer content inside the union of `mailing_panel` and `barcode_strip` is not printed. Exact indicia and return-address typography boxes remain unverified and are not invented here.
+
+When Modern Mail **does not** author the address face, the renderer must not fabricate a mailing-face page from Studio’s back schematic or from generic USPS assumptions.
+
+### How single-sided vs double-sided customer creative is represented
+
+Do **not** represent this as Click2Mail layout enums.
+
+Represent it as **address-face authorship**:
+
+- **Customer-authored address face** — Modern Mail produces two customer-authored pages: front, and address face with catalog keep-out. This is the vendor-neutral meaning of the researched two-page customer file.
+- **Fulfillment-generated address face** — Modern Mail produces one customer-authored page: the front. The address face remains a first-class physical face. This is the vendor-neutral meaning of the researched one-page customer file.
+
+Physical face count does not change. Customer-authored page count does.
+
+### Ownership
+
+| Object | Owns |
+|---|---|
+| **Mail Piece Catalog** | Physical faces, which face is the address face, keep-out and other geometry for the customer-authored address face. Does not own vendor layout names. |
+| **MailPieceSpec** | Campaign selection of catalog id/version, and (when recorded) campaign-level address-face authorship as a permitted option on this catalogued piece. Not implemented by this ADR. |
+| **CreativeSpec** | Creative expression. Does not own faces, pages, or keep-out. Still a single snapshot; this ADR does not add a back spec. |
+| **CreativeCanvas** | Semantic: two faces, address face, reserved **roles**. Not production pages or inch geometry. |
+| **MailPiece** | Immutable approved creative + the catalog version it was approved against. Does not become a page list. |
+| **ProductionDocument** | Manufacturable interpretation: applies catalog rules to that MailPiece, including which faces Modern Mail authored. Still not a PDF or vendor job. |
+| **Provider adapter** | Maps Modern Mail authorship + catalog product to provider file/page/layout requirements. Owns Click2Mail names. |
+| **Renderer** | Applies catalog geometry to customer-authored pages. Does not choose authorship or creative intent. |
+
+The renderer does not decide whether the address face is customer-authored. That is a campaign/physical option, not a layout-variant or AI choice.
+
+### Relationship to existing ADRs
+
+- ADR-002: address-face authorship is a campaign-specific option the catalog allows to vary; it is not a new catalog id.
+- ADR-005 / ADR-007: `CreativeCanvas` stays semantic; keep-out stays catalog.
+- ADR-006: Studio 8:5 is not a production page model.
+- ADR-008: `ProductionDocument` is derived from one `MailPiece` and resolves production rules from **that MailPiece’s** catalog version. This ADR adds the missing face/authorship meaning; it does not pass an arbitrary extra catalog version.
+
+No new Campaign model. No move of geometry off the catalog.
+
+### Invariants
+
+1. A mailed `postcard_5x8` v1 piece has two physical faces; the address face is `back`.
+2. The address/mailing face is conceptually first-class even when Modern Mail does not generate it.
+3. Customer-authored page count is 1 or 2; physical face count is 2.
+4. Keep-out applies only to a customer-authored address face, using catalog geometry, origin `trim_top_left`.
+5. Modern Mail must not invent single-sided page-2 coordinates.
+6. Click2Mail layout/template strings are not domain types.
+7. `CreativeCanvas` is not a production-geometry container.
+
+### Consequences
+
+Production rendering can ask a precise question: **which physical faces did Modern Mail author?** Keep-out is used only in the customer-authored address-face case. A future adapter can map those two authorship states to provider jobs without leaking provider names upward.
+
+Studio may continue to show a schematic back. That schematic is not a ProductionDocument page.
+
+This decision does not change application code, catalog types, `MailPiece`, `CreativeCanvas`, `CreativeSpec`, or `MailPieceSpec`. Recording address-face authorship on `MailPieceSpec` is a later implementation step.
+
+### What this decision does NOT decide
+
+- TypeScript fields or persistence
+- Beta default (customer-authored vs fulfillment-generated address face)
+- Whether the customer is shown that choice, or the platform decides it
+- CreativeSpec back-face composition / leftover area outside keep-out
+- Production renderer, PDF pages, fonts, DPI, color
+- Exact indicia / return-address typography boxes
+- Who supplies return-address content
+- Click2Mail `layout` / `documentClass` mapping
+- Launch workflow, audience lists, postage
+- Any other catalogued mail piece besides `postcard_5x8` v1
+
+---
+
+## ADR-010: Address-Face Authorship Is a Closed MailPieceSpec Decision
+
+### Status
+
+Accepted
+
+### Decision
+
+> **`MailPieceSpec` owns the campaign-level address-face authorship decision as a closed two-state value: `addressFaceAuthorship: "customer" | "fulfillment"`.**
+
+This ADR records the domain representation established after ADR-009. It does **not** implement the field.
+
+- `"customer"` means Modern Mail authors the front and the address/mailing face; the catalog keep-out applies to the customer-authored address face.
+- `"fulfillment"` means Modern Mail authors the front only; the physical mailing face still exists, but fulfillment generates that face and Modern Mail must not invent its geometry.
+
+This is a closed two-state domain value, not a boolean.
+
+Do **not** use `sidedness`.
+
+Do **not** use Click2Mail layout/template names.
+
+Do **not** create a recommended/selected pair for authorship. No authorship recommendation or override flow currently exists (unlike catalog piece selection under ADR-003).
+
+Do **not** copy this field onto `MailPiece` as part of this ADR.
+
+The value belongs to the `MailPieceSpec` lifecycle and is established at Strategy Confirmation alongside the other physical campaign decisions (ADR-004). Once the `MailPieceSpec` is confirmed, the value is write-once/frozen with the spec.
+
+This ADR models the domain concept only. It does **not** choose a beta default. It does **not** decide whether the customer will eventually see or override the choice. It does **not** decide whether Strategy will eventually recommend the choice. It does **not** implement the field.
+
+### Ownership
+
+| Object | Owns |
+|---|---|
+| **Mail Piece Catalog** | Physical faces, address-face identity, production geometry, and keep-out. |
+| **MailPieceSpec** | Campaign-level address-face authorship (`customer` \| `fulfillment`). |
+| **CreativeSpec** | Creative expression. Not physical page ownership. |
+| **CreativeCanvas** | Semantic faces, address face, and reserved roles. Not a production-page or geometry container. |
+| **MailPiece** | Immutable approved creative artifact. Not a page list. Does not receive this field in this ADR. |
+| **ProductionDocument** | Later interprets the MailPiece under the MailPieceSpec authorship decision. |
+| **Provider adapter** | Later translates the two Modern Mail states into provider-specific production requirements. |
+| **Renderer** | Later applies catalog geometry to customer-authored faces. Does not decide authorship. |
+
+### Why this representation
+
+Prefer `addressFaceAuthorship: "customer" | "fulfillment"` over:
+
+- **`customerAuthorsAddressFace: boolean`** — smaller, but `false` does not name the fulfillment-generated mailing face. ADR-009 is two named states, not a flag.
+- **`customerAuthoredPageCount: 1 | 2`** — records a consequence (how many pages Modern Mail authors), not the decision (who authors the address face). Page count follows authorship.
+- **`sidedness: "single" | "double"`** — print-shop language that collapses into Click2Mail template names and contradicts ADR-009.
+- **A recommended/selected authorship pair** — matches ADR-003 for catalog piece selection, but Strategy has no authorship recommendation, and there is no customer override UX. Introducing the pair now would invent a flow that does not exist.
+
+A single closed union matches existing domain style (`MailPieceFace`, `ImageryRole`) and stays vendor-neutral: `"customer"` means Modern Mail produces artwork for that face; `"fulfillment"` means the provider generates the mailing face. Neither value is a vendor layout enum.
+
+### Lifecycle
+
+The value is established at **Confirm strategy**, the existing persistence point for `MailPieceSpec`. After confirmation it is frozen with the spec, the same write-once behavior as selected catalog id/version in the current repository.
+
+Who sets the value in product terms remains unresolved. This ADR only models that the confirmed spec **owns** the decision. It does not choose a platform default or a customer control.
+
+### Consequences
+
+A later implementation may add `addressFaceAuthorship` to `MailPieceSpec` without adding a new Campaign model, catalog product, CreativeSpec field, or canvas geometry.
+
+A future production renderer can read this decision from `MailPieceSpec` and apply catalog keep-out only when the value is `"customer"`. When the value is `"fulfillment"`, it authors the front only and does not fabricate address-face coordinates.
+
+A future provider adapter maps the two Modern Mail states to provider jobs. Click2Mail layout strings remain adapter-owned.
+
+`MailPiece` continues to snapshot catalog id/version and approved `CreativeSpec` at approval. Authorship stays on `MailPieceSpec` unless a later ADR decides otherwise.
+
+This decision does not change application code, catalog types, `MailPieceSpec` TypeScript, `MailPiece`, `CreativeCanvas`, `CreativeSpec`, or campaign flow.
+
+### What this decision does NOT decide
+
+- TypeScript implementation or persistence of the field
+- Beta default (`"customer"` vs `"fulfillment"`)
+- Whether the customer is shown the choice or may override it
+- Whether Strategy will later recommend authorship (an ADR-003-style pair)
+- Whether approval should snapshot authorship onto `MailPiece`
+- CreativeSpec back-face composition / leftover area outside keep-out
+- Production renderer, PDF, fonts, DPI, color
+- Click2Mail `layout` / `documentClass` mapping
+- Launch workflow, audience lists, postage
