@@ -5,6 +5,8 @@ import { BETA_IMAGERY_LIBRARY } from "./beta-imagery-library"
 import { resolveCreativeImage } from "./resolve-creative-image"
 
 const NEIGHBORHOOD_SRC = "/creative-studio/imagery/stock_generic_local.jpg"
+const CREW_SRC = "/creative-studio/imagery/crew_trades_handshake.jpg"
+const CONSEQUENCE_SRC = "/creative-studio/imagery/consequence_ruined_kitchen.jpg"
 
 test("neighborhood role resolves to the curated local asset", () => {
   const neighborhood = BETA_IMAGERY_LIBRARY.find(
@@ -21,25 +23,26 @@ test("neighborhood role resolves to the curated local asset", () => {
   })
 })
 
-test("crew and consequence stay empty because no real assets exist", () => {
-  assert.equal(
-    BETA_IMAGERY_LIBRARY.some(
-      (asset) => asset.eligibleRole === "crew" && asset.previewSrc
-    ),
-    false
+test("crew role resolves to the first crew beta asset", () => {
+  const crew = BETA_IMAGERY_LIBRARY.filter(
+    (asset) => asset.eligibleRole === "crew" && asset.previewSrc
   )
-  assert.equal(
-    BETA_IMAGERY_LIBRARY.some(
-      (asset) => asset.eligibleRole === "consequence" && asset.previewSrc
-    ),
-    false
-  )
+  assert.equal(crew[0]?.id, "crew-trades-handshake")
+  assert.equal(crew[0]?.previewSrc, CREW_SRC)
   assert.deepEqual(resolveCreativeImage(undefined, "crew"), {
-    src: null,
+    src: CREW_SRC,
     showMonogram: false,
   })
+})
+
+test("consequence role resolves to the first consequence beta asset", () => {
+  const consequence = BETA_IMAGERY_LIBRARY.filter(
+    (asset) => asset.eligibleRole === "consequence" && asset.previewSrc
+  )
+  assert.equal(consequence[0]?.id, "consequence-ruined-kitchen")
+  assert.equal(consequence[0]?.previewSrc, CONSEQUENCE_SRC)
   assert.deepEqual(resolveCreativeImage(undefined, "consequence"), {
-    src: null,
+    src: CONSEQUENCE_SRC,
     showMonogram: false,
   })
 })
@@ -80,12 +83,12 @@ test("imageryRole overrides ImageryKey without inventing missing assets", () => 
     src: null,
     showMonogram: true,
   })
-  assert.deepEqual(resolveCreativeImage("stock_generic_local", "consequence"), {
-    src: null,
+  assert.deepEqual(resolveCreativeImage("stock_generic_local", "crew"), {
+    src: CREW_SRC,
     showMonogram: false,
   })
-  assert.deepEqual(resolveCreativeImage("stock_generic_local", "crew"), {
-    src: null,
+  assert.deepEqual(resolveCreativeImage("stock_generic_local", "consequence"), {
+    src: CONSEQUENCE_SRC,
     showMonogram: false,
   })
 })

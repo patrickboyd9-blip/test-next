@@ -29,7 +29,7 @@ export interface CuratedImageryAsset {
 }
 
 /**
- * Beta library. Crew and consequence remain undefined until real files exist.
+ * Beta library. First matching previewSrc per role is the Studio default.
  * Cluster is eligibility metadata only — not a creative decision.
  */
 export const BETA_IMAGERY_LIBRARY: readonly CuratedImageryAsset[] = [
@@ -40,5 +40,45 @@ export const BETA_IMAGERY_LIBRARY: readonly CuratedImageryAsset[] = [
     sourceClass: "curated",
     commercialPrintOk: true,
     previewSrc: "/creative-studio/imagery/stock_generic_local.jpg",
+  },
+  {
+    id: "crew-trades-handshake",
+    eligibleRole: "crew",
+    cluster: "home-services",
+    sourceClass: "curated",
+    commercialPrintOk: true,
+    attribution:
+      "Pexels — Kindel Media — https://www.pexels.com/photo/female-engineers-doing-a-handshake-8486896/",
+    previewSrc: "/creative-studio/imagery/crew_trades_handshake.jpg",
+  },
+  {
+    id: "crew-professional-handshake",
+    eligibleRole: "crew",
+    cluster: "generic",
+    sourceClass: "curated",
+    commercialPrintOk: true,
+    attribution:
+      "Pexels — Sora Shimazaki — https://www.pexels.com/photo/group-of-diverse-business-partners-shaking-hands-in-office-5668828/",
+    previewSrc: "/creative-studio/imagery/crew_professional_handshake.jpg",
+  },
+  {
+    id: "consequence-ruined-kitchen",
+    eligibleRole: "consequence",
+    cluster: "home-services",
+    sourceClass: "curated",
+    commercialPrintOk: true,
+    attribution:
+      "Pexels — Ömer Furkan Yakar — https://www.pexels.com/photo/abandoned-ruined-kitchen-17139803/",
+    previewSrc: "/creative-studio/imagery/consequence_ruined_kitchen.jpg",
+  },
+  {
+    id: "consequence-destroyed-interior",
+    eligibleRole: "consequence",
+    cluster: "home-services",
+    sourceClass: "curated",
+    commercialPrintOk: true,
+    attribution:
+      "Pexels — Tom Fisk — https://www.pexels.com/photo/destroyed-house-interior-16863840/",
+    previewSrc: "/creative-studio/imagery/consequence_destroyed_interior.jpg",
   },
 ]
