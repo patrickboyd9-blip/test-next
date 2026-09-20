@@ -1507,6 +1507,116 @@ No application code, catalog, MailPiece, MailPieceSpec, CreativeSpec, CreativeCa
 
 ---
 
+## ADR-012: ProductionDocument Is Created at Production Derivation, Not at Creative Approval
+
+### Status
+
+Accepted
+
+### Decision
+
+> **A `ProductionDocument` is created and persisted when the production path first interprets the current `MailPiece` for manufacture. It is not created at creative approval. It does not add a Campaign status. It is a campaign-domain object, not a PDF and not a provider job.**
+
+Creation is attached to the existing launch/production pipeline, not to `approveCreative()`.
+
+The existing Campaign lifecycle is unchanged:
+
+```
+draft
+        → strategy_confirmed     MailPieceSpec persisted
+        → generating_creative
+        → creative_ready
+        → creative_approved      MailPiece persisted
+        → audience_confirmed
+        → quantity_confirmed
+        → launched               production derivation may persist ProductionDocument
+                                  on this path, without a new status
+```
+
+`creative_approved` remains the creative-freeze event. `MailPiece` remains the immutable approved creative. `ProductionDocument` remains the later manufacturable interpretation (ADR-011).
+
+### Why not at creative approval
+
+`approveCreative()` already persists `MailPiece`. That object is the durable record of what creative was approved and which catalog version it was approved against.
+
+Approval is reversible until audience confirmation. Customers may approve, unapprove, and re-approve. Those MailPiece versions are already retained in `mailPieceVersions`. Eagerly deriving a `ProductionDocument` for each of them would create production-domain records for MailPieces that are never manufactured.
+
+Audience, quantity, postage, and payment are not inputs to `ProductionDocument` (ADR-008, ADR-011). Their confirmation is therefore not the creation trigger either.
+
+Studio approval copy (“this is what we’ll print and mail”) describes the MailPiece the customer is freezing. It does not start the production pipeline.
+
+Production partner integration and campaign launch are later milestones (v0.7.0, v0.8.0). Defining `ProductionDocument` does not pull it into the current creative lifecycle.
+
+### Why persist at production derivation
+
+ADR-011’s G2 interpretation is a durable domain object, not an ephemeral projection like `CreativeCanvas`.
+
+When the production path first needs a manufacturable interpretation of the current MailPiece, that interpretation is created once and persisted on the campaign, the same file-backed persistence used for `MailPiece` and `MailPieceSpec`.
+
+Derivation inputs are already frozen before that moment:
+
+- `MailPiece` (identity, version, catalog id/version, approved CreativeSpec)
+- `MailPieceSpec.addressFaceAuthorship`
+- the catalog version referenced by that MailPiece
+
+Waiting until production does not weaken reproducibility. It avoids placeholder production infrastructure during creative approval.
+
+Serialized artifacts and provider jobs remain downstream and separately persisted, if at all. This ADR does not design artifact storage or Click2Mail job records.
+
+### Relationship to MailPiece versions
+
+A `ProductionDocument` is derived from exactly one immutable MailPiece (ADR-011).
+
+It is not eagerly created for every MailPiece version. Unused historical MailPieces do not require documents.
+
+If a later MailPiece version is interpreted for production, that is a new `ProductionDocument`. An earlier document is not mutated.
+
+`ProductionDocument` has no version field of its own. MailPiece version is the source version.
+
+### Campaign lifecycle
+
+Do **not** add a Campaign status.
+
+Do **not** change `creative_approved`, unapprove, audience, or quantity behavior.
+
+Creation does not itself transition campaign status. It occurs on the existing production/launch path when that path is implemented.
+
+### Failure
+
+If derivation inputs are missing, do not create a `ProductionDocument`.
+
+Renderer, PDF, and provider failures happen after the domain object exists, or in later steps that produce artifacts and jobs. They must not leave a persisted document in an invented invalid state, and they must not block creative approval.
+
+### Invariants
+
+1. `ProductionDocument` is not created by `approveCreative()` or unapprove.
+2. It is created at most once per MailPiece that is interpreted for production, then immutable.
+3. No new Campaign status is introduced.
+4. Domain persistence is campaign JSON; artifact files and provider jobs are not this object.
+5. Beta `addressFaceAuthorship = "fulfillment"` remains: front customer-authored, back fulfillment-generated.
+6. Click2Mail types are not part of creation or persistence.
+
+### Consequences
+
+Creative approval stays a MailPiece event. Production interpretation stays a production-pipeline event.
+
+Implementation of creation and persistence belongs with the production/launch milestones, not with Studio. This ADR does not implement TypeScript, repository fields, a renderer, PDF, or Click2Mail.
+
+### What this decision does NOT decide
+
+- TypeScript shape or Campaign field names
+- The exact production-pipeline function name (that path is not implemented yet)
+- Artifact file storage
+- Provider/job persistence
+- Geometry snapshot vs catalog reference (ADR-011 remains reference-only)
+- Whether approval snapshots authorship onto MailPiece
+- Return-address content ownership
+- Click2Mail mapping
+- Renderer retry against an existing document
+- Any catalogued mail piece besides `postcard_5x8` v1
+
+---
+
 # Beta Product Decisions
 
 This section records product-scope defaults for the initial Modern Mail beta. These are not architectural ADRs and do not change the domain model above.
