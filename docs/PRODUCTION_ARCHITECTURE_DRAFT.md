@@ -1908,6 +1908,214 @@ No application code is changed by accepting this ADR.
 
 ---
 
+## ADR-015: Production Commitment Boundary
+
+### Status
+
+Accepted
+
+### Context
+
+The implemented campaign journey currently ends at `quantity_confirmed`. `deriveProductionDocument()` exists, is pure, and has no caller. `Campaign.status` already includes `launched`, but nothing writes it. A Draft Launch PRD exists at `docs/prd/Launch.md`. There is no launch action.
+
+Product documentation after quantity is:
+
+```
+review → pricing → payment → customer launch/commit → fulfillment
+```
+
+Accepted ADRs already establish:
+
+- Creative approval persists `MailPiece`. It does not start manufacture. (ADR-012)
+- Audience and quantity confirmation are not ProductionDocument inputs or triggers. (ADR-008, ADR-011, ADR-012)
+- A `ProductionDocument` is created when the production path first interprets the current `MailPiece` for manufacture. It is not a Campaign status, not a PDF, and not a provider job. (ADR-012, ADR-013)
+- Click2Mail job create/submit/status is a separate vendor state machine and must not be collapsed into Campaign status. (`docs/CLICK2MAIL_DUE_DILIGENCE.md`)
+
+What is not specified with enough authority:
+
+- whether payment success and launch confirmation are one customer event or two
+- whether writing `launched` and persisting `ProductionDocument` are the same write
+- when provider submission occurs relative to `launched`
+
+This ADR defines the production commitment boundary. It does not implement launch, payment, pricing, rendering, or Click2Mail. It does not invent a production state machine.
+
+### Decision
+
+> **The production commitment boundary is the customer’s explicit launch/commit of the campaign after the post-quantity final review.**
+
+That is the event that means:
+
+> Modern Mail may manufacture this campaign.
+
+Until that event, Modern Mail must not interpret the current `MailPiece` for manufacture, must not persist a `ProductionDocument`, and must not submit fulfillment.
+
+Already established, restated here:
+
+- Creative approval is not that event.
+- Audience confirmation is not that event.
+- Quantity confirmation is not that event.
+- AI must not launch, print, or spend without explicit customer confirmation. (`docs/AI_SYSTEM.md`)
+
+Documented product sequence, not changed by this ADR:
+
+After quantity, the customer-facing path is final review (including total cost), then payment, then launch, then fulfillment. (`docs/CAMPAIGN_CREATOR.md`, `docs/MILESTONES.md` v0.8)
+
+Unresolved: Whether “approve the campaign and payment” is one confirmation or two (pay, then launch). The Launch PRD must specify the UX. This ADR only requires that manufacture is unauthorized until the customer has explicitly committed the campaign, and that payment is a required customer gate before fulfillment submission (`docs/CAMPAIGN_CREATOR.md`). It does not assert that `launched` equals payment success.
+
+The existing `launched` status records that customer commitment. No new Campaign status is added for commitment, for ProductionDocument, or for vendor jobs.
+
+### Meaning of `launched`
+
+Already established:
+
+- `launched` is already a `CampaignStatus` value and the last progress step. (`lib/campaign-creator/types.ts`, `campaign-status.ts`, v0.1.0)
+- v0.8 ships “Launch confirmation, `launched` status” with final review and payment, under the question *Am I ready to commit and send?* (`docs/MILESTONES.md`)
+- After the customer approves the campaign and payment, Modern Mail should say the campaign has been launched; the customer must not be unsure whether it was submitted. (`docs/CAMPAIGN_CREATOR.md`)
+- Vendor `EDITING` / `AWAITING_PRODUCTION` / etc. track different facts from Modern Mail campaign status and must live alongside it, not inside it. (`docs/CLICK2MAIL_DUE_DILIGENCE.md`)
+
+`launched` means: the customer has committed this campaign to send. Modern Mail is authorized to manufacture the current `MailPiece`.
+
+`launched` does not mean:
+
+- creative is approved (`creative_approved` already means that)
+- audience or quantity are confirmed
+- a `ProductionDocument` exists (that is a domain record, not a status)
+- payment succeeded (unresolved equivalence; do not encode it here)
+- a provider job was created or submitted
+- print production started
+- the piece was mailed
+- the piece was delivered
+- any Click2Mail or other vendor status
+
+The customer launch/commit event is what writes `Campaign.status = "launched"`. Writing `launched` does not itself require a new status. ADR-012 remains in force: ProductionDocument creation does not transition status.
+
+### ProductionDocument relationship
+
+Already established:
+
+- `ProductionDocument` is the vendor-neutral manufacture interpretation of one immutable `MailPiece`. (ADR-008, ADR-011, ADR-013)
+- It is derived from current `MailPiece` + `MailPieceSpec.addressFaceAuthorship` + the MailPiece’s catalog version. (ADR-014)
+- It is created when the production path first interprets that MailPiece, persisted on campaign JSON, at most once per interpreted MailPiece, immutable afterward. (ADR-012)
+- It is not created at approval, unapprove, audience, or quantity. (ADR-012)
+- Creation does not add or change Campaign status. (ADR-012)
+
+The production path does not open until the production commitment boundary is crossed.
+
+Therefore:
+
+- A `ProductionDocument` must not be persisted before the customer commits.
+- A `ProductionDocument` belongs on the production path that the commitment opens — after authorization to manufacture, and before vendor-specific jobs.
+- Provider job creation is not the definition of ProductionDocument persistence. The object is vendor-neutral. (ADR-008, ADR-012)
+
+Unresolved — persist timing inside the opened path:
+
+The sources do not decide which of these is the persist moment:
+
+- the same campaign write that sets `launched`
+- a later step on the production path after `launched`, still before provider submit
+- a later step after payment if payment is a distinct event from launch confirmation
+
+ADR-012 only says: persist when that path first interprets the current MailPiece; payment is not a derivation input; artifacts and provider jobs are downstream.
+
+This ADR does not pick among those in-path timings. The Launch PRD / production-path implementation must pick one without moving persistence before commitment or after vendor job identity.
+
+### Downstream fulfillment boundary
+
+Already established:
+
+```
+ProductionDocument
+        → serialized production artifact (future; e.g. PDF)
+        → vendor adapter
+        → provider-specific document / job
+```
+
+Everything below remains downstream of the commitment boundary and of ProductionDocument:
+
+- renderer behavior
+- PDF / proof artifact storage
+- postage as a vendor/job option
+- address-list upload to a provider
+- Click2Mail document/job/create/submit
+- vendor payment rails if used at provider submit
+- vendor job status polling
+- mail-in-flight / delivered measurement
+
+Modern Mail campaign `launched` must not be assigned from those vendor states.
+
+### Invariants
+
+1. Creative approval freezes `MailPiece`. It does not authorize manufacture.
+2. Audience confirmation and quantity confirmation do not authorize manufacture.
+3. Only the customer’s explicit launch/commit authorizes manufacture.
+4. That commit writes the existing `launched` status. No new status.
+5. AI must not launch, print, or spend without explicit customer confirmation.
+6. `ProductionDocument` is not a Campaign status and does not get one.
+7. `ProductionDocument` is not created before commitment.
+8. `ProductionDocument` is not a PDF, Click2Mail job, or provider status.
+9. `addressFaceAuthorship` stays on `MailPieceSpec`. It is not snapshotted onto `MailPiece` by this ADR.
+10. ProductionDocument fields stay as ADR-013. This ADR does not change them.
+11. Click2Mail (or any vendor) state must not be folded into `Campaign.status`.
+12. Failure to render, pay by a provider, or submit a vendor job must not be modeled as “not launched” unless a later Launch PRD explicitly defines rollback of `launched`. That rollback is unresolved.
+
+### Deferred decisions
+
+These require a future Launch PRD (and later implementation). They are not decided here:
+
+- Final review screen contents and UX
+- Pricing / total cost presentation
+- Payment product: Modern Mail checkout vs beta equivalent vs provider-side pay-at-submit
+- Whether payment success is a precondition for writing `launched`, a sibling confirmation, or a later gate before provider submit
+- Launch confirmation UX
+- Mailing-list readiness vs audience definition already confirmed
+- Exact production-path function name and whether it is the same action that writes `launched`
+- ProductionDocument Campaign field name and persist timing inside the opened path
+- Failure, retry, and whether `launched` can be reverted
+- Provider submission timing relative to `launched`
+- Milestone order conflict: v0.7 Click2Mail vs v0.8 customer launch
+- Return-address content ownership
+- Renderer retry against an existing ProductionDocument
+
+### Consequences
+
+Implementers may treat `quantity_confirmed` as “ready for review/pay/launch,” not as “ready to manufacture.”
+
+`deriveProductionDocument()` stays uncalled until a production path exists after customer commit. Wiring it to `approveCreative`, `confirmAudience`, or `confirmQuantity` would violate this boundary.
+
+`launched` is reserved for customer commitment. Vendor and artifact systems must use their own records.
+
+This ADR does not implement:
+
+- launch action or UI
+- Campaign field for ProductionDocument
+- payment, pricing, lists
+- renderer, PDF, Click2Mail
+- any new status
+
+No application code changes by accepting this ADR.
+
+### Source grounding
+
+| Claim | Source | Kind |
+|---|---|---|
+| Post-quantity customer path: review → price → pay → launch → fulfillment | `docs/CAMPAIGN_CREATOR.md` Campaign Handoff, Final Review, Payment and Launch | Established product intent |
+| Pay/approve before fulfillment submit; then tell the customer it launched | `docs/CAMPAIGN_CREATOR.md` | Established product intent |
+| v0.8: final review, payment, launch confirmation, `launched`; question = commit and send | `docs/MILESTONES.md` | Established roadmap |
+| `launched` already exists; no writer | `types.ts`, `campaign-status.ts`, repository | Established implementation |
+| Explicit approval for commit, spend, launch; AI must not launch/print/spend | `docs/AI_SYSTEM.md` | Established |
+| Launch = review, approve, launch with confidence | `docs/PRODUCT_BIBLE.md` | Established, low detail |
+| Studio ends at creative approval; launch review is not Studio | `docs/prd/CreativeStudio.md` | Established |
+| PD at first production interpretation; not approval/audience/quantity; no new status | ADR-012 | Established |
+| PD shape and exclusions (including launch state, payment, audience, quantity) | ADR-013 | Established |
+| Derivation contract | ADR-014 | Established |
+| Vendor job states ≠ campaign status | `docs/CLICK2MAIL_DUE_DILIGENCE.md` | Established |
+| PD → artifact → adapter → vendor | ADR-008 | Established |
+| Commitment event = customer launch/commit; writes `launched`; PD only after that path opens | this ADR | Proposed (accepted here) |
+| Payment success ⇔ `launched`; PD persist vs `launched` write vs provider job | insufficient authority | Unresolved |
+| Major feature needs a PRD | `docs/ENGINEERING_PRINCIPLES.md` | Established; Draft Launch PRD recorded at `docs/prd/Launch.md` |
+
+---
+
 # Beta Product Decisions
 
 This section records product-scope defaults for the initial Modern Mail beta. These are not architectural ADRs and do not change the domain model above.
