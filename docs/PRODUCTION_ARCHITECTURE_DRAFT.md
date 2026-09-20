@@ -2985,6 +2985,117 @@ Campaign code still has only `AudienceDefinition`. This change is documentation 
 
 ---
 
+## ADR-022: Intended Recipient Set Current-Set Boundary
+
+### Status
+
+Accepted
+
+### Context
+
+ADR-018 established a campaign-owned, provider-neutral **intended recipient set** as the convergence point between `AudienceDefinition` and fulfillment. Customer-provided lists and Modern Mail / Data Axle acquisition both **populate or replace that set**. That phrasing names **one** campaign set as the convergence point. It does not decide what a later acquisition does to an already-existing set.
+
+ADR-019 placed the set as a campaign-owned **sibling artifact**, conceptually parallel to `campaign.mailPiece`, not nested in `CampaignBrief.audience`. The set is who Modern Mail **currently** intends to mail.
+
+ADR-020 established that one member is a concrete intended mail-to destination anchored by a physical mailing address. It does not define a field schema.
+
+ADR-021 established **first existence**: the set first exists when an acquisition path first supplies concrete mail-to destinations. Those destinations are the campaign's intended recipients. ADR-021 explicitly **does not define what happens to the set afterward**. Replace vs supplement, re-upload, second Data Axle acquisition, mutability, versioning, and snapshotting remain unresolved there.
+
+The post-existence lifecycle audit found no evidence for modeling customer upload and Data Axle as two parallel recipient collections for the same campaign. It also found no product evidence for replace vs append, versioning, or historical sets.
+
+`campaign.mailPiece` is “at most one current” with optional `mailPieceVersions`. `MailPieceSpec` is write-once (`applyStrategyConfirmation` in `lib/campaign-creator/mail-piece.ts`). Those are **contrasts only**. MailPiece versioning exists because Approve creative is a named freeze event. Recipients have no such freeze event (ADR-021). Do not copy those lifecycles onto the intended recipient set.
+
+The risk is a later implementation creating two campaign recipient collections (one per acquisition path), or treating “one current set” as a hidden replace, append, or versioning rule.
+
+### Decision
+
+> **The campaign has exactly one current Intended Recipient Set. A later acquisition event — including a customer-provided list or a Modern Mail / Data Axle acquisition — supplies destinations against that current campaign set; it does not create a second parallel Intended Recipient Set. This ADR does not decide whether the later acquisition replaces, supplements, mutates, versions, or snapshots the current set.**
+
+This ADR establishes only:
+
+1. There is **exactly one current** campaign-owned Intended Recipient Set.
+2. A later acquisition event operates **against that current set**, not as a second parallel set.
+
+“One current set” does **not** mean the set is immutable, versioned, or replaced in whole on acquisition. Those remain unresolved.
+
+This ADR does not add a TypeScript type, a `Campaign` field, a `CampaignStatus`, persistence, an Acquisition domain object, or a second recipient-set abstraction.
+
+### Current set vs acquisition event
+
+Distinguish:
+
+| Concept | Meaning |
+|---|---|
+| **Current Intended Recipient Set** | The one campaign-owned set of concrete mail-to destinations Modern Mail currently intends to mail. |
+| **Acquisition event** | A customer-provided list or Modern Mail / Data Axle supply of concrete destinations. First such event creates the set (ADR-021). A later such event is against the same current set. |
+| **Operation of a later acquisition** | Unresolved: replace, supplement, mutate, version, or snapshot. |
+
+Customer upload and Data Axle remain **paths into the same current set** (ADR-018). They are not two recipient collections.
+
+### Boundaries / non-goals
+
+This ADR does **not** decide:
+
+- replace vs supplement / append
+- mutable vs immutable
+- versioning
+- historical recipient sets
+- acquisition snapshots
+- re-upload behavior
+- second Data Axle acquisition behavior
+- in-place member edits
+- AudienceDefinition changes after acquisition
+- quantity changes after acquisition
+- validation / CASS / NCOA
+- address schema
+- launch eligibility
+- provider-submit gating
+- pricing
+- account-level reusable audiences
+- a new `CampaignStatus`
+
+Do not treat “exactly one current set” as resolving any of those.
+
+### Consequences
+
+The architecture now distinguishes:
+
+- the campaign's **one current** Intended Recipient Set
+- an **acquisition event** that supplies concrete destinations
+- the **unresolved operation** a later acquisition performs against the current set
+
+A later implementation must not model customer upload and Data Axle as two separate recipient collections for the same campaign.
+
+This ADR does not define that later operation. Campaign code still has only `AudienceDefinition`. This change is documentation only.
+
+### Open questions / unresolved decisions
+
+- Replace vs supplement / append
+- Mutable vs immutable; versioning; historical sets; snapshots
+- Re-upload; second Data Axle acquisition; switching paths
+- In-place member edits
+- AudienceDefinition or quantity change after acquisition
+- Validation / CASS / NCOA; address schema
+- Whether the set must exist before Launch Review, `launched`, or only before provider submit
+- Pricing; account-level reusable audiences
+
+### Source grounding
+
+| Claim | Source | Kind |
+|---|---|---|
+| Intended recipient set is campaign-owned and provider-neutral | ADR-018 | Established |
+| Both acquisition paths populate or replace **that** (one) set | ADR-018 Decision | Established; not a later-acquisition replace/append rule |
+| Set is a sibling of `mailPiece`; who MM **currently** intends to mail | ADR-019 | Established |
+| Member = mail-to destination anchored by a physical mailing address | ADR-020 | Established |
+| First existence = first concrete destinations from an acquisition path | ADR-021 | Established |
+| ADR-021 does not define what happens to the set afterward | ADR-021 Consequences | Established |
+| MailPiece current + history; MailPieceSpec write-once | `types.ts`; `applyCreativeApproval`; `applyStrategyConfirmation` | Established contrast; **not** an IRS precedent |
+| One current intended set; no second parallel collection | post-existence lifecycle audit; this ADR | **This ADR** |
+| Later acquisition operates against that current set | this ADR | **This ADR** |
+| Replace vs supplement; mutability; versioning; history | ADR-018; ADR-019; ADR-021; this ADR | Unresolved |
+
+---
+
 # Beta Product Decisions
 
 This section records product-scope defaults for the initial Modern Mail beta. These are not architectural ADRs and do not change the domain model above.
