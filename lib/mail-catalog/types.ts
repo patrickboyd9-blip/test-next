@@ -21,10 +21,17 @@ export type MailPieceFamily = "postcard"
 
 export type MailPieceFace = "front" | "back"
 
+export type MailPieceOrientation = "landscape" | "portrait"
+
+/**
+ * Origin for catalog geometry in inches.
+ * Keep-out rectangles use trim top-left, not artwork-canvas top-left.
+ */
+export type MailPieceGeometryOrigin = "trim_top_left"
+
 /**
  * Roles that a mailed postcard must reserve on the address face.
- * Geometry (inches, DPI, color) is intentionally omitted until a
- * 5×8-specific spec sheet exists — see diligence §8, §9, and §15.1.
+ * Numeric keep-out geometry, when known, lives on `reservedKeepOut`.
  */
 export type ReservedRegionRole =
   | "delivery_address"
@@ -39,14 +46,54 @@ export interface MailPieceTrimSize {
   longInches: number
 }
 
+export interface MailPieceInchesSize {
+  widthInches: number
+  heightInches: number
+}
+
+export interface MailPieceInchesRect {
+  xInches: number
+  yInches: number
+  widthInches: number
+  heightInches: number
+}
+
+export interface ReservedKeepOutRect extends MailPieceInchesRect {
+  /** Stable catalog identifier for this rectangle. Not a vendor template id. */
+  id: string
+}
+
+/**
+ * Unprintable keep-out on the address face.
+ * The keep-out is the union of `rectangles` (a stepped polygon when they overlap).
+ * Content inside the union is not printed.
+ */
+export interface ReservedKeepOut {
+  origin: MailPieceGeometryOrigin
+  rectangles: readonly ReservedKeepOutRect[]
+}
+
 export interface MailPiecePhysicalSpec {
   trimSizeInches: MailPieceTrimSize
+  /** Finished-piece orientation. Width is the horizontal edge. */
+  orientation: MailPieceOrientation
+  /** Finished trim as width × height, in inches. */
+  finishedTrimInches: MailPieceInchesSize
+  /** Bleed-inclusive artwork/document canvas as width × height, in inches. */
+  artworkCanvasInches: MailPieceInchesSize
+  /**
+   * Bleed beyond finished trim on each of the four sides, in inches.
+   * Distinct from `imageBleedExtensionMinimumInches`.
+   */
+  bleedInchesPerSide: number
+  /**
+   * Minimum distance images must extend past trim into the bleed, in inches.
+   * Distinct from `bleedInchesPerSide`; not the artboard size.
+   */
+  imageBleedExtensionMinimumInches: number
   /** Two faces of the physical piece. Print-side job options are production-layer. */
   faces: readonly MailPieceFace[]
-  /**
-   * This product is expected to print to the trimmed edge.
-   * Confirmed for the 5×8 postcard; numeric bleed allowance is not.
-   */
+  /** This product is expected to print to the trimmed edge. */
   fullBleedExpected: boolean
 }
 
@@ -54,10 +101,20 @@ export interface MailPieceCreativeCanvas {
   /** Face that carries USPS address, postage, and barcode regions when mailed. */
   addressFace: MailPieceFace
   reservedRegionRoles: readonly ReservedRegionRole[]
+  /** Recommended text inset inside finished trim, in inches. Not bleed. */
+  recommendedSafeTextInsetInches: number
+  /**
+   * Address-face keep-out. Coordinates are relative to `origin` (trim top-left),
+   * not the top-left of the bleed-inclusive artwork canvas.
+   *
+   * Verified for the customer-designed address face (double-sided page 2).
+   * Single-sided page-2 mailing-face coordinates are not encoded.
+   */
+  reservedKeepOut: ReservedKeepOut
 }
 
 export interface MailPieceCatalogProvenance {
-  /** Paths into docs/CLICK2MAIL_DUE_DILIGENCE.md that support this entry. */
+  /** Evidence that supports this entry. */
   sources: readonly string[]
   notes: string
 }
