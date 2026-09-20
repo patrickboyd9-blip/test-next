@@ -241,6 +241,22 @@ export interface MailPieceSpec {
   decidedBy: string
 }
 
+/**
+ * Immutable vendor-neutral approved artifact.
+ * Binds MailPieceSpec's selected catalog version to an approved CreativeSpec snapshot.
+ * Not a physical spec, canvas, PDF, ProductionDocument, or vendor job.
+ */
+export interface MailPiece {
+  id: string
+  version: number
+  approvedAt: string
+  directionId: string
+  revisionId: string
+  catalogId: MailPieceCatalogId
+  catalogVersion: MailPieceCatalogVersion
+  spec: CreativeSpec
+}
+
 export interface Campaign {
   id: string
   ownerId: string
@@ -250,6 +266,13 @@ export interface Campaign {
   transcript: ConversationMessage[]
   /** Set at Confirm strategy. Absent on campaigns confirmed before this field existed. */
   mailPieceSpec?: MailPieceSpec
+  /**
+   * Current approved MailPiece. At most one. Cleared on unapprove.
+   * Absent on campaigns approved before this field existed.
+   */
+  mailPiece?: MailPiece
+  /** Immutable approval history. Retained when the current MailPiece is cleared. */
+  mailPieceVersions?: MailPiece[]
   /** Internal signal only — never surfaced to the customer as a score. */
   readyForBriefReview: boolean
   createdAt: string

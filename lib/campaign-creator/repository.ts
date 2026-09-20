@@ -6,6 +6,7 @@ import { getMailPiece } from "@/lib/mail-catalog/catalog"
 
 import { normalizeCampaignStatus } from "./campaign-status"
 import { getActiveRevision, getActiveSpec, getApprovedSpec } from "./creative-state"
+import { applyCreativeApproval, applyCreativeUnapproval } from "./mail-piece"
 import { cloneSpec } from "./spec-diff"
 import type {
   Campaign,
@@ -327,29 +328,13 @@ class FileCampaignRepository implements CampaignRepository {
 
   async approveCreative(id: string): Promise<Campaign> {
     const campaign = await this.require(id)
-    const directionId = campaign.creative.selectedDirectionId
-    if (!directionId) throw new Error("No direction selected")
-
-    const activeRevision = getActiveRevision(campaign.creative, directionId)
-    if (!activeRevision) throw new Error("No active revision to approve")
-
-    const activeSpec =
-      campaign.creative.activeSpec ?? getActiveSpec(campaign.creative, directionId)
-    if (!activeSpec) throw new Error("No active spec to approve")
-
-    campaign.creative.approvedRevisionId = activeRevision.id
-    campaign.creative.approvedSpec = cloneSpec(activeSpec)
-    campaign.status = "creative_approved"
-    campaign.updatedAt = new Date().toISOString()
+    applyCreativeApproval(campaign, new Date().toISOString())
     return this.write(campaign)
   }
 
   async unapproveCreative(id: string): Promise<Campaign> {
     const campaign = await this.require(id)
-    campaign.creative.approvedRevisionId = undefined
-    campaign.creative.approvedSpec = undefined
-    campaign.status = "creative_ready"
-    campaign.updatedAt = new Date().toISOString()
+    applyCreativeUnapproval(campaign, new Date().toISOString())
     return this.write(campaign)
   }
 }
