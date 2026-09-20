@@ -1,6 +1,32 @@
+import { getMailPiece } from "@/lib/mail-catalog/catalog"
+
 import { cloneSpec } from "./spec-diff"
 import { getActiveRevision, getActiveSpec } from "./creative-state"
 import type { Campaign, MailPiece } from "./types"
+
+/**
+ * Persist MailPieceSpec at Confirm strategy if missing. Write-once: an existing
+ * spec is never patched, including legacy records that omit newer fields.
+ */
+export function applyStrategyConfirmation(campaign: Campaign, now: string): void {
+  if (!campaign.mailPieceSpec) {
+    // Beta: only postcard_5x8 v1 exists. Not a product rule that 5×8 is always recommended.
+    const catalogPiece = getMailPiece("postcard_5x8", 1)
+    campaign.mailPieceSpec = {
+      recommendedCatalogId: catalogPiece.id,
+      recommendedCatalogVersion: catalogPiece.version,
+      selectedCatalogId: catalogPiece.id,
+      selectedCatalogVersion: catalogPiece.version,
+      customerOverride: false,
+      decidedAt: now,
+      decidedBy: campaign.ownerId,
+      addressFaceAuthorship: "fulfillment",
+    }
+  }
+
+  campaign.status = "strategy_confirmed"
+  campaign.updatedAt = now
+}
 
 export function nextMailPieceVersion(
   history: readonly MailPiece[] | undefined

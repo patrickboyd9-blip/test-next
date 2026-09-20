@@ -226,6 +226,8 @@ export interface CampaignCreative {
   activeRevisionId?: string
 }
 
+export type AddressFaceAuthorship = "customer" | "fulfillment"
+
 /**
  * Campaign-specific physical mail-piece decision.
  * Catalog versions remain the source of physical/production constraints.
@@ -239,6 +241,11 @@ export interface MailPieceSpec {
   decidedAt: string
   /** Campaign owner at confirmation — existing ownerId, not a new user model. */
   decidedBy: string
+  /**
+   * Who authors the address/mailing face. Write-once at Confirm strategy.
+   * Beta default is platform-selected `"fulfillment"`. Not copied onto MailPiece.
+   */
+  addressFaceAuthorship: AddressFaceAuthorship
 }
 
 /**

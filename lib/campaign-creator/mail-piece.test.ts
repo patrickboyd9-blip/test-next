@@ -53,6 +53,7 @@ function mailPieceSpec(): MailPieceSpec {
     customerOverride: false,
     decidedAt: "2026-09-19T20:00:00.000Z",
     decidedBy: "owner@example.com",
+    addressFaceAuthorship: "fulfillment",
   }
 }
 
