@@ -846,3 +846,141 @@ ADR-005 remains in force: catalog v1 does not establish physical orientation; `C
 This ADR adds a Studio-only presentation rule: **8:5 landscape for the 5×8 postcard preview.**
 
 Implementation of that convention in `PostcardPreview` and related Studio surfaces remains a later step. This decision does not change application code, catalog types, `CreativeCanvas`, `MailPieceSpec`, `CreativeSpec`, prompts, or PRDs.
+
+---
+
+## ADR-007: Catalog Physical Geometry Does Not Automatically Flow Into CreativeCanvas
+
+### Status
+
+Accepted
+
+### Decision
+
+> **The Catalog may become richer without making CreativeCanvas richer.**
+
+The canonical Mail Piece Catalog is the authoritative source for physical mail-piece truth. It may contain richer physical and production metadata than the AI-facing `CreativeCanvas` exposes.
+
+`CreativeCanvas` remains a deliberately minimal, semantic projection of the selected catalog version for Creative Engine, Creative Intelligence, and Studio consumers. It is **not** a production specification.
+
+This ADR records that boundary now that `postcard_5x8` version 1 contains verified physical production geometry. It does not introduce a new projection, renderer, or domain object.
+
+ADR-005 remains the governing principle:
+
+> The Creative Engine receives the minimum physical/canvas knowledge necessary to make good creative decisions, without becoming coupled to the production catalog or fulfillment provider.
+
+### What the catalog now owns
+
+`postcard_5x8` version 1 now includes verified production geometry, including:
+
+- finished trim: 8" W × 5" H
+- physical orientation: landscape
+- artwork canvas: 8.5" W × 5.5" H
+- bleed: 0.25" per side
+- minimum image extension: 0.125", stored separately from bleed
+- recommended safe text inset: 0.25" inside trim
+- double-sided reserved keep-out geometry
+- keep-out coordinate origin: `trim_top_left`
+
+Those facts are catalog truth. Their existence does not require `CreativeCanvas` to project them.
+
+### What CreativeCanvas continues to expose
+
+The existing semantic fields remain the appropriate creative-facing subset:
+
+- unordered trim size pair (`shortInches` / `longInches`)
+- faces
+- address face
+- reserved region roles
+- `fullBleedExpected`
+
+Do **not** add to `CreativeCanvas`:
+
+- physical orientation
+- finished width/height assignment
+- artwork canvas dimensions
+- numeric bleed
+- minimum image extension
+- numeric safe-area inset
+- exact keep-out rectangles
+- coordinate origin
+- production mask geometry
+
+### Why this boundary exists
+
+Creative needs semantic knowledge about the mail piece, not manufacturing coordinates.
+
+Creative needs to know:
+
+- which face is the address face
+- that certain regions are reserved
+- that the piece is expected to print to the trimmed edge
+
+Creative does **not** need to reason in inches about bleed, safe zones, trim coordinates, artwork page dimensions, or production keep-out polygons.
+
+Those are deterministic production concerns. They belong to the catalog and to a future production renderer (or a later production-facing projection), not to the AI-facing canvas.
+
+This preserves the existing separation:
+
+- physical truth lives on the catalog
+- creative intent lives on `CreativeSpec`
+- production geometry is applied by production rendering, not by Creative
+
+### Double-sided keep-out
+
+The exact 5×8 double-sided keep-out geometry remains catalog/production-owned.
+
+`CreativeCanvas` exposes the semantic reservation through `reservedRegionRoles`.
+
+Do **not** duplicate the production polygon into `CreativeCanvas`.
+
+A future production renderer will read the authoritative numeric geometry from the selected catalog version. This ADR does not design that renderer.
+
+### Orientation
+
+The catalog now knows the physical 5×8 product is landscape.
+
+That does **not** require exposing `orientation` on `CreativeCanvas`.
+
+ADR-006 remains in force: Studio's 8:5 landscape viewing convention is a presentation concern, not catalog orientation and not production geometry.
+
+When production rendering exists, it should read authoritative physical orientation from the catalog. It must not read the Studio convention as physical truth, and catalog orientation must not be copied onto `CreativeCanvas` merely because it is now known.
+
+This updates the catalog-side assumption in ADR-005 and ADR-006 that orientation was unresolved. The `CreativeCanvas` restriction does not change: do not add orientation, numeric bleed, or geometry fields to the creative-facing projection.
+
+### Safe area
+
+The catalog owns the verified 0.25" safe/text inset.
+
+`CreativeCanvas` does not expose that numeric value.
+
+`fullBleedExpected` remains the semantic creative-facing edge rule.
+
+A future production renderer is responsible for enforcing the deterministic numeric safe area. This ADR does not specify how that enforcement is implemented.
+
+### What this does not change
+
+- ADR-005: `CreativeCanvas` is a derived, ephemeral, minimum projection. It is not the catalog entry, not `MailPieceSpec`, and not a production/preflight specification.
+- ADR-006: Studio 8:5 remains a presentation convention.
+- `CreativeCanvas` application shape, prompts, Studio preview, `CreativeSpec`, Creative Intelligence, `MailPieceSpec`, and catalog types are unchanged by this decision record.
+- No new production-facing projection is introduced here.
+
+### Rationale
+
+ADR-005 already anticipated catalog growth:
+
+> It creates a path where the catalog can become richer (numeric bleed, reserved-zone geometry, production options) without exposing that metadata to Creative. Production and the renderer may consume additional catalog facts later; the engine still receives only this minimum canvas.
+
+That path is now in use. Recording it as an explicit decision prevents the newly authoritative geometry from being copied onto `CreativeCanvas` by default.
+
+Passing production inches through the AI-facing canvas would couple Creative to manufacturing coordinates, invite the model to emit layout geometry, and collapse the distinction between semantic canvas knowledge and deterministic print rules.
+
+### Consequences
+
+Catalog richness is no longer a reason to expand `CreativeCanvas`.
+
+The future production renderer, when designed, may consume additional catalog facts directly from the selected catalog version. Those facts do not have to pass through `CreativeCanvas`.
+
+Studio may continue to use the current semantic canvas plus the ADR-006 viewing convention. Production-accurate preview or print geometry is a later renderer concern, not a CreativeCanvas expansion.
+
+This decision does not change application code, catalog types, `CreativeCanvas`, `MailPieceSpec`, `CreativeSpec`, prompts, Studio, or PRDs.
