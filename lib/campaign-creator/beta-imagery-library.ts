@@ -15,6 +15,14 @@ export interface CuratedImageryAsset {
   eligibleRole: ImageryRole
   cluster?: ImageryCluster
   sourceClass: ImagerySourceClass
+  /**
+   * Human/organizational declaration that the Modern Mail team has verified
+   * the asset is permitted for commercial marketing/print use under the
+   * applicable ownership or license terms. Do not mark true until that
+   * verification has occurred. Not an automated license check, not proof of
+   * license by itself, not a renderer/selection control, and not a
+   * substitute for provenance.
+   */
   commercialPrintOk: boolean
   attribution?: string
   previewSrc?: string
