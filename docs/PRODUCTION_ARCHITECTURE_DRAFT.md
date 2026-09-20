@@ -1393,3 +1393,67 @@ This decision does not change application code, catalog types, `MailPieceSpec` T
 - Production renderer, PDF, fonts, DPI, color
 - Click2Mail `layout` / `documentClass` mapping
 - Launch workflow, audience lists, postage
+
+---
+
+# Beta Product Decisions
+
+This section records product-scope defaults for the initial Modern Mail beta. These are not architectural ADRs and do not change the domain model above.
+
+ADR-009 established physical faces versus address-face authorship. ADR-010 established the closed `MailPieceSpec` representation `addressFaceAuthorship: "customer" | "fulfillment"`. That representation remains unchanged.
+
+---
+
+## Initial Beta Address-Face Authorship Is Platform-Selected `"fulfillment"`
+
+### Status
+
+Accepted
+
+### Decision
+
+> **The initial Modern Mail beta uses `addressFaceAuthorship = "fulfillment"`. The platform selects this value. The customer is not shown the choice.**
+
+For `postcard_5x8` version 1 in beta:
+
+- Modern Mail authors the front creative.
+- The physical address/mailing face still exists.
+- Fulfillment generates that mailing face.
+- Modern Mail must not invent or render the fulfillment-generated mailing-face geometry.
+
+This is a **beta default**, not a permanent product rule.
+
+The domain remains capable of supporting `"customer"` later without changing catalog identity. ADR-010's closed union is unchanged. This decision does not implement the TypeScript field, modify `MailPieceSpec`, or change campaign flow.
+
+Studio may continue to show an auto-generated address/mailing schematic. That schematic is not customer-authored creative and is not a production page (ADR-009).
+
+### Why this is the beta default
+
+The current beta product already behaves this way:
+
+1. `CreativeSpec` is front-centric and has no back creative specification.
+2. The current Studio back is an auto-generated address/mailing schematic, not customer-authored leftover creative.
+3. Current approval is approval of the front creative artifact.
+4. The Product Bible, UX Manifesto, and Campaign Creator assign marketing decisions to the customer and configuration/fulfillment complexity to Modern Mail.
+5. There is no documented beta promise that customers control leftover creative on the address face.
+
+Choosing `"customer"` for beta would imply capabilities the current product does not have: a back `CreativeSpec`, back composition, keep-out rendering of leftover content, return-address ownership/content, and two authored production pages.
+
+`"fulfillment"` records the current beta architecture honestly and avoids inventing those capabilities.
+
+This is **not** a choice of Click2Mail's "Single Sided Postcard" because it is easier to implement. Vendor layout names remain adapter-owned (ADR-009). Both authorship states remain valid domain values.
+
+This default does not prevent a later product decision to support customer-authored address-face creative.
+
+### What this decision does NOT decide
+
+- Whether customers can choose authorship in a future version
+- Whether Strategy eventually recommends authorship
+- Whether customer-authored back creative will be supported later
+- Back `CreativeSpec` / leftover composition
+- Return-address content ownership
+- Click2Mail `layout` / `documentClass` mapping
+- `ProductionDocument` implementation
+- Renderer / PDF implementation
+- Launch / audience / postage behavior
+- TypeScript implementation or persistence of `addressFaceAuthorship`
