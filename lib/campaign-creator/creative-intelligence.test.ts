@@ -240,6 +240,8 @@ function validDirection(
       tone: "Trustworthy",
       palette: ["#1e3a5f", "#4a90a4", "#f5f5f0"],
       imagery: "stock_generic_local",
+      leadJob: "offer",
+      imageryRole: "neighborhood",
       offer: "Free roof inspection",
     },
     ...overrides,

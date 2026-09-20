@@ -33,7 +33,9 @@ export const SPEC_FIELD_RULES = `CreativeSpec rules:
 - Include offer, phone, website, and qrDestination only when those values appear on the brief. Copy them exactly. Do not fabricate them.
 - visualDirection: one sentence describing the imagery approach
 - tone: from the brief, or a safe inference from the goal
-- Do not emit physical format, catalog identity, dimensions, bleed, or reserved-zone geometry`
+- leadJob: one of offer, problem, trust, urgency. The job the piece leads with. Does not create an offer or invent facts, deadlines, proof, or weather
+- imageryRole: one of consequence, neighborhood, crew, logo, none. The job of the image — not a file, URL, crop, or photograph to invent
+- Do not emit physical format, catalog identity, dimensions, bleed, reserved-zone geometry, or asset paths`
 
 export function buildCreativeCanvasPromptContext(canvas: CreativeCanvas): string {
   const roles = canvas.reservedRegionRoles.join(", ")

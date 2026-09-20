@@ -45,6 +45,8 @@ export function getMockCreativeDirections(
         tone: brief.emotionalTone ?? "Trustworthy, professional, local",
         palette: ["#1e3a5f", "#4a90a4", "#f5f5f0"],
         imagery: "stock_hvac",
+        leadJob: "trust",
+        imageryRole: "crew",
       },
     },
     {
@@ -72,6 +74,8 @@ export function getMockCreativeDirections(
         tone: "Urgent, energetic, action-oriented",
         palette: ["#c0392b", "#1a1a2e", "#ffffff"],
         imagery: "stock_hvac",
+        leadJob: "urgency",
+        imageryRole: "neighborhood",
       },
     },
     {
@@ -99,6 +103,8 @@ export function getMockCreativeDirections(
         tone: "Warm, welcoming, community-focused",
         palette: ["#2d6a4f", "#95d5b2", "#fefae0"],
         imagery: "stock_hvac",
+        leadJob: "offer",
+        imageryRole: "neighborhood",
       },
     },
   ]

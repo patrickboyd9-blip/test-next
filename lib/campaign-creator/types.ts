@@ -97,6 +97,31 @@ export type ImageryKey =
   | "logo_primary"
   | "none"
 
+export const LEAD_JOBS = ["offer", "problem", "trust", "urgency"] as const
+export type LeadJob = (typeof LEAD_JOBS)[number]
+
+export const IMAGERY_ROLES = [
+  "consequence",
+  "neighborhood",
+  "crew",
+  "logo",
+  "none",
+] as const
+export type ImageryRole = (typeof IMAGERY_ROLES)[number]
+
+export const GENERATED_SPEC_TOOL_REQUIRED = [
+  "layoutVariant",
+  "headline",
+  "body",
+  "callToAction",
+  "visualDirection",
+  "tone",
+  "palette",
+  "imagery",
+  "leadJob",
+  "imageryRole",
+] as const
+
 export type BackLayout = "standard_address"
 
 /** Positional / emphasis hints for template rendering — not customer-visible. */
@@ -139,6 +164,10 @@ export interface CreativeSpec {
   tone?: string
   palette?: string[]
   imagery?: ImageryKey
+  /** Primary creative job this piece leads with. Not an offer and not a campaign fact. */
+  leadJob?: LeadJob
+  /** Job the image should perform. Not a file, URL, crop, or photograph. */
+  imageryRole?: ImageryRole
   backLayout?: BackLayout
   layoutHints?: LayoutHints
 }

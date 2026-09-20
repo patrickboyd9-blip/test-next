@@ -24,11 +24,16 @@ import {
   buildRegenerateUserMessage,
 } from "./prompts"
 import { createAnthropicClient, type AnthropicToolUseBlock } from "./load-anthropic-sdk"
-import type {
-  CreativeDirection,
-  CreativeSpec,
-  ImageryKey,
-  LayoutVariant,
+import {
+  GENERATED_SPEC_TOOL_REQUIRED,
+  IMAGERY_ROLES,
+  LEAD_JOBS,
+  type CreativeDirection,
+  type CreativeSpec,
+  type ImageryKey,
+  type ImageryRole,
+  type LayoutVariant,
+  type LeadJob,
 } from "./types"
 
 const MODEL = "claude-sonnet-5"
@@ -57,6 +62,14 @@ const specToolProperties = {
   imagery: {
     type: "string",
     enum: ["stock_hvac", "stock_restaurant", "stock_generic_local", "logo_primary", "none"],
+  },
+  leadJob: {
+    type: "string",
+    enum: LEAD_JOBS,
+  },
+  imageryRole: {
+    type: "string",
+    enum: IMAGERY_ROLES,
   },
   layoutHints: {
     type: "object",
@@ -95,16 +108,7 @@ const generateDirectionsTool = {
             spec: {
               type: "object",
               properties: specToolProperties,
-              required: [
-                "layoutVariant",
-                "headline",
-                "body",
-                "callToAction",
-                "visualDirection",
-                "tone",
-                "palette",
-                "imagery",
-              ],
+              required: [...GENERATED_SPEC_TOOL_REQUIRED],
             },
           },
           required: ["name", "rationale", "tags", "recommended", "designedToDrive", "spec"],
@@ -370,6 +374,8 @@ function parseSpec(raw: unknown): CreativeSpec | undefined {
       ? raw.palette.filter((color): color is string => typeof color === "string")
       : undefined,
     imagery: isImageryKey(raw.imagery) ? raw.imagery : undefined,
+    leadJob: isLeadJob(raw.leadJob) ? raw.leadJob : undefined,
+    imageryRole: isImageryRole(raw.imageryRole) ? raw.imageryRole : undefined,
   }
 
   if (isRecord(raw.layoutHints)) {
@@ -424,4 +430,12 @@ function isImageryKey(value: unknown): value is ImageryKey {
     value === "logo_primary" ||
     value === "none"
   )
+}
+
+function isLeadJob(value: unknown): value is LeadJob {
+  return typeof value === "string" && (LEAD_JOBS as readonly string[]).includes(value)
+}
+
+function isImageryRole(value: unknown): value is ImageryRole {
+  return typeof value === "string" && (IMAGERY_ROLES as readonly string[]).includes(value)
 }

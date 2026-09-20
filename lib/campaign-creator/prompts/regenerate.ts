@@ -26,6 +26,7 @@ ${SPEC_FIELD_RULES}
 Regeneration constraints (same as generation):
 - Exactly 3 directions, exactly one recommended
 - At least 2 distinct layoutVariant values
+- Each spec must include leadJob and imageryRole from the closed lists, matching the new concept
 - New messaging angles — do not paraphrase the previous set
 - Honor the customer's feedback without abandoning the campaign goal or Primary Success Metric
 - Do not invent facts missing from the brief`
@@ -43,6 +44,8 @@ export function buildRegenerateUserMessage(input: {
     tags: direction.tags,
     layoutVariant: direction.spec.layoutVariant,
     headline: direction.spec.headline,
+    leadJob: direction.spec.leadJob,
+    imageryRole: direction.spec.imageryRole,
   }))
 
   return `The previous directions did not land. Create three new ones for the supplied canvas.

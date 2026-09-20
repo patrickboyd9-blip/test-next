@@ -30,7 +30,7 @@ ${SPEC_FIELD_RULES}
 
 Refinement rules:
 - Return a full next CreativeSpec snapshot, not a patch
-- Change only what the customer asked for. Preserve everything else
+- Change only what the customer asked for. Preserve everything else, including leadJob and imageryRole unless the request changes the creative concept
 - Ignore any legacy format or backLayout fields on the current spec — they are not physical authority. The supplied canvas is the physical authority
 - Do not emit format or backLayout
 - If the request would remove the QR path, phone, or offer when those are required for the campaign's success metric or brief, do not apply it. Set outcome to conflict and ask one alternative question

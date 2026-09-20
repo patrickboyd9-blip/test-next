@@ -14,6 +14,8 @@ const SPEC_FIELD_LABELS: Record<string, string> = {
   website: "Website",
   palette: "Colors",
   tone: "Tone",
+  leadJob: "Lead job",
+  imageryRole: "Imagery role",
   layoutHints: "Layout",
 }
 

@@ -19,12 +19,16 @@ import {
   conflictCopyUnrecognized,
   RECOMMENDATION_HEADLINE,
 } from "./studio-copy"
-import type {
-  CampaignBrief,
-  CreativeDirection,
-  CreativeSpec,
-  ImageryKey,
-  LayoutVariant,
+import {
+  IMAGERY_ROLES,
+  LEAD_JOBS,
+  type CampaignBrief,
+  type CreativeDirection,
+  type CreativeSpec,
+  type ImageryKey,
+  type ImageryRole,
+  type LayoutVariant,
+  type LeadJob,
 } from "./types"
 
 const LAYOUT_VARIANTS: readonly LayoutVariant[] = [
@@ -276,7 +280,10 @@ export function finalizeRefinement(input: {
     )
   }
 
-  const spec = applyFaithfulness(input.brief, input.proposed.spec)
+  const spec = preserveCreativeSemantics(
+    currentSpec,
+    applyFaithfulness(input.brief, input.proposed.spec)
+  )
   const removed = detectRemovedRequired(input.brief, currentSpec, spec)
   if (removed) {
     return buildConflictResult(
@@ -401,6 +408,20 @@ function normalizeDirection(
   }
 }
 
+function preserveCreativeSemantics(
+  current: CreativeSpec,
+  proposed: CreativeSpec
+): CreativeSpec {
+  const next = cloneSpec(proposed)
+  if (!isLeadJob(next.leadJob) && isLeadJob(current.leadJob)) {
+    next.leadJob = current.leadJob
+  }
+  if (!isImageryRole(next.imageryRole) && isImageryRole(current.imageryRole)) {
+    next.imageryRole = current.imageryRole
+  }
+  return next
+}
+
 function normalizeSpecEnums(spec: CreativeSpec): CreativeSpec {
   const next = cloneSpec(spec)
   if (next.layoutVariant && !isLayoutVariant(next.layoutVariant)) {
@@ -408,6 +429,12 @@ function normalizeSpecEnums(spec: CreativeSpec): CreativeSpec {
   }
   if (next.imagery && !isImageryKey(next.imagery)) {
     delete next.imagery
+  }
+  if (next.leadJob && !isLeadJob(next.leadJob)) {
+    delete next.leadJob
+  }
+  if (next.imageryRole && !isImageryRole(next.imageryRole)) {
+    delete next.imageryRole
   }
   if (next.palette) {
     const colors = next.palette.filter((color) => HEX_COLOR.test(color))
@@ -503,6 +530,16 @@ function validateDirection(
   if (!spec.imagery || !isImageryKey(spec.imagery)) {
     reasons.push(`${label} has an invalid imagery key`)
   }
+  if (!spec.leadJob || !isLeadJob(spec.leadJob)) {
+    reasons.push(
+      `${label} is missing a valid leadJob (offer, problem, trust, or urgency)`
+    )
+  }
+  if (!spec.imageryRole || !isImageryRole(spec.imageryRole)) {
+    reasons.push(
+      `${label} is missing a valid imageryRole (consequence, neighborhood, crew, logo, or none)`
+    )
+  }
   if (!spec.palette || spec.palette.length !== 3 || spec.palette.some((c) => !HEX_COLOR.test(c))) {
     reasons.push(`${label} palette must be 3 hex colors`)
   }
@@ -528,4 +565,12 @@ function isLayoutVariant(value: string): value is LayoutVariant {
 
 function isImageryKey(value: string): value is ImageryKey {
   return (IMAGERY_KEYS as readonly string[]).includes(value)
+}
+
+export function isLeadJob(value: string | undefined): value is LeadJob {
+  return Boolean(value && (LEAD_JOBS as readonly string[]).includes(value))
+}
+
+export function isImageryRole(value: string | undefined): value is ImageryRole {
+  return Boolean(value && (IMAGERY_ROLES as readonly string[]).includes(value))
 }
