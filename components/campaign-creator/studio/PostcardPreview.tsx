@@ -4,15 +4,15 @@ import { motion } from "framer-motion"
 
 import { cn } from "@/lib/utils"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
+import { resolveCreativeImage } from "@/lib/campaign-creator/resolve-creative-image"
 import type { CreativeSpec, LayoutVariant } from "@/lib/campaign-creator/types"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
 import { ShimmerOverlay, SpecDiffHighlight } from "./SpecDiffHighlight"
 import {
-  resolveStudioImagery,
   studioCopyHierarchy,
   type StudioCopyHierarchy,
-} from "./studio-imagery"
+} from "./studio-copy-hierarchy"
 
 export type PostcardPreviewSize = "hero" | "medium" | "thumbnail"
 
@@ -67,7 +67,7 @@ export function PostcardPreview({
   const [primary, secondary, accent] = spec.palette ?? DEFAULT_PALETTE
   const layout = (spec.layoutVariant ?? "trust_first") as LayoutVariant
   const isAddressSide = side === canvas.addressFace
-  const imagery = resolveStudioImagery(spec.imagery, spec.imageryRole)
+  const imagery = resolveCreativeImage(spec.imagery, spec.imageryRole)
   const photoSrc = imagery.src
   const showMonogram = imagery.showMonogram
 
