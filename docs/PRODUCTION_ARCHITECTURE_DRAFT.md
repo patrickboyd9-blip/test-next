@@ -984,3 +984,209 @@ The future production renderer, when designed, may consume additional catalog fa
 Studio may continue to use the current semantic canvas plus the ADR-006 viewing convention. Production-accurate preview or print geometry is a later renderer concern, not a CreativeCanvas expansion.
 
 This decision does not change application code, catalog types, `CreativeCanvas`, `MailPieceSpec`, `CreativeSpec`, prompts, Studio, or PRDs.
+
+---
+
+## ADR-008: ProductionDocument as the Vendor-Neutral Manufacturable Artifact
+
+### Status
+
+Accepted
+
+### Decision
+
+> **`ProductionDocument` is the vendor-neutral manufacturable result of applying catalog production constraints to an approved `MailPiece`. It is not the approved creative, not the catalog, and not a PDF or vendor job.**
+
+The production pipeline remains:
+
+```
+MailPieceSpec
+        │
+        ▼
+Creative Engine → CreativeSpec
+        │
+        ▼
+MailPiece
+        │
+        │  catalogId + catalogVersion already on MailPiece
+        ▼
+Production renderer  (future)
+        │
+        ▼
+ProductionDocument
+        │
+        ▼
+serialized production artifact  (future; e.g. a print-ready file)
+        │
+        ▼
+Production Provider / Vendor Adapter  (future)
+        │
+        ▼
+provider-specific document / job
+```
+
+`ProductionDocument` is the missing domain object between `MailPiece` and fulfillment.
+
+A `ProductionDocument` is derived from one immutable `MailPiece` and resolves its production rules from the Mail Piece Catalog version referenced by that `MailPiece`.
+
+`MailPiece` already contains `catalogId` and `catalogVersion`. An arbitrary catalog version is not independently passed alongside the MailPiece.
+
+This ADR establishes that boundary and its invariants. It does not implement a renderer, a TypeScript type, persistence, PDF generation, or a provider adapter.
+
+### Why this object exists
+
+`MailPiece` records **what creative was approved** and **which catalog version it was approved against**.
+
+The catalog records **what physical/production rules that piece must obey**.
+
+Neither object is the result of **applying** those rules. Studio `PostcardPreview` does not apply them either (ADR-006, ADR-007).
+
+Without `ProductionDocument`, the next implementation step would have to treat one of the following as manufacturable:
+
+- `CreativeSpec` / `approvedSpec`
+- `MailPiece`
+- `CreativeCanvas`
+- Studio preview
+- a Click2Mail upload
+
+Those are all the wrong contract surface. Click2Mail diligence already states the vendor contract is a print-ready file in expected geometry, **not** a `CreativeSpec`. This ADR keeps that file **downstream of** a vendor-neutral domain object, rather than making “PDF” the domain.
+
+### Responsibilities
+
+`ProductionDocument` is responsible for representing the **manufacturable interpretation** of one approved `MailPiece` under the immutable catalog version that MailPiece already references.
+
+It exists so that:
+
+- production rendering has a named output that is not `MailPiece`
+- serialization to a print file has a named input that is not `CreativeSpec`
+- a provider adapter has a Modern Mail object to translate, not a vendor document to invent from Studio
+
+### What it owns
+
+`ProductionDocument` owns:
+
+- its identity as a manufacturable Modern Mail artifact
+- a reference to the source `MailPiece` identity and MailPiece version
+- a reference to the catalog id and catalog version already recorded on that MailPiece
+- the fact that production constraints from that catalog version have been applied to that MailPiece
+
+It does **not** own the creative expression, the physical rules, or the vendor job.
+
+The exact field list is not part of this decision.
+
+### What it explicitly does not own
+
+| Owned by | Not copied onto ProductionDocument |
+|---|---|
+| **MailPiece** | Approved `CreativeSpec` snapshot, approval identity, direction/revision identity, MailPiece versioning |
+| **Mail Piece Catalog** | Trim, orientation, artwork canvas, bleed, image-extension minimum, safe inset, keep-out geometry, origin, reserved-region roles, full-bleed expectation |
+| **CreativeSpec** | Headline, body, CTA, palette, imagery, layout variant, lead job, imagery role, and other creative expression |
+| **CreativeCanvas** | Semantic creative-facing projection; not a production input for geometry |
+| **MailPieceSpec** | Campaign recommendation/selection/decision metadata |
+| **Provider adapter** | `documentClass`, paper/print enums, template IDs, API URLs, job IDs, postage SKUs, provider status |
+| **Campaign / audience / launch** | Address lists, quantity, postage payment, launch status, vendor job lifecycle |
+
+`ProductionDocument` may **reference** MailPiece identity and the catalog version already on that MailPiece. It must **not** redefine catalog physical rules, and it must **not** become a second copy of `CreativeSpec`.
+
+### Relationship to MailPiece
+
+`MailPiece` remains the immutable record of what creative was approved.
+
+- Created at the existing `approveCreative()` event
+- Binds selected catalog id/version to an approved `CreativeSpec` snapshot
+- Independent of any fulfillment provider
+- Not a PDF, not a `ProductionDocument`, not a vendor job
+
+`ProductionDocument` is derived **from** one immutable `MailPiece`. It does not replace it. Re-approval that creates MailPiece version *n+1* implies a new derivation; it does not mutate an earlier `ProductionDocument`. How that derivation is stored is not decided here.
+
+`approvedSpec` remains a compatibility snapshot on campaign creative state. It is **not** the production artifact.
+
+### Relationship to Mail Piece Catalog
+
+The catalog remains the authoritative source for physical/production truth (ADR-002, ADR-007).
+
+The production renderer, when designed, reads geometry from the catalog version **referenced by the MailPiece** (`MailPiece.catalogId` / `MailPiece.catalogVersion`), not from `CreativeCanvas` and not from a copy of inches stored on `ProductionDocument` as a competing source of truth.
+
+`ProductionDocument` records **which** catalog version was applied because that version is already on the source MailPiece. It does not become the catalog.
+
+This ADR does **not** decide whether a later audit/snapshot of resolved constraints is persisted on the document. ADR-002 left that open for “a future production/audit layer.” That remains open.
+
+### Relationship to CreativeCanvas / CreativeSpec
+
+ADR-005 and ADR-007 remain in force.
+
+- `CreativeSpec` is creative expression.
+- `CreativeCanvas` is the minimum semantic projection for Creative Engine, Creative Intelligence, and Studio.
+- Catalog growth does not make `CreativeCanvas` richer.
+- Production rendering does not pass catalog inches through `CreativeCanvas` in order to exist.
+
+`ProductionDocument` is production-facing. It is not an expanded canvas.
+
+Studio `PostcardPreview` remains an 8:5 presentation of `CreativeSpec`. It is not a production renderer and must not be treated as a `ProductionDocument`.
+
+### Production / provider boundary
+
+```
+ProductionDocument          vendor-neutral domain object
+        │
+        ▼
+serialized production artifact    file encoding derived from the document
+        │                         (future; PDF is one possible encoding, not the object)
+        ▼
+Vendor Adapter              translates Modern Mail production objects
+        │                   into provider-specific requests
+        ▼
+Click2Mail / Lob / future   implementation details
+```
+
+A future provider adapter consumes the production artifact/document and translates it. The rest of Modern Mail must not depend on Click2Mail types to mean “ready to manufacture.”
+
+Principle 1 remains: fulfillment providers are implementation details.
+
+### Domain object vs serialized artifact
+
+`ProductionDocument` is a **domain object**.
+
+A print-ready PDF, proof image, or similar file is a **serialized production artifact** that may later be derived from it.
+
+Those are not the same thing.
+
+This ADR therefore **refines** the draft object blurb that listed “print-ready PDF” as an example of `ProductionDocument` itself. A PDF may be *how* a `ProductionDocument` is encoded for a vendor. It is not the definition of the object.
+
+### Invariants
+
+1. `ProductionDocument` is distinct from `MailPiece`, `CreativeSpec`, `CreativeCanvas`, `MailPieceSpec`, Studio preview, PDF files, and provider jobs.
+2. A `ProductionDocument` is derived from one immutable `MailPiece` and resolves production rules from the catalog version that MailPiece already references.
+3. It may reference MailPiece identity and that MailPiece's catalog id/version; it must not redefine catalog physical rules.
+4. It must not carry provider identifiers, job options, or pricing.
+5. `CreativeCanvas` is not the production specification and is not the renderer input for geometry.
+6. Existence of `ProductionDocument` as a domain decision does not require a Campaign lifecycle state, a renderer, or a provider integration.
+
+### Consequences
+
+The repository may now treat “what we send to production” as a named object without implementing production.
+
+The next implementation step, when taken, is a production renderer **or** a persistence/shape decision for this object — not a Click2Mail client, and not an expansion of `CreativeCanvas`.
+
+`MailPiece` stays the approval artifact. Catalog stays physical truth. Creative stays semantic.
+
+No application code, catalog, canvas, Studio, or provider module is changed by accepting this ADR.
+
+### What this decision does NOT decide
+
+- TypeScript shape of `ProductionDocument`
+- Persistence (on Campaign or elsewhere)
+- Versioning/immutability mechanics beyond “do not mutate; derive again from a new MailPiece”
+- Whether one MailPiece yields one document or multiple serialized files
+- Production renderer design or technology
+- PDF library, PDF structure, fonts, DPI, color/CMYK conversion
+- Single-sided vs double-sided rendering architecture
+- Address-list / audience data
+- Postage / indicia implementation
+- Click2Mail API enums, documentClass, job lifecycle
+- Launch workflow or Campaign status changes
+- Production preflight implementation
+- A resolved geometry snapshot vs catalog reference-only
+- Any new projection besides the object already named in the production draft
+
+No additional abstraction is introduced. `Renderer`, `Production Provider`, and `Vendor Adapter` remain the existing draft names and remain unimplemented.
