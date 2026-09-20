@@ -1725,6 +1725,189 @@ No application code, TypeScript types, tests, catalog, renderer, PDF, or Click2M
 
 ---
 
+## ADR-014: ProductionDocument Derivation Contract
+
+### Status
+
+Accepted
+
+### Decision
+
+> **`ProductionDocument` derivation is a deterministic interpretation of the current `MailPiece` using the Campaign's frozen `MailPieceSpec` authorship decision and the immutable catalog version referenced by the MailPiece.**
+
+The conceptual derivation is:
+
+```
+current MailPiece
++ Campaign.mailPieceSpec.addressFaceAuthorship
++ catalog(MailPiece.catalogId, MailPiece.catalogVersion)
+        → ProductionDocument
+```
+
+This is intentionally not a MailPiece-only transformation because address-face authorship has not been snapshotted onto MailPiece. ADR-010 leaves that snapshotting unresolved. Do not resolve that question in this ADR.
+
+### Authoritative inputs
+
+The derivation reads exactly these frozen sources:
+
+1. Current MailPiece:
+   - `id`
+   - `version`
+   - `catalogId`
+   - `catalogVersion`
+
+2. Campaign MailPieceSpec:
+   - `addressFaceAuthorship`
+
+3. Catalog entry referenced by:
+   - `MailPiece.catalogId`
+   - `MailPiece.catalogVersion`
+
+The catalog is consulted to confirm the supported physical face model:
+
+- faces are the closed `front` / `back` pair
+- `addressFace === "back"`
+
+The derivation does not use `MailPieceSpec.selectedCatalogId` / `selectedCatalogVersion` as the catalog authority. The MailPiece's catalog identity is authoritative because it is the frozen catalog identity copied onto MailPiece at creative approval.
+
+The derivation assigns:
+
+- a new ProductionDocument `id`
+- `derivedAt`
+
+### Face derivation
+
+For the currently supported `postcard_5x8` model:
+
+- `front` is always `"customer"`
+- `back` is `"customer"` when `addressFaceAuthorship === "customer"`
+- `back` is `"fulfillment"` when `addressFaceAuthorship === "fulfillment"`
+
+Therefore:
+
+```
+addressFaceAuthorship = "fulfillment"
+        → faces = { front: "customer", back: "fulfillment" }
+
+addressFaceAuthorship = "customer"
+        → faces = { front: "customer", back: "customer" }
+```
+
+There is currently no repo or ADR evidence that the front face may be `"fulfillment"` for this catalogued piece. Do not generalize that constraint to future catalogued mail pieces.
+
+### Required derivation invariants
+
+A `ProductionDocument` must not be created when:
+
+- there is no current MailPiece
+- there is no Campaign MailPieceSpec
+- `addressFaceAuthorship` is missing
+- `addressFaceAuthorship` is not `"customer"` or `"fulfillment"`
+- the MailPiece's catalog id/version cannot be resolved
+- the catalog does not expose the closed `front` / `back` face pair
+- the catalog's address face is not `back`
+- `MailPieceSpec.selectedCatalogId` / version differs from `MailPiece.catalogId` / version
+
+The last condition represents an integrity violation, not a customer choice. MailPiece carries the frozen catalog identity used for the approved creative.
+
+Do not create a general validation framework in this ADR. These are the minimum derivation preconditions for the current ProductionDocument contract.
+
+### Determinism
+
+Given the same frozen:
+
+- MailPiece
+- `MailPieceSpec.addressFaceAuthorship`
+- immutable catalog version
+
+the semantic ProductionDocument result must be the same.
+
+The only newly assigned values are:
+
+- `id`
+- `derivedAt`
+
+Those are derivation/persistence metadata and are not semantic production interpretation.
+
+### Current MailPiece only
+
+Derivation operates only on the current MailPiece entering the production path, consistent with ADR-012.
+
+It must not scan `mailPieceVersions` or eagerly derive ProductionDocuments for historical MailPiece versions.
+
+If a later MailPiece version is sent through the production path, that version produces its own ProductionDocument under ADR-012 / ADR-013.
+
+### Explicitly excluded derivation inputs
+
+Do not consult these to determine or create the ProductionDocument:
+
+- CreativeSpec field values
+- CreativeCanvas
+- Studio state
+- audience
+- quantity
+- postage
+- payment
+- launch state
+- AI / Creative Intelligence
+- provider data
+- Click2Mail data
+- catalog physical geometry
+
+Catalog identity and face semantics may be read, but catalog geometry is not copied into ProductionDocument.
+
+Do not use `directionId`, `revisionId`, `approvedAt`, `recommendedCatalogId` / version, `customerOverride`, `decidedBy`, or other MailPieceSpec fields as ProductionDocument derivation inputs unless a later ADR explicitly changes the contract.
+
+### Architectural boundary
+
+ProductionDocument derivation answers:
+
+> What physical-face authorship interpretation of this approved MailPiece is being sent into manufacture?
+
+It does not answer:
+
+- How do we render it?
+- How do we create a PDF?
+- How do we submit it to Click2Mail?
+- Where do artifacts live?
+- How do we run provider jobs?
+
+Those remain downstream and unresolved.
+
+### Important unresolved decision
+
+ADR-010's unresolved question remains unchanged:
+
+Whether `addressFaceAuthorship` should eventually be snapshotted onto MailPiece.
+
+Until that decision changes, production derivation reads `Campaign.mailPieceSpec.addressFaceAuthorship`.
+
+Do not introduce a second authorship field onto MailPiece.
+
+### Consequences
+
+ProductionDocument derivation is conceptually a pure deterministic transformation of frozen domain inputs plus identity/timestamp assignment.
+
+It belongs on the future production/launch path established by ADR-012.
+
+This ADR does not choose:
+
+- TypeScript property names
+- Campaign persistence field
+- production function name
+- module location
+- artifact storage
+- provider/job persistence
+- renderer behavior
+- PDF generation
+- Click2Mail mapping
+- retry behavior
+- future cataloged mail-piece derivation rules
+
+No application code is changed by accepting this ADR.
+
+---
+
 # Beta Product Decisions
 
 This section records product-scope defaults for the initial Modern Mail beta. These are not architectural ADRs and do not change the domain model above.
