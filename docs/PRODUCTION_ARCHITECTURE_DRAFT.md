@@ -1617,6 +1617,114 @@ Implementation of creation and persistence belongs with the production/launch mi
 
 ---
 
+## ADR-013: Minimum Semantic Shape of ProductionDocument
+
+### Status
+
+Accepted
+
+### Decision
+
+> **`ProductionDocument` is a closed, vendor-neutral campaign-domain record representing the production interpretation of exactly one immutable `MailPiece`.**
+
+Its minimum durable semantic shape is:
+
+- `id`
+- `mailPieceId`
+- `mailPieceVersion`
+- `catalogId`
+- `catalogVersion`
+- `faces.front`
+- `faces.back`
+- `derivedAt`
+
+The face interpretation is a closed `front` / `back` pair, not a generic pages array.
+
+Each face value is `"customer"` | `"fulfillment"`.
+
+For the beta:
+
+- `faces.front` = `"customer"`
+- `faces.back` = `"fulfillment"`
+
+A future customer-authored address face would use:
+
+- `faces.front` = `"customer"`
+- `faces.back` = `"customer"`
+
+The `ProductionDocument` does **not** copy `MailPieceSpec.addressFaceAuthorship`.
+
+`addressFaceAuthorship` remains the campaign decision on `MailPieceSpec`. `ProductionDocument` stores its derived consequence as the per-face interpretation. This avoids creating a second source of truth.
+
+`catalogId` and `catalogVersion` are references copied from the source MailPiece and must correspond exactly to the catalog version referenced by that MailPiece. They do not duplicate catalog geometry.
+
+`ProductionDocument` has no independent version field. MailPiece version is the source version.
+
+`ProductionDocument` does not contain a generic `pages[]` collection because the physical mail-piece model established by ADR-009 / ADR-011 is a closed `front` / `back` face pair.
+
+`derivedAt` records when the production interpretation was established and persisted. It is domain persistence metadata, not renderer input and not a lifecycle status.
+
+### Architectural boundary
+
+`ProductionDocument` is the minimum semantic bridge between `MailPiece` and downstream production artifacts/providers. It says **what** was interpreted for manufacture, not **how** the renderer produces files or **how** a fulfillment provider submits the job.
+
+This ADR does not expand into renderer design, PDF design, Click2Mail mapping, validation/preflight, artifact storage, or production workflow implementation.
+
+### Field rationale
+
+1. `id` gives the `ProductionDocument` its own identity.
+2. `mailPieceId` + `mailPieceVersion` identify exactly which immutable approved creative was interpreted.
+3. `catalogId` + `catalogVersion` record which immutable catalog definition was applied without copying its physical facts.
+4. `faces.front` + `faces.back` capture the production interpretation of the two physical faces without introducing a generic page model.
+5. `derivedAt` records the derivation event.
+
+### Exclusions
+
+`ProductionDocument` does **not** contain:
+
+- `CreativeSpec` / `approvedSpec`
+- `CreativeCanvas`
+- catalog geometry such as dimensions, bleed, keep-outs, DPI, color
+- Studio presentation / CSS / preview data
+- PDF or other serialized production artifacts
+- proof images or artifact file IDs
+- Click2Mail `layout` / `documentClass` / job identifiers
+- provider-specific data
+- audience
+- quantity
+- postage
+- payment
+- campaign launch state
+- AI / Creative Intelligence
+- return-address content
+- `addressFaceAuthorship`
+- generic `pages[]`
+- independent `ProductionDocument` version
+- status / ready / invalid / preflight state
+- `campaignId` as a field merely because the document is persisted inside Campaign
+
+### Consequences
+
+A later implementation may persist this shape on the campaign at production derivation (ADR-012) without adding Campaign status, catalog geometry, CreativeSpec, or vendor types.
+
+No application code, TypeScript types, tests, catalog, renderer, PDF, or Click2Mail integration is changed by accepting this ADR.
+
+### What this decision does NOT decide
+
+- Exact TypeScript property names beyond the semantic field names above
+- Exact Campaign persistence field
+- Exact production-pipeline function
+- Geometry snapshot versus catalog reference beyond the current reference-only decision
+- Artifact storage
+- Provider/job persistence
+- Whether authorship is separately snapshotted onto MailPiece
+- Return-address content ownership
+- Click2Mail mapping
+- Renderer retry behavior
+- Any catalogued mail piece besides `postcard_5x8` v1
+
+---
+
 # Beta Product Decisions
 
 This section records product-scope defaults for the initial Modern Mail beta. These are not architectural ADRs and do not change the domain model above.
