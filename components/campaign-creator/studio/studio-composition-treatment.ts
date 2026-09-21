@@ -5,6 +5,8 @@ import {
   type LeadJob,
 } from "@/lib/campaign-creator/types"
 
+import { studioCompositionStructure } from "./studio-composition-structure"
+
 /**
  * Renderer-owned composition treatment. Derived at preview time from existing
  * CreativeSpec semantic jobs. Not a CreativeSpec field and not persisted.
@@ -21,6 +23,17 @@ export type TypeWeight = "medium" | "bold" | "extrabold"
 export type TypeRhythm = "immediate" | "compressed" | "composed" | "tense" | "default"
 export type HeroColorRole = "emphasis" | "ink"
 export type CtaColorRole = "emphasis-fill" | "ink-line" | "ink-quiet"
+export type CtaMark = "reverse-slug" | "hierarchy-line" | "quiet-line"
+export type PrintMarkArrangement =
+  | "flowing-type"
+  | "supporting-stack"
+  | "inscription"
+  | "sole-type"
+
+export interface StudioPrintMarkExecution {
+  ctaMark: CtaMark
+  arrangement: PrintMarkArrangement
+}
 
 export interface StudioTypeExecution {
   scale: number
@@ -155,6 +168,36 @@ export function studioTypeExecution(
         ctaColor,
       }
   }
+}
+
+/**
+ * Renderer-owned print-mark execution for CTA / QR / contact.
+ * Uses existing treatment knobs and layout family — not CreativeSpec fields.
+ */
+export function studioPrintMarks(
+  treatment: StudioCompositionTreatment,
+  layout?: LayoutVariant
+): StudioPrintMarkExecution {
+  const type = studioTypeExecution(treatment)
+  const ctaMark: CtaMark =
+    type.ctaColor === "emphasis-fill" || treatment.ctaWeight === "strong"
+      ? "reverse-slug"
+      : type.ctaColor === "ink-quiet" || treatment.ctaWeight === "quiet"
+        ? "quiet-line"
+        : "hierarchy-line"
+
+  return {
+    ctaMark,
+    arrangement: arrangementFromLayout(layout),
+  }
+}
+
+function arrangementFromLayout(layout?: LayoutVariant): PrintMarkArrangement {
+  const structure = studioCompositionStructure(layout)
+  if (structure.imageIsGround) return "inscription"
+  if (structure.hasOrganizingBand) return "supporting-stack"
+  if (!structure.hasImageRegion) return "sole-type"
+  return "flowing-type"
 }
 
 function treatmentFromLeadJob(

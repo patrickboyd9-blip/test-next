@@ -16,10 +16,10 @@ import { ShimmerOverlay, SpecDiffHighlight } from "./SpecDiffHighlight"
 import {
   resolveStudioPalette,
   studioCompositionTreatment,
+  studioPrintMarks,
   studioTypeExecution,
   type CropPreset,
-  type CtaColorRole,
-  type CtaWeight,
+  type CtaMark,
   type PhotoWeight,
   type StudioCompositionTreatment,
   type TypeRhythm,
@@ -376,7 +376,7 @@ function LeadType({
   )
 }
 
-function ActionCluster({
+function PrintMarks({
   spec,
   offer,
   leadWithOffer,
@@ -384,11 +384,13 @@ function ActionCluster({
   type,
   color,
   emphasis,
+  surface,
   treatment,
   phoneBottomRight,
   showQr,
   qrLarge,
   onPhoto = false,
+  layout,
 }: {
   spec: CreativeSpec
   offer: string
@@ -397,57 +399,80 @@ function ActionCluster({
   type: TypeScale
   color: string
   emphasis: string
+  surface: string
   treatment: StudioCompositionTreatment
   phoneBottomRight: boolean
   showQr: boolean
   qrLarge: boolean
   onPhoto?: boolean
+  layout: LayoutVariant
 }) {
-  return (
-    <div>
-      {!leadWithOffer && offer ? (
-        <p
-          className="mb-2 max-w-[20ch] font-medium"
-          style={{
-            color:
-              studioTypeExecution(treatment).heroColor === "emphasis" &&
-              treatment.typeVoice === "offer"
-                ? emphasis
-                : color,
-            fontSize: type.sub,
-            opacity: 0.8,
-          }}
-        >
-          {offer}
-        </p>
-      ) : null}
-      {spec.callToAction ? (
-        <PrintCta
-          color={color}
-          emphasis={emphasis}
-          size={type.cta}
-          weight={treatment.ctaWeight}
-          fillRole={studioTypeExecution(treatment).ctaColor}
-        >
-          {spec.callToAction}
-        </PrintCta>
-      ) : null}
-      <div className="mt-2 flex items-end justify-between gap-2">
-        {!compact ? (
-          <PostcardFooter
-            spec={spec}
-            color={color}
-            phoneBottomRight={phoneBottomRight}
-            size={type.footer}
-            quiet
-          />
-        ) : (
-          <span />
-        )}
-        {showQr ? (
-          <QrMark tone={color} compact={compact} large={qrLarge} onPhoto={onPhoto} />
-        ) : null}
+  const marks = studioPrintMarks(treatment, layout)
+  const arrangement = marks.arrangement
+  const cta = spec.callToAction ? (
+    <PrintCta color={color} emphasis={emphasis} size={type.cta} mark={marks.ctaMark}>
+      {spec.callToAction}
+    </PrintCta>
+  ) : null
+  const contact = !compact ? (
+    <ContactPrint
+      spec={spec}
+      color={color}
+      phoneBottomRight={phoneBottomRight}
+      size={type.footer}
+    />
+  ) : null
+  const qr = showQr ? (
+    <QrMark
+      tone={color}
+      field={onPhoto ? "#f7f7f4" : surface}
+      compact={compact}
+      large={qrLarge}
+      onPhoto={onPhoto}
+    />
+  ) : null
+  const supportingOffer =
+    !leadWithOffer && offer ? (
+      <p
+        className="max-w-[20ch] font-medium leading-snug"
+        style={{ color, fontSize: type.sub, opacity: 0.85 }}
+      >
+        {offer}
+      </p>
+    ) : null
+
+  if (arrangement === "inscription") {
+    return (
+      <div className={compact ? "mt-1.5 space-y-1.5" : "mt-2 space-y-2"}>
+        {supportingOffer}
+        {cta}
+        <div className="flex items-end gap-3">
+          <div className="min-w-0 flex-1">{contact}</div>
+          {qr}
+        </div>
       </div>
+    )
+  }
+
+  if (arrangement === "sole-type") {
+    return (
+      <div className={compact ? "mt-3 space-y-2" : "mt-5 space-y-2.5"}>
+        {supportingOffer}
+        <div className="flex items-end gap-3">
+          <div className="min-w-0">{cta}</div>
+          {qr}
+        </div>
+        {contact}
+      </div>
+    )
+  }
+
+  return (
+    <div className={compact ? "mt-2 space-y-2" : "mt-3 space-y-2.5"}>
+      {supportingOffer}
+      {cta}
+      {contact}
+      {qr}
     </div>
   )
 }
@@ -510,7 +535,7 @@ function TypePrimaryFront({
       <div
         data-region="type"
         className={cn(
-          "relative z-10 flex h-full w-[66%] flex-col justify-between",
+          "relative z-10 flex h-full w-[66%] flex-col",
           typeBreathing(compact, studioTypeExecution(treatment).rhythm)
         )}
       >
@@ -525,7 +550,7 @@ function TypePrimaryFront({
           treatment={treatment}
           showBody={false}
         />
-        <ActionCluster
+        <PrintMarks
           spec={spec}
           offer={offer}
           leadWithOffer={leadWithOffer}
@@ -533,10 +558,12 @@ function TypePrimaryFront({
           type={type}
           color={ink}
           emphasis={emphasis}
+          surface={surface}
           treatment={treatment}
           phoneBottomRight={phoneBottomRight}
           showQr={showQr}
           qrLarge={qrLarge}
+          layout={layout}
         />
       </div>
       <div
@@ -600,7 +627,7 @@ function PeerSplitFront({
       <div
         data-region="peer-type"
         className={cn(
-          "flex h-full w-[46%] min-w-0 flex-col justify-between",
+          "flex h-full w-[46%] min-w-0 flex-col",
           typeBreathing(compact, studioTypeExecution(treatment).rhythm)
         )}
       >
@@ -621,7 +648,7 @@ function PeerSplitFront({
             style={{ backgroundColor: emphasis, opacity: quiet ? 0.45 : 0.9 }}
           />
         </div>
-        <ActionCluster
+        <PrintMarks
           spec={spec}
           offer={offer}
           leadWithOffer={leadWithOffer}
@@ -629,10 +656,12 @@ function PeerSplitFront({
           type={type}
           color={ink}
           emphasis={emphasis}
+          surface={surface}
           treatment={treatment}
           phoneBottomRight={phoneBottomRight}
           showQr={showQr}
           qrLarge={qrLarge}
+          layout={layout}
         />
       </div>
     </div>
@@ -690,7 +719,7 @@ function BandedSplitFront({
         <div
           data-region="supporting"
           className={cn(
-            "flex min-w-0 flex-[5] flex-col justify-between",
+            "flex min-w-0 flex-[5] flex-col",
             compact ? "px-2 py-1.5" : "px-4 py-2.5"
           )}
         >
@@ -718,35 +747,21 @@ function BandedSplitFront({
           ) : (
             <span />
           )}
-          <div>
-            {spec.callToAction ? (
-              <PrintCta
-                color={ink}
-                emphasis={emphasis}
-                size={type.cta}
-                weight={treatment.ctaWeight}
-                fillRole={voice.ctaColor}
-              >
-                {spec.callToAction}
-              </PrintCta>
-            ) : null}
-            {!compact ? (
-              <div className="mt-1.5">
-                <PostcardFooter
-                  spec={spec}
-                  color={ink}
-                  phoneBottomRight={phoneBottomRight}
-                  size={type.footer}
-                  quiet
-                />
-              </div>
-            ) : null}
-            {showQr ? (
-              <div className="mt-2">
-                <QrMark tone={ink} compact={compact} large={qrLarge} />
-              </div>
-            ) : null}
-          </div>
+          <PrintMarks
+            spec={spec}
+            offer=""
+            leadWithOffer={leadWithOffer}
+            compact={compact}
+            type={type}
+            color={ink}
+            emphasis={emphasis}
+            surface={surface}
+            treatment={treatment}
+            phoneBottomRight={phoneBottomRight}
+            showQr={showQr}
+            qrLarge={qrLarge}
+            layout={layout}
+          />
         </div>
         <div data-region="image" className="relative min-w-0 flex-[4] overflow-hidden">
           <PhotoSlot
@@ -819,22 +834,22 @@ function ImageGroundedFront({
           treatment={treatment}
           showBody={false}
         />
-        <div className="mt-2">
-          <ActionCluster
-            spec={spec}
-            offer={offer}
-            leadWithOffer={leadWithOffer}
-            compact={compact}
-            type={type}
-            color={ink}
-            emphasis={emphasis}
-            treatment={treatment}
-            phoneBottomRight={phoneBottomRight}
-            showQr={showQr}
-            qrLarge={qrLarge}
-            onPhoto
-          />
-        </div>
+        <PrintMarks
+          spec={spec}
+          offer={offer}
+          leadWithOffer={leadWithOffer}
+          compact={compact}
+          type={type}
+          color={ink}
+          emphasis={emphasis}
+          surface={surface}
+          treatment={treatment}
+          phoneBottomRight={phoneBottomRight}
+          showQr={showQr}
+          qrLarge={qrLarge}
+          onPhoto
+          layout={layout}
+        />
       </div>
     </div>
   )
@@ -876,41 +891,23 @@ function TypeOnlyFront({
           treatment={treatment}
           showBody={false}
         />
-        {!leadWithOffer && offer ? (
-          <p
-            className="mt-3 max-w-[20ch] font-medium"
-            style={{ color: ink, fontSize: type.sub, opacity: 0.75 }}
-          >
-            {offer}
-          </p>
-        ) : null}
-        <div className={cn("flex items-end gap-3", compact ? "mt-3" : "mt-5")}>
-          {spec.callToAction ? (
-            <PrintCta
-              color={ink}
-              emphasis={emphasis}
-              size={type.cta}
-              weight={treatment.ctaWeight}
-              fillRole={voice.ctaColor}
-            >
-              {spec.callToAction}
-            </PrintCta>
-          ) : (
-            <span />
-          )}
-          {showQr ? <QrMark tone={ink} compact={compact} large={qrLarge} /> : null}
-        </div>
+        <PrintMarks
+          spec={spec}
+          offer={offer}
+          leadWithOffer={leadWithOffer}
+          compact={compact}
+          type={type}
+          color={ink}
+          emphasis={emphasis}
+          surface={surface}
+          treatment={treatment}
+          phoneBottomRight={phoneBottomRight}
+          showQr={showQr}
+          qrLarge={qrLarge}
+          layout={layout}
+        />
       </div>
       <div data-region="field" className="min-h-0 flex-1" aria-hidden />
-      {!compact ? (
-        <PostcardFooter
-          spec={spec}
-          color={ink}
-          phoneBottomRight={phoneBottomRight}
-          size={type.footer}
-          quiet
-        />
-      ) : null}
     </div>
   )
 }
@@ -965,120 +962,146 @@ function PrintCta({
   color,
   emphasis,
   size,
-  weight = "default",
-  fillRole,
+  mark,
 }: {
   children: string
   color: string
   emphasis: string
   size: string
-  weight?: CtaWeight
-  fillRole: CtaColorRole
+  mark: CtaMark
 }) {
-  if (weight === "strong" || fillRole === "emphasis-fill") {
-    const fill = emphasis
+  if (mark === "reverse-slug") {
     return (
-      <span
-        className="inline-flex items-center px-2 py-1 font-semibold leading-none tracking-[0.04em]"
-        style={{ backgroundColor: fill, color: inkOn(fill), fontSize: size }}
+      <p
+        className="w-full max-w-[18ch] font-bold leading-[1.05] tracking-[-0.02em]"
+        style={{
+          backgroundColor: emphasis,
+          color: inkOn(emphasis),
+          fontSize: size,
+          padding: "0.35em 0.4em 0.3em 0",
+        }}
       >
         {children}
-      </span>
+      </p>
     )
   }
 
-  if (weight === "quiet") {
+  if (mark === "quiet-line") {
     return (
-      <span
-        className="font-medium leading-none tracking-[0.06em]"
-        style={{ color, fontSize: size, opacity: 0.72 }}
+      <p
+        className="max-w-[20ch] font-medium leading-snug tracking-[-0.01em]"
+        style={{ color, fontSize: size, opacity: 0.82 }}
       >
         {children}
-      </span>
+      </p>
     )
   }
 
   return (
-    <div className="flex items-center gap-1.5">
-      <span className="h-px w-3 shrink-0" style={{ backgroundColor: emphasis }} />
+    <div>
       <span
-        className="font-medium leading-none tracking-[0.04em]"
+        className="mb-1.5 block h-px w-8"
+        style={{ backgroundColor: emphasis }}
+        aria-hidden
+      />
+      <p
+        className="max-w-[20ch] font-semibold leading-snug tracking-[-0.015em]"
         style={{ color, fontSize: size }}
       >
         {children}
-      </span>
+      </p>
     </div>
   )
 }
 
+const QR_MODULES = [
+  [1, 1, 1, 0, 1, 1, 1],
+  [1, 0, 1, 0, 1, 0, 1],
+  [1, 1, 1, 0, 1, 1, 1],
+  [0, 0, 0, 1, 0, 0, 0],
+  [1, 1, 1, 0, 1, 0, 1],
+  [1, 0, 1, 1, 0, 1, 0],
+  [1, 1, 1, 0, 1, 0, 1],
+] as const
+
 function QrMark({
   tone,
+  field,
   compact,
   large = false,
   onPhoto = false,
 }: {
   tone: string
+  field: string
   compact: boolean
   large?: boolean
   onPhoto?: boolean
 }) {
-  const cells = [1, 1, 1, 1, 0, 1, 1, 1, 1]
+  const quiet = onPhoto ? "#f7f7f4" : field
+  const module = tone
   return (
     <div
       className={cn(
-        "grid shrink-0 grid-cols-3 gap-px p-px",
-        compact ? "size-3.5" : large ? "size-6" : "size-5",
-        onPhoto && "bg-white/90"
+        "grid shrink-0 grid-cols-7 gap-px p-[3px]",
+        compact ? "size-8" : large ? "size-12" : "size-10"
       )}
-      style={onPhoto ? undefined : { backgroundColor: `${tone}14` }}
+      style={{ backgroundColor: quiet }}
       aria-hidden
     >
-      {cells.map((on, index) => (
-        <span
-          key={index}
-          className="block"
-          style={{ backgroundColor: on ? tone : "transparent" }}
-        />
-      ))}
+      {QR_MODULES.flatMap((row, y) =>
+        row.map((on, x) => (
+          <span
+            key={`${y}-${x}`}
+            className="block"
+            style={{ backgroundColor: on ? module : quiet }}
+          />
+        ))
+      )}
     </div>
   )
 }
 
-function PostcardFooter({
+function ContactPrint({
   spec,
   color,
   phoneBottomRight = false,
   size,
-  quiet = false,
 }: {
   spec: CreativeSpec
   color: string
   phoneBottomRight?: boolean
   size: string
-  quiet?: boolean
 }) {
   if (!spec.phone && !spec.website) return null
 
-  const parts = [spec.phone, spec.website].filter(Boolean)
   const style = {
     color,
     fontSize: size,
-    opacity: quiet ? 0.42 : 0.58,
-    letterSpacing: "0.02em",
+    opacity: 0.8,
+    letterSpacing: "-0.01em",
   }
 
   if (phoneBottomRight && spec.phone) {
     return (
-      <p className="min-w-0 truncate" style={style}>
+      <p className="min-w-0 font-medium leading-snug" style={style}>
         {spec.phone}
       </p>
     )
   }
 
   return (
-    <p className="min-w-0 truncate" style={style}>
-      {parts.join("  ·  ")}
-    </p>
+    <div className="min-w-0 space-y-0.5">
+      {spec.phone ? (
+        <p className="font-medium leading-snug" style={style}>
+          {spec.phone}
+        </p>
+      ) : null}
+      {spec.website ? (
+        <p className="leading-snug" style={style}>
+          {spec.website}
+        </p>
+      ) : null}
+    </div>
   )
 }
 

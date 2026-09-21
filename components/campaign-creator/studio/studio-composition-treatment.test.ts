@@ -12,6 +12,7 @@ import { studioCompositionStructure } from "./studio-composition-structure"
 import {
   resolveStudioPalette,
   studioCompositionTreatment,
+  studioPrintMarks,
   studioTypeExecution,
   type StudioCompositionTreatment,
 } from "./studio-composition-treatment"
@@ -354,5 +355,93 @@ test("layoutVariant still constrains photo weight independent of leadJob art dir
       layoutVariant: "image_grounded",
     }).photoWeight,
     "none"
+  )
+})
+
+test("print marks follow existing ctaWeight and ctaColor meaning", () => {
+  assert.equal(studioPrintMarks(treatmentFor("offer")).ctaMark, "reverse-slug")
+  assert.equal(studioPrintMarks(treatmentFor("urgency")).ctaMark, "reverse-slug")
+  assert.equal(studioPrintMarks(treatmentFor("trust")).ctaMark, "quiet-line")
+  assert.equal(studioPrintMarks(treatmentFor("problem")).ctaMark, "hierarchy-line")
+
+  assert.equal(studioTypeExecution(treatmentFor("offer")).ctaColor, "emphasis-fill")
+  assert.equal(studioTypeExecution(treatmentFor("trust")).ctaColor, "ink-quiet")
+  assert.equal(studioTypeExecution(treatmentFor("problem")).ctaColor, "ink-line")
+})
+
+test("print-mark arrangement follows composition family, not leadJob", () => {
+  assert.equal(
+    studioPrintMarks(treatmentFor("offer", { layoutVariant: "type_primary_split" }), "type_primary_split")
+      .arrangement,
+    "flowing-type"
+  )
+  assert.equal(
+    studioPrintMarks(treatmentFor("trust", { layoutVariant: "peer_split" }), "peer_split")
+      .arrangement,
+    "flowing-type"
+  )
+  assert.equal(
+    studioPrintMarks(treatmentFor("urgency", { layoutVariant: "banded_split" }), "banded_split")
+      .arrangement,
+    "supporting-stack"
+  )
+  assert.equal(
+    studioPrintMarks(treatmentFor("problem", { layoutVariant: "image_grounded" }), "image_grounded")
+      .arrangement,
+    "inscription"
+  )
+  assert.equal(
+    studioPrintMarks(treatmentFor("offer", { layoutVariant: "type_only" }), "type_only")
+      .arrangement,
+    "sole-type"
+  )
+
+  const leads: LeadJob[] = ["offer", "urgency", "trust", "problem"]
+  for (const layoutVariant of LAYOUT_VARIANTS) {
+    const baseline = studioPrintMarks(
+      treatmentFor("offer", { layoutVariant }),
+      layoutVariant
+    ).arrangement
+    for (const leadJob of leads) {
+      assert.equal(
+        studioPrintMarks(treatmentFor(leadJob, { layoutVariant }), layoutVariant).arrangement,
+        baseline
+      )
+      assert.deepEqual(
+        studioCompositionStructure(layoutVariant).regions,
+        studioCompositionStructure(layoutVariant).regions
+      )
+    }
+  }
+})
+
+test("print-mark execution is renderer-owned and not a CreativeSpec field", () => {
+  const spec: CreativeSpec = {
+    layoutVariant: "peer_split",
+    leadJob: "trust",
+    imageryRole: "crew",
+    headline: "Local crew",
+    callToAction: "Call today",
+    phone: "555-0100",
+    website: "example.com",
+    palette: ["#1e3a5f", "#4a90a4", "#f5f5f0"],
+  }
+  const marks = studioPrintMarks(
+    studioCompositionTreatment({
+      leadJob: spec.leadJob,
+      imageryRole: spec.imageryRole,
+      layoutVariant: spec.layoutVariant,
+    }),
+    spec.layoutVariant
+  )
+
+  assert.equal("ctaMark" in spec, false)
+  assert.equal("arrangement" in spec, false)
+  assert.equal("printMarks" in spec, false)
+  assert.ok(marks.ctaMark)
+  assert.ok(marks.arrangement)
+  assert.equal(
+    GENERATED_SPEC_TOOL_REQUIRED.includes("ctaMark" as never),
+    false
   )
 })
