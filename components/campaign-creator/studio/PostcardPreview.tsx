@@ -14,12 +14,16 @@ import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
 import { ShimmerOverlay, SpecDiffHighlight } from "./SpecDiffHighlight"
 import {
+  resolveStudioPalette,
   studioCompositionTreatment,
+  studioTypeExecution,
   type CropPreset,
+  type CtaColorRole,
   type CtaWeight,
   type PhotoWeight,
   type StudioCompositionTreatment,
-  type TypeEmphasis,
+  type TypeRhythm,
+  type TypeWeight,
 } from "./studio-composition-treatment"
 import {
   studioCopyHierarchy,
@@ -176,9 +180,10 @@ function PostcardFront({
   })
   const headlineScale = spec.layoutHints?.headlineScale ?? 1
   const hierarchy = studioCopyHierarchy(spec.leadJob)
-  const field = treatment.paletteMode === "field"
-  const surface = field ? primary : accent
-  const ink = field ? inkOn(primary) : primary
+  const { field: surface, ink, emphasis } = resolveStudioPalette(
+    [primary, secondary, accent],
+    treatment
+  )
   const context: FrontContext = {
     spec,
     primary,
@@ -186,18 +191,14 @@ function PostcardFront({
     accent,
     surface,
     ink,
+    emphasis,
     compact,
-    type: typeScale(
-      compact,
-      spec.leadJob === "urgency" ? Math.min(headlineScale * 1.1, 1.25) : headlineScale,
-      treatment.typeEmphasis
-    ),
+    type: typeScale(compact, headlineScale, studioTypeExecution(treatment).scale),
     phoneBottomRight: spec.layoutHints?.phonePosition === "bottom-right",
     qrLarge: spec.layoutHints?.qrProminence === "large",
     showQr: Boolean(spec.qrDestination?.trim() || spec.website?.trim()),
     offer: spec.offer?.trim() || "",
     photoAlt: spec.visualDirection?.trim() || "Campaign photography",
-    inkPrimary: inkOn(primary),
     photoSrc,
     showMonogram,
     hierarchy,
@@ -234,6 +235,7 @@ interface FrontContext {
   accent: string
   surface: string
   ink: string
+  emphasis: string
   compact: boolean
   type: TypeScale
   phoneBottomRight: boolean
@@ -241,7 +243,6 @@ interface FrontContext {
   showQr: boolean
   offer: string
   photoAlt: string
-  inkPrimary: string
   photoSrc: string | null
   showMonogram: boolean
   hierarchy: StudioCopyHierarchy
@@ -261,10 +262,9 @@ interface TypeScale {
 function typeScale(
   compact: boolean,
   headlineScale: number,
-  emphasis: TypeEmphasis
+  voiceScale: number
 ): TypeScale {
-  const emphasisBoost = emphasis === "aggressive" ? 1.12 : emphasis === "quiet" ? 0.9 : 1
-  const h = Math.min(Math.max(headlineScale * emphasisBoost, 0.85), 1.28)
+  const h = Math.min(Math.max(headlineScale * voiceScale, 0.85), 1.28)
   return {
     headline: compact
       ? `clamp(15px, ${8.2 * h}cqw, 22px)`
@@ -279,13 +279,26 @@ function typeScale(
   }
 }
 
-function headlineWeight(emphasis: TypeEmphasis): string {
-  return emphasis === "quiet" ? "font-medium" : "font-bold"
+function headlineWeight(weight: TypeWeight): string {
+  if (weight === "medium") return "font-medium"
+  if (weight === "extrabold") return "font-extrabold"
+  return "font-bold"
 }
 
-function typeBreathing(compact: boolean, emphasis: TypeEmphasis): string {
-  if (emphasis === "quiet") return compact ? "px-3 py-2.5" : "px-5 py-5 sm:px-6 sm:py-5"
-  if (emphasis === "aggressive") return compact ? "px-2 py-1.5" : "px-3.5 py-3 sm:px-4 sm:py-3.5"
+function typeRhythmClass(rhythm: TypeRhythm): string {
+  if (rhythm === "immediate") return "leading-[0.95] tracking-[-0.04em]"
+  if (rhythm === "compressed") return "leading-[0.84] tracking-[-0.055em]"
+  if (rhythm === "composed") return "leading-[1.12] tracking-[-0.012em]"
+  if (rhythm === "tense") return "leading-[0.9] tracking-[-0.02em]"
+  return "leading-[1.05] tracking-[-0.025em]"
+}
+
+function typeBreathing(compact: boolean, rhythm: TypeRhythm): string {
+  if (rhythm === "composed") return compact ? "px-3 py-2.5" : "px-5 py-5 sm:px-6 sm:py-5"
+  if (rhythm === "compressed") return compact ? "px-2 py-1.5" : "px-3 py-2.5 sm:px-3.5 sm:py-3"
+  if (rhythm === "immediate" || rhythm === "tense") {
+    return compact ? "px-2 py-1.5" : "px-3.5 py-3 sm:px-4 sm:py-3.5"
+  }
   return compact ? "px-2 py-2" : "px-4 py-3.5 sm:px-5 sm:py-4"
 }
 
@@ -296,6 +309,7 @@ function LeadType({
   compact,
   type,
   color,
+  emphasis,
   treatment,
   showBody,
   heroSize,
@@ -306,21 +320,21 @@ function LeadType({
   compact: boolean
   type: TypeScale
   color: string
+  emphasis: string
   treatment: StudioCompositionTreatment
   showBody: boolean
   heroSize?: string
 }) {
   const hero = leadWithOffer && offer ? offer : spec.headline
   const size = heroSize ?? (leadWithOffer && offer ? type.offer : type.headline)
+  const voice = studioTypeExecution(treatment)
+  const heroColor = voice.heroColor === "emphasis" ? emphasis : color
   return (
     <div className="min-w-0">
       {hero ? (
         <p
-          className={cn(
-            headlineWeight(treatment.typeEmphasis),
-            "max-w-[16ch] leading-[0.95] tracking-[-0.035em]"
-          )}
-          style={{ color, fontSize: size }}
+          className={cn(headlineWeight(voice.weight), "max-w-[16ch]", typeRhythmClass(voice.rhythm))}
+          style={{ color: heroColor, fontSize: size }}
         >
           {hero}
         </p>
@@ -328,10 +342,12 @@ function LeadType({
       {leadWithOffer && offer && spec.headline ? (
         <p
           className={cn(
-            "mt-2 max-w-[18ch] leading-[1.05] tracking-[-0.02em]",
-            treatment.typeEmphasis === "quiet" ? "font-medium" : "font-semibold"
+            "mt-2 max-w-[18ch]",
+            voice.rhythm === "composed"
+              ? "font-medium leading-snug tracking-[-0.01em]"
+              : "font-semibold leading-[1.05] tracking-[-0.02em]"
           )}
-          style={{ color, fontSize: type.headline, opacity: 0.88 }}
+          style={{ color, fontSize: type.headline, opacity: voice.rhythm === "composed" ? 0.72 : 0.88 }}
         >
           {spec.headline}
         </p>
@@ -350,7 +366,7 @@ function LeadType({
           style={{
             color,
             fontSize: type.body,
-            opacity: treatment.typeEmphasis === "quiet" ? 0.5 : 0.58,
+            opacity: voice.rhythm === "composed" ? 0.5 : 0.58,
           }}
         >
           {spec.body}
@@ -367,6 +383,7 @@ function ActionCluster({
   compact,
   type,
   color,
+  emphasis,
   treatment,
   phoneBottomRight,
   showQr,
@@ -379,6 +396,7 @@ function ActionCluster({
   compact: boolean
   type: TypeScale
   color: string
+  emphasis: string
   treatment: StudioCompositionTreatment
   phoneBottomRight: boolean
   showQr: boolean
@@ -390,13 +408,27 @@ function ActionCluster({
       {!leadWithOffer && offer ? (
         <p
           className="mb-2 max-w-[20ch] font-medium"
-          style={{ color, fontSize: type.sub, opacity: 0.8 }}
+          style={{
+            color:
+              studioTypeExecution(treatment).heroColor === "emphasis" &&
+              treatment.typeVoice === "offer"
+                ? emphasis
+                : color,
+            fontSize: type.sub,
+            opacity: 0.8,
+          }}
         >
           {offer}
         </p>
       ) : null}
       {spec.callToAction ? (
-        <PrintCta color={color} size={type.cta} weight={treatment.ctaWeight}>
+        <PrintCta
+          color={color}
+          emphasis={emphasis}
+          size={type.cta}
+          weight={treatment.ctaWeight}
+          fillRole={studioTypeExecution(treatment).ctaColor}
+        >
           {spec.callToAction}
         </PrintCta>
       ) : null}
@@ -418,10 +450,6 @@ function ActionCluster({
       </div>
     </div>
   )
-}
-
-function isQuietInk(treatment: StudioCompositionTreatment): boolean {
-  return treatment.paletteMode === "ink" && treatment.typeEmphasis === "quiet"
 }
 
 function supportingImagePlate(compact: boolean, weight: PhotoWeight): string {
@@ -457,6 +485,7 @@ function TypePrimaryFront({
   secondary,
   surface,
   ink,
+  emphasis,
   compact,
   type,
   phoneBottomRight,
@@ -482,7 +511,7 @@ function TypePrimaryFront({
         data-region="type"
         className={cn(
           "relative z-10 flex h-full w-[66%] flex-col justify-between",
-          typeBreathing(compact, treatment.typeEmphasis)
+          typeBreathing(compact, studioTypeExecution(treatment).rhythm)
         )}
       >
         <LeadType
@@ -492,6 +521,7 @@ function TypePrimaryFront({
           compact={compact}
           type={type}
           color={ink}
+          emphasis={emphasis}
           treatment={treatment}
           showBody={false}
         />
@@ -502,6 +532,7 @@ function TypePrimaryFront({
           compact={compact}
           type={type}
           color={ink}
+          emphasis={emphasis}
           treatment={treatment}
           phoneBottomRight={phoneBottomRight}
           showQr={showQr}
@@ -533,6 +564,7 @@ function PeerSplitFront({
   secondary,
   surface,
   ink,
+  emphasis,
   compact,
   type,
   phoneBottomRight,
@@ -548,7 +580,7 @@ function PeerSplitFront({
 }: FrontContext) {
   const leadWithOffer = copyOfferLeads(hierarchy)
   const structure = studioCompositionStructure(layout)
-  const quiet = treatment.typeEmphasis === "quiet"
+  const quiet = treatment.typeVoice === "trust"
   return (
     <div
       className="flex h-full"
@@ -569,13 +601,7 @@ function PeerSplitFront({
         data-region="peer-type"
         className={cn(
           "flex h-full w-[46%] min-w-0 flex-col justify-between",
-          quiet
-            ? compact
-              ? "px-2.5 py-2"
-              : "px-4 py-4"
-            : compact
-              ? "px-2 py-1.5"
-              : "px-3.5 py-3.5"
+          typeBreathing(compact, studioTypeExecution(treatment).rhythm)
         )}
       >
         <div>
@@ -586,12 +612,13 @@ function PeerSplitFront({
             compact={compact}
             type={type}
             color={ink}
+            emphasis={emphasis}
             treatment={treatment}
             showBody
           />
           <div
             className="mt-1.5 h-px w-6"
-            style={{ backgroundColor: secondary, opacity: quiet ? 0.5 : 1 }}
+            style={{ backgroundColor: emphasis, opacity: quiet ? 0.45 : 0.9 }}
           />
         </div>
         <ActionCluster
@@ -601,6 +628,7 @@ function PeerSplitFront({
           compact={compact}
           type={type}
           color={ink}
+          emphasis={emphasis}
           treatment={treatment}
           phoneBottomRight={phoneBottomRight}
           showQr={showQr}
@@ -613,10 +641,10 @@ function PeerSplitFront({
 
 function BandedSplitFront({
   spec,
-  primary,
   secondary,
   surface,
   ink,
+  emphasis,
   compact,
   type,
   phoneBottomRight,
@@ -624,7 +652,6 @@ function BandedSplitFront({
   showQr,
   offer,
   photoAlt,
-  inkPrimary,
   photoSrc,
   showMonogram,
   hierarchy,
@@ -634,9 +661,8 @@ function BandedSplitFront({
   const leadWithOffer = copyOfferLeads(hierarchy)
   const structure = studioCompositionStructure(layout)
   const bandText = leadWithOffer && offer ? offer : spec.headline
-  const quietInk = isQuietInk(treatment)
-  const bandFill = quietInk ? surface : primary
-  const bandInk = quietInk ? ink : inkPrimary
+  const voice = studioTypeExecution(treatment)
+  const bandColor = voice.heroColor === "emphasis" ? emphasis : ink
   return (
     <div
       className="flex h-full flex-col"
@@ -649,14 +675,11 @@ function BandedSplitFront({
           "flex w-full items-end",
           compact ? "min-h-[34%] px-2.5 py-2" : "min-h-[36%] px-5 py-3.5"
         )}
-        style={{ backgroundColor: bandFill, color: bandInk }}
+        style={{ backgroundColor: surface, color: bandColor }}
       >
         {bandText ? (
           <p
-            className={cn(
-              "max-w-[28ch] leading-[0.92] tracking-[-0.03em]",
-              headlineWeight(treatment.typeEmphasis)
-            )}
+            className={cn("max-w-[28ch]", headlineWeight(voice.weight), typeRhythmClass(voice.rhythm))}
             style={{ fontSize: leadWithOffer && offer ? type.offer : type.headline }}
           >
             {bandText}
@@ -697,7 +720,13 @@ function BandedSplitFront({
           )}
           <div>
             {spec.callToAction ? (
-              <PrintCta color={ink} size={type.cta} weight={treatment.ctaWeight}>
+              <PrintCta
+                color={ink}
+                emphasis={emphasis}
+                size={type.cta}
+                weight={treatment.ctaWeight}
+                fillRole={voice.ctaColor}
+              >
                 {spec.callToAction}
               </PrintCta>
             ) : null}
@@ -736,10 +765,10 @@ function BandedSplitFront({
 
 function ImageGroundedFront({
   spec,
-  primary,
   secondary,
   surface,
   ink,
+  emphasis,
   compact,
   type,
   phoneBottomRight,
@@ -747,7 +776,6 @@ function ImageGroundedFront({
   showQr,
   offer,
   photoAlt,
-  inkPrimary,
   photoSrc,
   showMonogram,
   hierarchy,
@@ -756,9 +784,6 @@ function ImageGroundedFront({
 }: FrontContext) {
   const leadWithOffer = copyOfferLeads(hierarchy)
   const structure = studioCompositionStructure(layout)
-  const quietInk = isQuietInk(treatment)
-  const plateFill = quietInk ? surface : primary
-  const plateInk = quietInk ? ink : inkPrimary
   return (
     <div
       className="relative h-full"
@@ -771,7 +796,7 @@ function ImageGroundedFront({
           alt={photoAlt}
           monogram={showMonogram ? monogramLetter(spec.headline) : null}
           fallback={secondary}
-          primary={plateInk}
+          primary={ink}
           crop={treatment.cropPreset}
         />
       </div>
@@ -781,7 +806,7 @@ function ImageGroundedFront({
           "absolute flex flex-col justify-end",
           inscriptionLockup(compact, spec.imageryRole, treatment.photoWeight)
         )}
-        style={{ backgroundColor: plateFill, color: plateInk }}
+        style={{ backgroundColor: surface, color: ink }}
       >
         <LeadType
           spec={spec}
@@ -789,7 +814,8 @@ function ImageGroundedFront({
           leadWithOffer={leadWithOffer}
           compact={compact}
           type={type}
-          color={plateInk}
+          color={ink}
+          emphasis={emphasis}
           treatment={treatment}
           showBody={false}
         />
@@ -800,7 +826,8 @@ function ImageGroundedFront({
             leadWithOffer={leadWithOffer}
             compact={compact}
             type={type}
-            color={plateInk}
+            color={ink}
+            emphasis={emphasis}
             treatment={treatment}
             phoneBottomRight={phoneBottomRight}
             showQr={showQr}
@@ -817,6 +844,7 @@ function TypeOnlyFront({
   spec,
   surface,
   ink,
+  emphasis,
   compact,
   type,
   phoneBottomRight,
@@ -829,22 +857,10 @@ function TypeOnlyFront({
 }: FrontContext) {
   const leadWithOffer = copyOfferLeads(hierarchy)
   const structure = studioCompositionStructure(layout)
+  const voice = studioTypeExecution(treatment)
   return (
     <div
-      className={cn(
-        "flex h-full flex-col",
-        treatment.typeEmphasis === "quiet"
-          ? compact
-            ? "px-3 py-2.5"
-            : "px-7 py-6"
-          : treatment.typeEmphasis === "aggressive"
-            ? compact
-              ? "px-2.5 py-2"
-              : "px-6 py-5"
-            : compact
-              ? "px-2.5 py-2"
-              : "px-6 py-5"
-      )}
+      className={cn("flex h-full flex-col", typeBreathing(compact, voice.rhythm))}
       style={{ backgroundColor: surface }}
       data-composition={structure.layoutVariant}
     >
@@ -856,6 +872,7 @@ function TypeOnlyFront({
           compact={compact}
           type={type}
           color={ink}
+          emphasis={emphasis}
           treatment={treatment}
           showBody={false}
         />
@@ -869,7 +886,13 @@ function TypeOnlyFront({
         ) : null}
         <div className={cn("flex items-end gap-3", compact ? "mt-3" : "mt-5")}>
           {spec.callToAction ? (
-            <PrintCta color={ink} size={type.cta} weight={treatment.ctaWeight}>
+            <PrintCta
+              color={ink}
+              emphasis={emphasis}
+              size={type.cta}
+              weight={treatment.ctaWeight}
+              fillRole={voice.ctaColor}
+            >
               {spec.callToAction}
             </PrintCta>
           ) : (
@@ -940,19 +963,24 @@ function PhotoSlot({
 function PrintCta({
   children,
   color,
+  emphasis,
   size,
   weight = "default",
+  fillRole,
 }: {
   children: string
   color: string
+  emphasis: string
   size: string
   weight?: CtaWeight
+  fillRole: CtaColorRole
 }) {
-  if (weight === "strong") {
+  if (weight === "strong" || fillRole === "emphasis-fill") {
+    const fill = emphasis
     return (
       <span
         className="inline-flex items-center px-2 py-1 font-semibold leading-none tracking-[0.04em]"
-        style={{ backgroundColor: color, color: inkOn(color), fontSize: size }}
+        style={{ backgroundColor: fill, color: inkOn(fill), fontSize: size }}
       >
         {children}
       </span>
@@ -972,7 +1000,7 @@ function PrintCta({
 
   return (
     <div className="flex items-center gap-1.5">
-      <span className="h-px w-3 shrink-0" style={{ backgroundColor: color }} />
+      <span className="h-px w-3 shrink-0" style={{ backgroundColor: emphasis }} />
       <span
         className="font-medium leading-none tracking-[0.04em]"
         style={{ color, fontSize: size }}

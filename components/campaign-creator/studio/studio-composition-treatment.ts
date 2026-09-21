@@ -14,6 +14,21 @@ export type CropPreset = "tight" | "default" | "open"
 export type TypeEmphasis = "aggressive" | "default" | "quiet"
 export type CtaWeight = "strong" | "default" | "quiet"
 export type PaletteMode = "field" | "ink"
+export type TypeVoice = "offer" | "urgency" | "trust" | "problem" | "default"
+export type PaletteSlot = "primary" | "secondary" | "accent"
+export type InkSlot = PaletteSlot | "on-field"
+export type TypeWeight = "medium" | "bold" | "extrabold"
+export type TypeRhythm = "immediate" | "compressed" | "composed" | "tense" | "default"
+export type HeroColorRole = "emphasis" | "ink"
+export type CtaColorRole = "emphasis-fill" | "ink-line" | "ink-quiet"
+
+export interface StudioTypeExecution {
+  scale: number
+  weight: TypeWeight
+  rhythm: TypeRhythm
+  heroColor: HeroColorRole
+  ctaColor: CtaColorRole
+}
 
 export interface StudioCompositionTreatment {
   photoWeight: PhotoWeight
@@ -21,7 +36,19 @@ export interface StudioCompositionTreatment {
   typeEmphasis: TypeEmphasis
   ctaWeight: CtaWeight
   paletteMode: PaletteMode
+  typeVoice: TypeVoice
+  fieldSlot: PaletteSlot
+  inkSlot: InkSlot
+  emphasisSlot: PaletteSlot
 }
+
+export interface StudioPaletteExecution {
+  field: string
+  ink: string
+  emphasis: string
+}
+
+const DEFAULT_PALETTE = ["#1e3a5f", "#4a90a4", "#f5f5f0"] as const
 
 const DEFAULT_TREATMENT: StudioCompositionTreatment = {
   photoWeight: "balanced",
@@ -29,6 +56,10 @@ const DEFAULT_TREATMENT: StudioCompositionTreatment = {
   typeEmphasis: "default",
   ctaWeight: "default",
   paletteMode: "ink",
+  typeVoice: "default",
+  fieldSlot: "accent",
+  inkSlot: "primary",
+  emphasisSlot: "secondary",
 }
 
 /**
@@ -52,6 +83,80 @@ export function studioCompositionTreatment(input: {
   }
 }
 
+/**
+ * Assigns the CreativeSpec palette into field / ink / emphasis roles.
+ * Does not invent campaign-independent brand colors.
+ */
+export function resolveStudioPalette(
+  palette: readonly string[] | undefined,
+  treatment: StudioCompositionTreatment
+): StudioPaletteExecution {
+  const slots = paletteSlots(palette)
+  const field = slots[treatment.fieldSlot]
+  const ink =
+    treatment.inkSlot === "on-field" ? contrastInk(field) : slots[treatment.inkSlot]
+  const emphasis = slots[treatment.emphasisSlot]
+  return { field, ink, emphasis }
+}
+
+/**
+ * Renderer-owned type voice for a leadJob treatment.
+ * Same type system, four different executions — not a font framework.
+ */
+export function studioTypeExecution(
+  treatment: StudioCompositionTreatment
+): StudioTypeExecution {
+  const ctaColor: CtaColorRole =
+    treatment.ctaWeight === "strong"
+      ? "emphasis-fill"
+      : treatment.ctaWeight === "quiet"
+        ? "ink-quiet"
+        : "ink-line"
+
+  switch (treatment.typeVoice) {
+    case "offer":
+      return {
+        scale: 1.1,
+        weight: "bold",
+        rhythm: "immediate",
+        heroColor: "emphasis",
+        ctaColor,
+      }
+    case "urgency":
+      return {
+        scale: 1,
+        weight: "extrabold",
+        rhythm: "compressed",
+        heroColor: "ink",
+        ctaColor,
+      }
+    case "trust":
+      return {
+        scale: 0.9,
+        weight: "medium",
+        rhythm: "composed",
+        heroColor: "ink",
+        ctaColor,
+      }
+    case "problem":
+      return {
+        scale: 1.16,
+        weight: "bold",
+        rhythm: "tense",
+        heroColor: "emphasis",
+        ctaColor,
+      }
+    default:
+      return {
+        scale: 1,
+        weight: "bold",
+        rhythm: "default",
+        heroColor: "ink",
+        ctaColor,
+      }
+  }
+}
+
 function treatmentFromLeadJob(
   leadJob: LeadJob | undefined
 ): StudioCompositionTreatment {
@@ -63,6 +168,10 @@ function treatmentFromLeadJob(
         typeEmphasis: "aggressive",
         ctaWeight: "strong",
         paletteMode: "field",
+        typeVoice: "offer",
+        fieldSlot: "primary",
+        inkSlot: "on-field",
+        emphasisSlot: "secondary",
       }
     case "urgency":
       return {
@@ -71,6 +180,10 @@ function treatmentFromLeadJob(
         typeEmphasis: "aggressive",
         ctaWeight: "strong",
         paletteMode: "field",
+        typeVoice: "urgency",
+        fieldSlot: "secondary",
+        inkSlot: "on-field",
+        emphasisSlot: "primary",
       }
     case "trust":
       return {
@@ -79,6 +192,10 @@ function treatmentFromLeadJob(
         typeEmphasis: "quiet",
         ctaWeight: "quiet",
         paletteMode: "ink",
+        typeVoice: "trust",
+        fieldSlot: "accent",
+        inkSlot: "primary",
+        emphasisSlot: "secondary",
       }
     case "problem":
       return {
@@ -87,6 +204,10 @@ function treatmentFromLeadJob(
         typeEmphasis: "aggressive",
         ctaWeight: "default",
         paletteMode: "field",
+        typeVoice: "problem",
+        fieldSlot: "primary",
+        inkSlot: "on-field",
+        emphasisSlot: "accent",
       }
     default:
       return { ...DEFAULT_TREATMENT }
@@ -125,4 +246,22 @@ function constrainPhotoWeight(
   }
   if (layout === "image_grounded" && weight === "none") return "balanced"
   return weight
+}
+
+function paletteSlots(palette: readonly string[] | undefined): Record<PaletteSlot, string> {
+  return {
+    primary: palette?.[0] || DEFAULT_PALETTE[0],
+    secondary: palette?.[1] || DEFAULT_PALETTE[1],
+    accent: palette?.[2] || DEFAULT_PALETTE[2],
+  }
+}
+
+function contrastInk(background: string): string {
+  const hex = background.replace("#", "")
+  if (hex.length !== 6) return "#1a1a1a"
+  const r = parseInt(hex.slice(0, 2), 16)
+  const g = parseInt(hex.slice(2, 4), 16)
+  const b = parseInt(hex.slice(4, 6), 16)
+  const luma = (r * 299 + g * 587 + b * 114) / 1000
+  return luma > 160 ? "#1a1a1a" : "#f7f7f4"
 }
