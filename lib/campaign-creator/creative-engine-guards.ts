@@ -21,7 +21,9 @@ import {
 } from "./studio-copy"
 import {
   IMAGERY_ROLES,
+  LAYOUT_VARIANTS,
   LEAD_JOBS,
+  normalizeLayoutVariant,
   type CampaignBrief,
   type CreativeDirection,
   type CreativeSpec,
@@ -30,14 +32,6 @@ import {
   type LayoutVariant,
   type LeadJob,
 } from "./types"
-
-const LAYOUT_VARIANTS: readonly LayoutVariant[] = [
-  "offer_hero",
-  "trust_first",
-  "urgency_banner",
-  "photo_led",
-  "minimal_cta",
-]
 
 const IMAGERY_KEYS: readonly ImageryKey[] = [
   "stock_hvac",
@@ -424,7 +418,10 @@ function preserveCreativeSemantics(
 
 function normalizeSpecEnums(spec: CreativeSpec): CreativeSpec {
   const next = cloneSpec(spec)
-  if (next.layoutVariant && !isLayoutVariant(next.layoutVariant)) {
+  const layoutVariant = normalizeLayoutVariant(next.layoutVariant)
+  if (layoutVariant) {
+    next.layoutVariant = layoutVariant
+  } else {
     delete next.layoutVariant
   }
   if (next.imagery && !isImageryKey(next.imagery)) {

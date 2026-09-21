@@ -83,12 +83,36 @@ export interface CampaignBrief {
 
 export type MailFormat = "postcard_4x6"
 
-export type LayoutVariant =
-  | "offer_hero"
-  | "trust_first"
-  | "urgency_banner"
-  | "photo_led"
-  | "minimal_cta"
+export const LAYOUT_VARIANTS = [
+  "type_primary_split",
+  "peer_split",
+  "banded_split",
+  "image_grounded",
+  "type_only",
+] as const
+export type LayoutVariant = (typeof LAYOUT_VARIANTS)[number]
+
+/** Read-side aliases for persisted CreativeSpecs that still use the former tokens. */
+export const LEGACY_LAYOUT_VARIANTS = {
+  offer_hero: "type_primary_split",
+  trust_first: "peer_split",
+  urgency_banner: "banded_split",
+  photo_led: "image_grounded",
+  minimal_cta: "type_only",
+} as const satisfies Record<string, LayoutVariant>
+
+export function normalizeLayoutVariant(
+  value: string | undefined
+): LayoutVariant | undefined {
+  if (!value) return undefined
+  if ((LAYOUT_VARIANTS as readonly string[]).includes(value)) {
+    return value as LayoutVariant
+  }
+  if (value in LEGACY_LAYOUT_VARIANTS) {
+    return LEGACY_LAYOUT_VARIANTS[value as keyof typeof LEGACY_LAYOUT_VARIANTS]
+  }
+  return undefined
+}
 
 export type ImageryKey =
   | "stock_hvac"

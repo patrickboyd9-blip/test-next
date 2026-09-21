@@ -27,7 +27,12 @@ export const SPEC_FIELD_RULES = `CreativeSpec rules:
 - body: max 40 words
 - callToAction: max 6 words
 - palette: exactly 3 hex colors (primary, secondary, accent)
-- layoutVariant: one of offer_hero, trust_first, urgency_banner, photo_led, minimal_cta
+- layoutVariant: one of type_primary_split, peer_split, banded_split, image_grounded, type_only. The compositional structure of the piece — not the leadJob, not imageryRole, and not a template, crop, or component.
+  type_primary_split: Type/message is the dominant compositional field; image is supporting.
+  peer_split: Type and image occupy peer compositional fields.
+  banded_split: A distinct message band organizes the composition with supporting content.
+  image_grounded: Image occupies the compositional ground; type is secondary.
+  type_only: No image field; type/action carry the composition.
 - imagery: one of stock_hvac, stock_restaurant, stock_generic_local, logo_primary, none
   Choose imagery from the business/industry in the brief. Do not invent photographs.
 - Include offer, phone, website, and qrDestination only when those values appear on the brief. Copy them exactly. Do not fabricate them.

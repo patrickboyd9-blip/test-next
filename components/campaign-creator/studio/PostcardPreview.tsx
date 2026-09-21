@@ -5,7 +5,11 @@ import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import { resolveCreativeImage } from "@/lib/campaign-creator/resolve-creative-image"
-import type { CreativeSpec, LayoutVariant } from "@/lib/campaign-creator/types"
+import {
+  normalizeLayoutVariant,
+  type CreativeSpec,
+  type LayoutVariant,
+} from "@/lib/campaign-creator/types"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
 import { ShimmerOverlay, SpecDiffHighlight } from "./SpecDiffHighlight"
@@ -77,7 +81,7 @@ export function PostcardPreview({
 }: PostcardPreviewProps) {
   const reducedMotion = useReducedMotion()
   const [primary, secondary, accent] = spec.palette ?? DEFAULT_PALETTE
-  const layout = (spec.layoutVariant ?? "trust_first") as LayoutVariant
+  const layout = normalizeLayoutVariant(spec.layoutVariant) ?? "peer_split"
   const isAddressSide = side === canvas.addressFace
   const imagery = resolveCreativeImage(spec.imagery, spec.imageryRole)
   const photoSrc = imagery.src
@@ -199,13 +203,13 @@ function PostcardFront({
   }
 
   const face =
-    layout === "offer_hero" ? (
+    layout === "type_primary_split" ? (
       <OfferHeroFront {...context} />
-    ) : layout === "urgency_banner" ? (
+    ) : layout === "banded_split" ? (
       <UrgencyBannerFront {...context} />
-    ) : layout === "photo_led" ? (
+    ) : layout === "image_grounded" ? (
       <PhotoLedFront {...context} />
-    ) : layout === "minimal_cta" ? (
+    ) : layout === "type_only" ? (
       <MinimalCtaFront {...context} />
     ) : (
       <TrustFirstFront {...context} />

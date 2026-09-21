@@ -14,12 +14,12 @@ test("offer-led neighborhood differs from trust-led crew", () => {
   const offerLed = studioCompositionTreatment({
     leadJob: "offer",
     imageryRole: "neighborhood",
-    layoutVariant: "offer_hero",
+    layoutVariant: "type_primary_split",
   })
   const trustLed = studioCompositionTreatment({
     leadJob: "trust",
     imageryRole: "crew",
-    layoutVariant: "trust_first",
+    layoutVariant: "peer_split",
   })
 
   assert.notDeepEqual(offerLed, trustLed)
@@ -37,7 +37,7 @@ test("offer-led neighborhood differs from trust-led crew", () => {
 
 test("treatment is derived from existing CreativeSpec jobs only", () => {
   const spec: CreativeSpec = {
-    layoutVariant: "offer_hero",
+    layoutVariant: "type_primary_split",
     leadJob: "offer",
     imageryRole: "neighborhood",
     headline: "Free Inspection",
@@ -61,22 +61,22 @@ test("treatment is derived from existing CreativeSpec jobs only", () => {
   assert.equal(treatment.paletteMode, "field")
 })
 
-test("minimal_cta never claims a photo weight", () => {
+test("type_only never claims a photo weight", () => {
   const treatment = studioCompositionTreatment({
     leadJob: "trust",
     imageryRole: "crew",
-    layoutVariant: "minimal_cta",
+    layoutVariant: "type_only",
   })
   assert.equal(treatment.photoWeight, "none")
   assert.equal(treatment.typeEmphasis, "quiet")
   assert.equal(treatment.paletteMode, "ink")
 })
 
-test("photo_led does not shrink the photo to subordinate", () => {
+test("image_grounded does not shrink the photo to subordinate", () => {
   const treatment = studioCompositionTreatment({
     leadJob: "offer",
     imageryRole: "neighborhood",
-    layoutVariant: "photo_led",
+    layoutVariant: "image_grounded",
   })
   assert.equal(treatment.photoWeight, "balanced")
   assert.equal(treatment.ctaWeight, "strong")
@@ -98,7 +98,7 @@ test("treatment output is renderer-owned visual knobs only", () => {
   const treatment = studioCompositionTreatment({
     leadJob: "offer",
     imageryRole: "neighborhood",
-    layoutVariant: "offer_hero",
+    layoutVariant: "type_primary_split",
   })
   assert.deepEqual(Object.keys(treatment).sort(), [
     "cropPreset",
@@ -117,13 +117,29 @@ test("treatment output is renderer-owned visual knobs only", () => {
   )
 })
 
+test("legacy layoutVariant tokens still constrain treatment", () => {
+  const typeOnly = studioCompositionTreatment({
+    leadJob: "trust",
+    imageryRole: "crew",
+    layoutVariant: "minimal_cta" as never,
+  })
+  assert.equal(typeOnly.photoWeight, "none")
+
+  const grounded = studioCompositionTreatment({
+    leadJob: "offer",
+    imageryRole: "neighborhood",
+    layoutVariant: "photo_led" as never,
+  })
+  assert.equal(grounded.photoWeight, "balanced")
+})
+
 test("all layout variants still resolve a treatment", () => {
   const layouts = [
-    "offer_hero",
-    "trust_first",
-    "urgency_banner",
-    "photo_led",
-    "minimal_cta",
+    "type_primary_split",
+    "peer_split",
+    "banded_split",
+    "image_grounded",
+    "type_only",
   ] as const
 
   for (const layoutVariant of layouts) {

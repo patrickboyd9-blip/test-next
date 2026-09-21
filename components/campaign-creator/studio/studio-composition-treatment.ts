@@ -1,7 +1,8 @@
-import type {
-  ImageryRole,
-  LayoutVariant,
-  LeadJob,
+import {
+  normalizeLayoutVariant,
+  type ImageryRole,
+  type LayoutVariant,
+  type LeadJob,
 } from "@/lib/campaign-creator/types"
 
 /**
@@ -39,12 +40,10 @@ export function studioCompositionTreatment(input: {
   imageryRole?: ImageryRole
   layoutVariant?: LayoutVariant
 }): StudioCompositionTreatment {
+  const layout = normalizeLayoutVariant(input.layoutVariant) ?? input.layoutVariant
   const fromJob = treatmentFromLeadJob(input.leadJob)
   const cropPreset = cropFromImageryRole(input.imageryRole, fromJob.cropPreset)
-  const photoWeight = constrainPhotoWeight(
-    input.layoutVariant,
-    fromJob.photoWeight
-  )
+  const photoWeight = constrainPhotoWeight(layout, fromJob.photoWeight)
 
   return {
     ...fromJob,
@@ -116,7 +115,7 @@ function constrainPhotoWeight(
   layout: LayoutVariant | undefined,
   weight: PhotoWeight
 ): PhotoWeight {
-  if (layout === "minimal_cta" || weight === "none") return "none"
-  if (layout === "photo_led" && weight === "subordinate") return "balanced"
+  if (layout === "type_only" || weight === "none") return "none"
+  if (layout === "image_grounded" && weight === "subordinate") return "balanced"
   return weight
 }

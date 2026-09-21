@@ -266,7 +266,7 @@ function validDirection(
   index: number,
   overrides: Partial<CreativeDirection> = {}
 ): CreativeDirection {
-  const layouts = ["offer_hero", "trust_first", "urgency_banner"] as const
+  const layouts = ["type_primary_split", "peer_split", "banded_split"] as const
   const headlines = ["Free Inspection Now", "Storm Season Alert", "Trusted Neighborhood"]
   const rationales = [
     "Puts trust before the sale and makes the offer easy to understand.",

@@ -910,7 +910,7 @@ Beta renders previews from this spec via template — not freeform images.
 | `visualDirection` | Yes | One sentence describing imagery approach |
 | `tone` | Yes | From brief emotional tone or inferred |
 | `palette` | Yes | 3 hex colors: primary, secondary, accent |
-| `layoutVariant` | Yes | One of: `offer_hero`, `trust_first`, `urgency_banner`, `photo_led`, `minimal_cta` |
+| `layoutVariant` | Yes | One of: `type_primary_split` (type/message is the dominant compositional field; image is supporting), `peer_split` (type and image occupy peer compositional fields), `banded_split` (a distinct message band organizes the composition with supporting content), `image_grounded` (image occupies the compositional ground; type is secondary), `type_only` (no image field; type/action carry the composition). Structure only — not `leadJob`, not `imageryRole`, not a template |
 | `imagery` | Yes | One of: `stock_hvac`, `stock_restaurant`, `stock_generic_local`, `logo_primary`, `none`. Beta uses curated stock keyed to industry |
 | `backLayout` | Yes | Beta always: `standard_address` — auto-generated address/indicia panel |
 

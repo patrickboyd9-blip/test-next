@@ -14,11 +14,16 @@ import { buildGenerateSystemPrompt } from "./prompts/generate"
 import { buildRegenerateSystemPrompt, buildRegenerateUserMessage } from "./prompts/regenerate"
 import { buildRefineSystemPrompt } from "./prompts/refine"
 import { SPEC_FIELD_RULES } from "./prompts/shared"
+import { normalizeCampaign } from "./repository"
 import { cloneSpec } from "./spec-diff"
 import {
   GENERATED_SPEC_TOOL_REQUIRED,
   IMAGERY_ROLES,
+  LAYOUT_VARIANTS,
   LEAD_JOBS,
+  createEmptyCampaignCreative,
+  normalizeLayoutVariant,
+  type Campaign,
   type CampaignBrief,
   type CreativeDirection,
   type CreativeSpec,
@@ -52,7 +57,7 @@ const canvas: CreativeCanvas = {
 
 function baseSpec(overrides: Partial<CreativeSpec> = {}): CreativeSpec {
   return {
-    layoutVariant: "offer_hero",
+    layoutVariant: "type_primary_split",
     headline: "Free Inspection Now",
     body: "Licensed local crew ready to inspect.",
     callToAction: "Call to book",
@@ -71,7 +76,7 @@ function validDirection(
   index: number,
   overrides: Partial<CreativeDirection> = {}
 ): CreativeDirection {
-  const layouts = ["offer_hero", "trust_first", "urgency_banner"] as const
+  const layouts = ["type_primary_split", "peer_split", "banded_split"] as const
   const jobs = ["offer", "problem", "trust"] as const
   const roles = ["neighborhood", "consequence", "crew"] as const
   const headlines = ["Free Inspection Now", "Hidden Roof Danger", "Trusted Roofing Team"]
@@ -190,7 +195,7 @@ test("generated CreativeSpec validation requires the new fields", () => {
 
 test("existing persisted CreativeSpec without the new fields remains loadable", () => {
   const legacy: CreativeSpec = {
-    layoutVariant: "trust_first",
+    layoutVariant: "peer_split",
     headline: "Trusted Local Expert",
     body: "Licensed and insured.",
     callToAction: "Call today",
@@ -294,6 +299,143 @@ test("prompt and tool schema expose leadJob and imageryRole as closed enums", ()
     "logo",
     "none",
   ])
+})
+
+test("layoutVariant contract names structure jobs, not leads or templates", () => {
+  assert.deepEqual([...LAYOUT_VARIANTS], [
+    "type_primary_split",
+    "peer_split",
+    "banded_split",
+    "image_grounded",
+    "type_only",
+  ])
+
+  for (const text of [
+    SPEC_FIELD_RULES,
+    buildGenerateSystemPrompt(canvas, { principles: [] }),
+    buildRefineSystemPrompt(canvas, { principles: [] }),
+  ]) {
+    for (const value of LAYOUT_VARIANTS) assert.match(text, new RegExp(`\\b${value}\\b`))
+    assert.match(text, /Type\/message is the dominant compositional field/)
+    assert.match(text, /Type and image occupy peer compositional fields/)
+    assert.match(text, /distinct message band/)
+    assert.match(text, /Image occupies the compositional ground/)
+    assert.match(text, /No image field/)
+    assert.doesNotMatch(text, /offer_hero/)
+    assert.doesNotMatch(text, /trust_first/)
+    assert.doesNotMatch(text, /urgency_banner/)
+    assert.doesNotMatch(text, /photo_led/)
+    assert.doesNotMatch(text, /minimal_cta/)
+  }
+})
+
+test("legacy layoutVariant tokens normalize to structure jobs", () => {
+  assert.equal(normalizeLayoutVariant("offer_hero"), "type_primary_split")
+  assert.equal(normalizeLayoutVariant("trust_first"), "peer_split")
+  assert.equal(normalizeLayoutVariant("urgency_banner"), "banded_split")
+  assert.equal(normalizeLayoutVariant("photo_led"), "image_grounded")
+  assert.equal(normalizeLayoutVariant("minimal_cta"), "type_only")
+  assert.equal(normalizeLayoutVariant("peer_split"), "peer_split")
+  assert.equal(normalizeLayoutVariant("unknown_layout"), undefined)
+})
+
+test("loading a campaign does not rewrite historical layoutVariant tokens", () => {
+  const persisted = JSON.parse(
+    JSON.stringify({
+      id: "campaign-legacy-layout",
+      ownerId: "owner@example.com",
+      status: "creative_approved",
+      brief: { offer: "Free roof inspection" },
+      creative: {
+        ...createEmptyCampaignCreative(),
+        selectedDirectionId: "dir-lead",
+        activeSpec: baseSpec({ layoutVariant: "urgency_banner" as never }),
+        activeRevisionId: "rev-1",
+        approvedRevisionId: "rev-1",
+        approvedSpec: baseSpec({ layoutVariant: "minimal_cta" as never }),
+        directions: [
+          {
+            id: "dir-lead",
+            name: "Offer First",
+            rationale: "Leads with the offer.",
+            designedToDrive: "Inspection bookings",
+            tags: ["offer-led"],
+            spec: baseSpec({ layoutVariant: "trust_first" as never }),
+            recommended: true,
+            createdAt: "2026-09-19T20:01:00.000Z",
+          },
+        ],
+        revisions: [
+          {
+            id: "rev-1",
+            directionId: "dir-lead",
+            version: 1,
+            spec: baseSpec({ layoutVariant: "photo_led" as never }),
+            customerPrompt: "Original concept",
+            studioResponse: "",
+            type: "refinement",
+            createdAt: "2026-09-19T20:01:00.000Z",
+          },
+        ],
+      },
+      transcript: [],
+      mailPiece: {
+        id: "mail-piece-1",
+        version: 1,
+        approvedAt: "2026-09-19T21:00:00.000Z",
+        directionId: "dir-lead",
+        revisionId: "rev-1",
+        catalogId: "postcard_5x8",
+        catalogVersion: 1,
+        spec: baseSpec({ layoutVariant: "offer_hero" as never }),
+      },
+      mailPieceVersions: [
+        {
+          id: "mail-piece-1",
+          version: 1,
+          approvedAt: "2026-09-19T21:00:00.000Z",
+          directionId: "dir-lead",
+          revisionId: "rev-1",
+          catalogId: "postcard_5x8",
+          catalogVersion: 1,
+          spec: baseSpec({ layoutVariant: "offer_hero" as never }),
+        },
+      ],
+      readyForBriefReview: true,
+      createdAt: "2026-09-19T19:00:00.000Z",
+      updatedAt: "2026-09-19T21:00:00.000Z",
+    })
+  ) as Campaign
+
+  const loaded = normalizeCampaign(persisted)
+
+  assert.equal(loaded.mailPiece?.spec.layoutVariant, "offer_hero")
+  assert.equal(loaded.mailPieceVersions?.[0].spec.layoutVariant, "offer_hero")
+  assert.equal(loaded.creative.directions[0].spec.layoutVariant, "trust_first")
+  assert.equal(loaded.creative.revisions[0].spec.layoutVariant, "photo_led")
+  assert.equal(loaded.creative.activeSpec?.layoutVariant, "urgency_banner")
+  assert.equal(loaded.creative.approvedSpec?.layoutVariant, "minimal_cta")
+
+  assert.equal(
+    normalizeLayoutVariant(loaded.mailPiece?.spec.layoutVariant),
+    "type_primary_split"
+  )
+  assert.equal(
+    normalizeLayoutVariant(loaded.creative.directions[0].spec.layoutVariant),
+    "peer_split"
+  )
+  assert.equal(
+    normalizeLayoutVariant(loaded.creative.revisions[0].spec.layoutVariant),
+    "image_grounded"
+  )
+  assert.equal(
+    normalizeLayoutVariant(loaded.creative.activeSpec?.layoutVariant),
+    "banded_split"
+  )
+  assert.equal(
+    normalizeLayoutVariant(loaded.creative.approvedSpec?.layoutVariant),
+    "type_only"
+  )
 })
 
 test("the new fields cannot introduce geometry or asset URLs", () => {

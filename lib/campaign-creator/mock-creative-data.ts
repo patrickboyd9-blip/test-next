@@ -32,7 +32,7 @@ export function getMockCreativeDirections(
       tags: ["Offer-led", "QR-forward", "Professional"],
       createdAt: MOCK_CREATED_AT,
       spec: {
-        layoutVariant: "trust_first",
+        layoutVariant: "peer_split",
         headline: `${business}`,
         subheadline: "Your neighbors trust us for fast, reliable HVAC service",
         body: `${offer}. Licensed, insured, and locally owned since 2008.`,
@@ -61,7 +61,7 @@ export function getMockCreativeDirections(
       tags: ["Urgency-led", "Offer-forward", "High contrast"],
       createdAt: MOCK_CREATED_AT,
       spec: {
-        layoutVariant: "urgency_banner",
+        layoutVariant: "banded_split",
         headline: "BEAT THE HEAT",
         subheadline: `${offer.toUpperCase()}`,
         body: `${business} — same-day appointments available. Scan or call today.`,
@@ -90,7 +90,7 @@ export function getMockCreativeDirections(
       tags: ["Community-led", "Warm tone", "Soft sell"],
       createdAt: MOCK_CREATED_AT,
       spec: {
-        layoutVariant: "photo_led",
+        layoutVariant: "image_grounded",
         headline: "Keeping Irvine comfortable",
         subheadline: `From your neighbors at ${business}`,
         body: `${offer}. We're proud to serve your neighborhood — book your appointment in seconds.`,

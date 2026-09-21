@@ -29,7 +29,7 @@ const MAIL_PIECE_KEYS = [
 
 function baseSpec(overrides: Partial<CreativeSpec> = {}): CreativeSpec {
   return {
-    layoutVariant: "offer_hero",
+    layoutVariant: "type_primary_split",
     headline: "Free Inspection Now",
     body: "Licensed local crew ready to inspect.",
     callToAction: "Call to book",

@@ -28,11 +28,12 @@ import {
   GENERATED_SPEC_TOOL_REQUIRED,
   IMAGERY_ROLES,
   LEAD_JOBS,
+  LAYOUT_VARIANTS,
+  normalizeLayoutVariant,
   type CreativeDirection,
   type CreativeSpec,
   type ImageryKey,
   type ImageryRole,
-  type LayoutVariant,
   type LeadJob,
 } from "./types"
 
@@ -46,7 +47,7 @@ const REFINE_TOOL_NAME = "apply_creative_refinement"
 const specToolProperties = {
   layoutVariant: {
     type: "string",
-    enum: ["offer_hero", "trust_first", "urgency_banner", "photo_led", "minimal_cta"],
+    enum: [...LAYOUT_VARIANTS],
   },
   headline: { type: "string" },
   subheadline: { type: "string" },
@@ -359,7 +360,9 @@ function parseSpec(raw: unknown): CreativeSpec | undefined {
   if (!isRecord(raw)) return undefined
 
   const spec: CreativeSpec = {
-    layoutVariant: isLayoutVariant(raw.layoutVariant) ? raw.layoutVariant : undefined,
+    layoutVariant: normalizeLayoutVariant(
+      typeof raw.layoutVariant === "string" ? raw.layoutVariant : undefined
+    ),
     headline: asOptionalString(raw.headline),
     subheadline: asOptionalString(raw.subheadline),
     body: asOptionalString(raw.body),
@@ -410,16 +413,6 @@ function asString(value: unknown): string {
 
 function asOptionalString(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value : undefined
-}
-
-function isLayoutVariant(value: unknown): value is LayoutVariant {
-  return (
-    value === "offer_hero" ||
-    value === "trust_first" ||
-    value === "urgency_banner" ||
-    value === "photo_led" ||
-    value === "minimal_cta"
-  )
 }
 
 function isImageryKey(value: unknown): value is ImageryKey {

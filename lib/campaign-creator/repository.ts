@@ -185,7 +185,8 @@ function normalizeCreative(raw: CampaignCreative | undefined): CampaignCreative 
   return creative
 }
 
-function normalizeCampaign(raw: Campaign): Campaign {
+/** Load-time campaign shaping only. Does not rewrite persisted CreativeSpec tokens. */
+export function normalizeCampaign(raw: Campaign): Campaign {
   return {
     ...raw,
     status: normalizeCampaignStatus(raw.status),
