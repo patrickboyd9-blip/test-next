@@ -1299,8 +1299,48 @@ Studio mode includes visually hidden skip link: **Skip to main action** — targ
 
 ### Future enhancements (post-beta, unordered)
 
+These are deferred product capabilities. They are not current implementation work, not milestone commitments, and not a change to current roadmap priority.
+
+#### Customer-owned creative assets and existing mailer import
+
+Modern Mail should not require customers to use only Modern Mail-generated imagery or creative. Customers should be able to bring their own brand assets and, eventually, their own existing creative into the Modern Mail workflow.
+
+At minimum this includes:
+
+- customer-uploaded images
+- customer-uploaded logos
+
+This subsumes the earlier “logo upload inline during refinement” item. Campaign Creator already expects required creative assets (logo, photographs, existing graphics, required text) to be collectable rather than recreated inside Modern Mail. This future capability is the Creative Engine / Creative Studio path that makes those customer-owned assets first-class inputs to generation and refinement.
+
+Future direction may extend beyond individual assets to importing an existing customer-created mailer or design.
+
+Potential future integrations include Figma and Canva. Those are a future integration / product direction, not a committed implementation decision. They may eventually support importing an entire customer-created mailer, not only uploading isolated assets. Do not assume Figma/Canva are asset-upload tools only.
+
+Preserve the distinction between:
+
+- customer-provided assets and copy
+- AI-generated creative
+- future full-mailer import and design-tool integrations
+
+This must remain compatible with the existing architectural principle that Modern Mail owns the structured creative and production workflow. Customer-provided creative should eventually enter through a defined creation/import path rather than bypassing the domain model.
+
+Do not decide implementation details, APIs, file formats, or Figma/Canva architecture here.
+
+#### Explicit “Insert your text”
+
+The Creative Engine already has some ability to incorporate customer-provided text (interview-collected required text, brief copy, and natural-language refinement such as setting a headline). The current UX does not make that capability sufficiently obvious.
+
+The Creative Engine should have a clear, first-class customer action such as **Insert your text**.
+
+This should make it obvious that a customer can provide their own wording and copy while still allowing the Creative Engine to structure and design the mailer around it.
+
+The goal is not necessarily to make customers manually design the mailer. The goal is to make customer-provided copy a clear, intentional input to the creative workflow.
+
+Do not decide the final UX here. Do not treat this as a CreativeSpec change.
+
+#### Other deferred enhancements
+
 - AI-generated imagery in template image slots
-- Logo upload inline during refinement
 - Additional mail formats
 - Brand profile influencing default palette and tone
 - "Similar to last campaign" direction shortcut
