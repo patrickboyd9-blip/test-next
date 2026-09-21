@@ -35,6 +35,7 @@ export const SPEC_FIELD_RULES = `CreativeSpec rules:
 - tone: from the brief, or a safe inference from the goal
 - leadJob: one of offer, problem, trust, urgency. The job the piece leads with. Does not create an offer or invent facts, deadlines, proof, or weather
 - imageryRole: one of consequence, neighborhood, crew, logo, none. The job of the image — not a file, URL, crop, or photograph to invent
+- leadJob and imageryRole must cohere with the concept. The image should reinforce the piece's lead, not compete with it. Judge that from the concept's copy, offer, audience, and visualDirection — not from enum names. The image may do a complementary job; it need not repeat the lead. No pairing is universally invalid.
 - Do not emit physical format, catalog identity, dimensions, bleed, reserved-zone geometry, or asset paths`
 
 export function buildCreativeCanvasPromptContext(canvas: CreativeCanvas): string {
