@@ -3096,6 +3096,120 @@ This ADR does not define that later operation. Campaign code still has only `Aud
 
 ---
 
+## ADR-023: CreativeSpec Semantic Jobs Must Be Materially Expressed by Composition
+
+### Status
+
+Accepted
+
+### Context
+
+ADR-005 already separates creative expression from rendering. `CreativeSpec` owns creative expression (headline, body, CTA, offer, tone, palette, imagery, `layoutVariant`, `layoutHints`, and related fields). The renderer owns projecting that spec onto `CreativeCanvas`: template geometry, preview aspect, reserved-zone rendering, and later production rendering. Creative decides **what** is expressed. The renderer decides **how** it is physically realized. The Creative Engine is not responsible for rendering. Physical product identity stays on `MailPieceSpec` / the catalog; `CreativeCanvas` is the creative-facing projection. Do not put trim, bleed, reserved-zone geometry, or catalog identity on `CreativeSpec`.
+
+`MailPiece` remains the immutable approved snapshot of that `CreativeSpec` (ADR-008 / ADR-012). Creative Intelligence supplies classified guidance to the Creative Engine; it does not persist a campaign field and does not render pixels (`lib/campaign-creator/creative-intelligence.ts`).
+
+The implemented Studio composition layer is `PostcardPreview` (`components/campaign-creator/studio/PostcardPreview.tsx`): five React front structures (`offer_hero`, `trust_first`, `urgency_banner`, `photo_led`, `minimal_cta`), a shared type ramp, a single photo crop (`object-[72%_40%]`), shared CTA/QR chrome, and a curated imagery library resolved by `resolveCreativeImage`. Beta still renders templates plus curated stock, not generated finished-postcard images (`docs/prd/CreativeStudio.md` §6.2; `docs/prd/AICreativeEngine.md` Imagery).
+
+`CreativeSpec` already names semantic jobs including `layoutVariant`, `leadJob`, `imageryRole`, `tone`, and `visualDirection`. Several of those jobs have little or no visual effect today: `tone` is used in a Focus caption (`FocusView.tsx`); `visualDirection` is photo `alt` text; `leadJob` mainly reorders offer vs headline (`studio-copy-hierarchy.ts`); `imageryRole` mainly swaps which library JPEG fills a fixed slot.
+
+A composition-boundary audit found that materially different directions — for example offer-led / bold direct response versus trust-led / editorial / premium — can collapse into essentially the same split-card treatment despite different CreativeSpec semantics.
+
+Adding more CreativeSpec fields before improving execution would expand the schema without making existing intent visible. The gap is the **CreativeSpec ↔ composition** boundary, not a missing pixel-level design language.
+
+### Decision
+
+> **CreativeSpec's existing semantic creative jobs must be materially expressed by the composition layer. Composition must not merely use those jobs to reorder copy or swap assets within essentially the same visual template. Semantic jobs such as `layoutVariant`, `leadJob`, and `imageryRole` must be capable of producing materially different visual compositions.**
+
+Recorded boundaries:
+
+- `CreativeSpec` remains the structured expression of creative intent.
+- The AI / Creative Engine authors semantic creative decisions and content.
+- The composition layer is responsible for visually executing those decisions.
+- Existing CreativeSpec fields should be meaningfully reflected in the rendered composition where they represent visual intent.
+- `layoutVariant`, `leadJob`, and `imageryRole` must influence **actual composition**, not merely copy ordering or asset selection.
+- Composition may vary structure, image treatment, visual emphasis, and palette application using semantic information **already present** on `CreativeSpec`.
+- Exact implementation details are **not** decided here.
+
+**Principle:** AI authors creative jobs and content. Composition executes those jobs.
+
+This ADR does not change TypeScript, React, prompts, `CreativeSpec`, or the renderer.
+
+### Preserved boundaries
+
+- `CreativeSpec` does **not** become a pixel-level design schema.
+- `CreativeSpec` does **not** contain arbitrary x/y coordinates, CSS, exact pixel margins or font sizes, or crop coordinates. Crop, scale, and placement remain renderer-owned (`resolve-creative-image.ts`; ADR-005 template geometry).
+- Catalog / `MailPieceSpec` / `CreativeCanvas` continue to own physical and product constraints.
+- `ProductionDocument` and vendor-specific rendering remain outside this decision (ADR-008, ADR-011, ADR-012).
+- The customer does not become responsible for manually laying out the mailer.
+- AI does not generate a finished postcard as one opaque image.
+
+### External research / Grok Bot
+
+The existing conceptual flow remains compatible with later external research:
+
+```text
+External / Grok research
+    → Creative Intelligence
+    → CreativeSpec
+    → composition
+```
+
+Grok Bot research is **not** part of this ADR. Do not implement or model it here. Composition must execute `CreativeSpec` regardless of where Creative Intelligence principles came from.
+
+### Boundaries / non-goals
+
+This ADR does **not** decide:
+
+- how many composition layouts are needed
+- whether the five existing layouts are modified, replaced, or expanded
+- whether a new composition abstraction is required
+- whether an image-generation model is introduced, or which provider
+- how Grok Bot research will be integrated
+- whether `CreativeSpec` needs additional fields
+- exact typography system
+- exact image-placement rules
+- exact CSS or renderer implementation
+- production / PDF rendering
+
+Do not treat “materially different compositions” as authorizing pixel fields on `CreativeSpec` or one-shot finished-mailer images.
+
+### Consequences
+
+Composition is now an **execution obligation** against existing semantic jobs, not a courtesy mapping onto one visual template.
+
+A later implementation must make distinct `layoutVariant` / `leadJob` / `imageryRole` combinations capable of looking like distinct designs, using structure, image treatment, emphasis, and palette application already licensed by this ADR.
+
+`CreativeSpec` stays a creative-expression object. `CreativeCanvas` / catalog stay physical. Creative Intelligence stays guidance into the engine. `MailPiece` still freezes the approved spec, not a layout engine.
+
+This change is documentation only.
+
+### Open questions / unresolved decisions
+
+- How the current five templates evolve
+- Whether a named composition abstraction is needed
+- Image generation (whether, and which provider)
+- Additional CreativeSpec fields
+- Typography and image-treatment rules
+- Production / PDF renderer
+- Grok Bot / external-research integration
+
+### Source grounding
+
+| Claim | Source | Kind |
+|---|---|---|
+| `CreativeSpec` owns creative expression; renderer projects it onto the canvas | ADR-005 | Established |
+| Creative decides what; renderer decides how / owns template geometry | ADR-005 Creative vs renderer | Established |
+| Do not put physical geometry on `CreativeSpec` | ADR-005; `CreativeCanvas` | Established |
+| Studio preview is templates + curated stock, not a finished generated image | `docs/prd/CreativeStudio.md` §6.2; `docs/prd/AICreativeEngine.md` Imagery | Established |
+| Five React fronts; shared crop, type, CTA chrome | `PostcardPreview.tsx` | Established implementation |
+| `leadJob` mainly reorders offer vs message; `imageryRole` selects a library file | `studio-copy-hierarchy.ts`; `resolve-creative-image.ts` | Established implementation |
+| `tone` / `visualDirection` required on generate, little/no visual effect | `creative-engine-guards.ts`; `FocusView.tsx`; `PostcardPreview.tsx` | Established implementation |
+| Distinct specs can collapse to the same split-card treatment | composition-boundary audit | Established audit finding |
+| Semantic jobs must be materially expressed by composition | this ADR | **This ADR** |
+| Layout count, image model, new spec fields, Grok, PDF | this ADR | Unresolved |
+
+---
+
 # Beta Product Decisions
 
 This section records product-scope defaults for the initial Modern Mail beta. These are not architectural ADRs and do not change the domain model above.
