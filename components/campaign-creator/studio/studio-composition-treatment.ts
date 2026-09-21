@@ -116,6 +116,13 @@ function constrainPhotoWeight(
   weight: PhotoWeight
 ): PhotoWeight {
   if (layout === "type_only" || weight === "none") return "none"
-  if (layout === "image_grounded" && weight === "subordinate") return "balanced"
+  if (layout === "type_primary_split") {
+    return weight === "dominant" ? "subordinate" : weight
+  }
+  if (layout === "peer_split") return "balanced"
+  if (layout === "banded_split") {
+    return weight === "dominant" ? "balanced" : weight
+  }
+  if (layout === "image_grounded" && weight === "none") return "balanced"
   return weight
 }

@@ -23,8 +23,10 @@ import {
 } from "./studio-composition-treatment"
 import {
   studioCopyHierarchy,
+  copyOfferLeads,
   type StudioCopyHierarchy,
 } from "./studio-copy-hierarchy"
+import { studioCompositionStructure } from "./studio-composition-structure"
 
 export type PostcardPreviewSize = "hero" | "medium" | "thumbnail"
 
@@ -200,19 +202,20 @@ function PostcardFront({
     showMonogram,
     hierarchy,
     treatment,
+    layout,
   }
 
   const face =
     layout === "type_primary_split" ? (
-      <OfferHeroFront {...context} />
+      <TypePrimaryFront {...context} />
     ) : layout === "banded_split" ? (
-      <UrgencyBannerFront {...context} />
+      <BandedSplitFront {...context} />
     ) : layout === "image_grounded" ? (
-      <PhotoLedFront {...context} />
+      <ImageGroundedFront {...context} />
     ) : layout === "type_only" ? (
-      <MinimalCtaFront {...context} />
+      <TypeOnlyFront {...context} />
     ) : (
-      <TrustFirstFront {...context} />
+      <PeerSplitFront {...context} />
     )
 
   if (fullBleed) return face
@@ -243,6 +246,7 @@ interface FrontContext {
   showMonogram: boolean
   hierarchy: StudioCopyHierarchy
   treatment: StudioCompositionTreatment
+  layout: LayoutVariant
 }
 
 interface TypeScale {
@@ -285,55 +289,170 @@ function typeBreathing(compact: boolean, emphasis: TypeEmphasis): string {
   return compact ? "px-2 py-2" : "px-4 py-3.5 sm:px-5 sm:py-4"
 }
 
-function offerLeads(
-  hierarchy: StudioCopyHierarchy,
-  layoutDefault: boolean
-): boolean {
-  if (hierarchy === "layout-default") return layoutDefault
-  return hierarchy === "offer-hero"
+function LeadType({
+  spec,
+  offer,
+  leadWithOffer,
+  compact,
+  type,
+  color,
+  treatment,
+  showBody,
+  heroSize,
+}: {
+  spec: CreativeSpec
+  offer: string
+  leadWithOffer: boolean
+  compact: boolean
+  type: TypeScale
+  color: string
+  treatment: StudioCompositionTreatment
+  showBody: boolean
+  heroSize?: string
+}) {
+  const hero = leadWithOffer && offer ? offer : spec.headline
+  const size = heroSize ?? (leadWithOffer && offer ? type.offer : type.headline)
+  return (
+    <div className="min-w-0">
+      {hero ? (
+        <p
+          className={cn(
+            headlineWeight(treatment.typeEmphasis),
+            "max-w-[16ch] leading-[0.95] tracking-[-0.035em]"
+          )}
+          style={{ color, fontSize: size }}
+        >
+          {hero}
+        </p>
+      ) : null}
+      {leadWithOffer && offer && spec.headline ? (
+        <p
+          className={cn(
+            "mt-2 max-w-[18ch] leading-[1.05] tracking-[-0.02em]",
+            treatment.typeEmphasis === "quiet" ? "font-medium" : "font-semibold"
+          )}
+          style={{ color, fontSize: type.headline, opacity: 0.88 }}
+        >
+          {spec.headline}
+        </p>
+      ) : null}
+      {!leadWithOffer && !compact && spec.subheadline ? (
+        <p
+          className="mt-2 max-w-[22ch] leading-snug"
+          style={{ color, fontSize: type.sub, opacity: 0.72 }}
+        >
+          {spec.subheadline}
+        </p>
+      ) : null}
+      {showBody && !compact && spec.body ? (
+        <p
+          className="mt-2 line-clamp-2 max-w-[24ch] leading-relaxed"
+          style={{
+            color,
+            fontSize: type.body,
+            opacity: treatment.typeEmphasis === "quiet" ? 0.5 : 0.58,
+          }}
+        >
+          {spec.body}
+        </p>
+      ) : null}
+    </div>
+  )
 }
 
-function offerHeroPhotoWidth(weight: PhotoWeight): string {
-  if (weight === "subordinate") return "w-[36%]"
-  if (weight === "dominant") return "w-[58%]"
-  return "w-[48%]"
-}
-
-function offerHeroTypeWidth(weight: PhotoWeight): string {
-  if (weight === "subordinate") return "w-[68%]"
-  if (weight === "dominant") return "w-[50%]"
-  return "w-[58%]"
-}
-
-function trustPhotoFlex(weight: PhotoWeight): string {
-  if (weight === "subordinate") return "flex-[4]"
-  if (weight === "dominant") return "flex-[7]"
-  return "flex-[5]"
-}
-
-function trustTypeFlex(weight: PhotoWeight): string {
-  if (weight === "subordinate") return "flex-[7]"
-  if (weight === "dominant") return "flex-[5]"
-  return "flex-[6]"
-}
-
-function bannerPhotoFlex(weight: PhotoWeight): string {
-  if (weight === "subordinate") return "flex-[1]"
-  if (weight === "dominant") return "flex-[2]"
-  return "flex-[1.35]"
-}
-
-function photoLedPanelWidth(weight: PhotoWeight): string {
-  if (weight === "dominant") return "w-[34%]"
-  if (weight === "subordinate") return "w-[48%]"
-  return "w-[40%]"
+function ActionCluster({
+  spec,
+  offer,
+  leadWithOffer,
+  compact,
+  type,
+  color,
+  treatment,
+  phoneBottomRight,
+  showQr,
+  qrLarge,
+  onPhoto = false,
+}: {
+  spec: CreativeSpec
+  offer: string
+  leadWithOffer: boolean
+  compact: boolean
+  type: TypeScale
+  color: string
+  treatment: StudioCompositionTreatment
+  phoneBottomRight: boolean
+  showQr: boolean
+  qrLarge: boolean
+  onPhoto?: boolean
+}) {
+  return (
+    <div>
+      {!leadWithOffer && offer ? (
+        <p
+          className="mb-2 max-w-[20ch] font-medium"
+          style={{ color, fontSize: type.sub, opacity: 0.8 }}
+        >
+          {offer}
+        </p>
+      ) : null}
+      {spec.callToAction ? (
+        <PrintCta color={color} size={type.cta} weight={treatment.ctaWeight}>
+          {spec.callToAction}
+        </PrintCta>
+      ) : null}
+      <div className="mt-2 flex items-end justify-between gap-2">
+        {!compact ? (
+          <PostcardFooter
+            spec={spec}
+            color={color}
+            phoneBottomRight={phoneBottomRight}
+            size={type.footer}
+            quiet
+          />
+        ) : (
+          <span />
+        )}
+        {showQr ? (
+          <QrMark tone={color} compact={compact} large={qrLarge} onPhoto={onPhoto} />
+        ) : null}
+      </div>
+    </div>
+  )
 }
 
 function isQuietInk(treatment: StudioCompositionTreatment): boolean {
   return treatment.paletteMode === "ink" && treatment.typeEmphasis === "quiet"
 }
 
-function OfferHeroFront({
+function supportingImagePlate(compact: boolean, weight: PhotoWeight): string {
+  if (compact) {
+    return weight === "balanced"
+      ? "right-[3%] top-[16%] h-[68%] w-[32%]"
+      : "right-[3%] top-[18%] h-[64%] w-[28%]"
+  }
+  return weight === "balanced"
+    ? "right-[4%] top-[11%] h-[78%] w-[34%]"
+    : "right-[4%] top-[13%] h-[74%] w-[30%]"
+}
+
+function inscriptionLockup(
+  compact: boolean,
+  role: FrontContext["spec"]["imageryRole"],
+  weight: PhotoWeight
+): string {
+  const present = role === "consequence" || weight === "subordinate"
+  const compactRole = role === "neighborhood" || weight === "dominant"
+  if (compact) {
+    return present
+      ? "bottom-1.5 left-1.5 max-w-[62%] px-2 py-1.5"
+      : "bottom-1.5 left-1.5 max-w-[54%] px-2 py-1.5"
+  }
+  if (present) return "bottom-[6%] left-[4%] w-[44%] px-3.5 py-3"
+  if (compactRole) return "bottom-[6%] left-[4%] w-[34%] px-3 py-2.5"
+  return "bottom-[6%] left-[4%] w-[38%] px-3.5 py-3"
+}
+
+function TypePrimaryFront({
   spec,
   secondary,
   surface,
@@ -349,12 +468,94 @@ function OfferHeroFront({
   showMonogram,
   hierarchy,
   treatment,
+  layout,
 }: FrontContext) {
-  const leadWithOffer = offerLeads(hierarchy, true)
-  const photoWeight = treatment.photoWeight
+  const leadWithOffer = copyOfferLeads(hierarchy)
+  const structure = studioCompositionStructure(layout)
   return (
-    <div className="relative h-full" style={{ backgroundColor: surface }}>
-      <div className={cn("absolute inset-y-0 right-0 overflow-hidden", offerHeroPhotoWidth(photoWeight))}>
+    <div
+      className="relative h-full"
+      style={{ backgroundColor: surface }}
+      data-composition={structure.layoutVariant}
+    >
+      <div
+        data-region="type"
+        className={cn(
+          "relative z-10 flex h-full w-[66%] flex-col justify-between",
+          typeBreathing(compact, treatment.typeEmphasis)
+        )}
+      >
+        <LeadType
+          spec={spec}
+          offer={offer}
+          leadWithOffer={leadWithOffer}
+          compact={compact}
+          type={type}
+          color={ink}
+          treatment={treatment}
+          showBody={false}
+        />
+        <ActionCluster
+          spec={spec}
+          offer={offer}
+          leadWithOffer={leadWithOffer}
+          compact={compact}
+          type={type}
+          color={ink}
+          treatment={treatment}
+          phoneBottomRight={phoneBottomRight}
+          showQr={showQr}
+          qrLarge={qrLarge}
+        />
+      </div>
+      <div
+        data-region="supporting-image"
+        className={cn(
+          "absolute overflow-hidden",
+          supportingImagePlate(compact, treatment.photoWeight)
+        )}
+      >
+        <PhotoSlot
+          src={photoSrc}
+          alt={photoAlt}
+          monogram={showMonogram ? monogramLetter(spec.headline) : null}
+          fallback={secondary}
+          primary={ink}
+          crop={treatment.cropPreset}
+        />
+      </div>
+    </div>
+  )
+}
+
+function PeerSplitFront({
+  spec,
+  secondary,
+  surface,
+  ink,
+  compact,
+  type,
+  phoneBottomRight,
+  qrLarge,
+  showQr,
+  offer,
+  photoAlt,
+  photoSrc,
+  showMonogram,
+  hierarchy,
+  treatment,
+  layout,
+}: FrontContext) {
+  const leadWithOffer = copyOfferLeads(hierarchy)
+  const structure = studioCompositionStructure(layout)
+  const quiet = treatment.typeEmphasis === "quiet"
+  return (
+    <div
+      className="flex h-full"
+      style={{ backgroundColor: surface }}
+      data-composition={structure.layoutVariant}
+    >
+      <div data-region="peer-image" className="relative h-full min-w-0 w-[54%] overflow-hidden">
         <PhotoSlot
           src={photoSrc}
           alt={photoAlt}
@@ -365,199 +566,52 @@ function OfferHeroFront({
         />
       </div>
       <div
+        data-region="peer-type"
         className={cn(
-          "relative z-10 flex h-full flex-col justify-between",
-          offerHeroTypeWidth(photoWeight),
-          typeBreathing(compact, treatment.typeEmphasis)
+          "flex h-full w-[46%] min-w-0 flex-col justify-between",
+          quiet
+            ? compact
+              ? "px-2.5 py-2"
+              : "px-4 py-4"
+            : compact
+              ? "px-2 py-1.5"
+              : "px-3.5 py-3.5"
         )}
-        style={{ backgroundColor: surface }}
       >
-        <div className="min-w-0 max-w-[22ch]">
-          {leadWithOffer && offer ? (
-            <p
-              className={cn(headlineWeight(treatment.typeEmphasis), "leading-[0.95] tracking-[-0.035em]")}
-              style={{ color: ink, fontSize: type.offer }}
-            >
-              {offer}
-            </p>
-          ) : null}
-          <p
-            className={cn(
-              "max-w-[18ch] leading-[1.05] tracking-[-0.02em]",
-              leadWithOffer && offer ? "mt-2" : "",
-              treatment.typeEmphasis === "quiet" ? "font-medium" : "font-semibold"
-            )}
-            style={{
-              color: ink,
-              fontSize: type.headline,
-              opacity: leadWithOffer && offer ? 0.88 : 1,
-            }}
-          >
-            {spec.headline}
-          </p>
-          {!leadWithOffer && !compact && spec.subheadline ? (
-            <p
-              className="mt-2 max-w-[22ch] leading-snug"
-              style={{ color: ink, fontSize: type.sub, opacity: 0.72 }}
-            >
-              {spec.subheadline}
-            </p>
-          ) : null}
-        </div>
         <div>
-          {!leadWithOffer && offer ? (
-            <p
-              className="mb-2 font-medium"
-              style={{ color: ink, fontSize: type.sub, opacity: 0.8 }}
-            >
-              {offer}
-            </p>
-          ) : null}
-          {spec.callToAction ? (
-            <PrintCta color={ink} size={type.cta} weight={treatment.ctaWeight}>
-              {spec.callToAction}
-            </PrintCta>
-          ) : null}
-          <div className="mt-2 flex items-end justify-between gap-2">
-            {!compact ? (
-              <PostcardFooter
-                spec={spec}
-                color={ink}
-                phoneBottomRight={phoneBottomRight}
-                size={type.footer}
-                quiet
-              />
-            ) : (
-              <span />
-            )}
-            {showQr ? <QrMark tone={ink} compact={compact} large={qrLarge} /> : null}
-          </div>
+          <LeadType
+            spec={spec}
+            offer={offer}
+            leadWithOffer={leadWithOffer}
+            compact={compact}
+            type={type}
+            color={ink}
+            treatment={treatment}
+            showBody
+          />
+          <div
+            className="mt-1.5 h-px w-6"
+            style={{ backgroundColor: secondary, opacity: quiet ? 0.5 : 1 }}
+          />
         </div>
-      </div>
-    </div>
-  )
-}
-
-function TrustFirstFront({
-  spec,
-  secondary,
-  surface,
-  ink,
-  compact,
-  type,
-  phoneBottomRight,
-  qrLarge,
-  showQr,
-  offer,
-  photoAlt,
-  photoSrc,
-  showMonogram,
-  hierarchy,
-  treatment,
-}: FrontContext) {
-  const leadWithOffer = offerLeads(hierarchy, false)
-  const quiet = treatment.typeEmphasis === "quiet"
-  return (
-    <div
-      className={cn(
-        "flex h-full",
-        quiet
-          ? compact
-            ? "gap-2.5 p-2"
-            : "gap-4 p-4 sm:p-5"
-          : compact
-            ? "gap-2 p-1.5"
-            : "gap-3.5 p-3 sm:p-3.5"
-      )}
-      style={{ backgroundColor: surface }}
-    >
-      <div className={cn("relative min-w-0 overflow-hidden", trustPhotoFlex(treatment.photoWeight))}>
-        <PhotoSlot
-          src={photoSrc}
-          alt={photoAlt}
-          monogram={showMonogram ? monogramLetter(spec.headline) : null}
-          fallback={secondary}
-          primary={ink}
-          crop={treatment.cropPreset}
+        <ActionCluster
+          spec={spec}
+          offer={offer}
+          leadWithOffer={leadWithOffer}
+          compact={compact}
+          type={type}
+          color={ink}
+          treatment={treatment}
+          phoneBottomRight={phoneBottomRight}
+          showQr={showQr}
+          qrLarge={qrLarge}
         />
       </div>
-      <div className={cn("flex min-w-0 flex-col justify-between", trustTypeFlex(treatment.photoWeight))}>
-        <div>
-          {leadWithOffer && offer ? (
-            <p
-              className={cn(headlineWeight(treatment.typeEmphasis), "leading-[0.95] tracking-[-0.035em]")}
-              style={{ color: ink, fontSize: type.offer }}
-            >
-              {offer}
-            </p>
-          ) : null}
-          <p
-            className={cn(
-              "max-w-[16ch] leading-[1.05] tracking-[-0.025em]",
-              leadWithOffer && offer ? "mt-2" : "",
-              treatment.typeEmphasis === "quiet" ? "font-medium" : "font-semibold"
-            )}
-            style={{
-              color: ink,
-              fontSize: type.headline,
-              opacity: leadWithOffer && offer ? 0.88 : 1,
-            }}
-          >
-            {spec.headline}
-          </p>
-          <div className="mt-1.5 h-px w-6" style={{ backgroundColor: secondary, opacity: quiet ? 0.5 : 1 }} />
-          {!compact && spec.subheadline ? (
-            <p
-              className="mt-2 max-w-[22ch] leading-snug"
-              style={{ color: ink, fontSize: type.sub, opacity: 0.72 }}
-            >
-              {spec.subheadline}
-            </p>
-          ) : null}
-          {!compact && spec.body ? (
-            <p
-              className="mt-2 line-clamp-2 max-w-[24ch] leading-relaxed"
-              style={{ color: ink, fontSize: type.body, opacity: quiet ? 0.5 : 0.58 }}
-            >
-              {spec.body}
-            </p>
-          ) : null}
-        </div>
-        <div>
-          {!leadWithOffer && offer && !compact ? (
-            <p
-              className="mb-2 font-medium"
-              style={{ color: ink, fontSize: type.sub, opacity: 0.8 }}
-            >
-              {offer}
-            </p>
-          ) : null}
-          {spec.callToAction ? (
-            <PrintCta color={ink} size={type.cta} weight={treatment.ctaWeight}>
-              {spec.callToAction}
-            </PrintCta>
-          ) : null}
-          <div className="mt-2 flex items-end justify-between gap-2">
-            {!compact ? (
-              <PostcardFooter
-                spec={spec}
-                color={ink}
-                phoneBottomRight={phoneBottomRight}
-                size={type.footer}
-                quiet
-              />
-            ) : (
-              <span />
-            )}
-            {showQr ? <QrMark tone={ink} compact={compact} large={qrLarge} /> : null}
-          </div>
-        </div>
-      </div>
     </div>
   )
 }
 
-function UrgencyBannerFront({
+function BandedSplitFront({
   spec,
   primary,
   secondary,
@@ -575,37 +629,45 @@ function UrgencyBannerFront({
   showMonogram,
   hierarchy,
   treatment,
+  layout,
 }: FrontContext) {
-  const leadWithOffer = offerLeads(hierarchy, false)
-  const bannerText = leadWithOffer && offer ? offer : spec.headline
-  const supportOffer = leadWithOffer ? "" : offer
-  const offerSize = hierarchy === "layout-default" ? type.offer : type.sub
+  const leadWithOffer = copyOfferLeads(hierarchy)
+  const structure = studioCompositionStructure(layout)
+  const bandText = leadWithOffer && offer ? offer : spec.headline
   const quietInk = isQuietInk(treatment)
-  const bannerFill = quietInk ? surface : primary
-  const bannerInk = quietInk ? ink : inkPrimary
+  const bandFill = quietInk ? surface : primary
+  const bandInk = quietInk ? ink : inkPrimary
   return (
-    <div className="flex h-full" style={{ backgroundColor: surface }}>
-      <div className="flex min-w-0 flex-[4] flex-col">
-        <div
-          className={cn(
-            "flex flex-1 items-end",
-            compact ? "px-2 py-1.5" : "px-4 py-3"
-          )}
-          style={{ backgroundColor: bannerFill, color: bannerInk }}
-        >
+    <div
+      className="flex h-full flex-col"
+      style={{ backgroundColor: surface }}
+      data-composition={structure.layoutVariant}
+    >
+      <div
+        data-region="band"
+        className={cn(
+          "flex w-full items-end",
+          compact ? "min-h-[34%] px-2.5 py-2" : "min-h-[36%] px-5 py-3.5"
+        )}
+        style={{ backgroundColor: bandFill, color: bandInk }}
+      >
+        {bandText ? (
           <p
             className={cn(
-              "max-w-[16ch] leading-[0.92] tracking-[-0.03em]",
+              "max-w-[28ch] leading-[0.92] tracking-[-0.03em]",
               headlineWeight(treatment.typeEmphasis)
             )}
-            style={{ fontSize: leadWithOffer ? type.offer : type.headline }}
+            style={{ fontSize: leadWithOffer && offer ? type.offer : type.headline }}
           >
-            {bannerText}
+            {bandText}
           </p>
-        </div>
+        ) : null}
+      </div>
+      <div className="flex min-h-0 flex-1">
         <div
+          data-region="supporting"
           className={cn(
-            "flex flex-[1.15] flex-col justify-between",
+            "flex min-w-0 flex-[5] flex-col justify-between",
             compact ? "px-2 py-1.5" : "px-4 py-2.5"
           )}
         >
@@ -616,12 +678,12 @@ function UrgencyBannerFront({
             >
               {spec.headline}
             </p>
-          ) : supportOffer ? (
+          ) : !leadWithOffer && offer ? (
             <p
               className="max-w-[18ch] font-semibold leading-[1.05] tracking-[-0.02em]"
-              style={{ color: ink, fontSize: offerSize }}
+              style={{ color: ink, fontSize: type.sub }}
             >
-              {supportOffer}
+              {offer}
             </p>
           ) : spec.subheadline ? (
             <p
@@ -630,7 +692,9 @@ function UrgencyBannerFront({
             >
               {spec.subheadline}
             </p>
-          ) : null}
+          ) : (
+            <span />
+          )}
           <div>
             {spec.callToAction ? (
               <PrintCta color={ink} size={type.cta} weight={treatment.ctaWeight}>
@@ -648,29 +712,29 @@ function UrgencyBannerFront({
                 />
               </div>
             ) : null}
+            {showQr ? (
+              <div className="mt-2">
+                <QrMark tone={ink} compact={compact} large={qrLarge} />
+              </div>
+            ) : null}
           </div>
         </div>
-      </div>
-      <div className={cn("relative min-w-0 overflow-hidden", bannerPhotoFlex(treatment.photoWeight))}>
-        <PhotoSlot
-          src={photoSrc}
-          alt={photoAlt}
-          monogram={showMonogram ? monogramLetter(spec.headline) : null}
-          fallback={secondary}
-          primary={ink}
-          crop={treatment.cropPreset}
-        />
-        {showQr ? (
-          <div className="absolute bottom-1.5 right-1.5">
-            <QrMark tone={ink} compact={compact} large={qrLarge} onPhoto />
-          </div>
-        ) : null}
+        <div data-region="image" className="relative min-w-0 flex-[4] overflow-hidden">
+          <PhotoSlot
+            src={photoSrc}
+            alt={photoAlt}
+            monogram={showMonogram ? monogramLetter(spec.headline) : null}
+            fallback={secondary}
+            primary={ink}
+            crop={treatment.cropPreset}
+          />
+        </div>
       </div>
     </div>
   )
 }
 
-function PhotoLedFront({
+function ImageGroundedFront({
   spec,
   primary,
   secondary,
@@ -688,90 +752,68 @@ function PhotoLedFront({
   showMonogram,
   hierarchy,
   treatment,
+  layout,
 }: FrontContext) {
-  const leadWithOffer = offerLeads(hierarchy, false)
+  const leadWithOffer = copyOfferLeads(hierarchy)
+  const structure = studioCompositionStructure(layout)
   const quietInk = isQuietInk(treatment)
-  const panelFill = quietInk ? surface : primary
-  const panelInk = quietInk ? ink : inkPrimary
+  const plateFill = quietInk ? surface : primary
+  const plateInk = quietInk ? ink : inkPrimary
   return (
-    <div className="relative h-full" style={{ backgroundColor: secondary }}>
-      <PhotoSlot
-        src={photoSrc}
-        alt={photoAlt}
-        monogram={showMonogram ? monogramLetter(spec.headline) : null}
-        fallback={secondary}
-        primary={panelInk}
-        crop={treatment.cropPreset}
-      />
+    <div
+      className="relative h-full"
+      style={{ backgroundColor: secondary }}
+      data-composition={structure.layoutVariant}
+    >
+      <div data-region="image-ground" className="absolute inset-0">
+        <PhotoSlot
+          src={photoSrc}
+          alt={photoAlt}
+          monogram={showMonogram ? monogramLetter(spec.headline) : null}
+          fallback={secondary}
+          primary={plateInk}
+          crop={treatment.cropPreset}
+        />
+      </div>
       <div
+        data-region="inscription"
         className={cn(
-          "absolute inset-y-0 right-0 flex flex-col justify-end",
-          photoLedPanelWidth(treatment.photoWeight),
-          compact
-            ? "px-2 py-2"
-            : treatment.typeEmphasis === "quiet"
-              ? "px-4 py-4"
-              : "px-3.5 py-3.5"
+          "absolute flex flex-col justify-end",
+          inscriptionLockup(compact, spec.imageryRole, treatment.photoWeight)
         )}
-        style={{ backgroundColor: panelFill, color: panelInk }}
+        style={{ backgroundColor: plateFill, color: plateInk }}
       >
-        {leadWithOffer && offer ? (
-          <p
-            className={cn(headlineWeight(treatment.typeEmphasis), "max-w-[14ch] leading-[0.95] tracking-[-0.03em]")}
-            style={{ fontSize: type.offer }}
-          >
-            {offer}
-          </p>
-        ) : null}
-        <p
-          className={cn(
-            "max-w-[14ch] leading-[1.02] tracking-[-0.025em]",
-            leadWithOffer && offer ? "mt-2" : "",
-            treatment.typeEmphasis === "quiet" ? "font-medium" : "font-semibold"
-          )}
-          style={{ fontSize: type.headline, opacity: leadWithOffer && offer ? 0.88 : 1 }}
-        >
-          {spec.headline}
-        </p>
-        {!leadWithOffer && offer ? (
-          <p
-            className="mt-2 font-medium leading-snug"
-            style={{ fontSize: type.sub, opacity: 0.88 }}
-          >
-            {offer}
-          </p>
-        ) : !leadWithOffer && !compact && spec.subheadline ? (
-          <p className="mt-2 leading-snug opacity-75" style={{ fontSize: type.sub }}>
-            {spec.subheadline}
-          </p>
-        ) : null}
-        {spec.callToAction ? (
-          <div className="mt-3">
-            <PrintCta color={panelInk} size={type.cta} weight={treatment.ctaWeight}>
-              {spec.callToAction}
-            </PrintCta>
-          </div>
-        ) : null}
-        <div className="mt-2 flex items-end justify-between gap-2">
-          {!compact ? (
-            <PostcardFooter
-              spec={spec}
-              color={panelInk}
-              phoneBottomRight={phoneBottomRight}
-              size={type.footer}
-              quiet
-            />
-          ) : (
-            <span />
-          )}
-          {showQr ? <QrMark tone={panelInk} compact={compact} large={qrLarge} /> : null}
+        <LeadType
+          spec={spec}
+          offer={offer}
+          leadWithOffer={leadWithOffer}
+          compact={compact}
+          type={type}
+          color={plateInk}
+          treatment={treatment}
+          showBody={false}
+        />
+        <div className="mt-2">
+          <ActionCluster
+            spec={spec}
+            offer={offer}
+            leadWithOffer={leadWithOffer}
+            compact={compact}
+            type={type}
+            color={plateInk}
+            treatment={treatment}
+            phoneBottomRight={phoneBottomRight}
+            showQr={showQr}
+            qrLarge={qrLarge}
+            onPhoto
+          />
         </div>
       </div>
     </div>
   )
 }
 
-function MinimalCtaFront({
+function TypeOnlyFront({
   spec,
   surface,
   ink,
@@ -783,60 +825,49 @@ function MinimalCtaFront({
   offer,
   hierarchy,
   treatment,
+  layout,
 }: FrontContext) {
-  const leadWithOffer = offerLeads(hierarchy, false)
+  const leadWithOffer = copyOfferLeads(hierarchy)
+  const structure = studioCompositionStructure(layout)
   return (
     <div
       className={cn(
-        "flex h-full flex-col justify-between",
+        "flex h-full flex-col",
         treatment.typeEmphasis === "quiet"
           ? compact
             ? "px-3 py-2.5"
-            : "px-8 py-7"
+            : "px-7 py-6"
           : treatment.typeEmphasis === "aggressive"
             ? compact
               ? "px-2.5 py-2"
               : "px-6 py-5"
             : compact
               ? "px-2.5 py-2"
-              : "px-7 py-6"
+              : "px-6 py-5"
       )}
       style={{ backgroundColor: surface }}
+      data-composition={structure.layoutVariant}
     >
-      <div>
-        {leadWithOffer && offer ? (
-          <p
-            className={cn(headlineWeight(treatment.typeEmphasis), "max-w-[16ch] leading-[0.95] tracking-[-0.035em]")}
-            style={{ color: ink, fontSize: type.offer }}
-          >
-            {offer}
-          </p>
-        ) : null}
-        <p
-          className={cn(
-            "max-w-[14ch] leading-[0.95] tracking-[-0.035em]",
-            leadWithOffer && offer ? "mt-2" : "",
-            treatment.typeEmphasis === "quiet" ? "font-medium" : "font-semibold"
-          )}
-          style={{
-            color: ink,
-            fontSize: type.headline,
-            opacity: leadWithOffer && offer ? 0.88 : 1,
-          }}
-        >
-          {spec.headline}
-        </p>
-      </div>
-      <div>
+      <div data-region="type" className="w-[62%] max-w-[22ch]">
+        <LeadType
+          spec={spec}
+          offer={offer}
+          leadWithOffer={leadWithOffer}
+          compact={compact}
+          type={type}
+          color={ink}
+          treatment={treatment}
+          showBody={false}
+        />
         {!leadWithOffer && offer ? (
           <p
-            className="mb-3 max-w-[20ch] font-medium"
+            className="mt-3 max-w-[20ch] font-medium"
             style={{ color: ink, fontSize: type.sub, opacity: 0.75 }}
           >
             {offer}
           </p>
         ) : null}
-        <div className="flex items-end justify-between gap-3">
+        <div className={cn("flex items-end gap-3", compact ? "mt-3" : "mt-5")}>
           {spec.callToAction ? (
             <PrintCta color={ink} size={type.cta} weight={treatment.ctaWeight}>
               {spec.callToAction}
@@ -846,18 +877,17 @@ function MinimalCtaFront({
           )}
           {showQr ? <QrMark tone={ink} compact={compact} large={qrLarge} /> : null}
         </div>
-        {!compact ? (
-          <div className="mt-3">
-            <PostcardFooter
-              spec={spec}
-              color={ink}
-              phoneBottomRight={phoneBottomRight}
-              size={type.footer}
-              quiet
-            />
-          </div>
-        ) : null}
       </div>
+      <div data-region="field" className="min-h-0 flex-1" aria-hidden />
+      {!compact ? (
+        <PostcardFooter
+          spec={spec}
+          color={ink}
+          phoneBottomRight={phoneBottomRight}
+          size={type.footer}
+          quiet
+        />
+      ) : null}
     </div>
   )
 }

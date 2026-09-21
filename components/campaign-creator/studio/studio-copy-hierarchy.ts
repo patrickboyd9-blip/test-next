@@ -4,7 +4,8 @@ export type StudioCopyHierarchy = "layout-default" | "offer-hero" | "message-her
 
 /**
  * leadJob drives copy hierarchy in PostcardPreview.
- * Undefined preserves each layout's current default.
+ * Undefined is layout-default, which does not make the offer the hero.
+ * Offer leads only when leadJob is offer — never because of a layoutVariant.
  */
 export function studioCopyHierarchy(
   leadJob: LeadJob | undefined
@@ -12,4 +13,8 @@ export function studioCopyHierarchy(
   if (!leadJob) return "layout-default"
   if (leadJob === "offer") return "offer-hero"
   return "message-hero"
+}
+
+export function copyOfferLeads(hierarchy: StudioCopyHierarchy): boolean {
+  return hierarchy === "offer-hero"
 }

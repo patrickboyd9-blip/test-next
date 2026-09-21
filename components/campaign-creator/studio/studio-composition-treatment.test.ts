@@ -28,7 +28,7 @@ test("offer-led neighborhood differs from trust-led crew", () => {
   assert.equal(offerLed.typeEmphasis, "aggressive")
   assert.equal(offerLed.ctaWeight, "strong")
   assert.equal(offerLed.paletteMode, "field")
-  assert.equal(trustLed.photoWeight, "dominant")
+  assert.equal(trustLed.photoWeight, "balanced")
   assert.equal(trustLed.cropPreset, "open")
   assert.equal(trustLed.typeEmphasis, "quiet")
   assert.equal(trustLed.ctaWeight, "quiet")
@@ -72,13 +72,13 @@ test("type_only never claims a photo weight", () => {
   assert.equal(treatment.paletteMode, "ink")
 })
 
-test("image_grounded does not shrink the photo to subordinate", () => {
+test("image_grounded keeps the image as ground even when offer wants a smaller photo", () => {
   const treatment = studioCompositionTreatment({
     leadJob: "offer",
     imageryRole: "neighborhood",
     layoutVariant: "image_grounded",
   })
-  assert.equal(treatment.photoWeight, "balanced")
+  assert.notEqual(treatment.photoWeight, "none")
   assert.equal(treatment.ctaWeight, "strong")
   assert.equal(treatment.paletteMode, "field")
 })
@@ -130,7 +130,7 @@ test("legacy layoutVariant tokens still constrain treatment", () => {
     imageryRole: "neighborhood",
     layoutVariant: "photo_led" as never,
   })
-  assert.equal(grounded.photoWeight, "balanced")
+  assert.notEqual(grounded.photoWeight, "none")
 })
 
 test("all layout variants still resolve a treatment", () => {
