@@ -319,6 +319,7 @@ Knowledge classification:
 How to use this knowledge:
 - Consider applicable principles when choosing angle, offer class, imagery role, trust, urgency, CTA, hierarchy, layout variant, and copy.
 - Do not blindly follow every principle.
+- When multiple principles apply to one direction, interpret each from its statement and the campaign context. Let one principle shape that direction's leadJob; use the others as supporting guidance for imagery, trust, offer, CTA, or hierarchy. Do not treat appliesTo as ownership. Do not let every applicable principle become a competing lead.
 - Do not claim that a principle is measured performance data.
 - Do not invent offers, proof, or images the brief does not contain.
 - Rationale may explain strategic difference. It must not claim conversion, bookings, lift, ROI, or that a direction will outperform.
