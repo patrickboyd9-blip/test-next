@@ -3210,6 +3210,252 @@ This change is documentation only.
 
 ---
 
+## ADR-024: Creative Intelligence Is Campaign-Scoped; Creative Engine Is Direction-Scoped
+
+### Status
+
+Proposed
+
+### Context
+
+ADR-005 already separates creative expression from rendering. `CreativeSpec` owns creative expression. The renderer owns projecting that spec onto `CreativeCanvas`. The Creative Engine is not responsible for rendering. Physical product identity stays on `MailPieceSpec` / the catalog; `CreativeCanvas` is the creative-facing projection.
+
+ADR-023 already records that Creative Intelligence supplies classified guidance to the Creative Engine; it does not persist a campaign field and does not render pixels (`lib/campaign-creator/creative-intelligence.ts`). The Creative Engine authors semantic creative decisions and content. Composition executes those jobs.
+
+The implemented split already matches that description:
+
+- `buildCreativeIntelligenceContext(brief)` assembles one non-persisted `CreativeIntelligenceContext` for the campaign: classified `CreativePrinciple`s (`heuristic` | `observed_pattern` | `unknown`), optional vertical cluster, optional `appliesTo`.
+- `formatCreativeIntelligenceContext` states that this pack is **decision guidance only**. Campaign Brief facts and the physical canvas outrank principles. Principles must not be followed blindly. When several apply, one may shape a direction’s `leadJob`; the others remain supporting guidance. `appliesTo` is not ownership.
+- `AnthropicCreativeEngine` is the only reasoner that writes `CreativeSpec`. Generation and regeneration produce exactly three `CreativeDirection`s, each with its own spec. Refinement mutates one direction’s spec. Guards and the closed tool schema (`GENERATED_SPEC_TOOL_REQUIRED`) enforce the contract (`docs/prd/AICreativeEngine.md`; `docs/prd/CreativeStudio.md` §6.6).
+
+What is not specified with enough authority:
+
+- whether Creative Intelligence may itself commit CreativeSpec values
+- whether art-direction / craft knowledge, when later admitted into Creative Intelligence, changes that job
+- how a campaign-level guidance pack relates to three direction-level specs
+
+If Creative Intelligence commits `layoutVariant`, `leadJob`, `imageryRole`, or any other CreativeSpec value at campaign scope, the three directions collapse into one predetermined art direction. Creative Intelligence would become a second Creative Engine. That contradicts ADR-023 and the existing generate/compare/focus model.
+
+This ADR records the campaign-scoped / direction-scoped boundary. It does not implement craft knowledge, change CreativeSpec, change the renderer, or ingest Creative Design Intelligence research.
+
+### Decision
+
+> **Creative Intelligence is campaign-scoped. The Creative Engine is direction-scoped.**
+>
+> Creative Intelligence is one campaign-level guidance pack shared by all three creative directions. It may identify applicable knowledge, bounds, live tensions, and the decision space the Engine must spend. It must not commit CreativeSpec.
+>
+> The Creative Engine is the only direction-scoped author of CreativeSpec.
+
+```text
+Campaign Brief + CreativeCanvas
+        │
+        ▼
+Creative Intelligence          ← one campaign-scoped pack
+        │
+        ▼
+Creative Engine                ← direction-scoped author
+        │
+        ▼
+three CreativeSpecs
+        │
+        ▼
+composition / renderer
+```
+
+### Campaign-scoped vs direction-scoped
+
+**Architectural test**
+
+- If a statement is true for all three directions **before a concept exists**, it belongs in campaign-scoped Creative Intelligence.
+- If a statement could be pasted directly onto a `CreativeSpec`, it is a direction-scoped Creative Engine decision.
+
+**Creative Intelligence establishes campaign-level guidance**
+
+Creative Intelligence may establish only campaign-level guidance:
+
+- which creative and design knowledge is applicable to this campaign
+- what knowledge is out of bounds or would require invention
+- what creative tensions are live and therefore should be explored across the direction set
+- what decision space the Engine must spend, using existing CreativeSpec jobs
+- relevant When NOT conditions
+- evidence and uncertainty posture (`kind`, and the existing rule that principles are not measured performance)
+- campaign-wide physical and factual constraints the Engine must respect, without restating or overriding `CreativeCanvas` / `MailPieceSpec` / the Campaign Brief
+
+That is the same job Creative Intelligence already has: pack assembly and classified guidance (`CreativeIntelligenceContext`). It is not a new object and not a persisted campaign field.
+
+**Creative Intelligence must not commit**
+
+Creative Intelligence must not write, pre-assign, or imply a single winner for:
+
+- `layoutVariant`
+- `leadJob`
+- `imageryRole`
+- `palette`
+- `visualDirection`
+- `tone`
+- copy (`headline`, `subheadline`, `body`, `offer` wording)
+- `callToAction`
+- optional-field inclusion or omission (`phone`, `website`, `qrDestination`, `subheadline`, and any other optional spec field)
+- `layoutHints` or any other CreativeSpec value
+- which of the three directions is recommended
+
+**The Creative Engine decides**
+
+The Creative Engine is the only direction-scoped author of CreativeSpec. It decides:
+
+- every CreativeSpec commitment for each direction
+- how the three directions differ
+- how competing principles are reconciled within each direction
+- which existing jobs are used on that direction
+- campaign-specific copy and palette
+- customer-facing rationale, tags, `designedToDrive`, `oneLineDifference`, and the single recommendation
+- refinement changes to one direction’s spec
+
+The Engine remains bound by the Campaign Brief, `CreativeCanvas`, faithfulness guards, and the existing generation-set rules (exactly three directions; at least two distinct `layoutVariant` values; distinct messaging angles). Creative Intelligence does not relax those rules and does not replace them.
+
+### Why Creative Intelligence must not author CreativeSpec
+
+Creative Intelligence is **one pack for the campaign**. The Engine produces **three direction-scoped specs**, then later refines one of them.
+
+A CreativeSpec value is a commitment about one piece: this face is type-led; this piece leads with the offer; this image job is `none`. If that commitment is made at campaign scope, all three directions inherit the same art direction. Compare, focus, and “none of these feel right” become three paraphrases of one predetermined spec.
+
+Creative Intelligence also lacks the Engine’s other direction-scoped duties: copy, palette, customer-facing rationale, recommendation, and refinement against customer language. Authoring spec fields there would create a second writer of creative expression and split the ADR-005 / ADR-023 authorship rule.
+
+`formatCreativeIntelligenceContext` already forbids treating `appliesTo` as ownership and forbids letting every applicable principle become a competing lead. This ADR makes the implied rule explicit: principles may shape a direction only when the Engine spends them on that direction.
+
+### Creative Design Intelligence does not change Creative Intelligence’s job
+
+ADR-023 left this flow compatible with later external research:
+
+```text
+External research
+    → Creative Intelligence
+    → CreativeSpec
+    → composition
+```
+
+Creative Design Intelligence research is external creative knowledge for Creative Intelligence. It is not a CreativeSpec schema, not a renderer brief, and not a scoring system.
+
+When that knowledge is later admitted, it thickens the same campaign-scoped pack: classified principles, applicability, When NOT, and uncertainty posture. It may enlarge the **decision space** the Engine is told to spend (`layoutVariant` as lead modality, `leadJob` as squint-test lead, `imageryRole` as honest image job, and so on).
+
+It does not:
+
+- change Creative Intelligence from guidance into a second Creative Engine
+- authorize Creative Intelligence to commit CreativeSpec
+- add CreativeSpec fields
+- require the renderer to understand the research
+- collapse three directions into one craft recipe
+
+Composition continues to execute `CreativeSpec` regardless of where Creative Intelligence principles came from. Ingestion of that research is **not** decided here.
+
+### Decision space vs decision
+
+Creative Intelligence may identify a **decision space**. It may not make the **decision**.
+
+A decision space names a live tension or an available route, and which existing CreativeSpec jobs can express it. A decision is a value on one direction’s spec.
+
+| Campaign-scoped (CI) | Direction-scoped (Engine) |
+|---|---|
+| This knowledge applies; that knowledge would require invention | This direction’s `imageryRole` is `none` |
+| These two leads are both live | Direction A leads with `trust`; direction B leads with `offer` |
+| Numeral-led treatment is a viable route | `leadJob: offer` on this spec |
+| Dual response paths need unequal weight | This spec’s `callToAction` and included contacts |
+| The address face is reserved; do not assume reverse proof | Proof appears in front copy, or is omitted |
+
+If a proposed Creative Intelligence statement can be pasted onto `CreativeSpec`, it is an Engine decision and does not belong in the pack as a commitment.
+
+### Examples
+
+**1. Quantified offer vs invented photography**
+
+CI may say: this campaign has a quantified offer, so numeral-led treatment is a viable creative route. Generic photography should not be forced into the piece.
+
+The Engine may then decide, for one direction:
+
+- `layoutVariant = type_primary_split`
+- `leadJob = offer`
+- `imageryRole = none`
+
+CI must not write those three values. Another direction in the same set may spend the same tension differently.
+
+**2. Two live tensions must not produce one campaign winner**
+
+CI may identify: trust credentials and a quantified offer are both live tensions.
+
+It must not choose `offer` — or `trust` — as the winner for all directions. That is the existing `hs-offer-classes` pattern applied to art direction: when the brief supports more than one reading, the Engine gives the directions distinct spends of the decision space.
+
+The Engine resolves the tension independently per direction. One spec may be offer-led and type-primary; another may be trust-led and image-grounded, if an honest image job exists.
+
+**3. Physical constraint is campaign-scoped; leftover proof is not a spec field**
+
+CI may remind the Engine that `CreativeCanvas` reserved roles occupy the address face, so interrupt → proof → redeem must not assume a second authored marketing face.
+
+The Engine still decides what appears on the one authored spec: whether proof is supporting front copy, whether it is omitted, and which `leadJob` that direction uses. CI does not invent a back-of-card CreativeSpec. `MailPieceSpec` / `CreativeCanvas` remain authoritative for the physical constraint.
+
+### Preserved architecture
+
+- Creative Intelligence remains non-persisted, campaign-local guidance. Not CampaignStrategy. Not evidence. Not a Campaign field. Not pixels.
+- The Creative Engine remains the only reasoner that writes `CreativeSpec`.
+- Three-direction generation remains intact, including the existing distinct-`layoutVariant` and distinct-angle constraints.
+- Existing CreativeSpec fields remain intact. This ADR adds none.
+- `CreativeCanvas` / `MailPieceSpec` / the catalog remain authoritative for physical constraints. The Campaign Brief remains authoritative for customer facts. Principles do not outrank either.
+- Creative Intelligence does not become a second Creative Engine.
+- No scoring system.
+- No craft-tier field on CreativeSpec, CreativeDirection, or Creative Intelligence.
+- No new abstraction solely to represent this boundary. `CreativeIntelligenceContext` and `CreativeEngine` remain the objects.
+- ADR-005 remains in force: CreativeSpec is expression; the renderer is execution.
+- ADR-023 remains in force: existing semantic jobs must be materially expressed by composition. This ADR does not weaken that execution obligation.
+- The customer still describes; the Engine still figures out the configuration (`docs/AI_SYSTEM.md`; Creative Engine voice rules).
+- `MailPiece` remains the immutable approved snapshot of a CreativeSpec, not a layout engine (ADR-008 / ADR-012).
+
+### Boundaries / non-goals
+
+This ADR does **not** decide:
+
+- ingestion of Creative Design Intelligence research, Grok Bot, or any other external corpus
+- new CreativeSpec fields
+- renderer or composition changes
+- prompt text, principle inventory, or `appliesTo` values
+- image generation
+- address-face leftover authorship or a second-face CreativeSpec
+- persistence, versioning, or customer visibility of Creative Intelligence
+- a scoring, ranking, or craft-tier system
+- implementation sequence, APIs, or file-level refactors
+
+Do not treat “art-direction-aware Creative Intelligence” as authority to pre-assign spec jobs or to dump research into the Engine prompt as law.
+
+### Consequences
+
+Once accepted, campaign-scoped guidance and direction-scoped authorship are distinct architectural facts, not a prompt convention.
+
+Later craft knowledge may enter Creative Intelligence only as classified, campaign-scoped guidance. The Engine remains the sole writer of each direction’s CreativeSpec. Composition continues to execute that spec.
+
+This change is documentation only. It does not change TypeScript, prompts, CreativeSpec, or the renderer.
+
+### Open questions / unresolved decisions
+
+- When Creative Design Intelligence research is later considered, what epistemic bar promotes a craft note into a `CreativePrinciple` (`heuristic` vs `observed_pattern` vs leave `unknown`). This ADR does not ingest that research.
+- Whether later craft guidance should continue to use the current `appliesTo` values (`offer`, `urgency`, `trust`, `imagery`, `cta`, `hierarchy`) as interpretive labels only. Expanding `appliesTo` is not authorized here and must not become hidden spec authorship.
+- How Creative Intelligence should name renderer-owned execution (for example numeral-as-hero, print-mark lockups) as decision space without implying pixel or treatment fields on CreativeSpec.
+- Whether a later, separate ADR is required for research ingestion itself. This ADR only states that ingestion cannot change Creative Intelligence’s job.
+
+### Source grounding
+
+| Claim | Source | Kind |
+|---|---|---|
+| `CreativeSpec` owns creative expression; renderer projects it onto the canvas | ADR-005 | Established |
+| Creative Engine authors semantic decisions and content; composition executes | ADR-023 | Established |
+| Creative Intelligence supplies classified guidance; not a campaign field; not pixels | ADR-023; `creative-intelligence.ts` | Established |
+| One `CreativeIntelligenceContext` per brief; principles are guidance, not facts | `buildCreativeIntelligenceContext`; `formatCreativeIntelligenceContext` | Established implementation |
+| Engine writes three direction specs; closed CreativeSpec jobs | `AnthropicCreativeEngine`; `GENERATED_SPEC_TOOL_REQUIRED`; Studio PRD §6.6 | Established implementation |
+| Brief facts and physical canvas outrank principles | `formatCreativeIntelligenceContext`; ADR-005 | Established |
+| `appliesTo` is not ownership; one principle may shape a direction’s `leadJob` | `formatCreativeIntelligenceContext` | Established implementation |
+| External research flows through Creative Intelligence, not onto CreativeSpec | ADR-023 External research / Grok Bot | Established |
+| Creative Intelligence is campaign-scoped; Engine is direction-scoped | this ADR | **This ADR** |
+| Research ingestion, new spec fields, renderer changes | this ADR | Unresolved |
+
+---
+
 # Beta Product Decisions
 
 This section records product-scope defaults for the initial Modern Mail beta. These are not architectural ADRs and do not change the domain model above.
