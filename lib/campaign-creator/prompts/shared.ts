@@ -55,6 +55,24 @@ Do not pre-assign Direction A, B, or C. Decide each direction's CreativeSpec fro
 
 Recommend exactly one direction for the Primary Success Metric. That is a recommendation, not a score of the other two. Principles remain guidance, not measured performance.`
 
+export const CONCEPTION_BEFORE_SPEC_RULES = `Conceive each direction as a complete communication idea before choosing CreativeSpec values. CreativeSpec is downstream of the creative concept, not the source of the concept.
+
+The concept must answer: What is this piece? What is the central creative idea or organizing device? Why does that idea serve this campaign, audience, and Primary Success Metric? What makes this direction meaningfully different from the other directions?
+
+name, rationale, oneLineDifference, and visualDirection articulate that concept. They are not decorative metadata.
+
+Only after the concept is established, choose the CreativeSpec values that express it — copy, leadJob, imageryRole, layoutVariant, palette, offer, CTA, and the rest. The spec must cohere with the concept. Do not choose layout, imagery, lead job, palette, or other spec values first and retrofit a rationale afterward.
+
+Do not require photography. A concept may be type-led, offer-led, object- or metaphor-led, editorial, invitation-led, or another idea the brief and Creative Intelligence actually support. Discover the appropriate creative idea from the brief and Creative Intelligence. Do not select from a fixed concept taxonomy.
+
+Do not invent facts, offers, proof, customer assets, imagery claims, or unsupported campaign readings.
+
+The set-level direction-spending rules remain authoritative: conceive three genuinely distinct directions when the brief supports them; two legitimate readings are enough; do not invent a third; do not pre-assign Direction A, B, or C.
+
+Creative Intelligence remains campaign-scoped. It establishes knowledge, bounds, tensions, and uncertainty. It does not conceive a direction or assign CreativeSpec values.
+
+The renderer executes CreativeSpec. It does not invent the concept.`
+
 export function buildCreativeCanvasPromptContext(canvas: CreativeCanvas): string {
   const roles = canvas.reservedRegionRoles.join(", ")
   const faces = canvas.faces.join(", ")

@@ -17,7 +17,11 @@ import {
 import { buildGenerateSystemPrompt } from "./prompts/generate"
 import { buildRegenerateSystemPrompt, buildRegenerateUserMessage } from "./prompts/regenerate"
 import { buildRefineSystemPrompt } from "./prompts/refine"
-import { DIRECTION_SET_REASONING_RULES, SPEC_FIELD_RULES } from "./prompts/shared"
+import {
+  CONCEPTION_BEFORE_SPEC_RULES,
+  DIRECTION_SET_REASONING_RULES,
+  SPEC_FIELD_RULES,
+} from "./prompts/shared"
 import { normalizeCampaign } from "./repository"
 import { cloneSpec } from "./spec-diff"
 import {
@@ -325,6 +329,54 @@ test("generate and regenerate share set-level direction-spending guidance; refin
   assert.match(regenerate, /New messaging angles/)
   assert.match(regenerate, /leadJob/)
   assert.match(regenerate, /imageryRole/)
+})
+
+test("generate and regenerate require conception before CreativeSpec; refine and CI do not", () => {
+  const generate = buildGenerateSystemPrompt(canvas, { principles: [] })
+  const regenerate = buildRegenerateSystemPrompt(canvas, { principles: [] })
+  const refine = buildRefineSystemPrompt(canvas, { principles: [] })
+  const intelligence = formatCreativeIntelligenceContext(
+    buildCreativeIntelligenceContext(brief)
+  )
+
+  for (const text of [CONCEPTION_BEFORE_SPEC_RULES, generate, regenerate]) {
+    assert.match(text, /complete communication idea before choosing CreativeSpec/)
+    assert.match(text, /CreativeSpec is downstream of the creative concept/)
+    assert.match(
+      text,
+      /name, rationale, oneLineDifference, and visualDirection articulate that concept/
+    )
+    assert.match(text, /Do not select from a fixed concept taxonomy/)
+    assert.match(text, /do not invent a third/)
+    assert.match(text, /does not conceive a direction/)
+  }
+
+  assert.equal(generate.includes(CONCEPTION_BEFORE_SPEC_RULES), true)
+  assert.equal(regenerate.includes(CONCEPTION_BEFORE_SPEC_RULES), true)
+  assert.equal(refine.includes(CONCEPTION_BEFORE_SPEC_RULES), false)
+  assert.equal(intelligence.includes(CONCEPTION_BEFORE_SPEC_RULES), false)
+  assert.equal(generate.includes(DIRECTION_SET_REASONING_RULES), true)
+  assert.equal(regenerate.includes(DIRECTION_SET_REASONING_RULES), true)
+
+  assert.doesNotMatch(refine, /CreativeSpec is downstream of the creative concept/)
+  assert.doesNotMatch(refine, /Do not select from a fixed concept taxonomy/)
+  assert.doesNotMatch(intelligence, /CreativeSpec is downstream of the creative concept/)
+  assert.doesNotMatch(intelligence, /Do not select from a fixed concept taxonomy/)
+  assert.doesNotMatch(
+    intelligence,
+    /name, rationale, oneLineDifference, and visualDirection articulate/
+  )
+
+  assert.match(generate, /Exactly 3 directions/)
+  assert.match(generate, /Exactly one recommended/)
+  assert.match(generate, /At least 2 distinct layoutVariant values/)
+  assert.match(generate, /genuinely different messaging angles/)
+  assert.match(generate, /leadJob/)
+  assert.match(generate, /imageryRole/)
+  assert.match(generate, /oneLineDifference/)
+  assert.match(regenerate, /Regeneration constraints \(same as generation\)/)
+  assert.match(regenerate, /Exactly 3 directions, exactly one recommended/)
+  assert.match(regenerate, /At least 2 distinct layoutVariant values/)
 })
 
 test("shared leadJob and imageryRole remain valid when layouts and copy differ", () => {

@@ -3,6 +3,7 @@ import type { CreativeIntelligenceContext } from "../creative-intelligence"
 import type { CampaignBrief } from "../types"
 
 import {
+  CONCEPTION_BEFORE_SPEC_RULES,
   CREATIVE_VOICE_RULES,
   DIRECTION_SET_REASONING_RULES,
   SPEC_FIELD_RULES,
@@ -25,6 +26,8 @@ ${buildCreativeIntelligencePromptSection(intelligence)}
 ${SPEC_FIELD_RULES}
 
 ${DIRECTION_SET_REASONING_RULES}
+
+${CONCEPTION_BEFORE_SPEC_RULES}
 
 Generation constraints:
 - Exactly 3 directions
