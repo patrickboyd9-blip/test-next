@@ -54,7 +54,7 @@ export const CREATIVE_DIRECT_MAIL_PRINCIPLES: readonly CreativePrinciple[] = [
     kind: "heuristic",
     appliesTo: ["offer", "hierarchy"],
     statement:
-      "Lead with the offer; decoration should not outrank a clear offer.",
+      "When the brief has a clear offer and that offer is a legitimate lead for the communication, the offer may lead; decoration should not outrank it. When the offer includes a concrete quantity already on the brief, that quantity may provide a viable interrupt. Do not invent an offer or a quantity. When NOT: do not force the offer or its quantity to lead when invitation, belonging, trust, or the customer's problem is the legitimate communication.",
   },
   {
     id: "dm-headline-value",
@@ -81,7 +81,7 @@ export const CREATIVE_DIRECT_MAIL_PRINCIPLES: readonly CreativePrinciple[] = [
     kind: "heuristic",
     appliesTo: ["cta"],
     statement:
-      "Make responding one easy action. Do not ask for several important things at once.",
+      "Make responding one easy action. Do not ask for several important things at once. When the brief includes two legitimate response paths for that same action, they should not become twin primary actions. Do not invent a second path. Which path is primary is not assigned here.",
   },
   {
     id: "dm-concrete-language",
@@ -122,6 +122,27 @@ export const CREATIVE_DIRECT_MAIL_PRINCIPLES: readonly CreativePrinciple[] = [
     appliesTo: ["imagery"],
     statement:
       "Recipient-specific property imagery — a photograph of that recipient's own house or lot — is a personalization pattern, not generic neighborhood stock. imageryRole neighborhood means a local or community setting, not an address-level picture. Do not invent recipient-property imagery the brief does not support.",
+  },
+  {
+    id: "dm-primary-interrupt",
+    kind: "observed_pattern",
+    appliesTo: ["hierarchy"],
+    statement:
+      "Establish one primary interrupt rather than equal competing modules. Photography or the message/offer can serve as that interrupt; do not assign which one here. When NOT: do not force photography when the campaign has no honest image job; do not force a message/offer interrupt when the brief's product or problem needs a visual explanation that an honest image job can provide.",
+  },
+  {
+    id: "dm-imagery-honesty",
+    kind: "observed_pattern",
+    appliesTo: ["imagery"],
+    statement:
+      "Do not force photography when the campaign has no honest image job. Do not invent people, crews, damage, neighborhoods, or proof the brief does not contain. Do not treat generic or interchangeable stock as if it proves a campaign-specific fact.",
+  },
+  {
+    id: "dm-print-not-ui-grammar",
+    kind: "observed_pattern",
+    appliesTo: ["cta", "hierarchy"],
+    statement:
+      "Do not use software-button or pill metaphors, fake digital depth, app-footer chrome, or badge-farm marketplace grammar as campaign defaults. Paper is not a software interface. When NOT: if a mandated brand system requires button language, keep it flat and do not add fake digital depth; a clear competent category-standard piece is not the same failure as those grammars. This is a craft bound, not a score and not a performance claim.",
   },
 ]
 

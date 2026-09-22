@@ -77,7 +77,7 @@ test("general principles are typed with a valid epistemic kind", () => {
   const general = principlesFor(context)
 
   assert.equal(general.length, CREATIVE_DIRECT_MAIL_PRINCIPLES.length)
-  assert.equal(general.length, 12)
+  assert.equal(general.length, 15)
   assert.deepEqual(
     general.map((principle) => principle.id),
     CREATIVE_DIRECT_MAIL_PRINCIPLES.map((principle) => principle.id)
@@ -176,7 +176,7 @@ test("non-home-services brief does not receive the home-services slice", () => {
 
   assert.equal(principlesFor(context, "home-services").length, 0)
   assert.equal(principlesFor(context, "plumbing").length, 0)
-  assert.equal(principlesFor(context).length, 12)
+  assert.equal(principlesFor(context).length, 15)
 })
 
 test("plumbing-specific behavior remains correctly scoped", () => {
@@ -250,6 +250,9 @@ test("principle formatting preserves epistemic labels in the prompt context", ()
     assert.match(text, /\[hs-consequence-imagery\]/)
     assert.match(text, /\[hs-crew-imagery\]/)
     assert.match(text, /\[dm-recipient-property-not-neighborhood\]/)
+    assert.match(text, /\[dm-primary-interrupt\]/)
+    assert.match(text, /\[dm-imagery-honesty\]/)
+    assert.match(text, /\[dm-print-not-ui-grammar\]/)
     assert.match(text, /kind=observed_pattern/)
   }
 
@@ -260,6 +263,85 @@ test("principle formatting preserves epistemic labels in the prompt context", ()
   assert.doesNotMatch(restaurantSection, /\[hs-offer-classes\]/)
   assert.doesNotMatch(restaurantSection, /\[hs-crew-imagery\]/)
   assert.match(restaurantSection, /\[dm-recipient-property-not-neighborhood\]/)
+  assert.match(restaurantSection, /\[dm-primary-interrupt\]/)
+  assert.match(restaurantSection, /\[dm-imagery-honesty\]/)
+  assert.match(restaurantSection, /\[dm-print-not-ui-grammar\]/)
+})
+
+test("craft principles stay campaign-scoped and do not assign CreativeSpec jobs", () => {
+  const leadOffer = CREATIVE_DIRECT_MAIL_PRINCIPLES.find(
+    (principle) => principle.id === "dm-lead-offer"
+  )
+  const oneAction = CREATIVE_DIRECT_MAIL_PRINCIPLES.find(
+    (principle) => principle.id === "dm-one-action"
+  )
+  const interrupt = CREATIVE_DIRECT_MAIL_PRINCIPLES.find(
+    (principle) => principle.id === "dm-primary-interrupt"
+  )
+  const honesty = CREATIVE_DIRECT_MAIL_PRINCIPLES.find(
+    (principle) => principle.id === "dm-imagery-honesty"
+  )
+  const grammar = CREATIVE_DIRECT_MAIL_PRINCIPLES.find(
+    (principle) => principle.id === "dm-print-not-ui-grammar"
+  )
+  const hsOneAction = HOME_SERVICES_PRINCIPLES.find(
+    (principle) => principle.id === "hs-one-action"
+  )
+
+  assert.ok(leadOffer)
+  assert.equal(leadOffer.kind, "heuristic")
+  assert.deepEqual(leadOffer.appliesTo, ["offer", "hierarchy"])
+  assert.match(leadOffer.statement, /the offer may lead/)
+  assert.match(leadOffer.statement, /quantity may provide a viable interrupt/)
+  assert.doesNotMatch(leadOffer.statement, /numeral-led/i)
+  assert.doesNotMatch(leadOffer.statement, /leadJob/)
+  assert.doesNotMatch(leadOffer.statement, /layoutVariant/)
+
+  assert.ok(oneAction)
+  assert.equal(oneAction.kind, "heuristic")
+  assert.deepEqual(oneAction.appliesTo, ["cta"])
+  assert.match(oneAction.statement, /twin primary actions/)
+  assert.match(oneAction.statement, /not assigned here/)
+  assert.doesNotMatch(oneAction.statement, /layoutVariant/)
+  assert.doesNotMatch(oneAction.statement, /leadJob/)
+
+  assert.ok(interrupt)
+  assert.equal(interrupt.kind, "observed_pattern")
+  assert.equal(interrupt.verticalCluster, undefined)
+  assert.deepEqual(interrupt.appliesTo, ["hierarchy"])
+  assert.match(interrupt.statement, /one primary interrupt/)
+  assert.doesNotMatch(interrupt.statement, /image-led/)
+  assert.doesNotMatch(interrupt.statement, /type-led/)
+  assert.doesNotMatch(interrupt.statement, /layoutVariant/)
+  assert.doesNotMatch(interrupt.statement, /leadJob/)
+  assert.doesNotMatch(interrupt.statement, /imageryRole/)
+
+  assert.ok(honesty)
+  assert.equal(honesty.kind, "observed_pattern")
+  assert.equal(honesty.verticalCluster, undefined)
+  assert.deepEqual(honesty.appliesTo, ["imagery"])
+  assert.match(honesty.statement, /Do not force photography/)
+  assert.match(honesty.statement, /interchangeable stock/)
+  assert.doesNotMatch(honesty.statement, /imageryRole/)
+  assert.doesNotMatch(honesty.statement, /layoutVariant/)
+  assert.doesNotMatch(honesty.statement, /still-life|lifestyle|documentary/)
+
+  assert.ok(grammar)
+  assert.equal(grammar.kind, "observed_pattern")
+  assert.equal(grammar.verticalCluster, undefined)
+  assert.deepEqual(grammar.appliesTo, ["cta", "hierarchy"])
+  assert.match(grammar.statement, /software-button or pill metaphors/)
+  assert.match(grammar.statement, /not a score/)
+  assert.doesNotMatch(grammar.statement, /quiet zone/i)
+  assert.doesNotMatch(grammar.statement, /craft tier/i)
+  assert.doesNotMatch(grammar.statement, /layoutVariant/)
+  assert.equal(rationaleHasUnsupportedPerformanceClaim(grammar.statement), false)
+
+  assert.ok(hsOneAction)
+  assert.equal(
+    hsOneAction.statement,
+    "Keep one primary recipient action. Phone and QR may both appear when the brief includes them; they should serve the same action."
+  )
 })
 
 function validDirection(
