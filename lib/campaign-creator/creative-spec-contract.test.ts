@@ -10,10 +10,14 @@ import {
   validateGenerationSet,
 } from "./creative-engine-guards"
 import { getMockCreativeDirections } from "./mock-creative-data"
+import {
+  buildCreativeIntelligenceContext,
+  formatCreativeIntelligenceContext,
+} from "./creative-intelligence"
 import { buildGenerateSystemPrompt } from "./prompts/generate"
 import { buildRegenerateSystemPrompt, buildRegenerateUserMessage } from "./prompts/regenerate"
 import { buildRefineSystemPrompt } from "./prompts/refine"
-import { SPEC_FIELD_RULES } from "./prompts/shared"
+import { DIRECTION_SET_REASONING_RULES, SPEC_FIELD_RULES } from "./prompts/shared"
 import { normalizeCampaign } from "./repository"
 import { cloneSpec } from "./spec-diff"
 import {
@@ -273,6 +277,84 @@ test("regenerate handles the fields as structured creative decisions", () => {
     assert.equal(isLeadJob(direction.spec.leadJob), true)
     assert.equal(isImageryRole(direction.spec.imageryRole), true)
   }
+})
+
+test("generate and regenerate share set-level direction-spending guidance; refine and CI do not", () => {
+  const generate = buildGenerateSystemPrompt(canvas, { principles: [] })
+  const regenerate = buildRegenerateSystemPrompt(canvas, { principles: [] })
+  const refine = buildRefineSystemPrompt(canvas, { principles: [] })
+  const intelligence = formatCreativeIntelligenceContext(
+    buildCreativeIntelligenceContext(brief)
+  )
+
+  for (const text of [DIRECTION_SET_REASONING_RULES, generate, regenerate]) {
+    assert.match(text, /The three directions are one set/)
+    assert.match(text, /spend those readings across the set/)
+    assert.match(text, /A campaign may support only two legitimate readings/)
+    assert.match(text, /Do not invent a third reading/)
+    assert.match(text, /Do not pre-assign Direction A, B, or C/)
+    assert.match(text, /Different headlines, palettes, or wording are not enough/)
+  }
+
+  assert.equal(generate.includes(DIRECTION_SET_REASONING_RULES), true)
+  assert.equal(regenerate.includes(DIRECTION_SET_REASONING_RULES), true)
+  assert.equal(refine.includes(DIRECTION_SET_REASONING_RULES), false)
+  assert.equal(intelligence.includes(DIRECTION_SET_REASONING_RULES), false)
+
+  assert.doesNotMatch(refine, /The three directions are one set/)
+  assert.doesNotMatch(refine, /Do not pre-assign Direction A, B, or C/)
+  assert.doesNotMatch(intelligence, /The three directions are one set/)
+  assert.doesNotMatch(intelligence, /Do not pre-assign Direction A, B, or C/)
+  assert.doesNotMatch(intelligence, /spend those readings across the set/)
+  assert.doesNotMatch(
+    intelligence,
+    /Different headlines, palettes, or wording are not enough/
+  )
+
+  assert.match(generate, /Exactly 3 directions/)
+  assert.match(generate, /Exactly one recommended/)
+  assert.match(generate, /At least 2 distinct layoutVariant values/)
+  assert.match(generate, /genuinely different messaging angles/)
+  assert.match(generate, /leadJob/)
+  assert.match(generate, /imageryRole/)
+  assert.match(generate, /Primary Success Metric/)
+  assert.match(generate, /oneLineDifference/)
+  assert.match(regenerate, /Regeneration constraints \(same as generation\)/)
+  assert.match(regenerate, /Exactly 3 directions, exactly one recommended/)
+  assert.match(regenerate, /At least 2 distinct layoutVariant values/)
+  assert.match(regenerate, /New messaging angles/)
+  assert.match(regenerate, /leadJob/)
+  assert.match(regenerate, /imageryRole/)
+})
+
+test("shared leadJob and imageryRole remain valid when layouts and copy differ", () => {
+  const reasons = validateGenerationSet(brief, [
+    validDirection(0, {
+      spec: baseSpec({
+        headline: "Free Inspection Now",
+        leadJob: "offer",
+        imageryRole: "neighborhood",
+        layoutVariant: "type_primary_split",
+      }),
+    }),
+    validDirection(1, {
+      spec: baseSpec({
+        headline: "Hidden Roof Danger",
+        leadJob: "offer",
+        imageryRole: "neighborhood",
+        layoutVariant: "banded_split",
+      }),
+    }),
+    validDirection(2, {
+      spec: baseSpec({
+        headline: "Trusted Roofing Team",
+        leadJob: "offer",
+        imageryRole: "neighborhood",
+        layoutVariant: "type_primary_split",
+      }),
+    }),
+  ])
+  assert.deepEqual(reasons, [])
 })
 
 test("prompt and tool schema expose leadJob and imageryRole as closed enums", () => {

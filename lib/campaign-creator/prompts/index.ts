@@ -1,6 +1,7 @@
 export { CREATIVE_PROMPT_VERSION } from "./versions"
 export {
   CREATIVE_VOICE_RULES,
+  DIRECTION_SET_REASONING_RULES,
   SPEC_FIELD_RULES,
   buildCreativeCanvasPromptContext,
   buildCreativeIntelligencePromptSection,

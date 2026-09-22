@@ -43,6 +43,18 @@ export const SPEC_FIELD_RULES = `CreativeSpec rules:
 - leadJob and imageryRole must cohere with the concept. The image should reinforce the piece's lead, not compete with it. Judge that from the concept's copy, offer, audience, and visualDirection — not from enum names. The image may do a complementary job; it need not repeat the lead. No pairing is universally invalid.
 - Do not emit physical format, catalog identity, dimensions, bleed, reserved-zone geometry, or asset paths`
 
+export const DIRECTION_SET_REASONING_RULES = `The three directions are one set. They share the campaign brief, the canvas, and the Creative Intelligence pack. They are not three isolated campaigns.
+
+Creative Intelligence names available readings, bounds, and tensions. It does not assign CreativeSpec values to a direction.
+
+When the brief and Creative Intelligence support more than one legitimate creative reading, spend those readings across the set rather than repeating the same reading three times. A campaign may support only two legitimate readings — use those two. Do not invent a third reading, interrupt, lead, image job, offer, or response path the brief cannot support.
+
+Meaningful difference is how the piece leads: communication angle, primary interrupt, lead job, honest imagery job or no forced photograph, composition structure, offer versus trust or problem emphasis, and which existing response path is primary when two exist. Different headlines, palettes, or wording are not enough if the creative logic is the same.
+
+Do not pre-assign Direction A, B, or C. Decide each direction's CreativeSpec from that direction's concept. Each direction must remain valid on its own under the brief, canvas, and Creative Intelligence bounds.
+
+Recommend exactly one direction for the Primary Success Metric. That is a recommendation, not a score of the other two. Principles remain guidance, not measured performance.`
+
 export function buildCreativeCanvasPromptContext(canvas: CreativeCanvas): string {
   const roles = canvas.reservedRegionRoles.join(", ")
   const faces = canvas.faces.join(", ")

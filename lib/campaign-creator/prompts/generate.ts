@@ -4,6 +4,7 @@ import type { CampaignBrief } from "../types"
 
 import {
   CREATIVE_VOICE_RULES,
+  DIRECTION_SET_REASONING_RULES,
   SPEC_FIELD_RULES,
   buildCreativeCanvasPromptContext,
   buildCreativeIntelligencePromptSection,
@@ -22,6 +23,8 @@ ${buildCreativeCanvasPromptContext(canvas)}
 ${buildCreativeIntelligencePromptSection(intelligence)}
 
 ${SPEC_FIELD_RULES}
+
+${DIRECTION_SET_REASONING_RULES}
 
 Generation constraints:
 - Exactly 3 directions
