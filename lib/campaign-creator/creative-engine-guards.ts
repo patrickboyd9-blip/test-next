@@ -20,17 +20,21 @@ import {
   RECOMMENDATION_HEADLINE,
 } from "./studio-copy"
 import {
+  IMAGE_PRESENCES,
   IMAGERY_ROLES,
   LAYOUT_VARIANTS,
   LEAD_JOBS,
+  TYPE_ROLES,
   normalizeLayoutVariant,
   type CampaignBrief,
   type CreativeDirection,
   type CreativeSpec,
+  type ImagePresence,
   type ImageryKey,
   type ImageryRole,
   type LayoutVariant,
   type LeadJob,
+  type TypeRole,
 } from "./types"
 
 const IMAGERY_KEYS: readonly ImageryKey[] = [
@@ -413,6 +417,12 @@ function preserveCreativeSemantics(
   if (!isImageryRole(next.imageryRole) && isImageryRole(current.imageryRole)) {
     next.imageryRole = current.imageryRole
   }
+  if (!isTypeRole(next.typeRole) && isTypeRole(current.typeRole)) {
+    next.typeRole = current.typeRole
+  }
+  if (!isImagePresence(next.imagePresence) && isImagePresence(current.imagePresence)) {
+    next.imagePresence = current.imagePresence
+  }
   return next
 }
 
@@ -432,6 +442,12 @@ function normalizeSpecEnums(spec: CreativeSpec): CreativeSpec {
   }
   if (next.imageryRole && !isImageryRole(next.imageryRole)) {
     delete next.imageryRole
+  }
+  if (next.typeRole && !isTypeRole(next.typeRole)) {
+    delete next.typeRole
+  }
+  if (next.imagePresence && !isImagePresence(next.imagePresence)) {
+    delete next.imagePresence
   }
   if (next.palette) {
     const colors = next.palette.filter((color) => HEX_COLOR.test(color))
@@ -537,6 +553,13 @@ function validateDirection(
       `${label} is missing a valid imageryRole (consequence, neighborhood, crew, logo, or none)`
     )
   }
+  if (spec.typeRole !== undefined && !isTypeRole(spec.typeRole)) {
+    reasons.push(`${label} has an invalid typeRole (copy or subject)`)
+  }
+  if (spec.imagePresence !== undefined && !isImagePresence(spec.imagePresence)) {
+    reasons.push(`${label} has an invalid imagePresence (field or accent)`)
+  }
+  reasons.push(...validateSemanticJobs(label, spec))
   if (!spec.palette || spec.palette.length !== 3 || spec.palette.some((c) => !HEX_COLOR.test(c))) {
     reasons.push(`${label} palette must be 3 hex colors`)
   }
@@ -570,4 +593,38 @@ export function isLeadJob(value: string | undefined): value is LeadJob {
 
 export function isImageryRole(value: string | undefined): value is ImageryRole {
   return Boolean(value && (IMAGERY_ROLES as readonly string[]).includes(value))
+}
+
+export function isTypeRole(value: string | undefined): value is TypeRole {
+  return Boolean(value && (TYPE_ROLES as readonly string[]).includes(value))
+}
+
+export function isImagePresence(value: string | undefined): value is ImagePresence {
+  return Boolean(value && (IMAGE_PRESENCES as readonly string[]).includes(value))
+}
+
+function validateSemanticJobs(label: string, spec: CreativeSpec): string[] {
+  const reasons: string[] = []
+  const layout = normalizeLayoutVariant(spec.layoutVariant)
+  const typeRole = isTypeRole(spec.typeRole) ? spec.typeRole : undefined
+  const imagePresence = isImagePresence(spec.imagePresence)
+    ? spec.imagePresence
+    : undefined
+
+  if (!layout || (!typeRole && !imagePresence)) return reasons
+
+  if (layout === "type_only" && imagePresence) {
+    reasons.push(`${label} type_only cannot include imagePresence`)
+  }
+  if (layout === "image_grounded" && imagePresence === "accent") {
+    reasons.push(`${label} image_grounded cannot use imagePresence accent`)
+  }
+  if (layout === "peer_split" && imagePresence === "accent") {
+    reasons.push(`${label} peer_split cannot use imagePresence accent`)
+  }
+  if (layout === "image_grounded" && typeRole === "subject") {
+    reasons.push(`${label} image_grounded cannot use typeRole subject`)
+  }
+
+  return reasons
 }

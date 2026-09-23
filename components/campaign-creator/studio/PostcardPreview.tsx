@@ -31,6 +31,10 @@ import {
   type StudioCopyHierarchy,
 } from "./studio-copy-hierarchy"
 import { studioCompositionStructure } from "./studio-composition-structure"
+import {
+  studioCompositionDerivation,
+  type StudioCompositionDerivation,
+} from "./studio-composition-derivation"
 
 export type PostcardPreviewSize = "hero" | "medium" | "thumbnail"
 
@@ -178,12 +182,19 @@ function PostcardFront({
     imageryRole: spec.imageryRole,
     layoutVariant: layout,
   })
+  const derivation = studioCompositionDerivation({
+    layoutVariant: layout,
+    typeRole: spec.typeRole,
+    imagePresence: spec.imagePresence,
+  })
   const headlineScale = spec.layoutHints?.headlineScale ?? 1
   const hierarchy = studioCopyHierarchy(spec.leadJob)
   const { field: surface, ink, emphasis } = resolveStudioPalette(
     [primary, secondary, accent],
     treatment
   )
+  const voiceScale = studioTypeExecution(treatment).scale
+  const objectScale = derivation.typePresence === "object" ? voiceScale * 1.16 : voiceScale
   const context: FrontContext = {
     spec,
     primary,
@@ -193,7 +204,8 @@ function PostcardFront({
     ink,
     emphasis,
     compact,
-    type: typeScale(compact, headlineScale, studioTypeExecution(treatment).scale),
+    type: typeScale(compact, headlineScale, objectScale),
+    derivation,
     phoneBottomRight: spec.layoutHints?.phonePosition === "bottom-right",
     qrLarge: spec.layoutHints?.qrProminence === "large",
     showQr: Boolean(spec.qrDestination?.trim() || spec.website?.trim()),
@@ -248,6 +260,7 @@ interface FrontContext {
   hierarchy: StudioCopyHierarchy
   treatment: StudioCompositionTreatment
   layout: LayoutVariant
+  derivation: StudioCompositionDerivation
 }
 
 interface TypeScale {
@@ -441,37 +454,26 @@ function PrintMarks({
       </p>
     ) : null
 
-  if (arrangement === "inscription") {
-    return (
-      <div className={compact ? "mt-1.5 space-y-1.5" : "mt-2 space-y-2"}>
-        {supportingOffer}
-        {cta}
-        <div className="flex items-end gap-3">
-          <div className="min-w-0 flex-1">{contact}</div>
-          {qr}
-        </div>
-      </div>
-    )
-  }
-
-  if (arrangement === "sole-type") {
-    return (
-      <div className={compact ? "mt-3 space-y-2" : "mt-5 space-y-2.5"}>
-        {supportingOffer}
-        <div className="flex items-end gap-3">
-          <div className="min-w-0">{cta}</div>
-          {qr}
-        </div>
-        {contact}
-      </div>
-    )
-  }
+  const spacing =
+    arrangement === "sole-type"
+      ? compact
+        ? "mt-3"
+        : "mt-5"
+      : arrangement === "inscription"
+        ? compact
+          ? "mt-1.5"
+          : "mt-2"
+        : compact
+          ? "mt-2"
+          : "mt-3"
 
   return (
-    <div className={compact ? "mt-2 space-y-2" : "mt-3 space-y-2.5"}>
-      {supportingOffer}
-      {cta}
-      {contact}
+    <div className={cn(spacing, "flex items-end gap-3")}>
+      <div className="min-w-0 flex-1 space-y-1.5">
+        {supportingOffer}
+        {cta}
+        {contact}
+      </div>
       {qr}
     </div>
   )
@@ -488,21 +490,16 @@ function supportingImagePlate(compact: boolean, weight: PhotoWeight): string {
     : "right-[4%] top-[13%] h-[74%] w-[30%]"
 }
 
-function inscriptionLockup(
-  compact: boolean,
-  role: FrontContext["spec"]["imageryRole"],
-  weight: PhotoWeight
-): string {
-  const present = role === "consequence" || weight === "subordinate"
-  const compactRole = role === "neighborhood" || weight === "dominant"
-  if (compact) {
-    return present
-      ? "bottom-1.5 left-1.5 max-w-[62%] px-2 py-1.5"
-      : "bottom-1.5 left-1.5 max-w-[54%] px-2 py-1.5"
-  }
-  if (present) return "bottom-[6%] left-[4%] w-[44%] px-3.5 py-3"
-  if (compactRole) return "bottom-[6%] left-[4%] w-[34%] px-3 py-2.5"
-  return "bottom-[6%] left-[4%] w-[38%] px-3.5 py-3"
+function accentImagePlate(compact: boolean): string {
+  return compact
+    ? "right-[4%] bottom-[10%] h-[38%] w-[20%]"
+    : "right-[5%] bottom-[8%] h-[42%] w-[18%]"
+}
+
+function groundedInscription(compact: boolean): string {
+  return compact
+    ? "bottom-1.5 left-1.5 max-w-[70%] px-2 py-1.5"
+    : "bottom-[6%] left-[4%] w-[56%] max-w-[28ch] px-1 py-1"
 }
 
 function TypePrimaryFront({
@@ -523,19 +520,25 @@ function TypePrimaryFront({
   hierarchy,
   treatment,
   layout,
+  derivation,
 }: FrontContext) {
   const leadWithOffer = copyOfferLeads(hierarchy)
   const structure = studioCompositionStructure(layout)
+  const smallPlate = derivation.imagePlate === "small"
   return (
     <div
       className="relative h-full"
       style={{ backgroundColor: surface }}
       data-composition={structure.layoutVariant}
+      data-type-presence={derivation.typePresence}
+      data-image-plate={derivation.imagePlate}
+      data-void={derivation.voidShape}
     >
       <div
         data-region="type"
         className={cn(
-          "relative z-10 flex h-full w-[66%] flex-col",
+          "relative z-10 flex h-full flex-col",
+          smallPlate ? "w-[58%]" : "w-[66%]",
           typeBreathing(compact, studioTypeExecution(treatment).rhythm)
         )}
       >
@@ -570,7 +573,9 @@ function TypePrimaryFront({
         data-region="supporting-image"
         className={cn(
           "absolute overflow-hidden",
-          supportingImagePlate(compact, treatment.photoWeight)
+          smallPlate
+            ? accentImagePlate(compact)
+            : supportingImagePlate(compact, treatment.photoWeight)
         )}
       >
         <PhotoSlot
@@ -604,6 +609,7 @@ function PeerSplitFront({
   hierarchy,
   treatment,
   layout,
+  derivation,
 }: FrontContext) {
   const leadWithOffer = copyOfferLeads(hierarchy)
   const structure = studioCompositionStructure(layout)
@@ -613,6 +619,9 @@ function PeerSplitFront({
       className="flex h-full"
       style={{ backgroundColor: surface }}
       data-composition={structure.layoutVariant}
+      data-type-presence={derivation.typePresence}
+      data-image-plate={derivation.imagePlate}
+      data-void={derivation.voidShape}
     >
       <div data-region="peer-image" className="relative h-full min-w-0 w-[54%] overflow-hidden">
         <PhotoSlot
@@ -686,6 +695,7 @@ function BandedSplitFront({
   hierarchy,
   treatment,
   layout,
+  derivation,
 }: FrontContext) {
   const leadWithOffer = copyOfferLeads(hierarchy)
   const structure = studioCompositionStructure(layout)
@@ -697,6 +707,9 @@ function BandedSplitFront({
       className="flex h-full flex-col"
       style={{ backgroundColor: surface }}
       data-composition={structure.layoutVariant}
+      data-type-presence={derivation.typePresence}
+      data-image-plate={derivation.imagePlate}
+      data-void={derivation.voidShape}
     >
       <div
         data-region="band"
@@ -796,14 +809,19 @@ function ImageGroundedFront({
   hierarchy,
   treatment,
   layout,
+  derivation,
 }: FrontContext) {
   const leadWithOffer = copyOfferLeads(hierarchy)
   const structure = studioCompositionStructure(layout)
+  const onPhotoInk = "#f7f7f4"
   return (
     <div
       className="relative h-full"
       style={{ backgroundColor: secondary }}
       data-composition={structure.layoutVariant}
+      data-type-presence={derivation.typePresence}
+      data-image-plate={derivation.imagePlate}
+      data-void={derivation.voidShape}
     >
       <div data-region="image-ground" className="absolute inset-0">
         <PhotoSlot
@@ -816,12 +834,20 @@ function ImageGroundedFront({
         />
       </div>
       <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[52%]"
+        style={{
+          background:
+            "linear-gradient(to top, rgba(20, 18, 16, 0.62) 0%, rgba(20, 18, 16, 0.28) 42%, rgba(20, 18, 16, 0) 100%)",
+        }}
+        aria-hidden
+      />
+      <div
         data-region="inscription"
         className={cn(
           "absolute flex flex-col justify-end",
-          inscriptionLockup(compact, spec.imageryRole, treatment.photoWeight)
+          groundedInscription(compact)
         )}
-        style={{ backgroundColor: surface, color: ink }}
+        style={{ color: onPhotoInk }}
       >
         <LeadType
           spec={spec}
@@ -829,7 +855,7 @@ function ImageGroundedFront({
           leadWithOffer={leadWithOffer}
           compact={compact}
           type={type}
-          color={ink}
+          color={onPhotoInk}
           emphasis={emphasis}
           treatment={treatment}
           showBody={false}
@@ -840,7 +866,7 @@ function ImageGroundedFront({
           leadWithOffer={leadWithOffer}
           compact={compact}
           type={type}
-          color={ink}
+          color={onPhotoInk}
           emphasis={emphasis}
           surface={surface}
           treatment={treatment}
@@ -869,17 +895,25 @@ function TypeOnlyFront({
   hierarchy,
   treatment,
   layout,
+  derivation,
 }: FrontContext) {
   const leadWithOffer = copyOfferLeads(hierarchy)
   const structure = studioCompositionStructure(layout)
   const voice = studioTypeExecution(treatment)
+  const asObject = derivation.typePresence === "object"
   return (
     <div
       className={cn("flex h-full flex-col", typeBreathing(compact, voice.rhythm))}
       style={{ backgroundColor: surface }}
       data-composition={structure.layoutVariant}
+      data-type-presence={derivation.typePresence}
+      data-image-plate={derivation.imagePlate}
+      data-void={derivation.voidShape}
     >
-      <div data-region="type" className="w-[62%] max-w-[22ch]">
+      <div
+        data-region="type"
+        className={asObject ? "w-[48%] max-w-[12ch]" : "w-[62%] max-w-[22ch]"}
+      >
         <LeadType
           spec={spec}
           offer={offer}
@@ -1081,6 +1115,7 @@ function ContactPrint({
     letterSpacing: "-0.01em",
   }
 
+  const parts = [spec.phone, spec.website].filter(Boolean)
   if (phoneBottomRight && spec.phone) {
     return (
       <p className="min-w-0 font-medium leading-snug" style={style}>
@@ -1090,18 +1125,9 @@ function ContactPrint({
   }
 
   return (
-    <div className="min-w-0 space-y-0.5">
-      {spec.phone ? (
-        <p className="font-medium leading-snug" style={style}>
-          {spec.phone}
-        </p>
-      ) : null}
-      {spec.website ? (
-        <p className="leading-snug" style={style}>
-          {spec.website}
-        </p>
-      ) : null}
-    </div>
+    <p className="min-w-0 font-medium leading-snug" style={style}>
+      {parts.join("  ·  ")}
+    </p>
   )
 }
 

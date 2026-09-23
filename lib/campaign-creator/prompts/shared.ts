@@ -41,6 +41,9 @@ export const SPEC_FIELD_RULES = `CreativeSpec rules:
 - leadJob: one of offer, problem, trust, urgency. The job the piece leads with. Does not create an offer or invent facts, deadlines, proof, or weather
 - imageryRole: one of consequence, neighborhood, crew, logo, none. The job of the image — not a file, URL, crop, or photograph to invent
 - leadJob and imageryRole must cohere with the concept. The image should reinforce the piece's lead, not compete with it. Judge that from the concept's copy, offer, audience, and visualDirection — not from enum names. The image may do a complementary job; it need not repeat the lead. No pairing is universally invalid.
+- typeRole: optional. one of copy, subject. Omit unless the concept makes a word or quantity the visual subject of the piece. copy: type is a conventional reading. subject: a word or quantity is the visual subject. Do not infer subject from leadJob. Do not infer subject from copy contents such as a price or "$25". Do not use typeRole as a typography-size instruction. Omitted means copy.
+- imagePresence: optional. one of field, accent. Omit unless the concept makes an image a witness to a type-led piece rather than occupying the family's normal image field. field: the image occupies the field the family already names. accent: the image is a witness; do not change layoutVariant because of accent. type_only cannot use imagePresence. Do not infer accent from imageryRole. Omitted means the family's default image presence.
+- typeRole and imagePresence are chosen after the concept is established, during specification. They are semantic jobs, not layout geometry.
 - Do not emit physical format, catalog identity, dimensions, bleed, reserved-zone geometry, or asset paths`
 
 export const DIRECTION_SET_REASONING_RULES = `The three directions are one set. They share the campaign brief, the canvas, and the Creative Intelligence pack. They are not three isolated campaigns.
@@ -50,6 +53,8 @@ Creative Intelligence names available readings, bounds, and tensions. It does no
 When the brief and Creative Intelligence support more than one legitimate creative reading, spend those readings across the set rather than repeating the same reading three times. A campaign may support only two legitimate readings — use those two. Do not invent a third reading, interrupt, lead, image job, offer, or response path the brief cannot support.
 
 Meaningful difference is how the piece leads: communication angle, primary interrupt, lead job, honest imagery job or no forced photograph, composition structure, offer versus trust or problem emphasis, and which existing response path is primary when two exist. Different headlines, palettes, or wording are not enough if the creative logic is the same.
+
+typeRole and imagePresence may differentiate a direction when the concept needs a visual subject or an image witness. They are not a set-uniqueness requirement. Do not force subject or accent onto a direction just to make the set look different.
 
 Do not pre-assign Direction A, B, or C. Decide each direction's CreativeSpec from that direction's concept. Each direction must remain valid on its own under the brief, canvas, and Creative Intelligence bounds.
 
@@ -61,7 +66,7 @@ The concept must answer: What is this piece? What is the central creative idea o
 
 name, rationale, oneLineDifference, and visualDirection articulate that concept. They are not decorative metadata.
 
-Only after the concept is established, choose the CreativeSpec values that express it — copy, leadJob, imageryRole, layoutVariant, palette, offer, CTA, and the rest. The spec must cohere with the concept. Do not choose layout, imagery, lead job, palette, or other spec values first and retrofit a rationale afterward.
+Only after the concept is established, choose the CreativeSpec values that express it — copy, leadJob, imageryRole, layoutVariant, typeRole, imagePresence, palette, offer, CTA, and the rest. The spec must cohere with the concept. Do not choose layout, imagery, lead job, type role, image presence, palette, or other spec values first and retrofit a rationale afterward.
 
 Do not require photography. A concept may be type-led, offer-led, object- or metaphor-led, editorial, invitation-led, or another idea the brief and Creative Intelligence actually support. Discover the appropriate creative idea from the brief and Creative Intelligence. Do not select from a fixed concept taxonomy.
 

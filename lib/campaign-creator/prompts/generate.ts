@@ -34,6 +34,7 @@ Generation constraints:
 - Exactly one recommended: true — your lead recommendation
 - At least 2 distinct layoutVariant values
 - Each spec must include leadJob and imageryRole from the closed lists, matching the concept
+- typeRole and imagePresence are optional. Emit them only after the concept is established, and only when the concept needs subject or accent
 - All 3 must have genuinely different messaging angles (not paraphrases)
 - Direction name: 2–4 editorial words (e.g. "Trusted Local Expert"), not a layout description
 - tags: exactly 3 strategic tags per direction

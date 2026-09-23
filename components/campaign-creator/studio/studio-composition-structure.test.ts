@@ -115,6 +115,15 @@ test("changing imageryRole does not change the structural family", () => {
   }
 })
 
+test("typeRole and imagePresence do not change the structural family", () => {
+  for (const layout of LAYOUT_VARIANTS) {
+    const baseline = studioCompositionStructure(layout)
+    assert.deepEqual(studioCompositionStructure(layout), baseline)
+    assert.equal("typeRole" in baseline, false)
+    assert.equal("imagePresence" in baseline, false)
+  }
+})
+
 test("type_primary_split does not inherently make the offer the hero", () => {
   assert.equal(copyOfferLeads(studioCopyHierarchy(undefined)), false)
   assert.equal(copyOfferLeads(studioCopyHierarchy("offer")), true)

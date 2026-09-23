@@ -133,6 +133,12 @@ export const IMAGERY_ROLES = [
 ] as const
 export type ImageryRole = (typeof IMAGERY_ROLES)[number]
 
+export const TYPE_ROLES = ["copy", "subject"] as const
+export type TypeRole = (typeof TYPE_ROLES)[number]
+
+export const IMAGE_PRESENCES = ["field", "accent"] as const
+export type ImagePresence = (typeof IMAGE_PRESENCES)[number]
+
 export const GENERATED_SPEC_TOOL_REQUIRED = [
   "layoutVariant",
   "headline",
@@ -192,6 +198,17 @@ export interface CreativeSpec {
   leadJob?: LeadJob
   /** Job the image should perform. Not a file, URL, crop, or photograph. */
   imageryRole?: ImageryRole
+  /**
+   * Job of the type. Omit unless a word or quantity is the visual subject.
+   * Omitted means copy. Not a typography-size instruction.
+   */
+  typeRole?: TypeRole
+  /**
+   * How the image occupies the family. Omit unless the image is a witness
+   * to a type-led piece. Omitted means the family's default. type_only
+   * cannot use this field.
+   */
+  imagePresence?: ImagePresence
   backLayout?: BackLayout
   layoutHints?: LayoutHints
 }

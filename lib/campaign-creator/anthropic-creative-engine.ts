@@ -26,15 +26,19 @@ import {
 import { createAnthropicClient, type AnthropicToolUseBlock } from "./load-anthropic-sdk"
 import {
   GENERATED_SPEC_TOOL_REQUIRED,
+  IMAGE_PRESENCES,
   IMAGERY_ROLES,
-  LEAD_JOBS,
   LAYOUT_VARIANTS,
+  LEAD_JOBS,
+  TYPE_ROLES,
   normalizeLayoutVariant,
   type CreativeDirection,
   type CreativeSpec,
+  type ImagePresence,
   type ImageryKey,
   type ImageryRole,
   type LeadJob,
+  type TypeRole,
 } from "./types"
 
 const MODEL = "claude-sonnet-5"
@@ -71,6 +75,14 @@ const specToolProperties = {
   imageryRole: {
     type: "string",
     enum: IMAGERY_ROLES,
+  },
+  typeRole: {
+    type: "string",
+    enum: TYPE_ROLES,
+  },
+  imagePresence: {
+    type: "string",
+    enum: IMAGE_PRESENCES,
   },
   layoutHints: {
     type: "object",
@@ -379,6 +391,8 @@ function parseSpec(raw: unknown): CreativeSpec | undefined {
     imagery: isImageryKey(raw.imagery) ? raw.imagery : undefined,
     leadJob: isLeadJob(raw.leadJob) ? raw.leadJob : undefined,
     imageryRole: isImageryRole(raw.imageryRole) ? raw.imageryRole : undefined,
+    typeRole: isTypeRole(raw.typeRole) ? raw.typeRole : undefined,
+    imagePresence: isImagePresence(raw.imagePresence) ? raw.imagePresence : undefined,
   }
 
   if (isRecord(raw.layoutHints)) {
@@ -431,4 +445,12 @@ function isLeadJob(value: unknown): value is LeadJob {
 
 function isImageryRole(value: unknown): value is ImageryRole {
   return typeof value === "string" && (IMAGERY_ROLES as readonly string[]).includes(value)
+}
+
+function isTypeRole(value: unknown): value is TypeRole {
+  return typeof value === "string" && (TYPE_ROLES as readonly string[]).includes(value)
+}
+
+function isImagePresence(value: unknown): value is ImagePresence {
+  return typeof value === "string" && (IMAGE_PRESENCES as readonly string[]).includes(value)
 }

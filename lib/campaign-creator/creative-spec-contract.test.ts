@@ -4,8 +4,10 @@ import { test } from "node:test"
 import {
   applyFaithfulness,
   finalizeRefinement,
+  isImagePresence,
   isImageryRole,
   isLeadJob,
+  isTypeRole,
   normalizeGenerationResult,
   validateGenerationSet,
 } from "./creative-engine-guards"
@@ -26,17 +28,21 @@ import { normalizeCampaign } from "./repository"
 import { cloneSpec } from "./spec-diff"
 import {
   GENERATED_SPEC_TOOL_REQUIRED,
+  IMAGE_PRESENCES,
   IMAGERY_ROLES,
   LAYOUT_VARIANTS,
   LEAD_JOBS,
+  TYPE_ROLES,
   createEmptyCampaignCreative,
   normalizeLayoutVariant,
   type Campaign,
   type CampaignBrief,
   type CreativeDirection,
   type CreativeSpec,
+  type ImagePresence,
   type ImageryRole,
   type LeadJob,
+  type TypeRole,
 } from "./types"
 import type { CreativeCanvas } from "./creative-canvas"
 
@@ -603,4 +609,243 @@ test("mock generation still produces valid leadJob and imageryRole", () => {
     assert.equal(isLeadJob(direction.spec.leadJob), true)
     assert.equal(isImageryRole(direction.spec.imageryRole), true)
   }
+})
+
+test("typeRole and imagePresence accept closed enums and omission", () => {
+  for (const typeRole of TYPE_ROLES) {
+    assert.equal(isTypeRole(typeRole), true, typeRole)
+  }
+  for (const imagePresence of IMAGE_PRESENCES) {
+    assert.equal(isImagePresence(imagePresence), true, imagePresence)
+  }
+  assert.equal(isTypeRole(undefined), false)
+  assert.equal(isImagePresence(undefined), false)
+  assert.equal(isTypeRole("object"), false)
+  assert.equal(isImagePresence("witness"), false)
+
+  const omitted = validateGenerationSet(brief, [
+    validDirection(0),
+    validDirection(1),
+    validDirection(2),
+  ])
+  assert.deepEqual(omitted, [])
+
+  const explicit = validateGenerationSet(brief, [
+    validDirection(0, {
+      spec: baseSpec({ typeRole: "copy", imagePresence: "field" }),
+    }),
+    validDirection(1),
+    validDirection(2),
+  ])
+  assert.deepEqual(explicit, [])
+})
+
+test("invalid typeRole and imagePresence values are stripped on normalize", () => {
+  const result = normalizeGenerationResult(
+    brief,
+    [
+      validDirection(0, {
+        spec: {
+          ...baseSpec(),
+          typeRole: "hero" as TypeRole,
+          imagePresence: "witness" as ImagePresence,
+        },
+      }),
+      validDirection(1),
+      validDirection(2),
+    ],
+    { stripInventedFacts: true }
+  )
+
+  assert.equal(result.directions[0].spec.typeRole, undefined)
+  assert.equal(result.directions[0].spec.imagePresence, undefined)
+  assert.equal(result.directions[0].spec.leadJob, "offer")
+})
+
+test("semantically invalid typeRole and imagePresence combinations fail generation", () => {
+  const invalid: Array<Partial<CreativeSpec>> = [
+    { layoutVariant: "type_only", imagePresence: "field", imageryRole: "none" },
+    { layoutVariant: "type_only", imagePresence: "accent", imageryRole: "none" },
+    { layoutVariant: "image_grounded", imagePresence: "accent" },
+    { layoutVariant: "peer_split", imagePresence: "accent" },
+    { layoutVariant: "image_grounded", typeRole: "subject" },
+  ]
+
+  for (const spec of invalid) {
+    const reasons = validateGenerationSet(brief, [
+      validDirection(0, { spec: baseSpec(spec) }),
+      validDirection(1),
+      validDirection(2),
+    ])
+    assert.equal(reasons.length > 0, true, JSON.stringify(spec))
+  }
+})
+
+test("legally unimplemented typeRole and imagePresence combinations remain valid", () => {
+  const legal: Array<Partial<CreativeSpec>> = [
+    { typeRole: "subject", leadJob: "offer" },
+    { typeRole: "subject", leadJob: "urgency" },
+    { typeRole: "subject", imageryRole: "neighborhood" },
+    { layoutVariant: "banded_split", imagePresence: "accent" },
+    {
+      layoutVariant: "type_primary_split",
+      typeRole: "subject",
+      imagePresence: "accent",
+    },
+    { layoutVariant: "peer_split", typeRole: "subject" },
+    { layoutVariant: "banded_split", typeRole: "subject" },
+  ]
+
+  for (const spec of legal) {
+    const reasons = validateGenerationSet(brief, [
+      validDirection(0, { spec: baseSpec(spec) }),
+      validDirection(1),
+      validDirection(2),
+    ])
+    assert.deepEqual(reasons, [], JSON.stringify(spec))
+  }
+})
+
+test("typeRole and imagePresence are not set-level uniqueness requirements", () => {
+  const reasons = validateGenerationSet(brief, [
+    validDirection(0, {
+      spec: baseSpec({
+        headline: "Free Inspection Now",
+        typeRole: "copy",
+        imagePresence: "field",
+        layoutVariant: "type_primary_split",
+      }),
+    }),
+    validDirection(1, {
+      spec: baseSpec({
+        headline: "Hidden Roof Danger",
+        typeRole: "copy",
+        imagePresence: "field",
+        layoutVariant: "banded_split",
+      }),
+    }),
+    validDirection(2, {
+      spec: baseSpec({
+        headline: "Trusted Roofing Team",
+        layoutVariant: "peer_split",
+      }),
+    }),
+  ])
+  assert.deepEqual(reasons, [])
+})
+
+test("historical CreativeSpec without typeRole and imagePresence remains loadable", () => {
+  const legacy: CreativeSpec = {
+    layoutVariant: "peer_split",
+    headline: "Trusted Local Expert",
+    body: "Licensed and insured.",
+    callToAction: "Call today",
+    visualDirection: "Neighborhood photography",
+    tone: "Trustworthy",
+    palette: ["#1e3a5f", "#4a90a4", "#f5f5f0"],
+    imagery: "stock_hvac",
+    offer: "Free roof inspection",
+  }
+
+  const loaded = cloneSpec(legacy)
+  const faithful = applyFaithfulness(brief, loaded)
+
+  assert.equal(loaded.typeRole, undefined)
+  assert.equal(loaded.imagePresence, undefined)
+  assert.equal(faithful.typeRole, undefined)
+  assert.equal(faithful.imagePresence, undefined)
+  assert.equal(faithful.leadJob, undefined)
+  assert.equal(faithful.imageryRole, undefined)
+})
+
+test("refine preserves typeRole and imagePresence unless the concept changes", () => {
+  const current = baseSpec({ typeRole: "subject", imagePresence: "accent" })
+
+  const preserved = finalizeRefinement({
+    brief,
+    directionId: "dir-1",
+    currentSpec: current,
+    prompt: "Make the headline larger",
+    proposed: {
+      outcome: "success",
+      spec: {
+        ...current,
+        typeRole: undefined,
+        imagePresence: undefined,
+        headline: "Trusted Crew",
+      },
+    },
+  })
+
+  assert.equal(preserved.spec.typeRole, "subject")
+  assert.equal(preserved.spec.imagePresence, "accent")
+  assert.equal(preserved.spec.headline, "Trusted Crew")
+
+  const changed = finalizeRefinement({
+    brief,
+    directionId: "dir-1",
+    currentSpec: current,
+    prompt: "Make the photograph occupy the supporting field",
+    proposed: {
+      outcome: "success",
+      spec: { ...current, typeRole: "copy", imagePresence: "field" },
+    },
+  })
+
+  assert.equal(changed.spec.typeRole, "copy")
+  assert.equal(changed.spec.imagePresence, "field")
+})
+
+test("offer copy does not infer typeRole or imagePresence", () => {
+  const spec = baseSpec({
+    leadJob: "offer",
+    headline: "$25 Off This Week",
+    offer: "$25 inspection",
+    imageryRole: "neighborhood",
+  })
+  assert.equal(spec.typeRole, undefined)
+  assert.equal(spec.imagePresence, undefined)
+
+  const reasons = validateGenerationSet(brief, [
+    validDirection(0, { spec }),
+    validDirection(1),
+    validDirection(2),
+  ])
+  assert.deepEqual(reasons, [])
+})
+
+test("prompt and tool schema expose optional typeRole and imagePresence", () => {
+  const generate = buildGenerateSystemPrompt(canvas, { principles: [] })
+  const regenerate = buildRegenerateSystemPrompt(canvas, { principles: [] })
+  const refine = buildRefineSystemPrompt(canvas, { principles: [] })
+  const intelligence = formatCreativeIntelligenceContext(
+    buildCreativeIntelligenceContext(brief)
+  )
+
+  for (const text of [SPEC_FIELD_RULES, generate, regenerate, refine]) {
+    assert.match(text, /typeRole/)
+    assert.match(text, /imagePresence/)
+    for (const value of TYPE_ROLES) assert.match(text, new RegExp(`\\b${value}\\b`))
+    for (const value of IMAGE_PRESENCES) {
+      assert.match(text, new RegExp(`\\b${value}\\b`))
+    }
+    assert.match(text, /Do not infer subject from leadJob/)
+    assert.match(text, /Do not infer accent from imageryRole/)
+    assert.doesNotMatch(text, /shaped void/)
+    assert.doesNotMatch(text, /small plate/)
+    assert.doesNotMatch(text, /print lockup/)
+  }
+
+  assert.match(generate, /typeRole and imagePresence are optional/)
+  assert.match(regenerate, /typeRole and imagePresence are optional/)
+  assert.match(CONCEPTION_BEFORE_SPEC_RULES, /typeRole, imagePresence/)
+  assert.match(DIRECTION_SET_REASONING_RULES, /not a set-uniqueness requirement/)
+
+  assert.equal(GENERATED_SPEC_TOOL_REQUIRED.includes("typeRole"), false)
+  assert.equal(GENERATED_SPEC_TOOL_REQUIRED.includes("imagePresence"), false)
+  assert.equal(GENERATED_SPEC_TOOL_REQUIRED.includes("leadJob"), true)
+  assert.equal(GENERATED_SPEC_TOOL_REQUIRED.includes("imageryRole"), true)
+
+  assert.doesNotMatch(intelligence, /typeRole/)
+  assert.doesNotMatch(intelligence, /imagePresence/)
 })
