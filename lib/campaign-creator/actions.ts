@@ -14,6 +14,9 @@ import {
 } from "./conversation-engine"
 import { toCreativeCanvas } from "./creative-canvas"
 import { getCreativeEngine } from "./creative-engine-provider"
+import { generateLeadDirectionImage as runGenerateLeadDirectionImage } from "./generate-lead-direction-image"
+import type { GeneratedAsset } from "./image-generation"
+import { createOpenAIImageGenerationAdapter } from "./openai-image-generation"
 import { getCampaignRepository } from "./repository"
 import { buildSpecDiff, cloneSpec } from "./spec-diff"
 import type { Campaign, CampaignBrief, CreativeRevision, MailPieceSpec } from "./types"
@@ -205,6 +208,24 @@ export async function generateStudioCreative(campaignId: string): Promise<Campai
 /** @deprecated Prefer generateStudioCreative — kept for in-flight callers. */
 export async function initializeStudioCreative(campaignId: string): Promise<Campaign> {
   return generateStudioCreative(campaignId)
+}
+
+/**
+ * Ephemeral lead-image execution. Does not persist GeneratedAsset.
+ * Does not change campaign creative-generation state.
+ */
+export async function generateLeadDirectionImage(
+  campaignId: string,
+  directionId: string
+): Promise<{ directionId: string; generated: GeneratedAsset | null }> {
+  const campaign = await repository.getCampaign(campaignId)
+  if (!campaign) throw new Error(`Campaign ${campaignId} not found`)
+
+  return runGenerateLeadDirectionImage(
+    campaign,
+    directionId,
+    createOpenAIImageGenerationAdapter
+  )
 }
 
 export async function selectCreativeDirection(

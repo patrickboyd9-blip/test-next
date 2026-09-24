@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 
 import { Button } from "@/components/ui/button"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
+import type { GeneratedAsset } from "@/lib/campaign-creator/image-generation"
 import type { CreativeDirection } from "@/lib/campaign-creator/types"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
@@ -16,9 +17,16 @@ interface LeadRevealViewProps {
   direction: CreativeDirection
   onContinue: () => void
   onCompare: () => void
+  generatedAsset?: GeneratedAsset | null
 }
 
-export function LeadRevealView({ canvas, direction, onContinue, onCompare }: LeadRevealViewProps) {
+export function LeadRevealView({
+  canvas,
+  direction,
+  onContinue,
+  onCompare,
+  generatedAsset,
+}: LeadRevealViewProps) {
   const reducedMotion = useReducedMotion()
   const [side, setSide] = useState<"front" | "back">("front")
 
@@ -47,7 +55,13 @@ export function LeadRevealView({ canvas, direction, onContinue, onCompare }: Lea
 
       <div className="flex flex-col items-center gap-2">
         <motion.div className="flex w-full justify-center" {...postcardSpring}>
-          <PostcardPreview canvas={canvas} spec={direction.spec} side={side} size="hero" />
+          <PostcardPreview
+            canvas={canvas}
+            spec={direction.spec}
+            side={side}
+            size="hero"
+            generatedAsset={generatedAsset}
+          />
         </motion.div>
         <PostcardSideToggle side={side} onSideChange={setSide} />
       </div>

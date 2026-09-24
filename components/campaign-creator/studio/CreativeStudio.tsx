@@ -5,12 +5,14 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import {
   applyRefinement,
   approveCreative,
+  generateLeadDirectionImage,
   generateStudioCreative,
   restoreRevision,
   selectCreativeDirection,
 } from "@/lib/campaign-creator/actions"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import { getActiveSpec } from "@/lib/campaign-creator/creative-state"
+import type { GeneratedAsset } from "@/lib/campaign-creator/image-generation"
 import {
   getLeadDirection,
   getMockCreativeDirections,
@@ -72,6 +74,11 @@ export function CreativeStudio({
   const [approvalSettled, setApprovalSettled] = useState(false)
   const generationStartedRef = useRef(false)
   const generationRequestIdRef = useRef(0)
+  const [generatedByDirectionId, setGeneratedByDirectionId] = useState<
+    Partial<Record<string, GeneratedAsset>>
+  >({})
+  const imageGenerationStartedForIdRef = useRef<string | null>(null)
+  const imageRequestIdRef = useRef(0)
 
   const directions = hasPersistedDirections
     ? campaign.creative.directions
@@ -123,6 +130,33 @@ export function CreativeStudio({
     }, STUDIO_GENERATION.failThresholdMs)
     return () => window.clearTimeout(timeout)
   }, [hasPersistedDirections, generationFailed, isInitializing])
+
+  useEffect(() => {
+    return () => {
+      imageRequestIdRef.current += 1
+    }
+  }, [])
+
+  useEffect(() => {
+    if (subPhase !== "lead" || !hasPersistedDirections) return
+    const directionId = leadDirection.id
+    if (imageGenerationStartedForIdRef.current === directionId) return
+
+    imageGenerationStartedForIdRef.current = directionId
+    const requestId = ++imageRequestIdRef.current
+
+    void generateLeadDirectionImage(campaign.id, directionId)
+      .then((result) => {
+        if (requestId !== imageRequestIdRef.current) return
+        if (result.generated) {
+          setGeneratedByDirectionId({ [result.directionId]: result.generated })
+        }
+      })
+      .catch((error) => {
+        if (requestId !== imageRequestIdRef.current) return
+        console.error("Lead image generation failed:", error)
+      })
+  }, [subPhase, hasPersistedDirections, leadDirection.id, campaign.id])
 
   async function handleSelectDirection(directionId: string) {
     setLocalSelectedId(directionId)
@@ -220,6 +254,7 @@ export function CreativeStudio({
       <LeadRevealView
         canvas={canvas}
         direction={leadDirection}
+        generatedAsset={generatedByDirectionId[leadDirection.id] ?? null}
         onContinue={async () => {
           await handleSelectDirection(leadDirection.id)
           setSubPhase("focus")
