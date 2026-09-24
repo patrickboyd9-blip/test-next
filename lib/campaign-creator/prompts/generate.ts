@@ -35,6 +35,7 @@ Generation constraints:
 - At least 2 distinct layoutVariant values
 - Each spec must include leadJob and imageryRole from the closed lists, matching the concept
 - typeRole and imagePresence are optional. Emit them only after the concept is established, and only when the concept needs subject or accent
+- After conceiving visualDirection, emit imagePresence: accent when that conception names a small witness to a type-led piece. Do not emit accent when the image occupies the family's normal supporting or image field. Do not infer accent from imageryRole. Do not emit accent merely to make directions visually different
 - All 3 must have genuinely different messaging angles (not paraphrases)
 - Direction name: 2–4 editorial words (e.g. "Trusted Local Expert"), not a layout description
 - tags: exactly 3 strategic tags per direction

@@ -42,7 +42,7 @@ export const SPEC_FIELD_RULES = `CreativeSpec rules:
 - imageryRole: one of consequence, neighborhood, crew, logo, none. The job of the image — not a file, URL, crop, or photograph to invent
 - leadJob and imageryRole must cohere with the concept. The image should reinforce the piece's lead, not compete with it. Judge that from the concept's copy, offer, audience, and visualDirection — not from enum names. The image may do a complementary job; it need not repeat the lead. No pairing is universally invalid.
 - typeRole: optional. one of copy, subject. Omit unless the concept makes a word or quantity the visual subject of the piece. copy: type is a conventional reading. subject: a word or quantity is the visual subject. Do not infer subject from leadJob. Do not infer subject from copy contents such as a price or "$25". Do not use typeRole as a typography-size instruction. Omitted means copy.
-- imagePresence: optional. one of field, accent. Omit unless the concept makes an image a witness to a type-led piece rather than occupying the family's normal image field. field: the image occupies the field the family already names. accent: the image is a witness; do not change layoutVariant because of accent. type_only cannot use imagePresence. Do not infer accent from imageryRole. Omitted means the family's default image presence.
+- imagePresence: optional. one of field, accent. After conceiving the visual direction, translate the stated image occupancy into this existing semantic job. If visualDirection says the image is a small witness to a type-led piece, emit imagePresence: accent. If the image is the family's normal supporting or image field, do not emit accent. field: the image occupies the family's normal image field. accent: the image is a secondary or small witness to a type-led piece and should not compete with the primary interrupt; do not change layoutVariant because of accent. type_only cannot use imagePresence. Do not infer accent from imageryRole. Do not emit accent merely to make directions visually different. The decision must come from the conceived visual role or occupancy. Omitted means the family's default image presence.
 - typeRole and imagePresence are chosen after the concept is established, during specification. They are semantic jobs, not layout geometry.
 - Do not emit physical format, catalog identity, dimensions, bleed, reserved-zone geometry, or asset paths`
 
@@ -79,6 +79,9 @@ The set-level direction-spending rules remain authoritative: conceive three genu
 Creative Intelligence remains campaign-scoped. It establishes knowledge, bounds, tensions, and uncertainty. It does not conceive a direction or assign CreativeSpec values.
 
 The renderer executes CreativeSpec. It does not invent the concept.`
+
+export const IMAGE_PRESENCE_TOOL_DESCRIPTION =
+  "field: image occupies the family's normal image field. accent: image is a secondary/small witness to a type-led piece and should not compete with the primary interrupt."
 
 export function buildCreativeCanvasPromptContext(canvas: CreativeCanvas): string {
   const roles = canvas.reservedRegionRoles.join(", ")

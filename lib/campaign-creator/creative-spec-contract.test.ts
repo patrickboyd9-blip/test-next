@@ -22,6 +22,7 @@ import { buildRefineSystemPrompt } from "./prompts/refine"
 import {
   CONCEPTION_BEFORE_SPEC_RULES,
   DIRECTION_SET_REASONING_RULES,
+  IMAGE_PRESENCE_TOOL_DESCRIPTION,
   SPEC_FIELD_RULES,
 } from "./prompts/shared"
 import { normalizeCampaign } from "./repository"
@@ -916,4 +917,45 @@ test("prompt and tool schema expose optional typeRole and imagePresence", () => 
 
   assert.doesNotMatch(intelligence, /typeRole/)
   assert.doesNotMatch(intelligence, /imagePresence/)
+})
+
+test("specification rules bind visualDirection witness occupancy to imagePresence accent", () => {
+  const generate = buildGenerateSystemPrompt(canvas, { principles: [] })
+  const regenerate = buildRegenerateSystemPrompt(canvas, { principles: [] })
+
+  for (const text of [SPEC_FIELD_RULES, generate, regenerate]) {
+    assert.match(text, /translate the stated image occupancy/)
+    assert.match(
+      text,
+      /If visualDirection says the image is a small witness to a type-led piece, emit imagePresence: accent/
+    )
+    assert.match(
+      text,
+      /If the image is the family's normal supporting or image field, do not emit accent/
+    )
+    assert.match(text, /Do not emit accent merely to make directions visually different/)
+    assert.match(text, /Do not infer accent from imageryRole/)
+    assert.match(text, /conceived visual role or occupancy/)
+    assert.match(text, /Do not infer subject from leadJob/)
+    assert.match(text, /Do not infer subject from copy contents/)
+  }
+
+  assert.match(
+    generate,
+    /emit imagePresence: accent when that conception names a small witness/
+  )
+  assert.match(
+    regenerate,
+    /emit imagePresence: accent when that conception names a small witness/
+  )
+
+  assert.match(IMAGE_PRESENCE_TOOL_DESCRIPTION, /family's normal image field/)
+  assert.match(
+    IMAGE_PRESENCE_TOOL_DESCRIPTION,
+    /secondary\/small witness to a type-led piece/
+  )
+  assert.match(IMAGE_PRESENCE_TOOL_DESCRIPTION, /should not compete with the primary interrupt/)
+  assert.match(IMAGE_PRESENCE_TOOL_DESCRIPTION, /\bfield\b/)
+  assert.match(IMAGE_PRESENCE_TOOL_DESCRIPTION, /\baccent\b/)
+  assert.doesNotMatch(IMAGE_PRESENCE_TOOL_DESCRIPTION, /\bwitness\b.*\bresult\b/)
 })

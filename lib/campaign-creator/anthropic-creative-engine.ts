@@ -16,6 +16,7 @@ import {
 import { buildCreativeIntelligenceContext } from "./creative-intelligence"
 import {
   CREATIVE_PROMPT_VERSION,
+  IMAGE_PRESENCE_TOOL_DESCRIPTION,
   buildGenerateSystemPrompt,
   buildGenerateUserMessage,
   buildRefineSystemPrompt,
@@ -83,6 +84,7 @@ const specToolProperties = {
   imagePresence: {
     type: "string",
     enum: IMAGE_PRESENCES,
+    description: IMAGE_PRESENCE_TOOL_DESCRIPTION,
   },
   layoutHints: {
     type: "object",

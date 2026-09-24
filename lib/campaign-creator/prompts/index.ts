@@ -3,6 +3,7 @@ export {
   CONCEPTION_BEFORE_SPEC_RULES,
   CREATIVE_VOICE_RULES,
   DIRECTION_SET_REASONING_RULES,
+  IMAGE_PRESENCE_TOOL_DESCRIPTION,
   SPEC_FIELD_RULES,
   buildCreativeCanvasPromptContext,
   buildCreativeIntelligencePromptSection,
