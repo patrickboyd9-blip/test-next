@@ -4,6 +4,7 @@ import { motion } from "framer-motion"
 
 import { cn } from "@/lib/utils"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
+import type { GeneratedAsset } from "@/lib/campaign-creator/image-generation"
 import { resolveCreativeImage } from "@/lib/campaign-creator/resolve-creative-image"
 import {
   normalizeLayoutVariant,
@@ -50,6 +51,8 @@ interface PostcardPreviewProps {
   highlightRegions?: string[]
   isShimmering?: boolean
   ariaLabel?: string
+  /** Ephemeral render-path image. Not persisted. Not a CreativeSpec field. */
+  generatedAsset?: GeneratedAsset | null
 }
 
 const SIZE_CLASSES: Record<PostcardPreviewSize, string> = {
@@ -90,12 +93,17 @@ export function PostcardPreview({
   highlightRegions = [],
   isShimmering = false,
   ariaLabel,
+  generatedAsset,
 }: PostcardPreviewProps) {
   const reducedMotion = useReducedMotion()
   const [primary, secondary, accent] = spec.palette ?? DEFAULT_PALETTE
   const layout = normalizeLayoutVariant(spec.layoutVariant) ?? "peer_split"
   const isAddressSide = side === canvas.addressFace
-  const imagery = resolveCreativeImage(spec.imagery, spec.imageryRole)
+  const imagery = resolveCreativeImage(
+    spec.imagery,
+    spec.imageryRole,
+    generatedAsset
+  )
   const photoSrc = imagery.src
   const showMonogram = imagery.showMonogram
 

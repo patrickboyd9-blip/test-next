@@ -2,6 +2,7 @@ import {
   BETA_IMAGERY_LIBRARY,
   type CuratedImageryAsset,
 } from "./beta-imagery-library"
+import type { GeneratedAsset } from "./image-generation"
 import type { ImageryKey, ImageryRole } from "./types"
 
 /**
@@ -37,13 +38,20 @@ function fromLibrary(role: ImageryRole): ResolvedImage {
  *
  * Cluster is not consulted. Layout and leadJob are not consulted.
  * Missing roles resolve empty rather than substituting another role's photo.
+ *
+ * generated is an optional render-path input. It is not a CreativeSpec field.
+ * none and logo still win over a generated photograph.
  */
 export function resolveCreativeImage(
   imagery: ImageryKey | undefined,
-  imageryRole?: ImageryRole
+  imageryRole?: ImageryRole,
+  generated?: GeneratedAsset | null
 ): ResolvedImage {
   if (imageryRole === "none") return EMPTY_IMAGE
   if (imageryRole === "logo") return MONOGRAM_IMAGE
+  if (imageryRole && generated?.src) {
+    return { src: generated.src, showMonogram: false }
+  }
   if (imageryRole) return fromLibrary(imageryRole)
 
   switch (imagery) {
