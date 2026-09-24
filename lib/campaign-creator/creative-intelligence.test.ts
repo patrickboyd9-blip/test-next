@@ -141,6 +141,11 @@ test("research-derived imagery principles are observed_pattern and do not duplic
   assert.equal(consequence[0].kind, "observed_pattern")
   assert.equal(consequence[0].appliesTo?.join(","), "imagery")
   assert.match(consequence[0].statement, /Name that role only/)
+  assert.match(consequence[0].statement, /job-site fact/)
+  assert.match(consequence[0].statement, /illustrative category situation/)
+  assert.match(consequence[0].statement, /cheap fear/)
+  assert.doesNotMatch(consequence[0].statement, /do not invent a photograph/)
+  assert.doesNotMatch(consequence[0].statement, /or visual the brief does not support/)
 
   const crew = roofing.principles.find((principle) => principle.id === "hs-crew-imagery")
   assert.ok(crew)
@@ -149,6 +154,8 @@ test("research-derived imagery principles are observed_pattern and do not duplic
   assert.deepEqual(crew.appliesTo, ["imagery", "trust"])
   assert.match(crew.statement, /imageryRole crew/)
   assert.match(crew.statement, /Name the role only/)
+  assert.match(crew.statement, /actual team/)
+  assert.match(crew.statement, /illustrative work situation/)
   assert.equal(
     restaurant.principles.some((principle) => principle.id === "hs-crew-imagery"),
     false
@@ -322,9 +329,13 @@ test("craft principles stay campaign-scoped and do not assign CreativeSpec jobs"
   assert.deepEqual(honesty.appliesTo, ["imagery"])
   assert.match(honesty.statement, /Do not force photography/)
   assert.match(honesty.statement, /interchangeable stock/)
+  assert.match(honesty.statement, /illustrative category situation/)
+  assert.match(honesty.statement, /campaign facts/)
+  assert.match(honesty.statement, /cheap fear/)
   assert.doesNotMatch(honesty.statement, /imageryRole/)
   assert.doesNotMatch(honesty.statement, /layoutVariant/)
   assert.doesNotMatch(honesty.statement, /still-life|lifestyle|documentary/)
+  assert.doesNotMatch(honesty.statement, /Do not invent people, crews, damage, neighborhoods, or proof the brief does not contain/)
 
   assert.ok(grammar)
   assert.equal(grammar.kind, "observed_pattern")

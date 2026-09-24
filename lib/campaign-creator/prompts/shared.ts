@@ -34,9 +34,9 @@ export const SPEC_FIELD_RULES = `CreativeSpec rules:
   image_grounded: Image occupies the compositional ground; type is secondary.
   type_only: No image field; type/action carry the composition.
 - imagery: one of stock_hvac, stock_restaurant, stock_generic_local, logo_primary, none
-  Choose imagery from the business/industry in the brief. Do not invent photographs.
+  Choose imagery from the business/industry in the brief. Do not invent an asset, path, or source file. This does not prohibit a conceived illustrative scene in visualDirection.
 - Include offer, phone, website, and qrDestination only when those values appear on the brief. Copy them exactly. Do not fabricate them.
-- visualDirection: one sentence describing the imagery approach
+- visualDirection: the conceived photograph for this direction, or the no-photo idea. Not a category label ("Neighborhood photography"), not a mood-only caption, not CSS, not a crop, and not an asset path. When imageryRole is none or logo, state that there is no photograph and why. When there is a photograph, say what it depicts, the honest job it performs, the photographic approach, how it supports this direction's primary interrupt rather than competing with it, whether it is the visual ground, a supporting image, or a small witness, and what would make it generic, invented, or interchangeable stock treated as proof. If the image is the ground, name a quiet area type can occupy. When this direction uses a photograph and no usable source image exists, conceive an original illustrative situation from the communication job and legitimate category knowledge. Write it as illustration, not as this recipient's or this customer's documented condition. A description-only BrandAsset is not a photograph. Do not invent people, crews, recipient property, damage-as-fact, or proof the brief does not contain. When NOT: cheap fear or gore escalation. Category conventions may inform the approach; they are not rules. Do not write a model prompt or provider instruction.
 - tone: from the brief, or a safe inference from the goal
 - leadJob: one of offer, problem, trust, urgency. The job the piece leads with. Does not create an offer or invent facts, deadlines, proof, or weather
 - imageryRole: one of consequence, neighborhood, crew, logo, none. The job of the image — not a file, URL, crop, or photograph to invent
@@ -70,7 +70,9 @@ Only after the concept is established, choose the CreativeSpec values that expre
 
 Do not require photography. A concept may be type-led, offer-led, object- or metaphor-led, editorial, invitation-led, or another idea the brief and Creative Intelligence actually support. Discover the appropriate creative idea from the brief and Creative Intelligence. Do not select from a fixed concept taxonomy.
 
-Do not invent facts, offers, proof, customer assets, imagery claims, or unsupported campaign readings.
+When this direction uses a photograph, conceive that photograph as part of the communication idea before writing visualDirection. visualDirection is that conception — what is shown, what job it does, how it relates to the interrupt and the type, and what to refuse — not a label for imageryRole. When this direction has no honest image job, decline photography; do not fill a slot. visualDirection then records the no-photo idea. Creative Intelligence may bound what would require invention; it does not choose the photograph.
+
+Do not invent facts, offers, proof, or unsupported campaign readings. Conceiving an illustrative situation in visualDirection is not inventing an asset or a campaign fact. The image model executes that conception; it does not choose the subject.
 
 The set-level direction-spending rules remain authoritative: conceive three genuinely distinct directions when the brief supports them; two legitimate readings are enough; do not invent a third; do not pre-assign Direction A, B, or C.
 

@@ -385,6 +385,74 @@ test("generate and regenerate require conception before CreativeSpec; refine and
   assert.match(regenerate, /At least 2 distinct layoutVariant values/)
 })
 
+test("prompts require a conceived photograph in visualDirection, not an imagery label", () => {
+  const generate = buildGenerateSystemPrompt(canvas, { principles: [] })
+  const regenerate = buildRegenerateSystemPrompt(canvas, { principles: [] })
+  const refine = buildRefineSystemPrompt(canvas, { principles: [] })
+  const intelligence = formatCreativeIntelligenceContext(
+    buildCreativeIntelligenceContext(brief)
+  )
+
+  for (const text of [SPEC_FIELD_RULES, generate, regenerate, refine]) {
+    assert.doesNotMatch(text, /one sentence describing the imagery approach/)
+    assert.match(text, /conceived photograph/)
+    assert.match(text, /Not a category label/)
+    assert.match(text, /no photograph and why/)
+    assert.match(text, /interchangeable stock treated as proof/)
+    assert.doesNotMatch(text, /ImageBrief/)
+    assert.doesNotMatch(text, /MMR-\d+/)
+    assert.doesNotMatch(text, /\bP1\b/)
+  }
+
+  for (const text of [CONCEPTION_BEFORE_SPEC_RULES, generate, regenerate]) {
+    assert.match(text, /conceive that photograph as part of the communication idea/)
+    assert.match(text, /decline photography/)
+    assert.match(text, /does not choose the photograph/)
+    assert.match(text, /Do not require photography/)
+    assert.match(text, /not inventing an asset or a campaign fact/)
+    assert.match(text, /image model executes that conception/)
+    assert.match(text, /does not choose the subject/)
+    assert.doesNotMatch(text, /imagery claims/)
+    assert.doesNotMatch(text, /customer assets/)
+  }
+
+  assert.doesNotMatch(refine, /conceive that photograph as part of the communication idea/)
+  assert.doesNotMatch(intelligence, /conceive that photograph/)
+  assert.doesNotMatch(intelligence, /Not a category label/)
+  assert.doesNotMatch(intelligence, /ImageBrief/)
+})
+
+test("illustrative category situation is allowed; invented campaign evidence is not", () => {
+  const generate = buildGenerateSystemPrompt(canvas, { principles: [] })
+  const regenerate = buildRegenerateSystemPrompt(canvas, { principles: [] })
+  const refine = buildRefineSystemPrompt(canvas, { principles: [] })
+  const intelligence = formatCreativeIntelligenceContext(
+    buildCreativeIntelligenceContext(brief)
+  )
+
+  for (const text of [SPEC_FIELD_RULES, generate, regenerate, refine]) {
+    assert.doesNotMatch(text, /Do not invent photographs\./)
+    assert.match(text, /Do not invent an asset, path, or source file/)
+    assert.match(text, /does not prohibit a conceived illustrative scene/)
+    assert.match(text, /no usable source image exists/)
+    assert.match(text, /original illustrative situation/)
+    assert.match(text, /description-only BrandAsset is not a photograph/)
+    assert.match(text, /not as this recipient's or this customer's documented condition/)
+    assert.match(text, /damage-as-fact/)
+    assert.match(text, /cheap fear or gore escalation/)
+    assert.match(text, /Do not write a model prompt or provider instruction/)
+  }
+
+  assert.match(intelligence, /illustrative category situation/)
+  assert.match(intelligence, /illustrative image is not evidence/)
+  assert.match(intelligence, /Name that role only/)
+  assert.doesNotMatch(intelligence, /images the brief does not contain/)
+  assert.doesNotMatch(intelligence, /do not invent a photograph/)
+  assert.doesNotMatch(intelligence, /description-only BrandAsset/)
+  assert.doesNotMatch(intelligence, /no usable source image exists/)
+  assert.doesNotMatch(intelligence, /image model executes/)
+})
+
 test("shared leadJob and imageryRole remain valid when layouts and copy differ", () => {
   const reasons = validateGenerationSet(brief, [
     validDirection(0, {

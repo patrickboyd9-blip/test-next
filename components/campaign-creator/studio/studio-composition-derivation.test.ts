@@ -2,8 +2,15 @@ import assert from "node:assert/strict"
 import { test } from "node:test"
 
 import { LAYOUT_VARIANTS, type CreativeSpec } from "../../../lib/campaign-creator/types"
-import { studioCompositionDerivation } from "./studio-composition-derivation"
+import {
+  TYPE_ONLY_FIGURE_CLAMP,
+  TYPE_ONLY_READING_HERO_MAX_PX,
+  studioCompositionDerivation,
+  typeOnlyFigureText,
+  typeOnlyRealization,
+} from "./studio-composition-derivation"
 import { studioCompositionStructure } from "./studio-composition-structure"
+import { studioCompositionTreatment, studioPrintMarks } from "./studio-composition-treatment"
 
 test("omitted jobs preserve family derivation", () => {
   const typePrimary = studioCompositionDerivation({ layoutVariant: "type_primary_split" })
@@ -160,6 +167,107 @@ test("subject on image_grounded does not become an object", () => {
   assert.equal(derived.typePresence, "reading")
 })
 
+test("type_only omitted typeRole keeps the reading-column realization", () => {
+  const derived = studioCompositionDerivation({ layoutVariant: "type_only" })
+  const realized = typeOnlyRealization(derived)
+
+  assert.equal(derived.layoutVariant, "type_only")
+  assert.equal(derived.typePresence, "reading")
+  assert.equal(realized.mode, "reading")
+  assert.equal(realized.figureSource, null)
+  assert.equal(realized.typeMeasure, "column")
+  assert.equal(realized.marksRegion, "type")
+  assert.equal(realized.figureClamp, null)
+  assert.deepEqual([...studioCompositionStructure(derived.layoutVariant).regions], [
+    "type",
+    "field",
+  ])
+})
+
+test("type_only + subject realizes a headline figure, not the offer phrase", () => {
+  const spec: CreativeSpec = {
+    layoutVariant: "type_only",
+    typeRole: "subject",
+    leadJob: "offer",
+    headline: "$25",
+    offer: "$25 off first treatment",
+    imageryRole: "none",
+  }
+  const derived = studioCompositionDerivation({
+    layoutVariant: spec.layoutVariant,
+    typeRole: spec.typeRole,
+    imagePresence: spec.imagePresence,
+  })
+  const realized = typeOnlyRealization(derived)
+
+  assert.equal(derived.layoutVariant, "type_only")
+  assert.equal(realized.mode, "object")
+  assert.equal(realized.figureSource, "headline")
+  assert.equal(realized.typeMeasure, "figure")
+  assert.equal(realized.marksRegion, "field")
+  assert.equal(typeOnlyFigureText(spec), "$25")
+  assert.notEqual(typeOnlyFigureText(spec), spec.offer)
+  assert.equal(typeOnlyFigureText({ headline: spec.offer }), spec.offer)
+})
+
+test("type_only subject display clamp exceeds the reading hero cap", () => {
+  const derived = studioCompositionDerivation({
+    layoutVariant: "type_only",
+    typeRole: "subject",
+  })
+  const realized = typeOnlyRealization(derived)
+  const compact = typeOnlyRealization(derived, true)
+
+  assert.equal(realized.figureClamp, TYPE_ONLY_FIGURE_CLAMP.default)
+  assert.match(realized.figureClamp ?? "", /96px/)
+  assert.equal(figureClampMaxPx(realized.figureClamp), 96)
+  assert.equal(figureClampMaxPx(compact.figureClamp), 44)
+  assert.ok(figureClampMaxPx(realized.figureClamp) > TYPE_ONLY_READING_HERO_MAX_PX)
+  assert.ok(figureClampMaxPx(compact.figureClamp) > TYPE_ONLY_READING_HERO_MAX_PX)
+})
+
+test("type_only subject keeps response marks in the field as sole-type", () => {
+  const derived = studioCompositionDerivation({
+    layoutVariant: "type_only",
+    typeRole: "subject",
+  })
+  const realized = typeOnlyRealization(derived)
+  const marks = studioPrintMarks(
+    studioCompositionTreatment({
+      leadJob: "offer",
+      imageryRole: "none",
+      layoutVariant: "type_only",
+    }),
+    "type_only"
+  )
+
+  assert.equal(realized.marksRegion, "field")
+  assert.notEqual(realized.marksRegion, realized.typeMeasure === "figure" ? "type" : "")
+  assert.equal(marks.arrangement, "sole-type")
+  assert.equal(derived.layoutVariant, "type_only")
+})
+
+test("type_only subject is not inferred from $25, leadJob, or offer", () => {
+  const spec: CreativeSpec = {
+    layoutVariant: "type_only",
+    leadJob: "offer",
+    headline: "$25 Off This Week",
+    offer: "$25 inspection",
+  }
+  const derived = studioCompositionDerivation({
+    layoutVariant: spec.layoutVariant,
+    typeRole: spec.typeRole,
+    imagePresence: spec.imagePresence,
+  })
+  const realized = typeOnlyRealization(derived)
+
+  assert.equal(spec.typeRole, undefined)
+  assert.equal(derived.typePresence, "reading")
+  assert.equal(realized.mode, "reading")
+  assert.equal(realized.figureSource, null)
+  assert.equal(typeOnlyFigureText(spec), "$25 Off This Week")
+})
+
 test("derivation never changes the five family region graphs", () => {
   for (const layoutVariant of LAYOUT_VARIANTS) {
     const baseline = studioCompositionStructure(layoutVariant)
@@ -172,3 +280,8 @@ test("derivation never changes the five family region graphs", () => {
     assert.deepEqual(studioCompositionStructure(derived.layoutVariant), baseline)
   }
 })
+
+function figureClampMaxPx(clamp: string | null): number {
+  const match = clamp?.match(/(\d+)px\)\s*$/)
+  return match ? Number(match[1]) : 0
+}

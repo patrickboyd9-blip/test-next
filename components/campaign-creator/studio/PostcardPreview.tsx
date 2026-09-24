@@ -33,6 +33,8 @@ import {
 import { studioCompositionStructure } from "./studio-composition-structure"
 import {
   studioCompositionDerivation,
+  typeOnlyFigureText,
+  typeOnlyRealization,
   type StudioCompositionDerivation,
 } from "./studio-composition-derivation"
 
@@ -900,7 +902,77 @@ function TypeOnlyFront({
   const leadWithOffer = copyOfferLeads(hierarchy)
   const structure = studioCompositionStructure(layout)
   const voice = studioTypeExecution(treatment)
-  const asObject = derivation.typePresence === "object"
+  const realization = typeOnlyRealization(derivation, compact)
+
+  if (realization.mode === "object") {
+    const figure = typeOnlyFigureText(spec)
+    const figureColor = voice.heroColor === "emphasis" ? emphasis : ink
+    return (
+      <div
+        className={cn("flex h-full flex-col", typeBreathing(compact, voice.rhythm))}
+        style={{ backgroundColor: surface }}
+        data-composition={structure.layoutVariant}
+        data-type-presence={derivation.typePresence}
+        data-image-plate={derivation.imagePlate}
+        data-void={derivation.voidShape}
+        data-type-measure={realization.typeMeasure}
+        data-marks-region={realization.marksRegion}
+        data-figure-source={realization.figureSource}
+      >
+        <div data-region="type" className="w-auto max-w-[6ch]">
+          {figure ? (
+            <p
+              className={cn(
+                headlineWeight(voice.weight),
+                "max-w-[6ch]",
+                typeRhythmClass(voice.rhythm)
+              )}
+              style={{ color: figureColor, fontSize: realization.figureClamp ?? undefined }}
+            >
+              {figure}
+            </p>
+          ) : null}
+        </div>
+        <div
+          data-region="field"
+          className="flex min-h-0 flex-1 flex-col justify-end"
+        >
+          {!compact && spec.subheadline ? (
+            <p
+              className="max-w-[22ch] leading-snug"
+              style={{ color: ink, fontSize: type.sub, opacity: 0.72 }}
+            >
+              {spec.subheadline}
+            </p>
+          ) : null}
+          {offer ? (
+            <p
+              className="mt-1 max-w-[20ch] font-medium leading-snug"
+              style={{ color: ink, fontSize: type.sub, opacity: 0.85 }}
+            >
+              {offer}
+            </p>
+          ) : null}
+          <PrintMarks
+            spec={spec}
+            offer=""
+            leadWithOffer={false}
+            compact={compact}
+            type={type}
+            color={ink}
+            emphasis={emphasis}
+            surface={surface}
+            treatment={treatment}
+            phoneBottomRight={phoneBottomRight}
+            showQr={showQr}
+            qrLarge={qrLarge}
+            layout={layout}
+          />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div
       className={cn("flex h-full flex-col", typeBreathing(compact, voice.rhythm))}
@@ -910,10 +982,7 @@ function TypeOnlyFront({
       data-image-plate={derivation.imagePlate}
       data-void={derivation.voidShape}
     >
-      <div
-        data-region="type"
-        className={asObject ? "w-[48%] max-w-[12ch]" : "w-[62%] max-w-[22ch]"}
-      >
+      <div data-region="type" className="w-[62%] max-w-[22ch]">
         <LeadType
           spec={spec}
           offer={offer}

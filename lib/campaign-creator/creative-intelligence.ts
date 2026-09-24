@@ -135,7 +135,7 @@ export const CREATIVE_DIRECT_MAIL_PRINCIPLES: readonly CreativePrinciple[] = [
     kind: "observed_pattern",
     appliesTo: ["imagery"],
     statement:
-      "Do not force photography when the campaign has no honest image job. Do not invent people, crews, damage, neighborhoods, or proof the brief does not contain. Do not treat generic or interchangeable stock as if it proves a campaign-specific fact.",
+      "Do not force photography when the campaign has no honest image job. Do not invent campaign facts, recipient-specific conditions, or proof the brief does not contain — people, crews, damage, or neighborhoods presented as this customer's or this recipient's documented condition. An original illustrative category situation is permitted when it is communication, not evidence. Do not treat generic or interchangeable stock as if it proves a campaign-specific fact. When NOT: cheap fear or gore escalation.",
   },
   {
     id: "dm-print-not-ui-grammar",
@@ -165,7 +165,7 @@ export const HOME_SERVICES_PRINCIPLES: readonly CreativePrinciple[] = [
     verticalCluster: "home-services",
     appliesTo: ["imagery"],
     statement:
-      "Problem-led or consequence imagery is a recurring creative role in emergency and repair home services. Name that role only; do not invent a photograph, job-site fact, or visual the brief does not support.",
+      "Problem-led or consequence imagery is a recurring creative role in emergency and repair home services. Name that role only; do not invent a job-site fact the brief does not support. That role may be fulfilled by an original illustrative category situation; it is not proof of a specific recipient or customer condition. When NOT: cheap fear or gore escalation.",
   },
   {
     id: "hs-trust-near-action",
@@ -181,7 +181,7 @@ export const HOME_SERVICES_PRINCIPLES: readonly CreativePrinciple[] = [
     verticalCluster: "home-services",
     appliesTo: ["imagery", "trust"],
     statement:
-      "Work or crew photography is a recurring visual trust or proof role in home-service mailers. When credibility is the creative job, imageryRole crew is an appropriate name for that role. Name the role only; do not invent a team, job-site, or customer-property photograph the brief does not support.",
+      "Work or crew photography is a recurring visual trust or proof role in home-service mailers. When credibility is the creative job, imageryRole crew is an appropriate name for that role. Name the role only; do not invent an actual team, actual customer property, or documentary proof the brief does not support. An illustrative work situation is not that claim.",
   },
   {
     id: "hs-front-back",
@@ -342,7 +342,7 @@ How to use this knowledge:
 - Do not blindly follow every principle.
 - When multiple principles apply to one direction, interpret each from its statement and the campaign context. Let one principle shape that direction's leadJob; use the others as supporting guidance for imagery, trust, offer, CTA, or hierarchy. Do not treat appliesTo as ownership. Do not let every applicable principle become a competing lead.
 - Do not claim that a principle is measured performance data.
-- Do not invent offers, proof, or images the brief does not contain.
+- Do not invent offers, proof, or campaign facts the brief does not contain. An illustrative image is not evidence.
 - Rationale may explain strategic difference. It must not claim conversion, bookings, lift, ROI, or that a direction will outperform.
 
 General direct-mail principles:
