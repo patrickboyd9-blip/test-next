@@ -25,7 +25,7 @@ export const SPEC_FIELD_RULES = `CreativeSpec rules:
 - headline: max 8 words
 - subheadline: max 12 words (optional)
 - body: max 40 words
-- callToAction: max 6 words
+- callToAction: optional. max 6 words when present. Omit when this direction has no response action on this face.
 - palette: exactly 3 hex colors (primary, secondary, accent)
 - layoutVariant: one of type_primary_split, peer_split, banded_split, image_grounded, type_only. The compositional structure of the piece — not the leadJob, not imageryRole, and not a template, crop, or component.
   type_primary_split: Type/message is the dominant compositional field; image is supporting.
@@ -35,7 +35,8 @@ export const SPEC_FIELD_RULES = `CreativeSpec rules:
   type_only: No image field; type/action carry the composition.
 - imagery: one of stock_hvac, stock_restaurant, stock_generic_local, logo_primary, none
   Choose imagery from the business/industry in the brief. Do not invent an asset, path, or source file. This does not prohibit a conceived illustrative scene in visualDirection.
-- Include offer, phone, website, and qrDestination only when those values appear on the brief. Copy them exactly. Do not fabricate them.
+- Include offer only when that value appears on the brief. Copy it exactly. Do not fabricate it.
+- phone, website, and qrDestination: use campaign contact values exactly when this direction uses them on this face. Omit them when this direction intentionally keeps them off this face. Never invent or paraphrase campaign contact facts. The Engine decides direction-level inclusion. Do not put the campaign's response path on every direction.
 - visualDirection: the conceived photograph for this direction, or the no-photo idea. Not a category label ("Neighborhood photography"), not a mood-only caption, not CSS, not a crop, and not an asset path. When imageryRole is none or logo, state that there is no photograph and why. When there is a photograph, say what it depicts, the honest job it performs, the photographic approach, how it supports this direction's primary interrupt rather than competing with it, whether it is the visual ground, a supporting image, or a small witness, and what would make it generic, invented, or interchangeable stock treated as proof. If the image is the ground, name a quiet area type can occupy. When this direction uses a photograph and no usable source image exists, conceive an original illustrative situation from the communication job and legitimate category knowledge. Write it as illustration, not as this recipient's or this customer's documented condition. A description-only BrandAsset is not a photograph. Do not invent people, crews, recipient property, damage-as-fact, or proof the brief does not contain. When NOT: cheap fear or gore escalation. Category conventions may inform the approach; they are not rules. Do not write a model prompt or provider instruction.
 - tone: from the brief, or a safe inference from the goal
 - leadJob: one of offer, problem, trust, urgency. The job the piece leads with. Does not create an offer or invent facts, deadlines, proof, or weather
@@ -56,7 +57,9 @@ Meaningful difference is how the piece leads: communication angle, primary inter
 
 typeRole and imagePresence may differentiate a direction when the concept needs a visual subject or an image witness. They are not a set-uniqueness requirement. Do not force subject or accent onto a direction just to make the set look different.
 
-Do not pre-assign Direction A, B, or C. Decide each direction's CreativeSpec from that direction's concept. Each direction must remain valid on its own under the brief, canvas, and Creative Intelligence bounds.
+Do not pre-assign Direction A, B, or C. Decide each direction's CreativeSpec from that direction's concept. Each direction must remain valid on its own under the brief, canvas, and Creative Intelligence bounds. Creative Intelligence does not choose which direction includes or omits contact.
+
+When the Primary Success Metric requires a phone path and the brief has a phone, at least one direction must include that phone. When it requires a QR path and the brief has a QR destination, at least one direction must include that destination. Other directions may omit phone, website, qrDestination, and callToAction when the concept keeps response off that face.
 
 Recommend exactly one direction for the Primary Success Metric. That is a recommendation, not a score of the other two. Principles remain guidance, not measured performance.`
 

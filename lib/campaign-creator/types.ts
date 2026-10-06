@@ -143,7 +143,6 @@ export const GENERATED_SPEC_TOOL_REQUIRED = [
   "layoutVariant",
   "headline",
   "body",
-  "callToAction",
   "visualDirection",
   "tone",
   "palette",

@@ -145,14 +145,8 @@ export function detectPromptConflict(
 
 export function applyFaithfulness(brief: CampaignBrief, spec: CreativeSpec): CreativeSpec {
   const next = cloneSpec(spec)
-  const phone = brief.phone ?? brief.businessInfo?.phone
-  const website = brief.website ?? brief.businessInfo?.website
-  const qr = brief.qrDestination ?? website
 
   if (brief.offer && !next.offer?.trim()) next.offer = brief.offer
-  if (phone && !next.phone?.trim()) next.phone = phone
-  if (website && !next.website?.trim()) next.website = website
-  if (qr && !next.qrDestination?.trim()) next.qrDestination = qr
   if (brief.emotionalTone && !next.tone) next.tone = brief.emotionalTone
 
   delete next.format
@@ -500,6 +494,8 @@ export function validateGenerationSet(
     reasons.push(...validateDirection(brief, direction, index))
   }
 
+  reasons.push(...validateCampaignResponseCoverage(brief, directions))
+
   return reasons
 }
 
@@ -534,7 +530,6 @@ function validateDirection(
 
   if (!spec.headline?.trim()) reasons.push(`${label} is missing a headline`)
   if (!spec.body?.trim()) reasons.push(`${label} is missing body copy`)
-  if (!spec.callToAction?.trim()) reasons.push(`${label} is missing a call to action`)
   if (!spec.visualDirection?.trim()) reasons.push(`${label} is missing visualDirection`)
   if (!spec.tone?.trim()) reasons.push(`${label} is missing tone`)
   if (!spec.layoutVariant || !isLayoutVariant(spec.layoutVariant)) {
@@ -567,13 +562,33 @@ function validateDirection(
   if (brief.offer && !spec.offer?.trim()) {
     reasons.push(`${label} is missing the brief offer`)
   }
+
+  return reasons
+}
+
+function validateCampaignResponseCoverage(
+  brief: CampaignBrief,
+  directions: CreativeDirection[]
+): string[] {
+  const reasons: string[] = []
   const phone = brief.phone ?? brief.businessInfo?.phone
-  if (phone && !spec.phone?.trim()) reasons.push(`${label} is missing the brief phone`)
   const website = brief.website ?? brief.businessInfo?.website
-  if (website && !spec.website?.trim()) reasons.push(`${label} is missing the brief website`)
   const qr = brief.qrDestination ?? website
-  if (qr && !spec.qrDestination?.trim()) {
-    reasons.push(`${label} is missing the brief QR destination`)
+
+  if (
+    metricUsesPhone(brief) &&
+    phone?.trim() &&
+    !directions.some((direction) => direction.spec.phone?.trim())
+  ) {
+    reasons.push("expected at least one direction to include the brief phone")
+  }
+
+  if (
+    metricUsesQr(brief) &&
+    qr?.trim() &&
+    !directions.some((direction) => direction.spec.qrDestination?.trim())
+  ) {
+    reasons.push("expected at least one direction to include the brief QR destination")
   }
 
   return reasons

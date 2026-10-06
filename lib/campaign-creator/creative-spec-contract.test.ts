@@ -912,6 +912,7 @@ test("prompt and tool schema expose optional typeRole and imagePresence", () => 
 
   assert.equal(GENERATED_SPEC_TOOL_REQUIRED.includes("typeRole"), false)
   assert.equal(GENERATED_SPEC_TOOL_REQUIRED.includes("imagePresence"), false)
+  assert.equal(GENERATED_SPEC_TOOL_REQUIRED.includes("callToAction"), false)
   assert.equal(GENERATED_SPEC_TOOL_REQUIRED.includes("leadJob"), true)
   assert.equal(GENERATED_SPEC_TOOL_REQUIRED.includes("imageryRole"), true)
 
