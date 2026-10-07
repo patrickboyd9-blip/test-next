@@ -75,6 +75,118 @@ export class CreativeGenerationInvalidError extends Error {
   }
 }
 
+const NAME_STOP_WORDS = new Set([
+  "a",
+  "an",
+  "the",
+  "and",
+  "or",
+  "of",
+  "for",
+  "to",
+  "with",
+  "in",
+  "on",
+  "at",
+])
+
+const TAG_PADS = ["Local", "Direct", "Clear"] as const
+
+/**
+ * Cosmetic name repair. A long or one-word label must not fail the set.
+ * Hard rendering failures stay in validateGenerationSet.
+ */
+export function repairDirectionName(name: string, headline?: string): string {
+  const raw = directionWords(name)
+  const meaningful = raw.filter((word) => !NAME_STOP_WORDS.has(word.toLowerCase()))
+
+  let words: string[]
+  if (raw.length > 4) {
+    words = (meaningful.length >= 2 ? meaningful : raw).slice(0, 4)
+  } else if (raw.length >= 2) {
+    words = raw
+  } else if (meaningful.length === 1) {
+    words = [meaningful[0], "Direction"]
+  } else {
+    const fromHeadline = directionWords(headline).filter(
+      (word) => !NAME_STOP_WORDS.has(word.toLowerCase())
+    )
+    if (fromHeadline.length >= 2) words = fromHeadline.slice(0, 4)
+    else if (fromHeadline.length === 1) words = [fromHeadline[0], "Direction"]
+    else words = ["Studio", "Direction"]
+  }
+
+  if (words.length < 2) words = [...words, "Direction"]
+  return words.slice(0, 4).join(" ")
+}
+
+export function repairDirectionTags(tags: string[] | undefined): string[] {
+  const next: string[] = []
+  for (const tag of tags ?? []) {
+    const trimmed = tag.trim()
+    if (!trimmed) continue
+    if (next.some((existing) => existing.toLowerCase() === trimmed.toLowerCase())) continue
+    next.push(trimmed)
+    if (next.length === 3) return next
+  }
+  for (const pad of TAG_PADS) {
+    if (next.length === 3) break
+    if (!next.some((existing) => existing.toLowerCase() === pad.toLowerCase())) {
+      next.push(pad)
+    }
+  }
+  return next.slice(0, 3)
+}
+
+export function generationRetryFeedback(reasons: string[]): string {
+  return [
+    "The previous answer was invalid. Fix every issue and return the tool again:",
+    ...reasons.map((reason) => `- ${reason}`),
+  ].join("\n")
+}
+
+/** First attempt sends the brief alone. A retry appends the validation reasons. */
+export function withGenerationRetryFeedback(
+  userMessage: string,
+  reasons: string[] | undefined
+): string {
+  if (!reasons || reasons.length === 0) return userMessage
+  return `${userMessage}\n\n${generationRetryFeedback(reasons)}`
+}
+
+function directionWords(value: string | undefined): string[] {
+  return (value ?? "")
+    .replace(/[^\p{L}\p{N}'’\-]+/gu, " ")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+}
+
+function deriveOneLineDifference(rationale: string): string {
+  const sentence = rationale.split(/(?<=[.!?])\s+/)[0]?.trim()
+  return sentence || "A different strategic frame."
+}
+
+function disambiguateDirectionNames(
+  directions: CreativeDirection[]
+): CreativeDirection[] {
+  const used = new Set<string>()
+  return directions.map((direction) => {
+    const words = direction.name.split(/\s+/).filter(Boolean)
+    let name = direction.name
+    let n = 2
+    while (used.has(name.toLowerCase())) {
+      const suffix = n === 2 ? "Two" : n === 3 ? "Three" : `${n}`
+      const base = words.length >= 4 ? words.slice(0, 3) : words
+      name = [...base, suffix].slice(0, 4).join(" ")
+      n += 1
+      if (n > 6) break
+    }
+    used.add(name.toLowerCase())
+    return name === direction.name ? direction : { ...direction, name }
+  })
+}
+
 export function containsBannedPhrasing(text: string): boolean {
   return BANNED_PHRASING.some((pattern) => pattern.test(text))
 }
@@ -349,8 +461,10 @@ export function normalizeGenerationResult(
   const now = new Date().toISOString()
   const normalized = preferPhotographicRecommendation(
     brief,
-    directions.map((direction) =>
-      normalizeDirection(brief, direction, now, options.stripInventedFacts)
+    disambiguateDirectionNames(
+      directions.map((direction) =>
+        normalizeDirection(brief, direction, now, options.stripInventedFacts)
+      )
     )
   )
 
@@ -419,20 +533,21 @@ function normalizeDirection(
     brief.primarySuccessMetric?.description ||
     brief.desiredRecipientAction ||
     "your campaign goal"
+  const rationale = sanitizeStudioResponse(
+    direction.rationale,
+    `A strong direction for ${designedToDrive}.`
+  )
 
   return {
     ...direction,
     id: crypto.randomUUID(),
-    name: direction.name.trim(),
-    rationale: sanitizeStudioResponse(
-      direction.rationale,
-      `A strong direction for ${designedToDrive}.`
-    ),
-    tags: (direction.tags ?? []).map((tag) => tag.trim()).filter(Boolean).slice(0, 3),
+    name: repairDirectionName(direction.name, spec.headline),
+    rationale,
+    tags: repairDirectionTags(direction.tags),
     designedToDrive,
     oneLineDifference: direction.recommended
       ? undefined
-      : direction.oneLineDifference?.trim(),
+      : direction.oneLineDifference?.trim() || deriveOneLineDifference(rationale),
     spec,
     createdAt,
   }

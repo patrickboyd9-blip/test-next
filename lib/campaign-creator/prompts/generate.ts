@@ -5,6 +5,7 @@ import type { CampaignBrief } from "../types"
 import {
   CONCEPTION_BEFORE_SPEC_RULES,
   CREATIVE_VOICE_RULES,
+  DIRECTION_NAME_CONSTRAINT,
   DIRECTION_SET_REASONING_RULES,
   SPEC_FIELD_RULES,
   buildCreativeCanvasPromptContext,
@@ -37,7 +38,7 @@ Generation constraints:
 - typeRole and imagePresence are optional. Emit them only after the concept is established, and only when the concept needs subject or accent
 - After conceiving visualDirection, emit imagePresence: accent when that conception names a small witness to a type-led piece. Do not emit accent when the image occupies the family's normal supporting or image field. Do not infer accent from imageryRole. Do not emit accent merely to make directions visually different
 - All 3 must have genuinely different messaging angles (not paraphrases)
-- Direction name: 2–4 editorial words (e.g. "Trusted Local Expert"), not a layout description
+- Direction name: ${DIRECTION_NAME_CONSTRAINT} Count the words before you return the tool
 - tags: exactly 3 strategic tags per direction
 - rationale: 2 sentences max, tied to the goal, audience, and Primary Success Metric. Explain why the concept is strategically different. Do not claim conversion, bookings, lift, ROI, or that a direction will outperform
 - designedToDrive: customer-language Primary Success Metric from the brief

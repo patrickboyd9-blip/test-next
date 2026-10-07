@@ -5,6 +5,7 @@ import type { CampaignBrief, CreativeDirection } from "../types"
 import {
   CONCEPTION_BEFORE_SPEC_RULES,
   CREATIVE_VOICE_RULES,
+  DIRECTION_NAME_CONSTRAINT,
   DIRECTION_SET_REASONING_RULES,
   SPEC_FIELD_RULES,
   buildCreativeCanvasPromptContext,
@@ -35,6 +36,7 @@ Regeneration constraints (same as generation):
 - Each spec must include leadJob and imageryRole from the closed lists, matching the new concept
 - typeRole and imagePresence are optional. Emit them only after the concept is established, and only when the concept needs subject or accent
 - After conceiving visualDirection, emit imagePresence: accent when that conception names a small witness to a type-led piece. Do not emit accent when the image occupies the family's normal supporting or image field. Do not infer accent from imageryRole. Do not emit accent merely to make directions visually different
+- Direction name: ${DIRECTION_NAME_CONSTRAINT} Count the words before you return the tool
 - New messaging angles — do not paraphrase the previous set
 - Honor the customer's feedback without abandoning the campaign goal or Primary Success Metric
 - Do not invent facts missing from the brief
