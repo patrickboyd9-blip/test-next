@@ -4,14 +4,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-**Modern Mail** — marketing site / early product shell for an "operating system for physical outreach" (direct mail campaigns: create, audience, launch, measure, optimize). This is a very early-stage Next.js codebase — currently just the landing page and a design-system foundation (shadcn components). There is no backend, database, auth, or test suite yet.
+**Modern Mail** — an operating system for physical outreach (direct mail: create, audience, launch, measure, optimize). The repo is a Next.js product shell: marketing landing page, Command Center, and Campaign Creator / Creative Studio. There is no production database or customer auth yet. Creative generation is Anthropic-backed when `ANTHROPIC_API_KEY` is set, and a mock engine otherwise.
+
+Studio quality is grounded by a curated research taste pack (`lib/reference-corpus/taste-pack.ts`, explained in `docs/TASTE_PACK_AND_PRINT_SPEC.md`). Generate and regenerate inject a few matching Reference Cards into Creative Intelligence. They do not dump raw research markdown, and they do not copy trademarks or specimen art.
+
+A 5×8 print-spec export (`/api/print-spec/postcard-5x8`) matches the locked `POSTCARD_5X8_V1` canvas, 0.25 in bleed, and address-side keep-outs at 300 DPI. Phase 1 files are RGB, not CMYK. The export does not log into Click2Mail or submit a job.
 
 Product context lives in `docs/`:
 - `docs/PRODUCT_BIBLE.md` — mission, vision, product principles, personas, and non-negotiables. It defines what the product should and shouldn't do (e.g. "not a print shop", "every workflow launchable in under five minutes").
 - `docs/UX_MANIFESTO.md` — UX bar: calm, premium, minimal, fast; how motion, copy, and layout should feel.
 - `docs/ENGINEERING_PRINCIPLES.md` — how we build: quality, milestones, definition of done, regression discipline.
 - `docs/RELEASE_CHECKLIST.MD` — mandatory verification before every milestone release (lint, build, dev, browser, git).
-- `docs/prd/` — feature PRDs (e.g. `CommandCenter.md`). Read the relevant PRD before implementing a feature.
+- `docs/prd/` — feature PRDs (e.g. `CommandCenter.md`, `CreativeStudio.md`, `AICreativeEngine.md`). Read the relevant PRD before implementing a feature.
+- `docs/TASTE_PACK_AND_PRINT_SPEC.md` — founder note for the research taste pack and the 5×8 print-spec spike, including what is still deferred (Click2Mail login, job submit, payment, Data Axle, CMYK).
 
 ## Product & Engineering Philosophy
 
@@ -43,7 +48,7 @@ npm run start    # run production build
 npm run lint     # eslint (flat config, eslint-config-next core-web-vitals + typescript)
 ```
 
-No test runner is configured in this repo yet.
+Tests are `node:test` files (`*.test.ts`) next to the modules. There is no `npm test` script. Run them with a TypeScript runner that resolves extensionless imports and the `@/` alias, for example `npx tsx --test <file>.test.ts`.
 
 There are two lockfiles at the root (`package-lock.json` and `package-lock 2.json`) — the latter is a stray duplicate, not a workspace file; don't treat it as authoritative.
 
@@ -57,3 +62,7 @@ There are two lockfiles at the root (`package-lock.json` and `package-lock 2.jso
   - `components/ui/` — generated shadcn primitives (built on `@base-ui/react`, styled with `class-variance-authority` + `cn()` from `lib/utils.ts`, which wraps `clsx` + `tailwind-merge`). Add new shadcn components via the `shadcn` CLI rather than hand-rolling variants, to stay consistent with existing primitives like `components/ui/button.tsx`.
   - `components/` (non-`ui`) — page-level/feature components, e.g. `Hero.tsx`.
 - `@/*` path alias maps to the repo root (see `tsconfig.json`).
+- `lib/campaign-creator/` — Creative Studio state, Creative Intelligence, and the Anthropic creative engine. `buildCreativeIntelligenceContext` is what generate, regenerate, and refine actually send.
+- `lib/reference-corpus/` — intake pointers for raw research, plus the curated Reference Card taste pack and the selector that picks a few cards per brief.
+- `lib/mail-catalog/` — immutable physical products. `POSTCARD_5X8_V1` is the 5×8 geometry (do not edit a published version in place).
+- `lib/print-spec/` — Phase 1 RGB print-spec export for that 5×8 geometry. Not a vendor job.

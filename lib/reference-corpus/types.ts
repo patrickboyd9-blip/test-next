@@ -5,6 +5,8 @@
  * Acquisition source is metadata. It does not change the item shape.
  * Grok research lives in patrickboyd9-blip/modern-mail-research.
  * This type is an application-side intake handle, not a copy of that repo.
+ * Prompt-safe readings of that research live in taste-pack.ts as Reference Cards.
+ * Do not paste raw example markdown into Creative Intelligence.
  */
 
 export const REFERENCE_SOURCE_CLASSES = [

@@ -33,6 +33,8 @@ When the Creative Studio or Creative Refinement PRD specifies customer-facing St
 
 **Out of scope for v0.4.0:** Logo file upload/storage, image generation, audience/fulfillment integrations, payment, Command Center live data, background job infrastructure, new npm packages, a test runner.
 
+**Later spike:** Creative Intelligence now also injects a curated research taste pack into generate, regenerate, and refine prompts. A separate 5×8 print-spec export matches catalog geometry at 300 DPI in RGB and does not submit a Click2Mail job. See `docs/TASTE_PACK_AND_PRINT_SPEC.md`. That spike does not change the customer-facing Studio flow in this document.
+
 ---
 
 ## 1. Purpose
