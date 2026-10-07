@@ -5,6 +5,8 @@ import type { GeneratedAsset, ImageGenerationAdapter } from "./image-generation"
 import { toImageBrief } from "./image-brief"
 import { OpenAIImageGenerationNotConfiguredError } from "./openai-image-generation"
 import {
+  fingerprintForSpec,
+  imageBriefContextFor,
   imageBriefFingerprint,
   type StudioImageRecord,
 } from "./studio-image-fingerprint"
@@ -13,7 +15,7 @@ import {
   isSafeStudioId,
   studioImagePublicPath,
 } from "./studio-image-paths"
-import type { CreativeSpec } from "./types"
+import type { CampaignBrief, CreativeSpec } from "./types"
 
 /**
  * Sidecar cache for conceived photographs.
@@ -23,12 +25,26 @@ import type { CreativeSpec } from "./types"
 
 const inflight = new Map<string, Promise<StudioImageRecord | null>>()
 
+export type StudioImageFallback = "not_configured" | "failed"
+
+export interface StudioImageMiss {
+  directionId: string
+  fingerprint: string
+  fallback: StudioImageFallback
+}
+
+export interface StudioImageLoad {
+  records: StudioImageRecord[]
+  misses: StudioImageMiss[]
+}
+
 export async function ensureStudioDirectionImages(options: {
   campaignId: string
   entries: readonly { directionId: string; spec: CreativeSpec }[]
+  campaignBrief?: CampaignBrief
   createAdapter: () => ImageGenerationAdapter
   cacheRoot?: string
-}): Promise<StudioImageRecord[]> {
+}): Promise<StudioImageLoad> {
   if (!isSafeStudioId(options.campaignId)) {
     throw new Error("Invalid campaign id")
   }
@@ -41,33 +57,69 @@ export async function ensureStudioDirectionImages(options: {
   }
 
   const records: StudioImageRecord[] = []
-  for (const entry of options.entries) {
+  const misses: StudioImageMiss[] = []
+  for (let index = 0; index < options.entries.length; index += 1) {
+    const entry = options.entries[index]
     try {
       const record = await ensureOne({
         campaignId: options.campaignId,
         directionId: entry.directionId,
         spec: entry.spec,
+        campaignBrief: options.campaignBrief,
         cacheRoot,
         getAdapter,
       })
       if (record) records.push(record)
     } catch (error) {
-      if (error instanceof OpenAIImageGenerationNotConfiguredError) return records
+      if (error instanceof OpenAIImageGenerationNotConfiguredError) {
+        misses.push(
+          ...missesFor(options.entries.slice(index), options.campaignBrief, "not_configured")
+        )
+        return { records, misses }
+      }
       console.error("Studio image generation failed:", error)
+      const miss = missFor(entry, options.campaignBrief, "failed")
+      if (miss) misses.push(miss)
     }
   }
-  return records
+  return { records, misses }
+}
+
+function missFor(
+  entry: { directionId: string; spec: CreativeSpec },
+  campaign: CampaignBrief | undefined,
+  fallback: StudioImageFallback
+): StudioImageMiss | null {
+  const fingerprint = fingerprintForSpec(
+    entry.spec,
+    imageBriefContextFor(entry.directionId, campaign)
+  )
+  if (!fingerprint) return null
+  return { directionId: entry.directionId, fingerprint, fallback }
+}
+
+function missesFor(
+  entries: readonly { directionId: string; spec: CreativeSpec }[],
+  campaign: CampaignBrief | undefined,
+  fallback: StudioImageFallback
+): StudioImageMiss[] {
+  return entries.flatMap((entry) => {
+    const miss = missFor(entry, campaign, fallback)
+    return miss ? [miss] : []
+  })
 }
 
 async function ensureOne(input: {
   campaignId: string
   directionId: string
   spec: CreativeSpec
+  campaignBrief?: CampaignBrief
   cacheRoot: string
   getAdapter: () => ImageGenerationAdapter
 }): Promise<StudioImageRecord | null> {
   if (!isSafeStudioId(input.directionId)) return null
-  const brief = toImageBrief(input.spec)
+  const context = imageBriefContextFor(input.directionId, input.campaignBrief)
+  const brief = toImageBrief(input.spec, context)
   if (!brief) return null
 
   const fingerprint = imageBriefFingerprint(brief)
@@ -88,11 +140,15 @@ async function loadOrGenerate(input: {
   campaignId: string
   directionId: string
   spec: CreativeSpec
+  campaignBrief?: CampaignBrief
   cacheRoot: string
   fingerprint: string
   getAdapter: () => ImageGenerationAdapter
 }): Promise<StudioImageRecord | null> {
-  const brief = toImageBrief(input.spec)
+  const brief = toImageBrief(
+    input.spec,
+    imageBriefContextFor(input.directionId, input.campaignBrief)
+  )
   if (!brief) return null
 
   const fileBase = `${input.directionId}--${input.fingerprint}`

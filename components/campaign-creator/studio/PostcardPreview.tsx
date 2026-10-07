@@ -62,6 +62,11 @@ interface PostcardPreviewProps {
   ariaLabel?: string
   /** Cached or just-resolved photograph. Not a CreativeSpec field. */
   generatedAsset?: GeneratedAsset | null
+  /**
+   * The beta shelf is a labeled stand-in. Leave this false while a
+   * campaign photograph should still succeed.
+   */
+  allowLibraryFallback?: boolean
   /** Brief contact. Used when the spec is empty or still has toy placeholder chrome. */
   identity?: PostcardIdentity
 }
@@ -106,6 +111,7 @@ export function PostcardPreview({
   ariaLabel,
   generatedAsset,
   identity,
+  allowLibraryFallback = false,
 }: PostcardPreviewProps) {
   const reducedMotion = useReducedMotion()
   const [primary, secondary, accent] = spec.palette ?? DEFAULT_PALETTE
@@ -114,7 +120,8 @@ export function PostcardPreview({
   const imagery = resolveCreativeImage(
     spec.imagery,
     spec.imageryRole,
-    generatedAsset
+    generatedAsset,
+    { libraryFallback: allowLibraryFallback }
   )
   const photoSrc = imagery.src
   const showMonogram = imagery.showMonogram

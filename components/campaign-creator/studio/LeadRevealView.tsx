@@ -12,6 +12,7 @@ import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
 import { PostcardPreview, PostcardSideToggle } from "./PostcardPreview"
 import { StrategyTags } from "./StrategyTags"
+import { StudioPhotoNote } from "./StudioPhotoNote"
 
 interface LeadRevealViewProps {
   canvas: CreativeCanvas
@@ -19,6 +20,8 @@ interface LeadRevealViewProps {
   onContinue: () => void
   onCompare: () => void
   generatedAsset?: GeneratedAsset | null
+  allowLibraryFallback?: boolean
+  photoNote?: string | null
   identity?: PostcardIdentity
 }
 
@@ -28,6 +31,8 @@ export function LeadRevealView({
   onContinue,
   onCompare,
   generatedAsset,
+  allowLibraryFallback = false,
+  photoNote,
   identity,
 }: LeadRevealViewProps) {
   const reducedMotion = useReducedMotion()
@@ -64,9 +69,11 @@ export function LeadRevealView({
             side={side}
             size="hero"
             generatedAsset={generatedAsset}
+            allowLibraryFallback={allowLibraryFallback}
             identity={identity}
           />
         </motion.div>
+        <StudioPhotoNote note={photoNote} />
         <PostcardSideToggle side={side} onSideChange={setSide} />
       </div>
 

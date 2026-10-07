@@ -1,6 +1,10 @@
 import type { GeneratedAsset } from "./image-generation"
-import { toImageBrief, type ImageBrief } from "./image-brief"
-import type { CreativeSpec } from "./types"
+import {
+  toImageBrief,
+  type ImageBrief,
+  type ImageBriefContext,
+} from "./image-brief"
+import type { CampaignBrief, CreativeSpec } from "./types"
 
 /**
  * Cache identity for a conceived photograph.
@@ -12,19 +16,38 @@ export interface StudioImageRecord {
   asset: GeneratedAsset
 }
 
+export function imageBriefContextFor(
+  directionId: string,
+  campaign?: CampaignBrief
+): ImageBriefContext {
+  return { campaign, variationKey: directionId }
+}
+
 export function imageBriefFingerprint(brief: ImageBrief): string {
+  const art = brief.artDirection
   const raw = [
     brief.imageryRole,
     brief.occupancy,
     brief.leadJob,
     brief.tone?.trim() ?? "",
     brief.visualDirection.trim(),
+    art.revision,
+    art.trade,
+    art.subject,
+    art.lighting,
+    art.framing,
+    art.emotion,
+    art.refuse,
+    art.craft ?? "",
   ].join("\u001f")
   return fnv(raw) + fnv(`${raw}#`)
 }
 
-export function fingerprintForSpec(spec: CreativeSpec): string | null {
-  const brief = toImageBrief(spec)
+export function fingerprintForSpec(
+  spec: CreativeSpec,
+  context: ImageBriefContext = {}
+): string | null {
+  const brief = toImageBrief(spec, context)
   if (!brief) return null
   return imageBriefFingerprint(brief)
 }
@@ -32,9 +55,13 @@ export function fingerprintForSpec(spec: CreativeSpec): string | null {
 export function lookupStudioImage(
   records: readonly StudioImageRecord[],
   directionId: string,
-  spec: CreativeSpec
+  spec: CreativeSpec,
+  campaign?: CampaignBrief
 ): GeneratedAsset | null {
-  const fingerprint = fingerprintForSpec(spec)
+  const fingerprint = fingerprintForSpec(
+    spec,
+    imageBriefContextFor(directionId, campaign)
+  )
   if (!fingerprint) return null
   return (
     records.find(
@@ -44,19 +71,24 @@ export function lookupStudioImage(
   )
 }
 
-export function studioImageEntries(creative: {
-  directions: readonly { id: string; spec: CreativeSpec }[]
-  selectedDirectionId?: string
-  activeSpec?: CreativeSpec
-}): Array<{ directionId: string; spec: CreativeSpec }> {
+export function studioImageEntries(
+  creative: {
+    directions: readonly { id: string; spec: CreativeSpec }[]
+    selectedDirectionId?: string
+    activeSpec?: CreativeSpec
+  },
+  campaign?: CampaignBrief
+): Array<{ directionId: string; spec: CreativeSpec }> {
   const entries: Array<{ directionId: string; spec: CreativeSpec }> = []
   for (const direction of creative.directions) {
     entries.push({ directionId: direction.id, spec: direction.spec })
+    const context = imageBriefContextFor(direction.id, campaign)
     if (
       direction.id === creative.selectedDirectionId &&
       creative.activeSpec &&
-      fingerprintForSpec(creative.activeSpec) &&
-      fingerprintForSpec(creative.activeSpec) !== fingerprintForSpec(direction.spec)
+      fingerprintForSpec(creative.activeSpec, context) &&
+      fingerprintForSpec(creative.activeSpec, context) !==
+        fingerprintForSpec(direction.spec, context)
     ) {
       entries.push({
         directionId: direction.id,
@@ -67,16 +99,22 @@ export function studioImageEntries(creative: {
   return entries
 }
 
-export function studioImageRequestKey(creative: {
-  directions: readonly { id: string; spec: CreativeSpec }[]
-  selectedDirectionId?: string
-  activeSpec?: CreativeSpec
-}): string {
-  return studioImageEntries(creative)
-    .map(
-      (entry) =>
-        `${entry.directionId}:${fingerprintForSpec(entry.spec) ?? "none"}`
-    )
+export function studioImageRequestKey(
+  creative: {
+    directions: readonly { id: string; spec: CreativeSpec }[]
+    selectedDirectionId?: string
+    activeSpec?: CreativeSpec
+  },
+  campaign?: CampaignBrief
+): string {
+  return studioImageEntries(creative, campaign)
+    .map((entry) => {
+      const fingerprint = fingerprintForSpec(
+        entry.spec,
+        imageBriefContextFor(entry.directionId, campaign)
+      )
+      return `${entry.directionId}:${fingerprint ?? "none"}`
+    })
     .join("|")
 }
 

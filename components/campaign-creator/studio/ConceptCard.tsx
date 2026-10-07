@@ -11,6 +11,7 @@ import type { CreativeDirection } from "@/lib/campaign-creator/types"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
 import { PostcardPreview, type PostcardPreviewSize } from "./PostcardPreview"
+import { StudioPhotoNote } from "./StudioPhotoNote"
 
 export type ConceptCardVariant = "hero" | "compact" | "strip"
 
@@ -22,6 +23,8 @@ interface ConceptCardProps {
   isSelected?: boolean
   identity?: PostcardIdentity
   generatedAsset?: GeneratedAsset | null
+  allowLibraryFallback?: boolean
+  photoNote?: string | null
   onSelect?: () => void
   index?: number
 }
@@ -34,6 +37,8 @@ export function ConceptCard({
   isSelected,
   identity,
   generatedAsset,
+  allowLibraryFallback = false,
+  photoNote,
   onSelect,
   index = 0,
 }: ConceptCardProps) {
@@ -77,11 +82,13 @@ export function ConceptCard({
           size={size}
           identity={identity}
           generatedAsset={generatedAsset}
+          allowLibraryFallback={allowLibraryFallback}
           enableHoverTilt={variant !== "strip"}
         />
       </div>
       {variant !== "strip" && (
         <>
+          <StudioPhotoNote note={photoNote} />
           <p className="text-sm font-semibold">{direction.name}</p>
           <p className="line-clamp-2 text-xs text-muted-foreground">
             {direction.oneLineDifference ?? direction.rationale}

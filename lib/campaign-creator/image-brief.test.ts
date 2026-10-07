@@ -123,6 +123,7 @@ test("returned brief has no provider, model, prompt, layout, crop, or position f
   const brief = toImageBrief(spec())
   assert.ok(brief)
   assert.deepEqual(briefKeys(brief), [
+    "artDirection",
     "doNotInvent",
     "imageryRole",
     "leadJob",

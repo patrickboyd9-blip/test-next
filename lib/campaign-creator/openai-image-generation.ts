@@ -86,14 +86,28 @@ export function buildOpenAIImagePrompt(brief: ImageBrief): string {
     (item) => `- ${item}`
   ).join("\n")
 
+  const art = brief.artDirection
+  const craftLine = art.craft
+    ? `Craft to imitate, not a picture to copy: ${art.craft}`
+    : null
+
   return [
-    "Execute this already-conceived photograph only. Do not invent a new subject, campaign, layout, or visual direction.",
+    "Execute this already-conceived photograph only. Do not invent a new campaign, layout, or mailer.",
+    "The Subject line is the photograph to make. If the conceived situation is only a label, ignore the label and make the Subject. If the conceived situation is already a specific scene, the Subject repeats it. Do not add a second, more generic subject.",
     `Imagery role: ${brief.imageryRole}`,
     ROLE_MODE_LOCK[brief.imageryRole],
     `Lead job: ${brief.leadJob}`,
     `Occupancy: ${brief.occupancy}`,
     OCCUPANCY_INSTRUCTION[brief.occupancy],
     toneLine,
+    "Art direction for a premium direct-mail photograph. Not a stock thumbnail and not a designed postcard.",
+    `Trade: ${art.trade}`,
+    `Subject: ${art.subject}`,
+    `Lighting: ${art.lighting}`,
+    `Framing: ${art.framing}`,
+    `Emotion: ${art.emotion}`,
+    craftLine,
+    `Refuse: ${art.refuse}`,
     "Conceived situation:",
     brief.visualDirection,
     "This is an original illustrative category situation or general representation. It is communication, not evidence. It is not documentation of this recipient's home, property, actual crew, or damage-as-fact. Do not invent campaign-specific proof. Do not treat generic or interchangeable stock as if it proves a specific customer situation. When NOT: cheap fear or gore escalation.",
@@ -101,7 +115,7 @@ export function buildOpenAIImagePrompt(brief: ImageBrief): string {
     doNotInvent,
     "Hard negatives — do not depict:",
     hardNegatives,
-    "Generate an original photograph. Do not generate headline, offer, CTA, phone number, URL, QR code, typography, palette, or postcard layout. Those are not part of this image.",
+    "Generate an original photograph. Do not generate headline, offer, CTA, phone number, URL, QR code, logo, typography, palette, or postcard layout. Those are not part of this image.",
   ]
     .filter((line): line is string => Boolean(line))
     .join("\n")

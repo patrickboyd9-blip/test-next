@@ -14,6 +14,7 @@ import type { Campaign, CreativeDirection, CreativeSpec } from "@/lib/campaign-c
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
 import { PostcardPreview, PostcardSideToggle } from "./PostcardPreview"
+import { StudioPhotoNote } from "./StudioPhotoNote"
 import { RevisionHistoryPanel } from "./RevisionHistoryPanel"
 import { StudioComposer } from "./StudioComposer"
 
@@ -24,6 +25,8 @@ interface RefinementViewProps {
   activeSpec: CreativeSpec
   identity?: PostcardIdentity
   generatedAsset?: GeneratedAsset | null
+  allowLibraryFallback?: boolean
+  photoNote?: string | null
   onCompare: () => void
   onApprove: () => void
   onApplyRefinement: (prompt: string) => Promise<CampaignUpdateResult>
@@ -44,6 +47,8 @@ export function RefinementView({
   activeSpec,
   identity,
   generatedAsset,
+  allowLibraryFallback = false,
+  photoNote,
   onCompare,
   onApprove,
   onApplyRefinement,
@@ -199,10 +204,12 @@ export function RefinementView({
               size="hero"
               identity={identity}
               generatedAsset={generatedAsset}
+              allowLibraryFallback={allowLibraryFallback}
               highlightRegions={highlightRegions}
               isShimmering={isShimmering}
               ariaLabel={`Postcard front: ${activeSpec.headline ?? direction.name}`}
             />
+            <StudioPhotoNote note={photoNote} />
             <PostcardSideToggle side={side} onSideChange={setSide} />
           </div>
 

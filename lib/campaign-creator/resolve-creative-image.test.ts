@@ -147,6 +147,21 @@ test("generated asset is ignored for imageryRole logo", () => {
   })
 })
 
+test("library fallback can be denied while a campaign photograph should still succeed", () => {
+  assert.deepEqual(
+    resolveCreativeImage(undefined, "crew", null, { libraryFallback: false }),
+    { src: null, showMonogram: false }
+  )
+  assert.deepEqual(
+    resolveCreativeImage("stock_hvac", undefined, null, { libraryFallback: false }),
+    { src: null, showMonogram: false }
+  )
+  assert.deepEqual(resolveCreativeImage(undefined, "crew", GENERATED, { libraryFallback: false }), {
+    src: GENERATED.src,
+    showMonogram: false,
+  })
+})
+
 test("existing curated fallback still works when generated is omitted", () => {
   assert.deepEqual(resolveCreativeImage(undefined, "neighborhood"), {
     src: NEIGHBORHOOD_SRC,

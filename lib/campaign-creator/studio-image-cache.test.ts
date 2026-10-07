@@ -9,6 +9,7 @@ import {
   type GeneratedAsset,
   type ImageGenerationAdapter,
 } from "./image-generation"
+import { OpenAIImageGenerationNotConfiguredError } from "./openai-image-generation"
 import { resolveCreativeImage } from "./resolve-creative-image"
 import { ensureStudioDirectionImages } from "./studio-image-cache"
 import {
@@ -114,27 +115,29 @@ test("a generated photograph is cached and reused by every Studio view", async (
 
   const first = await ensureStudioDirectionImages({
     campaignId: campaign.id,
-    entries: studioImageEntries(campaign.creative),
+    entries: studioImageEntries(campaign.creative, campaign.brief),
+    campaignBrief: campaign.brief,
     createAdapter: () => adapter,
     cacheRoot,
   })
 
   assert.equal(calls, 1)
-  assert.equal(first.length, 1)
-  assert.equal(first[0]?.directionId, "dir-inspect")
-  assert.match(first[0]?.asset.src ?? "", /^\/api\/studio-image\/camp-visual-1\/dir-inspect--[a-f0-9]+\.png$/)
+  assert.equal(first.records.length, 1)
+  assert.equal(first.misses.length, 0)
+  assert.equal(first.records[0]?.directionId, "dir-inspect")
+  assert.match(first.records[0]?.asset.src ?? "", /^\/api\/studio-image\/camp-visual-1\/dir-inspect--[a-f0-9]+\.png$/)
   const png = await readFile(
-    path.join(cacheRoot, campaign.id, first[0]!.asset.src.split("/").pop()!)
+    path.join(cacheRoot, campaign.id, first.records[0]!.asset.src.split("/").pop()!)
   )
   assert.equal(png.toString(), "hello")
   assert.deepEqual(campaign.creative, before)
 
   const specForViews = campaign.creative.directions[0]!.spec
-  const focus = lookupStudioImage(first, "dir-inspect", specForViews)
-  const compare = lookupStudioImage(first, "dir-inspect", specForViews)
-  const refine = lookupStudioImage(first, "dir-inspect", specForViews)
-  const approve = lookupStudioImage(first, "dir-inspect", specForViews)
-  assert.equal(focus?.src, first[0]?.asset.src)
+  const focus = lookupStudioImage(first.records, "dir-inspect", specForViews, campaign.brief)
+  const compare = lookupStudioImage(first.records, "dir-inspect", specForViews, campaign.brief)
+  const refine = lookupStudioImage(first.records, "dir-inspect", specForViews, campaign.brief)
+  const approve = lookupStudioImage(first.records, "dir-inspect", specForViews, campaign.brief)
+  assert.equal(focus?.src, first.records[0]?.asset.src)
   assert.equal(compare?.src, focus?.src)
   assert.equal(refine?.src, focus?.src)
   assert.equal(approve?.src, focus?.src)
@@ -149,12 +152,13 @@ test("a generated photograph is cached and reused by every Studio view", async (
 
   const second = await ensureStudioDirectionImages({
     campaignId: campaign.id,
-    entries: studioImageEntries(campaign.creative),
+    entries: studioImageEntries(campaign.creative, campaign.brief),
+    campaignBrief: campaign.brief,
     createAdapter: () => adapter,
     cacheRoot,
   })
   assert.equal(calls, 1)
-  assert.equal(second[0]?.asset.src, first[0]?.asset.src)
+  assert.equal(second.records[0]?.asset.src, first.records[0]?.asset.src)
   assert.deepEqual(campaign.creative, before)
 
   await rm(cacheRoot, { recursive: true, force: true })
@@ -190,10 +194,13 @@ test("a changed photograph misses the cache and does not reuse the old one", asy
   })
 
   assert.equal(calls, 2)
-  assert.equal(lookupStudioImage(first, "dir-inspect", original)?.src, "/tmp/generated-1.png")
-  assert.equal(lookupStudioImage(second, "dir-inspect", revised)?.src, "/tmp/generated-2.png")
-  assert.equal(lookupStudioImage([...first, ...second], "dir-inspect", original)?.src, "/tmp/generated-1.png")
-  assert.equal(lookupStudioImage(second, "dir-inspect", original), null)
+  assert.equal(lookupStudioImage(first.records, "dir-inspect", original)?.src, "/tmp/generated-1.png")
+  assert.equal(lookupStudioImage(second.records, "dir-inspect", revised)?.src, "/tmp/generated-2.png")
+  assert.equal(
+    lookupStudioImage([...first.records, ...second.records], "dir-inspect", original)?.src,
+    "/tmp/generated-1.png"
+  )
+  assert.equal(lookupStudioImage(second.records, "dir-inspect", original), null)
 
   await rm(cacheRoot, { recursive: true, force: true })
 })
@@ -202,7 +209,7 @@ test("active spec is requested alongside the original direction spec", () => {
   const campaign = campaignFor(
     spec({ visualDirection: "A different conceived leak, still illustrative" })
   )
-  const entries = studioImageEntries(campaign.creative)
+  const entries = studioImageEntries(campaign.creative, campaign.brief)
   const inspect = entries.filter((entry) => entry.directionId === "dir-inspect")
   assert.equal(inspect.length, 2)
   assert.equal(inspect[0]?.spec.visualDirection, spec().visualDirection)
@@ -210,4 +217,64 @@ test("active spec is requested alongside the original direction spec", () => {
     fingerprintForSpec(inspect[0]!.spec),
     fingerprintForSpec(inspect[1]!.spec)
   )
+})
+
+test("a missing image key is an honest miss and does not pretend the shelf is the photograph", async () => {
+  const cacheRoot = await mkdtemp(path.join(tmpdir(), "studio-images-"))
+  const loaded = await ensureStudioDirectionImages({
+    campaignId: CAMPAIGN_ID,
+    entries: [{ directionId: "dir-inspect", spec: spec() }],
+    createAdapter: () => {
+      throw new OpenAIImageGenerationNotConfiguredError()
+    },
+    cacheRoot,
+  })
+
+  assert.equal(loaded.records.length, 0)
+  assert.equal(loaded.misses[0]?.fallback, "not_configured")
+  assert.equal(
+    resolveCreativeImage(spec().imagery, spec().imageryRole, null, {
+      libraryFallback: false,
+    }).src,
+    null
+  )
+  assert.equal(resolveCreativeImage(spec().imagery, spec().imageryRole, null).src !== null, true)
+
+  await rm(cacheRoot, { recursive: true, force: true })
+})
+
+test("a failed generation is recorded and the other direction can still succeed", async () => {
+  const cacheRoot = await mkdtemp(path.join(tmpdir(), "studio-images-"))
+  let calls = 0
+  const loaded = await ensureStudioDirectionImages({
+    campaignId: CAMPAIGN_ID,
+    entries: [
+      { directionId: "dir-inspect", spec: spec() },
+      {
+        directionId: "dir-crew",
+        spec: spec({
+          imageryRole: "crew",
+          leadJob: "trust",
+          visualDirection:
+            "Hands and a coil of flashing at a roof edge, illustrative, not a named crew and not a logo.",
+        }),
+      },
+    ],
+    createAdapter: () => ({
+      async generate() {
+        calls += 1
+        if (calls === 1) throw new Error("provider down")
+        return generated("/tmp/generated-crew.png", "gen-crew")
+      },
+    }),
+    cacheRoot,
+  })
+
+  assert.equal(loaded.misses.length, 1)
+  assert.equal(loaded.misses[0]?.directionId, "dir-inspect")
+  assert.equal(loaded.misses[0]?.fallback, "failed")
+  assert.equal(loaded.records.length, 1)
+  assert.equal(loaded.records[0]?.directionId, "dir-crew")
+
+  await rm(cacheRoot, { recursive: true, force: true })
 })

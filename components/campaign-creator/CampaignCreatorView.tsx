@@ -6,7 +6,7 @@ import { isAtOrPastStatus } from "@/lib/campaign-creator/campaign-status"
 import { toCreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import { getApprovedSpec } from "@/lib/campaign-creator/creative-state"
 import { postcardIdentityFromBrief } from "@/lib/campaign-creator/studio-contact"
-import { lookupStudioImage } from "@/lib/campaign-creator/studio-image-fingerprint"
+import { presentStudioPhoto } from "@/lib/campaign-creator/studio-photo"
 import {
   confirmCampaignStrategy,
   confirmCampaignAudience,
@@ -233,7 +233,7 @@ export function CampaignCreatorView({ initialCampaign }: CampaignCreatorViewProp
   const progressStatus = studioProgressStatus ?? campaign.status
 
   const canvas = useMemo(() => resolveStudioCanvas(campaign), [campaign])
-  const studioImages = useStudioDirectionImages(campaign)
+  const studioPhotos = useStudioDirectionImages(campaign)
   const identity = postcardIdentityFromBrief(campaign.brief)
 
   const selectedDirectionId = campaign.creative.selectedDirectionId
@@ -241,6 +241,15 @@ export function CampaignCreatorView({ initialCampaign }: CampaignCreatorViewProp
     (d) => d.id === selectedDirectionId
   )
   const approvedSpec = getApprovedSpec(campaign.creative)
+  const approvedPhoto =
+    approvedDirection && approvedSpec
+      ? presentStudioPhoto(
+          studioPhotos,
+          approvedDirection.id,
+          approvedSpec,
+          campaign.brief
+        )
+      : null
 
   const interviewContent = (
     <>
@@ -284,7 +293,9 @@ export function CampaignCreatorView({ initialCampaign }: CampaignCreatorViewProp
           direction={approvedDirection}
           spec={approvedSpec}
           identity={identity}
-          generatedAsset={lookupStudioImage(studioImages, approvedDirection.id, approvedSpec)}
+          generatedAsset={approvedPhoto?.generatedAsset}
+          allowLibraryFallback={approvedPhoto?.allowLibraryFallback ?? false}
+          photoNote={approvedPhoto?.note}
           onEditCreative={handleEditCreative}
           isEditing={isUnapproving}
         />
@@ -301,7 +312,7 @@ export function CampaignCreatorView({ initialCampaign }: CampaignCreatorViewProp
           key={resumeInRefinement ? "refine-resume" : "studio"}
           campaign={campaign}
           canvas={canvas}
-          studioImages={studioImages}
+          studioPhotos={studioPhotos}
           onCampaignUpdate={handleCampaignUpdate}
           onProgressStatusChange={setStudioProgressStatus}
           initialSubPhase={resumeInRefinement ? "refine" : undefined}

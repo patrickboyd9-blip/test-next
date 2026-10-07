@@ -28,7 +28,7 @@ The mix:
 
 A roofing campaign sees the roofing card, a couple of related trade cards, and one craft card. A pizza campaign sees the food cards, not the roofing card. A campaign we do not have a vertical for sees only the craft cards, and the prompt says so.
 
-The existing Pexels photos stay the fallback when there is no customer photo. The cards raise the bar for hierarchy and the offer. They are not a new photo library.
+When image generation is available, Studio makes an original photograph for each direction from the campaign and these cards' craft. The small Pexels shelf is only a labeled stand-in when that photograph cannot be made. The cards raise the bar for hierarchy, the offer, and what the photograph should be doing. They are not a photo library, and they are not pictures to paste.
 
 The model is told to imitate the craft and not the brand, and not to spend money or submit a print job. The rehearsal engine used when there is no Anthropic key still shows its practice cards. It does not call the model, so those practice cards are not rewritten by this pack. The live generate and regenerate path is the one that reads the cards.
 

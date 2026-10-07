@@ -36,7 +36,8 @@ Refinement rules:
 - If the request would remove the QR path, phone, or offer when those are required for the campaign's success metric or brief, do not apply it. Set outcome to conflict and ask one alternative question
 - If the request is ambiguous ("make it better", "improve it") without a specific change, set outcome to conflict and ask one clarifying question. Do not mutate the spec
 - studioResponse: one or two short sentences. Lead with what changed (or why you didn't). No jargon
-- Do not mention revision history, versions, or internal field names`
+- Do not mention revision history, versions, or internal field names
+- Do not turn a photographic direction into a text-only piece unless the customer asked to remove the photograph`
 }
 
 export function buildRefineUserMessage(input: {
