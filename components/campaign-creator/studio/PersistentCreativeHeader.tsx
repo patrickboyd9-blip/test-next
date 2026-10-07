@@ -5,6 +5,8 @@ import { Check } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
+import type { GeneratedAsset } from "@/lib/campaign-creator/image-generation"
+import type { PostcardIdentity } from "@/lib/campaign-creator/studio-contact"
 import type { CreativeDirection, CreativeSpec } from "@/lib/campaign-creator/types"
 
 import { PostcardPreview } from "./PostcardPreview"
@@ -13,6 +15,8 @@ interface PersistentCreativeHeaderProps {
   canvas: CreativeCanvas | null
   direction: CreativeDirection
   spec: CreativeSpec
+  identity?: PostcardIdentity
+  generatedAsset?: GeneratedAsset | null
   onEditCreative: () => void
   isEditing?: boolean
 }
@@ -21,6 +25,8 @@ export function PersistentCreativeHeader({
   canvas,
   direction,
   spec,
+  identity,
+  generatedAsset,
   onEditCreative,
   isEditing = false,
 }: PersistentCreativeHeaderProps) {
@@ -44,6 +50,8 @@ export function PersistentCreativeHeader({
               canvas={canvas}
               spec={spec}
               size="thumbnail"
+              identity={identity}
+              generatedAsset={generatedAsset}
               enableHoverTilt={false}
               className="!max-w-none !h-full !aspect-auto"
             />

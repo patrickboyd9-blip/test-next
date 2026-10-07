@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState } from "react"
 import { isAtOrPastStatus } from "@/lib/campaign-creator/campaign-status"
 import { toCreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import { getApprovedSpec } from "@/lib/campaign-creator/creative-state"
+import { postcardIdentityFromBrief } from "@/lib/campaign-creator/studio-contact"
+import { lookupStudioImage } from "@/lib/campaign-creator/studio-image-fingerprint"
 import {
   confirmCampaignStrategy,
   confirmCampaignAudience,
@@ -38,6 +40,7 @@ import { OpeningPrompt } from "./OpeningPrompt"
 import { QuantityTrackingStage } from "./QuantityTrackingStage"
 import { CreativeStudio } from "./studio/CreativeStudio"
 import { PersistentCreativeHeader } from "./studio/PersistentCreativeHeader"
+import { useStudioDirectionImages } from "./studio/use-studio-direction-images"
 
 function resolveStudioCanvas(campaign: Campaign) {
   const mailPieceSpec = campaign.mailPieceSpec
@@ -211,10 +214,7 @@ export function CampaignCreatorView({ initialCampaign }: CampaignCreatorViewProp
     ((atAudienceOrQuantityConfirm && !campaign.mailPiece) || recoveryFromFailedConfirm)
 
   useEffect(() => {
-    if (!showStrategySummary) {
-      setFormatRecommendation(null)
-      return
-    }
+    if (!showStrategySummary) return
 
     let cancelled = false
     void getMailPieceFormatRecommendation(campaign.brief)
@@ -233,6 +233,8 @@ export function CampaignCreatorView({ initialCampaign }: CampaignCreatorViewProp
   const progressStatus = studioProgressStatus ?? campaign.status
 
   const canvas = useMemo(() => resolveStudioCanvas(campaign), [campaign])
+  const studioImages = useStudioDirectionImages(campaign)
+  const identity = postcardIdentityFromBrief(campaign.brief)
 
   const selectedDirectionId = campaign.creative.selectedDirectionId
   const approvedDirection = campaign.creative.directions.find(
@@ -261,7 +263,9 @@ export function CampaignCreatorView({ initialCampaign }: CampaignCreatorViewProp
         <BriefSummaryCard
           brief={campaign.brief}
           status={campaign.status}
-          formatRecommendation={formatRecommendation ?? undefined}
+          formatRecommendation={
+            showStrategySummary ? formatRecommendation ?? undefined : undefined
+          }
           onFieldChange={handleFieldChange}
           onConfirm={handleConfirmStrategy}
           isConfirming={isConfirmingStrategy}
@@ -279,6 +283,8 @@ export function CampaignCreatorView({ initialCampaign }: CampaignCreatorViewProp
           canvas={canvas}
           direction={approvedDirection}
           spec={approvedSpec}
+          identity={identity}
+          generatedAsset={lookupStudioImage(studioImages, approvedDirection.id, approvedSpec)}
           onEditCreative={handleEditCreative}
           isEditing={isUnapproving}
         />
@@ -295,6 +301,7 @@ export function CampaignCreatorView({ initialCampaign }: CampaignCreatorViewProp
           key={resumeInRefinement ? "refine-resume" : "studio"}
           campaign={campaign}
           canvas={canvas}
+          studioImages={studioImages}
           onCampaignUpdate={handleCampaignUpdate}
           onProgressStatusChange={setStudioProgressStatus}
           initialSubPhase={resumeInRefinement ? "refine" : undefined}

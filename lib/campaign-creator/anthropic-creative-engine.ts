@@ -101,7 +101,7 @@ const generateDirectionsTool = {
   description:
     "Propose exactly three distinct postcard directions from the campaign brief.",
   input_schema: {
-    type: "object",
+    type: "object" as const,
     properties: {
       promptVersion: {
         type: "string",
@@ -139,7 +139,7 @@ const refineDirectionTool = {
   description:
     "Apply a natural-language refinement or return a conflict without changing the spec.",
   input_schema: {
-    type: "object",
+    type: "object" as const,
     properties: {
       promptVersion: { type: "string" },
       outcome: { type: "string", enum: ["success", "conflict"] },

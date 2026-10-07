@@ -5,6 +5,9 @@ import { AnimatePresence, motion } from "framer-motion"
 
 import { Button } from "@/components/ui/button"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
+import type { GeneratedAsset } from "@/lib/campaign-creator/image-generation"
+import type { PostcardIdentity } from "@/lib/campaign-creator/studio-contact"
+import { lookupStudioImage, type StudioImageRecord } from "@/lib/campaign-creator/studio-image-fingerprint"
 import type { CreativeDirection, CreativeSpec } from "@/lib/campaign-creator/types"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
@@ -17,6 +20,9 @@ interface FocusViewProps {
   direction: CreativeDirection
   spec: CreativeSpec
   otherDirections: CreativeDirection[]
+  identity?: PostcardIdentity
+  studioImages?: readonly StudioImageRecord[]
+  generatedAsset?: GeneratedAsset | null
   onCompare: () => void
   onSwitch: (directionId: string) => void
   onStartRefining: () => void
@@ -36,6 +42,9 @@ export function FocusView({
   direction,
   spec,
   otherDirections,
+  identity,
+  studioImages = [],
+  generatedAsset,
   onCompare,
   onSwitch,
   onStartRefining,
@@ -68,6 +77,8 @@ export function FocusView({
             spec={spec}
             side={side}
             size="hero"
+            identity={identity}
+            generatedAsset={generatedAsset}
             ariaLabel={`Postcard: ${spec.headline ?? direction.name}`}
           />
           <PostcardSideToggle side={side} onSideChange={setSide} />
@@ -108,6 +119,8 @@ export function FocusView({
               canvas={canvas}
               direction={other}
               variant="strip"
+              identity={identity}
+              generatedAsset={lookupStudioImage(studioImages, other.id, other.spec)}
               onSelect={() => onSwitch(other.id)}
             />
           ))}

@@ -5,14 +5,17 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import {
   applyRefinement,
   approveCreative,
-  generateLeadDirectionImage,
   generateStudioCreative,
   restoreRevision,
   selectCreativeDirection,
 } from "@/lib/campaign-creator/actions"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import { getActiveSpec } from "@/lib/campaign-creator/creative-state"
-import type { GeneratedAsset } from "@/lib/campaign-creator/image-generation"
+import { postcardIdentityFromBrief } from "@/lib/campaign-creator/studio-contact"
+import {
+  lookupStudioImage,
+  type StudioImageRecord,
+} from "@/lib/campaign-creator/studio-image-fingerprint"
 import {
   getLeadDirection,
   getMockCreativeDirections,
@@ -38,6 +41,7 @@ export type StudioSubPhase =
 interface CreativeStudioProps {
   campaign: Campaign
   canvas: CreativeCanvas | null
+  studioImages?: readonly StudioImageRecord[]
   onCampaignUpdate: (campaign: Campaign) => void
   onProgressStatusChange?: (status: CampaignStatus) => void
   initialSubPhase?: StudioSubPhase
@@ -46,6 +50,7 @@ interface CreativeStudioProps {
 export function CreativeStudio({
   campaign,
   canvas,
+  studioImages = [],
   onCampaignUpdate,
   onProgressStatusChange,
   initialSubPhase,
@@ -74,11 +79,7 @@ export function CreativeStudio({
   const [approvalSettled, setApprovalSettled] = useState(false)
   const generationStartedRef = useRef(false)
   const generationRequestIdRef = useRef(0)
-  const [generatedByDirectionId, setGeneratedByDirectionId] = useState<
-    Partial<Record<string, GeneratedAsset>>
-  >({})
-  const imageGenerationStartedForIdRef = useRef<string | null>(null)
-  const imageRequestIdRef = useRef(0)
+  const identity = postcardIdentityFromBrief(campaign.brief)
 
   const directions = hasPersistedDirections
     ? campaign.creative.directions
@@ -130,33 +131,6 @@ export function CreativeStudio({
     }, STUDIO_GENERATION.failThresholdMs)
     return () => window.clearTimeout(timeout)
   }, [hasPersistedDirections, generationFailed, isInitializing])
-
-  useEffect(() => {
-    return () => {
-      imageRequestIdRef.current += 1
-    }
-  }, [])
-
-  useEffect(() => {
-    if (subPhase !== "lead" || !hasPersistedDirections) return
-    const directionId = leadDirection.id
-    if (imageGenerationStartedForIdRef.current === directionId) return
-
-    imageGenerationStartedForIdRef.current = directionId
-    const requestId = ++imageRequestIdRef.current
-
-    void generateLeadDirectionImage(campaign.id, directionId)
-      .then((result) => {
-        if (requestId !== imageRequestIdRef.current) return
-        if (result.generated) {
-          setGeneratedByDirectionId({ [result.directionId]: result.generated })
-        }
-      })
-      .catch((error) => {
-        if (requestId !== imageRequestIdRef.current) return
-        console.error("Lead image generation failed:", error)
-      })
-  }, [subPhase, hasPersistedDirections, leadDirection.id, campaign.id])
 
   async function handleSelectDirection(directionId: string) {
     setLocalSelectedId(directionId)
@@ -254,7 +228,8 @@ export function CreativeStudio({
       <LeadRevealView
         canvas={canvas}
         direction={leadDirection}
-        generatedAsset={generatedByDirectionId[leadDirection.id] ?? null}
+        identity={identity}
+        generatedAsset={lookupStudioImage(studioImages, leadDirection.id, leadDirection.spec)}
         onContinue={async () => {
           await handleSelectDirection(leadDirection.id)
           setSubPhase("focus")
@@ -268,6 +243,8 @@ export function CreativeStudio({
         canvas={canvas}
         directions={directions}
         recommendedId={leadDirection.id}
+        identity={identity}
+        studioImages={studioImages}
         onSelect={async (id) => {
           await handleSelectDirection(id)
           setSubPhase("focus")
@@ -283,6 +260,8 @@ export function CreativeStudio({
         campaign={campaign}
         direction={selectedDirection}
         activeSpec={activeSpec}
+        identity={identity}
+        generatedAsset={lookupStudioImage(studioImages, selectedId, activeSpec)}
         onCompare={() => setSubPhase("compare")}
         onApprove={() => openApproval("refine")}
         onApplyRefinement={handleApplyRefinement}
@@ -296,6 +275,9 @@ export function CreativeStudio({
         direction={selectedDirection}
         spec={activeSpec}
         otherDirections={otherDirections}
+        identity={identity}
+        studioImages={studioImages}
+        generatedAsset={lookupStudioImage(studioImages, selectedId, activeSpec)}
         onCompare={() => setSubPhase("compare")}
         onSwitch={async (id) => {
           await handleSelectDirection(id)
@@ -316,6 +298,8 @@ export function CreativeStudio({
           spec={activeSpec}
           brief={campaign.brief}
           directionName={selectedDirection.name}
+          identity={identity}
+          generatedAsset={lookupStudioImage(studioImages, selectedId, activeSpec)}
           onApprove={handleApprove}
           onKeepRefining={() => setSubPhase(approvalReturnPhase)}
           isApproving={isApproving}

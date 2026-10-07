@@ -8,6 +8,8 @@ import { getActiveVersion } from "@/lib/campaign-creator/creative-state"
 import { STUDIO_REFINEMENT } from "@/lib/campaign-creator/studio-config"
 import { REFINEMENT_SLOW_NETWORK_LINE } from "@/lib/campaign-creator/studio-copy"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
+import type { GeneratedAsset } from "@/lib/campaign-creator/image-generation"
+import type { PostcardIdentity } from "@/lib/campaign-creator/studio-contact"
 import type { Campaign, CreativeDirection, CreativeSpec } from "@/lib/campaign-creator/types"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
@@ -20,6 +22,8 @@ interface RefinementViewProps {
   campaign: Campaign
   direction: CreativeDirection
   activeSpec: CreativeSpec
+  identity?: PostcardIdentity
+  generatedAsset?: GeneratedAsset | null
   onCompare: () => void
   onApprove: () => void
   onApplyRefinement: (prompt: string) => Promise<CampaignUpdateResult>
@@ -38,6 +42,8 @@ export function RefinementView({
   campaign,
   direction,
   activeSpec,
+  identity,
+  generatedAsset,
   onCompare,
   onApprove,
   onApplyRefinement,
@@ -191,6 +197,8 @@ export function RefinementView({
               spec={activeSpec}
               side={side}
               size="hero"
+              identity={identity}
+              generatedAsset={generatedAsset}
               highlightRegions={highlightRegions}
               isShimmering={isShimmering}
               ariaLabel={`Postcard front: ${activeSpec.headline ?? direction.name}`}

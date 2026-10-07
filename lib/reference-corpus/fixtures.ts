@@ -3,6 +3,8 @@ import type { ReferenceCorpusItem } from "./types"
 /**
  * Application-side intake pointer to MMR-001 in modern-mail-research.
  * Does not copy the example markdown, principles, or syntheses.
+ * The prompt-safe reading of this record is the MMR-001 Reference Card
+ * in taste-pack.ts, not this intake object.
  */
 export const MMR_001_INTAKE_ID = "ref-mmr-001"
 

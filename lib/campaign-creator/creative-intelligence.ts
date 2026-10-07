@@ -1,12 +1,23 @@
 import { PLAYBOOKS, findIndustryPlaybook } from "../campaign-strategy/playbooks"
+import {
+  formatReferenceCardSection,
+  selectReferenceCards,
+  type ReferenceCardMatch,
+} from "../reference-corpus/select-reference-cards"
+import type { ReferenceCard } from "../reference-corpus/reference-card"
 import type { CampaignBrief } from "./types"
 
 /**
  * Non-persisted, campaign-local knowledge pack for the Creative Engine.
  * Not CampaignStrategy. Not evidence. Not a Campaign field.
+ *
+ * `referenceCards` are the curated taste baseline for this brief.
+ * They are generalized readings, not raw research markdown.
  */
 export interface CreativeIntelligenceContext {
   principles: readonly CreativePrinciple[]
+  referenceCards?: readonly ReferenceCard[]
+  referenceCardMatch?: ReferenceCardMatch
 }
 
 export const CREATIVE_PRINCIPLE_KINDS = [
@@ -293,12 +304,15 @@ const HOME_SERVICES_PATTERNS = [
 export function buildCreativeIntelligenceContext(
   brief: CampaignBrief
 ): CreativeIntelligenceContext {
+  const taste = selectReferenceCards(brief)
   return {
     principles: [
       ...CREATIVE_DIRECT_MAIL_PRINCIPLES,
       ...(isHomeServicesBrief(brief) ? HOME_SERVICES_PRINCIPLES : []),
       ...plumbingPrinciplesFor(brief),
     ],
+    referenceCards: taste.cards,
+    referenceCardMatch: taste.match,
   }
 }
 
@@ -327,6 +341,17 @@ ${formatPrincipleList(plumbing)}`
       : `Plumbing principles:
 None. No plumbing playbook matched this campaign. Do not invent plumbing knowledge.`
 
+  const taste =
+    context.referenceCards && context.referenceCards.length > 0
+      ? `\n\n${formatReferenceCardSection(
+          context.referenceCards,
+          context.referenceCardMatch ??
+            (context.referenceCards.every((card) => card.packGroup === "craft_exemplar")
+              ? "craft_only"
+              : "vertical")
+        )}`
+      : ""
+
   return `Creative Intelligence principles — decision guidance only.
 
 Knowledge classification:
@@ -350,7 +375,7 @@ ${formatPrincipleList(general)}
 
 ${homeServicesBlock}
 
-${plumbingBlock}`
+${plumbingBlock}${taste}`
 }
 
 export function isHomeServicesBrief(brief: CampaignBrief): boolean {
