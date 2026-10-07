@@ -5,6 +5,11 @@ import type {
 } from "./creative-engine"
 import { metricUsesPhone, metricUsesQr } from "./creative-state"
 import {
+  isLocalServiceBrief,
+  isPhotographicSpec,
+  isWeakTextOnlyRecommendation,
+} from "./photography-art-direction"
+import {
   buildPreservationNote,
   buildSpecDiff,
   buildSuccessStudioResponse,
@@ -342,8 +347,11 @@ export function normalizeGenerationResult(
   options: { stripInventedFacts: boolean }
 ): GenerateDirectionsResult {
   const now = new Date().toISOString()
-  const normalized = directions.map((direction) =>
-    normalizeDirection(brief, direction, now, options.stripInventedFacts)
+  const normalized = preferPhotographicRecommendation(
+    brief,
+    directions.map((direction) =>
+      normalizeDirection(brief, direction, now, options.stripInventedFacts)
+    )
   )
 
   const reasons = validateGenerationSet(brief, normalized)
@@ -362,6 +370,36 @@ export function normalizeGenerationResult(
     },
     recommendedDirectionId: lead.id,
   }
+}
+
+function preferPhotographicRecommendation(
+  brief: CampaignBrief,
+  directions: CreativeDirection[]
+): CreativeDirection[] {
+  if (!isLocalServiceBrief(brief)) return directions
+  const leadIndex = directions.findIndex((direction) => direction.recommended)
+  if (leadIndex < 0) return directions
+  const lead = directions[leadIndex]
+  if (!lead || !isWeakTextOnlyRecommendation(lead.spec)) return directions
+  const alternateIndex = directions.findIndex(
+    (direction, index) => index !== leadIndex && isPhotographicSpec(direction.spec)
+  )
+  if (alternateIndex < 0) return directions
+
+  return directions.map((direction, index) => {
+    if (index === alternateIndex) {
+      return { ...direction, recommended: true, oneLineDifference: undefined }
+    }
+    if (index === leadIndex) {
+      return {
+        ...direction,
+        recommended: false,
+        oneLineDifference:
+          direction.oneLineDifference?.trim() || "Type leads this version.",
+      }
+    }
+    return direction
+  })
 }
 
 function normalizeDirection(

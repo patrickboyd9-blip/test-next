@@ -7,13 +7,14 @@ import { Button } from "@/components/ui/button"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import type { GeneratedAsset } from "@/lib/campaign-creator/image-generation"
 import type { PostcardIdentity } from "@/lib/campaign-creator/studio-contact"
-import { lookupStudioImage, type StudioImageRecord } from "@/lib/campaign-creator/studio-image-fingerprint"
-import type { CreativeDirection, CreativeSpec } from "@/lib/campaign-creator/types"
+import { presentStudioPhoto, type StudioImageState } from "@/lib/campaign-creator/studio-photo"
+import type { CampaignBrief, CreativeDirection, CreativeSpec } from "@/lib/campaign-creator/types"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
 import { ConceptCard } from "./ConceptCard"
 import { PostcardPreview, PostcardSideToggle } from "./PostcardPreview"
 import { StrategyTags } from "./StrategyTags"
+import { StudioPhotoNote } from "./StudioPhotoNote"
 
 interface FocusViewProps {
   canvas: CreativeCanvas
@@ -21,8 +22,11 @@ interface FocusViewProps {
   spec: CreativeSpec
   otherDirections: CreativeDirection[]
   identity?: PostcardIdentity
-  studioImages?: readonly StudioImageRecord[]
+  brief?: CampaignBrief
+  studioPhotos?: StudioImageState
   generatedAsset?: GeneratedAsset | null
+  allowLibraryFallback?: boolean
+  photoNote?: string | null
   onCompare: () => void
   onSwitch: (directionId: string) => void
   onStartRefining: () => void
@@ -43,8 +47,11 @@ export function FocusView({
   spec,
   otherDirections,
   identity,
-  studioImages = [],
+  brief,
+  studioPhotos,
   generatedAsset,
+  allowLibraryFallback = false,
+  photoNote,
   onCompare,
   onSwitch,
   onStartRefining,
@@ -79,8 +86,10 @@ export function FocusView({
             size="hero"
             identity={identity}
             generatedAsset={generatedAsset}
+            allowLibraryFallback={allowLibraryFallback}
             ariaLabel={`Postcard: ${spec.headline ?? direction.name}`}
           />
+          <StudioPhotoNote note={photoNote} />
           <PostcardSideToggle side={side} onSideChange={setSide} />
         </motion.div>
       </AnimatePresence>
@@ -113,17 +122,23 @@ export function FocusView({
       <div className="flex flex-col gap-3">
         <p className="text-xs text-muted-foreground">or switch</p>
         <div className="flex gap-2">
-          {otherDirections.map((other) => (
-            <ConceptCard
-              key={other.id}
-              canvas={canvas}
-              direction={other}
-              variant="strip"
-              identity={identity}
-              generatedAsset={lookupStudioImage(studioImages, other.id, other.spec)}
-              onSelect={() => onSwitch(other.id)}
-            />
-          ))}
+          {otherDirections.map((other) => {
+            const photo = studioPhotos
+              ? presentStudioPhoto(studioPhotos, other.id, other.spec, brief)
+              : { generatedAsset: null, allowLibraryFallback: false, note: null }
+            return (
+              <ConceptCard
+                key={other.id}
+                canvas={canvas}
+                direction={other}
+                variant="strip"
+                identity={identity}
+                generatedAsset={photo.generatedAsset}
+                allowLibraryFallback={photo.allowLibraryFallback}
+                onSelect={() => onSwitch(other.id)}
+              />
+            )
+          })}
         </div>
       </div>
     </div>

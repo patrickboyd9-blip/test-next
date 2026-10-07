@@ -17,6 +17,8 @@ interface PersistentCreativeHeaderProps {
   spec: CreativeSpec
   identity?: PostcardIdentity
   generatedAsset?: GeneratedAsset | null
+  allowLibraryFallback?: boolean
+  photoNote?: string | null
   onEditCreative: () => void
   isEditing?: boolean
 }
@@ -27,6 +29,8 @@ export function PersistentCreativeHeader({
   spec,
   identity,
   generatedAsset,
+  allowLibraryFallback = false,
+  photoNote,
   onEditCreative,
   isEditing = false,
 }: PersistentCreativeHeaderProps) {
@@ -52,6 +56,7 @@ export function PersistentCreativeHeader({
               size="thumbnail"
               identity={identity}
               generatedAsset={generatedAsset}
+              allowLibraryFallback={allowLibraryFallback}
               enableHoverTilt={false}
               className="!max-w-none !h-full !aspect-auto"
             />
@@ -64,6 +69,9 @@ export function PersistentCreativeHeader({
             <Check className="size-3.5" aria-hidden />
             Creative approved
           </p>
+          {photoNote ? (
+            <p className="truncate text-xs text-muted-foreground">{photoNote}</p>
+          ) : null}
         </div>
 
         <Button

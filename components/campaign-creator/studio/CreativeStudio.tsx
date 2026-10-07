@@ -13,9 +13,9 @@ import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import { getActiveSpec } from "@/lib/campaign-creator/creative-state"
 import { postcardIdentityFromBrief } from "@/lib/campaign-creator/studio-contact"
 import {
-  lookupStudioImage,
-  type StudioImageRecord,
-} from "@/lib/campaign-creator/studio-image-fingerprint"
+  presentStudioPhoto,
+  type StudioImageState,
+} from "@/lib/campaign-creator/studio-photo"
 import {
   getLeadDirection,
   getMockCreativeDirections,
@@ -41,7 +41,7 @@ export type StudioSubPhase =
 interface CreativeStudioProps {
   campaign: Campaign
   canvas: CreativeCanvas | null
-  studioImages?: readonly StudioImageRecord[]
+  studioPhotos?: StudioImageState
   onCampaignUpdate: (campaign: Campaign) => void
   onProgressStatusChange?: (status: CampaignStatus) => void
   initialSubPhase?: StudioSubPhase
@@ -50,7 +50,7 @@ interface CreativeStudioProps {
 export function CreativeStudio({
   campaign,
   canvas,
-  studioImages = [],
+  studioPhotos = { records: [], misses: [], phase: "loading" },
   onCampaignUpdate,
   onProgressStatusChange,
   initialSubPhase,
@@ -94,6 +94,15 @@ export function CreativeStudio({
     campaign.creative.activeSpec ??
     getActiveSpec(campaign.creative, selectedId) ??
     selectedDirection.spec
+
+  const photoProps = (directionId: string, spec: typeof activeSpec) => {
+    const photo = presentStudioPhoto(studioPhotos, directionId, spec, campaign.brief)
+    return {
+      generatedAsset: photo.generatedAsset,
+      allowLibraryFallback: photo.allowLibraryFallback,
+      photoNote: photo.note,
+    }
+  }
 
   const runGeneration = useCallback(async () => {
     const requestId = ++generationRequestIdRef.current
@@ -229,7 +238,7 @@ export function CreativeStudio({
         canvas={canvas}
         direction={leadDirection}
         identity={identity}
-        generatedAsset={lookupStudioImage(studioImages, leadDirection.id, leadDirection.spec)}
+        {...photoProps(leadDirection.id, leadDirection.spec)}
         onContinue={async () => {
           await handleSelectDirection(leadDirection.id)
           setSubPhase("focus")
@@ -244,7 +253,8 @@ export function CreativeStudio({
         directions={directions}
         recommendedId={leadDirection.id}
         identity={identity}
-        studioImages={studioImages}
+        brief={campaign.brief}
+        studioPhotos={studioPhotos}
         onSelect={async (id) => {
           await handleSelectDirection(id)
           setSubPhase("focus")
@@ -261,7 +271,7 @@ export function CreativeStudio({
         direction={selectedDirection}
         activeSpec={activeSpec}
         identity={identity}
-        generatedAsset={lookupStudioImage(studioImages, selectedId, activeSpec)}
+        {...photoProps(selectedId, activeSpec)}
         onCompare={() => setSubPhase("compare")}
         onApprove={() => openApproval("refine")}
         onApplyRefinement={handleApplyRefinement}
@@ -276,8 +286,9 @@ export function CreativeStudio({
         spec={activeSpec}
         otherDirections={otherDirections}
         identity={identity}
-        studioImages={studioImages}
-        generatedAsset={lookupStudioImage(studioImages, selectedId, activeSpec)}
+        brief={campaign.brief}
+        studioPhotos={studioPhotos}
+        {...photoProps(selectedId, activeSpec)}
         onCompare={() => setSubPhase("compare")}
         onSwitch={async (id) => {
           await handleSelectDirection(id)
@@ -299,7 +310,7 @@ export function CreativeStudio({
           brief={campaign.brief}
           directionName={selectedDirection.name}
           identity={identity}
-          generatedAsset={lookupStudioImage(studioImages, selectedId, activeSpec)}
+          {...photoProps(selectedId, activeSpec)}
           onApprove={handleApprove}
           onKeepRefining={() => setSubPhase(approvalReturnPhase)}
           isApproving={isApproving}

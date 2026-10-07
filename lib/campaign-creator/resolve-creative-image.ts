@@ -42,17 +42,33 @@ function fromLibrary(role: ImageryRole): ResolvedImage {
  * generated is an optional render-path input. It is not a CreativeSpec field.
  * none and logo still win over a generated photograph.
  */
+export interface ResolveCreativeImageOptions {
+  /**
+   * The beta shelf is a labeled stand-in. Studio denies it while a
+   * campaign photograph should still succeed.
+   */
+  libraryFallback?: boolean
+}
+
 export function resolveCreativeImage(
   imagery: ImageryKey | undefined,
   imageryRole?: ImageryRole,
-  generated?: GeneratedAsset | null
+  generated?: GeneratedAsset | null,
+  options?: ResolveCreativeImageOptions
 ): ResolvedImage {
+  const allowLibrary = options?.libraryFallback !== false
   if (imageryRole === "none") return EMPTY_IMAGE
   if (imageryRole === "logo") return MONOGRAM_IMAGE
   if (imageryRole && generated?.src) {
     return { src: generated.src, showMonogram: false }
   }
-  if (imageryRole) return fromLibrary(imageryRole)
+  if (imageryRole) {
+    return allowLibrary ? fromLibrary(imageryRole) : EMPTY_IMAGE
+  }
+
+  if (!allowLibrary && imagery && imagery !== "none" && imagery !== "logo_primary") {
+    return EMPTY_IMAGE
+  }
 
   switch (imagery) {
     case "stock_generic_local":

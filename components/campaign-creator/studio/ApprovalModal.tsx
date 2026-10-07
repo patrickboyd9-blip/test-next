@@ -13,6 +13,7 @@ import { trackingDestination } from "@/lib/campaign-creator/creative-state"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
 import { PostcardPreview } from "./PostcardPreview"
+import { StudioPhotoNote } from "./StudioPhotoNote"
 
 interface ApprovalModalProps {
   open: boolean
@@ -22,6 +23,8 @@ interface ApprovalModalProps {
   directionName: string
   identity?: PostcardIdentity
   generatedAsset?: GeneratedAsset | null
+  allowLibraryFallback?: boolean
+  photoNote?: string | null
   onApprove: () => void
   onKeepRefining: () => void
   isApproving?: boolean
@@ -36,6 +39,8 @@ export function ApprovalModal({
   directionName,
   identity,
   generatedAsset,
+  allowLibraryFallback = false,
+  photoNote,
   onApprove,
   onKeepRefining,
   isApproving = false,
@@ -140,6 +145,7 @@ export function ApprovalModal({
                 size="medium"
                 identity={identity}
                 generatedAsset={generatedAsset}
+                allowLibraryFallback={allowLibraryFallback}
                 enableHoverTilt={false}
               />
               {approved && (
@@ -153,6 +159,11 @@ export function ApprovalModal({
                 </motion.div>
               )}
             </div>
+            {photoNote ? (
+              <div className="mb-4 flex justify-center">
+                <StudioPhotoNote note={photoNote} />
+              </div>
+            ) : null}
 
             <h2 id="approval-modal-title" className="text-center text-lg font-semibold">
               Ready to approve this design?

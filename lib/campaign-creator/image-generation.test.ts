@@ -31,6 +31,7 @@ function keysOf(value: object): string[] {
 }
 
 const IMAGE_BRIEF_KEYS = [
+  "artDirection",
   "doNotInvent",
   "imageryRole",
   "leadJob",

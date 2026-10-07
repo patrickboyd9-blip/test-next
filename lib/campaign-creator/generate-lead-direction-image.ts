@@ -1,5 +1,6 @@
 import { getActiveSpec } from "./creative-state"
 import { toImageBrief } from "./image-brief"
+import { imageBriefContextFor } from "./studio-image-fingerprint"
 import type { GeneratedAsset, ImageGenerationAdapter } from "./image-generation"
 import type { Campaign } from "./types"
 
@@ -22,7 +23,7 @@ export async function generateLeadDirectionImage(
 
   const spec =
     getActiveSpec(campaign.creative, directionId) ?? direction.spec
-  const brief = toImageBrief(spec)
+  const brief = toImageBrief(spec, imageBriefContextFor(directionId, campaign.brief))
   if (!brief) {
     return { directionId, generated: null }
   }

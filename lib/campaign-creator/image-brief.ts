@@ -1,6 +1,13 @@
 import {
+  buildPhotographyArtDirection,
+  type ImageBriefArtDirection,
+  type PhotoOccupancy,
+  type PhotoRole,
+} from "./photography-art-direction"
+import {
   LEAD_JOBS,
   normalizeLayoutVariant,
+  type CampaignBrief,
   type CreativeSpec,
   type ImageryRole,
   type LeadJob,
@@ -9,7 +16,9 @@ import {
 /**
  * Ephemeral execution request for a conceived photograph.
  * Derived from CreativeSpec. Not a CreativeSpec field. Not persisted.
- * The Creative Engine remains the sole author of imagery intent.
+ * The Creative Engine authors the situation. Art direction translates it
+ * into subject, light, framing, and emotion, and replaces a thin label
+ * with a trade-specific scene.
  */
 export const IMAGE_BRIEF_OCCUPANCIES = [
   "field",
@@ -37,6 +46,12 @@ export const IMAGE_BRIEF_DO_NOT_INVENT = [
   "generic or interchangeable stock presented as proof of a specific customer situation",
 ] as const
 
+export interface ImageBriefContext {
+  campaign?: CampaignBrief
+  /** Stable per direction so three directions do not share one scene. */
+  variationKey?: string
+}
+
 export interface ImageBrief {
   imageryRole: ImageBriefRole
   visualDirection: string
@@ -44,6 +59,7 @@ export interface ImageBrief {
   leadJob: LeadJob
   tone?: string
   doNotInvent: readonly string[]
+  artDirection: ImageBriefArtDirection
 }
 
 function isImageBriefRole(
@@ -80,12 +96,15 @@ function occupancyFromSpec(spec: CreativeSpec): ImageBriefOccupancy | null {
  * Translates an already-conceived CreativeSpec into an executable image brief.
  * Returns null when the spec has no honest photographic job.
  */
-export function toImageBrief(spec: CreativeSpec): ImageBrief | null {
+export function toImageBrief(
+  spec: CreativeSpec,
+  context: ImageBriefContext = {}
+): ImageBrief | null {
   if (!isImageBriefRole(spec.imageryRole)) return null
   if (!isImageBriefLeadJob(spec.leadJob)) return null
 
-  const visualDirection = spec.visualDirection
-  if (!visualDirection?.trim()) return null
+  const visualDirection = spec.visualDirection?.trim() ?? ""
+  if (!visualDirection) return null
 
   const occupancy = occupancyFromSpec(spec)
   if (!occupancy) return null
@@ -96,6 +115,14 @@ export function toImageBrief(spec: CreativeSpec): ImageBrief | null {
     occupancy,
     leadJob: spec.leadJob,
     doNotInvent: IMAGE_BRIEF_DO_NOT_INVENT,
+    artDirection: buildPhotographyArtDirection({
+      imageryRole: spec.imageryRole as PhotoRole,
+      leadJob: spec.leadJob,
+      occupancy: occupancy as PhotoOccupancy,
+      visualDirection,
+      campaign: context.campaign,
+      variationKey: context.variationKey,
+    }),
   }
 
   if (spec.tone?.trim()) {

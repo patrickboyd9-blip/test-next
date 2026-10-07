@@ -4,11 +4,8 @@ import { motion } from "framer-motion"
 
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import type { PostcardIdentity } from "@/lib/campaign-creator/studio-contact"
-import {
-  lookupStudioImage,
-  type StudioImageRecord,
-} from "@/lib/campaign-creator/studio-image-fingerprint"
-import type { CreativeDirection } from "@/lib/campaign-creator/types"
+import { presentStudioPhoto, type StudioImageState } from "@/lib/campaign-creator/studio-photo"
+import type { CampaignBrief, CreativeDirection } from "@/lib/campaign-creator/types"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
 import { ConceptCard } from "./ConceptCard"
@@ -18,7 +15,8 @@ interface CompareViewProps {
   directions: CreativeDirection[]
   recommendedId: string
   identity?: PostcardIdentity
-  studioImages?: readonly StudioImageRecord[]
+  brief?: CampaignBrief
+  studioPhotos?: StudioImageState
   onSelect: (directionId: string) => void
   onBack: () => void
 }
@@ -28,7 +26,8 @@ export function CompareView({
   directions,
   recommendedId,
   identity,
-  studioImages = [],
+  brief,
+  studioPhotos,
   onSelect,
   onBack,
 }: CompareViewProps) {
@@ -54,23 +53,30 @@ export function CompareView({
       <h2 className="text-lg font-semibold">Three directions for your campaign</h2>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        {directions.map((direction, index) => (
-          <motion.div
-            key={direction.id}
-            {...(direction.id === recommendedId ? leadScale : {})}
-          >
-            <ConceptCard
-              canvas={canvas}
-              direction={direction}
-              variant="compact"
-              isRecommended={direction.id === recommendedId}
-              identity={identity}
-              generatedAsset={lookupStudioImage(studioImages, direction.id, direction.spec)}
-              onSelect={() => onSelect(direction.id)}
-              index={direction.id === recommendedId ? 0 : index}
-            />
-          </motion.div>
-        ))}
+        {directions.map((direction, index) => {
+          const photo = studioPhotos
+            ? presentStudioPhoto(studioPhotos, direction.id, direction.spec, brief)
+            : { generatedAsset: null, allowLibraryFallback: false, note: null }
+          return (
+            <motion.div
+              key={direction.id}
+              {...(direction.id === recommendedId ? leadScale : {})}
+            >
+              <ConceptCard
+                canvas={canvas}
+                direction={direction}
+                variant="compact"
+                isRecommended={direction.id === recommendedId}
+                identity={identity}
+                generatedAsset={photo.generatedAsset}
+                allowLibraryFallback={photo.allowLibraryFallback}
+                photoNote={photo.note}
+                onSelect={() => onSelect(direction.id)}
+                index={direction.id === recommendedId ? 0 : index}
+              />
+            </motion.div>
+          )
+        })}
       </div>
 
       <p className="text-center text-xs text-muted-foreground">

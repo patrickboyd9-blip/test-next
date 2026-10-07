@@ -42,7 +42,8 @@ Generation constraints:
 - rationale: 2 sentences max, tied to the goal, audience, and Primary Success Metric. Explain why the concept is strategically different. Do not claim conversion, bookings, lift, ROI, or that a direction will outperform
 - designedToDrive: customer-language Primary Success Metric from the brief
 - oneLineDifference: required for the two non-lead directions (≤ 80 characters); omit or leave empty on the lead
-- Recommend the direction that best serves the Primary Success Metric, and say why in the rationale without performance claims`
+- Recommend the direction that best serves the Primary Success Metric, and say why in the rationale without performance claims
+- For a local service, that recommendation is photography-forward. Do not recommend a text-only direction unless the strategy truly has no honest image job`
 }
 
 export function buildGenerateUserMessage(

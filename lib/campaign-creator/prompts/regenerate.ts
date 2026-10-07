@@ -37,7 +37,8 @@ Regeneration constraints (same as generation):
 - After conceiving visualDirection, emit imagePresence: accent when that conception names a small witness to a type-led piece. Do not emit accent when the image occupies the family's normal supporting or image field. Do not infer accent from imageryRole. Do not emit accent merely to make directions visually different
 - New messaging angles — do not paraphrase the previous set
 - Honor the customer's feedback without abandoning the campaign goal or Primary Success Metric
-- Do not invent facts missing from the brief`
+- Do not invent facts missing from the brief
+- For a local service, the recommendation is photography-forward. Do not recommend a text-only direction unless the strategy truly has no honest image job`
 }
 
 export function buildRegenerateUserMessage(input: {

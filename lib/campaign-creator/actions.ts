@@ -17,11 +17,11 @@ import { getCreativeEngine } from "./creative-engine-provider"
 import { generateLeadDirectionImage as runGenerateLeadDirectionImage } from "./generate-lead-direction-image"
 import type { GeneratedAsset } from "./image-generation"
 import { createOpenAIImageGenerationAdapter } from "./openai-image-generation"
-import { ensureStudioDirectionImages } from "./studio-image-cache"
 import {
-  studioImageEntries,
-  type StudioImageRecord,
-} from "./studio-image-fingerprint"
+  ensureStudioDirectionImages,
+  type StudioImageLoad,
+} from "./studio-image-cache"
+import { studioImageEntries } from "./studio-image-fingerprint"
 import { getCampaignRepository } from "./repository"
 import { buildSpecDiff, cloneSpec } from "./spec-diff"
 import type { Campaign, CampaignBrief, CreativeRevision, MailPieceSpec } from "./types"
@@ -226,13 +226,14 @@ export async function initializeStudioCreative(campaignId: string): Promise<Camp
  */
 export async function loadStudioDirectionImages(
   campaignId: string
-): Promise<StudioImageRecord[]> {
+): Promise<StudioImageLoad> {
   const campaign = await repository.getCampaign(campaignId)
   if (!campaign) throw new Error(`Campaign ${campaignId} not found`)
 
   return ensureStudioDirectionImages({
     campaignId,
-    entries: studioImageEntries(campaign.creative),
+    entries: studioImageEntries(campaign.creative, campaign.brief),
+    campaignBrief: campaign.brief,
     createAdapter: createOpenAIImageGenerationAdapter,
   })
 }
