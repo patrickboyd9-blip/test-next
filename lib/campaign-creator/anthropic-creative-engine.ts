@@ -12,10 +12,12 @@ import {
   detectPromptConflict,
   finalizeRefinement,
   normalizeGenerationResult,
+  withGenerationRetryFeedback,
 } from "./creative-engine-guards"
 import { buildCreativeIntelligenceContext } from "./creative-intelligence"
 import {
   CREATIVE_PROMPT_VERSION,
+  DIRECTION_NAME_CONSTRAINT,
   IMAGE_PRESENCE_TOOL_DESCRIPTION,
   buildGenerateSystemPrompt,
   buildGenerateUserMessage,
@@ -114,7 +116,10 @@ const generateDirectionsTool = {
         items: {
           type: "object",
           properties: {
-            name: { type: "string" },
+            name: {
+              type: "string",
+              description: DIRECTION_NAME_CONSTRAINT,
+            },
             rationale: { type: "string" },
             tags: { type: "array", items: { type: "string" } },
             recommended: { type: "boolean" },
@@ -169,10 +174,13 @@ export class AnthropicCreativeEngine implements CreativeEngine {
     input: GenerateDirectionsInput
   ): Promise<GenerateDirectionsResult> {
     const intelligence = buildCreativeIntelligenceContext(input.brief)
-    return this.generateWithRetry(input.brief, () =>
+    return this.generateWithRetry(input.brief, (reasons) =>
       this.requestDirections({
         system: buildGenerateSystemPrompt(input.canvas, intelligence),
-        user: buildGenerateUserMessage(input.brief, input.canvas),
+        user: withGenerationRetryFeedback(
+          buildGenerateUserMessage(input.brief, input.canvas),
+          reasons
+        ),
       })
     )
   }
@@ -203,22 +211,23 @@ export class AnthropicCreativeEngine implements CreativeEngine {
     input: RegenerateDirectionsInput
   ): Promise<GenerateDirectionsResult> {
     const intelligence = buildCreativeIntelligenceContext(input.brief)
-    return this.generateWithRetry(input.brief, () =>
+    return this.generateWithRetry(input.brief, (reasons) =>
       this.requestDirections({
         system: buildRegenerateSystemPrompt(input.canvas, intelligence),
-        user: buildRegenerateUserMessage(input),
+        user: withGenerationRetryFeedback(buildRegenerateUserMessage(input), reasons),
       })
     )
   }
 
   private async generateWithRetry(
     brief: GenerateDirectionsInput["brief"],
-    request: () => Promise<CreativeDirection[]>
+    request: (reasons?: string[]) => Promise<CreativeDirection[]>
   ): Promise<GenerateDirectionsResult> {
+    let reasons: string[] | undefined
     let lastError: unknown
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
-        const directions = await request()
+        const directions = await request(reasons)
         return normalizeGenerationResult(brief, directions, {
           stripInventedFacts: true,
         })
@@ -227,6 +236,7 @@ export class AnthropicCreativeEngine implements CreativeEngine {
         if (!(error instanceof CreativeGenerationInvalidError) || attempt === 1) {
           throw error
         }
+        reasons = error.reasons
       }
     }
     throw lastError instanceof Error

@@ -38,6 +38,7 @@ import {
 import {
   studioCopyHierarchy,
   copyOfferLeads,
+  copyRestatesLead,
   type StudioCopyHierarchy,
 } from "./studio-copy-hierarchy"
 import { studioCompositionStructure } from "./studio-composition-structure"
@@ -379,6 +380,10 @@ function LeadType({
   const size = heroSize ?? (leadWithOffer && offer ? type.offer : type.headline)
   const voice = studioTypeExecution(treatment)
   const heroColor = voice.heroColor === "emphasis" ? emphasis : color
+  const followHeadline =
+    leadWithOffer && offer && spec.headline && !copyRestatesLead(offer, spec.headline)
+      ? spec.headline
+      : null
   return (
     <div className="min-w-0">
       {hero ? (
@@ -389,7 +394,7 @@ function LeadType({
           {hero}
         </p>
       ) : null}
-      {leadWithOffer && offer && spec.headline ? (
+      {followHeadline ? (
         <p
           className={cn(
             "mt-2 max-w-[18ch]",
@@ -399,7 +404,7 @@ function LeadType({
           )}
           style={{ color, fontSize: type.headline, opacity: voice.rhythm === "composed" ? 0.72 : 0.88 }}
         >
-          {spec.headline}
+          {followHeadline}
         </p>
       ) : null}
       {!leadWithOffer && !compact && spec.subheadline ? (
@@ -790,7 +795,9 @@ function BandedSplitFront({
           className="flex min-w-0 flex-[5] flex-col"
           style={safePad(compact, voice.rhythm)}
         >
-          {leadWithOffer && spec.headline ? (
+          {leadWithOffer &&
+          spec.headline &&
+          !(offer && copyRestatesLead(offer, spec.headline)) ? (
             <p
               className="max-w-[18ch] font-semibold leading-[1.05] tracking-[-0.02em]"
               style={{ color: ink, fontSize: type.sub, opacity: 0.88 }}
@@ -1003,7 +1010,7 @@ function TypeOnlyFront({
               {spec.subheadline}
             </p>
           ) : null}
-          {offer ? (
+          {offer && !(figure && copyRestatesLead(figure, offer)) ? (
             <p
               className="mt-1 max-w-[20ch] font-medium leading-snug"
               style={{ color: ink, fontSize: type.sub, opacity: 0.85 }}
@@ -1042,7 +1049,7 @@ function TypeOnlyFront({
     >
       <div
         data-region="type"
-        className="flex w-[68%] max-w-[24ch] flex-col"
+        className="flex h-full min-w-0 flex-1 flex-col"
         style={safePad(compact, voice.rhythm)}
       >
         <Wordmark name={cardName} color={ink} />
@@ -1072,7 +1079,6 @@ function TypeOnlyFront({
           layout={layout}
         />
       </div>
-      <div data-region="field" className="min-h-0 flex-1" aria-hidden />
     </div>
   )
 }
@@ -1137,7 +1143,7 @@ function PhotoSlot({
     )
   }
 
-  return <div className="h-full w-full" style={{ backgroundColor: fallback }} aria-hidden />
+  return null
 }
 
 function PrintCta({

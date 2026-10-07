@@ -21,6 +21,10 @@ Optimize every direction and change for the customer's Primary Success Metric.
 Keep rationale to two sentences, in plain English a fourth grader can follow.
 The customer describes. You figure out the configuration.`
 
+/** Tool schema and prompt copy. Direction names are labels, not sentences. */
+export const DIRECTION_NAME_CONSTRAINT =
+  "Exactly 2 to 4 words. Not a sentence and not a layout description. Example: Trusted Local Expert."
+
 export const SPEC_FIELD_RULES = `CreativeSpec rules:
 - headline: max 8 words
 - subheadline: max 12 words (optional)
