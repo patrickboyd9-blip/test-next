@@ -1,11 +1,21 @@
 "use client"
 
+import { useMemo, type CSSProperties } from "react"
 import { motion } from "framer-motion"
 
 import { cn } from "@/lib/utils"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import type { GeneratedAsset } from "@/lib/campaign-creator/image-generation"
 import { resolveCreativeImage } from "@/lib/campaign-creator/resolve-creative-image"
+import {
+  businessNameForCard,
+  displayWebsite,
+  resolveStudioContact,
+  type PostcardIdentity,
+  type StudioContact,
+} from "@/lib/campaign-creator/studio-contact"
+import { buildQrMatrix } from "@/lib/campaign-creator/studio-qr"
+import { postcard5x8SafeInset } from "@/lib/campaign-creator/studio-safe-inset"
 import {
   normalizeLayoutVariant,
   type CreativeSpec,
@@ -21,7 +31,6 @@ import {
   studioTypeExecution,
   type CropPreset,
   type CtaMark,
-  type PhotoWeight,
   type StudioCompositionTreatment,
   type TypeRhythm,
   type TypeWeight,
@@ -51,8 +60,10 @@ interface PostcardPreviewProps {
   highlightRegions?: string[]
   isShimmering?: boolean
   ariaLabel?: string
-  /** Ephemeral render-path image. Not persisted. Not a CreativeSpec field. */
+  /** Cached or just-resolved photograph. Not a CreativeSpec field. */
   generatedAsset?: GeneratedAsset | null
+  /** Brief contact. Used when the spec is empty or still has toy placeholder chrome. */
+  identity?: PostcardIdentity
 }
 
 const SIZE_CLASSES: Record<PostcardPreviewSize, string> = {
@@ -94,6 +105,7 @@ export function PostcardPreview({
   isShimmering = false,
   ariaLabel,
   generatedAsset,
+  identity,
 }: PostcardPreviewProps) {
   const reducedMotion = useReducedMotion()
   const [primary, secondary, accent] = spec.palette ?? DEFAULT_PALETTE
@@ -125,6 +137,7 @@ export function PostcardPreview({
       size={size}
       photoSrc={photoSrc}
       showMonogram={showMonogram}
+      identity={identity}
       fullBleed={canvas.fullBleedExpected}
     />
   )
@@ -174,6 +187,7 @@ function PostcardFront({
   size,
   photoSrc,
   showMonogram,
+  identity,
   fullBleed,
 }: {
   spec: CreativeSpec
@@ -184,6 +198,7 @@ function PostcardFront({
   size: PostcardPreviewSize
   photoSrc: string | null
   showMonogram: boolean
+  identity?: PostcardIdentity
   fullBleed: boolean
 }) {
   const compact = size === "thumbnail"
@@ -218,7 +233,7 @@ function PostcardFront({
     derivation,
     phoneBottomRight: spec.layoutHints?.phonePosition === "bottom-right",
     qrLarge: spec.layoutHints?.qrProminence === "large",
-    showQr: Boolean(spec.qrDestination?.trim() || spec.website?.trim()),
+    contact: resolveStudioContact(spec, identity),
     offer: spec.offer?.trim() || "",
     photoAlt: spec.visualDirection?.trim() || "Campaign photography",
     photoSrc,
@@ -262,7 +277,7 @@ interface FrontContext {
   type: TypeScale
   phoneBottomRight: boolean
   qrLarge: boolean
-  showQr: boolean
+  contact: StudioContact
   offer: string
   photoAlt: string
   photoSrc: string | null
@@ -316,13 +331,18 @@ function typeRhythmClass(rhythm: TypeRhythm): string {
   return "leading-[1.05] tracking-[-0.025em]"
 }
 
-function typeBreathing(compact: boolean, rhythm: TypeRhythm): string {
-  if (rhythm === "composed") return compact ? "px-3 py-2.5" : "px-5 py-5 sm:px-6 sm:py-5"
-  if (rhythm === "compressed") return compact ? "px-2 py-1.5" : "px-3 py-2.5 sm:px-3.5 sm:py-3"
-  if (rhythm === "immediate" || rhythm === "tense") {
-    return compact ? "px-2 py-1.5" : "px-3.5 py-3 sm:px-4 sm:py-3.5"
+function safePad(compact: boolean, rhythm: TypeRhythm): CSSProperties {
+  const inset = postcard5x8SafeInset()
+  const extra = rhythm === "composed" ? 1.5 : rhythm === "compressed" ? 0 : 0.35
+  const scale = compact ? 0.72 : 1
+  const x = inset.xPercent * scale
+  const y = (inset.yPercent + extra) * scale
+  return {
+    paddingTop: `${y}%`,
+    paddingRight: `${x}%`,
+    paddingBottom: `${y}%`,
+    paddingLeft: `${x}%`,
   }
-  return compact ? "px-2 py-2" : "px-4 py-3.5 sm:px-5 sm:py-4"
 }
 
 function LeadType({
@@ -407,12 +427,10 @@ function PrintMarks({
   type,
   color,
   emphasis,
-  surface,
   treatment,
   phoneBottomRight,
-  showQr,
+  contact,
   qrLarge,
-  onPhoto = false,
   layout,
 }: {
   spec: CreativeSpec
@@ -422,12 +440,10 @@ function PrintMarks({
   type: TypeScale
   color: string
   emphasis: string
-  surface: string
   treatment: StudioCompositionTreatment
   phoneBottomRight: boolean
-  showQr: boolean
+  contact: StudioContact
   qrLarge: boolean
-  onPhoto?: boolean
   layout: LayoutVariant
 }) {
   const marks = studioPrintMarks(treatment, layout)
@@ -437,22 +453,17 @@ function PrintMarks({
       {spec.callToAction}
     </PrintCta>
   ) : null
-  const contact = !compact ? (
+  const contactMark = !compact ? (
     <ContactPrint
-      spec={spec}
+      contact={contact}
       color={color}
       phoneBottomRight={phoneBottomRight}
-      size={type.footer}
+      phoneSize={type.cta}
+      websiteSize={type.footer}
     />
   ) : null
-  const qr = showQr ? (
-    <QrMark
-      tone={color}
-      field={onPhoto ? "#f7f7f4" : surface}
-      compact={compact}
-      large={qrLarge}
-      onPhoto={onPhoto}
-    />
+  const qr = contact.qrPayload ? (
+    <QrMark payload={contact.qrPayload} compact={compact} large={qrLarge} />
   ) : null
   const supportingOffer =
     !leadWithOffer && offer ? (
@@ -466,50 +477,45 @@ function PrintMarks({
 
   const spacing =
     arrangement === "sole-type"
-      ? compact
-        ? "mt-3"
-        : "mt-5"
+      ? "mt-auto"
       : arrangement === "inscription"
         ? compact
           ? "mt-1.5"
           : "mt-2"
-        : compact
-          ? "mt-2"
-          : "mt-3"
+        : "mt-auto"
 
   return (
-    <div className={cn(spacing, "flex items-end gap-3")}>
+    <div className={cn(spacing, "flex items-end gap-2.5")}>
       <div className="min-w-0 flex-1 space-y-1.5">
         {supportingOffer}
         {cta}
-        {contact}
+        {contactMark}
       </div>
       {qr}
     </div>
   )
 }
 
-function supportingImagePlate(compact: boolean, weight: PhotoWeight): string {
-  if (compact) {
-    return weight === "balanced"
-      ? "right-[3%] top-[16%] h-[68%] w-[32%]"
-      : "right-[3%] top-[18%] h-[64%] w-[28%]"
-  }
-  return weight === "balanced"
-    ? "right-[4%] top-[11%] h-[78%] w-[34%]"
-    : "right-[4%] top-[13%] h-[74%] w-[30%]"
+function brandMark(
+  showMonogram: boolean,
+  spec: CreativeSpec,
+  contact: StudioContact
+): { wordmark: string | null; monogram: string | null } {
+  if (!showMonogram) return { wordmark: null, monogram: null }
+  if (contact.businessName) return { wordmark: contact.businessName, monogram: null }
+  return { wordmark: null, monogram: monogramLetter(spec.headline) }
 }
 
-function accentImagePlate(compact: boolean): string {
-  return compact
-    ? "right-[4%] bottom-[10%] h-[38%] w-[20%]"
-    : "right-[5%] bottom-[8%] h-[42%] w-[18%]"
-}
-
-function groundedInscription(compact: boolean): string {
-  return compact
-    ? "bottom-1.5 left-1.5 max-w-[70%] px-2 py-1.5"
-    : "bottom-[6%] left-[4%] w-[56%] max-w-[28ch] px-1 py-1"
+function Wordmark({ name, color }: { name?: string; color: string }) {
+  if (!name) return null
+  return (
+    <p
+      className="mb-1.5 font-semibold uppercase tracking-[0.16em]"
+      style={{ color, fontSize: "clamp(8px, 2.1cqw, 11px)", opacity: 0.62 }}
+    >
+      {name}
+    </p>
+  )
 }
 
 function TypePrimaryFront({
@@ -522,7 +528,7 @@ function TypePrimaryFront({
   type,
   phoneBottomRight,
   qrLarge,
-  showQr,
+  contact,
   offer,
   photoAlt,
   photoSrc,
@@ -535,6 +541,8 @@ function TypePrimaryFront({
   const leadWithOffer = copyOfferLeads(hierarchy)
   const structure = studioCompositionStructure(layout)
   const smallPlate = derivation.imagePlate === "small"
+  const rhythm = studioTypeExecution(treatment).rhythm
+  const mark = brandMark(showMonogram, spec, contact)
   return (
     <div
       className="relative h-full"
@@ -543,15 +551,37 @@ function TypePrimaryFront({
       data-type-presence={derivation.typePresence}
       data-image-plate={derivation.imagePlate}
       data-void={derivation.voidShape}
+      data-safe-inset="0.25in"
     >
+      <div
+        data-region="supporting-image"
+        className={cn(
+          "absolute overflow-hidden",
+          smallPlate ? "bottom-0 right-0 h-[58%] w-[34%]" : "inset-y-0 right-0 w-[42%]"
+        )}
+      >
+        <PhotoSlot
+          src={photoSrc}
+          alt={photoAlt}
+          wordmark={mark.wordmark}
+          monogram={mark.monogram}
+          fallback={secondary}
+          primary={ink}
+          crop={smallPlate ? "tight" : treatment.cropPreset}
+        />
+      </div>
       <div
         data-region="type"
         className={cn(
           "relative z-10 flex h-full flex-col",
-          smallPlate ? "w-[58%]" : "w-[66%]",
-          typeBreathing(compact, studioTypeExecution(treatment).rhythm)
+          smallPlate ? "w-[68%]" : "w-[60%]"
         )}
+        style={safePad(compact, rhythm)}
       >
+        <Wordmark
+          name={businessNameForCard(contact.businessName, spec.headline)}
+          color={ink}
+        />
         <LeadType
           spec={spec}
           offer={offer}
@@ -571,30 +601,11 @@ function TypePrimaryFront({
           type={type}
           color={ink}
           emphasis={emphasis}
-          surface={surface}
           treatment={treatment}
           phoneBottomRight={phoneBottomRight}
-          showQr={showQr}
+          contact={contact}
           qrLarge={qrLarge}
           layout={layout}
-        />
-      </div>
-      <div
-        data-region="supporting-image"
-        className={cn(
-          "absolute overflow-hidden",
-          smallPlate
-            ? accentImagePlate(compact)
-            : supportingImagePlate(compact, treatment.photoWeight)
-        )}
-      >
-        <PhotoSlot
-          src={photoSrc}
-          alt={photoAlt}
-          monogram={showMonogram ? monogramLetter(spec.headline) : null}
-          fallback={secondary}
-          primary={ink}
-          crop={treatment.cropPreset}
         />
       </div>
     </div>
@@ -611,7 +622,7 @@ function PeerSplitFront({
   type,
   phoneBottomRight,
   qrLarge,
-  showQr,
+  contact,
   offer,
   photoAlt,
   photoSrc,
@@ -624,20 +635,24 @@ function PeerSplitFront({
   const leadWithOffer = copyOfferLeads(hierarchy)
   const structure = studioCompositionStructure(layout)
   const quiet = treatment.typeVoice === "trust"
+  const rhythm = studioTypeExecution(treatment).rhythm
+  const mark = brandMark(showMonogram, spec, contact)
   return (
     <div
-      className="flex h-full"
+      className="relative flex h-full"
       style={{ backgroundColor: surface }}
       data-composition={structure.layoutVariant}
       data-type-presence={derivation.typePresence}
       data-image-plate={derivation.imagePlate}
       data-void={derivation.voidShape}
+      data-safe-inset="0.25in"
     >
-      <div data-region="peer-image" className="relative h-full min-w-0 w-[54%] overflow-hidden">
+      <div data-region="peer-image" className="relative h-full min-w-0 w-[64%] shrink-0 overflow-hidden">
         <PhotoSlot
           src={photoSrc}
           alt={photoAlt}
-          monogram={showMonogram ? monogramLetter(spec.headline) : null}
+          wordmark={mark.wordmark}
+          monogram={mark.monogram}
           fallback={secondary}
           primary={ink}
           crop={treatment.cropPreset}
@@ -645,12 +660,14 @@ function PeerSplitFront({
       </div>
       <div
         data-region="peer-type"
-        className={cn(
-          "flex h-full w-[46%] min-w-0 flex-col",
-          typeBreathing(compact, studioTypeExecution(treatment).rhythm)
-        )}
+        className="relative z-10 -ml-[8%] flex h-full w-[44%] min-w-0 flex-col"
+        style={{ backgroundColor: surface, ...safePad(compact, rhythm) }}
       >
         <div>
+          <Wordmark
+            name={businessNameForCard(contact.businessName, spec.headline)}
+            color={ink}
+          />
           <LeadType
             spec={spec}
             offer={offer}
@@ -663,7 +680,7 @@ function PeerSplitFront({
             showBody
           />
           <div
-            className="mt-1.5 h-px w-6"
+            className="mt-2 h-px w-8"
             style={{ backgroundColor: emphasis, opacity: quiet ? 0.45 : 0.9 }}
           />
         </div>
@@ -675,10 +692,9 @@ function PeerSplitFront({
           type={type}
           color={ink}
           emphasis={emphasis}
-          surface={surface}
           treatment={treatment}
           phoneBottomRight={phoneBottomRight}
-          showQr={showQr}
+          contact={contact}
           qrLarge={qrLarge}
           layout={layout}
         />
@@ -697,7 +713,7 @@ function BandedSplitFront({
   type,
   phoneBottomRight,
   qrLarge,
-  showQr,
+  contact,
   offer,
   photoAlt,
   photoSrc,
@@ -712,6 +728,9 @@ function BandedSplitFront({
   const bandText = leadWithOffer && offer ? offer : spec.headline
   const voice = studioTypeExecution(treatment)
   const bandColor = voice.heroColor === "emphasis" ? emphasis : ink
+  const mark = brandMark(showMonogram, spec, contact)
+  const inset = postcard5x8SafeInset()
+  const bandPad = compact ? inset.yPercent * 0.45 : inset.yPercent * 0.7
   return (
     <div
       className="flex h-full flex-col"
@@ -720,36 +739,54 @@ function BandedSplitFront({
       data-type-presence={derivation.typePresence}
       data-image-plate={derivation.imagePlate}
       data-void={derivation.voidShape}
+      data-safe-inset="0.25in"
     >
       <div
         data-region="band"
-        className={cn(
-          "flex w-full items-end",
-          compact ? "min-h-[34%] px-2.5 py-2" : "min-h-[36%] px-5 py-3.5"
-        )}
-        style={{ backgroundColor: surface, color: bandColor }}
+        className="flex w-full shrink-0 items-end"
+        style={{
+          backgroundColor: surface,
+          color: bandColor,
+          paddingTop: `${bandPad}%`,
+          paddingRight: `${inset.xPercent}%`,
+          paddingBottom: `${bandPad * 0.65}%`,
+          paddingLeft: `${inset.xPercent}%`,
+        }}
       >
-        {bandText ? (
-          <p
-            className={cn("max-w-[28ch]", headlineWeight(voice.weight), typeRhythmClass(voice.rhythm))}
-            style={{ fontSize: leadWithOffer && offer ? type.offer : type.headline }}
-          >
-            {bandText}
-          </p>
-        ) : null}
+        <div className="min-w-0">
+          <Wordmark
+            name={businessNameForCard(contact.businessName, bandText)}
+            color={bandColor}
+          />
+          {bandText ? (
+            <p
+              className={cn(
+                "max-w-[22ch]",
+                headlineWeight(voice.weight),
+                typeRhythmClass(voice.rhythm)
+              )}
+              style={{ fontSize: leadWithOffer && offer ? type.offer : type.headline }}
+            >
+              {bandText}
+            </p>
+          ) : null}
+          <span
+            className="mt-1.5 block h-[3px] w-10"
+            style={{ backgroundColor: emphasis }}
+            aria-hidden
+          />
+        </div>
       </div>
       <div className="flex min-h-0 flex-1">
         <div
           data-region="supporting"
-          className={cn(
-            "flex min-w-0 flex-[5] flex-col",
-            compact ? "px-2 py-1.5" : "px-4 py-2.5"
-          )}
+          className="flex min-w-0 flex-[5] flex-col"
+          style={safePad(compact, voice.rhythm)}
         >
           {leadWithOffer && spec.headline ? (
             <p
               className="max-w-[18ch] font-semibold leading-[1.05] tracking-[-0.02em]"
-              style={{ color: ink, fontSize: type.headline, opacity: 0.88 }}
+              style={{ color: ink, fontSize: type.sub, opacity: 0.88 }}
             >
               {spec.headline}
             </p>
@@ -778,19 +815,19 @@ function BandedSplitFront({
             type={type}
             color={ink}
             emphasis={emphasis}
-            surface={surface}
             treatment={treatment}
             phoneBottomRight={phoneBottomRight}
-            showQr={showQr}
+            contact={contact}
             qrLarge={qrLarge}
             layout={layout}
           />
         </div>
-        <div data-region="image" className="relative min-w-0 flex-[4] overflow-hidden">
+        <div data-region="image" className="relative min-w-0 flex-[7] overflow-hidden">
           <PhotoSlot
             src={photoSrc}
             alt={photoAlt}
-            monogram={showMonogram ? monogramLetter(spec.headline) : null}
+            wordmark={mark.wordmark}
+            monogram={mark.monogram}
             fallback={secondary}
             primary={ink}
             crop={treatment.cropPreset}
@@ -804,14 +841,13 @@ function BandedSplitFront({
 function ImageGroundedFront({
   spec,
   secondary,
-  surface,
   ink,
   emphasis,
   compact,
   type,
   phoneBottomRight,
   qrLarge,
-  showQr,
+  contact,
   offer,
   photoAlt,
   photoSrc,
@@ -823,7 +859,10 @@ function ImageGroundedFront({
 }: FrontContext) {
   const leadWithOffer = copyOfferLeads(hierarchy)
   const structure = studioCompositionStructure(layout)
-  const onPhotoInk = "#f7f7f4"
+  const plate = "#f7f4ee"
+  const plateInk = "#1c1917"
+  const inset = postcard5x8SafeInset()
+  const mark = brandMark(showMonogram, spec, contact)
   return (
     <div
       className="relative h-full"
@@ -832,40 +871,43 @@ function ImageGroundedFront({
       data-type-presence={derivation.typePresence}
       data-image-plate={derivation.imagePlate}
       data-void={derivation.voidShape}
+      data-safe-inset="0.25in"
     >
       <div data-region="image-ground" className="absolute inset-0">
         <PhotoSlot
           src={photoSrc}
           alt={photoAlt}
-          monogram={showMonogram ? monogramLetter(spec.headline) : null}
+          wordmark={mark.wordmark}
+          monogram={mark.monogram}
           fallback={secondary}
           primary={ink}
           crop={treatment.cropPreset}
         />
       </div>
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[52%]"
-        style={{
-          background:
-            "linear-gradient(to top, rgba(20, 18, 16, 0.62) 0%, rgba(20, 18, 16, 0.28) 42%, rgba(20, 18, 16, 0) 100%)",
-        }}
-        aria-hidden
-      />
-      <div
         data-region="inscription"
-        className={cn(
-          "absolute flex flex-col justify-end",
-          groundedInscription(compact)
-        )}
-        style={{ color: onPhotoInk }}
+        className="absolute flex flex-col justify-end"
+        style={{
+          left: `${inset.xPercent}%`,
+          bottom: `${inset.yPercent}%`,
+          width: compact ? "72%" : "58%",
+          maxWidth: "30ch",
+          backgroundColor: plate,
+          color: plateInk,
+          padding: compact ? "0.45rem 0.5rem" : "0.7rem 0.85rem 0.65rem",
+        }}
       >
+        <Wordmark
+          name={businessNameForCard(contact.businessName, spec.headline)}
+          color={plateInk}
+        />
         <LeadType
           spec={spec}
           offer={offer}
           leadWithOffer={leadWithOffer}
           compact={compact}
           type={type}
-          color={onPhotoInk}
+          color={plateInk}
           emphasis={emphasis}
           treatment={treatment}
           showBody={false}
@@ -876,14 +918,12 @@ function ImageGroundedFront({
           leadWithOffer={leadWithOffer}
           compact={compact}
           type={type}
-          color={onPhotoInk}
+          color={plateInk}
           emphasis={emphasis}
-          surface={surface}
           treatment={treatment}
           phoneBottomRight={phoneBottomRight}
-          showQr={showQr}
+          contact={contact}
           qrLarge={qrLarge}
-          onPhoto
           layout={layout}
         />
       </div>
@@ -900,7 +940,7 @@ function TypeOnlyFront({
   type,
   phoneBottomRight,
   qrLarge,
-  showQr,
+  contact,
   offer,
   hierarchy,
   treatment,
@@ -911,14 +951,15 @@ function TypeOnlyFront({
   const structure = studioCompositionStructure(layout)
   const voice = studioTypeExecution(treatment)
   const realization = typeOnlyRealization(derivation, compact)
+  const cardName = businessNameForCard(contact.businessName, spec.headline)
 
   if (realization.mode === "object") {
     const figure = typeOnlyFigureText(spec)
     const figureColor = voice.heroColor === "emphasis" ? emphasis : ink
     return (
       <div
-        className={cn("flex h-full flex-col", typeBreathing(compact, voice.rhythm))}
-        style={{ backgroundColor: surface }}
+        className="flex h-full flex-col"
+        style={{ backgroundColor: surface, ...safePad(compact, voice.rhythm) }}
         data-composition={structure.layoutVariant}
         data-type-presence={derivation.typePresence}
         data-image-plate={derivation.imagePlate}
@@ -926,8 +967,10 @@ function TypeOnlyFront({
         data-type-measure={realization.typeMeasure}
         data-marks-region={realization.marksRegion}
         data-figure-source={realization.figureSource}
+        data-safe-inset="0.25in"
       >
         <div data-region="type" className="w-auto max-w-[6ch]">
+          <Wordmark name={cardName} color={ink} />
           {figure ? (
             <p
               className={cn(
@@ -969,10 +1012,9 @@ function TypeOnlyFront({
             type={type}
             color={ink}
             emphasis={emphasis}
-            surface={surface}
             treatment={treatment}
             phoneBottomRight={phoneBottomRight}
-            showQr={showQr}
+            contact={contact}
             qrLarge={qrLarge}
             layout={layout}
           />
@@ -983,14 +1025,20 @@ function TypeOnlyFront({
 
   return (
     <div
-      className={cn("flex h-full flex-col", typeBreathing(compact, voice.rhythm))}
+      className="flex h-full"
       style={{ backgroundColor: surface }}
       data-composition={structure.layoutVariant}
       data-type-presence={derivation.typePresence}
       data-image-plate={derivation.imagePlate}
       data-void={derivation.voidShape}
+      data-safe-inset="0.25in"
     >
-      <div data-region="type" className="w-[62%] max-w-[22ch]">
+      <div
+        data-region="type"
+        className="flex w-[68%] max-w-[24ch] flex-col"
+        style={safePad(compact, voice.rhythm)}
+      >
+        <Wordmark name={cardName} color={ink} />
         <LeadType
           spec={spec}
           offer={offer}
@@ -1010,10 +1058,9 @@ function TypeOnlyFront({
           type={type}
           color={ink}
           emphasis={emphasis}
-          surface={surface}
           treatment={treatment}
           phoneBottomRight={phoneBottomRight}
-          showQr={showQr}
+          contact={contact}
           qrLarge={qrLarge}
           layout={layout}
         />
@@ -1026,6 +1073,7 @@ function TypeOnlyFront({
 function PhotoSlot({
   src,
   alt,
+  wordmark,
   monogram,
   fallback,
   primary,
@@ -1033,6 +1081,7 @@ function PhotoSlot({
 }: {
   src: string | null
   alt: string
+  wordmark: string | null
   monogram: string | null
   fallback: string
   primary: string
@@ -1049,6 +1098,22 @@ function PhotoSlot({
     )
   }
 
+  if (wordmark) {
+    return (
+      <div
+        className="flex h-full w-full items-center justify-center px-[12%]"
+        style={{ backgroundColor: fallback }}
+      >
+        <p
+          className="text-center font-semibold uppercase leading-tight tracking-[0.14em]"
+          style={{ color: primary, fontSize: "clamp(11px, 4.2cqw, 18px)" }}
+        >
+          {wordmark}
+        </p>
+      </div>
+    )
+  }
+
   if (monogram) {
     return (
       <div
@@ -1056,8 +1121,8 @@ function PhotoSlot({
         style={{ backgroundColor: fallback }}
       >
         <span
-          className="flex size-[38%] items-center justify-center text-[18px] font-semibold sm:text-[22px]"
-          style={{ backgroundColor: primary, color: inkOn(primary) }}
+          className="font-semibold uppercase tracking-[0.18em]"
+          style={{ color: primary, fontSize: "clamp(18px, 8cqw, 36px)" }}
         >
           {monogram}
         </span>
@@ -1084,12 +1149,12 @@ function PrintCta({
   if (mark === "reverse-slug") {
     return (
       <p
-        className="w-full max-w-[18ch] font-bold leading-[1.05] tracking-[-0.02em]"
+        className="inline-block max-w-[18ch] font-bold leading-[1.05] tracking-[-0.02em]"
         style={{
           backgroundColor: emphasis,
           color: inkOn(emphasis),
           fontSize: size,
-          padding: "0.35em 0.4em 0.3em 0",
+          padding: "0.22em 0.38em 0.16em",
         }}
       >
         {children}
@@ -1125,86 +1190,83 @@ function PrintCta({
   )
 }
 
-const QR_MODULES = [
-  [1, 1, 1, 0, 1, 1, 1],
-  [1, 0, 1, 0, 1, 0, 1],
-  [1, 1, 1, 0, 1, 1, 1],
-  [0, 0, 0, 1, 0, 0, 0],
-  [1, 1, 1, 0, 1, 0, 1],
-  [1, 0, 1, 1, 0, 1, 0],
-  [1, 1, 1, 0, 1, 0, 1],
-] as const
-
 function QrMark({
-  tone,
-  field,
+  payload,
   compact,
   large = false,
-  onPhoto = false,
 }: {
-  tone: string
-  field: string
+  payload: string
   compact: boolean
   large?: boolean
-  onPhoto?: boolean
 }) {
-  const quiet = onPhoto ? "#f7f7f4" : field
-  const module = tone
+  const matrix = useMemo(() => buildQrMatrix(payload), [payload])
+  if (!matrix) return null
+  const modules = matrix.length
+  const box = compact ? 34 : large ? 76 : 62
+  const quiet = Math.max(3, Math.round((4 / modules) * box))
   return (
     <div
-      className={cn(
-        "grid shrink-0 grid-cols-7 gap-px p-[3px]",
-        compact ? "size-8" : large ? "size-12" : "size-10"
-      )}
-      style={{ backgroundColor: quiet }}
-      aria-hidden
+      className="shrink-0 bg-white"
+      style={{ width: box, height: box, padding: quiet }}
+      role="img"
+      aria-label={`QR code for ${payload}`}
     >
-      {QR_MODULES.flatMap((row, y) =>
-        row.map((on, x) => (
-          <span
-            key={`${y}-${x}`}
-            className="block"
-            style={{ backgroundColor: on ? module : quiet }}
-          />
-        ))
-      )}
+      <div
+        className="grid h-full w-full"
+        style={{ gridTemplateColumns: `repeat(${modules}, minmax(0, 1fr))` }}
+      >
+        {matrix.flatMap((row, y) =>
+          row.map((on, x) => (
+            <span
+              key={`${y}-${x}`}
+              className="block"
+              style={{ backgroundColor: on ? "#111111" : "#ffffff" }}
+            />
+          ))
+        )}
+      </div>
     </div>
   )
 }
 
 function ContactPrint({
-  spec,
+  contact,
   color,
   phoneBottomRight = false,
-  size,
+  phoneSize,
+  websiteSize,
 }: {
-  spec: CreativeSpec
+  contact: StudioContact
   color: string
   phoneBottomRight?: boolean
-  size: string
+  phoneSize: string
+  websiteSize: string
 }) {
-  if (!spec.phone && !spec.website) return null
-
-  const style = {
-    color,
-    fontSize: size,
-    opacity: 0.8,
-    letterSpacing: "-0.01em",
-  }
-
-  const parts = [spec.phone, spec.website].filter(Boolean)
-  if (phoneBottomRight && spec.phone) {
-    return (
-      <p className="min-w-0 font-medium leading-snug" style={style}>
-        {spec.phone}
-      </p>
-    )
-  }
+  if (!contact.phone && !contact.website) return null
 
   return (
-    <p className="min-w-0 font-medium leading-snug" style={style}>
-      {parts.join("  ·  ")}
-    </p>
+    <div className="min-w-0">
+      {contact.phone ? (
+        <p
+          className="font-semibold leading-none tabular-nums tracking-[-0.02em]"
+          style={{
+            color,
+            fontSize: phoneSize,
+            letterSpacing: phoneBottomRight ? "-0.03em" : "-0.02em",
+          }}
+        >
+          {contact.phone}
+        </p>
+      ) : null}
+      {contact.website ? (
+        <p
+          className="mt-1 font-medium leading-none"
+          style={{ color, fontSize: websiteSize, opacity: 0.72 }}
+        >
+          {displayWebsite(contact.website)}
+        </p>
+      ) : null}
+    </div>
   )
 }
 

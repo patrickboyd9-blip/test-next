@@ -287,7 +287,6 @@ function constrainPhotoWeight(
   if (layout === "banded_split") {
     return weight === "dominant" ? "balanced" : weight
   }
-  if (layout === "image_grounded" && weight === "none") return "balanced"
   return weight
 }
 

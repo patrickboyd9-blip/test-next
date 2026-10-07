@@ -3,6 +3,11 @@
 import { motion } from "framer-motion"
 
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
+import type { PostcardIdentity } from "@/lib/campaign-creator/studio-contact"
+import {
+  lookupStudioImage,
+  type StudioImageRecord,
+} from "@/lib/campaign-creator/studio-image-fingerprint"
 import type { CreativeDirection } from "@/lib/campaign-creator/types"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
@@ -12,6 +17,8 @@ interface CompareViewProps {
   canvas: CreativeCanvas
   directions: CreativeDirection[]
   recommendedId: string
+  identity?: PostcardIdentity
+  studioImages?: readonly StudioImageRecord[]
   onSelect: (directionId: string) => void
   onBack: () => void
 }
@@ -20,6 +27,8 @@ export function CompareView({
   canvas,
   directions,
   recommendedId,
+  identity,
+  studioImages = [],
   onSelect,
   onBack,
 }: CompareViewProps) {
@@ -55,6 +64,8 @@ export function CompareView({
               direction={direction}
               variant="compact"
               isRecommended={direction.id === recommendedId}
+              identity={identity}
+              generatedAsset={lookupStudioImage(studioImages, direction.id, direction.spec)}
               onSelect={() => onSelect(direction.id)}
               index={direction.id === recommendedId ? 0 : index}
             />

@@ -6,6 +6,8 @@ import { Check } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
+import type { GeneratedAsset } from "@/lib/campaign-creator/image-generation"
+import type { PostcardIdentity } from "@/lib/campaign-creator/studio-contact"
 import type { CampaignBrief, CreativeSpec } from "@/lib/campaign-creator/types"
 import { trackingDestination } from "@/lib/campaign-creator/creative-state"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
@@ -18,6 +20,8 @@ interface ApprovalModalProps {
   spec: CreativeSpec
   brief: CampaignBrief
   directionName: string
+  identity?: PostcardIdentity
+  generatedAsset?: GeneratedAsset | null
   onApprove: () => void
   onKeepRefining: () => void
   isApproving?: boolean
@@ -30,6 +34,8 @@ export function ApprovalModal({
   spec,
   brief,
   directionName,
+  identity,
+  generatedAsset,
   onApprove,
   onKeepRefining,
   isApproving = false,
@@ -128,7 +134,14 @@ export function ApprovalModal({
             transition={{ duration: reducedMotion ? 0.15 : 0.25, type: "spring", stiffness: 400, damping: 30 }}
           >
             <div className="relative mx-auto mb-4 flex justify-center">
-              <PostcardPreview canvas={canvas} spec={spec} size="medium" enableHoverTilt={false} />
+              <PostcardPreview
+                canvas={canvas}
+                spec={spec}
+                size="medium"
+                identity={identity}
+                generatedAsset={generatedAsset}
+                enableHoverTilt={false}
+              />
               {approved && (
                 <motion.div
                   className="absolute -right-1 -top-1 flex size-8 items-center justify-center rounded-full bg-primary text-primary-foreground"

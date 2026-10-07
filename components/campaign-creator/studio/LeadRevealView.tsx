@@ -6,6 +6,7 @@ import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import type { GeneratedAsset } from "@/lib/campaign-creator/image-generation"
+import type { PostcardIdentity } from "@/lib/campaign-creator/studio-contact"
 import type { CreativeDirection } from "@/lib/campaign-creator/types"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
@@ -18,6 +19,7 @@ interface LeadRevealViewProps {
   onContinue: () => void
   onCompare: () => void
   generatedAsset?: GeneratedAsset | null
+  identity?: PostcardIdentity
 }
 
 export function LeadRevealView({
@@ -26,6 +28,7 @@ export function LeadRevealView({
   onContinue,
   onCompare,
   generatedAsset,
+  identity,
 }: LeadRevealViewProps) {
   const reducedMotion = useReducedMotion()
   const [side, setSide] = useState<"front" | "back">("front")
@@ -61,6 +64,7 @@ export function LeadRevealView({
             side={side}
             size="hero"
             generatedAsset={generatedAsset}
+            identity={identity}
           />
         </motion.div>
         <PostcardSideToggle side={side} onSideChange={setSide} />

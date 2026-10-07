@@ -5,6 +5,8 @@ import { motion } from "framer-motion"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
+import type { GeneratedAsset } from "@/lib/campaign-creator/image-generation"
+import type { PostcardIdentity } from "@/lib/campaign-creator/studio-contact"
 import type { CreativeDirection } from "@/lib/campaign-creator/types"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
@@ -18,6 +20,8 @@ interface ConceptCardProps {
   variant?: ConceptCardVariant
   isRecommended?: boolean
   isSelected?: boolean
+  identity?: PostcardIdentity
+  generatedAsset?: GeneratedAsset | null
   onSelect?: () => void
   index?: number
 }
@@ -28,6 +32,8 @@ export function ConceptCard({
   variant = "compact",
   isRecommended,
   isSelected,
+  identity,
+  generatedAsset,
   onSelect,
   index = 0,
 }: ConceptCardProps) {
@@ -69,6 +75,8 @@ export function ConceptCard({
           canvas={canvas}
           spec={direction.spec}
           size={size}
+          identity={identity}
+          generatedAsset={generatedAsset}
           enableHoverTilt={variant !== "strip"}
         />
       </div>

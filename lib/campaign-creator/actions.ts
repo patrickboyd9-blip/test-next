@@ -17,6 +17,11 @@ import { getCreativeEngine } from "./creative-engine-provider"
 import { generateLeadDirectionImage as runGenerateLeadDirectionImage } from "./generate-lead-direction-image"
 import type { GeneratedAsset } from "./image-generation"
 import { createOpenAIImageGenerationAdapter } from "./openai-image-generation"
+import { ensureStudioDirectionImages } from "./studio-image-cache"
+import {
+  studioImageEntries,
+  type StudioImageRecord,
+} from "./studio-image-fingerprint"
 import { getCampaignRepository } from "./repository"
 import { buildSpecDiff, cloneSpec } from "./spec-diff"
 import type { Campaign, CampaignBrief, CreativeRevision, MailPieceSpec } from "./types"
@@ -214,6 +219,24 @@ export async function initializeStudioCreative(campaignId: string): Promise<Camp
  * Ephemeral lead-image execution. Does not persist GeneratedAsset.
  * Does not change campaign creative-generation state.
  */
+/**
+ * Cached photographs for every direction that has an image brief.
+ * Does not write GeneratedAsset onto Campaign or CreativeSpec.
+ * Missing OpenAI configuration returns an empty list so Studio keeps the curated shelf.
+ */
+export async function loadStudioDirectionImages(
+  campaignId: string
+): Promise<StudioImageRecord[]> {
+  const campaign = await repository.getCampaign(campaignId)
+  if (!campaign) throw new Error(`Campaign ${campaignId} not found`)
+
+  return ensureStudioDirectionImages({
+    campaignId,
+    entries: studioImageEntries(campaign.creative),
+    createAdapter: createOpenAIImageGenerationAdapter,
+  })
+}
+
 export async function generateLeadDirectionImage(
   campaignId: string,
   directionId: string
