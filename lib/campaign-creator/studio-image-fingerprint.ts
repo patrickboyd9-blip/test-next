@@ -14,6 +14,8 @@ export interface StudioImageRecord {
   directionId: string
   fingerprint: string
   asset: GeneratedAsset
+  /** Final wins over a preview of the same photograph when both are loaded. */
+  tier?: "preview" | "final"
 }
 
 export function imageBriefContextFor(
@@ -38,7 +40,9 @@ export function imageBriefFingerprint(brief: ImageBrief): string {
     art.framing,
     art.emotion,
     art.refuse,
+    art.negativeSpace,
     art.craft ?? "",
+    brief.lookBlock,
   ].join("\u001f")
   return fnv(raw) + fnv(`${raw}#`)
 }
@@ -63,12 +67,13 @@ export function lookupStudioImage(
     imageBriefContextFor(directionId, campaign)
   )
   if (!fingerprint) return null
-  return (
-    records.find(
-      (record) =>
-        record.directionId === directionId && record.fingerprint === fingerprint
-    )?.asset ?? null
+  const matches = records.filter(
+    (record) =>
+      record.directionId === directionId && record.fingerprint === fingerprint
   )
+  const chosen =
+    matches.find((record) => record.tier === "final") ?? matches[0]
+  return chosen?.asset ?? null
 }
 
 export function studioImageEntries(

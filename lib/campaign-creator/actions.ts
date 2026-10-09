@@ -1,6 +1,7 @@
 "use server"
 
 import { randomUUID } from "crypto"
+import { after } from "next/server"
 
 import { mockCurrentUser } from "@/lib/auth/mock-user"
 
@@ -17,11 +18,8 @@ import { getCreativeEngine } from "./creative-engine-provider"
 import { generateLeadDirectionImage as runGenerateLeadDirectionImage } from "./generate-lead-direction-image"
 import type { GeneratedAsset } from "./image-generation"
 import { createOpenAIImageGenerationAdapter } from "./openai-image-generation"
-import {
-  ensureStudioDirectionImages,
-  type StudioImageLoad,
-} from "./studio-image-cache"
-import { studioImageEntries } from "./studio-image-fingerprint"
+import type { StudioImageLoad } from "./studio-image-cache"
+import { syncStudioDirectionImages } from "./studio-image-jobs"
 import { getCampaignRepository } from "./repository"
 import { buildSpecDiff, cloneSpec } from "./spec-diff"
 import type { Campaign, CampaignBrief, CreativeRevision, MailPieceSpec } from "./types"
@@ -230,11 +228,16 @@ export async function loadStudioDirectionImages(
   const campaign = await repository.getCampaign(campaignId)
   if (!campaign) throw new Error(`Campaign ${campaignId} not found`)
 
-  return ensureStudioDirectionImages({
+  return syncStudioDirectionImages({
     campaignId,
-    entries: studioImageEntries(campaign.creative, campaign.brief),
+    creative: campaign.creative,
     campaignBrief: campaign.brief,
     createAdapter: createOpenAIImageGenerationAdapter,
+    schedule(work) {
+      after(() => {
+        void work()
+      })
+    },
   })
 }
 

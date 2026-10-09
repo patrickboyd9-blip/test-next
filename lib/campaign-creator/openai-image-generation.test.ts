@@ -21,7 +21,18 @@ import {
   buildOpenAIImageRequest,
   createOpenAIImageGenerationAdapter,
 } from "./openai-image-generation"
-import type { CreativeSpec } from "./types"
+import {
+  OPENAI_IMAGE_MODEL_FALLBACK,
+  OPENAI_IMAGE_MODEL_PIN,
+  OPENAI_IMAGE_QUALITY_FINAL,
+  OPENAI_IMAGE_SIZE_FINAL,
+  OPENAI_IMAGE_SIZE_TRIM,
+  isSupportedGptImageSize,
+  resolveOpenAIImageModel,
+  resolveOpenAIImageSettings,
+  snapGptImageSize,
+} from "./openai-image-settings"
+import type { CampaignBrief, CreativeSpec } from "./types"
 
 function spec(overrides: Partial<CreativeSpec> = {}): CreativeSpec {
   return {
@@ -84,19 +95,16 @@ test("ImageBrief fields are translated into the provider request", () => {
   assert.equal(request.n, 1)
   assert.equal(request.output_format, "png")
   assert.equal(request.moderation, "auto")
-  assert.match(prompt, /Execute this already-conceived photograph only/)
-  assert.match(prompt, /Imagery role: consequence/)
-  assert.match(prompt, /Lead job: urgency/)
-  assert.match(prompt, /Occupancy: field/)
-  assert.match(prompt, /Tone: Urgent, direct, motivating/)
+  assert.match(prompt, /Shot:/)
+  assert.match(prompt, /Subject and action:/)
   assert.match(prompt, /A few ants trailing across a kitchen counter/)
-  assert.match(prompt, /Subject:/)
-  assert.match(prompt, /Lighting:/)
-  assert.match(prompt, /Framing:/)
-  assert.match(prompt, /Emotion:/)
+  assert.match(prompt, /Tone of the situation: Urgent, direct, motivating/)
+  assert.match(prompt, /upper-left third/)
+  assert.match(prompt, /35mm at f\/4/)
   assert.match(prompt, /QR codes/)
   assert.doesNotMatch(prompt, /Free Inspection Now/)
   assert.doesNotMatch(prompt, /Call to book/)
+  assert.doesNotMatch(prompt, /\b(beautiful|perfect|stunning|luxury)\b/i)
 })
 
 test("hard negatives are present in the request prompt", () => {
@@ -105,7 +113,8 @@ test("hard negatives are present in the request prompt", () => {
   for (const negative of OPENAI_IMAGE_HARD_NEGATIVES) {
     assert.match(prompt, new RegExp(negative.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")))
   }
-  assert.match(prompt, /Do not generate headline, offer, CTA/)
+  assert.match(prompt, /single photograph, not an ad layout/i)
+  assert.match(prompt, /Hands that appear have a clear job/)
 })
 
 test("doNotInvent constraints are preserved in the request prompt", () => {
@@ -120,32 +129,55 @@ test("doNotInvent constraints are preserved in the request prompt", () => {
   assert.match(prompt, /cheap fear or gore escalation/)
 })
 
-test("occupancy is reflected distinctly in the request", () => {
-  const field = buildOpenAIImagePrompt(
-    requireBrief({
-      layoutVariant: "image_grounded",
-      imageryRole: "neighborhood",
-      leadJob: "offer",
-    })
-  )
-  const supporting = buildOpenAIImagePrompt(requireBrief())
-  const witness = buildOpenAIImagePrompt(
-    requireBrief({
-      imagePresence: "accent",
-      imageryRole: "neighborhood",
-      leadJob: "offer",
-    })
-  )
+test("shot list order, shared look, and layout negative space", () => {
+  const fieldBrief = requireBrief({
+    layoutVariant: "image_grounded",
+    imageryRole: "neighborhood",
+    leadJob: "offer",
+  })
+  const supportingBrief = requireBrief()
+  const witnessBrief = requireBrief({
+    imagePresence: "accent",
+    imageryRole: "neighborhood",
+    leadJob: "offer",
+  })
+  const bandedBrief = requireBrief({
+    layoutVariant: "banded_split",
+    imageryRole: "crew",
+    leadJob: "trust",
+  })
+  const field = buildOpenAIImagePrompt(fieldBrief)
+  const supporting = buildOpenAIImagePrompt(supportingBrief)
+  const witness = buildOpenAIImagePrompt(witnessBrief)
+  const banded = buildOpenAIImagePrompt(bandedBrief)
 
-  assert.match(field, /Occupancy: field/)
-  assert.match(field, /visual ground/)
-  assert.match(field, /full-bleed-ready/)
-  assert.match(supporting, /Occupancy: supporting/)
-  assert.match(supporting, /supporting image beside type/)
-  assert.match(witness, /Occupancy: witness/)
+  const labels = [
+    "Shot:",
+    "Subject and action:",
+    "Setting and region:",
+    "Light:",
+    "Camera and lens:",
+    "Imperfections:",
+    "Negative space:",
+    "Exclusions:",
+  ]
+  const indexes = labels.map((label) => field.indexOf(label))
+  assert.deepEqual(indexes, [...indexes].sort((a, b) => a - b))
+  assert.ok(indexes.every((index) => index >= 0))
+
+  assert.match(field, /upper-left third/)
+  assert.match(field, /24mm/)
+  assert.match(supporting, /right half/)
+  assert.match(supporting, /50mm/)
   assert.match(witness, /small witness/)
+  assert.match(banded, /horizontal band/)
+  assert.match(banded, /50mm/)
+  assert.equal(fieldBrief.lookBlock, supportingBrief.lookBlock)
+  assert.equal(field.includes(fieldBrief.lookBlock), true)
+  assert.equal(supporting.includes(supportingBrief.lookBlock), true)
   assert.notEqual(field, supporting)
   assert.notEqual(supporting, witness)
+  assert.notEqual(supporting, banded)
 })
 
 test("successful provider response maps to GeneratedAsset", async () => {
@@ -156,6 +188,7 @@ test("successful provider response maps to GeneratedAsset", async () => {
 
   const adapter = new OpenAIImageGenerationAdapter({
     apiKey: "test-openai-key",
+    env: {},
     now: () => new Date("2026-09-24T04:30:00.000Z"),
     createId: () => "gen-openai-1",
     fetch: async (input, init) => {
@@ -175,7 +208,7 @@ test("successful provider response maps to GeneratedAsset", async () => {
 
   assert.equal(requestedUrl, OPENAI_IMAGES_GENERATIONS_URL)
   assert.equal(requestedAuth, "Bearer test-openai-key")
-  assert.deepEqual(requestedBody, buildOpenAIImageRequest(brief))
+  assert.deepEqual(requestedBody, buildOpenAIImageRequest(brief, { env: {} }))
   assert.deepEqual(asset, {
     id: "gen-openai-1",
     src: "data:image/png;base64,abc123",
@@ -267,4 +300,143 @@ test("provider-specific details do not leak into the ImageGenerationAdapter cont
     assert.equal(request.model, OPENAI_IMAGE_MODEL)
     assert.notEqual(asset.model, brief.visualDirection)
   })
+})
+
+test("final settings cover the bleed canvas and stay configurable", () => {
+  assert.equal(isSupportedGptImageSize(OPENAI_IMAGE_SIZE_TRIM), true)
+  assert.equal(isSupportedGptImageSize("2550x1650"), false)
+  assert.equal(snapGptImageSize(2550, 1650), OPENAI_IMAGE_SIZE_FINAL)
+
+  const finalRequest = buildOpenAIImageRequest(requireBrief(), { tier: "final", env: {} })
+  assert.equal(finalRequest.quality, OPENAI_IMAGE_QUALITY_FINAL)
+  assert.equal(finalRequest.size, OPENAI_IMAGE_SIZE_FINAL)
+  assert.equal(finalRequest.model, OPENAI_IMAGE_MODEL_PIN)
+
+  const overridden = resolveOpenAIImageSettings("final", {
+    OPENAI_IMAGE_MODEL: "gpt-image-2.5-sunburst",
+    OPENAI_IMAGE_SIZE_FINAL: OPENAI_IMAGE_SIZE_TRIM,
+    OPENAI_IMAGE_QUALITY_FINAL: "xhigh",
+    OPENAI_IMAGE_CANDIDATES_FINAL: "2",
+  })
+  assert.equal(overridden.model, "gpt-image-2.5-sunburst")
+  assert.equal(overridden.size, OPENAI_IMAGE_SIZE_TRIM)
+  assert.equal(overridden.quality, "xhigh")
+  assert.equal(overridden.candidateCount, 2)
+
+  const invalid = resolveOpenAIImageSettings("preview", {
+    OPENAI_IMAGE_SIZE_PREVIEW: "100x100",
+    OPENAI_IMAGE_QUALITY_PREVIEW: "nope",
+    OPENAI_IMAGE_CANDIDATES_PREVIEW: "9",
+  })
+  assert.equal(invalid.size, OPENAI_IMAGE_SIZE)
+  assert.equal(invalid.quality, "medium")
+  assert.equal(invalid.candidateCount, 3)
+  assert.equal(resolveOpenAIImageModel({}), OPENAI_IMAGE_MODEL_PIN)
+  assert.equal(
+    resolveOpenAIImageModel({ OPENAI_IMAGE_MODEL: "  gpt-image-2  " }),
+    "gpt-image-2"
+  )
+})
+
+test("one campaign look is copied word for word and does not name the city", () => {
+  const coastal: CampaignBrief = {
+    goal: "Book roof inspections",
+    audience: { description: "Homeowners in Chula Vista" },
+    businessInfo: { name: "ABC Roofers", address: "Chula Vista, CA" },
+  }
+  const inland: CampaignBrief = {
+    goal: "Book jobs",
+    businessInfo: { name: "Other Co", address: "Denver, CO" },
+  }
+  const crew = toImageBrief(spec(), { campaign: coastal, variationKey: "dir-crew" })
+  const place = toImageBrief(
+    spec({
+      imageryRole: "neighborhood",
+      layoutVariant: "peer_split",
+      visualDirection:
+        "Rooflines along an ordinary residential street after rain, none of them this recipient's address.",
+    }),
+    { campaign: coastal, variationKey: "dir-place" }
+  )
+  const other = toImageBrief(spec(), { campaign: inland, variationKey: "dir-crew" })
+  assert.ok(crew && place && other)
+  assert.equal(crew.lookBlock, place.lookBlock)
+  assert.notEqual(crew.lookBlock, other.lookBlock)
+  assert.match(crew.lookBlock, /coastal/)
+  assert.doesNotMatch(crew.lookBlock, /Chula Vista/)
+  const crewPrompt = buildOpenAIImagePrompt(crew)
+  const placePrompt = buildOpenAIImagePrompt(place)
+  assert.equal(crewPrompt.includes(crew.lookBlock), true)
+  assert.equal(placePrompt.includes(place.lookBlock), true)
+  assert.match(placePrompt, /left third/)
+})
+
+test("largest candidate is kept and the call is metered", async () => {
+  const brief = requireBrief()
+  const lines: string[] = []
+  const original = console.info
+  console.info = (line?: unknown) => {
+    lines.push(String(line))
+  }
+  try {
+    const adapter = new OpenAIImageGenerationAdapter({
+      apiKey: "test-openai-key",
+      env: { OPENAI_IMAGE_CANDIDATES_FINAL: "2" },
+      createId: () => "gen-cost",
+      fetch: async (_input, init) => {
+        const body = JSON.parse(String(init?.body)) as { n: number; quality: string; size: string }
+        assert.equal(body.n, 2)
+        assert.equal(body.quality, "high")
+        assert.equal(body.size, OPENAI_IMAGE_SIZE_FINAL)
+        return jsonResponse({
+          data: [{ b64_json: "aa" }, { b64_json: "bbbb" }],
+          usage: {
+            input_tokens: 20,
+            output_tokens: 100,
+            output_tokens_details: { image_tokens: 100 },
+          },
+        })
+      },
+    })
+    const result = await adapter.generateDetailed(brief, {
+      tier: "final",
+      campaignId: "camp-1",
+      directionId: "dir-1",
+    })
+    assert.equal(result.asset.src, "data:image/png;base64,bbbb")
+    assert.equal(result.alternates.length, 1)
+    assert.equal(result.alternates[0]?.src, "data:image/png;base64,aa")
+  } finally {
+    console.info = original
+  }
+  assert.equal(lines.length, 1)
+  assert.match(lines[0] ?? "", /"event":"studio_image_cost"/)
+  assert.match(lines[0] ?? "", /"estimatedUsd":0.0031/)
+  assert.match(lines[0] ?? "", /"output_tokens":100/)
+})
+
+test("an unknown model falls back once to gpt-image-2", async () => {
+  const brief = requireBrief()
+  let calls = 0
+  const adapter = new OpenAIImageGenerationAdapter({
+    apiKey: "test-openai-key",
+    env: {},
+    fetch: async (_input, init) => {
+      calls += 1
+      const body = JSON.parse(String(init?.body)) as { model: string }
+      if (calls === 1) {
+        assert.equal(body.model, OPENAI_IMAGE_MODEL_PIN)
+        return jsonResponse(
+          { error: { code: "model_not_found", message: "The model does not exist" } },
+          404
+        )
+      }
+      assert.equal(body.model, OPENAI_IMAGE_MODEL_FALLBACK)
+      return jsonResponse({ data: [{ b64_json: "ok" }] })
+    },
+  })
+  const asset = await adapter.generate(brief)
+  assert.equal(calls, 2)
+  assert.equal(asset.model, OPENAI_IMAGE_MODEL_FALLBACK)
+  assert.equal(asset.src, "data:image/png;base64,ok")
 })

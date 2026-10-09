@@ -33,6 +33,15 @@ class MemoryBlob implements BlobObjectStore {
     const found = this.objects.get(pathname)
     return found ? { url: found.url, body: Buffer.from(found.body) } : null
   }
+
+  async putNew(pathname: string, body: Buffer | string, contentType: string) {
+    if (this.objects.has(pathname)) return null
+    return this.put(pathname, body, contentType)
+  }
+
+  async remove(pathname: string) {
+    this.objects.delete(pathname)
+  }
 }
 
 function spec(): CreativeSpec {

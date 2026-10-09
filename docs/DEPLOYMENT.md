@@ -42,7 +42,7 @@ Conversation, concept writing, and photograph generation are allowed **60 second
 
 Vercel’s current Hobby plan **with Fluid Compute** allows up to 300 seconds, and that is often the default. This app stays at 60 so a deploy cannot fail on the stricter Hobby cap. If Settings → Functions shows that Fluid Compute is on and a longer limit is allowed, the 60 second cap in the campaign page can be raised later.
 
-One concept-writing click is usually inside 60 seconds. Asking Studio for several photographs is one click that makes them one after another. That can run past 60 seconds. Photographs that finished are kept. Trying again does not redraw the ones already saved. A click that is cut off shows a failure for the photograph that did not finish.
+One concept-writing click is usually inside 60 seconds. Photographs do not wait inside that click. Studio saves a job, shows a loading note, and checks back every few seconds. Each check starts at most one photograph in the background, still limited to 60 seconds. A fast preview is made for each direction. The direction you choose is made again, larger, for print. If a photograph is cut off, Studio tries that one once more. A photograph that already finished is kept and is not made again.
 
 ## What you do not configure
 

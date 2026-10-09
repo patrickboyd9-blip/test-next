@@ -1,12 +1,19 @@
 import type { ImageBrief } from "./image-brief"
 
+export interface ImageGenerationOptions {
+  tier?: "preview" | "final"
+  candidateCount?: number
+  campaignId?: string
+  directionId?: string
+}
+
 /**
  * Execute-only generation boundary. Receives an already-conceived ImageBrief.
  * Does not author strategy, CreativeSpec, or renderer state.
  * Implementations may be OpenAI, Recraft, FLUX, or another provider later.
  */
 export interface ImageGenerationAdapter {
-  generate(brief: ImageBrief): Promise<GeneratedAsset>
+  generate(brief: ImageBrief, options?: ImageGenerationOptions): Promise<GeneratedAsset>
 }
 
 export const GENERATED_ASSET_SOURCE_CLASS = "generated" as const
