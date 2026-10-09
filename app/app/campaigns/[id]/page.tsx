@@ -4,6 +4,16 @@ import { CampaignCreatorView } from "@/components/campaign-creator/CampaignCreat
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { getCampaign } from "@/lib/campaign-creator/actions"
 
+export const runtime = "nodejs"
+export const dynamic = "force-dynamic"
+/**
+ * Hobby ceiling when Fluid Compute is off. A higher value fails that deploy
+ * with "maxDuration must be between 1 and 60". Applies to Server Actions
+ * used on this page (conversation, creative writing, photographs).
+ * A full set of photographs can still run past 60s. See docs/DEPLOYMENT.md.
+ */
+export const maxDuration = 60
+
 export default async function CampaignPage({
   params,
 }: {
