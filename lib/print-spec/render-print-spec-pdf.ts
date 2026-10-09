@@ -1,4 +1,8 @@
 import {
+  PRINT_DISPLAY_BASE_FONT,
+  PRINT_TEXT_BASE_FONT,
+} from "../campaign-creator/studio-typeface"
+import {
   buildPostcard5x8PrintSpec,
   type PdfRect,
   type Postcard5x8PrintSpec,
@@ -27,14 +31,15 @@ export function renderPostcard5x8PrintSpecPdf(
     pageObject(media, trim, bleed, "6 0 R"),
     streamObject(front),
     streamObject(back),
-    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+    `<< /Type /Font /Subtype /Type1 /BaseFont /${PRINT_DISPLAY_BASE_FONT} >>`,
+    `<< /Type /Font /Subtype /Type1 /BaseFont /${PRINT_TEXT_BASE_FONT} >>`,
   ]
 
   return Buffer.from(buildPdf(objects))
 }
 
 function pageObject(media: string, trim: string, bleed: string, contents: string): string {
-  return `<< /Type /Page /Parent 2 0 R /MediaBox ${media} /TrimBox ${trim} /BleedBox ${bleed} /Contents ${contents} /Resources << /Font << /F1 7 0 R >> >> >>`
+  return `<< /Type /Page /Parent 2 0 R /MediaBox ${media} /TrimBox ${trim} /BleedBox ${bleed} /Contents ${contents} /Resources << /Font << /F1 7 0 R /F2 8 0 R >> >> >>`
 }
 
 function pageStream(spec: Postcard5x8PrintSpec, face: "front" | "back"): string {
@@ -80,7 +85,11 @@ function pageStream(spec: Postcard5x8PrintSpec, face: "front" | "back"): string 
     "0.1 0.1 0.1 rg",
     `36 ${formatNumber(spec.pdfPagePoints.heightPoints - 36)} Td`,
     `(${pdfEscape(label)}) Tj`,
-    "0 -12 Td",
+    "ET",
+    "BT",
+    "/F2 8 Tf",
+    "0.1 0.1 0.1 rg",
+    `36 ${formatNumber(spec.pdfPagePoints.heightPoints - 48)} Td`,
     `(${pdfEscape(note)}) Tj`,
     "ET"
   )

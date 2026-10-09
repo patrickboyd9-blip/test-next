@@ -44,7 +44,9 @@ Generation constraints:
 - designedToDrive: customer-language Primary Success Metric from the brief
 - oneLineDifference: required for the two non-lead directions (≤ 80 characters); omit or leave empty on the lead
 - Recommend the direction that best serves the Primary Success Metric, and say why in the rationale without performance claims
-- For a local service, that recommendation is photography-forward. Do not recommend a text-only direction unless the strategy truly has no honest image job`
+- For a local service, that recommendation is photography-forward. Do not recommend a text-only direction unless the strategy truly has no honest image job
+- Headline is 3 to 6 words, never a sentence. Put the offer in the subheadline
+- Prefer image_grounded when the photograph should fill the card, or a split when type and photograph share it. A split gives the photograph at least half the card. Use type_only only when there is no honest image job. Use imagePresence accent only when the piece is deliberately type-led`
 }
 
 export function buildGenerateUserMessage(

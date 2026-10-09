@@ -44,7 +44,8 @@ test("an offer-led card does not repeat a headline that restates the offer", () 
   const html = htmlFor(spec())
   const visible = html.replace(/aria-label="[^"]*"/g, "")
   assert.match(visible, /Free roofing inspection/)
-  assert.doesNotMatch(visible, /No Catch/)
+  assert.doesNotMatch(visible, /Free Roofing Inspection\. No Catch/)
+  assert.equal(visible.match(/Free roofing inspection/g)?.length, 1)
 })
 
 test("a distinct headline still sits under the offer", () => {
@@ -53,6 +54,31 @@ test("a distinct headline still sits under the offer", () => {
   )
   assert.match(html, /Free roofing inspection/)
   assert.match(html, /Neighbors trust this crew/)
+})
+
+test("a long roofing headline is shortened, the photo takes half the card, and the phone stays", () => {
+  const html = htmlFor(
+    spec({
+      layoutVariant: "type_primary_split",
+      headline: "Your roof may already be letting water in after last week's storm",
+      palette: ["#1b4332", "#d8f3dc", "#fefae0"],
+      imagery: "stock_generic_local",
+      imageryRole: "consequence",
+      phone: "(619) 555-0148",
+      website: "https://abcroofers.com/inspect",
+      qrDestination: "https://abcroofers.com/inspect",
+    })
+  )
+  const visible = html.replace(/aria-label="Postcard preview:[^"]*"/g, "")
+  assert.match(visible, /font-family:var\(--font-display-family\)/)
+  assert.match(visible, /\(619\) 555-0148/)
+  assert.match(visible, /QR code for/)
+  assert.match(visible, /Your roof may already be letting/)
+  assert.doesNotMatch(visible, /letting water in after/)
+  const share = Number(html.match(/data-photo-share="([0-9.]+)"/)?.[1])
+  assert.ok(share >= 0.5, `photo share ${share}`)
+  assert.match(html, /data-layout-family="split"/)
+  assert.match(html, /data-layout-issues="none"/)
 })
 
 test("a card with no photo does not paint an empty color block", () => {
