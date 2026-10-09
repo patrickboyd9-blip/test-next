@@ -24,6 +24,7 @@ import {
   conflictCopyUnrecognized,
   RECOMMENDATION_HEADLINE,
 } from "./studio-copy"
+import { repairSpecHeadline } from "./headline-repair"
 import {
   IMAGE_PRESENCES,
   IMAGERY_ROLES,
@@ -389,9 +390,11 @@ export function finalizeRefinement(input: {
     )
   }
 
-  const spec = preserveCreativeSemantics(
-    currentSpec,
-    applyFaithfulness(input.brief, input.proposed.spec)
+  const spec = repairSpecHeadline(
+    preserveCreativeSemantics(
+      currentSpec,
+      applyFaithfulness(input.brief, input.proposed.spec)
+    )
   )
   const removed = detectRemovedRequired(input.brief, currentSpec, spec)
   if (removed) {
@@ -526,7 +529,7 @@ function normalizeDirection(
   if (shouldStripInvented) {
     spec = stripInventedFacts(brief, spec)
   }
-  spec = normalizeSpecEnums(spec)
+  spec = repairSpecHeadline(normalizeSpecEnums(spec))
 
   const designedToDrive =
     direction.designedToDrive.trim() ||

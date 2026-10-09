@@ -77,6 +77,8 @@ test("PDF page boxes match the 8.5 by 5.5 inch canvas and name the RGB limit", (
   assert.match(pdf, /No CMYK/)
   assert.match(pdf, /2550 x 1650/)
   assert.match(pdf, /not a mail job/)
+  assert.match(pdf, /BaseFont \/Helvetica-Bold/)
+  assert.match(pdf, /BaseFont \/Helvetica >>/)
   assert.doesNotMatch(pdf, /Authorization/i)
   assert.doesNotMatch(pdf, /documentClass/)
 })
