@@ -82,7 +82,7 @@ test("a long green-card headline fits without dropping under the print minimum",
   assert.ok(contrastRatio(plan.colors.headline, plan.colors.field) >= HEADLINE_CONTRAST_MIN)
 })
 
-test("an offer already written into the subhead is not repeated as its own line", () => {
+test("an offer already written into the subhead is pulled out so it can be larger than the body", () => {
   const plan = resolvePostcardLayout({
     spec: spec({
       layoutVariant: "banded_split",
@@ -94,8 +94,9 @@ test("an offer already written into the subhead is not repeated as its own line"
     showWordmark: true,
   })
   assert.equal(plan.headline, "A local crew that shows up")
-  assert.match(plan.subheadline, /Free roof inspection/)
-  assert.equal(plan.offerLine, "")
+  assert.match(plan.subheadline, /Chula Vista/)
+  assert.doesNotMatch(plan.subheadline, /Free roof inspection/i)
+  assert.equal(plan.offerLine, "Free roof inspection")
 })
 
 test("split layouts keep at least half the card for the photograph", () => {

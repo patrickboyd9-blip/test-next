@@ -20,6 +20,7 @@ import {
   type NormRect,
   type PostcardLayoutPlan,
 } from "./postcard-layout-qa"
+import { qrQuietPaddingRatio, rubricFailures } from "./postcard-rubric"
 import {
   studioCompositionTreatment,
   studioPrintMarks,
@@ -102,6 +103,8 @@ export function PostcardFrontFace({
       data-photo-share={plan.photoShare.toFixed(3)}
       data-headline-pt={plan.typePt.headline.toFixed(1)}
       data-layout-issues={plan.issues.map((issue) => issue.code).join(" ") || "none"}
+      data-rubric-fails={rubricFailures(plan.rubric).map((check) => check.id).join(" ") || "none"}
+      data-qr-in={plan.qrInches.toFixed(3)}
       data-type-presence={derivation.typePresence}
       data-image-plate={derivation.imagePlate}
       data-void={derivation.voidShape}
@@ -166,7 +169,6 @@ export function PostcardFrontFace({
             compact={compact}
             contact={contact}
             mark={marks.ctaMark}
-            qrLarge={spec.layoutHints?.qrProminence === "large"}
           />
         </div>
       </div>
@@ -304,14 +306,12 @@ function PrintMarks({
   compact,
   contact,
   mark,
-  qrLarge,
 }: {
   spec: CreativeSpec
   plan: PostcardLayoutPlan
   compact: boolean
   contact: StudioContact
   mark: CtaMark
-  qrLarge: boolean
 }) {
   return (
     <div className="flex items-end gap-[0.6em]">
@@ -337,7 +337,7 @@ function PrintMarks({
         ) : null}
       </div>
       {contact.qrPayload ? (
-        <QrMark payload={contact.qrPayload} compact={compact} large={qrLarge} />
+        <QrMark payload={contact.qrPayload} sizeIn={plan.qrInches} />
       ) : null}
     </div>
   )
@@ -415,25 +415,19 @@ function ContactPrint({
   )
 }
 
-function QrMark({
-  payload,
-  compact,
-  large = false,
-}: {
-  payload: string
-  compact: boolean
-  large?: boolean
-}) {
+function QrMark({ payload, sizeIn }: { payload: string; sizeIn: number }) {
   const matrix = useMemo(() => buildQrMatrix(payload), [payload])
   if (!matrix) return null
   const modules = matrix.length
-  const box = compact ? "16cqw" : large ? "18cqw" : "14cqw"
+  const box = `${((sizeIn / 8) * 100).toFixed(3)}cqw`
+  const quiet = qrQuietPaddingRatio(modules)
   return (
     <div
       className="shrink-0 bg-white"
-      style={{ width: box, height: box, padding: "4%" }}
+      style={{ width: box, height: box, padding: `${(quiet * 100).toFixed(2)}%` }}
       role="img"
       aria-label={`QR code for ${payload}`}
+      data-qr-quiet-modules="4"
     >
       <div
         className="grid h-full w-full"

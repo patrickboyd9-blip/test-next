@@ -1,4 +1,4 @@
-import { repairHeadlineCopy } from "@/lib/campaign-creator/headline-repair"
+import { headlineWordCount, repairHeadlineCopy } from "@/lib/campaign-creator/headline-repair"
 import {
   normalizeLayoutVariant,
   type CreativeSpec,
@@ -8,8 +8,18 @@ import { POSTCARD_5X8_V1 } from "@/lib/mail-catalog/pieces/postcard-5x8"
 
 import { copyRestatesLead } from "./studio-copy-hierarchy"
 import {
+  QR_LARGE_INCHES,
+  QR_STANDARD_INCHES,
+  RUBRIC_HEADLINE_BODY_RATIO,
+  RUBRIC_OFFER_BODY_RATIO,
+  RUBRIC_QR_QUIET_MODULES,
+  scoreAPlusPostcard,
+  type RubricCheck,
+} from "./postcard-rubric"
+import {
   resolveStudioPalette,
   studioCompositionTreatment,
+  studioPrintMarks,
   studioTypeExecution,
 } from "./studio-composition-treatment"
 
@@ -37,7 +47,7 @@ export const PRINT_MAX_PT = {
   headline: 64,
   subhead: 18,
   offer: 18,
-  body: 13,
+  body: 12,
   cta: 16,
   contact: 18,
   wordmark: 10,
@@ -63,8 +73,18 @@ export interface NormRect {
 }
 
 export interface LayoutIssue {
-  code: "contrast" | "overflow" | "min-size" | "photo-share"
-  role: "headline" | "subhead" | "offer" | "body" | "cta" | "contact" | "photo"
+  code:
+    | "contrast"
+    | "overflow"
+    | "min-size"
+    | "photo-share"
+    | "headline-length"
+    | "hierarchy"
+    | "safe-zone"
+    | "modules"
+    | "scrim"
+    | "keep-out"
+  role: "headline" | "subhead" | "offer" | "body" | "cta" | "contact" | "photo" | "card"
   detail: string
 }
 
@@ -106,6 +126,10 @@ export interface PostcardLayoutPlan {
     contact: number
     wordmark: number
   }
+  /** Outer QR box, including the quiet zone. */
+  qrInches: number
+  qrQuietModules: number
+  rubric: RubricCheck[]
   issues: LayoutIssue[]
   fixes: string[]
 }
@@ -187,7 +211,9 @@ export function resolvePostcardLayout(input: {
     issues,
   })
 
-  return {
+  const qrInches = input.spec.layoutHints?.qrProminence === "large" ? QR_LARGE_INCHES : QR_STANDARD_INCHES
+  const marks = studioPrintMarks(treatment, layout)
+  const draft = {
     family,
     layoutVariant: layout,
     photoShare: geometry.photoShare,
@@ -209,9 +235,29 @@ export function resolvePostcardLayout(input: {
       contact: fitted.contactPt,
       wordmark: PRINT_MIN_PT.wordmark,
     },
+    qrInches,
+    qrQuietModules: RUBRIC_QR_QUIET_MODULES,
     issues,
     fixes,
   }
+  const rubric = scoreAPlusPostcard(
+    rubricFacts({
+      plan: draft,
+      overPhoto: family === "photo-dominant",
+      headlineOverflows: fitted.headline.overflows,
+      offerPaint: copy.offerPaint,
+      phoneShown: Boolean(collapse(input.spec.phone)),
+      qrShown: Boolean(collapse(input.spec.qrDestination) || collapse(input.spec.website)),
+      ctaShown: Boolean(collapse(input.spec.callToAction)),
+      ctaBoxed: marks.ctaMark === "reverse-slug",
+    })
+  )
+  for (const check of rubric) {
+    if (check.pass) continue
+    issues.push(rubricIssue(check))
+  }
+
+  return { ...draft, rubric, issues }
 }
 
 export function layoutIssueCopy(issue: LayoutIssue): string {
@@ -223,7 +269,19 @@ export function layoutIssueCopy(issue: LayoutIssue): string {
     case "min-size":
       return "Some type is still smaller than it should be on a postcard."
     case "photo-share":
-      return "The photograph still covers less than half the card."
+      return "The photograph still covers less of the card than it should."
+    case "headline-length":
+      return "The headline is still longer than eight words."
+    case "hierarchy":
+      return "The headline and offer are still too close to the body size."
+    case "safe-zone":
+      return "Some type still sits outside the safe zone."
+    case "modules":
+      return "The card still stacks too many boxed modules."
+    case "scrim":
+      return "Type still sits on the photograph without a readable panel."
+    case "keep-out":
+      return "Creative type still crosses the address or barcode clear zone."
   }
 }
 
@@ -326,10 +384,122 @@ export function fitTextLine(input: {
   }
 }
 
+function rubricFacts(input: {
+  plan: Omit<PostcardLayoutPlan, "rubric">
+  overPhoto: boolean
+  headlineOverflows: boolean
+  offerPaint: "headline" | "line" | "subhead" | "none"
+  phoneShown: boolean
+  qrShown: boolean
+  ctaShown: boolean
+  ctaBoxed: boolean
+}): Parameters<typeof scoreAPlusPostcard>[0] {
+  const { plan } = input
+  const headlineContrast = input.overPhoto
+    ? worstCaseContrast(plan.colors.headline, plan.colors.scrim, plan.colors.scrimOpacity)
+    : contrastRatio(plan.colors.headline, plan.colors.field)
+  const inkContrast = input.overPhoto
+    ? worstCaseContrast(plan.colors.ink, plan.colors.scrim, plan.colors.scrimOpacity)
+    : contrastRatio(plan.colors.ink, plan.colors.field)
+  const offerContrast =
+    input.offerPaint === "none"
+      ? null
+      : input.offerPaint === "headline"
+        ? headlineContrast
+        : inkContrast
+  const back = postcardBackRegions()
+  const trim = { x: 0, y: 0, w: 1, h: 1 }
+  const typeOnPhoto = Boolean(plan.photoRect && rectsIntersect(plan.textColumn, plan.photoRect))
+  const boxed = (input.ctaShown && input.ctaBoxed ? 1 : 0) + (input.qrShown ? 1 : 0)
+  return {
+    headlineContrast,
+    offerContrast,
+    ctaContrast: !input.ctaShown
+      ? null
+      : input.ctaBoxed
+        ? contrastRatio(plan.colors.ctaInk, plan.colors.ctaFill)
+        : inkContrast,
+    headlineOverflows: input.headlineOverflows,
+    headlineWords: headlineWordCount(plan.hero),
+    heroPhoto: Boolean(plan.photoRect),
+    fullBleed: plan.photoShare >= 0.98,
+    photoShare: plan.photoShare,
+    headlinePt: plan.typePt.headline,
+    bodyPt: plan.body ? plan.typePt.body : PRINT_MIN_PT.body,
+    bodyShown: Boolean(plan.body),
+    offerPt:
+      input.offerPaint === "none"
+        ? null
+        : input.offerPaint === "headline"
+          ? plan.typePt.headline
+          : input.offerPaint === "line"
+            ? plan.typePt.offer
+            : plan.typePt.subhead,
+    textInsideSafe: rectContains(back.safe, plan.textColumn),
+    photoInsideTrim: !plan.photoRect || rectContains(trim, plan.photoRect),
+    phoneShown: input.phoneShown,
+    phonePt: plan.typePt.contact,
+    qrShown: input.qrShown,
+    qrInches: plan.qrInches,
+    qrQuietModules: plan.qrQuietModules,
+    boxedModules: boxed,
+    typeOnPhoto,
+    scrimCoversType: Boolean(plan.scrimRect && rectContains(plan.scrimRect, plan.textColumn)),
+    scrimOpacity: plan.colors.scrimOpacity,
+    backClear:
+      !rectsIntersect(back.returnAddress, back.mailingPanel) &&
+      !rectsIntersect(back.returnAddress, back.barcodeStrip) &&
+      !rectsIntersect(back.indicia, back.mailingPanel) &&
+      !rectsIntersect(back.indicia, back.barcodeStrip) &&
+      rectContains(back.safe, back.returnAddress) &&
+      rectContains(back.safe, back.indicia),
+  }
+}
+
+function rubricIssue(check: RubricCheck): LayoutIssue {
+  const role =
+    check.id === "AF2" || check.id === "AF3" || check.id === "AF5"
+      ? "headline"
+      : check.id === "AF4" || check.id === "AF9"
+        ? "photo"
+        : check.id === "AF7"
+          ? "contact"
+          : check.id === "AF1"
+            ? "cta"
+            : "card"
+  const code =
+    check.id === "AF1"
+      ? "contrast"
+      : check.id === "AF2"
+        ? "overflow"
+        : check.id === "AF3"
+          ? "headline-length"
+          : check.id === "AF4"
+            ? "photo-share"
+            : check.id === "AF5"
+              ? "hierarchy"
+              : check.id === "AF6"
+                ? "safe-zone"
+                : check.id === "AF7"
+                  ? "min-size"
+                  : check.id === "AF8"
+                    ? "modules"
+                    : check.id === "AF9"
+                      ? "scrim"
+                      : "keep-out"
+  return { code, role, detail: check.detail }
+}
+
 function displayCopy(
   spec: CreativeSpec,
   repaired: { headline: string; subheadline?: string }
-): { hero: string; subheadline: string; offerLine: string; body: string } {
+): {
+  hero: string
+  subheadline: string
+  offerLine: string
+  body: string
+  offerPaint: "headline" | "line" | "subhead" | "none"
+} {
   const offer = collapse(spec.offer)
   const headline = repaired.headline
   const sub = collapse(repaired.subheadline)
@@ -339,13 +509,16 @@ function displayCopy(
   if (sub && !sameLine(hero, sub)) subheadline = sub
 
   let offerLine = ""
-  if (
-    offer &&
-    !sameLine(hero, offer) &&
-    !sameLine(subheadline, offer) &&
-    !lineInside(subheadline, offer)
-  ) {
+  let offerPaint: "headline" | "line" | "subhead" | "none" = "none"
+  if (offer && sameLine(hero, offer)) {
+    offerPaint = "headline"
+  } else if (offer && lineInside(subheadline, offer)) {
+    subheadline = removeLine(subheadline, offer)
     offerLine = offer
+    offerPaint = "line"
+  } else if (offer && !sameLine(subheadline, offer)) {
+    offerLine = offer
+    offerPaint = "line"
   }
 
   const body = collapse(spec.body)
@@ -355,6 +528,7 @@ function displayCopy(
     subheadline,
     offerLine,
     body: showBody ? body : "",
+    offerPaint,
   }
 }
 
@@ -365,17 +539,29 @@ function sameLine(a: string, b: string): boolean {
 }
 
 function lineInside(haystack: string, needle: string): boolean {
-  const words = (value: string) =>
-    value
-      .toLowerCase()
-      .replace(/[^\p{L}\p{N}\s]+/gu, " ")
-      .split(/\s+/)
-      .filter(Boolean)
-      .join(" ")
-  const host = words(haystack)
-  const line = words(needle)
+  const host = wordsOf(haystack)
+  const line = wordsOf(needle)
   if (!host || !line) return false
   return host.includes(line)
+}
+
+function wordsOf(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s]+/gu, " ")
+    .split(/\s+/)
+    .filter(Boolean)
+    .join(" ")
+}
+
+function removeLine(host: string, line: string): string {
+  const pattern = line.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+  return host
+    .replace(new RegExp(pattern, "i"), " ")
+    .replace(/\s+([,.;!?])/g, "$1")
+    .replace(/([.!?])(?:\s*[.!?])+/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim()
 }
 
 function geometryFor(
@@ -659,14 +845,17 @@ function fitStack(input: {
     lineHeight: DISPLAY_LINE,
   })
   const bodyRoom = remain - headline.heightIn
+  const offerCap = input.offer ? offer.fontPt / RUBRIC_OFFER_BODY_RATIO : PRINT_MAX_PT.body
+  const ratioCap = Math.min(PRINT_MAX_PT.body, headline.fontPt / RUBRIC_HEADLINE_BODY_RATIO, offerCap)
+  const bodyMax = Math.floor(ratioCap * 2) / 2
   let body =
-    input.body && !headline.overflows && bodyRoom >= 0.5
+    input.body && !headline.overflows && bodyRoom >= 0.5 && bodyMax + 0.001 >= PRINT_MIN_PT.body
       ? fitTextLine({
           text: input.body,
           widthIn: input.widthIn,
           heightIn: Math.min(0.62, bodyRoom),
           minPt: PRINT_MIN_PT.body,
-          maxPt: PRINT_MAX_PT.body,
+          maxPt: bodyMax,
           em: TEXT_EM,
           lineHeight: TEXT_LINE,
         })
