@@ -1,55 +1,51 @@
 import { randomUUID } from "crypto"
 
-import type { ImageBrief, ImageBriefOccupancy, ImageBriefRole } from "./image-brief"
+import type { ImageBrief } from "./image-brief"
 import {
   GENERATED_ASSET_SOURCE_CLASS,
   type GeneratedAsset,
   type ImageGenerationAdapter,
+  type ImageGenerationOptions,
 } from "./image-generation"
+import {
+  OPENAI_IMAGE_MODEL_FALLBACK,
+  OPENAI_IMAGE_MODEL_PIN,
+  estimateImageCostUsd,
+  logImageCost,
+  resolveOpenAIImageSettings,
+  type OpenAIImageQuality,
+  type OpenAIImageUsage,
+  type StudioImageTier,
+} from "./openai-image-settings"
+import {
+  OPENAI_IMAGE_ALWAYS_EXCLUSIONS,
+  buildOpenAIImagePrompt,
+} from "./photography-shot-list"
 
 export const OPENAI_IMAGE_PROVIDER = "openai"
-/** Evaluated snapshot pin from the first-slice provider research. */
-export const OPENAI_IMAGE_MODEL = "gpt-image-2.5-flare-2026-09-08"
+/** Documented GPT Image 2.5 Flare snapshot. Override with OPENAI_IMAGE_MODEL. */
+export const OPENAI_IMAGE_MODEL = OPENAI_IMAGE_MODEL_PIN
 export const OPENAI_IMAGE_SIZE = "1536x1024"
-export const OPENAI_IMAGE_QUALITY = "high"
+export const OPENAI_IMAGE_QUALITY = "medium"
 export const OPENAI_IMAGES_GENERATIONS_URL =
   "https://api.openai.com/v1/images/generations"
 
+export { OPENAI_IMAGE_ALWAYS_EXCLUSIONS, buildOpenAIImagePrompt }
+
+/** Phrases the shot list must keep out of the photograph. */
 export const OPENAI_IMAGE_HARD_NEGATIVES = [
   "text",
-  "headlines",
-  "prices",
-  "phone numbers",
-  "URLs",
-  "QR codes",
+  "letters",
+  "signage",
   "logos",
   "watermarks",
-  "badges",
-  "starbursts",
-  "pill buttons",
-  "footer icon rows",
-  "postcard or flyer chrome",
-  "UI or card chrome",
-  "design a mailer",
+  "QR codes",
+  "overlays",
+  "plastic skin",
+  "CGI gloss",
+  "symmetrical faces",
+  "warped tools",
 ] as const
-
-const OCCUPANCY_INSTRUCTION: Record<ImageBriefOccupancy, string> = {
-  field:
-    "This photograph is the visual ground. Make a full-bleed-ready original photograph. Leave any quiet or empty region named in the conceived situation empty and low-detail so type can occupy it later. Do not fill every inch.",
-  supporting:
-    "This photograph is a supporting image beside type, not the hero collage and not a finished mailer. Keep the scene quiet enough that type can lead.",
-  witness:
-    "This photograph is a small witness to a type-led piece. Keep it restrained and secondary. It is not a full-bleed field and not a designed card.",
-}
-
-const ROLE_MODE_LOCK: Record<ImageBriefRole, string> = {
-  consequence:
-    "Mode: consequence. An original illustrative category situation. Not lifestyle stock, not gore, and not this recipient's documented condition.",
-  crew:
-    "Mode: work / crew. An illustrative professional work situation. Not an actual named team and not documentary proof of this customer's job.",
-  neighborhood:
-    "Mode: environmental / local situation. Not this recipient's property. Not generic neighborhood stock treated as proof.",
-}
 
 export class OpenAIImageGenerationNotConfiguredError extends Error {
   constructor() {
@@ -70,66 +66,30 @@ export class OpenAIImageGenerationFailedError extends Error {
 export interface OpenAIImagesGenerationsRequest {
   model: string
   prompt: string
-  n: 1
-  size: typeof OPENAI_IMAGE_SIZE
-  quality: typeof OPENAI_IMAGE_QUALITY
+  n: number
+  size: string
+  quality: OpenAIImageQuality
   output_format: "png"
   moderation: "auto"
 }
 
-export function buildOpenAIImagePrompt(brief: ImageBrief): string {
-  const toneLine = brief.tone?.trim()
-    ? `Tone: ${brief.tone.trim()}`
-    : null
-  const doNotInvent = brief.doNotInvent.map((item) => `- ${item}`).join("\n")
-  const hardNegatives = OPENAI_IMAGE_HARD_NEGATIVES.map(
-    (item) => `- ${item}`
-  ).join("\n")
-
-  const art = brief.artDirection
-  const craftLine = art.craft
-    ? `Craft to imitate, not a picture to copy: ${art.craft}`
-    : null
-
-  return [
-    "Execute this already-conceived photograph only. Do not invent a new campaign, layout, or mailer.",
-    "The Subject line is the photograph to make. If the conceived situation is only a label, ignore the label and make the Subject. If the conceived situation is already a specific scene, the Subject repeats it. Do not add a second, more generic subject.",
-    `Imagery role: ${brief.imageryRole}`,
-    ROLE_MODE_LOCK[brief.imageryRole],
-    `Lead job: ${brief.leadJob}`,
-    `Occupancy: ${brief.occupancy}`,
-    OCCUPANCY_INSTRUCTION[brief.occupancy],
-    toneLine,
-    "Art direction for a premium direct-mail photograph. Not a stock thumbnail and not a designed postcard.",
-    `Trade: ${art.trade}`,
-    `Subject: ${art.subject}`,
-    `Lighting: ${art.lighting}`,
-    `Framing: ${art.framing}`,
-    `Emotion: ${art.emotion}`,
-    craftLine,
-    `Refuse: ${art.refuse}`,
-    "Conceived situation:",
-    brief.visualDirection,
-    "This is an original illustrative category situation or general representation. It is communication, not evidence. It is not documentation of this recipient's home, property, actual crew, or damage-as-fact. Do not invent campaign-specific proof. Do not treat generic or interchangeable stock as if it proves a specific customer situation. When NOT: cheap fear or gore escalation.",
-    "Do not invent:",
-    doNotInvent,
-    "Hard negatives — do not depict:",
-    hardNegatives,
-    "Generate an original photograph. Do not generate headline, offer, CTA, phone number, URL, QR code, logo, typography, palette, or postcard layout. Those are not part of this image.",
-  ]
-    .filter((line): line is string => Boolean(line))
-    .join("\n")
+export interface OpenAIImageGenerationResult {
+  asset: GeneratedAsset
+  alternates: GeneratedAsset[]
+  usage: OpenAIImageUsage | null
 }
 
 export function buildOpenAIImageRequest(
-  brief: ImageBrief
+  brief: ImageBrief,
+  options?: { tier?: StudioImageTier; env?: NodeJS.ProcessEnv }
 ): OpenAIImagesGenerationsRequest {
+  const settings = resolveOpenAIImageSettings(options?.tier ?? "preview", options?.env)
   return {
-    model: OPENAI_IMAGE_MODEL,
+    model: settings.model,
     prompt: buildOpenAIImagePrompt(brief),
-    n: 1,
-    size: OPENAI_IMAGE_SIZE,
-    quality: OPENAI_IMAGE_QUALITY,
+    n: settings.candidateCount,
+    size: settings.size,
+    quality: settings.quality,
     output_format: "png",
     moderation: "auto",
   }
@@ -148,12 +108,15 @@ export class OpenAIImageGenerationAdapter implements ImageGenerationAdapter {
   #fetchImpl: typeof fetch
   #now: () => Date
   #createId: () => string
+  #env: NodeJS.ProcessEnv | undefined
 
   constructor(options: {
     apiKey: string
     fetch?: typeof fetch
     now?: () => Date
     createId?: () => string
+    /** When omitted, production reads process.env at call time. */
+    env?: NodeJS.ProcessEnv
   }) {
     const apiKey = options.apiKey.trim()
     if (!apiKey) {
@@ -163,20 +126,52 @@ export class OpenAIImageGenerationAdapter implements ImageGenerationAdapter {
     this.#fetchImpl = options.fetch ?? fetch
     this.#now = options.now ?? (() => new Date())
     this.#createId = options.createId ?? randomUUID
+    this.#env = options.env
   }
 
-  async generate(brief: ImageBrief): Promise<GeneratedAsset> {
-    const request = buildOpenAIImageRequest(brief)
-    const response = await this.#fetchImpl(OPENAI_IMAGES_GENERATIONS_URL, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${this.#apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(request),
-    })
+  async generate(
+    brief: ImageBrief,
+    options?: ImageGenerationOptions
+  ): Promise<GeneratedAsset> {
+    const detailed = await this.generateDetailed(brief, options)
+    return detailed.asset
+  }
+
+  async generateDetailed(
+    brief: ImageBrief,
+    options?: ImageGenerationOptions
+  ): Promise<OpenAIImageGenerationResult> {
+    const tier = options?.tier ?? "preview"
+    const env = this.#env ?? process.env
+    let request = buildOpenAIImageRequest(brief, { tier, env })
+    if (options?.candidateCount) {
+      request = {
+        ...request,
+        n: Math.min(3, Math.max(1, options.candidateCount)),
+      }
+    }
+
+    let attempt = 1
+    let response = await this.#post(request)
+    if (!response.ok) {
+      const body = await readErrorBody(response)
+      const fallback =
+        isUnknownModelError(response.status, body) &&
+        request.model !== OPENAI_IMAGE_MODEL_FALLBACK
+      if (!fallback) {
+        this.#log(request, tier, options, response.status, null, attempt)
+        throw new OpenAIImageGenerationFailedError(
+          `OpenAI image generation failed with status ${response.status}.`
+        )
+      }
+      this.#log(request, tier, options, response.status, null, attempt)
+      request = { ...request, model: OPENAI_IMAGE_MODEL_FALLBACK }
+      attempt = 2
+      response = await this.#post(request)
+    }
 
     if (!response.ok) {
+      this.#log(request, tier, options, response.status, null, attempt)
       throw new OpenAIImageGenerationFailedError(
         `OpenAI image generation failed with status ${response.status}.`
       )
@@ -184,24 +179,102 @@ export class OpenAIImageGenerationAdapter implements ImageGenerationAdapter {
 
     const payload = (await parseJson(response)) as {
       data?: Array<{ b64_json?: string; url?: string }>
+      usage?: OpenAIImageUsage
     }
-    const image = payload.data?.[0]
-    const src = imageSrcFromPayload(image)
-
+    const images = payload.data ?? []
+    const chosenIndex = pickCandidateIndex(images)
+    const chosen = images[chosenIndex]
+    const src = imageSrcFromPayload(chosen)
     if (!src) {
       throw new OpenAIImageGenerationFailedError(
         "OpenAI image generation returned an empty or malformed image payload."
       )
     }
 
-    return {
-      id: this.#createId(),
-      src,
+    const generatedAt = this.#now().toISOString()
+    const toAsset = (imageSrc: string, index: number): GeneratedAsset => ({
+      id: index === chosenIndex ? this.#createId() : `${this.#createId()}-${index}`,
+      src: imageSrc,
       sourceClass: GENERATED_ASSET_SOURCE_CLASS,
       provider: OPENAI_IMAGE_PROVIDER,
-      model: OPENAI_IMAGE_MODEL,
-      generatedAt: this.#now().toISOString(),
+      model: request.model,
+      generatedAt,
+    })
+
+    const asset = toAsset(src, chosenIndex)
+    const alternates = images.flatMap((image, index) => {
+      if (index === chosenIndex) return []
+      const alternateSrc = imageSrcFromPayload(image)
+      return alternateSrc ? [toAsset(alternateSrc, index)] : []
+    })
+
+    this.#log(request, tier, options, response.status, payload.usage ?? null, attempt)
+    return { asset, alternates, usage: payload.usage ?? null }
+  }
+
+  async #post(request: OpenAIImagesGenerationsRequest): Promise<Response> {
+    return this.#fetchImpl(OPENAI_IMAGES_GENERATIONS_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${this.#apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(request),
+    })
+  }
+
+  #log(
+    request: OpenAIImagesGenerationsRequest,
+    tier: StudioImageTier,
+    options: ImageGenerationOptions | undefined,
+    status: number,
+    usage: OpenAIImageUsage | null,
+    attempt: number
+  ): void {
+    logImageCost({
+      model: request.model,
+      quality: request.quality,
+      size: request.size,
+      n: request.n,
+      tier,
+      campaignId: options?.campaignId,
+      directionId: options?.directionId,
+      attempt,
+      status,
+      usage,
+      estimatedUsd: estimateImageCostUsd(usage),
+    })
+  }
+}
+
+export function pickCandidateIndex(
+  images: Array<{ b64_json?: string; url?: string }>
+): number {
+  let best = 0
+  let bestSize = -1
+  for (let index = 0; index < images.length; index += 1) {
+    const encoded = images[index]?.b64_json?.trim() ?? ""
+    const size = encoded ? encoded.length : (images[index]?.url?.trim().length ?? 0)
+    if (size > bestSize) {
+      best = index
+      bestSize = size
     }
+  }
+  return best
+}
+
+function isUnknownModelError(status: number, body: string): boolean {
+  if (status !== 400 && status !== 404) return false
+  return /model_not_found|unknown model|invalid model|does not exist|model .* not found/i.test(
+    body
+  )
+}
+
+async function readErrorBody(response: Response): Promise<string> {
+  try {
+    return (await response.text()).slice(0, 500)
+  } catch {
+    return ""
   }
 }
 

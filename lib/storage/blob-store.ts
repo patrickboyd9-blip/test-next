@@ -1,4 +1,4 @@
-import { BlobNotFoundError, get, head, put } from "@vercel/blob"
+import { BlobNotFoundError, del, get, head, put } from "@vercel/blob"
 
 /**
  * Object storage for generated Studio files.
@@ -15,6 +15,13 @@ export interface BlobObjectStore {
   stat(pathname: string): Promise<{ url: string } | null>
   /** Bytes plus the public URL. Null when the object is absent. */
   get(pathname: string): Promise<{ url: string; body: Buffer } | null>
+  /** Creates the object only when it is absent. Null when it already exists. */
+  putNew(
+    pathname: string,
+    body: Buffer | string,
+    contentType: string
+  ): Promise<{ url: string } | null>
+  remove(pathname: string): Promise<void>
 }
 
 export function blobReadWriteToken(env: NodeJS.ProcessEnv = process.env): string | null {
@@ -71,5 +78,39 @@ export function createVercelBlobObjectStore(token: string): BlobObjectStore {
         body: await readBlobStream(result.stream),
       }
     },
+
+    async putNew(pathname, body, contentType) {
+      try {
+        const blob = await put(pathname, body, {
+          access: "public",
+          token,
+          contentType,
+          addRandomSuffix: false,
+          allowOverwrite: false,
+        })
+        return { url: blob.url }
+      } catch (error) {
+        if (blobAlreadyExists(error)) return null
+        throw error
+      }
+    },
+
+    async remove(pathname) {
+      try {
+        await del(pathname, { token })
+      } catch (error) {
+        if (error instanceof BlobNotFoundError) return
+        const name = error instanceof Error ? error.name : ""
+        if (name === "BlobNotFoundError") return
+        throw error
+      }
+    },
   }
+}
+
+function blobAlreadyExists(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : ""
+  if (/already exists|conflict/i.test(message)) return true
+  const status = (error as { status?: number }).status
+  return status === 409 || status === 412
 }

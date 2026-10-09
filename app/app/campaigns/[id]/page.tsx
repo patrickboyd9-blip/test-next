@@ -9,8 +9,9 @@ export const dynamic = "force-dynamic"
 /**
  * Hobby ceiling when Fluid Compute is off. A higher value fails that deploy
  * with "maxDuration must be between 1 and 60". Applies to Server Actions
- * used on this page (conversation, creative writing, photographs).
- * A full set of photographs can still run past 60s. See docs/DEPLOYMENT.md.
+ * used on this page (conversation, creative writing).
+ * Photographs return immediately and finish in after(), one picture per
+ * invocation, still inside this 60s cap. See docs/DEPLOYMENT.md.
  */
 export const maxDuration = 60
 

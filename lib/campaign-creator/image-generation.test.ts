@@ -35,6 +35,7 @@ const IMAGE_BRIEF_KEYS = [
   "doNotInvent",
   "imageryRole",
   "leadJob",
+  "lookBlock",
   "occupancy",
   "tone",
   "visualDirection",

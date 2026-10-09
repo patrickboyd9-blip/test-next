@@ -33,6 +33,8 @@ export interface StudioImageMiss {
 export interface StudioImageLoad {
   records: StudioImageRecord[]
   misses: StudioImageMiss[]
+  /** True while a photograph is still being made off the request path. */
+  pending?: boolean
 }
 
 export async function ensureStudioDirectionImages(options: {
@@ -162,7 +164,7 @@ async function loadOrGenerate(input: {
   if (cached) return cached
 
   const generated = await input.getAdapter().generate(brief)
-  const asset = await persistAsset(generated, input.store, input.campaignId, fileBase)
+  const asset = await persistGeneratedAsset(generated, input.store, input.campaignId, fileBase)
   await input.store.writeSidecar(input.campaignId, fileBase, {
     fingerprint: input.fingerprint,
     asset,
@@ -185,7 +187,7 @@ function cachedRecord(
   return { directionId, fingerprint, asset: raw.asset }
 }
 
-async function persistAsset(
+export async function persistGeneratedAsset(
   generated: GeneratedAsset,
   store: StudioImageStore,
   campaignId: string,

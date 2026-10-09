@@ -1,3 +1,4 @@
+import { buildCampaignLookBlock } from "./campaign-look"
 import {
   buildPhotographyArtDirection,
   type ImageBriefArtDirection,
@@ -60,6 +61,8 @@ export interface ImageBrief {
   tone?: string
   doNotInvent: readonly string[]
   artDirection: ImageBriefArtDirection
+  /** Fixed for the campaign. Copied word for word into every direction prompt. */
+  lookBlock: string
 }
 
 function isImageBriefRole(
@@ -122,7 +125,9 @@ export function toImageBrief(
       visualDirection,
       campaign: context.campaign,
       variationKey: context.variationKey,
+      layoutVariant: normalizeLayoutVariant(spec.layoutVariant),
     }),
+    lookBlock: buildCampaignLookBlock(context.campaign),
   }
 
   if (spec.tone?.trim()) {
