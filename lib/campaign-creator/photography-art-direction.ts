@@ -8,6 +8,7 @@ import {
   type CampaignBrief,
   type CreativeSpec,
   type ImageryRole,
+  type LayoutVariant,
   type LeadJob,
 } from "./types"
 
@@ -18,7 +19,7 @@ import {
  * thin label into a trade-specific photograph and keeps a specific
  * conception intact.
  */
-export const PHOTOGRAPHY_ART_DIRECTION_REVISION = "2026-10-07.1"
+export const PHOTOGRAPHY_ART_DIRECTION_REVISION = "2026-10-09.1"
 
 export type PhotoRole = Exclude<ImageryRole, "none" | "logo">
 export type PhotoOccupancy = "field" | "supporting" | "witness"
@@ -31,6 +32,8 @@ export interface ImageBriefArtDirection {
   framing: string
   emotion: string
   refuse: string
+  /** Calm region left for type, named for the chosen layout. */
+  negativeSpace: string
   craft?: string
 }
 
@@ -297,6 +300,25 @@ export function isWeakTextOnlyRecommendation(spec: CreativeSpec): boolean {
   )
 }
 
+export function negativeSpaceForLayout(
+  layout: LayoutVariant | undefined,
+  occupancy: PhotoOccupancy
+): string {
+  if (occupancy === "witness") {
+    return "Keep the frame quiet and secondary, with no faces or tools crowding the edges. Type leads the card, so this stays a small witness rather than a hero picture."
+  }
+  if (layout === "image_grounded" || occupancy === "field") {
+    return "Leave the upper-left third of the frame calm and low-detail, empty of faces, hands, and tools. The headline will sit there."
+  }
+  if (layout === "banded_split") {
+    return "Keep a calm horizontal band across the top of the frame, low-detail sky or wall, empty of faces and tools. Type will sit in that band."
+  }
+  if (layout === "peer_split") {
+    return "Keep the left third of the frame calm and low-detail, empty of faces and tools. Type will share that side of the card."
+  }
+  return "Keep the right half of the frame calm and low-detail, empty of faces and tools. Type will sit beside the photograph on that side."
+}
+
 export function buildPhotographyArtDirection(input: {
   imageryRole: PhotoRole
   leadJob: LeadJob
@@ -304,6 +326,7 @@ export function buildPhotographyArtDirection(input: {
   visualDirection: string
   campaign?: CampaignBrief
   variationKey?: string
+  layoutVariant?: LayoutVariant
 }): ImageBriefArtDirection {
   const trade = tradeForCampaign(input.campaign)
   const bank = BANKS[trade] ?? LOCAL_SERVICE
@@ -321,6 +344,7 @@ export function buildPhotographyArtDirection(input: {
     framing: FRAMING[input.occupancy],
     emotion: EMOTION[input.leadJob],
     refuse: REFUSE,
+    negativeSpace: negativeSpaceForLayout(input.layoutVariant, input.occupancy),
   }
 
   const craft = craftNote(input.campaign, trade)

@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from "fs/promises"
+import { mkdir, readFile, unlink, writeFile } from "fs/promises"
 import path from "path"
 
 import {
@@ -18,6 +18,13 @@ import {
 export interface StudioImageSidecar {
   fingerprint?: string
   asset?: GeneratedAsset
+  tier?: "preview" | "final"
+  status?: "queued" | "running" | "ready" | "failed"
+  attempts?: number
+  alternates?: GeneratedAsset[]
+  error?: string
+  claim?: string
+  claimedAt?: string
 }
 
 /**
@@ -30,8 +37,15 @@ export interface StudioImageStore {
   writeSidecar(
     campaignId: string,
     fileBase: string,
-    sidecar: { fingerprint: string; asset: GeneratedAsset }
+    sidecar: StudioImageSidecar
   ): Promise<void>
+  /** True when this caller created the sidecar. False when it already existed. */
+  createSidecar(
+    campaignId: string,
+    fileBase: string,
+    sidecar: StudioImageSidecar
+  ): Promise<boolean>
+  deleteSidecar(campaignId: string, fileBase: string): Promise<void>
   persistPng(campaignId: string, fileName: string, bytes: Buffer): Promise<string>
 }
 
@@ -65,6 +79,30 @@ export function createFileStudioImageStore(cacheRoot: string): StudioImageStore 
       if (!filePath) throw new Error("Invalid studio image id")
       await mkdir(path.dirname(filePath), { recursive: true })
       await writeFile(filePath, JSON.stringify(sidecar))
+    },
+
+    async createSidecar(campaignId, fileBase, sidecar) {
+      const filePath = jsonPath(cacheRoot, campaignId, fileBase)
+      if (!filePath) throw new Error("Invalid studio image id")
+      await mkdir(path.dirname(filePath), { recursive: true })
+      try {
+        await writeFile(filePath, JSON.stringify(sidecar), { flag: "wx" })
+        return true
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === "EEXIST") return false
+        throw error
+      }
+    },
+
+    async deleteSidecar(campaignId, fileBase) {
+      const filePath = jsonPath(cacheRoot, campaignId, fileBase)
+      if (!filePath) return
+      try {
+        await unlink(filePath)
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === "ENOENT") return
+        throw error
+      }
     },
 
     async persistPng(campaignId, fileName, bytes) {
@@ -107,6 +145,21 @@ export function createBlobStudioImageStore(blobs: BlobObjectStore): StudioImageS
         JSON.stringify(sidecar),
         "application/json"
       )
+    },
+
+    async createSidecar(campaignId, fileBase, sidecar) {
+      if (!safePair(campaignId, fileBase)) throw new Error("Invalid studio image id")
+      const created = await blobs.putNew(
+        studioImageBlobPath(campaignId, `${fileBase}.json`),
+        JSON.stringify(sidecar),
+        "application/json"
+      )
+      return created !== null
+    },
+
+    async deleteSidecar(campaignId, fileBase) {
+      if (!safePair(campaignId, fileBase)) return
+      await blobs.remove(studioImageBlobPath(campaignId, `${fileBase}.json`))
     },
 
     async persistPng(campaignId, fileName, bytes) {

@@ -127,6 +127,7 @@ test("returned brief has no provider, model, prompt, layout, crop, or position f
     "doNotInvent",
     "imageryRole",
     "leadJob",
+    "lookBlock",
     "occupancy",
     "tone",
     "visualDirection",
