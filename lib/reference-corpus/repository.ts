@@ -1,5 +1,9 @@
-import { mkdir, readFile, writeFile } from "fs/promises"
-import path from "path"
+import {
+  createAppDocumentStore,
+  createFileDocumentStore,
+  defaultDocumentDirectory,
+  type DocumentStore,
+} from "@/lib/storage/document-store"
 
 import {
   REFERENCE_SOURCE_CLASSES,
@@ -9,16 +13,14 @@ import {
 } from "./types"
 
 /**
- * File-backed store for raw reference evidence.
- * Lives at .data/reference-corpus, not .data/campaigns.
- * Swap later for a real database; callers depend on this interface only.
+ * Store for raw reference evidence.
+ * Separate from campaigns. JSON files under .data/reference-corpus unless
+ * DATABASE_URL or POSTGRES_URL selects Postgres.
  */
 export interface ReferenceCorpusRepository {
   save(item: ReferenceCorpusItem): Promise<ReferenceCorpusItem>
   get(id: string): Promise<ReferenceCorpusItem | null>
 }
-
-const DEFAULT_DATA_DIR = path.join(process.cwd(), ".data", "reference-corpus")
 
 function isSourceClass(value: string): value is ReferenceSourceClass {
   return (REFERENCE_SOURCE_CLASSES as readonly string[]).includes(value)
@@ -47,39 +49,41 @@ function assertItem(item: ReferenceCorpusItem): void {
   }
 }
 
-class FileReferenceCorpusRepository implements ReferenceCorpusRepository {
-  constructor(private readonly dataDir: string) {}
-
-  private filePath(id: string) {
-    return path.join(this.dataDir, `${id}.json`)
-  }
+class DocumentReferenceCorpusRepository implements ReferenceCorpusRepository {
+  constructor(private readonly store: DocumentStore) {}
 
   async save(item: ReferenceCorpusItem): Promise<ReferenceCorpusItem> {
     assertItem(item)
-    await mkdir(this.dataDir, { recursive: true })
-    await writeFile(this.filePath(item.id), JSON.stringify(item, null, 2), "utf-8")
+    await this.store.put(item.id, item)
     return item
   }
 
   async get(id: string): Promise<ReferenceCorpusItem | null> {
-    try {
-      const raw = await readFile(this.filePath(id), "utf-8")
-      const item = JSON.parse(raw) as ReferenceCorpusItem
-      assertItem(item)
-      return item
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === "ENOENT") return null
-      throw error
-    }
+    const raw = await this.store.get(id)
+    if (!raw || typeof raw !== "object") return null
+    const item = raw as ReferenceCorpusItem
+    assertItem(item)
+    return item
   }
 }
 
 export function createReferenceCorpusRepository(options?: {
   dataDir?: string
+  store?: DocumentStore
 }): ReferenceCorpusRepository {
-  return new FileReferenceCorpusRepository(options?.dataDir ?? DEFAULT_DATA_DIR)
+  if (options?.store) {
+    return new DocumentReferenceCorpusRepository(options.store)
+  }
+  if (options?.dataDir) {
+    return new DocumentReferenceCorpusRepository(
+      createFileDocumentStore(options.dataDir)
+    )
+  }
+  return new DocumentReferenceCorpusRepository(
+    createAppDocumentStore("reference_corpus")
+  )
 }
 
 export function defaultReferenceCorpusDataDir(): string {
-  return DEFAULT_DATA_DIR
+  return defaultDocumentDirectory("reference_corpus")
 }

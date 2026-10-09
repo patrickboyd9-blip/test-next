@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto"
-import { mkdir, readFile, writeFile } from "fs/promises"
-import path from "path"
+
+import { createAppDocumentStore, type DocumentStore } from "@/lib/storage/document-store"
 
 import { normalizeCampaignStatus } from "./campaign-status"
 import { getActiveRevision, getActiveSpec, getApprovedSpec } from "./creative-state"
@@ -104,8 +104,6 @@ export interface CampaignRepository {
   unapproveCreative(id: string): Promise<Campaign>
 }
 
-const DATA_DIR = path.join(process.cwd(), ".data", "campaigns")
-
 function backfillDirectionRevisions(
   directions: CreativeDirection[],
   revisions: CreativeRevision[]
@@ -195,33 +193,21 @@ export function normalizeCampaign(raw: Campaign): Campaign {
 }
 
 /**
- * File-backed store for the beta vertical slice. Durable across a dev-server
- * restart, but not the long-term store — swap this class for a real database
- * implementation later; callers only depend on the CampaignRepository
- * interface above, so nothing upstream needs to change.
+ * Campaign mutations over a DocumentStore.
+ * Local JSON files when no database URL is set. Postgres otherwise.
+ * Callers depend only on CampaignRepository.
  */
-class FileCampaignRepository implements CampaignRepository {
-  private async ensureDir() {
-    await mkdir(DATA_DIR, { recursive: true })
-  }
-
-  private filePath(id: string) {
-    return path.join(DATA_DIR, `${id}.json`)
-  }
+class StoredCampaignRepository implements CampaignRepository {
+  constructor(private readonly store: DocumentStore) {}
 
   private async read(id: string): Promise<Campaign | null> {
-    try {
-      const raw = await readFile(this.filePath(id), "utf-8")
-      return normalizeCampaign(JSON.parse(raw) as Campaign)
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === "ENOENT") return null
-      throw error
-    }
+    const raw = await this.store.get(id)
+    if (!raw || typeof raw !== "object") return null
+    return normalizeCampaign(raw as Campaign)
   }
 
   private async write(campaign: Campaign): Promise<Campaign> {
-    await this.ensureDir()
-    await writeFile(this.filePath(campaign.id), JSON.stringify(campaign, null, 2), "utf-8")
+    await this.store.put(campaign.id, campaign)
     return campaign
   }
 
@@ -393,7 +379,13 @@ class FileCampaignRepository implements CampaignRepository {
 
 let repository: CampaignRepository | null = null
 
+export function createCampaignRepository(store: DocumentStore): CampaignRepository {
+  return new StoredCampaignRepository(store)
+}
+
 export function getCampaignRepository(): CampaignRepository {
-  if (!repository) repository = new FileCampaignRepository()
+  if (!repository) {
+    repository = createCampaignRepository(createAppDocumentStore("campaigns"))
+  }
   return repository
 }

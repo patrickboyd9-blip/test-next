@@ -1,27 +1,34 @@
-import { readFile } from "fs/promises"
+import { openStudioImage } from "@/lib/campaign-creator/studio-image-store"
 
-import { resolveStudioImageFile } from "@/lib/campaign-creator/studio-image-paths"
+export const runtime = "nodejs"
+export const dynamic = "force-dynamic"
 
 /**
  * Cached Studio photograph. Not customer artwork upload and not the print-spec guide.
+ * Local files are served directly. Blob-backed files redirect to the public blob URL.
  */
 export async function GET(
   _request: Request,
   context: { params: Promise<{ campaignId: string; file: string }> }
 ): Promise<Response> {
   const { campaignId, file } = await context.params
-  const filePath = resolveStudioImageFile(campaignId, file)
-  if (!filePath) return new Response("Not found", { status: 404 })
+  const image = await openStudioImage(campaignId, file)
+  if (!image) return new Response("Not found", { status: 404 })
 
-  try {
-    const bytes = await readFile(filePath)
-    return new Response(new Uint8Array(bytes), {
+  if (image.kind === "redirect") {
+    return new Response(null, {
+      status: 307,
       headers: {
-        "Content-Type": "image/png",
+        Location: image.url,
         "Cache-Control": "public, max-age=31536000, immutable",
       },
     })
-  } catch {
-    return new Response("Not found", { status: 404 })
   }
+
+  return new Response(new Uint8Array(image.bytes), {
+    headers: {
+      "Content-Type": "image/png",
+      "Cache-Control": "public, max-age=31536000, immutable",
+    },
+  })
 }

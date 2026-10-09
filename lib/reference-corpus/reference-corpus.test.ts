@@ -4,6 +4,8 @@ import os from "os"
 import path from "path"
 import { test } from "node:test"
 
+import { createPostgresDocumentStore } from "../storage/document-store"
+import { MemorySql } from "../storage/memory-sql"
 import { MMR_001_INTAKE, MMR_001_INTAKE_ID } from "./fixtures"
 import {
   createReferenceCorpusRepository,
@@ -185,6 +187,19 @@ test("evidence can come from a research pointer or from media", async () => {
       /requires evidence/
     )
   })
+})
+
+test("reference corpus items persist in postgres when that store is selected", async () => {
+  const sql = new MemorySql()
+  const store = createReferenceCorpusRepository({
+    store: createPostgresDocumentStore("reference_corpus", sql),
+  })
+  await store.save(MMR_001_INTAKE)
+  const loaded = await store.get(MMR_001_INTAKE_ID)
+  assert.equal(loaded?.id, MMR_001_INTAKE_ID)
+  assert.equal(loaded?.provenance.researchId, "MMR-001")
+  assert.match(sql.statements.join("\n"), /INSERT INTO reference_corpus/)
+  assert.equal(await store.get("missing"), null)
 })
 
 test("the corpus store does not live with or write campaign data", async () => {

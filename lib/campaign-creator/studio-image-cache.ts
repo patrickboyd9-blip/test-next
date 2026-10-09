@@ -1,6 +1,3 @@
-import { mkdir, readFile, writeFile } from "fs/promises"
-import path from "path"
-
 import type { GeneratedAsset, ImageGenerationAdapter } from "./image-generation"
 import { toImageBrief } from "./image-brief"
 import { OpenAIImageGenerationNotConfiguredError } from "./openai-image-generation"
@@ -10,11 +7,11 @@ import {
   imageBriefFingerprint,
   type StudioImageRecord,
 } from "./studio-image-fingerprint"
+import { isSafeStudioId } from "./studio-image-paths"
 import {
-  defaultStudioImageCacheRoot,
-  isSafeStudioId,
-  studioImagePublicPath,
-} from "./studio-image-paths"
+  resolveStudioImageStore,
+  type StudioImageStore,
+} from "./studio-image-store"
 import type { CampaignBrief, CreativeSpec } from "./types"
 
 /**
@@ -44,12 +41,14 @@ export async function ensureStudioDirectionImages(options: {
   campaignBrief?: CampaignBrief
   createAdapter: () => ImageGenerationAdapter
   cacheRoot?: string
+  imageStore?: StudioImageStore
+  dedupeScope?: string
 }): Promise<StudioImageLoad> {
   if (!isSafeStudioId(options.campaignId)) {
     throw new Error("Invalid campaign id")
   }
 
-  const cacheRoot = options.cacheRoot ?? defaultStudioImageCacheRoot()
+  const { store, scope } = resolveStudioImageStore(options)
   let adapter: ImageGenerationAdapter | null = null
   const getAdapter = () => {
     if (!adapter) adapter = options.createAdapter()
@@ -66,7 +65,8 @@ export async function ensureStudioDirectionImages(options: {
         directionId: entry.directionId,
         spec: entry.spec,
         campaignBrief: options.campaignBrief,
-        cacheRoot,
+        store,
+        scope,
         getAdapter,
       })
       if (record) records.push(record)
@@ -114,7 +114,8 @@ async function ensureOne(input: {
   directionId: string
   spec: CreativeSpec
   campaignBrief?: CampaignBrief
-  cacheRoot: string
+  store: StudioImageStore
+  scope: string
   getAdapter: () => ImageGenerationAdapter
 }): Promise<StudioImageRecord | null> {
   if (!isSafeStudioId(input.directionId)) return null
@@ -123,7 +124,7 @@ async function ensureOne(input: {
   if (!brief) return null
 
   const fingerprint = imageBriefFingerprint(brief)
-  const key = `${input.cacheRoot}:${input.campaignId}:${input.directionId}:${fingerprint}`
+  const key = `${input.scope}:${input.campaignId}:${input.directionId}:${fingerprint}`
   const pending = inflight.get(key)
   if (pending) return pending
 
@@ -141,7 +142,8 @@ async function loadOrGenerate(input: {
   directionId: string
   spec: CreativeSpec
   campaignBrief?: CampaignBrief
-  cacheRoot: string
+  store: StudioImageStore
+  scope: string
   fingerprint: string
   getAdapter: () => ImageGenerationAdapter
 }): Promise<StudioImageRecord | null> {
@@ -152,21 +154,19 @@ async function loadOrGenerate(input: {
   if (!brief) return null
 
   const fileBase = `${input.directionId}--${input.fingerprint}`
-  const jsonPath = path.join(input.cacheRoot, input.campaignId, `${fileBase}.json`)
-  const cached = await readCachedRecord(jsonPath, input.directionId, input.fingerprint)
+  const cached = cachedRecord(
+    await input.store.readSidecar(input.campaignId, fileBase),
+    input.directionId,
+    input.fingerprint
+  )
   if (cached) return cached
 
   const generated = await input.getAdapter().generate(brief)
-  const asset = await persistAsset(generated, {
-    cacheRoot: input.cacheRoot,
-    campaignId: input.campaignId,
-    fileBase,
+  const asset = await persistAsset(generated, input.store, input.campaignId, fileBase)
+  await input.store.writeSidecar(input.campaignId, fileBase, {
+    fingerprint: input.fingerprint,
+    asset,
   })
-  await mkdir(path.dirname(jsonPath), { recursive: true })
-  await writeFile(
-    jsonPath,
-    JSON.stringify({ fingerprint: input.fingerprint, asset })
-  )
   return {
     directionId: input.directionId,
     fingerprint: input.fingerprint,
@@ -174,38 +174,27 @@ async function loadOrGenerate(input: {
   }
 }
 
-async function readCachedRecord(
-  jsonPath: string,
+function cachedRecord(
+  raw: { fingerprint?: string; asset?: GeneratedAsset } | null,
   directionId: string,
   fingerprint: string
-): Promise<StudioImageRecord | null> {
-  try {
-    const raw = JSON.parse(await readFile(jsonPath, "utf8")) as {
-      fingerprint?: string
-      asset?: GeneratedAsset
-    }
-    if (raw.fingerprint !== fingerprint || !raw.asset?.src) return null
-    if (raw.asset.sourceClass !== "generated") return null
-    return { directionId, fingerprint, asset: raw.asset }
-  } catch {
-    return null
-  }
+): StudioImageRecord | null {
+  if (!raw) return null
+  if (raw.fingerprint !== fingerprint || !raw.asset?.src) return null
+  if (raw.asset.sourceClass !== "generated") return null
+  return { directionId, fingerprint, asset: raw.asset }
 }
 
 async function persistAsset(
   generated: GeneratedAsset,
-  location: { cacheRoot: string; campaignId: string; fileBase: string }
+  store: StudioImageStore,
+  campaignId: string,
+  fileBase: string
 ): Promise<GeneratedAsset> {
   if (!generated.src.startsWith("data:image/")) return generated
   const comma = generated.src.indexOf(",")
   if (comma < 0) return generated
   const bytes = Buffer.from(generated.src.slice(comma + 1), "base64")
-  const fileName = `${location.fileBase}.png`
-  const filePath = path.join(location.cacheRoot, location.campaignId, fileName)
-  await mkdir(path.dirname(filePath), { recursive: true })
-  await writeFile(filePath, bytes)
-  return {
-    ...generated,
-    src: studioImagePublicPath(location.campaignId, fileName),
-  }
+  const src = await store.persistPng(campaignId, `${fileBase}.png`, bytes)
+  return { ...generated, src }
 }
