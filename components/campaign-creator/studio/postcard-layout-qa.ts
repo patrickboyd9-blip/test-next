@@ -13,6 +13,22 @@ import { POSTCARD_5X8_V1 } from "@/lib/mail-catalog/pieces/postcard-5x8"
 
 import { copyRestatesLead } from "./studio-copy-hierarchy"
 import {
+  QR_CONTACT_RESERVE_IN,
+  QR_EDGE_RESERVE_IN,
+  QR_LABEL_PT,
+  QR_MODULE_FIELD,
+  QR_MODULE_INK,
+  QR_ONE_INCH,
+  designRuleFailures,
+  fitQrInches,
+  qrScanLabel,
+  scoreDesignRules,
+  wordCount,
+  type DesignRuleCheck,
+  type DesignRuleFacts,
+  type DesignRuleId,
+} from "./design-rules"
+import {
   QR_LARGE_INCHES,
   QR_STANDARD_INCHES,
   RUBRIC_HEADLINE_BODY_RATIO,
@@ -89,6 +105,7 @@ export interface LayoutIssue {
     | "modules"
     | "scrim"
     | "qr"
+    | "lockup"
     | "keep-out"
   role: "headline" | "subhead" | "offer" | "body" | "cta" | "contact" | "photo" | "card"
   detail: string
@@ -132,14 +149,25 @@ export interface PostcardLayoutPlan {
     body: number
     cta: number
     contact: number
+    website: number
     wordmark: number
   }
   /** Outer QR box, including the quiet zone. */
   qrInches: number
   qrQuietModules: number
+  qrLabel: string
+  /** Code, label, phone, and URL as one band in the type column. */
+  lockup: ContactLockup | null
   rubric: RubricCheck[]
+  designRules: DesignRuleCheck[]
   issues: LayoutIssue[]
   fixes: string[]
+}
+
+export interface ContactLockup {
+  qrRect: NormRect
+  labelRect: NormRect
+  clusterRect: NormRect
 }
 
 const TRIM_W = POSTCARD_5X8_V1.physical.finishedTrimInches.widthInches
@@ -209,6 +237,30 @@ export function resolvePostcardLayout(input: {
   })
 
   const inner = innerTextBox(geometry.textColumn)
+  const contact = input.contact ?? resolveStudioContact(input.spec)
+  const qrPayload = contact.qrPayload
+  const qrClaimed = Boolean(
+    collapse(input.spec.qrDestination) ||
+      collapse(input.spec.website) ||
+      collapse(input.spec.phone)
+  )
+  const qrShown = Boolean(qrPayload) || qrClaimed
+  const fullCard = !input.compact
+  const contactBeside = fullCard && Boolean(contact.phone || contact.website)
+  const requestedQr = input.spec.layoutHints?.qrProminence === "large" ? QR_LARGE_INCHES : QR_STANDARD_INCHES
+  const qrInches = qrShown
+    ? fitQrInches(
+        requestedQr,
+        inner.w * TRIM_W,
+        contactBeside ? QR_CONTACT_RESERVE_IN : QR_EDGE_RESERVE_IN
+      )
+    : requestedQr
+  if (qrShown && qrInches + 0.01 < requestedQr) {
+    fixes.push("Sized the QR so the phone and the quiet zone still fit beside it.")
+  }
+  const qrLabel = qrShown ? qrScanLabel(input.spec.callToAction) : ""
+  const lockup = qrShown || contactBeside ? placeLockup(geometry.textColumn, qrInches, Boolean(qrLabel)) : null
+
   const fitted = fitStack({
     hero: copy.hero,
     subhead: copy.subheadline,
@@ -217,11 +269,11 @@ export function resolvePostcardLayout(input: {
     widthIn: inner.w * TRIM_W,
     heightIn: inner.h * TRIM_H,
     showWordmark: Boolean(input.showWordmark) && !input.compact,
+    qrInches: qrShown ? qrInches : 0,
     fixes,
     issues,
   })
 
-  const qrInches = input.spec.layoutHints?.qrProminence === "large" ? QR_LARGE_INCHES : QR_STANDARD_INCHES
   const marks = studioPrintMarks(treatment, layout)
   const draft = {
     family,
@@ -243,41 +295,67 @@ export function resolvePostcardLayout(input: {
       body: fitted.body.fontPt,
       cta: fitted.ctaPt,
       contact: fitted.contactPt,
+      website: Math.max(PRINT_MIN_PT.contact, fitted.contactPt - 3),
       wordmark: PRINT_MIN_PT.wordmark,
     },
     qrInches,
     qrQuietModules: RUBRIC_QR_QUIET_MODULES,
+    qrLabel,
+    lockup,
     headlineWeight: 800,
     issues,
     fixes,
   }
-  const contact = input.contact ?? resolveStudioContact(input.spec)
-  const qrPayload = contact.qrPayload
-  const qrClaimed = Boolean(
-    collapse(input.spec.qrDestination) ||
-      collapse(input.spec.website) ||
-      collapse(input.spec.phone)
-  )
   const qrDecodable = Boolean(qrPayload && qrPaintDecodes(qrPayload))
-  const rubric = scoreAPlusPostcard(
-    rubricFacts({
+  const rubricInput = {
+    plan: draft,
+    overPhoto: family === "photo-dominant",
+    headlineOverflows: fitted.headline.overflows,
+    offerPaint: copy.offerPaint,
+    phoneShown: Boolean(contact.phone),
+    qrShown,
+    qrDecodable,
+    ctaShown: Boolean(collapse(input.spec.callToAction)),
+    ctaBoxed: marks.ctaMark === "reverse-slug",
+  }
+  const rubric = scoreAPlusPostcard(rubricFacts(rubricInput))
+  const measured = rubricFacts(rubricInput)
+  const back = postcardBackRegions()
+  const designRules = scoreDesignRules(
+    designFacts({
+      measured,
       plan: draft,
-      overPhoto: family === "photo-dominant",
-      headlineOverflows: fitted.headline.overflows,
+      offerPresent: Boolean(collapse(input.spec.offer)),
       offerPaint: copy.offerPaint,
-      phoneShown: Boolean(collapse(input.spec.phone)),
-      qrShown: Boolean(qrPayload) || qrClaimed,
-      qrDecodable,
-      ctaShown: Boolean(collapse(input.spec.callToAction)),
-      ctaBoxed: marks.ctaMark === "reverse-slug",
+      ctaWords: wordCount(input.spec.callToAction),
+      qrPayload,
+      website: contact.website,
+      fullCard,
+      phoneInLockup: fullCard && Boolean(contact.phone),
+      urlInLockup: fullCard && Boolean(contact.website),
+      lockupInsideSafe: lockup
+        ? rectContains(back.safe, lockup.qrRect) &&
+          rectContains(back.safe, lockup.labelRect) &&
+          rectContains(back.safe, lockup.clusterRect)
+        : true,
+      labelOutsideQuiet: lockup ? !rectsIntersect(lockup.qrRect, lockup.labelRect) : true,
+      responseCluster: lockup ? rectContains(draft.textColumn, lockup.clusterRect) : true,
+      qrBesideCta: lockup ? rectContains(lockup.clusterRect, lockup.qrRect) : false,
+      columnCanHoldOneInch:
+        inner.w * TRIM_W - (contactBeside ? QR_CONTACT_RESERVE_IN : QR_EDGE_RESERVE_IN) + 0.001 >=
+        QR_ONE_INCH,
     })
   )
   for (const check of rubric) {
     if (check.pass) continue
     issues.push(rubricIssue(check))
   }
+  for (const check of designRuleFailures(designRules)) {
+    if (coveredByRubric(check.id)) continue
+    issues.push(designIssue(check))
+  }
 
-  return { ...draft, rubric, issues }
+  return { ...draft, rubric, designRules, issues }
 }
 
 export function layoutIssueCopy(issue: LayoutIssue): string {
@@ -292,6 +370,8 @@ export function layoutIssueCopy(issue: LayoutIssue): string {
       return "The photograph still covers less of the card than it should."
     case "qr":
       return "The QR code is missing or will not scan."
+    case "lockup":
+      return "The phone, website, and QR are still not one readable lockup."
     case "headline-length":
       return "The headline is still longer than eight words."
     case "hierarchy":
@@ -407,7 +487,7 @@ export function fitTextLine(input: {
 }
 
 function rubricFacts(input: {
-  plan: Omit<PostcardLayoutPlan, "rubric">
+  plan: Omit<PostcardLayoutPlan, "rubric" | "designRules">
   overPhoto: boolean
   headlineOverflows: boolean
   offerPaint: "headline" | "line" | "subhead" | "none"
@@ -478,6 +558,140 @@ function rubricFacts(input: {
       rectContains(back.safe, back.returnAddress) &&
       rectContains(back.safe, back.indicia),
   }
+}
+
+const RUBRIC_COVERED = new Set<DesignRuleId>([
+  "TP-02",
+  "TP-04",
+  "TP-05",
+  "TP-06",
+  "TP-07",
+  "TP-08",
+  "TP-09",
+  "TP-10",
+  "QR-2",
+])
+
+function coveredByRubric(id: DesignRuleId): boolean {
+  return RUBRIC_COVERED.has(id)
+}
+
+function designIssue(check: DesignRuleCheck): LayoutIssue {
+  return { code: "lockup", role: "contact", detail: check.detail }
+}
+
+function designFacts(input: {
+  measured: ReturnType<typeof rubricFacts>
+  plan: Omit<PostcardLayoutPlan, "rubric" | "designRules">
+  offerPresent: boolean
+  offerPaint: DesignRuleFacts["offerPaint"]
+  ctaWords: number
+  qrPayload: string | null
+  website: string | undefined
+  fullCard: boolean
+  phoneInLockup: boolean
+  urlInLockup: boolean
+  lockupInsideSafe: boolean
+  labelOutsideQuiet: boolean
+  responseCluster: boolean
+  qrBesideCta: boolean
+  columnCanHoldOneInch: boolean
+}): DesignRuleFacts {
+  const { measured, plan } = input
+  return {
+    ctaShown: measured.ctaContrast !== null,
+    ctaWords: input.ctaWords,
+    headlineWords: measured.headlineWords,
+    offerPresent: input.offerPresent,
+    offerPaint: input.offerPaint,
+    headlineContrast: measured.headlineContrast,
+    offerContrast: measured.offerContrast,
+    ctaContrast: measured.ctaContrast,
+    headlinePt: measured.headlinePt,
+    bodyPt: measured.bodyPt,
+    bodyShown: measured.bodyShown,
+    offerPt: measured.offerPt,
+    heroPhoto: measured.heroPhoto,
+    fullBleed: measured.fullBleed,
+    photoShare: measured.photoShare,
+    textInsideSafe: measured.textInsideSafe,
+    photoInsideTrim: measured.photoInsideTrim,
+    boxedModules: measured.boxedModules,
+    typeOnPhoto: measured.typeOnPhoto,
+    scrimCoversType: measured.scrimCoversType,
+    scrimOpacity: measured.scrimOpacity,
+    backClear: measured.backClear,
+    responseCluster: input.responseCluster,
+    qrShown: measured.qrShown,
+    qrDecodable: measured.qrDecodable,
+    qrInches: measured.qrInches,
+    columnCanHoldOneInch: input.columnCanHoldOneInch,
+    qrQuietModules: measured.qrQuietModules,
+    labelPresent: Boolean(plan.qrLabel),
+    labelWords: wordCount(plan.qrLabel),
+    labelOutsideQuiet: input.labelOutsideQuiet,
+    labelPt: QR_LABEL_PT,
+    labelContrast: contrastRatio("#14120f", QR_MODULE_FIELD),
+    moduleContrast: contrastRatio(QR_MODULE_INK, QR_MODULE_FIELD),
+    moduleInkDarker: relativeLuminance(QR_MODULE_INK) < relativeLuminance(QR_MODULE_FIELD),
+    qrBesideCta: input.qrBesideCta,
+    lockupInsideSafe: input.lockupInsideSafe,
+    fullCard: input.fullCard,
+    phoneShown: measured.phoneShown,
+    phoneInLockup: input.phoneInLockup,
+    phonePt: measured.phonePt,
+    urlShown: Boolean(input.website),
+    urlInLockup: input.urlInLockup,
+    urlPt: plan.typePt.website,
+    urlMatchesQr: hostsMatch(input.website, input.qrPayload),
+  }
+}
+
+function hostsMatch(website: string | undefined, payload: string | null): boolean {
+  if (!payload || payload.startsWith("tel:")) return true
+  if (!website) return true
+  const left = hostnameOf(website)
+  const right = hostnameOf(payload)
+  if (!left || !right) return true
+  return left === right
+}
+
+function hostnameOf(value: string): string | null {
+  const trimmed = value.trim()
+  if (!trimmed) return null
+  try {
+    const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`
+    return new URL(withProtocol).hostname.replace(/^www\./i, "").toLowerCase()
+  } catch {
+    return null
+  }
+}
+
+const QR_LABEL_BLOCK_IN = 0.16
+const QR_LABEL_GAP_IN = 0.04
+
+function placeLockup(column: NormRect, qrInches: number, withLabel: boolean): ContactLockup {
+  const inner = innerTextBox(column)
+  const qrW = qrInches / TRIM_W
+  const qrH = qrInches / TRIM_H
+  const labelH = withLabel ? QR_LABEL_BLOCK_IN / TRIM_H : 0
+  const gapH = withLabel ? QR_LABEL_GAP_IN / TRIM_H : 0
+  const qrX = Math.max(inner.x, inner.x + inner.w - qrW)
+  const qrY = Math.max(inner.y, inner.y + inner.h - qrH - labelH - gapH)
+  const qrRect = { x: qrX, y: qrY, w: Math.min(qrW, inner.w), h: qrH }
+  const labelRect = {
+    x: qrRect.x,
+    y: qrRect.y + qrRect.h + gapH,
+    w: qrRect.w,
+    h: labelH,
+  }
+  const clusterRect = {
+    x: inner.x,
+    y: qrRect.y,
+    w: inner.w,
+    h: Math.max(qrRect.h, labelRect.y + labelRect.h - qrRect.y),
+  }
+  return { qrRect, labelRect, clusterRect }
 }
 
 function rubricIssue(check: RubricCheck): LayoutIssue {
@@ -841,6 +1055,7 @@ function fitStack(input: {
   widthIn: number
   heightIn: number
   showWordmark: boolean
+  qrInches: number
   fixes: string[]
   issues: LayoutIssue[]
 }): {
@@ -854,7 +1069,7 @@ function fitStack(input: {
   const wordmarkH = input.showWordmark ? 0.34 : 0
   const ctaPt = PRINT_MAX_PT.cta
   const contactPt = 16
-  const marksH = 1.3
+  const marksH = input.qrInches > 0 ? Math.max(1.35, input.qrInches + QR_LABEL_BLOCK_IN + QR_LABEL_GAP_IN) : 1.15
   const gap = 0.14
   let remain = Math.max(0.5, input.heightIn - wordmarkH - marksH - gap)
 

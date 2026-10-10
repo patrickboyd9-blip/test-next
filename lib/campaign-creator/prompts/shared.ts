@@ -29,7 +29,8 @@ export const SPEC_FIELD_RULES = `CreativeSpec rules:
 - headline: 3 to 6 words. Hard cap 8. A short display line, not a sentence. Do not put the offer or supporting detail here.
 - subheadline: the offer and supporting detail. Max 18 words. Use it whenever the offer or a qualifier would otherwise make the headline a sentence.
 - body: max 40 words
-- callToAction: optional. max 6 words when present. Omit when this direction has no response action on this face.
+- callToAction: optional. max 6 words when present. Omit when this direction has no response action on this face. One action only.
+- When phone, website, or qrDestination is on this face, they are one lockup next to that call to action. They serve the same action. Do not invent a second action. The photograph contains no QR code, phone number, or URL.
 - palette: exactly 3 hex colors (primary, secondary, accent)
 - layoutVariant: one of type_primary_split, peer_split, banded_split, image_grounded, type_only. The compositional structure of the piece — not the leadJob, not imageryRole, and not a template, crop, or component.
   type_primary_split: Type/message is the dominant compositional field; image is supporting.
