@@ -53,9 +53,12 @@ test("studio files are written and read with private blob access", async () => {
   const store = createVercelBlobObjectStore("rw-token", sdk)
   const saved = await store.put("studio-images/c/a.png", Buffer.from("hi"), "image/png")
   assert.match(saved.url, /\.private\.blob\.vercel-storage\.com/)
+  const created = await store.putNew("studio-images/c/a.json", "{}", "application/json")
+  assert.ok(created)
   const loaded = await store.get("studio-images/c/a.png")
   assert.equal(loaded?.body.toString(), "hello")
   assert.deepEqual(calls, [
+    { method: "put", access: STUDIO_BLOB_ACCESS, token: "rw-token" },
     { method: "put", access: STUDIO_BLOB_ACCESS, token: "rw-token" },
     { method: "get", access: STUDIO_BLOB_ACCESS, token: "rw-token" },
   ])

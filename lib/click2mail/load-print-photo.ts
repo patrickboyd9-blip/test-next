@@ -8,6 +8,7 @@ import type { PostcardPrintImage } from "@/lib/print-spec/render-campaign-postca
 /**
  * The final-tier Studio photograph, when one has been saved.
  * A preview is not used: enlarging it would drop below 300 DPI.
+ * openStudioImage already returns the bytes for a local file or a private blob.
  */
 export async function loadFinalPostcardPhoto(
   campaign: Campaign
@@ -22,16 +23,8 @@ export async function loadFinalPostcardPhoto(
 
   const fileName = `${studioImageFileBase(mailPiece.directionId, fingerprint, "final")}.png`
   const opened = await openStudioImage(campaign.id, fileName)
-  if (!opened) return null
+  if (!opened || opened.bytes.length === 0) return null
 
-  const bytes = opened.kind === "bytes" ? opened.bytes : await readRemote(opened.url)
-  if (!bytes || bytes.length === 0) return null
-  const size = readRasterSize(bytes)
-  return { bytes, width: size.width, height: size.height }
-}
-
-async function readRemote(url: string): Promise<Buffer | null> {
-  const response = await fetch(url)
-  if (!response.ok) return null
-  return Buffer.from(await response.arrayBuffer())
+  const size = readRasterSize(opened.bytes)
+  return { bytes: opened.bytes, width: size.width, height: size.height }
 }
