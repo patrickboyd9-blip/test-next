@@ -72,7 +72,7 @@ function generated(src: string): GeneratedAsset {
   }
 }
 
-test("blob storage keeps the in-flight dedupe and serves the image route by redirect", async () => {
+test("blob storage keeps the in-flight dedupe and the image route reads the bytes", async () => {
   const blobs = new MemoryBlob()
   const store = createBlobStudioImageStore(blobs)
   let calls = 0
@@ -103,7 +103,7 @@ test("blob storage keeps the in-flight dedupe and serves the image route by redi
   assert.equal(calls, 1)
   assert.equal(first.records.length, 1)
   assert.equal(first.records[0]?.asset.src, second.records[0]?.asset.src)
-  assert.match(first.records[0]?.asset.src ?? "", /^https:\/\/blob\.example\/studio-images\/camp-blob-1\/dir-inspect--[a-f0-9]+\.png$/)
+  assert.match(first.records[0]?.asset.src ?? "", /^\/api\/studio-image\/camp-blob-1\/dir-inspect--[a-f0-9]+\.png$/)
 
   const fileName = first.records[0]!.asset.src.split("/").pop()!
   const png = blobs.objects.get(studioImageBlobPath("camp-blob-1", fileName))
@@ -123,10 +123,8 @@ test("blob storage keeps the in-flight dedupe and serves the image route by redi
     cacheRoot: path.join(os.tmpdir(), "studio-images-missing"),
     blobs,
   })
-  assert.equal(opened?.kind, "redirect")
-  if (opened?.kind === "redirect") {
-    assert.equal(opened.url, first.records[0]?.asset.src)
-  }
+  assert.equal(opened?.kind, "bytes")
+  if (opened?.kind === "bytes") assert.equal(opened.bytes.toString(), "hello")
 })
 
 test("a local studio image is served as bytes and a missing blob is a 404", async () => {

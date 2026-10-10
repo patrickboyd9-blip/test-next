@@ -94,7 +94,8 @@ export function PostcardPreview({
     : postcardLayoutIssues(
         spec,
         compact,
-        Boolean(businessNameForCard(contact.businessName, spec.headline))
+        Boolean(businessNameForCard(contact.businessName, spec.headline)),
+        contact
       )
 
   const content = isAddressSide ? (

@@ -47,8 +47,13 @@ const ROLE_LABELS: Record<string, string> = {
   barcode_clear_zone: "Barcode clear zone",
 }
 
-export function postcardLayoutIssues(spec: CreativeSpec, compact: boolean, showWordmark: boolean) {
-  return resolvePostcardLayout({ spec, compact, showWordmark }).issues
+export function postcardLayoutIssues(
+  spec: CreativeSpec,
+  compact: boolean,
+  showWordmark: boolean,
+  contact?: StudioContact
+) {
+  return resolvePostcardLayout({ spec, compact, showWordmark, contact }).issues
 }
 
 export function PostcardFrontFace({
@@ -73,6 +78,7 @@ export function PostcardFrontFace({
     spec,
     compact,
     showWordmark: Boolean(wordmark) && !compact,
+    contact,
   })
   const treatment = studioCompositionTreatment({
     leadJob: spec.leadJob,

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
 
+import { resolveStudioContact } from "@/lib/campaign-creator/studio-contact"
 import type { CreativeSpec } from "@/lib/campaign-creator/types"
 
 import {
@@ -188,6 +189,30 @@ test("a type-led booking card fails AF7 when the QR cannot be encoded", () => {
   assert.match(af7?.detail ?? "", /missing or will not scan/)
   assert.ok(plan.issues.some((issue) => issue.code === "qr"))
   assert.match(layoutIssueCopy({ code: "qr", role: "contact", detail: "" }), /will not scan/)
+})
+
+test("the QR check uses the code the card paints, including the brief website", () => {
+  const next = spec({
+    layoutVariant: "type_only",
+    imageryRole: "none",
+    imagery: "none",
+    headline: "Your Table Is Waiting",
+    phone: undefined,
+    website: undefined,
+    qrDestination: "Reserve a table",
+  })
+  const withoutBrief = resolvePostcardLayout({ spec: next })
+  assert.ok(withoutBrief.issues.some((issue) => issue.code === "qr"))
+
+  const contact = resolveStudioContact(next, {
+    businessName: "Jordan's Plumbing",
+    website: "https://jordans.example/book",
+  })
+  const plan = resolvePostcardLayout({ spec: next, contact })
+  const af7 = plan.rubric.find((check) => check.id === "AF7")
+  assert.equal(af7?.pass, true, af7?.detail)
+  assert.equal(plan.issues.some((issue) => issue.code === "qr"), false)
+  assert.equal(contact.qrPayload, "https://jordans.example/book")
 })
 
 test("a type-led booking URL decodes, so AF7 passes", () => {

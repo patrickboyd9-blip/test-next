@@ -5,6 +5,7 @@ import { renderToStaticMarkup } from "react-dom/server"
 
 import { toCreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import { POSTCARD_5X8_V1 } from "@/lib/mail-catalog/pieces/postcard-5x8"
+import type { PostcardIdentity } from "@/lib/campaign-creator/studio-contact"
 import type { CreativeSpec } from "@/lib/campaign-creator/types"
 
 import jsQR from "jsqr"
@@ -68,7 +69,7 @@ function decodeRenderedQr(html: string): string | null {
   return jsQR(data, size, size)?.data ?? null
 }
 
-function htmlFor(next: CreativeSpec): string {
+function htmlFor(next: CreativeSpec, identity?: PostcardIdentity): string {
   return renderToStaticMarkup(
     createElement(PostcardPreview, {
       canvas,
@@ -76,6 +77,7 @@ function htmlFor(next: CreativeSpec): string {
       side: "front",
       size: "hero",
       enableHoverTilt: false,
+      identity,
     })
   )
 }
@@ -119,6 +121,25 @@ test("a long roofing headline is shortened, the photo takes half the card, and t
   assert.ok(share >= 0.5, `photo share ${share}`)
   assert.match(html, /data-layout-family="split"/)
   assert.match(html, /data-layout-issues="none"/)
+})
+
+test("a prose reservation line still paints the brief website, and the warning agrees", () => {
+  const html = htmlFor(
+    spec({
+      headline: "Your Table Is Waiting",
+      callToAction: "Scan to reserve now",
+      qrDestination: "Reserve a table",
+      phone: undefined,
+      website: undefined,
+    }),
+    {
+      businessName: "Jordan's Plumbing",
+      website: "https://jordans.example/book",
+    }
+  )
+  assert.equal(decodeRenderedQr(html), "https://jordans.example/book")
+  assert.doesNotMatch(html, /will not scan/)
+  assert.doesNotMatch(html, /data-layout-issues="[^"]*\bqr\b/)
 })
 
 test("a type-led navy card paints a scannable QR tile instead of an empty square", () => {

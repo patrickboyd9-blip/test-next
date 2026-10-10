@@ -44,7 +44,18 @@ import type { CampaignBrief, CampaignCreative, CreativeSpec } from "./types"
  * One photograph is started per request. The browser polls. A killed run
  * leaves the job stale; the next poll retries it once. A picture that already
  * landed in storage is never generated again.
+ *
+ * after() only keeps the function alive for the promise the callback returns.
+ * Dropping that promise (void work()) lets Vercel freeze the invocation
+ * before the photograph is saved, and the card stays on "Making the photograph".
  */
+export function scheduleAfterResponse(
+  afterFn: (task: () => Promise<unknown>) => void,
+  work: () => Promise<void>
+): void {
+  afterFn(() => work())
+}
+
 const MAX_ATTEMPTS = 2
 const STALE_MS = 75_000
 
