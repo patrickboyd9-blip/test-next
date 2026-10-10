@@ -86,6 +86,29 @@ test("a weak roofing label becomes three different trade scenes", () => {
   assert.match(subjects[0]!.craft ?? "", /interior leak|not a crew portrait/i)
 })
 
+test("a before/after concept is prompted as one cohesive photograph", () => {
+  const visualDirection =
+    "Before and after of a worn roof on the left half and a new roof on the right half, two photos stitched together."
+  const brief = toImageBrief(
+    spec({
+      visualDirection,
+      layoutVariant: "peer_split",
+      headline: "See The Transformation",
+      imageryRole: "neighborhood",
+      leadJob: "trust",
+    }),
+    { campaign: roofingBrief, variationKey: "dir-transform" }
+  )
+  assert.ok(brief)
+  const prompt = buildOpenAIImagePrompt(brief)
+  assert.match(prompt, /One cohesive photograph of a single moment/)
+  assert.match(prompt, /do not stitch two photos together/i)
+  assert.match(prompt, /No before-and-after diptych/)
+  assert.doesNotMatch(prompt, /left half/)
+  assert.doesNotMatch(prompt, /right half/)
+  assert.doesNotMatch(prompt, /stitched together/)
+})
+
 test("a specific conceived scene is kept and still art-directed", () => {
   const visualDirection =
     "A slow drip from a ceiling stain into a bucket in an ordinary living room, illustrative and not this house."

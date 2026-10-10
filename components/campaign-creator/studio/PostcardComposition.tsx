@@ -9,18 +9,19 @@ import {
   displayWebsite,
   type StudioContact,
 } from "@/lib/campaign-creator/studio-contact"
-import { buildQrMatrix } from "@/lib/campaign-creator/studio-qr"
+import { paintQr } from "@/lib/campaign-creator/studio-qr"
 import { STUDIO_DISPLAY_CSS, STUDIO_TEXT_CSS } from "@/lib/campaign-creator/studio-typeface"
 
 import {
   layoutIssueCopy,
+  photoScrimGradient,
   pointsToCqw,
   postcardBackRegions,
   resolvePostcardLayout,
   type NormRect,
   type PostcardLayoutPlan,
 } from "./postcard-layout-qa"
-import { qrQuietPaddingRatio, rubricFailures } from "./postcard-rubric"
+import { rubricFailures } from "./postcard-rubric"
 import {
   studioCompositionTreatment,
   studioPrintMarks,
@@ -102,6 +103,7 @@ export function PostcardFrontFace({
       data-layout-family={plan.family}
       data-photo-share={plan.photoShare.toFixed(3)}
       data-headline-pt={plan.typePt.headline.toFixed(1)}
+      data-headline-weight={plan.headlineWeight}
       data-layout-issues={plan.issues.map((issue) => issue.code).join(" ") || "none"}
       data-rubric-fails={rubricFailures(plan.rubric).map((check) => check.id).join(" ") || "none"}
       data-qr-in={plan.qrInches.toFixed(3)}
@@ -130,15 +132,23 @@ export function PostcardFrontFace({
           />
         </div>
       ) : null}
+      {plan.family === "photo-dominant" && plan.scrimRect ? (
+        <div
+          data-region="scrim"
+          data-scrim="gradient"
+          className="pointer-events-none absolute"
+          style={{
+            ...rectStyle(plan.scrimRect),
+            background: photoScrimGradient(plan) ?? undefined,
+          }}
+        />
+      ) : null}
       <div
         data-region={typeRegion}
         className="absolute flex flex-col overflow-hidden"
         style={{
           ...rectStyle(plan.textColumn),
-          backgroundColor:
-            plan.family === "photo-dominant"
-              ? cssColor(plan.colors.scrim, plan.colors.scrimOpacity)
-              : plan.colors.field,
+          backgroundColor: plan.family === "photo-dominant" ? "transparent" : plan.colors.field,
           padding: "1.25% 1.5%",
         }}
       >
@@ -248,9 +258,10 @@ function DisplayStack({ plan, compact }: { plan: PostcardLayoutPlan; compact: bo
       {plan.hero ? (
         <p
           className="font-extrabold"
+          data-headline-weight={plan.headlineWeight}
           style={{
             fontFamily: STUDIO_DISPLAY_CSS,
-            fontWeight: 800,
+            fontWeight: plan.headlineWeight,
             fontSize: pointsToCqw(plan.typePt.headline),
             lineHeight: 1.02,
             letterSpacing: "-0.03em",
@@ -416,33 +427,50 @@ function ContactPrint({
 }
 
 function QrMark({ payload, sizeIn }: { payload: string; sizeIn: number }) {
-  const matrix = useMemo(() => buildQrMatrix(payload), [payload])
-  if (!matrix) return null
-  const modules = matrix.length
-  const box = `${((sizeIn / 8) * 100).toFixed(3)}cqw`
-  const quiet = qrQuietPaddingRatio(modules)
+  const painted = useMemo(() => paintQr(payload), [payload])
+  if (!painted) return null
+  const total = painted.modules + painted.quiet * 2
+  const symbol = `${((sizeIn / 8) * 100).toFixed(3)}cqw`
+  // Stay inside the four-module quiet zone so the rounded corner never clips a module.
+  const radius = `${(((sizeIn * 1.6) / total / 8) * 100).toFixed(3)}cqw`
   return (
     <div
       className="shrink-0 bg-white"
-      style={{ width: box, height: box, padding: `${(quiet * 100).toFixed(2)}%` }}
-      role="img"
-      aria-label={`QR code for ${payload}`}
-      data-qr-quiet-modules="4"
+      data-qr-tile="rounded"
+      style={{ width: symbol, borderRadius: radius, overflow: "hidden" }}
     >
-      <div
-        className="grid h-full w-full"
-        style={{ gridTemplateColumns: `repeat(${modules}, minmax(0, 1fr))` }}
+      <svg
+        viewBox={`0 0 ${total} ${total}`}
+        role="img"
+        aria-label={`QR code for ${payload}`}
+        data-qr-modules={painted.modules}
+        data-qr-quiet-modules={painted.quiet}
+        shapeRendering="crispEdges"
+        style={{ display: "block", width: "100%", height: "auto" }}
       >
-        {matrix.flatMap((row, y) =>
-          row.map((on, x) => (
-            <span
-              key={`${y}-${x}`}
-              className="block"
-              style={{ backgroundColor: on ? "#111111" : "#ffffff" }}
-            />
-          ))
-        )}
-      </div>
+        <rect width={total} height={total} fill="#ffffff" />
+        {painted.dark.map(([x, y]) => (
+          <rect
+            key={`${x}-${y}`}
+            x={x + painted.quiet}
+            y={y + painted.quiet}
+            width={1}
+            height={1}
+            fill="#111111"
+          />
+        ))}
+      </svg>
+      <p
+        className="text-center font-semibold uppercase tracking-[0.12em]"
+        style={{
+          color: "#14120f",
+          fontSize: "clamp(7px, 1.2cqw, 11px)",
+          lineHeight: 1,
+          padding: "0.35em 0.4em 0.55em",
+        }}
+      >
+        Scan to book
+      </p>
     </div>
   )
 }
@@ -567,15 +595,6 @@ function rectStyle(rect: NormRect): CSSProperties {
     width: `${rect.w * 100}%`,
     height: `${rect.h * 100}%`,
   }
-}
-
-function cssColor(hex: string, opacity: number): string {
-  if (opacity >= 0.999) return hex
-  const value = hex.replace("#", "")
-  const r = parseInt(value.slice(0, 2), 16)
-  const g = parseInt(value.slice(2, 4), 16)
-  const b = parseInt(value.slice(4, 6), 16)
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`
 }
 
 function monogramLetter(headline: string | undefined): string {

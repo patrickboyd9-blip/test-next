@@ -63,6 +63,8 @@ export interface RubricFacts {
   phoneShown: boolean
   phonePt: number
   qrShown: boolean
+  /** False when a QR should be on this face but the painted symbol will not scan. */
+  qrDecodable: boolean
   qrInches: number
   qrQuietModules: number
   boxedModules: number
@@ -179,14 +181,16 @@ function af6(facts: RubricFacts): RubricCheck {
 
 function af7(facts: RubricFacts): RubricCheck {
   const phoneOk = !facts.phoneShown || facts.phonePt + 0.01 >= RUBRIC_PHONE_MIN_PT
-  const qrOk =
-    !facts.qrShown ||
-    (facts.qrInches + 0.001 >= RUBRIC_QR_MIN_INCHES &&
-      facts.qrQuietModules >= RUBRIC_QR_QUIET_MODULES)
+  const sizeOk =
+    facts.qrInches + 0.001 >= RUBRIC_QR_MIN_INCHES &&
+    facts.qrQuietModules >= RUBRIC_QR_QUIET_MODULES
+  const qrOk = !facts.qrShown || (sizeOk && facts.qrDecodable)
   const phone = facts.phoneShown ? `phone ${trimPt(facts.phonePt)}pt` : "no phone on this face"
-  const qr = facts.qrShown
-    ? `QR ${facts.qrInches.toFixed(2)}in with a ${facts.qrQuietModules}-module quiet zone`
-    : "no QR on this face"
+  const qr = !facts.qrShown
+    ? "no QR on this face"
+    : !facts.qrDecodable
+      ? "QR is missing or will not scan"
+      : `QR ${facts.qrInches.toFixed(2)}in with a ${facts.qrQuietModules}-module quiet zone and it scans`
   return {
     id: "AF7",
     pass: phoneOk && qrOk,

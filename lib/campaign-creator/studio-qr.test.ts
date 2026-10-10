@@ -4,7 +4,7 @@ import { test } from "node:test"
 import jsQR from "jsqr"
 
 import { resolveStudioContact } from "./studio-contact"
-import { buildQrMatrix } from "./studio-qr"
+import { buildQrMatrix, paintQr, qrPaintDecodes } from "./studio-qr"
 
 test("QR encodes the brief URL when the spec still has toy contact", () => {
   const contact = resolveStudioContact(
@@ -67,6 +67,17 @@ test("no scannable target produces no matrix", () => {
   assert.equal(contact.qrPayload, null)
   assert.equal(buildQrMatrix(""), null)
   assert.equal(buildQrMatrix("   "), null)
+})
+
+test("the painted symbol decodes, and a blank payload does not", () => {
+  const payload = "https://summitroofing.com/inspect"
+  const painted = paintQr(payload)
+  assert.ok(painted)
+  assert.ok(painted.dark.length > 20)
+  assert.equal(painted.quiet, 4)
+  assert.equal(qrPaintDecodes(payload), true)
+  assert.equal(qrPaintDecodes(""), false)
+  assert.equal(qrPaintDecodes("   "), false)
 })
 
 test("different payloads produce different matrices", () => {

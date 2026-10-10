@@ -58,6 +58,55 @@ const directions: Array<{ name: string; spec: CreativeSpec }> = [
   },
 ]
 
+test("the founder's three roofing directions pass every automated auto-fail", () => {
+  const founder = [
+    {
+      name: "Book In Seconds",
+      spec: roofing({
+        layoutVariant: "type_only",
+        headline: "Book In Seconds",
+        subheadline: "A free roof inspection, on your schedule.",
+        callToAction: "Book a time",
+        offer: "Free roof inspection",
+        visualDirection: "Type only. Navy field, no photograph.",
+        palette: ["#1e3a5f", "#F5C518", "#f4f1ea"],
+        imagery: "none",
+        imageryRole: "none",
+        leadJob: "offer",
+      }),
+    },
+    {
+      name: "Photo led",
+      spec: roofing({
+        layoutVariant: "image_grounded",
+        headline: "Free Roof Inspection",
+        palette: ["#3d4450", "#d9d6d0", "#f4f1ea"],
+        imageryRole: "neighborhood",
+        leadJob: "offer",
+      }),
+    },
+    {
+      name: "See The Transformation",
+      spec: roofing({
+        layoutVariant: "peer_split",
+        headline: "See The Transformation",
+        subheadline: "One finished roof.",
+        callToAction: "Book the inspection",
+        palette: ["#1e3a5f", "#8aa4b5", "#f6f1e7"],
+        imageryRole: "neighborhood",
+        leadJob: "trust",
+        visualDirection:
+          "Before and after of a worn roof on the left half and a new roof on the right half.",
+      }),
+    },
+  ]
+  for (const direction of founder) {
+    const plan = resolvePostcardLayout({ spec: direction.spec, showWordmark: true })
+    const failed = plan.rubric.filter((check) => !check.pass).map((check) => `${check.id} ${check.detail}`)
+    assert.deepEqual(failed, [], `${direction.name}\n${plan.rubric.map((check) => `${check.id} ${check.pass ? "pass" : "fail"} — ${check.detail}`).join("\n")}`)
+  }
+})
+
 test("the three roofing directions pass every automated auto-fail", () => {
   for (const direction of directions) {
     const plan = resolvePostcardLayout({ spec: direction.spec, showWordmark: true })
@@ -104,6 +153,7 @@ test("each auto-fail can fire on its own", () => {
     { id: "AF7", patch: { phoneShown: true, phonePt: 9 } },
     { id: "AF7", patch: { qrShown: true, qrInches: 0.5, qrQuietModules: 4 } },
     { id: "AF7", patch: { qrShown: true, qrInches: 1, qrQuietModules: 1 } },
+    { id: "AF7", patch: { qrShown: true, qrDecodable: false } },
     { id: "AF8", patch: { boxedModules: 4 } },
     { id: "AF9", patch: { typeOnPhoto: true, scrimCoversType: false, scrimOpacity: 0 } },
     { id: "AF10", patch: { backClear: false } },
@@ -134,6 +184,7 @@ function passingFacts(): RubricFacts {
     phoneShown: true,
     phonePt: 16,
     qrShown: true,
+    qrDecodable: true,
     qrInches: 1.125,
     qrQuietModules: 4,
     boxedModules: 2,
