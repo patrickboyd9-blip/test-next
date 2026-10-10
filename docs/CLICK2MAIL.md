@@ -44,6 +44,8 @@ The PDF matches the 5×8 postcard we already locked:
 
 The front uses the final Studio photograph when that file is already at least 300 dots per inch at print size. A smaller preview is not stretched. If the final photograph is not ready yet, the file uses the approved words on a solid color so a staging test can still go out. Fonts are embedded. Color is still RGB. Click2Mail prefers CMYK, and an RGB file can shift when it is printed. We are not hiding that.
 
+The address side prints the approved creative in the open area only: the brand, a short message, the offer, the phone, a QR code for the scan destination, and the return lines. The address panel and the barcode strip stay blank so Click2Mail can print the recipient, indicia, and barcode there.
+
 ## Credentials
 
 Set these on the server, or in your shell before the smoke test. Never commit them.
@@ -80,7 +82,13 @@ Click2Mail does not publish the exact postcard option strings. They come from th
 | `C2M_BILLING_TYPE` | `User Credit` |
 | `C2M_ADDRESS_MAPPING_ID` | `1` |
 
-Address lists are ready when the status is **3 or higher and not 9**. Their older docs say 3, a legacy guide says 5, and 9 means error. `C2M_ADDRESS_LIST_READY_MIN` (default `3`) and `C2M_ADDRESS_LIST_ERROR_STATUS` (default `9`) change that rule.
+Address lists are ready when the status is **3 or higher and not 9**. Their older docs say 3, a legacy guide says 5, and 9 means error. A live staging list reached **3** (`CASS Standardized`) and never returned 5. `C2M_ADDRESS_LIST_READY_MIN` (default `3`) and `C2M_ADDRESS_LIST_ERROR_STATUS` (default `9`) change that rule.
+
+## Staging credit and postage
+
+A staging credit purchase can return Success while `GET /credit` stays at **0.00**. Submitting with **User Credit** still succeeds. The smoke test does not stop `--submit` on staging because the balance is under $1. The in-app test order does not check the balance either. `--skip-balance-check` is there if you need the same skip outside staging. `--buy-credit` still adds $10 with the published staging test card when you ask for it.
+
+A live staging job (1297313, total $1.30) listed postage as **First Class Automation Letter** at **$0.707**. Confirm with Click2Mail that this product is classified as a postcard before any production mailing. The mail class we send is `First Class`.
 
 The other paper we have seen named is `White 80# Gloss with UV Coating`. If the first paper name is rejected, pass the other one to the smoke test.
 
@@ -98,13 +106,13 @@ npm run c2m:smoke
 
 That checks the credit balance, builds a sample postcard PDF, uploads it, creates a one-address list, creates a job, and requests a proof. It does **not** submit the job, so it does not spend credit.
 
-If the balance is under $1:
+On staging, a balance under $1 does not stop the run. Staging can keep reporting 0.00 after a purchase and still accept the submit. To add $10 anyway:
 
 ```bash
 npm run c2m:smoke -- --buy-credit
 ```
 
-That adds $10 with Click2Mail’s published staging test card (`4111111111111111`, a future expiration). It will not do that against production.
+That uses Click2Mail’s published staging test card (`4111111111111111`, a future expiration). It will not do that against production. Outside staging, a balance under $1 stops the run unless you pass `--skip-balance-check`.
 
 When the proof looks acceptable and you want to spend staging credit:
 

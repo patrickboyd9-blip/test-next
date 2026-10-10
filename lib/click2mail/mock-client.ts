@@ -53,7 +53,12 @@ export function createMockClick2MailClient(options?: {
     },
     async getJob(jobId) {
       calls.push(`getJob:${jobId}`)
-      return { id: jobId, status: 0, description: "Success", jobStatus: "AWAITING_PRODUCTION" }
+      return {
+        id: jobId,
+        status: 4,
+        description: "Awaiting Production",
+        jobStatus: "AWAITING_PRODUCTION",
+      }
     },
     async getTracking(jobId) {
       calls.push(`getTracking:${jobId}`)

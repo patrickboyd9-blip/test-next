@@ -124,6 +124,8 @@ export async function placeClick2MailOrder(input: PlaceOrderInput): Promise<Mail
     }
 
     if (input.submit && !order.submitted) {
+      // Staging /credit can stay 0.00 after a purchase that returned Success.
+      // User Credit submit still succeeds there, so this path does not read or block on balance.
       const submitted = await input.client.submitJob(order.jobId, product.billingType)
       order.submitted = true
       order.submittedAt = now()

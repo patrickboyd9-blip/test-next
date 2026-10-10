@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <job>
-    <id>8675309</id>
-    <status>0</status>
-    <description>Success</description>
-    <jobStatus>AWAITING_PRODUCTION</jobStatus>
+    <id>1297313</id>
+    <status>4</status>
+    <description>Awaiting Production</description>
 </job>

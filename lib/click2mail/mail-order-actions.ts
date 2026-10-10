@@ -2,7 +2,7 @@
 
 import { isAtOrPastStatus } from "@/lib/campaign-creator/campaign-status"
 import { getCampaignRepository } from "@/lib/campaign-creator/repository"
-import { postcardIdentityFromBrief, resolveStudioContact } from "@/lib/campaign-creator/studio-contact"
+import { displayWebsite, postcardIdentityFromBrief, resolveStudioContact } from "@/lib/campaign-creator/studio-contact"
 import type { Campaign, CreativeSpec } from "@/lib/campaign-creator/types"
 import type { PostcardPrintCopy } from "@/lib/print-spec/render-campaign-postcard-pdf"
 import { renderPostcardPrintPdf } from "@/lib/print-spec/render-campaign-postcard-pdf"
@@ -182,14 +182,17 @@ function printCopy(campaign: Campaign): PostcardPrintCopy {
   const spec = campaign.mailPiece?.spec ?? {}
   const identity = postcardIdentityFromBrief(campaign.brief)
   const contact = resolveStudioContact(spec, identity)
+  const address = campaign.brief.businessInfo?.address?.trim()
   return {
     headline: spec.headline,
     body: spec.body,
     offer: spec.offer,
     callToAction: spec.callToAction,
-    businessName: identity.businessName,
+    businessName: contact.businessName,
     phone: contact.phone,
-    website: contact.website,
+    website: contact.website ? displayWebsite(contact.website) : undefined,
+    qrPayload: contact.qrPayload ?? undefined,
+    returnLines: address ? [address] : [],
   }
 }
 

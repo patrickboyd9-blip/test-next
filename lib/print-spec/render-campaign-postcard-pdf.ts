@@ -4,6 +4,8 @@ import path from "node:path"
 import fontkit from "@pdf-lib/fontkit"
 import { PDFDocument, rgb, type PDFFont, type PDFPage } from "pdf-lib"
 
+import { buildQrMatrix, QR_QUIET_MODULES } from "../campaign-creator/studio-qr"
+
 import type { InchesRect } from "./postcard-5x8-print-spec"
 import {
   buildPostcard5x8PrintSpec,
@@ -24,6 +26,54 @@ export interface PostcardPrintCopy {
   businessName?: string
   phone?: string
   website?: string
+  /** Scan target painted inside the address-side content box. */
+  qrPayload?: string
+  /** Return lines in the content box. The vendor address panel stays blank. */
+  returnLines?: string[]
+}
+
+export interface AddressBackPlan {
+  returnLines: string[]
+  brand?: string
+  message?: string
+  supporting?: string
+  offer?: string
+  phone?: string
+  website?: string
+  callToAction?: string
+  qrPayload?: string
+}
+
+const QR_MAX_INCHES = 1.05
+
+export function addressBackPlan(copy: PostcardPrintCopy): AddressBackPlan {
+  const brand = textOf(copy.businessName)
+  const headline = textOf(copy.headline)
+  const body = textOf(copy.body)
+  return {
+    returnLines: (copy.returnLines ?? []).map(textOf).filter((line): line is string => Boolean(line)).slice(0, 3),
+    brand,
+    message: headline || body,
+    supporting: headline && body && body !== headline ? body : undefined,
+    offer: textOf(copy.offer),
+    phone: textOf(copy.phone),
+    website: textOf(copy.website),
+    callToAction: textOf(copy.callToAction),
+    qrPayload: textOf(copy.qrPayload),
+  }
+}
+
+/** QR slot inside the address-side content box, canvas inches, y down. */
+export function addressBackQrPlacement(content: InchesRect, hasQr: boolean): InchesRect | null {
+  if (!hasQr) return null
+  const size = Math.min(QR_MAX_INCHES, content.widthInches * 0.42, content.heightInches * 0.34)
+  if (size < 0.6) return null
+  return {
+    xInches: content.xInches,
+    yInches: content.yInches + content.heightInches - size,
+    widthInches: size,
+    heightInches: size,
+  }
 }
 
 export interface PostcardPrintImage {
@@ -141,21 +191,21 @@ export async function renderPostcardPrintPdf(input: {
   return { bytes, backContent, imageDpi, artwork }
 }
 
+/** Smoke-test postcard. The address side uses the same back layout as an approved piece. */
+export const SAMPLE_POSTCARD_COPY: PostcardPrintCopy = {
+  businessName: "Northwind HVAC",
+  headline: "A quieter house",
+  body: "We check the system and tell you what it needs.",
+  offer: "Free inspection",
+  callToAction: "Call to book",
+  phone: "555-0100",
+  website: "northwind.example",
+  qrPayload: "https://northwind.example/inspect",
+  returnLines: ["100 Market St, Austin, TX 78701"],
+}
+
 export async function renderSamplePostcardPdf(): Promise<Uint8Array> {
-  const spec = buildPostcard5x8PrintSpec()
-  const plate = encodeSolidPng(spec.pixelSize.widthPx, spec.pixelSize.heightPx, [30, 58, 95])
-  const rendered = await renderPostcardPrintPdf({
-    copy: {
-      businessName: "Modern Mail",
-      headline: "Staging sample",
-      body: "This file is a Click2Mail staging test. It is not a live mailing.",
-      offer: "Test only",
-      callToAction: "No live mail",
-      phone: "555-0100",
-      website: "modernmail.test",
-    },
-    image: { bytes: plate, width: spec.pixelSize.widthPx, height: spec.pixelSize.heightPx },
-  })
+  const rendered = await renderPostcardPrintPdf({ copy: SAMPLE_POSTCARD_COPY })
   return rendered.bytes
 }
 
@@ -270,58 +320,89 @@ function drawBack(
     height: spec.pdfPagePoints.heightPoints,
     color: rgb(1, 1, 1),
   })
+  const plan = addressBackPlan(copy)
   const box = canvasRectToPdf(content, spec.artworkCanvasInches.heightInches)
+  const qr = addressBackQrPlacement(content, Boolean(plan.qrPayload && buildQrMatrix(plan.qrPayload)))
+  const qrPoints = qr ? qr.widthInches * 72 : 0
+  const textFloor = box.yPoints + (qrPoints > 0 ? qrPoints + 8 : 4)
   const ink = rgb(0.12, 0.14, 0.18)
   const muted = rgb(0.28, 0.32, 0.38)
-  let top = box.yPoints + box.heightPoints - 4
-  if (copy.businessName) {
+  let top = box.yPoints + box.heightPoints - 2
+
+  if (plan.brand && top > textFloor) {
     top = drawWrapped({
       page,
       font: semibold,
-      text: copy.businessName,
+      text: plan.brand,
       x: box.xPoints,
       top,
       width: box.widthPoints,
-      size: 13,
-      leading: 16,
+      size: 12,
+      leading: 15,
       color: ink,
-      maxLines: 2,
+      maxLines: linesThatFit(top, textFloor, 15, 2),
+    })
+    top -= 4
+  }
+  for (const line of plan.returnLines) {
+    if (top - 10 < textFloor) break
+    page.drawText(truncate(line, regular, 8, box.widthPoints), {
+      x: box.xPoints,
+      y: top - 8,
+      size: 8,
+      font: regular,
+      color: muted,
+    })
+    top -= 11
+  }
+  if (plan.returnLines.length > 0) top -= 6
+  if (plan.message && top > textFloor) {
+    top = drawWrapped({
+      page,
+      font: semibold,
+      text: plan.message,
+      x: box.xPoints,
+      top,
+      width: box.widthPoints,
+      size: 16,
+      leading: 19,
+      color: ink,
+      maxLines: linesThatFit(top, textFloor, 19, 3),
     })
     top -= 6
   }
-  if (copy.headline) {
+  if (plan.offer && top > textFloor) {
     top = drawWrapped({
       page,
       font: semibold,
-      text: copy.headline,
+      text: plan.offer,
       x: box.xPoints,
       top,
       width: box.widthPoints,
-      size: 18,
-      leading: 22,
+      size: 12,
+      leading: 15,
       color: ink,
-      maxLines: 3,
+      maxLines: linesThatFit(top, textFloor, 15, 2),
     })
-    top -= 8
+    top -= 6
   }
-  const message = [copy.offer, copy.body].filter(Boolean).join(" ")
-  if (message) {
+  if (plan.supporting && top > textFloor) {
     top = drawWrapped({
       page,
       font: regular,
-      text: message,
+      text: plan.supporting,
       x: box.xPoints,
       top,
       width: box.widthPoints,
-      size: 11,
-      leading: 14,
+      size: 10,
+      leading: 13,
       color: ink,
-      maxLines: 8,
+      maxLines: linesThatFit(top, textFloor, 13, 4),
     })
-    top -= 10
+    top -= 8
   }
-  const contact = [copy.callToAction, copy.phone, copy.website].filter(Boolean).join("   ")
-  if (contact) {
+  if (!qr && plan.callToAction && top > textFloor) {
+    const contact = [plan.callToAction, plan.phone, plan.website].filter(Boolean).join("   ")
     drawWrapped({
       page,
       font: regular,
@@ -332,9 +413,70 @@ function drawBack(
       size: 10,
       leading: 13,
       color: muted,
-      maxLines: 3,
+      maxLines: linesThatFit(top, textFloor, 13, 3),
     })
   }
+
+  if (qr && plan.qrPayload) {
+    drawQr(page, plan.qrPayload, box.xPoints, box.yPoints, qrPoints)
+    const contactX = box.xPoints + qrPoints + 8
+    const contactWidth = box.widthPoints - qrPoints - 8
+    const beside = [plan.phone, plan.website, plan.callToAction].filter((line): line is string => Boolean(line))
+    if (contactWidth > 36) {
+      let cursor = box.yPoints + qrPoints - 12
+      for (const line of beside) {
+        if (cursor < box.yPoints) break
+        page.drawText(truncate(line, regular, 9, contactWidth), {
+          x: contactX,
+          y: cursor,
+          size: 9,
+          font: regular,
+          color: ink,
+        })
+        cursor -= 12
+      }
+    }
+  }
+}
+
+function linesThatFit(top: number, floor: number, leading: number, cap: number): number {
+  const room = Math.floor((top - floor) / leading)
+  return Math.max(0, Math.min(cap, room))
+}
+
+function drawQr(page: PDFPage, payload: string, x: number, y: number, size: number) {
+  const matrix = buildQrMatrix(payload)
+  if (!matrix || size <= 0) return
+  const modules = matrix.length
+  const total = modules + QR_QUIET_MODULES * 2
+  const cell = size / total
+  page.drawRectangle({
+    x,
+    y,
+    width: size,
+    height: size,
+    color: rgb(1, 1, 1),
+  })
+  const ink = rgb(0.08, 0.09, 0.1)
+  for (let row = 0; row < modules; row += 1) {
+    const line = matrix[row]
+    if (!line) continue
+    for (let col = 0; col < modules; col += 1) {
+      if (!line[col]) continue
+      page.drawRectangle({
+        x: x + (col + QR_QUIET_MODULES) * cell,
+        y: y + size - (row + QR_QUIET_MODULES + 1) * cell,
+        width: cell,
+        height: cell,
+        color: ink,
+      })
+    }
+  }
+}
+
+function textOf(value: string | undefined): string | undefined {
+  const trimmed = value?.replace(/\s+/g, " ").trim()
+  return trimmed || undefined
 }
 
 function drawWrapped(options: {
@@ -349,6 +491,7 @@ function drawWrapped(options: {
   color: ReturnType<typeof rgb>
   maxLines: number
 }): number {
+  if (options.maxLines < 1 || !options.text.trim()) return options.top
   const lines = wrapText(options.text, options.font, options.size, options.width).slice(0, options.maxLines)
   let cursor = options.top - options.size
   for (const line of lines) {
