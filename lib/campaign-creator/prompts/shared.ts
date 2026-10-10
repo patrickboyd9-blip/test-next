@@ -28,7 +28,7 @@ export const DIRECTION_NAME_CONSTRAINT =
 export const SPEC_FIELD_RULES = `CreativeSpec rules:
 - headline: 3 to 6 words. Hard cap 8. A short display line, not a sentence. Do not put the offer or supporting detail here.
 - subheadline: the offer and supporting detail. Max 18 words. Use it whenever the offer or a qualifier would otherwise make the headline a sentence.
-- body: max 40 words
+- body: max 40 words. Offer and body address the reader (you, your), or the offer stays a plain offer with no condition. Do not write the reader as they, their, or them. Those words may name a problem or a thing, not the person holding the card.
 - callToAction: optional. max 6 words when present. Omit when this direction has no response action on this face. One action only.
 - When phone, website, or qrDestination is on this face, they are one lockup next to that call to action. They serve the same action. Do not invent a second action. The photograph contains no QR code, phone number, or URL.
 - palette: exactly 3 hex colors (primary, secondary, accent)

@@ -68,6 +68,13 @@ test("a scan label follows the call to action and stays short", () => {
   assert.equal(qrScanLabel(undefined), "Scan")
 })
 
+test("a scan label follows the code, not a call mentioned beside a booking URL", () => {
+  assert.equal(qrScanLabel("Call or scan to schedule", "https://www.abcroofers.com/book"), "Scan to book")
+  assert.equal(qrScanLabel("Call or scan to schedule", "https://www.abcroofers.com"), "Scan to book")
+  assert.equal(qrScanLabel("Call the office", "https://abcroofers.com"), "Scan")
+  assert.equal(qrScanLabel("Book a time", "tel:+16195550148"), "Scan to call")
+})
+
 test("a large code shrinks to the room beside the phone", () => {
   const wide = fitQrInches(1.5, 7.2, QR_CONTACT_RESERVE_IN)
   assert.equal(wide, 1.5)

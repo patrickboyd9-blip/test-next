@@ -1,3 +1,4 @@
+import { repairCustomerVoice } from "@/lib/campaign-creator/customer-voice"
 import { headlineWordCount, repairHeadlineCopy } from "@/lib/campaign-creator/headline-repair"
 import {
   resolveStudioContact,
@@ -31,6 +32,7 @@ import {
 import {
   QR_LARGE_INCHES,
   QR_STANDARD_INCHES,
+  RUBRIC_BODY_FLOOR_PT,
   RUBRIC_HEADLINE_BODY_RATIO,
   RUBRIC_OFFER_BODY_RATIO,
   RUBRIC_QR_QUIET_MODULES,
@@ -245,8 +247,9 @@ export function resolvePostcardLayout(input: {
       collapse(input.spec.phone)
   )
   const qrShown = Boolean(qrPayload) || qrClaimed
-  const fullCard = !input.compact
-  const contactBeside = fullCard && Boolean(contact.phone || contact.website)
+  // Compare thumbnails are the same card, smaller. Phone and website stay.
+  const fullCard = true
+  const contactBeside = Boolean(contact.phone || contact.website)
   const requestedQr = input.spec.layoutHints?.qrProminence === "large" ? QR_LARGE_INCHES : QR_STANDARD_INCHES
   const qrInches = qrShown
     ? fitQrInches(
@@ -258,7 +261,7 @@ export function resolvePostcardLayout(input: {
   if (qrShown && qrInches + 0.01 < requestedQr) {
     fixes.push("Sized the QR so the phone and the quiet zone still fit beside it.")
   }
-  const qrLabel = qrShown ? qrScanLabel(input.spec.callToAction) : ""
+  const qrLabel = qrShown ? qrScanLabel(input.spec.callToAction, qrPayload) : ""
   const lockup = qrShown || contactBeside ? placeLockup(geometry.textColumn, qrInches, Boolean(qrLabel)) : null
 
   const fitted = fitStack({
@@ -283,7 +286,7 @@ export function resolvePostcardLayout(input: {
     textColumn: geometry.textColumn,
     scrimRect: geometry.scrimRect,
     headline: repaired.headline,
-    subheadline: copy.subheadline,
+    subheadline: fitted.subhead.text,
     hero: copy.hero,
     offerLine: copy.offerLine,
     body: fitted.body.text,
@@ -740,9 +743,9 @@ function displayCopy(
   body: string
   offerPaint: "headline" | "line" | "subhead" | "none"
 } {
-  const offer = collapse(spec.offer)
+  const offer = repairCustomerVoice(collapse(spec.offer))
   const headline = repaired.headline
-  const sub = collapse(repaired.subheadline)
+  const sub = repairCustomerVoice(collapse(repaired.subheadline))
   const hero = offer && headline && copyRestatesLead(offer, headline) ? offer : headline
 
   let subheadline = ""
@@ -761,7 +764,7 @@ function displayCopy(
     offerPaint = "line"
   }
 
-  const body = collapse(spec.body)
+  const body = repairCustomerVoice(collapse(spec.body))
   const showBody = body && !sameLine(hero, body) && !sameLine(subheadline, body)
   return {
     hero,
@@ -1071,7 +1074,14 @@ function fitStack(input: {
   const contactPt = 16
   const marksH = input.qrInches > 0 ? Math.max(1.35, input.qrInches + QR_LABEL_BLOCK_IN + QR_LABEL_GAP_IN) : 1.15
   const gap = 0.14
-  let remain = Math.max(0.5, input.heightIn - wordmarkH - marksH - gap)
+  const budget = Math.max(0.5, input.heightIn - wordmarkH - marksH - gap)
+  const offerFloor = input.offer
+    ? Math.max(PRINT_MIN_PT.offer, ceilHalf(RUBRIC_BODY_FLOOR_PT * RUBRIC_OFFER_BODY_RATIO))
+    : PRINT_MIN_PT.offer
+  const headlineFloor = Math.max(
+    PRINT_MIN_PT.headline,
+    ceilHalf(RUBRIC_BODY_FLOOR_PT * RUBRIC_HEADLINE_BODY_RATIO)
+  )
 
   const empty = (minPt: number): FittedLine => ({
     text: "",
@@ -1081,63 +1091,143 @@ function fitStack(input: {
     overflows: false,
   })
 
-  const subhead = input.subhead
-    ? fitTextLine({
-        text: input.subhead,
-        widthIn: input.widthIn,
-        heightIn: Math.min(0.78, remain * 0.34),
-        minPt: PRINT_MIN_PT.subhead,
-        maxPt: PRINT_MAX_PT.subhead,
-        em: TEXT_EM,
-        lineHeight: TEXT_LINE,
-      })
-    : empty(PRINT_MIN_PT.subhead)
-  remain = Math.max(0.35, remain - subhead.heightIn)
-
-  const offer = input.offer
+  // The offer is fitted before the supporting copy so a long line cannot
+  // collapse to the body size. Supporting copy is cut when the column is tight.
+  let offer = input.offer
     ? fitTextLine({
         text: input.offer,
         widthIn: input.widthIn,
-        heightIn: Math.min(0.55, remain * 0.28),
-        minPt: PRINT_MIN_PT.offer,
+        heightIn: Math.min(1.2, Math.max(0.7, budget * 0.42)),
+        minPt: offerFloor,
         maxPt: PRINT_MAX_PT.offer,
         em: TEXT_EM,
         lineHeight: TEXT_LINE,
       })
     : empty(PRINT_MIN_PT.offer)
-  remain = Math.max(0.35, remain - offer.heightIn)
+  if (input.offer && offer.overflows) {
+    offer = fitTextLine({
+      text: input.offer,
+      widthIn: input.widthIn,
+      heightIn: Math.min(budget * 0.72, 1.7),
+      minPt: offerFloor,
+      maxPt: PRINT_MAX_PT.offer,
+      em: TEXT_EM,
+      lineHeight: TEXT_LINE,
+    })
+    input.fixes.push("Gave the offer more of the card so it stays larger than the body.")
+  }
 
-  const headline = fitTextLine({
+  let remain = Math.max(0.35, budget - offer.heightIn)
+  const supportReserve = input.subhead || input.body ? 0.85 : 0
+  let headline = fitTextLine({
     text: input.hero,
     widthIn: input.widthIn,
-    heightIn: remain,
-    minPt: PRINT_MIN_PT.headline,
+    heightIn: Math.max(0.9, remain - supportReserve),
+    minPt: headlineFloor,
     maxPt: PRINT_MAX_PT.headline,
     em: DISPLAY_EM,
     lineHeight: DISPLAY_LINE,
   })
-  const bodyRoom = remain - headline.heightIn
-  const offerCap = input.offer ? offer.fontPt / RUBRIC_OFFER_BODY_RATIO : PRINT_MAX_PT.body
-  const ratioCap = Math.min(PRINT_MAX_PT.body, headline.fontPt / RUBRIC_HEADLINE_BODY_RATIO, offerCap)
-  const bodyMax = Math.floor(ratioCap * 2) / 2
-  let body =
-    input.body && !headline.overflows && bodyRoom >= 0.5 && bodyMax + 0.001 >= PRINT_MIN_PT.body
-      ? fitTextLine({
-          text: input.body,
-          widthIn: input.widthIn,
-          heightIn: Math.min(0.62, bodyRoom),
-          minPt: PRINT_MIN_PT.body,
-          maxPt: bodyMax,
-          em: TEXT_EM,
-          lineHeight: TEXT_LINE,
-        })
-      : empty(PRINT_MIN_PT.body)
-  if (input.body && !body.text) {
-    input.fixes.push("Held the body back so the headline can stay large.")
+  if (headline.overflows && supportReserve > 0) {
+    headline = fitTextLine({
+      text: input.hero,
+      widthIn: input.widthIn,
+      heightIn: Math.max(0.8, remain - 0.42),
+      minPt: headlineFloor,
+      maxPt: PRINT_MAX_PT.headline,
+      em: DISPLAY_EM,
+      lineHeight: DISPLAY_LINE,
+    })
   }
-  if (body.overflows) {
-    body = empty(PRINT_MIN_PT.body)
-    input.fixes.push("Held the body back so the headline can stay large.")
+  if (headline.overflows) {
+    headline = fitTextLine({
+      text: input.hero,
+      widthIn: input.widthIn,
+      heightIn: remain,
+      minPt: headlineFloor,
+      maxPt: PRINT_MAX_PT.headline,
+      em: DISPLAY_EM,
+      lineHeight: DISPLAY_LINE,
+    })
+  }
+  if (headline.overflows && input.offer && offer.heightIn > 0.55) {
+    const tighter = fitTextLine({
+      text: input.offer,
+      widthIn: input.widthIn,
+      heightIn: Math.max(0.55, offer.heightIn * 0.8),
+      minPt: offerFloor,
+      maxPt: PRINT_MAX_PT.offer,
+      em: TEXT_EM,
+      lineHeight: TEXT_LINE,
+    })
+    if (!tighter.overflows) offer = tighter
+    remain = Math.max(0.35, budget - offer.heightIn)
+    headline = fitTextLine({
+      text: input.hero,
+      widthIn: input.widthIn,
+      heightIn: remain,
+      minPt: headlineFloor,
+      maxPt: PRINT_MAX_PT.headline,
+      em: DISPLAY_EM,
+      lineHeight: DISPLAY_LINE,
+    })
+  }
+
+  const supportCap = input.offer
+    ? floorHalf(offer.fontPt / RUBRIC_OFFER_BODY_RATIO)
+    : PRINT_MAX_PT.subhead
+  const room = Math.max(0, remain - headline.heightIn)
+
+  let subhead = empty(PRINT_MIN_PT.subhead)
+  if (
+    input.subhead &&
+    !headline.overflows &&
+    supportCap + 0.001 >= PRINT_MIN_PT.subhead &&
+    room >= 0.22
+  ) {
+    const fitted = fitOrTrim({
+      text: input.subhead,
+      widthIn: input.widthIn,
+      heightIn: Math.min(0.95, room),
+      minPt: PRINT_MIN_PT.subhead,
+      maxPt: Math.min(PRINT_MAX_PT.subhead, supportCap),
+      em: TEXT_EM,
+      lineHeight: TEXT_LINE,
+    })
+    if (fitted.text && fitted.text !== collapse(input.subhead)) {
+      input.fixes.push("Cut the supporting line so the offer stays larger than the body.")
+    }
+    if (!fitted.text) {
+      input.fixes.push("Held the supporting line back so the offer stays larger than the body.")
+    }
+    subhead = fitted
+  } else if (input.subhead && input.offer) {
+    input.fixes.push("Held the supporting line back so the offer stays larger than the body.")
+  }
+
+  const bodyRoom = room - subhead.heightIn
+  const bodyCap = Math.min(
+    PRINT_MAX_PT.body,
+    floorHalf(Math.max(headline.fontPt, headlineFloor) / RUBRIC_HEADLINE_BODY_RATIO),
+    input.offer ? floorHalf(offer.fontPt / RUBRIC_OFFER_BODY_RATIO) : PRINT_MAX_PT.body
+  )
+  let body = empty(PRINT_MIN_PT.body)
+  if (input.body && !headline.overflows && bodyRoom >= 0.22 && bodyCap + 0.001 >= PRINT_MIN_PT.body) {
+    const fitted = fitOrTrim({
+      text: input.body,
+      widthIn: input.widthIn,
+      heightIn: Math.min(0.62, bodyRoom),
+      minPt: PRINT_MIN_PT.body,
+      maxPt: bodyCap,
+      em: TEXT_EM,
+      lineHeight: TEXT_LINE,
+    })
+    if (!fitted.text || fitted.text !== collapse(input.body)) {
+      input.fixes.push("Cut the body so the headline and offer stay larger than it.")
+    }
+    body = fitted
+  } else if (input.body) {
+    input.fixes.push("Cut the body so the headline and offer stay larger than it.")
   }
 
   if (headline.text && headline.fontPt < PRINT_MAX_PT.headline - 0.5) {
@@ -1166,6 +1256,33 @@ function fitStack(input: {
   }
 
   return { headline, subhead, offer, body, ctaPt, contactPt }
+}
+
+function ceilHalf(value: number): number {
+  return Math.ceil(value * 2 - 1e-6) / 2
+}
+
+function floorHalf(value: number): number {
+  return Math.floor(value * 2 + 1e-6) / 2
+}
+
+function fitOrTrim(input: {
+  text: string
+  widthIn: number
+  heightIn: number
+  minPt: number
+  maxPt: number
+  em: number
+  lineHeight: number
+}): FittedLine {
+  const direct = fitTextLine(input)
+  if (!direct.overflows) return direct
+  const words = collapse(input.text).split(/\s+/).filter(Boolean)
+  for (let count = words.length - 1; count >= 2; count -= 1) {
+    const fitted = fitTextLine({ ...input, text: words.slice(0, count).join(" ") })
+    if (!fitted.overflows) return fitted
+  }
+  return { text: "", fontPt: input.minPt, lines: 0, heightIn: 0, overflows: false }
 }
 
 function innerTextBox(column: NormRect): NormRect {

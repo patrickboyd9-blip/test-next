@@ -112,7 +112,7 @@ export interface DesignRuleFacts {
   moduleInkDarker: boolean
   qrBesideCta: boolean
   lockupInsideSafe: boolean
-  /** Full card, not the compare thumbnail that hides the contact lines. */
+  /** True when contact lines are painted. Compare thumbnails paint them too. */
   fullCard: boolean
   phoneShown: boolean
   phoneInLockup: boolean
@@ -299,11 +299,23 @@ export function fitQrInches(requested: number, columnWidthIn: number, reserveIn:
   return Math.max(RUBRIC_QR_MIN_INCHES, Math.min(requested, snapped))
 }
 
-/** Short line under the code. Never a second offer. */
-export function qrScanLabel(callToAction: string | undefined): string {
+const BOOKING_WORD = /\b(book|booking|schedule|scheduling|reserve|reservation|appointment)\b/i
+
+/**
+ * Short line under the code. It names what the code does.
+ * A phone code says call. A booking URL says book.
+ * The call to action is only a hint when the code itself has no payload.
+ */
+export function qrScanLabel(callToAction: string | undefined, qrPayload?: string | null): string {
+  const payload = (qrPayload ?? "").trim()
+  if (payload) {
+    if (/^tel:/i.test(payload)) return "Scan to call"
+    if (BOOKING_WORD.test(payload) || BOOKING_WORD.test(callToAction ?? "")) return "Scan to book"
+    return "Scan"
+  }
   const words = (callToAction ?? "").replace(/\s+/g, " ").trim().toLowerCase()
   if (/\bcall\b/.test(words)) return "Scan to call"
-  if (/\b(book|schedule|reserve)\b/.test(words)) return "Scan to book"
+  if (BOOKING_WORD.test(words)) return "Scan to book"
   return "Scan"
 }
 
@@ -494,7 +506,7 @@ function qr10(facts: DesignRuleFacts): DesignRuleCheck {
 }
 
 function qr11(facts: DesignRuleFacts): DesignRuleCheck {
-  if (!facts.fullCard) return rule("QR-11", true, "Contact lines are held off the thumbnail.")
+  if (!facts.fullCard) return rule("QR-11", true, "This measurement is not a painted card.")
   const phoneOk = !facts.phoneShown || (facts.phoneInLockup && facts.phonePt + 0.01 >= RUBRIC_PHONE_MIN_PT)
   const urlOk = !facts.urlShown || (facts.urlInLockup && facts.urlPt + 0.01 >= RUBRIC_PHONE_MIN_PT)
   return rule(

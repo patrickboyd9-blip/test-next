@@ -4,6 +4,7 @@ import path from "node:path"
 import fontkit from "@pdf-lib/fontkit"
 import { PDFDocument, rgb, type PDFFont, type PDFPage } from "pdf-lib"
 
+import { repairCustomerVoice } from "../campaign-creator/customer-voice"
 import { buildQrMatrix, QR_QUIET_MODULES } from "../campaign-creator/studio-qr"
 
 import type { InchesRect } from "./postcard-5x8-print-spec"
@@ -47,26 +48,60 @@ export interface AddressBackPlan {
 const QR_MAX_INCHES = 1.05
 
 export function addressBackPlan(copy: PostcardPrintCopy): AddressBackPlan {
-  const brand = textOf(copy.businessName)
-  const headline = textOf(copy.headline)
-  const body = textOf(copy.body)
+  const voiced = voicePrintCopy(copy)
+  const brand = textOf(voiced.businessName)
+  const headline = textOf(voiced.headline)
+  const body = textOf(voiced.body)
   return {
-    returnLines: (copy.returnLines ?? []).map(textOf).filter((line): line is string => Boolean(line)).slice(0, 3),
+    returnLines: (voiced.returnLines ?? []).map(textOf).filter((line): line is string => Boolean(line)).slice(0, 3),
     brand,
     message: headline || body,
     supporting: headline && body && body !== headline ? body : undefined,
-    offer: textOf(copy.offer),
-    phone: textOf(copy.phone),
-    website: textOf(copy.website),
-    callToAction: textOf(copy.callToAction),
-    qrPayload: textOf(copy.qrPayload),
+    offer: textOf(voiced.offer),
+    phone: textOf(voiced.phone),
+    website: textOf(voiced.website),
+    callToAction: textOf(voiced.callToAction),
+    qrPayload: textOf(voiced.qrPayload),
+  }
+}
+
+/** Every string the print file paints for this copy, including phone and website. */
+export function postcardPrintLines(copy: PostcardPrintCopy): string[] {
+  const plan = addressBackPlan(copy)
+  return [
+    plan.brand,
+    plan.message,
+    plan.supporting,
+    plan.offer,
+    plan.phone,
+    plan.website,
+    plan.callToAction,
+    ...plan.returnLines,
+  ].filter((line): line is string => Boolean(line))
+}
+
+function voicePrintCopy(copy: PostcardPrintCopy): PostcardPrintCopy {
+  return {
+    ...copy,
+    offer: copy.offer ? repairCustomerVoice(copy.offer) : copy.offer,
+    body: copy.body ? repairCustomerVoice(copy.body) : copy.body,
   }
 }
 
 /** QR slot inside the address-side content box, canvas inches, y down. */
-export function addressBackQrPlacement(content: InchesRect, hasQr: boolean): InchesRect | null {
+export function addressBackQrPlacement(
+  content: InchesRect,
+  hasQr: boolean,
+  reserveForContact = false
+): InchesRect | null {
   if (!hasQr) return null
-  const size = Math.min(QR_MAX_INCHES, content.widthInches * 0.42, content.heightInches * 0.34)
+  const contactReserve = reserveForContact ? 1.7 : 0
+  const size = Math.min(
+    QR_MAX_INCHES,
+    content.widthInches * 0.42,
+    content.heightInches * 0.34,
+    Math.max(0.6, content.widthInches - contactReserve)
+  )
   if (size < 0.6) return null
   return {
     xInches: content.xInches,
@@ -163,6 +198,7 @@ export async function renderPostcardPrintPdf(input: {
     throw new Error("Print photograph dimensions do not match the file.")
   }
 
+  const copy = voicePrintCopy(input.copy)
   const doc = await PDFDocument.create()
   doc.registerFontkit(fontkit)
   const regular = await doc.embedFont(readFont("SourceSans3-Regular.ttf"), { subset: true })
@@ -177,8 +213,8 @@ export async function renderPostcardPrintPdf(input: {
   markBoxes(back, spec)
 
   front.drawImage(embedded, { x: 0, y: 0, width, height })
-  drawFrontCaption(front, spec, input.copy, regular, semibold)
-  drawBack(back, spec, backContent, input.copy, regular, semibold)
+  drawFrontCaption(front, spec, copy, regular, semibold)
+  drawBack(back, spec, backContent, copy, regular, semibold)
 
   doc.setTitle("Modern Mail 5x8 postcard")
   doc.setProducer("Modern Mail")
@@ -281,23 +317,43 @@ function drawFrontCaption(
     height: box.heightPoints,
     color: rgb(0.1, 0.14, 0.2),
   })
-  const text = [copy.headline, copy.offer, copy.callToAction].filter(Boolean).join("  ·  ")
+  const plan = addressBackPlan(copy)
+  const contact = [plan.phone, plan.website].filter((line): line is string => Boolean(line))
+  const contactSize = 10
+  const contactLeading = 12
+  const nameSize = plan.brand ? 9 : 0
+  const reservedBottom = 8 + (plan.brand ? nameSize + 4 : 0) + contact.length * contactLeading
+  const messageTop = box.yPoints + box.heightPoints - 14
+  const messageFloor = box.yPoints + reservedBottom
+  const text = [plan.message, plan.offer, plan.callToAction].filter(Boolean).join("  ·  ")
   drawWrapped({
     page,
     font: semibold,
     text: text || "Postcard",
     x: box.xPoints + 12,
-    top: box.yPoints + box.heightPoints - 16,
+    top: messageTop,
     width: box.widthPoints - 24,
     size: 16,
     leading: 20,
     color: rgb(1, 1, 1),
-    maxLines: 3,
+    maxLines: linesThatFit(messageTop, messageFloor, 20, 3),
   })
-  if (copy.businessName) {
-    page.drawText(truncate(copy.businessName, regular, 9, box.widthPoints - 24), {
+  let contactTop = messageFloor - 2
+  for (const line of contact) {
+    const size = fitTypeSize(line, regular, contactSize, box.widthPoints - 24)
+    page.drawText(line, {
       x: box.xPoints + 12,
-      y: box.yPoints + 10,
+      y: contactTop - size,
+      size,
+      font: regular,
+      color: rgb(1, 1, 1),
+    })
+    contactTop -= contactLeading
+  }
+  if (plan.brand) {
+    page.drawText(truncate(plan.brand, regular, 9, box.widthPoints - 24), {
+      x: box.xPoints + 12,
+      y: box.yPoints + 8,
       size: 9,
       font: regular,
       color: rgb(0.86, 0.9, 0.94),
@@ -322,9 +378,15 @@ function drawBack(
   })
   const plan = addressBackPlan(copy)
   const box = canvasRectToPdf(content, spec.artworkCanvasInches.heightInches)
-  const qr = addressBackQrPlacement(content, Boolean(plan.qrPayload && buildQrMatrix(plan.qrPayload)))
+  const hasContact = Boolean(plan.phone || plan.website)
+  const qr = addressBackQrPlacement(
+    content,
+    Boolean(plan.qrPayload && buildQrMatrix(plan.qrPayload)),
+    hasContact
+  )
   const qrPoints = qr ? qr.widthInches * 72 : 0
-  const textFloor = box.yPoints + (qrPoints > 0 ? qrPoints + 8 : 4)
+  const contactBlock = !qr && hasContact ? 14 * [plan.phone, plan.website].filter(Boolean).length : 0
+  const textFloor = box.yPoints + (qrPoints > 0 ? qrPoints + 8 : 4 + contactBlock)
   const ink = rgb(0.12, 0.14, 0.18)
   const muted = rgb(0.28, 0.32, 0.38)
   let top = box.yPoints + box.heightPoints - 2
@@ -402,41 +464,60 @@ function drawBack(
     top -= 8
   }
   if (!qr && plan.callToAction && top > textFloor) {
-    const contact = [plan.callToAction, plan.phone, plan.website].filter(Boolean).join("   ")
     drawWrapped({
       page,
       font: regular,
-      text: contact,
+      text: plan.callToAction,
       x: box.xPoints,
       top,
       width: box.widthPoints,
       size: 10,
       leading: 13,
       color: muted,
-      maxLines: linesThatFit(top, textFloor, 13, 3),
+      maxLines: linesThatFit(top, textFloor, 13, 2),
     })
   }
 
   if (qr && plan.qrPayload) {
     drawQr(page, plan.qrPayload, box.xPoints, box.yPoints, qrPoints)
     const contactX = box.xPoints + qrPoints + 8
-    const contactWidth = box.widthPoints - qrPoints - 8
+    const contactWidth = Math.max(36, box.widthPoints - qrPoints - 8)
     const beside = [plan.phone, plan.website, plan.callToAction].filter((line): line is string => Boolean(line))
-    if (contactWidth > 36) {
-      let cursor = box.yPoints + qrPoints - 12
-      for (const line of beside) {
-        if (cursor < box.yPoints) break
-        page.drawText(truncate(line, regular, 9, contactWidth), {
-          x: contactX,
-          y: cursor,
-          size: 9,
-          font: regular,
-          color: ink,
-        })
-        cursor -= 12
-      }
+    let cursor = box.yPoints + qrPoints - 4
+    for (const line of beside) {
+      const size = fitTypeSize(line, regular, 9, contactWidth)
+      cursor -= size
+      if (cursor < box.yPoints) break
+      page.drawText(line, {
+        x: contactX,
+        y: cursor,
+        size,
+        font: regular,
+        color: ink,
+      })
+      cursor -= 3
+    }
+  } else if (hasContact) {
+    const lines = [plan.phone, plan.website].filter((line): line is string => Boolean(line))
+    let cursor = box.yPoints + contactBlock
+    for (const line of [...lines].reverse()) {
+      const size = fitTypeSize(line, regular, 10, box.widthPoints)
+      cursor -= size + 2
+      page.drawText(line, {
+        x: box.xPoints,
+        y: Math.max(box.yPoints, cursor),
+        size,
+        font: regular,
+        color: ink,
+      })
     }
   }
+}
+
+function fitTypeSize(text: string, font: PDFFont, start: number, width: number): number {
+  let size = start
+  while (size > 6 && font.widthOfTextAtSize(text, size) > width) size -= 0.5
+  return size
 }
 
 function linesThatFit(top: number, floor: number, leading: number, cap: number): number {

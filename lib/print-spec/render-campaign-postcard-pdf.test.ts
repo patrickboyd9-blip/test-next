@@ -9,6 +9,7 @@ import {
   addressSideContentRect,
   assertPostcardPrintPdf,
   assertPrintImageDpi,
+  postcardPrintLines,
   rectsOverlap,
   renderPostcardPrintPdf,
   renderSamplePostcardPdf,
@@ -53,6 +54,17 @@ function containsRect(outer: { xInches: number; yInches: number; widthInches: nu
     inner.yInches + inner.heightInches <= outer.yInches + outer.heightInches + 0.001
   )
 }
+
+test("print lines keep a provided phone and website", () => {
+  const lines = postcardPrintLines({
+    headline: "Small Leaks Start Quiet",
+    phone: "222-333-4456",
+    website: "www.abcroofers.com",
+    qrPayload: "https://www.abcroofers.com/book",
+  })
+  assert.ok(lines.includes("222-333-4456"))
+  assert.ok(lines.includes("www.abcroofers.com"))
+})
 
 test("a photograph under 300 DPI is refused", () => {
   assert.throws(
