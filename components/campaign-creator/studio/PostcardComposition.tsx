@@ -21,6 +21,7 @@ import {
   type NormRect,
   type PostcardLayoutPlan,
 } from "./postcard-layout-qa"
+import { designRuleFailures, designRuleWarnings } from "./design-rules"
 import { rubricFailures } from "./postcard-rubric"
 import {
   studioCompositionTreatment,
@@ -112,7 +113,10 @@ export function PostcardFrontFace({
       data-headline-weight={plan.headlineWeight}
       data-layout-issues={plan.issues.map((issue) => issue.code).join(" ") || "none"}
       data-rubric-fails={rubricFailures(plan.rubric).map((check) => check.id).join(" ") || "none"}
+      data-design-fails={designRuleFailures(plan.designRules).map((check) => check.id).join(" ") || "none"}
+      data-design-warnings={designRuleWarnings(plan.designRules).map((check) => check.id).join(" ") || "none"}
       data-qr-in={plan.qrInches.toFixed(3)}
+      data-qr-label={plan.qrLabel || undefined}
       data-type-presence={derivation.typePresence}
       data-image-plate={derivation.imagePlate}
       data-void={derivation.voidShape}
@@ -331,7 +335,7 @@ function PrintMarks({
   mark: CtaMark
 }) {
   return (
-    <div className="flex items-end gap-[0.6em]">
+    <div className="flex items-end" data-contact-lockup="response" style={{ gap: pointsToCqw(8.6) }}>
       <div className="min-w-0 flex-1 space-y-[0.28em]">
         {spec.callToAction ? (
           <PrintCta
@@ -349,12 +353,12 @@ function PrintMarks({
             contact={contact}
             color={plan.colors.ink}
             phoneSize={pointsToCqw(plan.typePt.contact)}
-            websiteSize={pointsToCqw(Math.max(11, plan.typePt.contact - 3))}
+            websiteSize={pointsToCqw(plan.typePt.website)}
           />
         ) : null}
       </div>
       {contact.qrPayload ? (
-        <QrMark payload={contact.qrPayload} sizeIn={plan.qrInches} />
+        <QrMark payload={contact.qrPayload} sizeIn={plan.qrInches} label={plan.qrLabel} />
       ) : null}
     </div>
   )
@@ -432,51 +436,59 @@ function ContactPrint({
   )
 }
 
-function QrMark({ payload, sizeIn }: { payload: string; sizeIn: number }) {
+function QrMark({ payload, sizeIn, label }: { payload: string; sizeIn: number; label: string }) {
   const painted = useMemo(() => paintQr(payload), [payload])
   if (!painted) return null
   const total = painted.modules + painted.quiet * 2
   const symbol = `${((sizeIn / 8) * 100).toFixed(3)}cqw`
-  // Stay inside the four-module quiet zone so the rounded corner never clips a module.
+  // The curve stays inside the quiet zone so it never clips a module.
   const radius = `${(((sizeIn * 1.6) / total / 8) * 100).toFixed(3)}cqw`
   return (
-    <div
-      className="shrink-0 bg-white"
-      data-qr-tile="rounded"
-      style={{ width: symbol, borderRadius: radius, overflow: "hidden" }}
-    >
-      <svg
-        viewBox={`0 0 ${total} ${total}`}
-        role="img"
-        aria-label={`QR code for ${payload}`}
-        data-qr-modules={painted.modules}
-        data-qr-quiet-modules={painted.quiet}
-        shapeRendering="crispEdges"
-        style={{ display: "block", width: "100%", height: "auto" }}
+    <div className="shrink-0" data-qr-lockup="beside-cta">
+      <div
+        className="bg-white"
+        data-qr-tile="rounded"
+        data-qr-module-ink="#111111"
+        data-qr-module-field="#ffffff"
+        style={{ width: symbol, borderRadius: radius, overflow: "hidden" }}
       >
-        <rect width={total} height={total} fill="#ffffff" />
-        {painted.dark.map(([x, y]) => (
-          <rect
-            key={`${x}-${y}`}
-            x={x + painted.quiet}
-            y={y + painted.quiet}
-            width={1}
-            height={1}
-            fill="#111111"
-          />
-        ))}
-      </svg>
-      <p
-        className="text-center font-semibold uppercase tracking-[0.12em]"
-        style={{
-          color: "#14120f",
-          fontSize: "clamp(7px, 1.2cqw, 11px)",
-          lineHeight: 1,
-          padding: "0.35em 0.4em 0.55em",
-        }}
-      >
-        Scan to book
-      </p>
+        <svg
+          viewBox={`0 0 ${total} ${total}`}
+          role="img"
+          aria-label={`QR code for ${payload}`}
+          data-qr-modules={painted.modules}
+          data-qr-quiet-modules={painted.quiet}
+          shapeRendering="crispEdges"
+          style={{ display: "block", width: "100%", height: "auto" }}
+        >
+          <rect width={total} height={total} fill="#ffffff" />
+          {painted.dark.map(([x, y]) => (
+            <rect
+              key={`${x}-${y}`}
+              x={x + painted.quiet}
+              y={y + painted.quiet}
+              width={1}
+              height={1}
+              fill="#111111"
+            />
+          ))}
+        </svg>
+      </div>
+      {label ? (
+        <p
+          data-qr-label={label}
+          className="text-center font-semibold leading-none"
+          style={{
+            color: "#14120f",
+            backgroundColor: "#ffffff",
+            fontSize: pointsToCqw(8),
+            marginTop: pointsToCqw(2.9),
+            padding: "0.28em 0.2em",
+          }}
+        >
+          {label}
+        </p>
+      ) : null}
     </div>
   )
 }

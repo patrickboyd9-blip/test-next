@@ -159,5 +159,7 @@ test("generate and regenerate ask for a 3 to 6 word headline", () => {
     assert.match(prompt, /3 to 6 words/)
     assert.match(prompt, /Hard cap 8/)
     assert.match(prompt, /subheadline/)
+    assert.match(prompt, /one lockup next to that call to action/)
+    assert.match(prompt, /The photograph contains no QR code/)
   }
 })
