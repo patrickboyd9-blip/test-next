@@ -10,7 +10,11 @@ import {
   type ImageGenerationOptions,
 } from "./image-generation"
 import { fingerprintForSpec, imageBriefContextFor } from "./studio-image-fingerprint"
-import { studioImageFileBase, syncStudioDirectionImages } from "./studio-image-jobs"
+import {
+  scheduleAfterResponse,
+  studioImageFileBase,
+  syncStudioDirectionImages,
+} from "./studio-image-jobs"
 import type { CampaignBrief, CampaignCreative, CreativeSpec } from "./types"
 import { createEmptyCampaignCreative } from "./types"
 
@@ -83,6 +87,19 @@ const brief: CampaignBrief = {
   goal: "Book roof inspections",
   businessInfo: { name: "Summit Roofing", address: "Denver, CO" },
 }
+
+test("after() is given the photograph promise, not a callback that drops it", async () => {
+  let seen: Promise<unknown> | undefined
+  const work = Promise.resolve()
+  scheduleAfterResponse(
+    (task) => {
+      seen = task()
+    },
+    () => work
+  )
+  assert.equal(seen, work)
+  await seen
+})
 
 test("a photograph job returns before the provider runs, then polls to ready", async () => {
   const cacheRoot = await mkdtemp(path.join(tmpdir(), "studio-jobs-"))

@@ -19,7 +19,7 @@ import { generateLeadDirectionImage as runGenerateLeadDirectionImage } from "./g
 import type { GeneratedAsset } from "./image-generation"
 import { createOpenAIImageGenerationAdapter } from "./openai-image-generation"
 import type { StudioImageLoad } from "./studio-image-cache"
-import { syncStudioDirectionImages } from "./studio-image-jobs"
+import { scheduleAfterResponse, syncStudioDirectionImages } from "./studio-image-jobs"
 import { getCampaignRepository } from "./repository"
 import { buildSpecDiff, cloneSpec } from "./spec-diff"
 import type { Campaign, CampaignBrief, CreativeRevision, MailPieceSpec } from "./types"
@@ -234,9 +234,7 @@ export async function loadStudioDirectionImages(
     campaignBrief: campaign.brief,
     createAdapter: createOpenAIImageGenerationAdapter,
     schedule(work) {
-      after(() => {
-        void work()
-      })
+      scheduleAfterResponse(after, work)
     },
   })
 }

@@ -26,13 +26,15 @@ You do not create tables, run SQL, or copy database passwords into the project b
 | Connection | Variable the app reads | What it is for |
 | --- | --- | --- |
 | Neon Postgres | `DATABASE_URL`, or `POSTGRES_URL` if that is what Neon created instead | Campaigns, and any saved reference-corpus records |
-| Vercel Blob | `BLOB_READ_WRITE_TOKEN` | Photographs Studio generates |
+| Vercel Blob | `BLOB_READ_WRITE_TOKEN` | Photographs Studio generates. The store stays **Private**. |
 
 Neon often adds other variables (`DATABASE_URL_UNPOOLED`, host, user, and so on). Leave them. The app uses `DATABASE_URL` when it is set, and otherwise `POSTGRES_URL`.
 
 Without those database variables, the live site cannot remember a campaign. Creating one and then opening it returns a 404, because each Vercel request has its own temporary disk. Local development does not need them.
 
 Without the Blob token, generated photographs stay on the local disk. That disk is not shared on Vercel, so Studio on the live site needs Blob.
+
+The Blob store must stay **Private**. That is the setting Vercel picks when you create a store, and a store cannot be changed from Private to Public later. Studio saves each photograph into that private store, then the site itself shows the picture. The browser does not open the Blob address. Do not create a second, public store for photographs, and do not delete the private one. `BLOB_STORE_ID` and `BLOB_WEBHOOK_PUBLIC_KEY` can stay as Vercel created them. The app does not need you to edit them.
 
 Without the two API keys, campaign pages still open. The writing and the photographs fall back to the built-in practice behavior instead of calling Anthropic or OpenAI.
 
@@ -42,7 +44,7 @@ Conversation, concept writing, and photograph generation are allowed **60 second
 
 Vercel’s current Hobby plan **with Fluid Compute** allows up to 300 seconds, and that is often the default. This app stays at 60 so a deploy cannot fail on the stricter Hobby cap. If Settings → Functions shows that Fluid Compute is on and a longer limit is allowed, the 60 second cap in the campaign page can be raised later.
 
-One concept-writing click is usually inside 60 seconds. Photographs do not wait inside that click. Studio saves a job, shows a loading note, and checks back every few seconds. Each check starts at most one photograph in the background, still limited to 60 seconds. A fast preview is made for each direction. The direction you choose is made again, larger, for print. If a photograph is cut off, Studio tries that one once more. A photograph that already finished is kept and is not made again.
+One concept-writing click is usually inside 60 seconds. Photographs do not wait inside that click. Studio starts one photograph in the background and keeps that same visit alive until the picture is saved or the 60 second cap runs out. The page checks back every few seconds. A fast preview is made for each direction. The direction you choose is made again, larger, for print. If a photograph is cut off, Studio tries that one once more. A photograph that already finished is kept and is not made again.
 
 ## What you do not configure
 

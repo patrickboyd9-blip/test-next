@@ -30,7 +30,8 @@ export interface StudioImageSidecar {
 /**
  * Where a conceived photograph and its sidecar live.
  * File implementation writes under the cache root. Blob implementation
- * uploads to Vercel Blob and returns the public blob URL.
+ * uploads to a private Vercel Blob store and returns the app image route.
+ * The browser never opens the private blob URL.
  */
 export interface StudioImageStore {
   readSidecar(campaignId: string, fileBase: string): Promise<StudioImageSidecar | null>
@@ -166,12 +167,12 @@ export function createBlobStudioImageStore(blobs: BlobObjectStore): StudioImageS
       if (!resolveStudioImageFile(campaignId, fileName, defaultStudioImageCacheRoot())) {
         throw new Error("Invalid studio image file")
       }
-      const blob = await blobs.put(
+      await blobs.put(
         studioImageBlobPath(campaignId, fileName),
         bytes,
         "image/png"
       )
-      return blob.url
+      return studioImagePublicPath(campaignId, fileName)
     },
   }
 }
@@ -214,13 +215,12 @@ export function resolveStudioImageStore(options: {
   }
 }
 
-export type OpenedStudioImage =
-  | { kind: "bytes"; bytes: Buffer }
-  | { kind: "redirect"; url: string }
+export type OpenedStudioImage = { kind: "bytes"; bytes: Buffer }
 
 /**
- * Local file first, then a public blob URL when Blob is configured.
+ * Local file first, then the private blob when Blob is configured.
  * Used by /api/studio-image so both storage modes stay addressable.
+ * The route always returns the bytes. A private blob URL is not public.
  */
 export async function openStudioImage(
   campaignId: string,
@@ -250,7 +250,7 @@ export async function openStudioImage(
         : null
   if (!blobs) return null
 
-  const meta = await blobs.stat(studioImageBlobPath(campaignId, fileName))
-  if (!meta) return null
-  return { kind: "redirect", url: meta.url }
+  const object = await blobs.get(studioImageBlobPath(campaignId, fileName))
+  if (!object) return null
+  return { kind: "bytes", bytes: object.body }
 }

@@ -1,5 +1,8 @@
 import { headlineWordCount, repairHeadlineCopy } from "@/lib/campaign-creator/headline-repair"
-import { resolveStudioContact } from "@/lib/campaign-creator/studio-contact"
+import {
+  resolveStudioContact,
+  type StudioContact,
+} from "@/lib/campaign-creator/studio-contact"
 import { qrPaintDecodes } from "@/lib/campaign-creator/studio-qr"
 import {
   normalizeLayoutVariant,
@@ -165,6 +168,8 @@ export function resolvePostcardLayout(input: {
   spec: CreativeSpec
   compact?: boolean
   showWordmark?: boolean
+  /** The contact the card actually paints. Defaults to the spec alone. */
+  contact?: StudioContact
 }): PostcardLayoutPlan {
   const layout = normalizeLayoutVariant(input.spec.layoutVariant) ?? "peer_split"
   const family = postcardLayoutFamily(input.spec)
@@ -246,7 +251,7 @@ export function resolvePostcardLayout(input: {
     issues,
     fixes,
   }
-  const contact = resolveStudioContact(input.spec)
+  const contact = input.contact ?? resolveStudioContact(input.spec)
   const qrPayload = contact.qrPayload
   const qrClaimed = Boolean(
     collapse(input.spec.qrDestination) ||
