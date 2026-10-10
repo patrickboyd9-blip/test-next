@@ -52,11 +52,8 @@ The lines on the file are guides. They are not a customer's postcard.
 
 ## Still not built
 
-- A Click2Mail login, or any API credential
-- Creating, proving, or submitting a mail job
-- Taking payment
-- Buying or uploading a mailing list (including Data Axle)
-- Turning the on-screen Studio card into press-ready customer art
-- CMYK conversion
+- Taking a customer’s card. Staging tests spend Click2Mail user credit. See `docs/CLICK2MAIL.md`.
+- Buying a mailing list (including Data Axle). A CSV or a single test address can be sent.
+- CMYK conversion. The print file is still RGB.
 
-Those wait until a later decision. This spike stops at taste and at a size-correct file.
+Payment, list buying, and CMYK still wait. The staging mail path is documented in `docs/CLICK2MAIL.md`.

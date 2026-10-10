@@ -6,18 +6,21 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "c2m:smoke": "tsx scripts/c2m-smoke.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.116.0",
     "@base-ui/react": "1.7.0",
     "@neondatabase/serverless": "^1.2.0",
+    "@pdf-lib/fontkit": "^1.1.1",
     "@vercel/blob": "^2.8.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.43.0",
     "lucide-react": "^1.28.0",
     "next": "16.2.11",
+    "pdf-lib": "^1.17.1",
     "qrcode": "^1.5.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",
@@ -35,6 +38,7 @@
     "eslint-config-next": "16.2.11",
     "jsqr": "^1.4.0",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   },
   "allowScripts": {
