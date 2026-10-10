@@ -11,6 +11,7 @@ import {
   contrastRatio,
   fitTextLine,
   layoutIssueCopy,
+  photoScrimGradient,
   postcardBackRegions,
   postcardLayoutFamily,
   rectContains,
@@ -99,7 +100,7 @@ test("an offer already written into the subhead is pulled out so it can be large
   assert.equal(plan.offerLine, "Free roof inspection")
 })
 
-test("split layouts keep at least half the card for the photograph", () => {
+test("split layouts keep at least 55% of the card for the photograph", () => {
   for (const layoutVariant of ["type_primary_split", "peer_split", "banded_split"] as const) {
     const plan = resolvePostcardLayout({
       spec: spec({ layoutVariant, imageryRole: "crew", leadJob: "trust" }),
@@ -167,6 +168,80 @@ test("a line that cannot fit at the print minimum stays an issue", () => {
   assert.equal(fitted.overflows, true)
   assert.equal(fitted.fontPt, PRINT_MIN_PT.headline)
   assert.match(layoutIssueCopy({ code: "overflow", role: "headline", detail: "" }), /doesn't fit/)
+})
+
+test("a type-led booking card fails AF7 when the QR cannot be encoded", () => {
+  const plan = resolvePostcardLayout({
+    spec: spec({
+      layoutVariant: "type_only",
+      imageryRole: "none",
+      imagery: "none",
+      headline: "Book In Seconds",
+      palette: ["#1e3a5f", "#F5C518", "#f4f1ea"],
+      phone: undefined,
+      website: undefined,
+      qrDestination: "not a destination",
+    }),
+  })
+  const af7 = plan.rubric.find((check) => check.id === "AF7")
+  assert.equal(af7?.pass, false, af7?.detail)
+  assert.match(af7?.detail ?? "", /missing or will not scan/)
+  assert.ok(plan.issues.some((issue) => issue.code === "qr"))
+  assert.match(layoutIssueCopy({ code: "qr", role: "contact", detail: "" }), /will not scan/)
+})
+
+test("a type-led booking URL decodes, so AF7 passes", () => {
+  const plan = resolvePostcardLayout({
+    spec: spec({
+      layoutVariant: "type_only",
+      imageryRole: "none",
+      imagery: "none",
+      headline: "Book In Seconds",
+      palette: ["#1e3a5f", "#F5C518", "#f4f1ea"],
+    }),
+  })
+  assert.equal(plan.family, "type-led")
+  const af7 = plan.rubric.find((check) => check.id === "AF7")
+  assert.equal(af7?.pass, true, af7?.detail)
+  assert.match(af7?.detail ?? "", /it scans/)
+})
+
+test("photo-led type sits on a gradient that stays opaque under the words", () => {
+  const plan = resolvePostcardLayout({ spec: spec() })
+  assert.equal(plan.family, "photo-dominant")
+  assert.ok(plan.scrimRect)
+  assert.ok(plan.scrimRect.w > plan.textColumn.w)
+  assert.ok(plan.colors.scrimOpacity >= 0.88)
+  const gradient = photoScrimGradient(plan)
+  assert.match(gradient ?? "", /linear-gradient\(90deg/)
+  const overWhite = composite(plan.colors.scrim, "#ffffff", plan.colors.scrimOpacity)
+  const overBlack = composite(plan.colors.scrim, "#000000", plan.colors.scrimOpacity)
+  assert.ok(contrastRatio(plan.colors.headline, overWhite) >= HEADLINE_CONTRAST_MIN)
+  assert.ok(contrastRatio(plan.colors.ink, overBlack) >= HEADLINE_CONTRAST_MIN)
+  const solidStop = Number(gradient?.match(/(\d+\.\d+)%/)?.[1])
+  const textRight = ((plan.textColumn.x + plan.textColumn.w) / plan.scrimRect.w) * 100
+  assert.ok(solidStop + 0.2 >= textRight, `solid ${solidStop} text ${textRight}`)
+})
+
+test("a pale split panel takes a bolder color from the campaign palette", () => {
+  const plan = resolvePostcardLayout({
+    spec: spec({
+      layoutVariant: "peer_split",
+      headline: "See The Transformation",
+      subheadline: "One finished roof.",
+      callToAction: "Book the inspection",
+      palette: ["#1e3a5f", "#8aa4b5", "#f6f1e7"],
+      leadJob: "trust",
+      imageryRole: "neighborhood",
+    }),
+    showWordmark: true,
+  })
+  assert.equal(plan.family, "split")
+  assert.ok(plan.photoShare + 0.001 >= 0.55, String(plan.photoShare))
+  assert.equal(plan.colors.field.toLowerCase(), "#1e3a5f")
+  assert.equal(plan.headlineWeight, 800)
+  assert.ok(contrastRatio(plan.colors.headline, plan.colors.field) >= HEADLINE_CONTRAST_MIN)
+  assert.equal(plan.issues.filter((issue) => issue.code === "contrast" || issue.code === "photo-share").length, 0)
 })
 
 test("scrim contrast holds over both a white and a black photograph", () => {

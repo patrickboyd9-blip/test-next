@@ -1,4 +1,6 @@
 import { headlineWordCount, repairHeadlineCopy } from "@/lib/campaign-creator/headline-repair"
+import { resolveStudioContact } from "@/lib/campaign-creator/studio-contact"
+import { qrPaintDecodes } from "@/lib/campaign-creator/studio-qr"
 import {
   normalizeLayoutVariant,
   type CreativeSpec,
@@ -53,11 +55,11 @@ export const PRINT_MAX_PT = {
   wordmark: 10,
 } as const
 
-export const SPLIT_PHOTO_SHARE_MIN = 0.5
+export const SPLIT_PHOTO_SHARE_MIN = 0.55
 
 const INK_DARK = "#14120f"
 const INK_LIGHT = "#f7f4ee"
-const DISPLAY_EM = 0.6
+const DISPLAY_EM = 0.56
 const TEXT_EM = 0.5
 const DISPLAY_LINE = 1.02
 const TEXT_LINE = 1.18
@@ -83,6 +85,7 @@ export interface LayoutIssue {
     | "safe-zone"
     | "modules"
     | "scrim"
+    | "qr"
     | "keep-out"
   role: "headline" | "subhead" | "offer" | "body" | "cta" | "contact" | "photo" | "card"
   detail: string
@@ -117,6 +120,8 @@ export interface PostcardLayoutPlan {
     scrim: string
     scrimOpacity: number
   }
+  /** Display cut. 800 is Archivo's heaviest loaded weight. */
+  headlineWeight: number
   typePt: {
     headline: number
     subhead: number
@@ -184,7 +189,7 @@ export function resolvePostcardLayout(input: {
     issues.push({
       code: "photo-share",
       role: "photo",
-      detail: "The photograph covers less than half the card.",
+      detail: "The photograph covers less than 55% of the card.",
     })
   }
 
@@ -237,9 +242,18 @@ export function resolvePostcardLayout(input: {
     },
     qrInches,
     qrQuietModules: RUBRIC_QR_QUIET_MODULES,
+    headlineWeight: 800,
     issues,
     fixes,
   }
+  const contact = resolveStudioContact(input.spec)
+  const qrPayload = contact.qrPayload
+  const qrClaimed = Boolean(
+    collapse(input.spec.qrDestination) ||
+      collapse(input.spec.website) ||
+      collapse(input.spec.phone)
+  )
+  const qrDecodable = Boolean(qrPayload && qrPaintDecodes(qrPayload))
   const rubric = scoreAPlusPostcard(
     rubricFacts({
       plan: draft,
@@ -247,7 +261,8 @@ export function resolvePostcardLayout(input: {
       headlineOverflows: fitted.headline.overflows,
       offerPaint: copy.offerPaint,
       phoneShown: Boolean(collapse(input.spec.phone)),
-      qrShown: Boolean(collapse(input.spec.qrDestination) || collapse(input.spec.website)),
+      qrShown: Boolean(qrPayload) || qrClaimed,
+      qrDecodable,
       ctaShown: Boolean(collapse(input.spec.callToAction)),
       ctaBoxed: marks.ctaMark === "reverse-slug",
     })
@@ -270,6 +285,8 @@ export function layoutIssueCopy(issue: LayoutIssue): string {
       return "Some type is still smaller than it should be on a postcard."
     case "photo-share":
       return "The photograph still covers less of the card than it should."
+    case "qr":
+      return "The QR code is missing or will not scan."
     case "headline-length":
       return "The headline is still longer than eight words."
     case "hierarchy":
@@ -391,6 +408,7 @@ function rubricFacts(input: {
   offerPaint: "headline" | "line" | "subhead" | "none"
   phoneShown: boolean
   qrShown: boolean
+  qrDecodable: boolean
   ctaShown: boolean
   ctaBoxed: boolean
 }): Parameters<typeof scoreAPlusPostcard>[0] {
@@ -440,6 +458,7 @@ function rubricFacts(input: {
     phoneShown: input.phoneShown,
     phonePt: plan.typePt.contact,
     qrShown: input.qrShown,
+    qrDecodable: input.qrDecodable,
     qrInches: plan.qrInches,
     qrQuietModules: plan.qrQuietModules,
     boxedModules: boxed,
@@ -481,7 +500,9 @@ function rubricIssue(check: RubricCheck): LayoutIssue {
               : check.id === "AF6"
                 ? "safe-zone"
                 : check.id === "AF7"
-                  ? "min-size"
+                  ? check.detail.includes("will not scan")
+                    ? "qr"
+                    : "min-size"
                   : check.id === "AF8"
                     ? "modules"
                     : check.id === "AF9"
@@ -592,18 +613,18 @@ function geometryFor(
   }
 
   if (family === "photo-dominant") {
-    const panel = inches(INSET, 0.45, 3.9, 4.3)
+    const textColumn = inches(INSET, INSET, 3.65, TRIM_H - INSET * 2)
     return {
       photoShare: 1,
       photoRect: { x: 0, y: 0, w: 1, h: 1 },
-      textColumn: panel,
-      scrimRect: panel,
+      textColumn,
+      scrimRect: inches(0, 0, 6.4, TRIM_H),
     }
   }
 
   if (layout === "peer_split") {
-    const photoRect = inches(0, 0, 4.64, TRIM_H)
-    const textColumn = inches(4.8, INSET, 7.75 - 4.8, TRIM_H - INSET * 2)
+    const photoRect = inches(0, 0, 4.48, TRIM_H)
+    const textColumn = inches(4.6, INSET, 7.75 - 4.6, TRIM_H - INSET * 2)
     return {
       photoShare: photoRect.w * photoRect.h,
       photoRect,
@@ -622,6 +643,27 @@ function geometryFor(
   }
 }
 
+/**
+ * Soft fade from the type side into the photograph.
+ * The type column stays on the opaque stop, so contrast does not depend on the photo.
+ */
+export function photoScrimGradient(plan: {
+  colors: PostcardLayoutPlan["colors"]
+  scrimRect: NormRect | null
+  textColumn: NormRect
+}): string | null {
+  const scrim = plan.scrimRect
+  if (!scrim || scrim.w <= 0) return null
+  const textRight = plan.textColumn.x + plan.textColumn.w
+  const hold = Math.min(scrim.x + scrim.w * 0.92, textRight + 0.02)
+  const solidStop = clamp(((hold - scrim.x) / scrim.w) * 100, 36, 78)
+  const midStop = Math.min(94, solidStop + 16)
+  const solid = rgba(plan.colors.scrim, plan.colors.scrimOpacity)
+  const mid = rgba(plan.colors.scrim, plan.colors.scrimOpacity * 0.42)
+  const clear = rgba(plan.colors.scrim, 0)
+  return `linear-gradient(90deg, ${solid} 0%, ${solid} ${solidStop.toFixed(1)}%, ${mid} ${midStop.toFixed(1)}%, ${clear} 100%)`
+}
+
 function resolveColors(input: {
   family: LayoutFamily
   field: string
@@ -637,7 +679,7 @@ function resolveColors(input: {
       preferredInk: input.headlinePrefersEmphasis ? input.emphasis : input.ink,
     })
     if (scrim.opacity > 0.8 || scrim.scrim !== input.field) {
-      input.fixes.push("Put the type on a panel so it stays readable over the photo.")
+      input.fixes.push("Laid a gradient under the type so it stays readable over the photo.")
     }
     const cta = ctaPair(scrim.scrim, input.emphasis)
     const colors = {
@@ -653,7 +695,17 @@ function resolveColors(input: {
     return colors
   }
 
-  const field = input.field
+  let field = input.field
+  if (input.family === "split") {
+    const bold = boldestPaletteColor(input.field, input.ink, input.emphasis)
+    if (
+      relativeLuminance(input.field) > 0.42 &&
+      relativeLuminance(bold) + 0.08 < relativeLuminance(input.field)
+    ) {
+      field = bold
+      input.fixes.push("Set the type panel to a stronger color from the campaign palette.")
+    }
+  }
   let ink = readableInk(field, input.ink, HEADLINE_CONTRAST_MIN)
   const preferredHeadline = input.headlinePrefersEmphasis ? input.emphasis : ink
   let headline = readableInk(field, preferredHeadline, HEADLINE_CONTRAST_MIN)
@@ -732,7 +784,7 @@ function repairScrim(input: { preferredScrim: string; preferredInk: string }): {
 } {
   const scrims = uniqueColors([input.preferredScrim, INK_DARK, "#f4f1ea", INK_LIGHT])
   const inks = uniqueColors([input.preferredInk, INK_LIGHT, INK_DARK])
-  const opacities = [0.82, 0.9, 1]
+  const opacities = [1, 0.94, 0.88]
   let fallback = { scrim: INK_DARK, ink: INK_LIGHT, opacity: 1, score: 0 }
   for (const opacity of opacities) {
     for (const scrim of scrims) {
@@ -797,7 +849,7 @@ function fitStack(input: {
   const wordmarkH = input.showWordmark ? 0.34 : 0
   const ctaPt = PRINT_MAX_PT.cta
   const contactPt = 16
-  const marksH = 1.28
+  const marksH = 1.3
   const gap = 0.14
   let remain = Math.max(0.5, input.heightIn - wordmarkH - marksH - gap)
 
@@ -897,8 +949,9 @@ function fitStack(input: {
 }
 
 function innerTextBox(column: NormRect): NormRect {
-  const padX = 0.12 / TRIM_W
-  const padY = 0.1 / TRIM_H
+  // Matches the type column's 1.5% / 1.25% padding, which is tighter than a fixed inset on a narrow split.
+  const padX = Math.max(0.04, column.w * TRIM_W * 0.015) / TRIM_W
+  const padY = Math.max(0.04, column.h * TRIM_H * 0.0125) / TRIM_H
   return {
     x: column.x + padX,
     y: column.y + padY,
@@ -951,6 +1004,22 @@ export function readableInk(background: string, preferred: string, minimum: numb
 
 function contrastInk(background: string): string {
   return relativeLuminance(background) > 0.45 ? INK_DARK : INK_LIGHT
+}
+
+function boldestPaletteColor(...colors: string[]): string {
+  return uniqueColors(colors).reduce((best, color) =>
+    relativeLuminance(color) < relativeLuminance(best) ? color : best
+  )
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value))
+}
+
+function rgba(hex: string, alpha: number): string {
+  const rgb = hexToRgb(hex) ?? [20, 18, 15]
+  const opacity = Math.round(alpha * 1000) / 1000
+  return `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${opacity})`
 }
 
 function darkest(...colors: string[]): string {

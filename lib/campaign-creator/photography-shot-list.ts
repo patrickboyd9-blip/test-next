@@ -16,9 +16,37 @@ const ROLE_SHOT: Record<ImageBriefRole, string> = {
     "Show the ordinary place. Not one address treated as the recipient's home.",
 }
 
+const COMPARISON_PHOTOGRAPH =
+  /\b(before\s*(?:\/|&|and|-)\s*after|before-and-after|transformation|diptych|side[\s-]by[\s-]side|two\s+(?:photos|pictures|images|halves)|left\s+half|right\s+half|split\s+(?:photo|image|frame|screen)|stitched)\b/i
+
+/** A before/after or transformation idea, which the image model will otherwise stitch into two halves. */
+export function isComparisonPhotograph(value: string): boolean {
+  return COMPARISON_PHOTOGRAPH.test(value)
+}
+
+/**
+ * One frame of the finished moment. The conceived situation stays;
+ * the split, diptych, and stitched-half language does not.
+ */
+export function cohesivePhotograph(subject: string): string {
+  const situation = subject
+    .replace(
+      /\b(before\s*(?:\/|&|and|-)\s*after|before-and-after|diptych|side[\s-]by[\s-]side|two\s+(?:photos|pictures|images|halves)|left\s+half|right\s+half|split\s+(?:photo|image|frame|screen)|stitched(?:\s+together)?)\b/gi,
+      " "
+    )
+    .replace(/\s+/g, " ")
+    .replace(/\s+([,.])/g, "$1")
+    .trim()
+  const lead =
+    "One cohesive photograph of a single moment in one continuous frame. Show the finished work in its place, not both states. Do not divide the frame into a before half and an after half, and do not stitch two photos together."
+  return situation ? `${lead} ${situation}` : lead
+}
+
 export function buildOpenAIImagePrompt(brief: ImageBrief): string {
   const art = brief.artDirection
   const tone = brief.tone?.trim()
+  const comparison = isComparisonPhotograph(`${art.subject} ${brief.visualDirection}`)
+  const subject = comparison ? cohesivePhotograph(art.subject) : art.subject
   const invented = brief.doNotInvent
     .map((item) => `Do not invent ${item}.`)
     .join(" ")
@@ -26,7 +54,7 @@ export function buildOpenAIImagePrompt(brief: ImageBrief): string {
   return [
     `Shot: One documentary photograph, taken mid-task. Nobody is looking at the camera. If a person is in frame, they are an ordinary adult about 30 to 55, with natural skin. ${ROLE_SHOT[brief.imageryRole]}`,
     [
-      `Subject and action: ${art.subject}`,
+      `Subject and action: ${subject}`,
       art.craft ? `Craft to imitate, not a picture to copy: ${art.craft}` : null,
       "Hands that appear have a clear job with a tool or material. Do not pose empty hands toward the camera. Trade-specific details stay visible.",
     ]
@@ -48,9 +76,14 @@ export function buildOpenAIImagePrompt(brief: ImageBrief): string {
       "Exclusions:",
       invented,
       "Do not invent campaign-specific proof. When NOT: cheap fear or gore escalation.",
+      comparison
+        ? "No before-and-after diptych and no two photos stitched side by side."
+        : null,
       art.refuse,
       OPENAI_IMAGE_ALWAYS_EXCLUSIONS,
-    ].join(" "),
+    ]
+      .filter((line): line is string => Boolean(line))
+      .join(" "),
   ].join("\n")
 }
 
