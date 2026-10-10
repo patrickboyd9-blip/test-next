@@ -18,6 +18,7 @@ import {
   unapproveCreative,
   type MailPieceFormatRecommendationView,
 } from "@/lib/campaign-creator/actions"
+import type { PrintMailMode } from "@/lib/click2mail/mode"
 import type { Campaign, CampaignBrief, CampaignStatus, ConversationMessage } from "@/lib/campaign-creator/types"
 import { getMailPiece } from "@/lib/mail-catalog/catalog"
 
@@ -37,6 +38,7 @@ import { CollapsedConversation } from "./CollapsedConversation"
 import { Composer } from "./Composer"
 import { ConversationThread } from "./ConversationThread"
 import { OpeningPrompt } from "./OpeningPrompt"
+import { PrintMailTestStage } from "./PrintMailTestStage"
 import { QuantityTrackingStage } from "./QuantityTrackingStage"
 import { CreativeStudio } from "./studio/CreativeStudio"
 import { PersistentCreativeHeader } from "./studio/PersistentCreativeHeader"
@@ -57,9 +59,10 @@ function isMissingCurrentMailPieceError(error: unknown): boolean {
 
 interface CampaignCreatorViewProps {
   initialCampaign: Campaign
+  printMailMode: PrintMailMode
 }
 
-export function CampaignCreatorView({ initialCampaign }: CampaignCreatorViewProps) {
+export function CampaignCreatorView({ initialCampaign, printMailMode }: CampaignCreatorViewProps) {
   const [campaign, setCampaign] = useState<Campaign>(initialCampaign)
   const [composerValue, setComposerValue] = useState("")
   const [pendingMessage, setPendingMessage] = useState<string | null>(null)
@@ -303,8 +306,18 @@ export function CampaignCreatorView({ initialCampaign }: CampaignCreatorViewProp
 
       {showApprovedHandoff && isCreativeApproved && Boolean(campaign.mailPiece) && (
         <p className="mb-6 text-sm text-muted-foreground" role="status" aria-live="polite">
-          Creative approved — audience confirmation comes next.
+          Creative approved. Confirm the audience when you are ready. A staging print test is below.
         </p>
+      )}
+
+      {isAtOrPastStatus(campaign.status, "creative_approved") && Boolean(campaign.mailPiece) && (
+        <div className="mb-6">
+          <PrintMailTestStage
+            campaign={campaign}
+            mode={printMailMode}
+            onCampaign={setCampaign}
+          />
+        </div>
       )}
 
       {showCreativeStudio && !isCreativeApproved && (

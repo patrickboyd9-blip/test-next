@@ -1,3 +1,4 @@
+import type { MailOrderRecord } from "@/lib/click2mail/order-record"
 import type {
   MailPieceCatalogId,
   MailPieceCatalogVersion,
@@ -343,6 +344,12 @@ export interface Campaign {
   mailPiece?: MailPiece
   /** Immutable approval history. Retained when the current MailPiece is cleared. */
   mailPieceVersions?: MailPiece[]
+  /**
+   * Latest Click2Mail test (or guarded production) order.
+   * Does not change campaign status. Absent until a print test is sent.
+   */
+  mailOrder?: MailOrderRecord
+  mailOrderHistory?: MailOrderRecord[]
   /** Internal signal only — never surfaced to the customer as a score. */
   readyForBriefReview: boolean
   createdAt: string

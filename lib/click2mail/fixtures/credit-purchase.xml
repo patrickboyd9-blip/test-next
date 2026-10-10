@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<credit>
+    <allowNegative>false</allowNegative>
+    <status>0</status>
+    <description>Success</description>
+    <statusUrl>http://stage-rest.click2mail.com/molpro/credit</statusUrl>
+</credit>

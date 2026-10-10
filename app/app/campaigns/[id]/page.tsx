@@ -3,6 +3,8 @@ import { notFound } from "next/navigation"
 import { CampaignCreatorView } from "@/components/campaign-creator/CampaignCreatorView"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { getCampaign } from "@/lib/campaign-creator/actions"
+import { describePrintMailMode } from "@/lib/click2mail/config"
+import type { PrintMailMode } from "@/lib/click2mail/mode"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -14,6 +16,18 @@ export const dynamic = "force-dynamic"
  * invocation, still inside this 60s cap. See docs/DEPLOYMENT.md.
  */
 export const maxDuration = 60
+
+function printMailMode(): PrintMailMode {
+  try {
+    return describePrintMailMode()
+  } catch {
+    return {
+      environment: "stage",
+      productionEnabled: false,
+      credentialsConfigured: false,
+    }
+  }
+}
 
 export default async function CampaignPage({
   params,
@@ -35,7 +49,7 @@ export default async function CampaignPage({
           Campaign Creator
         </span>
       </header>
-      <CampaignCreatorView initialCampaign={campaign} />
+      <CampaignCreatorView initialCampaign={campaign} printMailMode={printMailMode()} />
     </div>
   )
 }

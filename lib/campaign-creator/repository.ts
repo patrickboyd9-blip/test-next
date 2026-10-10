@@ -2,6 +2,8 @@ import { randomUUID } from "crypto"
 
 import { createAppDocumentStore, type DocumentStore } from "@/lib/storage/document-store"
 
+import type { MailOrderRecord } from "@/lib/click2mail/order-record"
+
 import { normalizeCampaignStatus } from "./campaign-status"
 import { getActiveRevision, getActiveSpec, getApprovedSpec } from "./creative-state"
 import {
@@ -102,6 +104,7 @@ export interface CampaignRepository {
   ): Promise<Campaign>
   approveCreative(id: string): Promise<Campaign>
   unapproveCreative(id: string): Promise<Campaign>
+  saveMailOrder(id: string, order: MailOrderRecord): Promise<Campaign>
 }
 
 function backfillDirectionRevisions(
@@ -373,6 +376,17 @@ class StoredCampaignRepository implements CampaignRepository {
   async unapproveCreative(id: string): Promise<Campaign> {
     const campaign = await this.require(id)
     applyCreativeUnapproval(campaign, new Date().toISOString())
+    return this.write(campaign)
+  }
+
+  async saveMailOrder(id: string, order: MailOrderRecord): Promise<Campaign> {
+    const campaign = await this.require(id)
+    if (campaign.mailOrder && campaign.mailOrder.id !== order.id) {
+      const history = campaign.mailOrderHistory ?? []
+      campaign.mailOrderHistory = [...history, campaign.mailOrder].slice(-20)
+    }
+    campaign.mailOrder = order
+    campaign.updatedAt = order.updatedAt
     return this.write(campaign)
   }
 }

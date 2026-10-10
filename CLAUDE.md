@@ -65,4 +65,5 @@ There are two lockfiles at the root (`package-lock.json` and `package-lock 2.jso
 - `lib/campaign-creator/` — Creative Studio state, Creative Intelligence, and the Anthropic creative engine. `buildCreativeIntelligenceContext` is what generate, regenerate, and refine actually send.
 - `lib/reference-corpus/` — intake pointers for raw research, plus the curated Reference Card taste pack and the selector that picks a few cards per brief.
 - `lib/mail-catalog/` — immutable physical products. `POSTCARD_5X8_V1` is the 5×8 geometry (do not edit a published version in place).
-- `lib/print-spec/` — Phase 1 RGB print-spec export for that 5×8 geometry. Not a vendor job.
+- `lib/print-spec/` — Phase 1 RGB print-spec export for that 5×8 geometry, plus the campaign postcard PDF used for a mail test.
+- `lib/click2mail/` — staging-first Click2Mail client, recipient CSV, and the test mail order stored on the campaign. Production calls stay off unless `C2M_ALLOW_PRODUCTION=true`. See `docs/CLICK2MAIL.md`.

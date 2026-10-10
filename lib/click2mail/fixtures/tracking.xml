@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<job>
+  <id>8675309</id>
+  <status>0</status>
+  <description>Success</description>
+  <tracking>
+    <mailPiece>
+      <barCode>00270200802005045061</barCode>
+      <address>Awesome User,715 S Calhoun St,Fort Wayne,IN,46802</address>
+      <status>Printed</status>
+      <dateTime>2021-12-22 20:32:02.0</dateTime>
+      <statusLocation>FLINT,MI</statusLocation>
+    </mailPiece>
+  </tracking>
+</job>
