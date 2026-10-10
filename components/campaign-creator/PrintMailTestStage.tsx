@@ -262,7 +262,7 @@ function OrderStatus({ order }: { order: NonNullable<Campaign["mailOrder"]> }) {
         <Detail label="Address list" value={order.addressListId} />
         <Detail label="List status" value={order.addressListStatus !== undefined ? String(order.addressListStatus) : undefined} />
         <Detail label="Job" value={order.jobId} />
-        <Detail label="Job status" value={order.jobStatus} />
+        <Detail label="Click2Mail status" value={vendorJobLine(order)} />
         <Detail label="Proof" value={order.proofId} />
         <Detail label="Tracking pieces" value={order.trackingPieceCount !== undefined ? String(order.trackingPieceCount) : undefined} />
         <Detail label="Updated" value={formatWhen(order.updatedAt)} />
@@ -270,6 +270,13 @@ function OrderStatus({ order }: { order: NonNullable<Campaign["mailOrder"]> }) {
       {order.error && <p className="mt-3 text-destructive">{order.error}</p>}
     </div>
   )
+}
+
+function vendorJobLine(order: NonNullable<Campaign["mailOrder"]>): string | undefined {
+  const code = order.resultCode !== undefined ? String(order.resultCode) : ""
+  const description = order.resultDescription?.trim() ?? ""
+  if (code && description) return `${code} · ${description}`
+  return description || code || undefined
 }
 
 function Detail({ label, value }: { label: string; value?: string }) {

@@ -98,6 +98,8 @@ test("mock client places a staging order and polls status", async () => {
     now: () => "2026-10-10T00:01:00.000Z",
   })
   assert.equal(refreshed.jobStatus, "AWAITING_PRODUCTION")
+  assert.equal(refreshed.resultCode, 4)
+  assert.equal(refreshed.resultDescription, "Awaiting Production")
   assert.equal(refreshed.trackingPieceCount, 0)
   assert.equal(refreshed.lastPolledAt, "2026-10-10T00:01:00.000Z")
 })

@@ -10,10 +10,13 @@
  *
  * --buy-credit adds $10 with Click2Mail's published staging test card when the
  * balance is under $1. It refuses to run that purchase when C2M_ENV=prod.
+ * Staging often reports 0.00 after that purchase and still accepts User Credit,
+ * so a low balance does not block --submit on stage.
  * --submit pays the job with User Credit (or C2M_BILLING_TYPE). Without it,
  * the job stays in editing and nothing is charged.
  */
 import { createClick2MailClientFromEnv } from "../lib/click2mail/client"
+import { jobStatusLabel } from "../lib/click2mail/job-status"
 import { addressListPhase, mergeProduct, type Click2MailProductOptions } from "../lib/click2mail/config"
 import { waitForAddressList } from "../lib/click2mail/order"
 import type { Recipient } from "../lib/click2mail/recipients"
@@ -65,8 +68,9 @@ function printHelp(): void {
 Checks staging credit, uploads a sample 5x8 PDF, creates one address,
 creates a job, and requests a proof.
 
-  --buy-credit     If balance < $1, add $10 with the staging test card
-  --submit         Submit the job with User Credit after the proof
+  --buy-credit          If balance < $1, add $10 with the staging test card
+  --skip-balance-check  Continue when balance < $1 (staging already does this)
+  --submit              Submit the job with User Credit after the proof
   --document-class "Postcard 5 x 8"
   --layout "Double Sided Postcard"
   --paper-type "White Matte with Gloss UV Finish"
@@ -85,11 +89,13 @@ Flags accept --name value or --name=value.
 
 function parseArgs(argv: string[]): {
   buyCredit: boolean
+  skipBalanceCheck: boolean
   submit: boolean
   product: Partial<Click2MailProductOptions>
 } {
   const product: Partial<Click2MailProductOptions> = {}
   let buyCredit = false
+  let skipBalanceCheck = false
   let submit = false
   for (let index = 0; index < argv.length; index += 1) {
     const token = argv[index] ?? ""
@@ -99,6 +105,10 @@ function parseArgs(argv: string[]): {
     }
     if (token === "--buy-credit") {
       buyCredit = true
+      continue
+    }
+    if (token === "--skip-balance-check") {
+      skipBalanceCheck = true
       continue
     }
     if (token === "--submit") {
@@ -115,7 +125,7 @@ function parseArgs(argv: string[]): {
     if (!key) throw new Error(`Unknown flag --${name}. Try --help.`)
     product[key] = value
   }
-  return { buyCredit, submit, product }
+  return { buyCredit, skipBalanceCheck, submit, product }
 }
 
 function line(step: string, fields: Record<string, string | number | null | undefined>): void {
@@ -146,11 +156,8 @@ async function main(): Promise<void> {
   const credit = await client.getCredit()
   line("credit", { balance: credit.balance.toFixed(2), status: credit.status ?? "ok" })
 
-  if (credit.balance < 1) {
-    if (!flags.buyCredit) {
-      console.log("Balance is under $1. Re-run with --buy-credit to add $10 of staging test credit.")
-      process.exit(1)
-    }
+  let balance = credit.balance
+  if (balance < 1 && flags.buyCredit) {
     if (config.environment === "prod") {
       console.log("Refusing to buy credit with the staging test card while C2M_ENV=prod.")
       process.exit(1)
@@ -158,7 +165,19 @@ async function main(): Promise<void> {
     const purchased = await client.purchaseCredit(STAGING_TEST_PURCHASE)
     line("purchase", { amount: "10.00", status: purchased.status, description: purchased.description })
     const after = await client.getCredit()
+    balance = after.balance
     line("credit", { balance: after.balance.toFixed(2), status: after.status ?? "ok" })
+  }
+
+  if (balance < 1) {
+    const relax = config.environment === "stage" || flags.skipBalanceCheck
+    if (!relax) {
+      console.log("Balance is under $1. Re-run with --buy-credit to add $10 of staging test credit, or pass --skip-balance-check.")
+      process.exit(1)
+    }
+    console.log(
+      "Balance is under $1. Staging can report 0.00 after a successful credit purchase, and User Credit submit can still succeed. Continuing."
+    )
   }
 
   const pdf = await renderSamplePostcardPdf()
@@ -235,6 +254,7 @@ async function main(): Promise<void> {
     id: current.id,
     status: current.status,
     jobStatus: current.jobStatus,
+    label: jobStatusLabel(current.jobStatus),
     description: current.description,
   })
 }

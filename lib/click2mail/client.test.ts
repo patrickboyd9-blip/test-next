@@ -16,6 +16,7 @@ import {
   type Click2MailTransport,
 } from "./client"
 import { Click2MailError } from "./errors"
+import { jobStatusLabel } from "./job-status"
 
 function fixture(name: string): string {
   return readFileSync(path.join(process.cwd(), "lib/click2mail/fixtures", name), "utf8")
@@ -182,8 +183,12 @@ test("document, list, job, proof, and tracking use recorded XML", async () => {
   assert.equal(editing.jobStatus, "EDITING")
   assert.equal(editing.status, 9)
 
-  const awaiting = await client.getJob("8675309")
+  const awaiting = await client.getJob("1297313")
+  assert.equal(awaiting.id, "1297313")
+  assert.equal(awaiting.status, 4)
+  assert.equal(awaiting.description, "Awaiting Production")
   assert.equal(awaiting.jobStatus, "AWAITING_PRODUCTION")
+  assert.equal(jobStatusLabel(awaiting.jobStatus), "Waiting for the printer")
 
   const tracking = await client.getTracking("8675309")
   assert.equal(tracking.pieces.length, 1)

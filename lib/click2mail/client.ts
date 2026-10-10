@@ -6,7 +6,7 @@ import {
   type Click2MailConfig,
 } from "./config"
 import { Click2MailError, redactSecrets } from "./errors"
-import { canonicalJobStatus } from "./job-status"
+import { interpretVendorJob } from "./job-status"
 import { buildAddressListXml } from "./recipients"
 import type {
   AddressListSnapshot,
@@ -337,7 +337,11 @@ export function createClick2MailClient(options: {
       const response = await send({ method: "GET", path: `/jobs/${encodeURIComponent(jobId)}` })
       const result = readResult(parseBody(response, secrets))
       if (response.status < 200 || response.status >= 300) throw fail(response, result, secrets)
-      const lifecycle = canonicalJobStatus(result.jobStatus) ?? canonicalJobStatus(result.description)
+      const lifecycle = interpretVendorJob({
+        resultCode: result.status,
+        description: result.description,
+        jobStatusField: result.jobStatus,
+      })
       if (result.status !== null && result.status !== 0 && !lifecycle) {
         throw fail(response, result, secrets)
       }
@@ -400,9 +404,12 @@ function toJob(
 ): JobSnapshot {
   if (!result.id) throw fail(response, result, secrets)
   const lifecycle =
-    canonicalJobStatus(result.jobStatus) ??
-    canonicalJobStatus(result.description) ??
-    fallbackStatus
+    interpretVendorJob({
+      resultCode: result.status,
+      description: result.description,
+      jobStatusField: result.jobStatus,
+      fallback: fallbackStatus,
+    }) ?? fallbackStatus
   return {
     id: result.id,
     status: result.status,
