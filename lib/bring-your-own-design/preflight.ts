@@ -5,7 +5,7 @@ import { buildPostcard6x9PrintSpec } from "@/lib/print-spec/postcard-6x9-print-s
 import { readRasterSize } from "@/lib/print-spec/raster"
 
 import { decodeRaster, readRasterDpi, sniffDesignMedia } from "./decode-raster"
-import { inspectPdf } from "./pdf-inspect"
+import { inspectPdf, isNearWhite } from "./pdf-inspect"
 
 export type DesignFace = "front" | "back"
 
@@ -413,7 +413,7 @@ function rasterHasKeepOutInk(
         const red = rgba[index] ?? 255
         const green = rgba[index + 1] ?? 255
         const blue = rgba[index + 2] ?? 255
-        if (red < 245 || green < 245 || blue < 245) {
+        if (!isNearWhite(red, green, blue)) {
           ink += 1
           if (ink >= 8) return true
         }

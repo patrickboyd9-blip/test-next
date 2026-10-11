@@ -92,6 +92,20 @@ test("ink in the address area is a warning, not a block", async () => {
 
   const front = await preflightDesignFile({ bytes: png, declaredType: "image/png", face: "front" })
   assert.equal(front.some((item) => item.code === "keep_out"), false)
+
+  const cream = new Uint8Array(width * height * 4)
+  for (let index = 0; index < cream.length; index += 4) {
+    cream[index] = 248
+    cream[index + 1] = 244
+    cream[index + 2] = 236
+    cream[index + 3] = 255
+  }
+  const paper = await preflightDesignFile({
+    bytes: encodeRgbaPng(width, height, cream, 300),
+    declaredType: "image/png",
+    face: "back",
+  })
+  assert.equal(paper.some((item) => item.code === "keep_out"), false)
 })
 
 test("a PDF with the wrong page count, trim size, or a missing font is explained in plain language", async () => {

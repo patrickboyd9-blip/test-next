@@ -319,7 +319,7 @@ function vectorTouchesKeepOut(content: string, geometry: PostcardGeometry): bool
       const [x, y, width, height] = numbers.slice(-4)
       rect = { x: x ?? 0, y: y ?? 0, width: width ?? 0, height: height ?? 0 }
     } else if ((token === "f" || token === "F" || token === "b" || token === "B") && rect) {
-      if (!nearWhite(fill.r, fill.g, fill.b) && rectHitsKeepOut(rect, geometry)) return true
+      if (!isNearWhite(fill.r, fill.g, fill.b) && rectHitsKeepOut(rect, geometry)) return true
     } else if (token === "Tm" && numbers.length >= 6) {
       textX = numbers[numbers.length - 2] ?? 0
       textY = numbers[numbers.length - 1] ?? 0
@@ -380,7 +380,7 @@ function imageInkInKeepOut(image: PdfImageInfo, geometry: PostcardGeometry): boo
         const index = (y * image.width + x) * 4
         const alpha = image.rgba[index + 3] ?? 255
         if (alpha < 20) continue
-        if (!nearWhite(image.rgba[index] ?? 255, image.rgba[index + 1] ?? 255, image.rgba[index + 2] ?? 255)) {
+        if (!isNearWhite(image.rgba[index] ?? 255, image.rgba[index + 1] ?? 255, image.rgba[index + 2] ?? 255)) {
           ink += 1
           if (ink >= 8) {
             image.coversKeepOut = true
@@ -393,8 +393,9 @@ function imageInkInKeepOut(image: PdfImageInfo, geometry: PostcardGeometry): boo
   return false
 }
 
-function nearWhite(red: number, green: number, blue: number): boolean {
-  return red >= 245 && green >= 245 && blue >= 245
+/** Paper white and a light cream count as empty. A real mark is darker than this. */
+export function isNearWhite(red: number, green: number, blue: number): boolean {
+  return red >= 230 && green >= 230 && blue >= 230
 }
 
 function tokenize(content: string): string[] {
