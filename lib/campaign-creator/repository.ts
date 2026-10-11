@@ -7,6 +7,10 @@ import type { MailOrderRecord } from "@/lib/click2mail/order-record"
 import { normalizeCampaignStatus } from "./campaign-status"
 import { getActiveRevision, getActiveSpec, getApprovedSpec } from "./creative-state"
 import {
+  applyUploadedDesignApproval,
+  clearUploadedDesignApproval,
+} from "@/lib/bring-your-own-design/approval"
+import {
   applyCreativeApproval,
   applyCreativeUnapproval,
   applyStrategyConfirmation,
@@ -21,6 +25,8 @@ import type {
   CreativeRecommendation,
   CreativeRevision,
   CreativeSpec,
+  DesignSource,
+  UploadedDesign,
 } from "./types"
 import { createEmptyCampaignCreative } from "./types"
 
@@ -104,6 +110,9 @@ export interface CampaignRepository {
   ): Promise<Campaign>
   approveCreative(id: string): Promise<Campaign>
   unapproveCreative(id: string): Promise<Campaign>
+  setDesignSource(id: string, source: DesignSource): Promise<Campaign>
+  saveUploadedDesign(id: string, design: UploadedDesign): Promise<Campaign>
+  approveUploadedDesign(id: string, printFileKey: string): Promise<Campaign>
   saveMailOrder(id: string, order: MailOrderRecord): Promise<Campaign>
 }
 
@@ -376,6 +385,39 @@ class StoredCampaignRepository implements CampaignRepository {
   async unapproveCreative(id: string): Promise<Campaign> {
     const campaign = await this.require(id)
     applyCreativeUnapproval(campaign, new Date().toISOString())
+    clearUploadedDesignApproval(campaign)
+    return this.write(campaign)
+  }
+
+  async setDesignSource(id: string, source: DesignSource): Promise<Campaign> {
+    const campaign = await this.require(id)
+    if (!campaign.mailPieceSpec) {
+      throw new Error("Confirm the strategy before choosing a design.")
+    }
+    if (campaign.mailPiece || campaign.status === "creative_approved") {
+      throw new Error("Unapprove the postcard before changing how it is designed.")
+    }
+    campaign.designSource = source
+    campaign.updatedAt = new Date().toISOString()
+    return this.write(campaign)
+  }
+
+  async saveUploadedDesign(id: string, design: UploadedDesign): Promise<Campaign> {
+    const campaign = await this.require(id)
+    if (campaign.designSource !== "upload") {
+      throw new Error("Choose upload before adding a design.")
+    }
+    if (campaign.mailPiece || campaign.status === "creative_approved") {
+      throw new Error("Unapprove the postcard before replacing the design.")
+    }
+    campaign.uploadedDesign = design
+    campaign.updatedAt = new Date().toISOString()
+    return this.write(campaign)
+  }
+
+  async approveUploadedDesign(id: string, printFileKey: string): Promise<Campaign> {
+    const campaign = await this.require(id)
+    applyUploadedDesignApproval(campaign, new Date().toISOString(), printFileKey)
     return this.write(campaign)
   }
 

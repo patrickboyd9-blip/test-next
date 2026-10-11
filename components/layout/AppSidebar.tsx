@@ -38,7 +38,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Command Center", href: "/app", icon: LayoutDashboard },
   { label: "Campaigns", href: "/app/campaigns/new", icon: Megaphone },
   { label: "Audience", href: "/app/audience", icon: Users, soon: true },
-  { label: "Templates", href: "/app/templates", icon: LayoutTemplate, soon: true },
+  { label: "Templates", href: "/app/templates", icon: LayoutTemplate },
   { label: "AI Creator", href: "/app/ai-creator", icon: Sparkles, soon: true },
   { label: "Insights", href: "/app/insights", icon: BarChart3, soon: true },
   { label: "Settings", href: "/app/settings", icon: Settings, soon: true },

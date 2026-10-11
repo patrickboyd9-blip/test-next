@@ -1,5 +1,4 @@
 import { POSTCARD_5X8_V1 } from "../mail-catalog/pieces/postcard-5x8"
-import type { ReservedKeepOutRect } from "../mail-catalog/types"
 
 /**
  * Phase 1 print-spec for the immutable 5×8 catalog entry.
@@ -62,6 +61,38 @@ export interface PrintSpecKeepOut {
   canvas: InchesRect
   pixels: PixelRect
   pdf: PdfRect
+}
+
+/** Trim-origin keep-out passed into the shared geometry builder. */
+export interface PostcardGeometryKeepOutInput {
+  id: string
+  xInches: number
+  yInches: number
+  widthInches: number
+  heightInches: number
+}
+
+/**
+ * Page geometry shared by the 5×8 catalog spec, the 6×9 template, the
+ * designer downloads, and upload preflight. One builder, so the bleed,
+ * trim, safe zone, and keep-outs cannot drift apart.
+ */
+export interface PostcardGeometry {
+  artworkCanvasInches: InchesSize
+  finishedTrimInches: InchesSize
+  bleedInchesPerSide: number
+  imageBleedExtensionMinimumInches: number
+  recommendedSafeTextInsetInches: number
+  pixelSize: { widthPx: number; heightPx: number }
+  pdfPagePoints: { widthPoints: number; heightPoints: number }
+  /** PDF TrimBox lower-left and upper-right, points. */
+  trimBox: readonly [number, number, number, number]
+  /** PDF BleedBox. Equal to the media box: bleed is the page. */
+  bleedBox: readonly [number, number, number, number]
+  mediaBox: readonly [number, number, number, number]
+  trimOnCanvas: InchesRect
+  safeTextOnCanvas: InchesRect
+  keepOuts: readonly PrintSpecKeepOut[]
 }
 
 export interface Postcard5x8PrintSpec {
@@ -147,16 +178,19 @@ function box(
   return [x, y, x + width, y + height]
 }
 
-export function buildPostcard5x8PrintSpec(): Postcard5x8PrintSpec {
-  const entry = POSTCARD_5X8_V1
-  const canvas = entry.physical.artworkCanvasInches
-  const trim = entry.physical.finishedTrimInches
-  const bleed = entry.physical.bleedInchesPerSide
-  const safeInset = entry.creativeCanvas.recommendedSafeTextInsetInches
+export function buildPostcardGeometry(input: {
+  artworkCanvasInches: InchesSize
+  finishedTrimInches: InchesSize
+  bleedInchesPerSide: number
+  imageBleedExtensionMinimumInches: number
+  recommendedSafeTextInsetInches: number
+  keepOuts: readonly PostcardGeometryKeepOutInput[]
+}): PostcardGeometry {
+  const canvas = input.artworkCanvasInches
+  const trim = input.finishedTrimInches
+  const bleed = input.bleedInchesPerSide
+  const safeInset = input.recommendedSafeTextInsetInches
 
-  if (entry.id !== "postcard_5x8" || entry.version !== 1) {
-    throw new Error("Print spec spike is bound to postcard_5x8 version 1.")
-  }
   if (canvas.widthInches !== trim.widthInches + bleed * 2) {
     throw new Error("Artwork canvas width does not equal trim plus bleed.")
   }
@@ -181,19 +215,11 @@ export function buildPostcard5x8PrintSpec(): Postcard5x8PrintSpec {
   const pageHeightPoints = inchesToPoints(canvas.heightInches)
   const trimPdf = canvasRectToPdf(trimOnCanvas, canvas.heightInches)
 
-  const keepOuts = entry.creativeCanvas.reservedKeepOut.rectangles.map(
-    (rect) => keepOutFromCatalog(rect, bleed, canvas.heightInches)
+  const keepOuts = input.keepOuts.map((rect) =>
+    keepOutFromCatalog(rect, bleed, canvas.heightInches)
   )
 
   return {
-    catalogId: "postcard_5x8",
-    catalogVersion: 1,
-    dpi: PRINT_SPEC_DPI,
-    colorSpace: "rgb",
-    colorPolicy: PRINT_SPEC_PHASE1_COLOR_POLICY,
-    nonGoals: PRINT_SPEC_NON_GOALS,
-    faces: ["front", "back"],
-    addressFace: "back",
     artworkCanvasInches: {
       widthInches: canvas.widthInches,
       heightInches: canvas.heightInches,
@@ -203,8 +229,7 @@ export function buildPostcard5x8PrintSpec(): Postcard5x8PrintSpec {
       heightInches: trim.heightInches,
     },
     bleedInchesPerSide: bleed,
-    imageBleedExtensionMinimumInches:
-      entry.physical.imageBleedExtensionMinimumInches,
+    imageBleedExtensionMinimumInches: input.imageBleedExtensionMinimumInches,
     recommendedSafeTextInsetInches: safeInset,
     pixelSize: {
       widthPx: inchesToPixels(canvas.widthInches),
@@ -228,8 +253,36 @@ export function buildPostcard5x8PrintSpec(): Postcard5x8PrintSpec {
   }
 }
 
+export function buildPostcard5x8PrintSpec(): Postcard5x8PrintSpec {
+  const entry = POSTCARD_5X8_V1
+  if (entry.id !== "postcard_5x8" || entry.version !== 1) {
+    throw new Error("Print spec spike is bound to postcard_5x8 version 1.")
+  }
+
+  const geometry = buildPostcardGeometry({
+    artworkCanvasInches: entry.physical.artworkCanvasInches,
+    finishedTrimInches: entry.physical.finishedTrimInches,
+    bleedInchesPerSide: entry.physical.bleedInchesPerSide,
+    imageBleedExtensionMinimumInches: entry.physical.imageBleedExtensionMinimumInches,
+    recommendedSafeTextInsetInches: entry.creativeCanvas.recommendedSafeTextInsetInches,
+    keepOuts: entry.creativeCanvas.reservedKeepOut.rectangles,
+  })
+
+  return {
+    catalogId: "postcard_5x8",
+    catalogVersion: 1,
+    dpi: PRINT_SPEC_DPI,
+    colorSpace: "rgb",
+    colorPolicy: PRINT_SPEC_PHASE1_COLOR_POLICY,
+    nonGoals: PRINT_SPEC_NON_GOALS,
+    faces: ["front", "back"],
+    addressFace: "back",
+    ...geometry,
+  }
+}
+
 function keepOutFromCatalog(
-  rect: ReservedKeepOutRect,
+  rect: PostcardGeometryKeepOutInput,
   bleedInchesPerSide: number,
   pageHeightInches: number
 ): PrintSpecKeepOut {

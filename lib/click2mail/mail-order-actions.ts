@@ -5,6 +5,7 @@ import { getCampaignRepository } from "@/lib/campaign-creator/repository"
 import { displayWebsite, postcardIdentityFromBrief, resolveStudioContact } from "@/lib/campaign-creator/studio-contact"
 import type { Campaign, CreativeSpec } from "@/lib/campaign-creator/types"
 import type { PostcardPrintCopy } from "@/lib/print-spec/render-campaign-postcard-pdf"
+import { loadApprovedUploadPdf } from "@/lib/bring-your-own-design/print-source"
 import { renderPostcardPrintPdf } from "@/lib/print-spec/render-campaign-postcard-pdf"
 
 import { assertClick2MailCallable, loadClick2MailConfig } from "./config"
@@ -129,14 +130,20 @@ async function runOrder(
 
   if (!existing?.documentId) {
     try {
-      const photo = await loadFinalPostcardPhoto(campaign)
-      const rendered = await renderPostcardPrintPdf({
-        copy: printCopy(campaign),
-        image: photo ?? undefined,
-        plateColor: plateFromSpec(campaign.mailPiece?.spec),
-      })
-      pdf = rendered.bytes
-      artwork = rendered.artwork
+      const uploaded = await loadApprovedUploadPdf(campaign)
+      if (uploaded) {
+        pdf = uploaded
+        artwork = "uploaded-design"
+      } else {
+        const photo = await loadFinalPostcardPhoto(campaign)
+        const rendered = await renderPostcardPrintPdf({
+          copy: printCopy(campaign),
+          image: photo ?? undefined,
+          plateColor: plateFromSpec(campaign.mailPiece?.spec),
+        })
+        pdf = rendered.bytes
+        artwork = rendered.artwork
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : "The print file could not be built."
       return { campaign, issues: [message] }

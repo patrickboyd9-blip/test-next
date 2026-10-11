@@ -328,6 +328,37 @@ export interface ProductionDocument {
   derivedAt: string
 }
 
+export type DesignSource = "studio" | "upload"
+
+export type DesignFaceName = "front" | "back"
+
+export interface UploadedDesignFile {
+  fileName: string
+  mediaType: "application/pdf" | "image/png" | "image/jpeg"
+  byteLength: number
+  /** Storage key, such as `front.png`. Not a public URL. */
+  key: string
+}
+
+export interface UploadedDesignIssue {
+  severity: "error" | "warning"
+  code: string
+  face: DesignFaceName
+  message: string
+}
+
+/** Customer artwork uploaded instead of a Studio direction. */
+export interface UploadedDesign {
+  front?: UploadedDesignFile
+  back?: UploadedDesignFile
+  issues: UploadedDesignIssue[]
+  checkedAt?: string
+  /** Set when the customer approves the proof. */
+  approvedAt?: string
+  /** Storage key of the print-ready PDF built at approval. */
+  printFileKey?: string
+}
+
 export interface Campaign {
   id: string
   ownerId: string
@@ -335,6 +366,13 @@ export interface Campaign {
   brief: CampaignBrief
   creative: CampaignCreative
   transcript: ConversationMessage[]
+  /**
+   * How the postcard is designed. Absent until the customer chooses,
+   * and absent on campaigns created before this choice existed.
+   */
+  designSource?: DesignSource
+  /** Present when designSource is "upload". */
+  uploadedDesign?: UploadedDesign
   /** Set at Confirm strategy. Absent on campaigns confirmed before this field existed. */
   mailPieceSpec?: MailPieceSpec
   /**
