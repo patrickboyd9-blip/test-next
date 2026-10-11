@@ -140,7 +140,9 @@ export async function preflightDesignFile(input: {
   if (classified.kind !== "artwork") {
     issues.push(rasterSizeIssue(face, classified, geometry))
   }
-  if (classified.ppi !== null) issues.push(...resolutionIssues(face, classified.ppi, geometry))
+  if (classified.ppi !== null && (classified.kind === "artwork" || classified.ppi < BLOCK_PPI - 0.01)) {
+    issues.push(...resolutionIssues(face, classified.ppi, geometry))
+  }
 
   if (face === "back") {
     const decoded = decodeRaster(input.bytes, raster.kind)

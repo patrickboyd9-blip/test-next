@@ -31,6 +31,7 @@ test("a trim-only picture is described as the finished card", async () => {
   assert.match(message, /8\.5 × 5\.5 inches/)
   assert.match(message, /quarter inch/)
   assert.equal(only(issues, "page_size").severity, "error")
+  assert.equal(issues.length, 1)
   assertNoJargon(message)
 })
 
