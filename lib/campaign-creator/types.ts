@@ -51,7 +51,12 @@ export interface BusinessInfo {
   name?: string
   website?: string
   phone?: string
+  /** Single line, used when a Studio proof prints a return address. */
   address?: string
+  street?: string
+  city?: string
+  state?: string
+  postalCode?: string
   socialHandle?: string
 }
 
@@ -347,6 +352,17 @@ export interface UploadedDesignIssue {
   message: string
 }
 
+/**
+ * Optional feedback on an uploaded design.
+ * Declining it does not block approval, and suggestions never edit the file.
+ */
+export interface UploadedDesignReview {
+  declined?: boolean
+  /** Three to five suggestions. No scores or grades. */
+  suggestions?: string[]
+  reviewedAt?: string
+}
+
 /** Customer artwork uploaded instead of a Studio direction. */
 export interface UploadedDesign {
   front?: UploadedDesignFile
@@ -357,11 +373,22 @@ export interface UploadedDesign {
   approvedAt?: string
   /** Storage key of the print-ready PDF built at approval. */
   printFileKey?: string
+  review?: UploadedDesignReview
 }
+
+/** Set when the customer starts by uploading artwork instead of the strategy conversation. */
+export type CampaignEntry = "upload"
 
 export interface Campaign {
   id: string
   ownerId: string
+  /** Name the customer gave this campaign. Required on the upload path. */
+  name?: string
+  /**
+   * How the campaign started. Absent means the strategy conversation.
+   * "upload" skips that conversation and Studio.
+   */
+  entry?: CampaignEntry
   status: CampaignStatus
   brief: CampaignBrief
   creative: CampaignCreative

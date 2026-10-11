@@ -1,3 +1,8 @@
+import {
+  isDesignReviewAvailable,
+  type UploadedArtworkFace,
+} from "@/lib/bring-your-own-design/design-review"
+
 import type { CreativeEngine } from "./creative-engine"
 import { MockCreativeEngine } from "./mock-creative-engine"
 
@@ -39,4 +44,20 @@ export async function getCreativeEngine(): Promise<CreativeEngine> {
 
   cached = { kind, engine }
   return engine
+}
+
+/**
+ * Vision review of an uploaded front and back.
+ * Uses the Anthropic creative engine. Hidden from the customer when no key is set.
+ */
+export async function reviewUploadedArtwork(input: {
+  front: UploadedArtworkFace
+  back: UploadedArtworkFace
+}): Promise<string[]> {
+  const apiKey = process.env.ANTHROPIC_API_KEY?.trim()
+  if (!isDesignReviewAvailable() || !apiKey) {
+    throw new Error("Review is not available right now. You can still approve the proof.")
+  }
+  const { reviewUploadedArtworkWithAnthropic } = await import("./anthropic-creative-engine")
+  return reviewUploadedArtworkWithAnthropic(apiKey, input)
 }

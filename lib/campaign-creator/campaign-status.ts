@@ -1,4 +1,4 @@
-import type { CampaignStatus } from "./types"
+import type { CampaignEntry, CampaignStatus } from "./types"
 
 /** Canonical lifecycle order — used for progress and at-or-past checks. */
 export const CAMPAIGN_STATUS_ORDER: readonly CampaignStatus[] = [
@@ -68,6 +68,16 @@ export function isCreativePhase(status: CampaignStatus): boolean {
     status === "generating_creative" ||
     status === "creative_ready" ||
     status === "creative_approved"
+  )
+}
+
+/** Upload-first campaigns skip the strategy conversation. Design is the upload and proof. */
+export function progressStepsForEntry(
+  entry: CampaignEntry | undefined
+): ReadonlyArray<{ id: CampaignProgressStepId; label: string }> {
+  if (entry !== "upload") return CAMPAIGN_PROGRESS_STEPS
+  return CAMPAIGN_PROGRESS_STEPS.filter((step) => step.id !== "strategy").map((step) =>
+    step.id === "creative" ? { id: step.id, label: "Design" } : step
   )
 }
 

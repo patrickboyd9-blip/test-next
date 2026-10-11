@@ -500,9 +500,13 @@ The same campaign should ultimately feed:
 
 ## Upload a design
 
-A customer who already has artwork can skip Studio.
+A customer who already has artwork can skip the strategy conversation and Studio.
 
-After the strategy is confirmed, they choose “I already have a design.” They upload a PDF, PNG, or JPG for the front and another for the back. The check uses the same 5×8 print spec as the template: page size 8.5 × 5.5 in, including a quarter inch of bleed. A finished-size file (8 × 5) and an eighth-inch bleed file (8.25 × 5.25, the size Canva makes when bleed is on) are rejected in plain language. Pictures under 300 pixels per inch are a warning. Pictures under 100 pixels per inch are rejected. A PDF must be one page per side, and its fonts must be included in the file. Ink in the address area is a warning, because the address, postage, and barcode cover that area.
+On the first Campaign Creator screen, under “What would you like to accomplish?”, they can choose “I already have a design.” A short form asks for a campaign name and the return address the printer needs. Someone who already confirmed a strategy can still choose that path from the design step.
+
+After both files pass the print check, they may be asked “Do you want our team to review and offer some feedback?” Yes and No are equal choices. No never blocks approval. Yes asks for a few encouraging suggestions and does not change the file. The question stays hidden when the creative engine has no API key.
+
+They upload a PDF, PNG, or JPG for the front and another for the back. The check uses the same 5×8 print spec as the template: page size 8.5 × 5.5 in, including a quarter inch of bleed. A finished-size file (8 × 5) and an eighth-inch bleed file (8.25 × 5.25, the size Canva makes when bleed is on) are rejected in plain language. Pictures under 300 pixels per inch are a warning. Pictures under 100 pixels per inch are rejected. A PDF must be one page per side, and its fonts must be included in the file. Ink in the address area is a warning, because the address, postage, and barcode cover that area.
 
 The proof shows both sides with the cut line and the address area drawn on top. The customer has to approve that proof. The approved files become the print PDF used by the same staging mail path as a Studio postcard.
 

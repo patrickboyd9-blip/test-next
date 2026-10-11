@@ -14,6 +14,7 @@ import { loadFinalPostcardPhoto } from "./load-print-photo"
 import { placeClick2MailOrder, refreshClick2MailOrder } from "./order"
 import type { MailOrderRecord } from "./order-record"
 import { normalizeRecipient, parseRecipientCsv, type Recipient } from "./recipients"
+import { returnAddressFromBusiness } from "./return-address"
 import type { ReturnAddress } from "./types"
 
 const repository = getCampaignRepository()
@@ -204,8 +205,7 @@ function printCopy(campaign: Campaign): PostcardPrintCopy {
 }
 
 function returnAddressFor(campaign: Campaign): ReturnAddress {
-  const name = campaign.brief.businessInfo?.name?.trim() || "Modern Mail Test"
-  return { rtnOrganization: name.slice(0, 80) }
+  return returnAddressFromBusiness(campaign.brief.businessInfo)
 }
 
 function plateFromSpec(spec: CreativeSpec | undefined): [number, number, number] | undefined {

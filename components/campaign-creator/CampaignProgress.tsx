@@ -1,13 +1,14 @@
 import { cn } from "@/lib/utils"
 import {
-  CAMPAIGN_PROGRESS_STEPS,
   getProgressStepStates,
+  progressStepsForEntry,
   type ProgressStepState,
 } from "@/lib/campaign-creator/campaign-status"
-import type { CampaignStatus } from "@/lib/campaign-creator/types"
+import type { CampaignEntry, CampaignStatus } from "@/lib/campaign-creator/types"
 
 interface CampaignProgressProps {
   status: CampaignStatus
+  entry?: CampaignEntry
   className?: string
 }
 
@@ -34,8 +35,9 @@ function stepStyles(state: ProgressStepState) {
   }
 }
 
-export function CampaignProgress({ status, className }: CampaignProgressProps) {
+export function CampaignProgress({ status, entry, className }: CampaignProgressProps) {
   const stepStates = getProgressStepStates(status)
+  const steps = progressStepsForEntry(entry)
 
   return (
     <nav
@@ -43,10 +45,10 @@ export function CampaignProgress({ status, className }: CampaignProgressProps) {
       className={cn("w-full", className)}
     >
       <ol className="flex items-center">
-        {CAMPAIGN_PROGRESS_STEPS.map((step, index) => {
+        {steps.map((step, index) => {
           const state = stepStates[step.id]
           const styles = stepStyles(state)
-          const isLast = index === CAMPAIGN_PROGRESS_STEPS.length - 1
+          const isLast = index === steps.length - 1
 
           return (
             <li
