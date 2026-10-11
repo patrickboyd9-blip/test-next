@@ -26,6 +26,11 @@ import {
   buildRegenerateSystemPrompt,
   buildRegenerateUserMessage,
 } from "./prompts"
+import {
+  DESIGN_REVIEW_SYSTEM,
+  normalizeDesignReview,
+  type UploadedArtworkFace,
+} from "@/lib/bring-your-own-design/design-review"
 import { createAnthropicClient, type AnthropicToolUseBlock } from "./load-anthropic-sdk"
 import {
   GENERATED_SPEC_TOOL_REQUIRED,
@@ -50,6 +55,28 @@ const REFINE_MAX_TOKENS = 2048
 
 const GENERATE_TOOL_NAME = "propose_creative_directions"
 const REFINE_TOOL_NAME = "apply_creative_refinement"
+const REVIEW_TOOL_NAME = "offer_design_feedback"
+const REVIEW_MAX_TOKENS = 1024
+
+const offerDesignFeedbackTool = {
+  name: REVIEW_TOOL_NAME,
+  description:
+    "Offer 3 to 5 friendly suggestions about the uploaded postcard. No scores, grades, or file edits.",
+  input_schema: {
+    type: "object" as const,
+    properties: {
+      suggestions: {
+        type: "array",
+        minItems: 3,
+        maxItems: 5,
+        items: { type: "string" },
+        description:
+          "3 to 5 sentences. The first says what works well. Changes start with 'You might consider'. No scores or grades.",
+      },
+    },
+    required: ["suggestions"],
+  },
+}
 
 const specToolProperties = {
   layoutVariant: {
@@ -307,6 +334,72 @@ export class AnthropicCreativeEngine implements CreativeEngine {
     }
 
     return parseRefinement(toolUse.input)
+  }
+
+  async reviewUploadedDesign(input: {
+    front: UploadedArtworkFace
+    back: UploadedArtworkFace
+  }): Promise<string[]> {
+    const response = await this.client.messages.create({
+      model: MODEL,
+      max_tokens: REVIEW_MAX_TOKENS,
+      system: DESIGN_REVIEW_SYSTEM,
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "text", text: "Front of the postcard." },
+            artworkBlock(input.front),
+            { type: "text", text: "Back of the postcard." },
+            artworkBlock(input.back),
+            {
+              type: "text",
+              text: "Use the tool. Start with what works well. Do not score the design or edit the file.",
+            },
+          ],
+        },
+      ],
+      tools: [offerDesignFeedbackTool],
+      tool_choice: { type: "tool", name: REVIEW_TOOL_NAME },
+    })
+
+    const toolUse = response.content.find(
+      (block): block is AnthropicToolUseBlock => block.type === "tool_use"
+    )
+    if (!toolUse) {
+      throw new Error("Creative engine did not return design feedback.")
+    }
+    return normalizeDesignReview(toolUse.input)
+  }
+}
+
+export async function reviewUploadedArtworkWithAnthropic(
+  apiKey: string,
+  input: { front: UploadedArtworkFace; back: UploadedArtworkFace }
+): Promise<string[]> {
+  return new AnthropicCreativeEngine(apiKey).reviewUploadedDesign(input)
+}
+
+function artworkBlock(face: UploadedArtworkFace) {
+  const data = Buffer.from(face.bytes).toString("base64")
+  if (face.mediaType === "application/pdf") {
+    return {
+      type: "document" as const,
+      source: {
+        type: "base64" as const,
+        media_type: "application/pdf" as const,
+        data,
+      },
+      title: "Postcard",
+    }
+  }
+  return {
+    type: "image" as const,
+    source: {
+      type: "base64" as const,
+      media_type: face.mediaType,
+      data,
+    },
   }
 }
 

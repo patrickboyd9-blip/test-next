@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 
 import { CampaignCreatorView } from "@/components/campaign-creator/CampaignCreatorView"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { isDesignReviewAvailable } from "@/lib/bring-your-own-design/design-review"
 import { getCampaign } from "@/lib/campaign-creator/actions"
 import { describePrintMailMode } from "@/lib/click2mail/config"
 import type { PrintMailMode } from "@/lib/click2mail/mode"
@@ -49,7 +50,11 @@ export default async function CampaignPage({
           Campaign Creator
         </span>
       </header>
-      <CampaignCreatorView initialCampaign={campaign} printMailMode={printMailMode()} />
+      <CampaignCreatorView
+        initialCampaign={campaign}
+        printMailMode={printMailMode()}
+        designReviewAvailable={isDesignReviewAvailable()}
+      />
     </div>
   )
 }

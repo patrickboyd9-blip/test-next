@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react"
 
+import { beginUploadedDesignPath } from "@/lib/bring-your-own-design/actions"
+import type { UploadPathBasics } from "@/lib/bring-your-own-design/upload-path"
 import { isAtOrPastStatus } from "@/lib/campaign-creator/campaign-status"
 import { toCreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import { getApprovedSpec } from "@/lib/campaign-creator/creative-state"
@@ -41,6 +43,7 @@ import { OpeningPrompt } from "./OpeningPrompt"
 import { PrintMailTestStage } from "./PrintMailTestStage"
 import { QuantityTrackingStage } from "./QuantityTrackingStage"
 import { DesignPathChoice } from "./upload/DesignPathChoice"
+import { UploadBasicsForm } from "./upload/UploadBasicsForm"
 import { UploadDesign } from "./upload/UploadDesign"
 import { CreativeStudio } from "./studio/CreativeStudio"
 import { PersistentCreativeHeader } from "./studio/PersistentCreativeHeader"
@@ -62,9 +65,14 @@ function isMissingCurrentMailPieceError(error: unknown): boolean {
 interface CampaignCreatorViewProps {
   initialCampaign: Campaign
   printMailMode: PrintMailMode
+  designReviewAvailable?: boolean
 }
 
-export function CampaignCreatorView({ initialCampaign, printMailMode }: CampaignCreatorViewProps) {
+export function CampaignCreatorView({
+  initialCampaign,
+  printMailMode,
+  designReviewAvailable = false,
+}: CampaignCreatorViewProps) {
   const [campaign, setCampaign] = useState<Campaign>(initialCampaign)
   const [composerValue, setComposerValue] = useState("")
   const [pendingMessage, setPendingMessage] = useState<string | null>(null)
@@ -80,6 +88,7 @@ export function CampaignCreatorView({ initialCampaign, printMailMode }: Campaign
   const [recoveryFromFailedConfirm, setRecoveryFromFailedConfirm] = useState(false)
   const [formatRecommendation, setFormatRecommendation] =
     useState<MailPieceFormatRecommendationView | null>(null)
+  const [showUploadBasics, setShowUploadBasics] = useState(false)
 
   async function handleSend() {
     const text = composerValue.trim()
@@ -206,7 +215,7 @@ export function CampaignCreatorView({ initialCampaign, printMailMode }: Campaign
 
   const showStrategySummary =
     campaign.status === "draft" && campaign.readyForBriefReview
-  const showComposer = campaign.status === "draft"
+  const showComposer = campaign.status === "draft" && !showUploadBasics
   const showCreativeStudio = isAtOrPastStatus(campaign.status, "strategy_confirmed")
   const isCreativeApproved = campaign.status === "creative_approved"
   const uploadPath = campaign.designSource === "upload"
@@ -265,7 +274,21 @@ export function CampaignCreatorView({ initialCampaign, printMailMode }: Campaign
   const interviewContent = (
     <>
       {campaign.transcript.length === 0 && !pendingMessage ? (
-        <OpeningPrompt onSelectExample={setComposerValue} />
+        showUploadBasics ? (
+          <UploadBasicsForm
+            onBack={() => setShowUploadBasics(false)}
+            onSubmit={async (basics: UploadPathBasics) => {
+              const updated = await beginUploadedDesignPath(campaign.id, basics)
+              setCampaign(updated)
+              setShowUploadBasics(false)
+            }}
+          />
+        ) : (
+          <OpeningPrompt
+            onSelectExample={setComposerValue}
+            onHaveDesign={() => setShowUploadBasics(true)}
+          />
+        )
       ) : (
         <ConversationThread messages={displayMessages} isThinking={isSending} />
       )}
@@ -332,6 +355,7 @@ export function CampaignCreatorView({ initialCampaign, printMailMode }: Campaign
         <UploadDesign
           campaign={campaign}
           onCampaign={handleCampaignUpdate}
+          reviewAvailable={designReviewAvailable}
           readOnly={isCreativeApproved}
           onEdit={isCreativeApproved ? () => void handleEditCreative() : undefined}
           isEditing={isUnapproving}
@@ -378,6 +402,7 @@ export function CampaignCreatorView({ initialCampaign, printMailMode }: Campaign
         <AudienceStage
           audience={campaign.brief.audience}
           status={campaign.status}
+          fromConversation={campaign.entry !== "upload"}
           onFieldChange={handleFieldChange}
           onConfirm={handleConfirmAudience}
           isConfirming={isConfirmingAudience}
@@ -401,6 +426,7 @@ export function CampaignCreatorView({ initialCampaign, printMailMode }: Campaign
   return (
     <CampaignCreatorLayout
       status={campaign.status}
+      entry={campaign.entry}
       progressStatus={progressStatus}
       interview={interviewContent}
       studio={studioContent}

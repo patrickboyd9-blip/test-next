@@ -10,6 +10,7 @@ import {
   applyUploadedDesignApproval,
   clearUploadedDesignApproval,
 } from "@/lib/bring-your-own-design/approval"
+import { applyLeaveUploadPath, applyUploadPathStart, type UploadPathBasics } from "@/lib/bring-your-own-design/upload-path"
 import {
   applyCreativeApproval,
   applyCreativeUnapproval,
@@ -27,6 +28,7 @@ import type {
   CreativeSpec,
   DesignSource,
   UploadedDesign,
+  UploadedDesignReview,
 } from "./types"
 import { createEmptyCampaignCreative } from "./types"
 
@@ -111,7 +113,10 @@ export interface CampaignRepository {
   approveCreative(id: string): Promise<Campaign>
   unapproveCreative(id: string): Promise<Campaign>
   setDesignSource(id: string, source: DesignSource): Promise<Campaign>
+  beginUploadPath(id: string, basics: Partial<UploadPathBasics>): Promise<Campaign>
+  leaveUploadPath(id: string): Promise<Campaign>
   saveUploadedDesign(id: string, design: UploadedDesign): Promise<Campaign>
+  saveUploadedDesignReview(id: string, review: UploadedDesignReview): Promise<Campaign>
   approveUploadedDesign(id: string, printFileKey: string): Promise<Campaign>
   saveMailOrder(id: string, order: MailOrderRecord): Promise<Campaign>
 }
@@ -389,6 +394,18 @@ class StoredCampaignRepository implements CampaignRepository {
     return this.write(campaign)
   }
 
+  async beginUploadPath(id: string, basics: Partial<UploadPathBasics>): Promise<Campaign> {
+    const campaign = await this.require(id)
+    applyUploadPathStart(campaign, basics, new Date().toISOString())
+    return this.write(campaign)
+  }
+
+  async leaveUploadPath(id: string): Promise<Campaign> {
+    const campaign = await this.require(id)
+    applyLeaveUploadPath(campaign, new Date().toISOString())
+    return this.write(campaign)
+  }
+
   async setDesignSource(id: string, source: DesignSource): Promise<Campaign> {
     const campaign = await this.require(id)
     if (!campaign.mailPieceSpec) {
@@ -411,6 +428,17 @@ class StoredCampaignRepository implements CampaignRepository {
       throw new Error("Unapprove the postcard before replacing the design.")
     }
     campaign.uploadedDesign = design
+    campaign.updatedAt = new Date().toISOString()
+    return this.write(campaign)
+  }
+
+  async saveUploadedDesignReview(id: string, review: UploadedDesignReview): Promise<Campaign> {
+    const campaign = await this.require(id)
+    const design = campaign.uploadedDesign
+    if (campaign.designSource !== "upload" || !design?.front || !design.back) {
+      throw new Error("Upload the front and the back before asking for a review.")
+    }
+    campaign.uploadedDesign = { ...design, review }
     campaign.updatedAt = new Date().toISOString()
     return this.write(campaign)
   }

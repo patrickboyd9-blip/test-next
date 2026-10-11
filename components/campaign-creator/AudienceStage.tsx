@@ -18,6 +18,7 @@ import { Field } from "./BriefSummaryCard"
 interface AudienceStageProps {
   audience: AudienceDefinition | undefined
   status: CampaignStatus
+  fromConversation?: boolean
   onFieldChange: (patch: Partial<CampaignBrief>) => void
   onConfirm: () => void
   isConfirming?: boolean
@@ -27,6 +28,7 @@ interface AudienceStageProps {
 export function AudienceStage({
   audience,
   status,
+  fromConversation = true,
   onFieldChange,
   onConfirm,
   isConfirming,
@@ -45,7 +47,9 @@ export function AudienceStage({
         <CardDescription>
           {isConfirmed
             ? "This audience is confirmed and will carry forward into the rest of your campaign."
-            : "Here's the audience from our conversation — confirm or adjust it before we build your mailing list."}
+            : fromConversation
+              ? "Here's the audience from our conversation — confirm or adjust it before we build your mailing list."
+              : "Describe who should receive this, then confirm it."}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
