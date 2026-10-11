@@ -186,7 +186,6 @@ export function PostcardFrontFace({
           <PrintMarks
             spec={spec}
             plan={plan}
-            compact={compact}
             contact={contact}
             mark={marks.ctaMark}
           />
@@ -295,9 +294,11 @@ function DisplayStack({ plan, compact }: { plan: PostcardLayoutPlan; compact: bo
       ) : null}
       {!compact && plan.offerLine ? (
         <p
-          className="mt-[0.3em] font-semibold"
+          className="mt-[0.3em] font-bold"
+          data-offer-weight="700"
           style={{
             fontSize: pointsToCqw(plan.typePt.offer),
+            fontWeight: 700,
             lineHeight: 1.15,
             color: plan.colors.ink,
           }}
@@ -324,13 +325,11 @@ function DisplayStack({ plan, compact }: { plan: PostcardLayoutPlan; compact: bo
 function PrintMarks({
   spec,
   plan,
-  compact,
   contact,
   mark,
 }: {
   spec: CreativeSpec
   plan: PostcardLayoutPlan
-  compact: boolean
   contact: StudioContact
   mark: CtaMark
 }) {
@@ -348,14 +347,12 @@ function PrintMarks({
             {spec.callToAction}
           </PrintCta>
         ) : null}
-        {!compact ? (
-          <ContactPrint
-            contact={contact}
-            color={plan.colors.ink}
-            phoneSize={pointsToCqw(plan.typePt.contact)}
-            websiteSize={pointsToCqw(plan.typePt.website)}
-          />
-        ) : null}
+        <ContactPrint
+          contact={contact}
+          color={plan.colors.ink}
+          phoneSize={pointsToCqw(plan.typePt.contact)}
+          websiteSize={pointsToCqw(plan.typePt.website)}
+        />
       </div>
       {contact.qrPayload ? (
         <QrMark payload={contact.qrPayload} sizeIn={plan.qrInches} label={plan.qrLabel} />
@@ -418,17 +415,22 @@ function ContactPrint({
 }) {
   if (!contact.phone && !contact.website) return null
   return (
-    <div className="min-w-0">
+    <div className="min-w-0" data-contact-lines="shown">
       {contact.phone ? (
         <p
           className="font-semibold leading-none tabular-nums tracking-[-0.02em]"
+          data-contact-phone={contact.phone}
           style={{ color, fontSize: phoneSize }}
         >
           {contact.phone}
         </p>
       ) : null}
       {contact.website ? (
-        <p className="mt-[0.2em] font-medium leading-none" style={{ color, fontSize: websiteSize }}>
+        <p
+          className="mt-[0.2em] font-medium leading-none"
+          data-contact-website={displayWebsite(contact.website)}
+          style={{ color, fontSize: websiteSize }}
+        >
           {displayWebsite(contact.website)}
         </p>
       ) : null}

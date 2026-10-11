@@ -84,6 +84,48 @@ test("a long green-card headline fits without dropping under the print minimum",
   assert.ok(contrastRatio(plan.colors.headline, plan.colors.field) >= HEADLINE_CONTRAST_MIN)
 })
 
+test("a roofing card with a long offer keeps headline and offer above the body", () => {
+  const plan = resolvePostcardLayout({
+    spec: spec({
+      headline: "Small Leaks Start Quiet",
+      subheadline:
+        "Get a free roof inspection and catch problems before they show up inside your home.",
+      body: "Get a free roof inspection and catch problems before they show up inside your home.",
+      offer: "Free roof inspection if they book an appointment",
+      callToAction: "Call or scan to schedule",
+      phone: "222-333-4456",
+      website: "www.abcroofers.com",
+      qrDestination: "https://www.abcroofers.com/book",
+      leadJob: "problem",
+      imageryRole: "consequence",
+    }),
+    showWordmark: true,
+  })
+  const bodyRef = plan.body ? plan.typePt.body : 11
+  const support = plan.body ? plan.typePt.body : plan.subheadline ? plan.typePt.subhead : bodyRef
+  assert.equal(plan.issues.some((issue) => issue.code === "hierarchy"), false, JSON.stringify(plan.issues))
+  assert.ok(plan.typePt.headline / bodyRef + 0.001 >= 2.5, `${plan.typePt.headline} vs ${bodyRef}`)
+  assert.ok(plan.typePt.offer / bodyRef + 0.001 >= 1.5, `${plan.typePt.offer} vs ${bodyRef}`)
+  assert.ok(plan.typePt.offer + 0.01 >= support * 1.5, `offer ${plan.typePt.offer} support ${support}`)
+  assert.match(plan.offerLine, /\byou\b/)
+  assert.doesNotMatch(plan.offerLine, /\bthey\b/i)
+  assert.match(plan.subheadline, /before they show up/)
+  assert.equal(plan.qrLabel, "Scan to book")
+  const compact = resolvePostcardLayout({
+    spec: spec({
+      headline: "Small Leaks Start Quiet",
+      offer: "Free roof inspection if they book an appointment",
+      callToAction: "Call or scan to schedule",
+      phone: "222-333-4456",
+      website: "www.abcroofers.com",
+      qrDestination: "https://www.abcroofers.com/book",
+    }),
+    compact: true,
+  })
+  assert.equal(compact.issues.some((issue) => issue.code === "hierarchy"), false)
+  assert.equal(compact.qrLabel, "Scan to book")
+})
+
 test("an offer already written into the subhead is pulled out so it can be larger than the body", () => {
   const plan = resolvePostcardLayout({
     spec: spec({
