@@ -15,7 +15,7 @@ export interface MailOrderRecord {
   environment: "stage" | "prod"
   pieceCount: number
   estimatedCostLabel: string
-  artwork: "final-photo" | "type-plate"
+  artwork: "final-photo" | "type-plate" | "uploaded-design"
   documentId?: string
   addressListId?: string
   addressListStatus?: number

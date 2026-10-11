@@ -40,6 +40,8 @@ import { ConversationThread } from "./ConversationThread"
 import { OpeningPrompt } from "./OpeningPrompt"
 import { PrintMailTestStage } from "./PrintMailTestStage"
 import { QuantityTrackingStage } from "./QuantityTrackingStage"
+import { DesignPathChoice } from "./upload/DesignPathChoice"
+import { UploadDesign } from "./upload/UploadDesign"
 import { CreativeStudio } from "./studio/CreativeStudio"
 import { PersistentCreativeHeader } from "./studio/PersistentCreativeHeader"
 import { useStudioDirectionImages } from "./studio/use-studio-direction-images"
@@ -207,6 +209,12 @@ export function CampaignCreatorView({ initialCampaign, printMailMode }: Campaign
   const showComposer = campaign.status === "draft"
   const showCreativeStudio = isAtOrPastStatus(campaign.status, "strategy_confirmed")
   const isCreativeApproved = campaign.status === "creative_approved"
+  const uploadPath = campaign.designSource === "upload"
+  const studioStarted =
+    campaign.designSource === "studio" ||
+    campaign.creative.directions.length > 0 ||
+    campaign.status === "generating_creative"
+  const showDesignChoice = showCreativeStudio && !isCreativeApproved && !uploadPath && !studioStarted
   const showAudience = isAtOrPastStatus(campaign.status, "creative_approved")
   const showQuantityTracking = isAtOrPastStatus(campaign.status, "audience_confirmed")
   const hasPersistedCreative = campaign.creative.directions.length > 0
@@ -320,7 +328,21 @@ export function CampaignCreatorView({ initialCampaign, printMailMode }: Campaign
         </div>
       )}
 
-      {showCreativeStudio && !isCreativeApproved && (
+      {uploadPath && (
+        <UploadDesign
+          campaign={campaign}
+          onCampaign={handleCampaignUpdate}
+          readOnly={isCreativeApproved}
+          onEdit={isCreativeApproved ? () => void handleEditCreative() : undefined}
+          isEditing={isUnapproving}
+        />
+      )}
+
+      {showDesignChoice && (
+        <DesignPathChoice campaignId={campaign.id} onCampaign={handleCampaignUpdate} />
+      )}
+
+      {showCreativeStudio && !isCreativeApproved && !uploadPath && studioStarted && (
         <CreativeStudio
           key={resumeInRefinement ? "refine-resume" : "studio"}
           campaign={campaign}
