@@ -36,14 +36,13 @@ import {
 import { AudienceStage } from "./AudienceStage"
 import { BriefSummaryCard } from "./BriefSummaryCard"
 import { CampaignCreatorLayout } from "./CampaignCreatorLayout"
+import { CampaignOpening } from "./CampaignOpening"
 import { CollapsedConversation } from "./CollapsedConversation"
 import { Composer } from "./Composer"
 import { ConversationThread } from "./ConversationThread"
-import { OpeningPrompt } from "./OpeningPrompt"
 import { PrintMailTestStage } from "./PrintMailTestStage"
 import { QuantityTrackingStage } from "./QuantityTrackingStage"
 import { DesignPathChoice } from "./upload/DesignPathChoice"
-import { UploadBasicsForm } from "./upload/UploadBasicsForm"
 import { UploadDesign } from "./upload/UploadDesign"
 import { CreativeStudio } from "./studio/CreativeStudio"
 import { PersistentCreativeHeader } from "./studio/PersistentCreativeHeader"
@@ -88,7 +87,6 @@ export function CampaignCreatorView({
   const [recoveryFromFailedConfirm, setRecoveryFromFailedConfirm] = useState(false)
   const [formatRecommendation, setFormatRecommendation] =
     useState<MailPieceFormatRecommendationView | null>(null)
-  const [showUploadBasics, setShowUploadBasics] = useState(false)
 
   async function handleSend() {
     const text = composerValue.trim()
@@ -215,7 +213,8 @@ export function CampaignCreatorView({
 
   const showStrategySummary =
     campaign.status === "draft" && campaign.readyForBriefReview
-  const showComposer = campaign.status === "draft" && !showUploadBasics
+  const awaitingFirstMessage = campaign.transcript.length === 0 && !pendingMessage
+  const showComposer = campaign.status === "draft" && !awaitingFirstMessage
   const showCreativeStudio = isAtOrPastStatus(campaign.status, "strategy_confirmed")
   const isCreativeApproved = campaign.status === "creative_approved"
   const uploadPath = campaign.designSource === "upload"
@@ -273,22 +272,18 @@ export function CampaignCreatorView({
 
   const interviewContent = (
     <>
-      {campaign.transcript.length === 0 && !pendingMessage ? (
-        showUploadBasics ? (
-          <UploadBasicsForm
-            onBack={() => setShowUploadBasics(false)}
-            onSubmit={async (basics: UploadPathBasics) => {
-              const updated = await beginUploadedDesignPath(campaign.id, basics)
-              setCampaign(updated)
-              setShowUploadBasics(false)
-            }}
-          />
-        ) : (
-          <OpeningPrompt
-            onSelectExample={setComposerValue}
-            onHaveDesign={() => setShowUploadBasics(true)}
-          />
-        )
+      {awaitingFirstMessage ? (
+        <CampaignOpening
+          composerValue={composerValue}
+          onComposerChange={setComposerValue}
+          onSend={handleSend}
+          sending={isSending}
+          onSelectExample={setComposerValue}
+          onSubmitUpload={async (basics: UploadPathBasics) => {
+            const updated = await beginUploadedDesignPath(campaign.id, basics)
+            setCampaign(updated)
+          }}
+        />
       ) : (
         <ConversationThread messages={displayMessages} isThinking={isSending} />
       )}

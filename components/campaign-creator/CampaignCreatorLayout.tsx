@@ -29,7 +29,7 @@ export function CampaignCreatorLayout({
   const progress = progressStatus ?? status
 
   return (
-    <div className={cn("mx-auto flex w-full flex-1 flex-col gap-8", className)}>
+    <div className={cn("mx-auto flex w-full flex-1 flex-col gap-8 px-4 py-6 md:px-6", className)}>
       <CampaignProgress status={progress} entry={entry} />
 
       {interviewMode && (
