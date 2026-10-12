@@ -5,11 +5,13 @@ import { useEffect, useRef, useState } from "react"
 import type { UploadPathBasics } from "@/lib/bring-your-own-design/upload-path"
 
 import { Composer } from "./Composer"
+import { DesignRequestForm } from "./design-request/DesignRequestForm"
 import { OpeningPrompt } from "./OpeningPrompt"
 import { StartPathChoice } from "./StartPathChoice"
+import { TemplateGallery } from "./templates/TemplateGallery"
 import { UploadBasicsForm } from "./upload/UploadBasicsForm"
 
-export type OpeningStep = "choose" | "ai" | "upload"
+export type OpeningStep = "choose" | "ai" | "upload" | "template" | "team"
 
 interface CampaignOpeningProps {
   /** Lets tests render each path. The live screen always starts on the choice. */
@@ -20,6 +22,7 @@ interface CampaignOpeningProps {
   sending?: boolean
   onSelectExample: (prompt: string) => void
   onSubmitUpload: (basics: UploadPathBasics) => Promise<void>
+  onSelectTemplate: (templateId: string) => Promise<void>
 }
 
 export function CampaignOpening({
@@ -30,6 +33,7 @@ export function CampaignOpening({
   sending = false,
   onSelectExample,
   onSubmitUpload,
+  onSelectTemplate,
 }: CampaignOpeningProps) {
   const [step, setStep] = useState<OpeningStep>(initialStep)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -57,6 +61,8 @@ export function CampaignOpening({
         <StartPathChoice
           onDesignWithAi={() => setStep("ai")}
           onHaveDesign={() => setStep("upload")}
+          onStartFromTemplate={() => setStep("template")}
+          onRequestDesign={() => setStep("team")}
         />
       )}
       {step === "ai" && (
@@ -73,6 +79,10 @@ export function CampaignOpening({
       {step === "upload" && (
         <UploadBasicsForm onBack={() => setStep("choose")} onSubmit={onSubmitUpload} />
       )}
+      {step === "template" && (
+        <TemplateGallery onBack={() => setStep("choose")} onSelect={onSelectTemplate} />
+      )}
+      {step === "team" && <DesignRequestForm onBack={() => setStep("choose")} />}
     </div>
   )
 }

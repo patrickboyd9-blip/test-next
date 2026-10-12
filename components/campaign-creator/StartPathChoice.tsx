@@ -1,6 +1,6 @@
 "use client"
 
-import { Sparkles, Upload } from "lucide-react"
+import { LayoutTemplate, PenLine, Sparkles, Upload } from "lucide-react"
 import type { ReactNode } from "react"
 
 import { cn } from "@/lib/utils"
@@ -8,12 +8,19 @@ import { cn } from "@/lib/utils"
 interface StartPathChoiceProps {
   onDesignWithAi: () => void
   onHaveDesign: () => void
+  onStartFromTemplate: () => void
+  onRequestDesign: () => void
 }
 
 const choiceCardClass =
   "flex min-h-52 w-full flex-1 cursor-pointer flex-col items-start gap-4 rounded-xl border bg-card p-5 text-left transition-colors hover:bg-muted/40 focus-visible:z-10 focus-visible:border-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-foreground/40"
 
-export function StartPathChoice({ onDesignWithAi, onHaveDesign }: StartPathChoiceProps) {
+export function StartPathChoice({
+  onDesignWithAi,
+  onHaveDesign,
+  onStartFromTemplate,
+  onRequestDesign,
+}: StartPathChoiceProps) {
   return (
     <div className="flex flex-col gap-6 py-6">
       <div
@@ -41,6 +48,24 @@ export function StartPathChoice({ onDesignWithAi, onHaveDesign }: StartPathChoic
             onClick={onHaveDesign}
           />
         </div>
+        <div className="flex">
+          <ChoiceCard
+            choice="template"
+            title="Start from a template"
+            description="Browse proven mailers for your industry, then let AI tailor one to your business."
+            icon={<LayoutTemplate className="size-4" />}
+            onClick={onStartFromTemplate}
+          />
+        </div>
+        <div className="flex">
+          <ChoiceCard
+            choice="team"
+            title="Have our team design it"
+            description="Share your logo, offer, and style. Our designers build a custom postcard for you."
+            icon={<PenLine className="size-4" />}
+            onClick={onRequestDesign}
+          />
+        </div>
       </div>
     </div>
   )
@@ -54,7 +79,7 @@ function ChoiceCard({
   emphasized = false,
   onClick,
 }: {
-  choice: "ai" | "upload"
+  choice: "ai" | "upload" | "template" | "team"
   title: string
   description: string
   icon: ReactNode

@@ -162,12 +162,18 @@ If a requirement is not relevant to the campaign, Modern Mail should not ask for
 
 ## Opening Experience
 
-The Campaign Creator begins with two equal choices, side by side on a wide screen and stacked on a narrow one.
+The Campaign Creator begins with four equal choices, in a two-by-two grid on a wide screen and stacked on a narrow one.
 
 - **Design it with AI.** Tell us your goal and our AI designs a ready-to-mail postcard in minutes.
 - **I already have a design.** Upload your own front and back. We'll check it for print and show you a proof.
+- **Start from a template.** Browse proven mailers for your industry, then let AI tailor one to your business.
+- **Have our team design it.** Share your logo, offer, and style. Our designers build a custom postcard for you.
 
-Both choices are the full card, and either can be used from the keyboard. A small Back control returns to this choice.
+Each choice is the full card, and any of them can be used from the keyboard. A small Back control returns to this choice.
+
+Choosing Start from a template opens a gallery. The customer can filter it by industry. The mailers are data records, so more can be added without redesigning the screen. Picking one loads that mailer into Studio. The customer then personalizes it in the existing chat — business name, phone, website, offer, photos — and continues through proof and print. The postcard stays on the locked 5×8 mail piece, with the same bleed and safe area. The 6×9 print spec is left as it is.
+
+Choosing Have our team design it opens a request. The customer gives a company name, address, vibe, and the specific offer, and chooses how people should respond. A QR code needs a link, a phone call needs a number, a website needs an address, and Other needs a short description. A logo and other images can be attached. Notes and size (5×8 or 6×9) are optional. The request is saved for the team, with a short confirmation. Nothing is emailed. The team reads requests on Design requests inside the app.
 
 Choosing Design it with AI opens a simple, open-ended prompt. The heading, example prompts, and chat field stay hidden until that choice.
 

@@ -41,10 +41,18 @@ export class MemorySql implements SqlExecutor {
     if (sql.startsWith("SELECT")) {
       const table = /FROM ([a-z_]+)/.exec(sql)?.[1]
       if (!table) throw new Error(`Unparsed SELECT: ${sql}`)
-      const row = this.tables.get(table)?.get(String(params[0]))
+      const bucket = this.tables.get(table)
+      const present = (row: Row): T => {
+        const data = this.returnDataAsString ? JSON.stringify(row.data) : row.data
+        return { data } as unknown as T
+      }
+      if (!/\bWHERE\b/i.test(sql)) {
+        if (!bucket) return []
+        return [...bucket.values()].map(present)
+      }
+      const row = bucket?.get(String(params[0]))
       if (!row) return []
-      const data = this.returnDataAsString ? JSON.stringify(row.data) : row.data
-      return [{ data } as unknown as T]
+      return [present(row)]
     }
 
     if (sql.startsWith("INSERT")) {

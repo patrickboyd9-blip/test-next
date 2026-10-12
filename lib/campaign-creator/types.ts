@@ -376,8 +376,11 @@ export interface UploadedDesign {
   review?: UploadedDesignReview
 }
 
-/** Set when the customer starts by uploading artwork instead of the strategy conversation. */
-export type CampaignEntry = "upload"
+/**
+ * How the customer skipped the strategy conversation.
+ * "upload" is their own artwork. "template" is a catalog mailer in Studio.
+ */
+export type CampaignEntry = "upload" | "template"
 
 export interface Campaign {
   id: string
@@ -387,6 +390,7 @@ export interface Campaign {
   /**
    * How the campaign started. Absent means the strategy conversation.
    * "upload" skips that conversation and Studio.
+   * "template" skips that conversation and opens the mailer in Studio.
    */
   entry?: CampaignEntry
   status: CampaignStatus

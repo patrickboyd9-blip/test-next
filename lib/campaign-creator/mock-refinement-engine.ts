@@ -7,6 +7,10 @@ import {
 } from "./spec-diff"
 import { metricUsesPhone, metricUsesQr } from "./creative-state"
 import {
+  applyPersonalizationToSpec,
+  personalizationFromPrompt,
+} from "./prompt-personalization"
+import {
   conflictCopyAmbiguous,
   conflictCopyOffer,
   conflictCopyPhone,
@@ -34,7 +38,8 @@ export type RefinementOutcome =
     }
 
 export function applyMockRefinement(input: RefinementInput): RefinementOutcome {
-  const prompt = input.prompt.trim().toLowerCase()
+  const original = input.prompt.trim()
+  const prompt = original.toLowerCase()
   if (!prompt) {
     return {
       kind: "conflict",
@@ -81,7 +86,7 @@ export function applyMockRefinement(input: RefinementInput): RefinementOutcome {
     }
   }
 
-  const next = cloneSpec(input.currentSpec)
+  let next = cloneSpec(input.currentSpec)
   const hints: LayoutHints = { ...next.layoutHints }
   let matched = false
 
@@ -126,6 +131,16 @@ export function applyMockRefinement(input: RefinementInput): RefinementOutcome {
   )
   if (headlineMatch?.[1]) {
     next.headline = headlineMatch[1].trim()
+    matched = true
+  }
+
+  const personalized = applyPersonalizationToSpec(
+    next,
+    input.brief,
+    personalizationFromPrompt(original)
+  )
+  if (personalized !== next) {
+    next = personalized
     matched = true
   }
 

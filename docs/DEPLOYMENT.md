@@ -19,14 +19,14 @@ Do these in order. Connecting storage does not update the site that is already r
    Add both for Production (and Preview if you use it).
 7. Open **Deployments**, open the latest production deployment, and choose **Redeploy**. Environment variables are picked up on a new deployment. A refresh of the old deployment is not enough.
 
-You do not create tables, run SQL, or copy database passwords into the project by hand. The Neon and Blob connections create the variables below. The app creates its tables the first time someone opens or saves a campaign.
+You do not create tables, run SQL, or copy database passwords into the project by hand. The Neon and Blob connections create the variables below. The app creates its tables the first time someone opens or saves a campaign, and the first time someone sends a design request.
 
 ## Variables the Storage tab creates
 
 | Connection | Variable the app reads | What it is for |
 | --- | --- | --- |
-| Neon Postgres | `DATABASE_URL`, or `POSTGRES_URL` if that is what Neon created instead | Campaigns, and any saved reference-corpus records |
-| Vercel Blob | `BLOB_READ_WRITE_TOKEN` | Photographs Studio generates. The store stays **Private**. |
+| Neon Postgres | `DATABASE_URL`, or `POSTGRES_URL` if that is what Neon created instead | Campaigns, reference-corpus records, and design requests |
+| Vercel Blob | `BLOB_READ_WRITE_TOKEN` | Photographs Studio generates, and logos or images attached to a design request. The store stays **Private**. |
 
 Neon often adds other variables (`DATABASE_URL_UNPOOLED`, host, user, and so on). Leave them. The app uses `DATABASE_URL` when it is set, and otherwise `POSTGRES_URL`.
 

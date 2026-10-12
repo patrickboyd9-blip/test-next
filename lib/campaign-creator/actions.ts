@@ -20,6 +20,10 @@ import type { GeneratedAsset } from "./image-generation"
 import { createOpenAIImageGenerationAdapter } from "./openai-image-generation"
 import type { StudioImageLoad } from "./studio-image-cache"
 import { scheduleAfterResponse, syncStudioDirectionImages } from "./studio-image-jobs"
+import {
+  briefPatchFromPersonalization,
+  personalizationFromPrompt,
+} from "./prompt-personalization"
 import { getCampaignRepository } from "./repository"
 import { buildSpecDiff, cloneSpec } from "./spec-diff"
 import type { Campaign, CampaignBrief, CreativeRevision, MailPieceSpec } from "./types"
@@ -52,6 +56,14 @@ function requireCreativeCanvas(
 
 export async function createDraftCampaign(): Promise<Campaign> {
   return repository.createCampaign(mockCurrentUser.email)
+}
+
+/** Opens a catalog mailer in Studio on this draft. */
+export async function beginFromTemplate(
+  campaignId: string,
+  templateId: string
+): Promise<Campaign> {
+  return repository.beginTemplatePath(campaignId, templateId)
 }
 
 export async function getCampaign(campaignId: string): Promise<Campaign | null> {
@@ -266,6 +278,7 @@ export async function applyRefinement(
 ): Promise<Campaign> {
   const trimmed = prompt.trim()
   if (!trimmed) throw new Error("Prompt cannot be empty")
+  const personalization = personalizationFromPrompt(trimmed)
 
   const campaign = await repository.getCampaign(campaignId)
   if (!campaign) throw new Error(`Campaign ${campaignId} not found`)
@@ -300,7 +313,12 @@ export async function applyRefinement(
         ? null
         : getNextVersion(campaign.creative, directionId),
   }
-  return repository.appendRevision(campaignId, revision, result.spec)
+  const saved = await repository.appendRevision(campaignId, revision, result.spec)
+  if (revision.type === "conflict") return saved
+
+  const briefPatch = briefPatchFromPersonalization(campaign.brief, personalization)
+  if (!briefPatch) return saved
+  return repository.updateBrief(campaignId, briefPatch)
 }
 
 export async function restoreRevision(
