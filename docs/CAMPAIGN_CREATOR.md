@@ -18,7 +18,7 @@ Campaign Creator should feel less like completing a marketing form and more like
 
 Campaign creation should be conversational and progressive.
 
-The customer begins by describing what they want to accomplish in their own words.
+A customer who wants a design begins by describing what they want to accomplish in their own words. A customer who already has artwork can upload it instead.
 
 Modern Mail then determines what it needs to know next.
 
@@ -162,7 +162,14 @@ If a requirement is not relevant to the campaign, Modern Mail should not ask for
 
 ## Opening Experience
 
-The Campaign Creator should begin with a simple, open-ended prompt.
+The Campaign Creator begins with two equal choices, side by side on a wide screen and stacked on a narrow one.
+
+- **Design it with AI.** Tell us your goal and our AI designs a ready-to-mail postcard in minutes.
+- **I already have a design.** Upload your own front and back. We'll check it for print and show you a proof.
+
+Both choices are the full card, and either can be used from the keyboard. A small Back control returns to this choice.
+
+Choosing Design it with AI opens a simple, open-ended prompt. The heading, example prompts, and chat field stay hidden until that choice.
 
 The primary question should be:
 
@@ -502,7 +509,7 @@ The same campaign should ultimately feed:
 
 A customer who already has artwork can skip the strategy conversation and Studio.
 
-On the first Campaign Creator screen, under “What would you like to accomplish?”, they can choose “I already have a design.” A short form asks for a campaign name and the return address the printer needs. Someone who already confirmed a strategy can still choose that path from the design step.
+On the first Campaign Creator screen, they can choose “I already have a design.” A short form asks for a campaign name and the return address the printer needs. Someone who already confirmed a strategy can still choose that path from the design step.
 
 After both files pass the print check, they may be asked “Do you want our team to review and offer some feedback?” Yes and No are equal choices. No never blocks approval. Yes asks for a few encouraging suggestions and does not change the file. The question stays hidden when the creative engine has no API key.
 

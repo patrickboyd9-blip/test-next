@@ -5,17 +5,22 @@ import { renderToStaticMarkup } from "react-dom/server"
 
 import { OpeningPrompt } from "./OpeningPrompt"
 
-test("I already have a design sits under the heading and above the suggestion chips", () => {
+test("the AI prompt shows the heading, examples, and a way back", () => {
   const html = renderToStaticMarkup(
     createElement(OpeningPrompt, {
       onSelectExample() {},
-      onHaveDesign() {},
+      onBack() {},
     })
   )
+  const back = html.indexOf(">Back<")
   const heading = html.indexOf("What would you like to accomplish?")
-  const option = html.indexOf("I already have a design")
   const chip = html.indexOf("I want to get more appointments from homeowners nearby.")
-  assert.ok(heading >= 0)
-  assert.ok(option > heading)
-  assert.ok(chip > option)
+  assert.ok(back >= 0)
+  assert.ok(heading > back)
+  assert.ok(chip > heading)
+  assert.match(html, /I want to send 1,000 postcards to this neighborhood\./)
+  assert.match(html, /We&#x27;re opening a restaurant and want to promote our grand opening\./)
+  assert.match(html, /I want to send birthday cards to our employees\./)
+  assert.doesNotMatch(html, /Design it with AI/)
+  assert.doesNotMatch(html, /I already have a design/)
 })
