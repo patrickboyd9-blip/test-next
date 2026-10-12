@@ -25,12 +25,14 @@ test("the first screen is two equal choices and hides the prompt", () => {
   assert.equal(cards.length, 2)
   for (const card of cards) {
     assert.match(card, /type="button"/)
-    assert.match(card, /h-full/)
+    assert.doesNotMatch(card, /\bh-full\b/)
+    assert.match(card, /flex-1/)
     assert.match(card, /min-h-52/)
     assert.match(card, /w-full/)
     assert.match(card, /p-5/)
+    assert.match(card, /focus-visible:border-foreground/)
     assert.match(card, /focus-visible:ring-3/)
-    assert.match(card, /focus-visible:ring-ring\/50/)
+    assert.match(card, /focus-visible:ring-foreground\/40/)
   }
   assert.match(html, /data-choice="ai"/)
   assert.match(html, /data-choice="upload"/)

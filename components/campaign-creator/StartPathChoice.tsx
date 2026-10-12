@@ -11,7 +11,7 @@ interface StartPathChoiceProps {
 }
 
 const choiceCardClass =
-  "flex h-full min-h-52 w-full cursor-pointer flex-col items-start gap-4 rounded-xl border bg-card p-5 text-left transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+  "flex min-h-52 w-full flex-1 cursor-pointer flex-col items-start gap-4 rounded-xl border bg-card p-5 text-left transition-colors hover:bg-muted/40 focus-visible:z-10 focus-visible:border-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-foreground/40"
 
 export function StartPathChoice({ onDesignWithAi, onHaveDesign }: StartPathChoiceProps) {
   return (
@@ -21,21 +21,26 @@ export function StartPathChoice({ onDesignWithAi, onHaveDesign }: StartPathChoic
         aria-label="How to start this campaign"
         className="grid w-full grid-cols-1 items-stretch gap-3 sm:grid-cols-2"
       >
-        <ChoiceCard
-          choice="ai"
-          title="Design it with AI"
-          description="Tell us your goal and our AI designs a ready-to-mail postcard in minutes."
-          icon={<Sparkles className="size-4" />}
-          emphasized
-          onClick={onDesignWithAi}
-        />
-        <ChoiceCard
-          choice="upload"
-          title="I already have a design"
-          description="Upload your own front and back. We'll check it for print and show you a proof."
-          icon={<Upload className="size-4" />}
-          onClick={onHaveDesign}
-        />
+        {/* A plain wrapper stretches in the grid. A button as the grid item does not. */}
+        <div className="flex">
+          <ChoiceCard
+            choice="ai"
+            title="Design it with AI"
+            description="Tell us your goal and our AI designs a ready-to-mail postcard in minutes."
+            icon={<Sparkles className="size-4" />}
+            emphasized
+            onClick={onDesignWithAi}
+          />
+        </div>
+        <div className="flex">
+          <ChoiceCard
+            choice="upload"
+            title="I already have a design"
+            description="Upload your own front and back. We'll check it for print and show you a proof."
+            icon={<Upload className="size-4" />}
+            onClick={onHaveDesign}
+          />
+        </div>
       </div>
     </div>
   )
