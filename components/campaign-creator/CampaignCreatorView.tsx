@@ -10,6 +10,7 @@ import { getApprovedSpec } from "@/lib/campaign-creator/creative-state"
 import { postcardIdentityFromBrief } from "@/lib/campaign-creator/studio-contact"
 import { presentStudioPhoto } from "@/lib/campaign-creator/studio-photo"
 import {
+  beginFromTemplate,
   confirmCampaignStrategy,
   confirmCampaignAudience,
   confirmCampaignQuantity,
@@ -283,6 +284,10 @@ export function CampaignCreatorView({
             const updated = await beginUploadedDesignPath(campaign.id, basics)
             setCampaign(updated)
           }}
+          onSelectTemplate={async (templateId: string) => {
+            const updated = await beginFromTemplate(campaign.id, templateId)
+            setCampaign(updated)
+          }}
         />
       ) : (
         <ConversationThread messages={displayMessages} isThinking={isSending} />
@@ -369,7 +374,9 @@ export function CampaignCreatorView({
           studioPhotos={studioPhotos}
           onCampaignUpdate={handleCampaignUpdate}
           onProgressStatusChange={setStudioProgressStatus}
-          initialSubPhase={resumeInRefinement ? "refine" : undefined}
+          initialSubPhase={
+            resumeInRefinement || campaign.entry === "template" ? "refine" : undefined
+          }
         />
       )}
 
@@ -397,7 +404,7 @@ export function CampaignCreatorView({
         <AudienceStage
           audience={campaign.brief.audience}
           status={campaign.status}
-          fromConversation={campaign.entry !== "upload"}
+          fromConversation={campaign.entry !== "upload" && campaign.entry !== "template"}
           onFieldChange={handleFieldChange}
           onConfirm={handleConfirmAudience}
           isConfirming={isConfirmingAudience}

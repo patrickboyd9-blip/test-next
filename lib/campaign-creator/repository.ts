@@ -11,6 +11,8 @@ import {
   clearUploadedDesignApproval,
 } from "@/lib/bring-your-own-design/approval"
 import { applyLeaveUploadPath, applyUploadPathStart, type UploadPathBasics } from "@/lib/bring-your-own-design/upload-path"
+import { applyTemplateStart } from "@/lib/mail-templates/apply"
+import { getMailTemplate } from "@/lib/mail-templates/query"
 import {
   applyCreativeApproval,
   applyCreativeUnapproval,
@@ -114,6 +116,7 @@ export interface CampaignRepository {
   unapproveCreative(id: string): Promise<Campaign>
   setDesignSource(id: string, source: DesignSource): Promise<Campaign>
   beginUploadPath(id: string, basics: Partial<UploadPathBasics>): Promise<Campaign>
+  beginTemplatePath(id: string, templateId: string): Promise<Campaign>
   leaveUploadPath(id: string): Promise<Campaign>
   saveUploadedDesign(id: string, design: UploadedDesign): Promise<Campaign>
   saveUploadedDesignReview(id: string, review: UploadedDesignReview): Promise<Campaign>
@@ -397,6 +400,14 @@ class StoredCampaignRepository implements CampaignRepository {
   async beginUploadPath(id: string, basics: Partial<UploadPathBasics>): Promise<Campaign> {
     const campaign = await this.require(id)
     applyUploadPathStart(campaign, basics, new Date().toISOString())
+    return this.write(campaign)
+  }
+
+  async beginTemplatePath(id: string, templateId: string): Promise<Campaign> {
+    const template = getMailTemplate(templateId)
+    if (!template) throw new Error("That template is no longer available.")
+    const campaign = await this.require(id)
+    applyTemplateStart(campaign, template, new Date().toISOString())
     return this.write(campaign)
   }
 

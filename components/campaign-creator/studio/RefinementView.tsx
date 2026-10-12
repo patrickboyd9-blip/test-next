@@ -187,6 +187,13 @@ export function RefinementView({
         <span className="rounded bg-muted px-2 py-0.5 text-xs font-medium">v{version} current</span>
       </div>
 
+      {campaign.entry === "template" && (
+        <p className="text-sm leading-6 text-muted-foreground">
+          Add your business name, phone, website, offer, or a photo. This stays a 5×8 postcard,
+          with the same bleed and safe area used for print.
+        </p>
+      )}
+
       <AnimatePresence mode="wait">
         <motion.div
           key={`refine-${direction.id}`}

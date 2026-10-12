@@ -71,11 +71,14 @@ export function isCreativePhase(status: CampaignStatus): boolean {
   )
 }
 
-/** Upload-first campaigns skip the strategy conversation. Design is the upload and proof. */
+/**
+ * Upload and template campaigns skip the strategy conversation.
+ * Design is the upload proof, or the mailer in Studio.
+ */
 export function progressStepsForEntry(
   entry: CampaignEntry | undefined
 ): ReadonlyArray<{ id: CampaignProgressStepId; label: string }> {
-  if (entry !== "upload") return CAMPAIGN_PROGRESS_STEPS
+  if (entry !== "upload" && entry !== "template") return CAMPAIGN_PROGRESS_STEPS
   return CAMPAIGN_PROGRESS_STEPS.filter((step) => step.id !== "strategy").map((step) =>
     step.id === "creative" ? { id: step.id, label: "Design" } : step
   )
