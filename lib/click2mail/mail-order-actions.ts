@@ -157,6 +157,7 @@ async function runOrder(
     config,
     pdf,
     recipients,
+    postcardSize: "5x8",
     documentName: `mm-${campaign.id.slice(0, 8)}-${stamp}`,
     addressListName: `mm-${campaign.id.slice(0, 8)}-${stamp}`,
     returnAddress: returnAddressFor(campaign),

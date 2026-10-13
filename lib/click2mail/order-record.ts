@@ -27,6 +27,8 @@ export interface MailOrderRecord {
   proofDescription?: string
   submitted: boolean
   trackingPieceCount?: number
+  /** Shown when the job was submitted near or after the 8:00 PM ET batch cutoff. */
+  cutoffNote?: string
   product: MailOrderProduct
   error?: string
   createdAt: string

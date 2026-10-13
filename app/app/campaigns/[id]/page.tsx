@@ -4,6 +4,7 @@ import { CampaignCreatorView } from "@/components/campaign-creator/CampaignCreat
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { isDesignReviewAvailable } from "@/lib/bring-your-own-design/design-review"
 import { getCampaign } from "@/lib/campaign-creator/actions"
+import { POSTCARD_5X8_POSTAGE } from "@/lib/click2mail/cost"
 import { describePrintMailMode } from "@/lib/click2mail/config"
 import type { PrintMailMode } from "@/lib/click2mail/mode"
 
@@ -26,6 +27,7 @@ function printMailMode(): PrintMailMode {
       environment: "stage",
       productionEnabled: false,
       credentialsConfigured: false,
+      postage: POSTCARD_5X8_POSTAGE,
     }
   }
 }

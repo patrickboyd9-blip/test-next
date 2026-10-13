@@ -48,7 +48,7 @@ test("config defaults to staging and keeps product strings overridable", () => {
   assert.equal(config.product.documentClass, "Postcard 5 x 8")
   assert.equal(config.product.layout, "Double Sided Postcard")
   assert.equal(config.product.paperType, "White Matte with Gloss UV Finish")
-  assert.equal(config.product.envelope, "")
+  assert.equal(config.product.envelope, " ")
   assert.equal(config.addressListReadyMinStatus, 3)
   assert.equal(config.addressListErrorStatus, 9)
 
@@ -56,14 +56,14 @@ test("config defaults to staging and keeps product strings overridable", () => {
     C2M_ENV: "prod",
     C2M_ALLOW_PRODUCTION: "true",
     C2M_DOCUMENT_CLASS: "Postcard custom",
-    C2M_ENVELOPE: "",
+    C2M_ENVELOPE: "#10 Double Window",
     C2M_ADDRESS_LIST_READY_MIN: "5",
   } as NodeJS.ProcessEnv)
   assert.equal(custom.environment, "prod")
   assert.equal(custom.baseUrl, PROD_BASE_URL)
   assert.equal(custom.allowProduction, true)
   assert.equal(custom.product.documentClass, "Postcard custom")
-  assert.equal(custom.product.envelope, "")
+  assert.equal(custom.product.envelope, "#10 Double Window")
   assert.equal(custom.addressListReadyMinStatus, 5)
 })
 
@@ -170,10 +170,16 @@ test("document, list, job, proof, and tracking use recorded XML", async () => {
   })
   assert.equal(job.id, "13331417")
   assert.equal(job.jobStatus, "EDITING")
+  assert.equal(sent[3]?.form?.documentClass, "Postcard 5 x 8")
+  assert.equal(sent[3]?.form?.layout, "Double Sided Postcard")
   assert.equal(sent[3]?.form?.paperType, "White 80# Gloss with UV Coating")
-  assert.equal(sent[3]?.form?.envelope, "")
+  assert.equal(sent[3]?.form?.envelope, " ")
   assert.equal(sent[3]?.form?.mailClass, "First Class")
+  assert.equal(sent[3]?.form?.printOption, "Printing both sides")
+  assert.equal(sent[3]?.form?.quantity, undefined)
   assert.equal(sent[3]?.form?.rtnOrganization, "Modern Mail Test")
+  assert.doesNotMatch(sent[3]?.form?.documentClass ?? "", /Letter/)
+  assert.doesNotMatch(sent[3]?.form?.envelope ?? "", /#10|Flat Envelope/)
 
   const proof = await client.createProof(job.id)
   assert.equal(proof.id, "987654")
