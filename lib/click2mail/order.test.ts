@@ -85,7 +85,14 @@ test("mock client places a staging order and polls status", async () => {
   assert.equal(order.submitted, true)
   assert.equal(order.jobStatus, "ORDER_SUBMITTED")
   assert.equal(order.error, undefined)
+  assert.equal(mock.lastJob?.product.documentClass, "Postcard 5 x 8")
   assert.equal(mock.lastJob?.product.layout, "Double Sided Postcard")
+  assert.equal(mock.lastJob?.product.mailClass, "First Class")
+  assert.equal(mock.lastJob?.product.envelope, " ")
+  assert.equal(mock.lastJob?.quantity, undefined)
+  assert.match(order.estimatedCostLabel, /\$0\.495/)
+  assert.match(order.estimatedCostLabel, /\$0\.82/)
+  assert.match(order.cutoffNote ?? "", /8:00 PM ET/)
   assert.equal(mock.lastJob?.returnAddress?.rtnOrganization, "Modern Mail Test")
   assert.deepEqual(mock.calls.filter((call) => call.startsWith("getAddressList")), [
     "getAddressList:list-1",
@@ -128,4 +135,64 @@ test("a list that stays pending is saved without a job", async () => {
   assert.equal(order.jobId, undefined)
   assert.match(order.error ?? "", /still processing/)
   assert.equal(mock.calls.includes("createJob"), false)
+})
+
+test("a 6x9 postcard is submitted as a postcard, not a letter", async () => {
+  const mock = createMockClick2MailClient()
+  const config = loadClick2MailConfig({
+    C2M_ENV: "stage",
+    C2M_USERNAME: "user",
+    C2M_PASSWORD: "secret",
+    C2M_DOCUMENT_CLASS: "Letter 8.5 x 11",
+    C2M_LAYOUT: "Address on Separate Page",
+    C2M_ENVELOPE: "#10 Double Window",
+    C2M_PAPER_TYPE: "White 24#",
+  } as NodeJS.ProcessEnv)
+  const order = await placeClick2MailOrder({
+    client: mock,
+    config,
+    pdf: new Uint8Array([1]),
+    recipients: [recipient],
+    documentName: "sample",
+    addressListName: "sample list",
+    artwork: "type-plate",
+    postcardSize: "6x9",
+    submit: false,
+    proof: false,
+    now: () => "2026-10-13T16:00:00.000Z",
+  })
+  assert.equal(order.documentId, "doc-1")
+  assert.equal(order.jobId, "job-1")
+  assert.equal(order.error, undefined)
+  assert.equal(order.cutoffNote, undefined)
+  assert.equal(mock.lastJob?.product.documentClass, "Postcard 6 x 9")
+  assert.equal(mock.lastJob?.product.layout, "Double Sided Postcard")
+  assert.equal(mock.lastJob?.product.envelope, " ")
+  assert.equal(mock.lastJob?.product.paperType, "White Matte with Gloss UV Finish")
+  assert.equal(mock.lastJob?.product.mailClass, "First Class")
+  assert.equal(mock.lastJob?.quantity, undefined)
+})
+
+test("a 5x8 job refuses a letter paper override before it uploads", async () => {
+  const mock = createMockClick2MailClient()
+  const config = loadClick2MailConfig({
+    C2M_ENV: "stage",
+    C2M_USERNAME: "user",
+    C2M_PASSWORD: "secret",
+  } as NodeJS.ProcessEnv)
+  const order = await placeClick2MailOrder({
+    client: mock,
+    config,
+    pdf: new Uint8Array([1]),
+    recipients: [recipient],
+    documentName: "sample",
+    addressListName: "sample list",
+    artwork: "type-plate",
+    productOverrides: { paperType: "White 24#" },
+    submit: true,
+    proof: false,
+    now: () => "2026-10-13T16:00:00.000Z",
+  })
+  assert.match(order.error ?? "", /letter paper/)
+  assert.equal(mock.calls.includes("createDocument"), false)
 })

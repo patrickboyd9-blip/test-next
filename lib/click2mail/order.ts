@@ -2,10 +2,11 @@ import { randomUUID } from "crypto"
 
 import {
   addressListPhase,
-  mergeProduct,
   type Click2MailConfig,
 } from "./config"
-import { placeholderCostLabel } from "./cost"
+import { mailingCutoffWarning } from "./cutoff"
+import { loadPostcardPostage, postageEstimateLabel } from "./cost"
+import { assertPostcardJobProduct, resolvePostcardProduct, type PostcardSize } from "./products"
 import type { MailOrderRecord } from "./order-record"
 import type { Recipient } from "./recipients"
 import type { Click2MailClient, ReturnAddress } from "./types"
@@ -18,6 +19,7 @@ export interface PlaceOrderInput {
   documentName: string
   addressListName: string
   returnAddress?: ReturnAddress
+  postcardSize?: PostcardSize
   productOverrides?: Partial<Click2MailConfig["product"]>
   artwork: MailOrderRecord["artwork"]
   submit: boolean
@@ -32,7 +34,12 @@ export interface PlaceOrderInput {
 
 export async function placeClick2MailOrder(input: PlaceOrderInput): Promise<MailOrderRecord> {
   const now = input.now ?? (() => new Date().toISOString())
-  const product = mergeProduct(input.config.product, input.productOverrides)
+  const product = resolvePostcardProduct(
+    input.postcardSize ?? "5x8",
+    input.config.product,
+    input.productOverrides
+  )
+  const postage = loadPostcardPostage()
   const existing = input.existing
   const order: MailOrderRecord = existing
     ? { ...existing, error: undefined, updatedAt: now() }
@@ -41,7 +48,11 @@ export async function placeClick2MailOrder(input: PlaceOrderInput): Promise<Mail
         mode: input.config.environment === "prod" ? "production" : "test",
         environment: input.config.environment,
         pieceCount: input.recipients.length,
-        estimatedCostLabel: placeholderCostLabel(input.recipients.length),
+        estimatedCostLabel: postageEstimateLabel(
+          input.recipients.length,
+          postage,
+          input.postcardSize ?? "5x8"
+        ),
         artwork: input.artwork,
         submitted: false,
         product: {
@@ -58,6 +69,7 @@ export async function placeClick2MailOrder(input: PlaceOrderInput): Promise<Mail
       }
 
   try {
+    assertPostcardJobProduct(product)
     if (!order.documentId) {
       const document = await input.client.createDocument({
         documentName: input.documentName,
@@ -107,7 +119,6 @@ export async function placeClick2MailOrder(input: PlaceOrderInput): Promise<Mail
         addressId: order.addressListId,
         product,
         returnAddress: input.returnAddress,
-        quantity: input.recipients.length > 0 ? input.recipients.length : order.pieceCount,
       })
       order.jobId = job.id
       order.jobStatus = job.jobStatus || "EDITING"
@@ -124,6 +135,8 @@ export async function placeClick2MailOrder(input: PlaceOrderInput): Promise<Mail
     }
 
     if (input.submit && !order.submitted) {
+      const cutoffNote = mailingCutoffWarning(new Date(now()))
+      if (cutoffNote) order.cutoffNote = cutoffNote
       // Staging /credit can stay 0.00 after a purchase that returned Success.
       // User Credit submit still succeeds there, so this path does not read or block on balance.
       const submitted = await input.client.submitJob(order.jobId, product.billingType)

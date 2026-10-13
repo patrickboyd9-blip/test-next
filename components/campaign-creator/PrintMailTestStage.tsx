@@ -19,7 +19,8 @@ import {
   refreshPrintMailStatus,
   submitPrintMailTest,
 } from "@/lib/click2mail/mail-order-actions"
-import { placeholderCostLabel } from "@/lib/click2mail/cost"
+import { postageEstimate } from "@/lib/click2mail/cost"
+import { mailingCutoffWarning } from "@/lib/click2mail/cutoff"
 import { isTerminalJobStatus, jobStatusLabel } from "@/lib/click2mail/job-status"
 import type { PrintMailMode } from "@/lib/click2mail/mode"
 import { parseRecipientCsv, normalizeRecipient } from "@/lib/click2mail/recipients"
@@ -47,6 +48,7 @@ export function PrintMailTestStage({ campaign, mode, onCampaign }: PrintMailTest
   const [csvText, setCsvText] = useState("")
   const [issues, setIssues] = useState<string[]>([])
   const [busy, setBusy] = useState(false)
+  const [now, setNow] = useState(() => new Date())
 
   const recipients = useMemo(() => {
     if (source === "csv") return parseRecipientCsv(csvText).recipients
@@ -59,6 +61,13 @@ export function PrintMailTestStage({ campaign, mode, onCampaign }: PrintMailTest
   const productionLocked = mode.environment === "prod" && !mode.productionEnabled
   const canSend = mode.credentialsConfigured && !productionLocked && pieceCount > 0 && !busy
   const testMode = !mode.productionEnabled
+  const cutoffWarning = order?.submitted ? null : mailingCutoffWarning(now)
+  const postage = postageEstimate(pieceCount, mode.postage)
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 60_000)
+    return () => window.clearInterval(timer)
+  }, [])
 
   useEffect(() => {
     if (!mode.credentialsConfigured || !order?.jobId || isTerminalJobStatus(order.jobStatus)) return
@@ -140,12 +149,17 @@ export function PrintMailTestStage({ campaign, mode, onCampaign }: PrintMailTest
             <p className="text-lg font-medium">{pieceCount}</p>
           </div>
           <div>
-            <p className="text-sm text-muted-foreground">Estimated cost</p>
-            <p className="text-lg font-medium">
-              {pieceCount > 0 ? placeholderCostLabel(pieceCount) : "Add addresses to see a placeholder"}
-            </p>
+            <p className="text-sm text-muted-foreground">Estimated postage</p>
+            <p className="text-lg font-medium">{postage.amountLabel}</p>
+            <p className="text-sm text-muted-foreground">{postage.detail}</p>
           </div>
         </div>
+
+        {cutoffWarning && (
+          <p className="rounded-lg border bg-muted/40 p-3 text-sm" role="status">
+            {cutoffWarning}
+          </p>
+        )}
 
         <div className="flex gap-2">
           <Button
@@ -256,7 +270,7 @@ function OrderStatus({ order }: { order: NonNullable<Campaign["mailOrder"]> }) {
       </p>
       <dl className="mt-3 grid gap-1 text-muted-foreground sm:grid-cols-2">
         <Detail label="Pieces" value={String(order.pieceCount)} />
-        <Detail label="Cost note" value={order.estimatedCostLabel} />
+        <Detail label="Postage estimate" value={order.estimatedCostLabel} />
         <Detail label="Artwork" value={order.artwork === "final-photo" ? "Final photograph" : "Words on a solid ground"} />
         <Detail label="Document" value={order.documentId} />
         <Detail label="Address list" value={order.addressListId} />
@@ -267,6 +281,11 @@ function OrderStatus({ order }: { order: NonNullable<Campaign["mailOrder"]> }) {
         <Detail label="Tracking pieces" value={order.trackingPieceCount !== undefined ? String(order.trackingPieceCount) : undefined} />
         <Detail label="Updated" value={formatWhen(order.updatedAt)} />
       </dl>
+      {order.cutoffNote && (
+        <p className="mt-3 rounded-md border bg-background p-2 text-foreground" role="status">
+          {order.cutoffNote}
+        </p>
+      )}
       {order.error && <p className="mt-3 text-destructive">{order.error}</p>}
     </div>
   )

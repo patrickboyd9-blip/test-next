@@ -17,7 +17,8 @@
  */
 import { createClick2MailClientFromEnv } from "../lib/click2mail/client"
 import { jobStatusLabel } from "../lib/click2mail/job-status"
-import { addressListPhase, mergeProduct, type Click2MailProductOptions } from "../lib/click2mail/config"
+import { addressListPhase, type Click2MailProductOptions } from "../lib/click2mail/config"
+import { assertPostcardJobProduct, isPostcardSize, postcardJobProduct, type PostcardSize } from "../lib/click2mail/products"
 import { waitForAddressList } from "../lib/click2mail/order"
 import type { Recipient } from "../lib/click2mail/recipients"
 import type { PurchaseCreditInput } from "../lib/click2mail/types"
@@ -71,6 +72,7 @@ creates a job, and requests a proof.
   --buy-credit          If balance < $1, add $10 with the staging test card
   --skip-balance-check  Continue when balance < $1 (staging already does this)
   --submit              Submit the job with User Credit after the proof
+  --size 5x8|6x9        Postcard size. Default 5x8. 6x9 uses "Postcard 6 x 9"
   --document-class "Postcard 5 x 8"
   --layout "Double Sided Postcard"
   --paper-type "White Matte with Gloss UV Finish"
@@ -91,12 +93,14 @@ function parseArgs(argv: string[]): {
   buyCredit: boolean
   skipBalanceCheck: boolean
   submit: boolean
+  size: PostcardSize
   product: Partial<Click2MailProductOptions>
 } {
   const product: Partial<Click2MailProductOptions> = {}
   let buyCredit = false
   let skipBalanceCheck = false
   let submit = false
+  let size: PostcardSize = "5x8"
   for (let index = 0; index < argv.length; index += 1) {
     const token = argv[index] ?? ""
     if (token === "--help" || token === "-h") {
@@ -115,6 +119,12 @@ function parseArgs(argv: string[]): {
       submit = true
       continue
     }
+    if (token === "--size" || token.startsWith("--size=")) {
+      const value = token.startsWith("--size=") ? token.slice("--size=".length) : (argv[(index += 1)] ?? "")
+      if (!isPostcardSize(value)) throw new Error(`--size must be 5x8 or 6x9. Got ${value || "(blank)"}.`)
+      size = value
+      continue
+    }
     const inline = token.match(/^--([a-z0-9-]+)=(.*)$/)
     const name = inline ? inline[1] : token.startsWith("--") ? token.slice(2) : ""
     if (!name || !token.startsWith("--")) {
@@ -125,7 +135,7 @@ function parseArgs(argv: string[]): {
     if (!key) throw new Error(`Unknown flag --${name}. Try --help.`)
     product[key] = value
   }
-  return { buyCredit, skipBalanceCheck, submit, product }
+  return { buyCredit, skipBalanceCheck, submit, size, product }
 }
 
 function line(step: string, fields: Record<string, string | number | null | undefined>): void {
@@ -137,8 +147,16 @@ function line(step: string, fields: Record<string, string | number | null | unde
 
 async function main(): Promise<void> {
   const flags = parseArgs(process.argv.slice(2))
-  const { client, config } = createClick2MailClientFromEnv(process.env, flags.product)
-  const product = mergeProduct(config.product, flags.product)
+  const sized = postcardJobProduct(flags.size)
+  const { client, config } = createClick2MailClientFromEnv(process.env, {
+    documentClass: sized.documentClass,
+    layout: sized.layout,
+    envelope: sized.envelope,
+    mailClass: sized.mailClass,
+    ...flags.product,
+  })
+  const product = config.product
+  assertPostcardJobProduct(product)
 
   console.log(`Click2Mail smoke (${config.environment})`)
   console.log(`base ${config.baseUrl}`)
@@ -217,7 +235,6 @@ async function main(): Promise<void> {
     documentId: document.id,
     addressId: ready.id,
     product,
-    quantity: 1,
     returnAddress: { rtnOrganization: "Modern Mail Test" },
   })
   line("job", { id: job.id, status: job.status, jobStatus: job.jobStatus, description: job.description })

@@ -1,14 +1,16 @@
+import { loadPostcardPostage } from "./cost"
 import { Click2MailError } from "./errors"
 import type { PrintMailMode } from "./mode"
+import { POSTCARD_NO_ENVELOPE, postcardJobProduct } from "./products"
 
 export const STAGE_BASE_URL = "https://stage-rest.click2mail.com/molpro"
 /** Probable production host. Override with C2M_BASE_URL if Click2Mail publishes a different one. */
 export const PROD_BASE_URL = "https://rest.click2mail.com/molpro"
 
 /**
- * Defaults are the postcard strings from our research.
- * Click2Mail does not publish the enum, so every one of these can be replaced
- * with an environment variable without a code change.
+ * Account-level product strings. The 5×8 postcard is the default job.
+ * A 6×9 job replaces the document class at submit time.
+ * Every field can still be replaced with an environment variable.
  */
 export interface Click2MailProductOptions {
   documentFormat: string
@@ -24,19 +26,7 @@ export interface Click2MailProductOptions {
   billingType: string
 }
 
-export const DEFAULT_PRODUCT: Click2MailProductOptions = {
-  documentFormat: "PDF",
-  documentClass: "Postcard 5 x 8",
-  layout: "Double Sided Postcard",
-  productionTime: "Next Day",
-  envelope: "",
-  color: "Full Color",
-  paperType: "White Matte with Gloss UV Finish",
-  printOption: "Printing both sides",
-  mailClass: "First Class",
-  addressMappingId: "1",
-  billingType: "User Credit",
-}
+export const DEFAULT_PRODUCT: Click2MailProductOptions = postcardJobProduct("5x8")
 
 export interface Click2MailConfig {
   environment: "stage" | "prod"
@@ -70,6 +60,13 @@ function textOr(value: string | undefined, fallback: string): string {
   return trimmed ? trimmed : fallback
 }
 
+/** A blank envelope means "no envelope", which postcards send as a single space. */
+function readEnvelope(value: string | undefined, fallback: string): string {
+  if (value === undefined) return fallback
+  const trimmed = value.trim()
+  return trimmed.length > 0 ? trimmed : fallback || POSTCARD_NO_ENVELOPE
+}
+
 export function loadClick2MailConfig(env: NodeJS.ProcessEnv = process.env): Click2MailConfig {
   const environment = readEnvironment(env.C2M_ENV)
   const baseUrl = textOr(
@@ -90,8 +87,7 @@ export function loadClick2MailConfig(env: NodeJS.ProcessEnv = process.env): Clic
       documentClass: textOr(env.C2M_DOCUMENT_CLASS, DEFAULT_PRODUCT.documentClass),
       layout: textOr(env.C2M_LAYOUT, DEFAULT_PRODUCT.layout),
       productionTime: textOr(env.C2M_PRODUCTION_TIME, DEFAULT_PRODUCT.productionTime),
-      envelope:
-        env.C2M_ENVELOPE !== undefined ? env.C2M_ENVELOPE.trim() : DEFAULT_PRODUCT.envelope,
+      envelope: readEnvelope(env.C2M_ENVELOPE, DEFAULT_PRODUCT.envelope),
       color: textOr(env.C2M_COLOR, DEFAULT_PRODUCT.color),
       paperType: textOr(env.C2M_PAPER_TYPE, DEFAULT_PRODUCT.paperType),
       printOption: textOr(env.C2M_PRINT_OPTION, DEFAULT_PRODUCT.printOption),
@@ -121,6 +117,7 @@ export function describePrintMailMode(env: NodeJS.ProcessEnv = process.env): Pri
     environment: config.environment,
     productionEnabled: config.environment === "prod" && config.allowProduction,
     credentialsConfigured: Boolean(config.username && config.password),
+    postage: loadPostcardPostage(env),
   }
 }
 

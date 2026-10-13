@@ -481,7 +481,9 @@ function jobForm(input: JobDraft): Record<string, string> {
     addressId: input.addressId,
     appSignature: "Modern Mail",
   }
-  if (input.quantity !== undefined) form.quantity = String(input.quantity)
+  // Quantity is only for products that do not use an address list.
+  // Sending it on a postcard job can price the piece as something other than a postcard.
+  if (input.quantity !== undefined && !input.addressId) form.quantity = String(input.quantity)
   const address = input.returnAddress
   if (!address) return form
   const pairs: Array<[keyof typeof address, string]> = [
