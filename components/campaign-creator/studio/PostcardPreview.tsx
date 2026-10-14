@@ -4,10 +4,10 @@ import { motion } from "framer-motion"
 
 import { cn } from "@/lib/utils"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
+import { repairHeadlineCopy } from "@/lib/campaign-creator/headline-repair"
 import type { GeneratedAsset } from "@/lib/campaign-creator/image-generation"
 import { resolveCreativeImage } from "@/lib/campaign-creator/resolve-creative-image"
 import {
-  businessNameForCard,
   resolveStudioContact,
   type PostcardIdentity,
 } from "@/lib/campaign-creator/studio-contact"
@@ -18,12 +18,7 @@ import {
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
 import { ShimmerOverlay, SpecDiffHighlight } from "./SpecDiffHighlight"
-import {
-  LayoutIssueNote,
-  PostcardBackFace,
-  PostcardFrontFace,
-  postcardLayoutIssues,
-} from "./PostcardComposition"
+import { PostcardBackFace, PostcardFrontFace } from "./PostcardComposition"
 
 export type PostcardPreviewSize = "hero" | "medium" | "thumbnail"
 
@@ -89,14 +84,6 @@ export function PostcardPreview({
   )
   const contact = resolveStudioContact(spec, identity)
   const compact = size === "thumbnail"
-  const issues = isAddressSide
-    ? []
-    : postcardLayoutIssues(
-        spec,
-        compact,
-        Boolean(businessNameForCard(contact.businessName, spec.headline)),
-        contact
-      )
 
   const content = isAddressSide ? (
     <PostcardBackFace
@@ -149,7 +136,10 @@ export function PostcardPreview({
           className
         )}
         role="img"
-        aria-label={ariaLabel ?? `Postcard preview: ${spec.headline ?? "Creative design"}`}
+        aria-label={
+          ariaLabel ??
+          `Postcard preview: ${repairHeadlineCopy(spec).headline || "Creative design"}`
+        }
         {...hoverProps}
       >
         {face}
@@ -160,7 +150,6 @@ export function PostcardPreview({
           </>
         )}
       </motion.div>
-      {!isAddressSide ? <LayoutIssueNote issues={issues} /> : null}
     </div>
   )
 }

@@ -5,8 +5,10 @@ import { resolveStudioContact } from "@/lib/campaign-creator/studio-contact"
 import type { CreativeSpec } from "@/lib/campaign-creator/types"
 
 import {
+  CONTACT_PRINT_MIN_PT,
   CTA_CONTRAST_MIN,
   HEADLINE_CONTRAST_MIN,
+  PHOTO_COVERAGE_MIN,
   PRINT_MIN_PT,
   SPLIT_PHOTO_SHARE_MIN,
   contrastRatio,
@@ -19,6 +21,7 @@ import {
   rectsIntersect,
   resolvePostcardLayout,
 } from "./postcard-layout-qa"
+import { RUBRIC_QR_MIN_INCHES } from "./postcard-rubric"
 
 function spec(overrides: Partial<CreativeSpec> = {}): CreativeSpec {
   return {
@@ -154,13 +157,24 @@ test("split layouts keep at least 55% of the card for the photograph", () => {
   }
 })
 
-test("type-led is only the no-photo piece or an explicit accent witness", () => {
+test("type-led is the no-photo piece, and a corner photograph is expanded", () => {
   const typeOnly = resolvePostcardLayout({
     spec: spec({ layoutVariant: "type_only", imageryRole: "none", imagery: "none" }),
   })
   assert.equal(postcardLayoutFamily(typeOnly), "type-led")
   assert.equal(typeOnly.photoShare, 0)
   assert.equal(typeOnly.photoRect, null)
+
+  const accentWithoutPhoto = resolvePostcardLayout({
+    spec: spec({
+      layoutVariant: "type_primary_split",
+      imagePresence: "accent",
+      imagery: "none",
+      imageryRole: "none",
+    }),
+  })
+  assert.equal(accentWithoutPhoto.family, "type-led")
+  assert.equal(accentWithoutPhoto.photoShare, 0)
 
   const accent = resolvePostcardLayout({
     spec: spec({
@@ -169,9 +183,11 @@ test("type-led is only the no-photo piece or an explicit accent witness", () => 
       typeRole: "copy",
     }),
   })
-  assert.equal(accent.family, "type-led")
-  assert.ok(accent.photoShare < SPLIT_PHOTO_SHARE_MIN)
+  assert.equal(accent.family, "split")
+  assert.ok(accent.photoShare + 0.001 >= 0.45, String(accent.photoShare))
   assert.ok(accent.photoRect)
+  assert.equal(accent.issues.some((issue) => issue.code === "photo-share"), false)
+  assert.ok(accent.fixes.some((fix) => fix.startsWith("Expanded the photograph")))
 })
 
 test("front type stays inside the safe inset and the back keeps creative type out of the address keep-out", () => {
@@ -309,6 +325,56 @@ test("a pale split panel takes a bolder color from the campaign palette", () => 
   assert.equal(plan.headlineWeight, 800)
   assert.ok(contrastRatio(plan.colors.headline, plan.colors.field) >= HEADLINE_CONTRAST_MIN)
   assert.equal(plan.issues.filter((issue) => issue.code === "contrast" || issue.code === "photo-share").length, 0)
+})
+
+test("a plumbing accent card expands the photo, rewrites the headline, and keeps the QR readable", () => {
+  const plan = resolvePostcardLayout({
+    spec: spec({
+      layoutVariant: "type_primary_split",
+      imagePresence: "accent",
+      headline: "Plumbers Solana Beach Trusts",
+      subheadline: "A neighbor you can call when a pipe starts dripping.",
+      body: "Local, licensed, and easy to reach.",
+      offer: "Free plumbing inspection",
+      callToAction: "Call or scan to book",
+      phone: "123-444-5588",
+      website: "www.abplumbing.com",
+      qrDestination: "https://www.abplumbing.com",
+      palette: ["#f6f1e7", "#1e3a5f", "#c4a574"],
+      leadJob: "trust",
+      imageryRole: "neighborhood",
+    }),
+    showWordmark: true,
+  })
+  assert.equal(plan.headline, "The Plumber Solana Beach Trusts")
+  assert.equal(plan.hero, "The Plumber Solana Beach Trusts")
+  assert.ok(plan.photoShare + 0.001 >= PHOTO_COVERAGE_MIN, String(plan.photoShare))
+  assert.ok(plan.qrInches + 0.001 >= RUBRIC_QR_MIN_INCHES, String(plan.qrInches))
+  assert.ok(plan.typePt.contact + 0.01 >= CONTACT_PRINT_MIN_PT)
+  assert.ok(plan.typePt.website + 0.01 >= CONTACT_PRINT_MIN_PT)
+  assert.equal(plan.issues.some((issue) => issue.code === "photo-share"), false)
+})
+
+test("split plumbing directions keep a 0.75in QR and 9pt contact type", () => {
+  for (const layoutVariant of ["image_grounded", "type_primary_split", "peer_split"] as const) {
+    const plan = resolvePostcardLayout({
+      spec: spec({
+        layoutVariant,
+        headline: layoutVariant === "type_primary_split" ? "Small Leak, Big Bill" : "Your Free Plumbing Inspection",
+        phone: "123-444-5588",
+        website: "www.abplumbing.com",
+        qrDestination: "https://www.abplumbing.com",
+        callToAction: "Call or scan to schedule",
+      }),
+      showWordmark: true,
+    })
+    assert.ok(plan.qrInches + 0.001 >= RUBRIC_QR_MIN_INCHES, `${layoutVariant} ${plan.qrInches}`)
+    assert.ok(plan.typePt.contact + 0.01 >= CONTACT_PRINT_MIN_PT, String(plan.typePt.contact))
+    assert.ok(plan.typePt.website + 0.01 >= CONTACT_PRINT_MIN_PT, String(plan.typePt.website))
+    if (plan.photoRect) {
+      assert.ok(plan.photoShare + 0.001 >= PHOTO_COVERAGE_MIN, `${layoutVariant} ${plan.photoShare}`)
+    }
+  }
 })
 
 test("scrim contrast holds over both a white and a black photograph", () => {

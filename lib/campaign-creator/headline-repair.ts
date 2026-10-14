@@ -60,7 +60,7 @@ export function repairHeadlineCopy(input: HeadlineCopy): {
   headline: string
   subheadline?: string
 } {
-  const raw = collapse(input.headline)
+  const raw = repairBusinessPlaceHeadline(collapse(input.headline))
   if (!raw) {
     const subheadline = collapse(input.subheadline)
     return { headline: "", subheadline: subheadline || undefined }
@@ -117,6 +117,148 @@ export function repairSpecHeadline<T extends HeadlineCopy>(spec: T): T {
   const subSame = (next.subheadline ?? "") === (spec.subheadline ?? "")
   if (headlineSame && subSame) return spec
   return { ...spec, headline: next.headline, subheadline: next.subheadline }
+}
+
+/**
+ * "Plumbers Solana Beach Trusts" is a business noun, a place, and a verb
+ * with the wrong number. It becomes "The Plumber Solana Beach Trusts".
+ * Ordinary headlines do not match and stay as they are.
+ */
+const PLACE_HEADLINE_VERBS = new Set([
+  "trusts",
+  "recommends",
+  "chooses",
+  "prefers",
+  "loves",
+  "knows",
+  "calls",
+  "hires",
+  "picks",
+  "needs",
+  "wants",
+  "uses",
+  "backs",
+])
+
+const PLACE_MODIFIERS = new Set(["trusted", "local", "neighborhood", "family", "hometown"])
+
+const NOT_A_PLACE = new Set([
+  "a",
+  "an",
+  "the",
+  "and",
+  "or",
+  "for",
+  "with",
+  "your",
+  "our",
+  "their",
+  "you",
+  "to",
+  "of",
+  "in",
+  "on",
+  "at",
+  "by",
+  "from",
+  "near",
+  "this",
+  "that",
+  "these",
+  "those",
+  "always",
+  "already",
+  "still",
+  "really",
+  "truly",
+  "just",
+  "only",
+  "more",
+  "most",
+  "very",
+  "now",
+  "today",
+  "here",
+  "there",
+  "home",
+  "house",
+  "free",
+  "best",
+  "quiet",
+  "small",
+  "big",
+  "early",
+  "fast",
+  "same",
+  "next",
+  "last",
+  "first",
+  "leak",
+  "leaks",
+  "bill",
+  "roof",
+  "roofs",
+  "crew",
+  "crews",
+  "team",
+  "water",
+  "heat",
+  "storm",
+])
+
+const AGENT_NOUN = /(er|or|ar|ist|ian|man|ic)$/i
+
+function repairBusinessPlaceHeadline(value: string): string {
+  const words = tokenize(value)
+  if (words.length < 3) return value
+  const verb = words[words.length - 1] ?? ""
+  if (!PLACE_HEADLINE_VERBS.has(normalizeToken(verb))) return value
+
+  let index = 0
+  if (normalizeToken(words[0] ?? "") === "the") index = 1
+
+  const modifiers: string[] = []
+  while (index < words.length - 2 && PLACE_MODIFIERS.has(normalizeToken(words[index] ?? ""))) {
+    modifiers.push(words[index] ?? "")
+    index += 1
+  }
+
+  const business = words[index] ?? ""
+  if (!isAgentNoun(business)) return value
+  const place = words.slice(index + 1, -1)
+  if (place.length < 1 || place.length > 4 || !place.every(isPlaceToken)) return value
+
+  const nextWords = ["The", ...modifiers.map(titleWord), titleWord(singularizeBusiness(business)), ...place, verb]
+  if (nextWords.length > HEADLINE_WORD_HARD_CAP) return value
+  const next = nextWords.join(" ")
+  return next === value ? value : next
+}
+
+function isAgentNoun(word: string): boolean {
+  return AGENT_NOUN.test(singularizeBusiness(word))
+}
+
+function isPlaceToken(word: string): boolean {
+  const token = normalizeToken(word)
+  if (!token || NOT_A_PLACE.has(token) || PLACE_HEADLINE_VERBS.has(token) || isAgentNoun(word)) {
+    return false
+  }
+  if (/^(de|la|los|las|san|santa|st|saint|fort|mount|lake|port)$/i.test(token)) return true
+  return /^[\p{Lu}]/u.test(word)
+}
+
+function singularizeBusiness(word: string): string {
+  const lower = word.toLowerCase()
+  if (lower.endsWith("ies") && lower.length > 4) return `${word.slice(0, -3)}y`
+  if (/(ches|shes|sses|xes|zes)$/i.test(lower) && lower.length > 4) return word.slice(0, -2)
+  if (lower.endsWith("s") && !lower.endsWith("ss") && lower.length > 3) return word.slice(0, -1)
+  return word
+}
+
+function titleWord(word: string): string {
+  if (!word) return word
+  if (word === word.toUpperCase()) return word
+  return word.charAt(0).toUpperCase() + word.slice(1)
 }
 
 function splitOnPunctuation(value: string): { left: string; right: string } | null {

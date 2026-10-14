@@ -13,7 +13,7 @@ import { paintQr } from "@/lib/campaign-creator/studio-qr"
 import { STUDIO_DISPLAY_CSS, STUDIO_TEXT_CSS } from "@/lib/campaign-creator/studio-typeface"
 
 import {
-  layoutIssueCopy,
+  LOCKUP_GAP_PT,
   photoScrimGradient,
   pointsToCqw,
   postcardBackRegions,
@@ -46,15 +46,6 @@ const ROLE_LABELS: Record<string, string> = {
   postage_indicia: "Postage indicia",
   delivery_address: "Delivery address",
   barcode_clear_zone: "Barcode clear zone",
-}
-
-export function postcardLayoutIssues(
-  spec: CreativeSpec,
-  compact: boolean,
-  showWordmark: boolean,
-  contact?: StudioContact
-) {
-  return resolvePostcardLayout({ spec, compact, showWordmark, contact }).issues
 }
 
 export function PostcardFrontFace({
@@ -116,6 +107,8 @@ export function PostcardFrontFace({
       data-design-fails={designRuleFailures(plan.designRules).map((check) => check.id).join(" ") || "none"}
       data-design-warnings={designRuleWarnings(plan.designRules).map((check) => check.id).join(" ") || "none"}
       data-qr-in={plan.qrInches.toFixed(3)}
+      data-contact-pt={plan.typePt.contact.toFixed(1)}
+      data-website-pt={plan.typePt.website.toFixed(1)}
       data-qr-label={plan.qrLabel || undefined}
       data-type-presence={derivation.typePresence}
       data-image-plate={derivation.imagePlate}
@@ -192,16 +185,6 @@ export function PostcardFrontFace({
         </div>
       </div>
     </div>
-  )
-}
-
-export function LayoutIssueNote({ issues }: { issues: PostcardLayoutPlan["issues"] }) {
-  if (issues.length === 0) return null
-  const lines = [...new Set(issues.map(layoutIssueCopy))]
-  return (
-    <p className="mt-2 max-w-sm text-center text-xs text-muted-foreground" role="status">
-      {lines.join(" ")}
-    </p>
   )
 }
 
@@ -334,8 +317,12 @@ function PrintMarks({
   mark: CtaMark
 }) {
   return (
-    <div className="flex items-end" data-contact-lockup="response" style={{ gap: pointsToCqw(8.6) }}>
-      <div className="min-w-0 flex-1 space-y-[0.28em]">
+    <div
+      className="flex items-center"
+      data-contact-lockup="response"
+      style={{ gap: pointsToCqw(LOCKUP_GAP_PT), paddingTop: pointsToCqw(8) }}
+    >
+      <div className="min-w-0 flex-1" style={{ display: "flex", flexDirection: "column", gap: pointsToCqw(6) }}>
         {spec.callToAction ? (
           <PrintCta
             mark={mark}
@@ -415,7 +402,11 @@ function ContactPrint({
 }) {
   if (!contact.phone && !contact.website) return null
   return (
-    <div className="min-w-0" data-contact-lines="shown">
+    <div
+      className="min-w-0"
+      data-contact-lines="shown"
+      style={{ display: "flex", flexDirection: "column", gap: pointsToCqw(4) }}
+    >
       {contact.phone ? (
         <p
           className="font-semibold leading-none tabular-nums tracking-[-0.02em]"
@@ -427,7 +418,7 @@ function ContactPrint({
       ) : null}
       {contact.website ? (
         <p
-          className="mt-[0.2em] font-medium leading-none"
+          className="font-medium leading-none"
           data-contact-website={displayWebsite(contact.website)}
           style={{ color, fontSize: websiteSize }}
         >
