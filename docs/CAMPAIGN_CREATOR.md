@@ -175,7 +175,7 @@ Choosing Start from a template opens a gallery. The customer can filter it by in
 
 Choosing Have our team design it opens a request. The customer gives a company name, address, vibe, and the specific offer, and chooses how people should respond. A QR code needs a link, a phone call needs a number, a website needs an address, and Other needs a short description. A logo and other images can be attached. Notes and size (5×8 or 6×9) are optional. The request is saved for the team, with a short confirmation. Nothing is emailed. The team reads requests on Design requests inside the app.
 
-Choosing Design it with AI opens a simple, open-ended prompt. The heading, example prompts, and chat field stay hidden until that choice.
+Choosing Design it with AI opens a simple, open-ended prompt. The heading, example prompts, and chat field stay hidden until that choice. Confirming that strategy generates three directions. Modern Mail does not ask again how the postcard should be designed. A campaign created before the start grid, with no stored path, does the same.
 
 The primary question should be:
 
@@ -515,7 +515,7 @@ The same campaign should ultimately feed:
 
 A customer who already has artwork can skip the strategy conversation and Studio.
 
-On the first Campaign Creator screen, they can choose “I already have a design.” A short form asks for a campaign name and the return address the printer needs. Someone who already confirmed a strategy can still choose that path from the design step.
+On the first Campaign Creator screen, they can choose “I already have a design.” A short form asks for a campaign name and the return address the printer needs.
 
 After both files pass the print check, they may be asked “Do you want our team to review and offer some feedback?” Yes and No are equal choices. No never blocks approval. Yes asks for a few encouraging suggestions and does not change the file. The question stays hidden when the creative engine has no API key.
 

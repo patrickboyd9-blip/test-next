@@ -18,6 +18,7 @@ import {
   applyCreativeUnapproval,
   applyStrategyConfirmation,
 } from "./mail-piece"
+import { applyAiGenerationStart, applyAiStart } from "./start-path"
 import { cloneSpec } from "./spec-diff"
 import type {
   Campaign,
@@ -259,8 +260,10 @@ class StoredCampaignRepository implements CampaignRepository {
 
   async appendMessage(id: string, message: ConversationMessage): Promise<Campaign> {
     const campaign = await this.require(id)
+    const now = new Date().toISOString()
     campaign.transcript = [...campaign.transcript, message]
-    campaign.updatedAt = new Date().toISOString()
+    applyAiStart(campaign, now)
+    campaign.updatedAt = now
     return this.write(campaign)
   }
 
@@ -286,9 +289,7 @@ class StoredCampaignRepository implements CampaignRepository {
 
   async markGeneratingCreative(id: string): Promise<Campaign> {
     const campaign = await this.require(id)
-    if (campaign.creative.directions.length > 0) return campaign
-    if (campaign.status === "generating_creative") return campaign
-    campaign.status = "generating_creative"
+    if (!applyAiGenerationStart(campaign)) return campaign
     campaign.updatedAt = new Date().toISOString()
     return this.write(campaign)
   }
