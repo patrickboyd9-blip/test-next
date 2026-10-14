@@ -26,7 +26,7 @@ export const DIRECTION_NAME_CONSTRAINT =
   "Exactly 2 to 4 words. Not a sentence and not a layout description. Example: Trusted Local Expert."
 
 export const SPEC_FIELD_RULES = `CreativeSpec rules:
-- headline: 3 to 6 words. Hard cap 8. A short display line, not a sentence. Do not put the offer or supporting detail here.
+- headline: 3 to 6 words. Hard cap 8. A short display line, not a sentence. Do not put the offer or supporting detail here. A business and a place must read as natural English: "The Plumber Solana Beach Trusts", not "Plumbers Solana Beach Trusts".
 - subheadline: the offer and supporting detail. Max 18 words. Use it whenever the offer or a qualifier would otherwise make the headline a sentence.
 - body: max 40 words. Offer and body address the reader (you, your), or the offer stays a plain offer with no condition. Do not write the reader as they, their, or them. Those words may name a problem or a thing, not the person holding the card.
 - callToAction: optional. max 6 words when present. Omit when this direction has no response action on this face. One action only.

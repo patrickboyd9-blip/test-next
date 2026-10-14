@@ -119,6 +119,55 @@ test("detail moved into an existing subhead stays its own sentence", () => {
   )
 })
 
+test("a plural business and a place is rewritten as natural English", () => {
+  const repaired = repairHeadlineCopy({
+    headline: "Plumbers Solana Beach Trusts",
+  })
+  assert.equal(repaired.headline, "The Plumber Solana Beach Trusts")
+  assert.equal(repaired.subheadline, undefined)
+  assert.deepEqual(repairHeadlineCopy(repaired), repaired)
+})
+
+test("other trades and already-natural headlines follow the same place pattern", () => {
+  assert.equal(
+    repairHeadlineCopy({ headline: "Roofers Chula Vista Recommends" }).headline,
+    "The Roofer Chula Vista Recommends"
+  )
+  assert.equal(
+    repairHeadlineCopy({ headline: "Dentists San Diego Chooses" }).headline,
+    "The Dentist San Diego Chooses"
+  )
+  assert.equal(
+    repairHeadlineCopy({ headline: "The Plumber Solana Beach Trusts" }).headline,
+    "The Plumber Solana Beach Trusts"
+  )
+  assert.equal(
+    repairHeadlineCopy({ headline: "Plumber Solana Beach Trusts" }).headline,
+    "The Plumber Solana Beach Trusts"
+  )
+  assert.equal(repairHeadlineCopy({ headline: "Trusted Neighborhood Plumber" }).headline, "Trusted Neighborhood Plumber")
+  assert.equal(repairHeadlineCopy({ headline: "Small Leak, Big Bill" }).headline, "Small Leak, Big Bill")
+  assert.equal(
+    repairHeadlineCopy({ headline: "Your Neighbors Trust This Crew" }).headline,
+    "Your Neighbors Trust This Crew"
+  )
+})
+
+test("generation rewrites an awkward business and place headline", () => {
+  const result = normalizeGenerationResult(
+    brief,
+    [
+      direction(0, {
+        spec: baseSpec({ headline: "Plumbers Solana Beach Trusts" }),
+      }),
+      direction(1),
+      direction(2),
+    ],
+    { stripInventedFacts: true }
+  )
+  assert.equal(result.directions[0]?.spec.headline, "The Plumber Solana Beach Trusts")
+})
+
 test("repair is stable and leaves a short headline alone", () => {
   const once = repairHeadlineCopy({
     headline: "Free roof inspection, including a complimentary gutter check",
@@ -161,5 +210,7 @@ test("generate and regenerate ask for a 3 to 6 word headline", () => {
     assert.match(prompt, /subheadline/)
     assert.match(prompt, /one lockup next to that call to action/)
     assert.match(prompt, /The photograph contains no QR code/)
+    assert.match(prompt, /The Plumber Solana Beach Trusts/)
+    assert.match(prompt, /Plumbers Solana Beach Trusts/)
   }
 })

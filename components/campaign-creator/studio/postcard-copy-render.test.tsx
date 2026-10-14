@@ -197,6 +197,59 @@ test("a split card uses display type at full weight on a palette panel", () => {
   assert.ok(share >= 0.55, `photo share ${share}`)
 })
 
+test("plumbing directions do not print critic notes, and the contact block stays readable", () => {
+  const cards = [
+    spec({
+      layoutVariant: "image_grounded",
+      headline: "Your Free Plumbing Inspection",
+      imagery: "stock_generic_local",
+      imageryRole: "crew",
+      phone: "123-444-5588",
+      website: "www.abplumbing.com",
+      qrDestination: "https://www.abplumbing.com",
+    }),
+    spec({
+      layoutVariant: "type_primary_split",
+      headline: "Small Leak, Big Bill",
+      imagery: "stock_generic_local",
+      imageryRole: "consequence",
+      phone: "123-444-5588",
+      website: "www.abplumbing.com",
+      qrDestination: "https://www.abplumbing.com",
+      callToAction: "Call or scan to schedule",
+    }),
+    spec({
+      layoutVariant: "type_primary_split",
+      imagePresence: "accent",
+      headline: "Plumbers Solana Beach Trusts",
+      imagery: "stock_generic_local",
+      imageryRole: "neighborhood",
+      phone: "123-444-5588",
+      website: "www.abplumbing.com",
+      qrDestination: "https://www.abplumbing.com",
+      palette: ["#f6f1e7", "#1e3a5f", "#c4a574"],
+    }),
+  ]
+  for (const next of cards) {
+    const html = htmlFor(next)
+    assert.doesNotMatch(html, /covers less of the card/)
+    assert.doesNotMatch(html, /still doesn't/)
+    assert.doesNotMatch(html, /still does not/)
+    assert.doesNotMatch(html, /data-layout-issues="[^"]*photo-share/)
+    const qr = Number(html.match(/data-qr-in="([0-9.]+)"/)?.[1])
+    const contact = Number(html.match(/data-contact-pt="([0-9.]+)"/)?.[1])
+    const website = Number(html.match(/data-website-pt="([0-9.]+)"/)?.[1])
+    assert.ok(qr + 0.001 >= 0.75, `qr ${qr}`)
+    assert.ok(contact + 0.01 >= 9, `contact ${contact}`)
+    assert.ok(website + 0.01 >= 9, `website ${website}`)
+    const share = Number(html.match(/data-photo-share="([0-9.]+)"/)?.[1])
+    assert.ok(share + 0.001 >= 0.45, `photo ${share}`)
+  }
+  const trusted = htmlFor(cards[2])
+  assert.match(trusted, /The Plumber Solana Beach Trusts/)
+  assert.doesNotMatch(trusted, /Plumbers Solana Beach Trusts/)
+})
+
 test("a card with no photo does not paint an empty color block", () => {
   const typeOnly = htmlFor(spec())
   const split = htmlFor(

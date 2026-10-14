@@ -49,7 +49,7 @@ import {
 /**
  * Renderer-owned layout check for the 5×8 postcard.
  * Measures contrast, fit, and photo share, then repairs what it can.
- * Remaining issues are returned for the Studio to say out loud.
+ * Remaining issues stay internal. They are not customer copy.
  * Not a CreativeSpec field. Not a Click2Mail job.
  */
 
@@ -77,6 +77,12 @@ export const PRINT_MAX_PT = {
 } as const
 
 export const SPLIT_PHOTO_SHARE_MIN = 0.55
+/** A photograph on the front covers at least this share, or the layout is expanded. */
+export const PHOTO_COVERAGE_MIN = 0.45
+/** Phone and website type cannot print smaller than this. */
+export const CONTACT_PRINT_MIN_PT = 9
+/** Space between the contact lines and the QR. About 0.19 in. */
+export const LOCKUP_GAP_PT = 14
 
 const INK_DARK = "#14120f"
 const INK_LIGHT = "#f7f4ee"
@@ -202,7 +208,6 @@ export function resolvePostcardLayout(input: {
   contact?: StudioContact
 }): PostcardLayoutPlan {
   const layout = normalizeLayoutVariant(input.spec.layoutVariant) ?? "peer_split"
-  const family = postcardLayoutFamily(input.spec)
   const repaired = repairHeadlineCopy(input.spec)
   const copy = displayCopy(input.spec, repaired)
   const treatment = studioCompositionTreatment({
@@ -216,10 +221,29 @@ export function resolvePostcardLayout(input: {
   const issues: LayoutIssue[] = []
 
   if (repaired.headline && repaired.headline !== collapse(input.spec.headline)) {
-    fixes.push("Shortened the headline and moved the rest into the subhead.")
+    const subChanged = (repaired.subheadline ?? "") !== collapse(input.spec.subheadline)
+    fixes.push(
+      subChanged
+        ? "Shortened the headline and moved the rest into the subhead."
+        : "Rewrote the headline so it reads as natural English."
+    )
   }
 
-  const geometry = geometryFor(family, layout, input.spec.imagePresence === "accent")
+  let family = postcardLayoutFamily(input.spec)
+  const accent = input.spec.imagePresence === "accent" && photographIntended(input.spec)
+  let geometry = geometryFor(family, layout, accent)
+  if (shouldExpandPhoto(input.spec, geometry)) {
+    const half = geometryFor("split", layout, false)
+    if (half.photoRect && half.photoShare + 0.001 >= PHOTO_COVERAGE_MIN) {
+      family = "split"
+      geometry = half
+      fixes.push("Expanded the photograph to a full-bleed half so it covers the card.")
+    } else {
+      family = "photo-dominant"
+      geometry = geometryFor("photo-dominant", layout, false)
+      fixes.push("Laid the photograph across the card and put the type on a scrim.")
+    }
+  }
   if (family === "split" && geometry.photoShare + 0.001 < SPLIT_PHOTO_SHARE_MIN) {
     issues.push({
       code: "photo-share",
@@ -297,8 +321,8 @@ export function resolvePostcardLayout(input: {
       offer: fitted.offer.fontPt,
       body: fitted.body.fontPt,
       cta: fitted.ctaPt,
-      contact: fitted.contactPt,
-      website: Math.max(PRINT_MIN_PT.contact, fitted.contactPt - 3),
+      contact: Math.max(fitted.contactPt, PRINT_MIN_PT.contact, CONTACT_PRINT_MIN_PT),
+      website: Math.max(fitted.contactPt - 3, PRINT_MIN_PT.contact, CONTACT_PRINT_MIN_PT),
       wordmark: PRINT_MIN_PT.wordmark,
     },
     qrInches,
@@ -361,6 +385,7 @@ export function resolvePostcardLayout(input: {
   return { ...draft, rubric, designRules, issues }
 }
 
+/** Internal repair language. The Studio does not show this to the customer. */
 export function layoutIssueCopy(issue: LayoutIssue): string {
   switch (issue.code) {
     case "contrast":
@@ -805,6 +830,21 @@ function removeLine(host: string, line: string): string {
     .replace(/([.!?])(?:\s*[.!?])+/g, "$1")
     .replace(/\s+/g, " ")
     .trim()
+}
+
+function shouldExpandPhoto(
+  spec: CreativeSpec,
+  geometry: { photoShare: number; photoRect: NormRect | null }
+): boolean {
+  if (!geometry.photoRect) return false
+  if (geometry.photoShare + 0.001 >= PHOTO_COVERAGE_MIN) return false
+  return photographIntended(spec)
+}
+
+function photographIntended(spec: CreativeSpec): boolean {
+  if (spec.imageryRole === "none" || spec.imageryRole === "logo") return false
+  if (spec.imagery === "none" || spec.imagery === "logo_primary") return false
+  return true
 }
 
 function geometryFor(

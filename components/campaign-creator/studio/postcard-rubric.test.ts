@@ -117,7 +117,7 @@ test("the three roofing directions pass every automated auto-fail", () => {
   }
 })
 
-test("a small accent photograph fails the hero-photo minimum", () => {
+test("a small accent photograph is expanded until it clears the hero-photo minimum", () => {
   const plan = resolvePostcardLayout({
     spec: roofing({
       layoutVariant: "type_primary_split",
@@ -127,8 +127,9 @@ test("a small accent photograph fails the hero-photo minimum", () => {
     showWordmark: true,
   })
   const af4 = plan.rubric.find((check) => check.id === "AF4")
-  assert.equal(af4?.pass, false, af4?.detail)
-  assert.ok((af4?.detail ?? "").includes("%"))
+  assert.equal(af4?.pass, true, af4?.detail)
+  assert.ok(plan.photoShare + 0.001 >= 0.45, String(plan.photoShare))
+  assert.equal(plan.issues.some((issue) => issue.code === "photo-share"), false)
 })
 
 test("a quiet zone is four modules of the symbol, not a token padding", () => {
