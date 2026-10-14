@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import { repairHeadlineCopy } from "@/lib/campaign-creator/headline-repair"
 import type { GeneratedAsset } from "@/lib/campaign-creator/image-generation"
+import { medicareDisclaimerFor } from "@/lib/campaign-creator/medicare-compliance"
 import { resolveCreativeImage } from "@/lib/campaign-creator/resolve-creative-image"
 import {
   resolveStudioContact,
@@ -13,6 +14,7 @@ import {
 } from "@/lib/campaign-creator/studio-contact"
 import {
   normalizeLayoutVariant,
+  type CampaignBrief,
   type CreativeSpec,
 } from "@/lib/campaign-creator/types"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
@@ -41,6 +43,8 @@ interface PostcardPreviewProps {
   allowLibraryFallback?: boolean
   /** Brief contact. Used when the spec is empty or still has toy placeholder chrome. */
   identity?: PostcardIdentity
+  /** Campaign brief. Selects a relevant stand-in and the Medicare disclaimer. */
+  brief?: CampaignBrief
 }
 
 const SIZE_CLASSES: Record<PostcardPreviewSize, string> = {
@@ -70,6 +74,7 @@ export function PostcardPreview({
   ariaLabel,
   generatedAsset,
   identity,
+  brief,
   allowLibraryFallback = false,
 }: PostcardPreviewProps) {
   const reducedMotion = useReducedMotion()
@@ -80,7 +85,7 @@ export function PostcardPreview({
     spec.imagery,
     spec.imageryRole,
     generatedAsset,
-    { libraryFallback: allowLibraryFallback }
+    { libraryFallback: allowLibraryFallback, campaign: brief }
   )
   const contact = resolveStudioContact(spec, identity)
   const compact = size === "thumbnail"
@@ -92,6 +97,7 @@ export function PostcardPreview({
       accent={accent}
       reservedRoles={canvas.reservedRegionRoles}
       compact={compact}
+      disclaimer={medicareDisclaimerFor(brief)}
     />
   ) : (
     <PostcardFrontFace

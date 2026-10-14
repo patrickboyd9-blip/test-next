@@ -52,7 +52,7 @@ export function buildOpenAIImagePrompt(brief: ImageBrief): string {
     .join(" ")
 
   return [
-    `Shot: One documentary photograph, taken mid-task. Nobody is looking at the camera. If a person is in frame, they are an ordinary adult about 30 to 55, with natural skin. ${ROLE_SHOT[brief.imageryRole]}`,
+    shotLine(brief),
     [
       `Subject and action: ${subject}`,
       art.craft ? `Craft to imitate, not a picture to copy: ${art.craft}` : null,
@@ -80,11 +80,26 @@ export function buildOpenAIImagePrompt(brief: ImageBrief): string {
         ? "No before-and-after diptych and no two photos stitched side by side."
         : null,
       art.refuse,
+      brief.correction,
       OPENAI_IMAGE_ALWAYS_EXCLUSIONS,
     ]
       .filter((line): line is string => Boolean(line))
       .join(" "),
   ].join("\n")
+}
+
+function shotLine(brief: ImageBrief): string {
+  const trade = brief.artDirection.trade
+  if (trade.startsWith("medicare")) {
+    if (/headshot|uploaded agent/i.test(brief.artDirection.subject)) {
+      return "Shot: One honest headshot of the agent, looking at the camera, friendly and capable. Natural skin, daylight or soft window light. Not a stock model and not a government portrait."
+    }
+    return "Shot: One documentary photograph of an active, capable couple in their sixties or seventies doing something they enjoy. They look well and independent. Natural skin, contemporary color, not sepia. Not a construction site and not a hospital."
+  }
+  if (trade === "final_expense") {
+    return "Shot: One photograph of a living family together, well and connected. Natural skin, contemporary color. No casket, funeral, cemetery, or grief."
+  }
+  return `Shot: One documentary photograph, taken mid-task. Nobody is looking at the camera. If a person is in frame, they are an ordinary adult about 30 to 55, with natural skin. ${ROLE_SHOT[brief.imageryRole]}`
 }
 
 function cameraLine(brief: ImageBrief): string {

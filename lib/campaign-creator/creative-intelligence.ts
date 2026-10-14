@@ -1,5 +1,9 @@
 import { PLAYBOOKS, findIndustryPlaybook } from "../campaign-strategy/playbooks"
 import {
+  MEDICARE_AGENT_DISCLAIMER,
+  isMedicareAgentBrief,
+} from "./medicare-compliance"
+import {
   formatReferenceCardSection,
   selectReferenceCards,
   type ReferenceCardMatch,
@@ -273,6 +277,56 @@ const PLUMBING_PRINCIPLES: readonly CreativePrinciple[] = [
   },
 ]
 
+const MEDICARE_AGENT_PRINCIPLES: readonly CreativePrinciple[] = [
+  {
+    id: "med-disclaimer",
+    kind: "heuristic",
+    verticalCluster: "medicare-agent",
+    appliesTo: ["hierarchy"],
+    statement: `The address side carries this disclaimer, exactly, in type a person can read: ${MEDICARE_AGENT_DISCLAIMER} Do not put that sentence on the front, and do not paraphrase it.`,
+  },
+  {
+    id: "med-no-government",
+    kind: "heuristic",
+    verticalCluster: "medicare-agent",
+    appliesTo: ["imagery", "hierarchy"],
+    statement:
+      "Never use government-looking imagery or wording. Do not show or name the Capitol, an eagle, a seal, a flag, or a Medicare card. Do not write Official Business, benefit, entitled, or you qualify. A small line saying the sender is not the government does not make those cues acceptable.",
+  },
+  {
+    id: "med-real-dates",
+    kind: "heuristic",
+    verticalCluster: "medicare-agent",
+    appliesTo: ["urgency"],
+    statement:
+      "Do not invent a deadline or a respond-within-days rush. The only enrollment window you may name is Annual Enrollment, October 15 through December 7, and only when this mailing is for that season.",
+  },
+  {
+    id: "med-no-invented-dollars",
+    kind: "heuristic",
+    verticalCluster: "medicare-agent",
+    appliesTo: ["offer"],
+    statement:
+      "Do not state a $0 premium or any dollar benefit unless that exact claim is already on the brief. Lead with a free plan review when the brief has no other offer.",
+  },
+  {
+    id: "med-photo",
+    kind: "observed_pattern",
+    verticalCluster: "medicare-agent",
+    appliesTo: ["imagery"],
+    statement:
+      "Prefer the real agent headshot when the brief includes an uploaded photograph of the agent. Otherwise show an active, capable older couple. Do not show a frail, sad, or hospitalized person, a sepia scene, an obvious stock model, a construction site, or any other trade.",
+  },
+  {
+    id: "med-layout",
+    kind: "observed_pattern",
+    verticalCluster: "medicare-agent",
+    appliesTo: ["hierarchy", "cta"],
+    statement:
+      "Use big type, plenty of open space, and a large QR next to the call to action. The three directions should not collapse into one dull type-only card.",
+  },
+]
+
 const PLUMBING_OFFER_PATTERNS_WHEN_BRIEF_HAS_NONE: CreativePrinciple = {
   id: "pl-offer-patterns",
   kind: "heuristic",
@@ -310,6 +364,7 @@ export function buildCreativeIntelligenceContext(
       ...CREATIVE_DIRECT_MAIL_PRINCIPLES,
       ...(isHomeServicesBrief(brief) ? HOME_SERVICES_PRINCIPLES : []),
       ...plumbingPrinciplesFor(brief),
+      ...(isMedicareAgentBrief(brief) ? MEDICARE_AGENT_PRINCIPLES : []),
     ],
     referenceCards: taste.cards,
     referenceCardMatch: taste.match,
@@ -325,6 +380,9 @@ export function formatCreativeIntelligenceContext(
   )
   const plumbing = context.principles.filter(
     (principle) => principle.verticalCluster === "plumbing"
+  )
+  const medicare = context.principles.filter(
+    (principle) => principle.verticalCluster === "medicare-agent"
   )
 
   const homeServicesBlock =
@@ -352,6 +410,11 @@ None. No plumbing playbook matched this campaign. Do not invent plumbing knowled
         )}`
       : ""
 
+  const medicareBlock =
+    medicare.length > 0
+      ? `\n\nMedicare agent principles (matched vertical only):\n${formatPrincipleList(medicare)}`
+      : ""
+
   return `Creative Intelligence principles — decision guidance only.
 
 Knowledge classification:
@@ -375,7 +438,7 @@ ${formatPrincipleList(general)}
 
 ${homeServicesBlock}
 
-${plumbingBlock}${taste}`
+${plumbingBlock}${medicareBlock}${taste}`
 }
 
 export function isHomeServicesBrief(brief: CampaignBrief): boolean {

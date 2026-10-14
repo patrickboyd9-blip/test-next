@@ -63,6 +63,11 @@ export interface ImageBrief {
   artDirection: ImageBriefArtDirection
   /** Fixed for the campaign. Copied word for word into every direction prompt. */
   lookBlock: string
+  /**
+   * Extra refusal added when a previous photograph was the wrong industry.
+   * Not part of the cache identity. Not shown to the customer.
+   */
+  correction?: string
 }
 
 function isImageBriefRole(

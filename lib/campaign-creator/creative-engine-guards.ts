@@ -25,6 +25,12 @@ import {
   RECOMMENDATION_HEADLINE,
 } from "./studio-copy"
 import { repairSpecCustomerVoice } from "./customer-voice"
+import {
+  isMedicareAgentBrief,
+  medicareCopyViolations,
+  repairMedicareAgentSpec,
+  scrubMedicareLanguage,
+} from "./medicare-compliance"
 import { repairSpecHeadline } from "./headline-repair"
 import {
   IMAGE_PRESENCES,
@@ -391,11 +397,14 @@ export function finalizeRefinement(input: {
     )
   }
 
-  const spec = repairSpecCustomerVoice(
-    repairSpecHeadline(
-      preserveCreativeSemantics(
-        currentSpec,
-        applyFaithfulness(input.brief, input.proposed.spec)
+  const spec = repairMedicareAgentSpec(
+    input.brief,
+    repairSpecCustomerVoice(
+      repairSpecHeadline(
+        preserveCreativeSemantics(
+          currentSpec,
+          applyFaithfulness(input.brief, input.proposed.spec)
+        )
       )
     )
   )
@@ -430,7 +439,9 @@ export function finalizeRefinement(input: {
       spec,
       customerPrompt: prompt,
       studioResponse: sanitizeStudioResponse(
-        input.proposed.studioResponse ?? "",
+        isMedicareAgentBrief(input.brief)
+          ? scrubMedicareLanguage(input.proposed.studioResponse ?? "", input.brief)
+          : (input.proposed.studioResponse ?? ""),
         fallback
       ),
       type: "refinement",
@@ -465,11 +476,14 @@ export function normalizeGenerationResult(
   options: { stripInventedFacts: boolean }
 ): GenerateDirectionsResult {
   const now = new Date().toISOString()
-  const normalized = preferPhotographicRecommendation(
+  const normalized = applyMedicareCompliance(
     brief,
-    disambiguateDirectionNames(
-      directions.map((direction) =>
-        normalizeDirection(brief, direction, now, options.stripInventedFacts)
+    preferPhotographicRecommendation(
+      brief,
+      disambiguateDirectionNames(
+        directions.map((direction) =>
+          normalizeDirection(brief, direction, now, options.stripInventedFacts)
+        )
       )
     )
   )
@@ -721,8 +735,37 @@ function validateDirection(
   if (brief.offer && !spec.offer?.trim()) {
     reasons.push(`${label} is missing the brief offer`)
   }
+  for (const violation of medicareCopyViolations(brief, spec)) {
+    reasons.push(`${label} ${violation}`)
+  }
 
   return reasons
+}
+
+function applyMedicareCompliance(
+  brief: CampaignBrief,
+  directions: CreativeDirection[]
+): CreativeDirection[] {
+  if (!isMedicareAgentBrief(brief)) return directions
+  return directions.map((direction, index) => {
+    const spec = repairMedicareAgentSpec(brief, direction.spec, index)
+    const rationale = scrubMedicareLanguage(direction.rationale, brief)
+    const difference = direction.oneLineDifference
+      ? scrubMedicareLanguage(direction.oneLineDifference, brief)
+      : direction.oneLineDifference
+    return {
+      ...direction,
+      rationale:
+        rationale.split(/\s+/).filter(Boolean).length >= 8
+          ? rationale
+          : `${direction.name} leads with a free plan review and a photograph of capable people.`,
+      oneLineDifference: direction.recommended ? undefined : difference || direction.oneLineDifference,
+      spec,
+      tags: repairDirectionTags(
+        direction.tags.map((tag) => scrubMedicareLanguage(tag, brief)).filter(Boolean)
+      ),
+    }
+  })
 }
 
 function validateCampaignResponseCoverage(

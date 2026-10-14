@@ -16,6 +16,9 @@ import {
   LOCKUP_GAP_PT,
   photoScrimGradient,
   pointsToCqw,
+  contrastRatio,
+  fitTextLine,
+  medicareDisclaimerBand,
   postcardBackRegions,
   resolvePostcardLayout,
   type NormRect,
@@ -194,16 +197,30 @@ export function PostcardBackFace({
   accent,
   reservedRoles,
   compact,
+  disclaimer,
 }: {
   primary: string
   secondary: string
   accent: string
   reservedRoles: readonly string[]
   compact: boolean
+  disclaimer?: string | null
 }) {
   const regions = postcardBackRegions()
   const has = (role: string) => reservedRoles.includes(role)
   const paper = accent || "#f7f6f2"
+  const band = medicareDisclaimerBand()
+  const fitted = disclaimer
+    ? fitTextLine({
+        text: disclaimer,
+        widthIn: 3.7,
+        heightIn: 1.08,
+        minPt: 8,
+        maxPt: compact ? 8 : 11,
+        lineHeight: 1.2,
+      })
+    : null
+  const ink = readableDisclaimerInk(primary, paper)
 
   return (
     <div className="relative h-full" style={{ backgroundColor: paper }} data-safe-inset="0.25in">
@@ -240,8 +257,29 @@ export function PostcardBackFace({
           rect={regions.barcodeStrip}
         />
       ) : null}
+      {fitted && disclaimer ? (
+        <p
+          data-medicare-disclaimer=""
+          className="absolute m-0 overflow-hidden"
+          style={{
+            ...rectStyle(band),
+            fontFamily: STUDIO_TEXT_CSS,
+            fontSize: pointsToCqw(fitted.fontPt),
+            lineHeight: 1.2,
+            color: ink,
+          }}
+        >
+          {disclaimer}
+        </p>
+      ) : null}
     </div>
   )
+}
+
+function readableDisclaimerInk(preferred: string, paper: string): string {
+  if (contrastRatio(preferred, paper) >= 4.5) return preferred
+  if (contrastRatio("#1c1917", paper) >= 4.5) return "#1c1917"
+  return "#f7f6f2"
 }
 
 function DisplayStack({ plan, compact }: { plan: PostcardLayoutPlan; compact: boolean }) {

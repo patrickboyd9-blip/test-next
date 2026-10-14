@@ -56,6 +56,9 @@ export function presentStudioPhoto(
   const miss = state.misses.find(
     (item) => item.directionId === directionId && item.fingerprint === fingerprint
   )
+  if (miss?.fallback === "withheld") {
+    return { generatedAsset: null, allowLibraryFallback: true, note: null }
+  }
   if (miss) {
     return {
       generatedAsset: null,

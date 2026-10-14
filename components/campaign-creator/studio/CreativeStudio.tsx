@@ -238,6 +238,7 @@ export function CreativeStudio({
         canvas={canvas}
         direction={leadDirection}
         identity={identity}
+        brief={campaign.brief}
         {...photoProps(leadDirection.id, leadDirection.spec)}
         onContinue={async () => {
           await handleSelectDirection(leadDirection.id)

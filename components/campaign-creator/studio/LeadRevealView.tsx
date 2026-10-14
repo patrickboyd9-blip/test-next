@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import type { GeneratedAsset } from "@/lib/campaign-creator/image-generation"
 import type { PostcardIdentity } from "@/lib/campaign-creator/studio-contact"
-import type { CreativeDirection } from "@/lib/campaign-creator/types"
+import type { CampaignBrief, CreativeDirection } from "@/lib/campaign-creator/types"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
 import { PostcardPreview, PostcardSideToggle } from "./PostcardPreview"
@@ -23,6 +23,7 @@ interface LeadRevealViewProps {
   allowLibraryFallback?: boolean
   photoNote?: string | null
   identity?: PostcardIdentity
+  brief?: CampaignBrief
 }
 
 export function LeadRevealView({
@@ -34,6 +35,7 @@ export function LeadRevealView({
   allowLibraryFallback = false,
   photoNote,
   identity,
+  brief,
 }: LeadRevealViewProps) {
   const reducedMotion = useReducedMotion()
   const [side, setSide] = useState<"front" | "back">("front")
@@ -71,6 +73,7 @@ export function LeadRevealView({
             generatedAsset={generatedAsset}
             allowLibraryFallback={allowLibraryFallback}
             identity={identity}
+            brief={brief}
           />
         </motion.div>
         <StudioPhotoNote note={photoNote} />

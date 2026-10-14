@@ -4,6 +4,7 @@ import { createElement } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 
 import { toCreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
+import { MEDICARE_AGENT_DISCLAIMER } from "@/lib/campaign-creator/medicare-compliance"
 import { POSTCARD_5X8_V1 } from "@/lib/mail-catalog/pieces/postcard-5x8"
 import type { PostcardIdentity } from "@/lib/campaign-creator/studio-contact"
 import type { CreativeSpec } from "@/lib/campaign-creator/types"
@@ -264,4 +265,64 @@ test("a card with no photo does not paint an empty color block", () => {
   assert.doesNotMatch(split, emptyWell)
   assert.doesNotMatch(typeOnly, /data-region="field"/)
   assert.match(split, /data-region="supporting-image"/)
+})
+
+test("a Medicare address side prints the disclaimer and a matching photograph", () => {
+  const medicare = {
+    goal: "Medicare plan reviews for people turning 65",
+    website: "https://harbor.example/review",
+  }
+  const back = renderToStaticMarkup(
+    createElement(PostcardPreview, {
+      canvas,
+      spec: spec({
+        layoutVariant: "peer_split",
+        headline: "Free Plan Review",
+        imagery: "stock_generic_local",
+        imageryRole: "neighborhood",
+        visualDirection:
+          "An active, capable older couple walking a sunny residential sidewalk, contemporary color.",
+      }),
+      side: "back",
+      size: "hero",
+      enableHoverTilt: false,
+      brief: medicare,
+    })
+  )
+  assert.match(back, /data-medicare-disclaimer/)
+  assert.match(back, new RegExp(MEDICARE_AGENT_DISCLAIMER.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")))
+
+  const roofingBack = renderToStaticMarkup(
+    createElement(PostcardPreview, {
+      canvas,
+      spec: spec(),
+      side: "back",
+      size: "hero",
+      enableHoverTilt: false,
+      brief: { goal: "Book roof inspections" },
+    })
+  )
+  assert.doesNotMatch(roofingBack, /data-medicare-disclaimer/)
+  assert.doesNotMatch(roofingBack, /1-800-MEDICARE/)
+
+  const front = renderToStaticMarkup(
+    createElement(PostcardPreview, {
+      canvas,
+      spec: spec({
+        layoutVariant: "peer_split",
+        headline: "Free Plan Review",
+        imagery: "stock_generic_local",
+        imageryRole: "crew",
+        visualDirection:
+          "An active, capable older couple talking at a sunny outdoor table, natural color.",
+      }),
+      side: "front",
+      size: "hero",
+      enableHoverTilt: false,
+      allowLibraryFallback: true,
+      brief: medicare,
+    })
+  )
+  assert.match(front, /medicare-couple-table/)
+  assert.doesNotMatch(front, /crew_trades_handshake/)
 })

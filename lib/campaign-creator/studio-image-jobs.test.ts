@@ -15,6 +15,7 @@ import {
   studioImageFileBase,
   syncStudioDirectionImages,
 } from "./studio-image-jobs"
+import { presentStudioPhoto } from "./studio-photo"
 import type { CampaignBrief, CampaignCreative, CreativeSpec } from "./types"
 import { createEmptyCampaignCreative } from "./types"
 
@@ -334,5 +335,92 @@ test("missing credentials do not start a job", async () => {
   assert.equal(load.records.length, 0)
   assert.equal(load.misses.length, 2)
   assert.equal(load.misses[0]?.fallback, "not_configured")
+  await rm(cacheRoot, { recursive: true, force: true })
+})
+
+test("a mismatched photograph is retried once, then withheld without a note", async () => {
+  const cacheRoot = await mkdtemp(path.join(tmpdir(), "studio-jobs-relevance-"))
+  const corrections: Array<string | undefined> = []
+  const options = {
+    campaignId: CAMPAIGN_ID,
+    creative: creative(false),
+    campaignBrief: brief,
+    cacheRoot,
+    configured: true,
+    runInline: true,
+    photoCheck: async () => false,
+    createAdapter: () => ({
+      async generate(imageBrief: { correction?: string }) {
+        corrections.push(imageBrief.correction)
+        return generated("mismatch")
+      },
+    }),
+  }
+
+  let load = await syncStudioDirectionImages(options)
+  for (let step = 0; step < 8 && load.pending; step += 1) {
+    load = await syncStudioDirectionImages(options)
+  }
+
+  assert.equal(load.pending, false)
+  assert.equal(load.records.length, 0)
+  assert.equal(load.misses.length, 2)
+  assert.ok(load.misses.every((item) => item.fallback === "withheld"))
+  assert.ok(corrections.some((line) => /did not match/i.test(line ?? "")))
+  const shown = presentStudioPhoto(
+    { records: [], misses: load.misses, phase: "ready" },
+    "dir-a",
+    spec(),
+    brief
+  )
+  assert.equal(shown.generatedAsset, null)
+  assert.equal(shown.allowLibraryFallback, true)
+  assert.equal(shown.note, null)
+  await rm(cacheRoot, { recursive: true, force: true })
+})
+
+test("a matching alternate is kept and the mismatch is not stored", async () => {
+  const cacheRoot = await mkdtemp(path.join(tmpdir(), "studio-jobs-alternate-"))
+  const options = {
+    campaignId: CAMPAIGN_ID,
+    creative: creative(false),
+    campaignBrief: brief,
+    cacheRoot,
+    configured: true,
+    runInline: true,
+    photoCheck: async ({ src }: { src: string }) => src.includes("couple"),
+    createAdapter: () => {
+      const adapter = {
+        async generate() {
+          return generated("unused")
+        },
+        async generateDetailed() {
+          return {
+            asset: { ...generated("construction"), src: "data:image/png;base64,construction" },
+            alternates: [{ ...generated("couple"), src: "data:image/png;base64,couple" }],
+            usage: null,
+          }
+        },
+      }
+      return adapter
+    },
+  }
+
+  let load = await syncStudioDirectionImages(options)
+  for (let step = 0; step < 6 && load.pending; step += 1) {
+    load = await syncStudioDirectionImages(options)
+  }
+
+  assert.equal(load.pending, false)
+  assert.equal(load.records.length, 2)
+  const saved = load.records.find((record) => record.directionId === "dir-a")
+  const png = await readFile(path.join(cacheRoot, CAMPAIGN_ID, saved!.asset.src.split("/").pop()!))
+  assert.deepEqual(png, Buffer.from("couple", "base64"))
+  const names = await import("fs/promises").then((fs) => fs.readdir(path.join(cacheRoot, CAMPAIGN_ID)))
+  for (const name of names) {
+    if (!name.endsWith(".png")) continue
+    const bytes = await readFile(path.join(cacheRoot, CAMPAIGN_ID, name))
+    assert.notDeepEqual(bytes, Buffer.from("construction", "base64"))
+  }
   await rm(cacheRoot, { recursive: true, force: true })
 })

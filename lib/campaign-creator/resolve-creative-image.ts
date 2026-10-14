@@ -3,7 +3,8 @@ import {
   type CuratedImageryAsset,
 } from "./beta-imagery-library"
 import type { GeneratedAsset } from "./image-generation"
-import type { ImageryKey, ImageryRole } from "./types"
+import { matchPhotoTags, photoExpectationForBrief } from "./photo-relevance"
+import type { CampaignBrief, ImageryKey, ImageryRole } from "./types"
 
 /**
  * Preview-facing result of asset resolution. Not a CreativeSpec field.
@@ -18,15 +19,30 @@ const EMPTY_IMAGE: ResolvedImage = { src: null, showMonogram: false }
 const MONOGRAM_IMAGE: ResolvedImage = { src: null, showMonogram: true }
 
 function availableAssetForRole(
-  role: ImageryRole
+  role: ImageryRole,
+  campaign?: CampaignBrief
 ): CuratedImageryAsset | undefined {
-  return BETA_IMAGERY_LIBRARY.find(
+  const eligible = BETA_IMAGERY_LIBRARY.filter(
     (asset) => asset.eligibleRole === role && Boolean(asset.previewSrc)
   )
+  if (!campaign) return eligible[0]
+  const expectation = photoExpectationForBrief(campaign)
+  const matched = eligible.find(
+    (asset) =>
+      matchPhotoTags({ tags: asset.tags, describedSubject: asset.tags?.join(" ") }, expectation) ===
+      "match"
+  )
+  if (matched) return matched
+  const neutral = eligible.find(
+    (asset) =>
+      matchPhotoTags({ tags: asset.tags, describedSubject: asset.tags?.join(" ") }, expectation) ===
+      "unknown"
+  )
+  return neutral
 }
 
-function fromLibrary(role: ImageryRole): ResolvedImage {
-  const src = availableAssetForRole(role)?.previewSrc ?? null
+function fromLibrary(role: ImageryRole, campaign?: CampaignBrief): ResolvedImage {
+  const src = availableAssetForRole(role, campaign)?.previewSrc ?? null
   return { src, showMonogram: false }
 }
 
@@ -48,6 +64,8 @@ export interface ResolveCreativeImageOptions {
    * campaign photograph should still succeed.
    */
   libraryFallback?: boolean
+  /** When set, a stand-in from another industry is not used. */
+  campaign?: CampaignBrief
 }
 
 export function resolveCreativeImage(
@@ -63,7 +81,7 @@ export function resolveCreativeImage(
     return { src: generated.src, showMonogram: false }
   }
   if (imageryRole) {
-    return allowLibrary ? fromLibrary(imageryRole) : EMPTY_IMAGE
+    return allowLibrary ? fromLibrary(imageryRole, options?.campaign) : EMPTY_IMAGE
   }
 
   if (!allowLibrary && imagery && imagery !== "none" && imagery !== "logo_primary") {
@@ -74,7 +92,7 @@ export function resolveCreativeImage(
     case "stock_generic_local":
     case "stock_hvac":
     case "stock_restaurant":
-      return fromLibrary("neighborhood")
+      return fromLibrary("neighborhood", options?.campaign)
     case "logo_primary":
       return MONOGRAM_IMAGE
     case "none":

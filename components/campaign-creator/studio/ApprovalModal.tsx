@@ -144,6 +144,7 @@ export function ApprovalModal({
                 spec={spec}
                 size="medium"
                 identity={identity}
+                brief={brief}
                 generatedAsset={generatedAsset}
                 allowLibraryFallback={allowLibraryFallback}
                 enableHoverTilt={false}

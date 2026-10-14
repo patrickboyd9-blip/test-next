@@ -39,6 +39,34 @@ test("crew role resolves to the first crew beta asset", () => {
   })
 })
 
+test("a Medicare brief does not receive a construction stand-in", () => {
+  const brief = { goal: "Medicare plan reviews for people turning 65" }
+  assert.equal(
+    resolveCreativeImage(undefined, "crew", null, { campaign: brief }).src,
+    "/creative-studio/imagery/medicare-couple-table.jpg"
+  )
+  assert.equal(
+    resolveCreativeImage(undefined, "neighborhood", null, { campaign: brief }).src,
+    "/creative-studio/imagery/medicare-couple-walk.jpg"
+  )
+  assert.equal(
+    resolveCreativeImage(undefined, "consequence", null, { campaign: brief }).src,
+    "/creative-studio/imagery/medicare-couple-garden.jpg"
+  )
+})
+
+test("a roofing brief still uses the trade stand-in when no campaign filter is required", () => {
+  const brief = { goal: "Book roof inspections", businessInfo: { name: "Summit Roofing" } }
+  assert.equal(
+    resolveCreativeImage(undefined, "crew", null, { campaign: brief }).src,
+    CREW_SRC
+  )
+  assert.equal(
+    resolveCreativeImage(undefined, "neighborhood", null, { campaign: brief }).src,
+    NEIGHBORHOOD_SRC
+  )
+})
+
 test("consequence role resolves to the first consequence beta asset", () => {
   const consequence = BETA_IMAGERY_LIBRARY.filter(
     (asset) => asset.eligibleRole === "consequence" && asset.previewSrc

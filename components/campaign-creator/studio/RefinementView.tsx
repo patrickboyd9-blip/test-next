@@ -210,6 +210,7 @@ export function RefinementView({
               side={side}
               size="hero"
               identity={identity}
+              brief={campaign.brief}
               generatedAsset={generatedAsset}
               allowLibraryFallback={allowLibraryFallback}
               highlightRegions={highlightRegions}

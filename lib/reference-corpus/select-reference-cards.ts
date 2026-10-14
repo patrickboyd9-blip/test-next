@@ -32,6 +32,18 @@ const VERTICAL_PATTERNS: Record<ReferenceCardVertical, readonly RegExp[]> = {
   fitness: [/\bfitness\b/i, /\bgyms?\b/i],
   jewelry: [/\bjewel(?:ry|er)?\b/i],
   remodeling: [/\bremodel(?:ing|er)?\b/i],
+  medicare_agent: [/\bmedicare\b/i],
+  medicare_seminar: [
+    /\bmedicare\b[^.]{0,40}\b(seminar|luncheon|dinner|lunch)\b/i,
+    /\b(seminar|luncheon|dinner|lunch)\b[^.]{0,40}\bmedicare\b/i,
+  ],
+  medicare_plan: [/\bmedicare advantage\b/i, /\bmedigap\b/i, /\bmedicare supplement\b/i],
+  final_expense: [/\bfinal expense\b/i, /\bburial insurance\b/i],
+  life_insurance: [/\blife insurance\b/i],
+  auto_insurance: [
+    /\b(auto|car|homeowners?|home)\s+insurance\b/i,
+    /\bproperty insurance\b/i,
+  ],
 }
 
 const SIBLING_RANK: Partial<
@@ -52,6 +64,12 @@ const SIBLING_RANK: Partial<
   physical_therapy: ["chiropractic", "dental", "med_spa"],
   restaurant: ["pizza_qsr"],
   pizza_qsr: ["restaurant"],
+  medicare_agent: ["medicare_seminar", "medicare_plan", "life_insurance"],
+  medicare_seminar: ["medicare_agent", "medicare_plan"],
+  medicare_plan: ["medicare_agent", "medicare_seminar"],
+  final_expense: ["life_insurance", "medicare_agent"],
+  life_insurance: ["final_expense", "medicare_agent"],
+  auto_insurance: ["life_insurance"],
 }
 
 export type ReferenceCardMatch = "vertical" | "craft_only"

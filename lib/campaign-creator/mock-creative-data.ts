@@ -1,3 +1,4 @@
+import { isMedicareAgentBrief } from "./medicare-compliance"
 import type {
   CampaignBrief,
   CreativeDirection,
@@ -10,6 +11,8 @@ const MOCK_CREATED_AT = "2026-01-01T00:00:00.000Z"
 export function getMockCreativeDirections(
   brief: CampaignBrief = {}
 ): CreativeDirection[] {
+  if (isMedicareAgentBrief(brief)) return medicareAgentDirections(brief)
+
   const business = brief.businessInfo?.name ?? "ABC Air Conditioning"
   const offer = brief.offer ?? "15% off your first service call"
   const phone = brief.phone ?? brief.businessInfo?.phone ?? "(949) 555-0142"
@@ -105,6 +108,105 @@ export function getMockCreativeDirections(
         imagery: "stock_hvac",
         leadJob: "offer",
         imageryRole: "neighborhood",
+      },
+    },
+  ]
+}
+
+function medicareAgentDirections(brief: CampaignBrief): CreativeDirection[] {
+  const business = brief.businessInfo?.name ?? "Your local advisor"
+  const offer = brief.offer?.trim() || "Free plan review"
+  const phone = brief.phone ?? brief.businessInfo?.phone
+  const website = brief.website ?? brief.businessInfo?.website
+  const designedToDrive =
+    brief.primarySuccessMetric?.description ?? "Plan review conversations"
+  const contact = {
+    ...(phone ? { phone } : {}),
+    ...(website ? { website, qrDestination: brief.qrDestination ?? website } : {}),
+  }
+
+  return [
+    {
+      id: "dir-free-review",
+      name: "Free Plan Review",
+      recommended: true,
+      designedToDrive,
+      rationale:
+        "Leads with a free plan review and a large way to respond, for someone who wants help before choosing a plan.",
+      tags: ["Offer-led", "Local", "Clear"],
+      createdAt: MOCK_CREATED_AT,
+      spec: {
+        layoutVariant: "peer_split",
+        headline: "Free Plan Review",
+        subheadline: `A local look from ${business}`,
+        body: "Scan or call and we will walk through the plans we offer in your area.",
+        callToAction: "Scan for a review",
+        offer,
+        ...contact,
+        visualDirection:
+          "An active, capable older couple walking a sunny residential sidewalk, contemporary color, healthy and independent, with quiet sky left open for type.",
+        tone: "Calm, local, plain",
+        palette: ["#1f3a4d", "#e7eef2", "#f6f3ee"],
+        imagery: "stock_generic_local",
+        leadJob: "offer",
+        imageryRole: "neighborhood",
+        layoutHints: { qrProminence: "large" },
+      },
+    },
+    {
+      id: "dir-capable-couple",
+      name: "Capable Couple",
+      recommended: false,
+      designedToDrive,
+      oneLineDifference: "The people in the picture lead, and the review stays a conversation.",
+      rationale:
+        "Puts an active older couple first so the piece feels human and local, then offers the same free review.",
+      tags: ["Trust-led", "Human", "Calm"],
+      createdAt: MOCK_CREATED_AT,
+      spec: {
+        layoutVariant: "image_grounded",
+        headline: "Your Next Step",
+        subheadline: "Talk with someone local",
+        body: "You can sit down for a free plan review and ask what the plans we offer would mean for you.",
+        callToAction: "Book a review",
+        offer,
+        ...contact,
+        visualDirection:
+          "An active, capable older couple talking at a sunny outdoor table, natural color, at ease, with calm space beside them for type.",
+        tone: "Warm, capable, unhurried",
+        palette: ["#3f4f3a", "#efe6d6", "#f7f4ee"],
+        imagery: "stock_generic_local",
+        leadJob: "trust",
+        imageryRole: "crew",
+        layoutHints: { qrProminence: "large" },
+      },
+    },
+    {
+      id: "dir-straight-talk",
+      name: "Straight Talk",
+      recommended: false,
+      designedToDrive,
+      oneLineDifference: "Big type and open space carry the explanation, with the photograph kept beside the words.",
+      rationale:
+        "Uses large type and open space so the review is easy to read at arm's length, with one large code beside the action.",
+      tags: ["Plain speech", "Open", "Readable"],
+      createdAt: MOCK_CREATED_AT,
+      spec: {
+        layoutVariant: "type_primary_split",
+        headline: "Straight Talk Here",
+        subheadline: "No rush and no fine print",
+        body: "You get a plain explanation of the plans we offer, with room to read and one code to scan.",
+        callToAction: "Start the review",
+        offer,
+        ...contact,
+        visualDirection:
+          "An active, capable older couple gardening together in daylight, standing and well, contemporary color, with open space around them.",
+        tone: "Direct, calm, adult",
+        palette: ["#243044", "#d9e2ec", "#f4f1ea"],
+        imagery: "stock_generic_local",
+        leadJob: "offer",
+        imageryRole: "consequence",
+        layoutHints: { qrProminence: "large" },
       },
     },
   ]
