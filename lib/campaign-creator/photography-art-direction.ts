@@ -1,5 +1,10 @@
 import { isHomeServicesBrief } from "./creative-intelligence"
 import {
+  isFinalExpenseBrief,
+  isMedicareAgentBrief,
+  uploadedAgentPortrait,
+} from "./medicare-compliance"
+import {
   referenceVerticalsForBrief,
   selectReferenceCards,
 } from "../reference-corpus/select-reference-cards"
@@ -212,6 +217,42 @@ const DENTAL: SceneBank = {
   ],
 }
 
+const MEDICARE: SceneBank = {
+  consequence: [
+    "An active, capable older couple gardening together in daylight, standing and well, contemporary color, with open space around them. Not frail, not a hospital, and not this recipient's medical record.",
+    "An active older couple cooking together in a bright kitchen, both well and independent, natural color, calm counter space left quiet for type. Not sepia and not a stock-model pose.",
+    "An active couple in their sixties on a neighborhood porch in open shade, capable and at ease, contemporary color. Not a cane as the subject and not a clinical room.",
+  ],
+  crew: [
+    "An active, capable older couple talking at a sunny outdoor table, natural color, at ease, with calm space beside them for type. Not a handshake and not a posed catalog smile.",
+    "A friendly headshot of a local advisor only when that photograph was uploaded. Otherwise an active older couple, eyes alive, natural skin, daylight, looking engaged with each other.",
+    "An active couple walking and talking, seen from a few paces, faces natural and well, contemporary clothes, no logo and no government emblem.",
+  ],
+  neighborhood: [
+    "An active, capable older couple walking a sunny residential sidewalk, contemporary color, healthy and independent, with quiet sky left open for type. Not a construction site.",
+    "A tree-lined block in ordinary daylight with an active older couple crossing toward a cafe, no readable signs and no landmark treated as proof.",
+    "A shaded residential street and an active couple out for a walk, one time of day, contemporary color, not sepia.",
+  ],
+}
+
+const FINAL_EXPENSE: SceneBank = {
+  consequence: [
+    "A living family at a kitchen table in daylight, multi-generation and well, contemporary color. Not grief, not a funeral, and not a casket.",
+    "Two generations on a front porch, alive and at ease, open shade. Not a cemetery and not a hospital.",
+    "A family walking a quiet block together, capable and connected, natural color. Not a coffin and not an official emblem.",
+  ],
+  crew: [
+    "A living family photographed together, faces natural, contemporary color, no one in mourning. Not a casket and not a funeral.",
+    "Hands of two generations around a table, only the people and the table, daylight. Not grief and not a government seal.",
+    "A parent and an adult child in a bright kitchen, well and ordinary. Not a cemetery.",
+  ],
+  neighborhood: [
+    "An ordinary home with a family on the walk, living and well, daylight, no readable signs. Not a funeral home.",
+    "A residential street and a family out together, contemporary color. Not a capitol and not a casket.",
+    "A front yard in open light, people alive and capable. Not sepia and not a cemetery.",
+  ],
+}
+
 const LOCAL_SERVICE: SceneBank = {
   consequence: [
     "The visible cost of waiting, in an ordinary home, shown as a category situation: one small problem in a calm room. Not gore and not a ruined kitchen used as stock proof.",
@@ -231,6 +272,8 @@ const LOCAL_SERVICE: SceneBank = {
 }
 
 const BANKS: Record<string, SceneBank> = {
+  medicare: MEDICARE,
+  final_expense: FINAL_EXPENSE,
   roofing: ROOFING,
   hvac: HVAC,
   plumbing: PLUMBING,
@@ -246,6 +289,12 @@ const BANKS: Record<string, SceneBank> = {
 }
 
 const TRADE_PREFERENCE = [
+  "final_expense",
+  "medicare_agent",
+  "medicare_seminar",
+  "medicare_plan",
+  "life_insurance",
+  "auto_insurance",
   "roofing",
   "hvac",
   "plumbing",
@@ -329,21 +378,25 @@ export function buildPhotographyArtDirection(input: {
   layoutVariant?: LayoutVariant
 }): ImageBriefArtDirection {
   const trade = tradeForCampaign(input.campaign)
-  const bank = BANKS[trade] ?? LOCAL_SERVICE
+  const bank = BANKS[bankKey(trade)] ?? LOCAL_SERVICE
   const conceived = input.visualDirection.trim()
   const weak = isWeakVisualDirection(conceived)
-  const subject = weak
-    ? pick(bank[input.imageryRole], `${input.variationKey ?? "direction"}:${input.leadJob}`)
-    : conceived
+  const portrait = trade.startsWith("medicare") ? uploadedAgentPortrait(input.campaign) : undefined
+  const subject =
+    portrait && input.imageryRole === "crew"
+      ? `The uploaded agent photograph: ${portrait}. A friendly headshot, eyes to the camera, natural color, capable and local. Not a stock model and not a government portrait.`
+      : weak || badSubject(conceived, trade)
+        ? pick(bank[input.imageryRole], `${input.variationKey ?? "direction"}:${input.leadJob}`)
+        : conceived
 
   const art: ImageBriefArtDirection = {
     revision: PHOTOGRAPHY_ART_DIRECTION_REVISION,
     trade,
     subject,
-    lighting: lightingFor(input.imageryRole, input.campaign),
+    lighting: lightingFor(input.imageryRole, input.campaign, trade),
     framing: FRAMING[input.occupancy],
     emotion: EMOTION[input.leadJob],
-    refuse: REFUSE,
+    refuse: refuseFor(trade),
     negativeSpace: negativeSpaceForLayout(input.layoutVariant, input.occupancy),
   }
 
@@ -356,10 +409,40 @@ function tradeForCampaign(campaign: CampaignBrief | undefined): string {
   if (!campaign) return "local-service"
   const matched = referenceVerticalsForBrief(campaign)
   const preferred = TRADE_PREFERENCE.find((trade) => matched.includes(trade))
-  return preferred ?? "local-service"
+  if (preferred) return preferred
+  if (isFinalExpenseBrief(campaign)) return "final_expense"
+  if (isMedicareAgentBrief(campaign)) return "medicare_agent"
+  return "local-service"
 }
 
-function lightingFor(role: PhotoRole, campaign: CampaignBrief | undefined): string {
+function bankKey(trade: string): string {
+  if (trade.startsWith("medicare")) return "medicare"
+  return trade
+}
+
+function refuseFor(trade: string): string {
+  if (trade.startsWith("medicare")) {
+    return "No text, headlines, prices, phone numbers, URLs, QR codes, logos, watermarks, or postcard chrome. No Capitol, eagle, seal, flag, Medicare card, or official-notice styling. No construction site, hard hat, hospital, frail or isolated person, sepia tone, casket, funeral, or obvious stock-model pose. Not this recipient's medical record."
+  }
+  if (trade === "final_expense") {
+    return "No text, logos, QR codes, or watermarks. No casket, coffin, funeral, cemetery, or grief scene. No Capitol, eagle, seal, flag, or official-notice styling."
+  }
+  return REFUSE
+}
+
+function badSubject(value: string, trade: string): boolean {
+  if (!trade.startsWith("medicare") && trade !== "final_expense" && trade !== "life_insurance") {
+    return false
+  }
+  return /\b(construction|hard hats?|job sites?|scaffolding|capitol|eagles?|medicare cards?|hospitals?|frail|sepia|caskets?|funerals?|cemeter(?:y|ies)|coffins?)\b/i.test(
+    value
+  )
+}
+
+function lightingFor(role: PhotoRole, campaign: CampaignBrief | undefined, trade = ""): string {
+  if (trade.startsWith("medicare") || trade === "final_expense") {
+    return "Open natural daylight, contemporary color, not sepia and not clinical fluorescent."
+  }
   const base = LIGHT[role]
   if (role !== "neighborhood" || !campaign) return base
   const text = [

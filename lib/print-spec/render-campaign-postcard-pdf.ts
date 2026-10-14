@@ -31,6 +31,11 @@ export interface PostcardPrintCopy {
   qrPayload?: string
   /** Return lines in the content box. The vendor address panel stays blank. */
   returnLines?: string[]
+  /**
+   * Legal line painted on the address side, exactly as given.
+   * It is not rewritten into customer voice.
+   */
+  disclaimer?: string
 }
 
 export interface AddressBackPlan {
@@ -43,6 +48,7 @@ export interface AddressBackPlan {
   website?: string
   callToAction?: string
   qrPayload?: string
+  disclaimer?: string
 }
 
 const QR_MAX_INCHES = 1.05
@@ -62,6 +68,7 @@ export function addressBackPlan(copy: PostcardPrintCopy): AddressBackPlan {
     website: textOf(voiced.website),
     callToAction: textOf(voiced.callToAction),
     qrPayload: textOf(voiced.qrPayload),
+    disclaimer: textOf(copy.disclaimer),
   }
 }
 
@@ -76,6 +83,7 @@ export function postcardPrintLines(copy: PostcardPrintCopy): string[] {
     plan.phone,
     plan.website,
     plan.callToAction,
+    plan.disclaimer,
     ...plan.returnLines,
   ].filter((line): line is string => Boolean(line))
 }
@@ -92,23 +100,61 @@ function voicePrintCopy(copy: PostcardPrintCopy): PostcardPrintCopy {
 export function addressBackQrPlacement(
   content: InchesRect,
   hasQr: boolean,
-  reserveForContact = false
+  reserveForContact = false,
+  bottomReserveIn = 0
 ): InchesRect | null {
   if (!hasQr) return null
   const contactReserve = reserveForContact ? 1.7 : 0
+  const usableHeight = content.heightInches - bottomReserveIn
   const size = Math.min(
     QR_MAX_INCHES,
     content.widthInches * 0.42,
-    content.heightInches * 0.34,
+    usableHeight * 0.34,
     Math.max(0.6, content.widthInches - contactReserve)
   )
-  if (size < 0.6) return null
+  if (size < 0.6 || usableHeight < size) return null
   return {
     xInches: content.xInches,
-    yInches: content.yInches + content.heightInches - size,
+    yInches: content.yInches + content.heightInches - bottomReserveIn - size,
     widthInches: size,
     heightInches: size,
   }
+}
+
+/** Bottom band of the address-side content box. Stays out of the keep-outs. */
+export function addressBackDisclaimerPlacement(
+  content: InchesRect,
+  disclaimer?: string
+): InchesRect | null {
+  const text = textOf(disclaimer)
+  if (!text) return null
+  const heightInches = 1.12
+  if (content.heightInches <= heightInches + 0.9) return null
+  return {
+    xInches: content.xInches,
+    yInches: content.yInches + content.heightInches - heightInches,
+    widthInches: content.widthInches,
+    heightInches: heightInches,
+  }
+}
+
+export function disclaimerPrintFits(
+  font: PDFFont,
+  text: string,
+  band: InchesRect
+): { size: number; lineCount: number; fits: boolean } {
+  const width = Math.max(36, band.widthInches * 72 - 2)
+  const room = band.heightInches * 72
+  for (const size of [9, 8]) {
+    const lines = wrapText(text, font, size, width)
+    const painted = lines.join(" ").replace(/\s+/g, " ").trim()
+    const expected = text.replace(/\s+/g, " ").trim()
+    const leading = size + 2.5
+    if (painted === expected && lines.length * leading <= room + 0.5) {
+      return { size, lineCount: lines.length, fits: true }
+    }
+  }
+  return { size: 8, lineCount: wrapText(text, font, 8, width).length, fits: false }
 }
 
 export interface PostcardPrintImage {
@@ -378,15 +424,21 @@ function drawBack(
   })
   const plan = addressBackPlan(copy)
   const box = canvasRectToPdf(content, spec.artworkCanvasInches.heightInches)
+  const disclaimerBand = addressBackDisclaimerPlacement(content, plan.disclaimer)
+  const disclaimerFit = plan.disclaimer && disclaimerBand
+    ? disclaimerPrintFits(regular, plan.disclaimer, disclaimerBand)
+    : null
   const hasContact = Boolean(plan.phone || plan.website)
   const qr = addressBackQrPlacement(
     content,
     Boolean(plan.qrPayload && buildQrMatrix(plan.qrPayload)),
-    hasContact
+    hasContact,
+    disclaimerBand?.heightInches ?? 0
   )
   const qrPoints = qr ? qr.widthInches * 72 : 0
+  const disclaimerPoints = disclaimerBand ? disclaimerBand.heightInches * 72 : 0
   const contactBlock = !qr && hasContact ? 14 * [plan.phone, plan.website].filter(Boolean).length : 0
-  const textFloor = box.yPoints + (qrPoints > 0 ? qrPoints + 8 : 4 + contactBlock)
+  const textFloor = box.yPoints + disclaimerPoints + (qrPoints > 0 ? qrPoints + 8 : 4 + contactBlock)
   const ink = rgb(0.12, 0.14, 0.18)
   const muted = rgb(0.28, 0.32, 0.38)
   let top = box.yPoints + box.heightPoints - 2
@@ -478,16 +530,33 @@ function drawBack(
     })
   }
 
+  if (disclaimerBand && plan.disclaimer && disclaimerFit) {
+    const disclaimerBox = canvasRectToPdf(disclaimerBand, spec.artworkCanvasInches.heightInches)
+    drawWrapped({
+      page,
+      font: regular,
+      text: plan.disclaimer,
+      x: disclaimerBox.xPoints,
+      top: disclaimerBox.yPoints + disclaimerBox.heightPoints - 2,
+      width: disclaimerBox.widthPoints,
+      size: disclaimerFit.size,
+      leading: disclaimerFit.size + 2.5,
+      color: muted,
+      maxLines: disclaimerFit.lineCount,
+    })
+  }
+
+  const stackBottom = box.yPoints + disclaimerPoints
   if (qr && plan.qrPayload) {
-    drawQr(page, plan.qrPayload, box.xPoints, box.yPoints, qrPoints)
+    drawQr(page, plan.qrPayload, box.xPoints, stackBottom, qrPoints)
     const contactX = box.xPoints + qrPoints + 8
     const contactWidth = Math.max(36, box.widthPoints - qrPoints - 8)
     const beside = [plan.phone, plan.website, plan.callToAction].filter((line): line is string => Boolean(line))
-    let cursor = box.yPoints + qrPoints - 4
+    let cursor = stackBottom + qrPoints - 4
     for (const line of beside) {
       const size = fitTypeSize(line, regular, 9, contactWidth)
       cursor -= size
-      if (cursor < box.yPoints) break
+      if (cursor < stackBottom) break
       page.drawText(line, {
         x: contactX,
         y: cursor,
@@ -499,13 +568,13 @@ function drawBack(
     }
   } else if (hasContact) {
     const lines = [plan.phone, plan.website].filter((line): line is string => Boolean(line))
-    let cursor = box.yPoints + contactBlock
+    let cursor = stackBottom + contactBlock
     for (const line of [...lines].reverse()) {
       const size = fitTypeSize(line, regular, 10, box.widthPoints)
       cursor -= size + 2
       page.drawText(line, {
         x: box.xPoints,
-        y: Math.max(box.yPoints, cursor),
+        y: Math.max(stackBottom, cursor),
         size,
         font: regular,
         color: ink,

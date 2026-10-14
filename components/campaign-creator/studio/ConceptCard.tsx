@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import type { GeneratedAsset } from "@/lib/campaign-creator/image-generation"
 import type { PostcardIdentity } from "@/lib/campaign-creator/studio-contact"
-import type { CreativeDirection } from "@/lib/campaign-creator/types"
+import type { CampaignBrief, CreativeDirection } from "@/lib/campaign-creator/types"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
 import { PostcardPreview, type PostcardPreviewSize } from "./PostcardPreview"
@@ -22,6 +22,7 @@ interface ConceptCardProps {
   isRecommended?: boolean
   isSelected?: boolean
   identity?: PostcardIdentity
+  brief?: CampaignBrief
   generatedAsset?: GeneratedAsset | null
   allowLibraryFallback?: boolean
   photoNote?: string | null
@@ -36,6 +37,7 @@ export function ConceptCard({
   isRecommended,
   isSelected,
   identity,
+  brief,
   generatedAsset,
   allowLibraryFallback = false,
   photoNote,
@@ -81,6 +83,7 @@ export function ConceptCard({
           spec={direction.spec}
           size={size}
           identity={identity}
+          brief={brief}
           generatedAsset={generatedAsset}
           allowLibraryFallback={allowLibraryFallback}
           enableHoverTilt={variant !== "strip"}

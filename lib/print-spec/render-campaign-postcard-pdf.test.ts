@@ -1,12 +1,20 @@
 import assert from "node:assert/strict"
+import { readFileSync } from "node:fs"
+import path from "node:path"
 import { test } from "node:test"
 
+import fontkit from "@pdf-lib/fontkit"
+import { PDFDocument } from "pdf-lib"
+
+import { MEDICARE_AGENT_DISCLAIMER } from "../campaign-creator/medicare-compliance"
 import { buildPostcard5x8PrintSpec } from "./postcard-5x8-print-spec"
 import { encodeSolidPng } from "./raster"
 import {
+  addressBackDisclaimerPlacement,
   addressBackPlan,
   addressBackQrPlacement,
   addressSideContentRect,
+  disclaimerPrintFits,
   assertPostcardPrintPdf,
   assertPrintImageDpi,
   postcardPrintLines,
@@ -54,6 +62,59 @@ function containsRect(outer: { xInches: number; yInches: number; widthInches: nu
     inner.yInches + inner.heightInches <= outer.yInches + outer.heightInches + 0.001
   )
 }
+
+test("a Medicare disclaimer fits the address-side content box and stays off the QR", async () => {
+  const spec = buildPostcard5x8PrintSpec()
+  const content = addressSideContentRect(spec)
+  const band = addressBackDisclaimerPlacement(content, MEDICARE_AGENT_DISCLAIMER)
+  assert.ok(band)
+  assert.equal(containsRect(content, band!), true)
+  for (const keepOut of spec.keepOuts) {
+    assert.equal(rectsOverlap(band!, keepOut.canvas), false)
+  }
+  const qr = addressBackQrPlacement(content, true, true, band!.heightInches)
+  assert.ok(qr)
+  assert.equal(rectsOverlap(band!, qr!), false)
+  assert.equal(containsRect(content, qr!), true)
+
+  const doc = await PDFDocument.create()
+  doc.registerFontkit(fontkit)
+  const font = await doc.embedFont(
+    readFileSync(path.join(process.cwd(), "lib/print-spec/fonts/SourceSans3-Regular.ttf"))
+  )
+  const fit = disclaimerPrintFits(font, MEDICARE_AGENT_DISCLAIMER, band!)
+  assert.equal(fit.fits, true)
+  assert.ok(fit.size >= 8)
+
+  const plan = addressBackPlan({
+    ...SAMPLE_POSTCARD_COPY,
+    disclaimer: MEDICARE_AGENT_DISCLAIMER,
+    offer: "They book a plan review",
+  })
+  assert.equal(plan.disclaimer, MEDICARE_AGENT_DISCLAIMER)
+  assert.equal(plan.offer, "You book a plan review")
+  const lines = postcardPrintLines({
+    headline: "Free Plan Review",
+    disclaimer: MEDICARE_AGENT_DISCLAIMER,
+  })
+  assert.ok(lines.includes(MEDICARE_AGENT_DISCLAIMER))
+
+  const rendered = await renderPostcardPrintPdf({
+    copy: {
+      businessName: "Harbor Advisors",
+      headline: "Free Plan Review",
+      body: "We walk through the plans we offer in your area.",
+      offer: "Free plan review",
+      callToAction: "Scan for a review",
+      phone: "555-0142",
+      website: "harbor.example",
+      qrPayload: "https://harbor.example/review",
+      disclaimer: MEDICARE_AGENT_DISCLAIMER,
+    },
+  })
+  await assertPostcardPrintPdf(rendered.bytes)
+  assert.equal(rendered.bytes.byteLength > 1000, true)
+})
 
 test("print lines keep a provided phone and website", () => {
   const lines = postcardPrintLines({

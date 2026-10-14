@@ -85,6 +85,7 @@ export function FocusView({
             side={side}
             size="hero"
             identity={identity}
+            brief={brief}
             generatedAsset={generatedAsset}
             allowLibraryFallback={allowLibraryFallback}
             ariaLabel={`Postcard: ${spec.headline ?? direction.name}`}
@@ -133,6 +134,7 @@ export function FocusView({
                 direction={other}
                 variant="strip"
                 identity={identity}
+                brief={brief}
                 generatedAsset={photo.generatedAsset}
                 allowLibraryFallback={photo.allowLibraryFallback}
                 onSelect={() => onSwitch(other.id)}

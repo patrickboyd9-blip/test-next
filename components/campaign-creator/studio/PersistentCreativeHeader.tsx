@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import type { GeneratedAsset } from "@/lib/campaign-creator/image-generation"
 import type { PostcardIdentity } from "@/lib/campaign-creator/studio-contact"
-import type { CreativeDirection, CreativeSpec } from "@/lib/campaign-creator/types"
+import type { CampaignBrief, CreativeDirection, CreativeSpec } from "@/lib/campaign-creator/types"
 
 import { PostcardPreview } from "./PostcardPreview"
 
@@ -16,6 +16,7 @@ interface PersistentCreativeHeaderProps {
   direction: CreativeDirection
   spec: CreativeSpec
   identity?: PostcardIdentity
+  brief?: CampaignBrief
   generatedAsset?: GeneratedAsset | null
   allowLibraryFallback?: boolean
   photoNote?: string | null
@@ -28,6 +29,7 @@ export function PersistentCreativeHeader({
   direction,
   spec,
   identity,
+  brief,
   generatedAsset,
   allowLibraryFallback = false,
   photoNote,
@@ -55,6 +57,7 @@ export function PersistentCreativeHeader({
               spec={spec}
               size="thumbnail"
               identity={identity}
+              brief={brief}
               generatedAsset={generatedAsset}
               allowLibraryFallback={allowLibraryFallback}
               enableHoverTilt={false}

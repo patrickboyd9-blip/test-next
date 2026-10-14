@@ -454,6 +454,15 @@ export function postcardBackRegions(): BackRegionLayout {
   }
 }
 
+/**
+ * Address-side legal line for a Medicare agent piece.
+ * Trim inches: left of the mailing panel, above the barcode strip,
+ * and below the return-address block.
+ */
+export function medicareDisclaimerBand(): NormRect {
+  return inches(0.28, 3.05, 3.85, 1.2)
+}
+
 export function fitTextLine(input: {
   text: string
   widthIn: number

@@ -29,9 +29,20 @@ const canvas: CreativeCanvas = {
   fullBleedExpected: true,
 }
 
-test("the curated pack is 20 prompt-safe postcard cards", () => {
+test("the curated pack is 41 prompt-safe postcard cards", () => {
   assert.doesNotThrow(() => assertResearchTastePack())
-  assert.equal(RESEARCH_TASTE_PACK.length, 20)
+  assert.equal(RESEARCH_TASTE_PACK.length, 41)
+  assert.equal(
+    RESEARCH_TASTE_PACK.filter((card) => card.packGroup === "insurance").length,
+    21
+  )
+  for (let id = 513; id <= 533; id += 1) {
+    assert.equal(
+      RESEARCH_TASTE_PACK.some((card) => card.mmrId === `MMR-${id}`),
+      true,
+      `MMR-${id}`
+    )
+  }
   assert.equal(
     RESEARCH_TASTE_PACK.filter((card) => card.packGroup === "home_services").length,
     10
@@ -130,4 +141,33 @@ test("generate and regenerate prompts consume the taste cards without raw resear
     assert.doesNotMatch(prompt, /ridge vents/i)
     assert.doesNotMatch(prompt, /source_url/i)
   }
+})
+
+test("a Medicare agent brief gets the agent cards and not a roofing or auto card", () => {
+  const brief: CampaignBrief = {
+    goal: "Book free Medicare plan reviews for people turning 65",
+    businessInfo: { name: "Harbor Advisors" },
+    offer: "Free plan review",
+    audience: { description: "Adults in St. Petersburg approaching Medicare" },
+  }
+  const selection = selectReferenceCards(brief)
+  const ids = selection.cards.map((card) => card.mmrId)
+  assert.equal(selection.match, "vertical")
+  assert.equal(ids.includes("MMR-514"), true)
+  assert.equal(ids.includes("MMR-515"), true)
+  assert.equal(ids.includes("MMR-516"), true)
+  assert.equal(ids.includes("MMR-001"), false)
+  assert.equal(ids.includes("MMR-531"), false)
+  assert.equal(ids.length <= 4, true)
+})
+
+test("an auto insurance brief gets the auto cards and not a Medicare agent card", () => {
+  const brief: CampaignBrief = {
+    goal: "Quote more home and auto insurance bundles",
+    businessInfo: { name: "Pinnacle Agency" },
+  }
+  const ids = selectReferenceCards(brief).cards.map((card) => card.mmrId)
+  assert.equal(ids.includes("MMR-531"), true)
+  assert.equal(ids.includes("MMR-514"), false)
+  assert.equal(ids.includes("MMR-001"), false)
 })

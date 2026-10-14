@@ -1,6 +1,7 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
 
+import { MEDICARE_AGENT_DISCLAIMER } from "@/lib/campaign-creator/medicare-compliance"
 import { resolveStudioContact } from "@/lib/campaign-creator/studio-contact"
 import type { CreativeSpec } from "@/lib/campaign-creator/types"
 
@@ -12,6 +13,7 @@ import {
   contrastRatio,
   fitTextLine,
   layoutIssueCopy,
+  medicareDisclaimerBand,
   photoScrimGradient,
   postcardBackRegions,
   postcardLayoutFamily,
@@ -196,6 +198,23 @@ test("front type stays inside the safe inset and the back keeps creative type ou
   assert.equal(rectsIntersect(back.indicia, back.barcodeStrip), false)
   assert.ok(rectContains(back.safe, back.returnAddress))
   assert.ok(rectContains(back.safe, back.indicia))
+
+  const band = medicareDisclaimerBand()
+  assert.equal(rectsIntersect(band, back.mailingPanel), false)
+  assert.equal(rectsIntersect(band, back.barcodeStrip), false)
+  assert.equal(rectsIntersect(band, back.returnAddress), false)
+  assert.ok(rectContains(back.safe, band))
+  const fitted = fitTextLine({
+    text: MEDICARE_AGENT_DISCLAIMER,
+    widthIn: 3.7,
+    heightIn: 1.08,
+    minPt: 8,
+    maxPt: 11,
+    lineHeight: 1.2,
+  })
+  assert.equal(fitted.overflows, false)
+  assert.ok(fitted.fontPt >= 8)
+  assert.equal(fitted.text, MEDICARE_AGENT_DISCLAIMER)
 })
 
 test("a line that cannot fit at the print minimum stays an issue", () => {

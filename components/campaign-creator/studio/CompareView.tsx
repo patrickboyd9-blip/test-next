@@ -68,6 +68,7 @@ export function CompareView({
                 variant="compact"
                 isRecommended={direction.id === recommendedId}
                 identity={identity}
+                brief={brief}
                 generatedAsset={photo.generatedAsset}
                 allowLibraryFallback={photo.allowLibraryFallback}
                 photoNote={photo.note}

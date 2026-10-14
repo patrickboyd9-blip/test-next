@@ -229,3 +229,109 @@ test("a deliberate type-led strategy can stay recommended", () => {
   const lead = result.directions.find((item) => item.recommended)
   assert.equal(lead?.spec.layoutVariant, "type_only")
 })
+
+const medicareBrief: CampaignBrief = {
+  goal: "Book Medicare plan reviews",
+  audience: { description: "People turning 65 in the neighborhood" },
+  businessInfo: { name: "Harbor Advisors" },
+  website: "https://harbor.example/review",
+  qrDestination: "https://harbor.example/review",
+}
+
+test("a Medicare brief replaces a construction scene with a capable couple", () => {
+  const roles = ["neighborhood", "crew", "consequence"] as const
+  const arts = roles.map((imageryRole, index) =>
+    buildPhotographyArtDirection({
+      imageryRole,
+      leadJob: index === 0 ? "offer" : index === 1 ? "trust" : "problem",
+      occupancy: "supporting",
+      visualDirection: "Close-up of asphalt shingles on a construction site",
+      campaign: medicareBrief,
+      variationKey: `med-${imageryRole}`,
+    })
+  )
+  assert.deepEqual(
+    arts.map((art) => art.trade),
+    ["medicare_agent", "medicare_agent", "medicare_agent"]
+  )
+  for (const art of arts) {
+    assert.match(art.subject, /couple/i)
+    assert.doesNotMatch(art.subject, /construction site|asphalt shingle|a casket|the capitol|an eagle/i)
+    assert.match(art.lighting, /daylight|contemporary/i)
+    assert.match(art.lighting, /not sepia/i)
+  }
+  const prompt = buildOpenAIImagePrompt(
+    toImageBrief(
+      spec({
+        visualDirection: arts[0]!.subject,
+        imageryRole: "neighborhood",
+        leadJob: "offer",
+        layoutVariant: "peer_split",
+      }),
+      { campaign: medicareBrief, variationKey: "med-neighborhood" }
+    )!
+  )
+  assert.match(prompt, /sixties or seventies/i)
+  assert.doesNotMatch(prompt, /30 to 55/)
+})
+
+test("an uploaded agent photo becomes the crew portrait", () => {
+  const art = buildPhotographyArtDirection({
+    imageryRole: "crew",
+    leadJob: "trust",
+    occupancy: "supporting",
+    visualDirection: "A frail patient in a hospital hallway",
+    campaign: {
+      ...medicareBrief,
+      brandAssets: [{ id: "photo-1", type: "photo", description: "Jordan Hale, local advisor" }],
+    },
+    variationKey: "med-headshot",
+  })
+  assert.match(art.subject, /headshot|uploaded agent/i)
+  const prompt = buildOpenAIImagePrompt(
+    toImageBrief(
+      spec({
+        visualDirection: art.subject,
+        imageryRole: "crew",
+        leadJob: "trust",
+        layoutVariant: "peer_split",
+      }),
+      {
+        campaign: {
+          ...medicareBrief,
+          brandAssets: [{ id: "photo-1", type: "photo", description: "Jordan Hale, local advisor" }],
+        },
+        variationKey: "med-headshot",
+      }
+    )!
+  )
+  assert.match(prompt, /looking at the camera/i)
+})
+
+test("final expense refuses a casket", () => {
+  const art = buildPhotographyArtDirection({
+    imageryRole: "consequence",
+    leadJob: "trust",
+    occupancy: "field",
+    visualDirection: "A casket in a cemetery at dusk",
+    campaign: { goal: "Final expense coverage for a family" },
+    variationKey: "final-expense",
+  })
+  assert.equal(art.trade, "final_expense")
+  assert.doesNotMatch(`${art.subject} ${art.refuse}`, /show a casket|casket in a cemetery/i)
+  assert.match(art.refuse, /casket/i)
+  const prompt = buildOpenAIImagePrompt(
+    toImageBrief(
+      spec({
+        visualDirection: "A casket in a cemetery at dusk",
+        imageryRole: "consequence",
+        leadJob: "trust",
+        layoutVariant: "image_grounded",
+        headline: "A Family Conversation",
+      }),
+      { campaign: { goal: "Final expense coverage for a family" }, variationKey: "final-expense" }
+    )!
+  )
+  assert.match(prompt, /No casket/i)
+  assert.doesNotMatch(prompt, /30 to 55/)
+})

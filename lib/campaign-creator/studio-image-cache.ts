@@ -22,7 +22,7 @@ import type { CampaignBrief, CreativeSpec } from "./types"
 
 const inflight = new Map<string, Promise<StudioImageRecord | null>>()
 
-export type StudioImageFallback = "not_configured" | "failed"
+export type StudioImageFallback = "not_configured" | "failed" | "withheld"
 
 export interface StudioImageMiss {
   directionId: string

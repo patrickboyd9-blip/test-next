@@ -39,6 +39,12 @@ export const REFERENCE_CARD_VERTICALS = [
   "fitness",
   "jewelry",
   "remodeling",
+  "medicare_agent",
+  "medicare_seminar",
+  "medicare_plan",
+  "final_expense",
+  "life_insurance",
+  "auto_insurance",
 ] as const
 export type ReferenceCardVertical = (typeof REFERENCE_CARD_VERTICALS)[number]
 
@@ -47,6 +53,7 @@ export const REFERENCE_CARD_PACK_GROUPS = [
   "local_healthcare",
   "hospitality",
   "craft_exemplar",
+  "insurance",
 ] as const
 export type ReferenceCardPackGroup = (typeof REFERENCE_CARD_PACK_GROUPS)[number]
 

@@ -30,7 +30,20 @@ import {
   type StudioImageSidecar,
   type StudioImageStore,
 } from "./studio-image-store"
+import {
+  openAIVisionPhotoCheck,
+  photoExpectationForBrief,
+  photoMatchesCampaign,
+} from "./photo-relevance"
 import type { CampaignBrief, CampaignCreative, CreativeSpec } from "./types"
+
+export interface StudioPhotoCheckInput {
+  src: string
+  describedSubject: string
+  campaign?: CampaignBrief
+}
+
+export type StudioPhotoCheck = (input: StudioPhotoCheckInput) => Promise<boolean>
 
 /**
  * Photographs are not made inside the web request.
@@ -93,6 +106,8 @@ export async function syncStudioDirectionImages(options: {
   schedule?: (work: () => Promise<void>) => void
   /** Tests run the provider before returning. Production uses schedule. */
   runInline?: boolean
+  /** When omitted, tags and a vision check decide. A mismatch is not shown. */
+  photoCheck?: StudioPhotoCheck
   now?: () => Date
   configured?: boolean
   env?: NodeJS.ProcessEnv
@@ -129,6 +144,7 @@ export async function syncStudioDirectionImages(options: {
       createAdapter: options.createAdapter,
       slot: due,
       now,
+      photoCheck: options.photoCheck,
     })
 
   if (options.runInline) {
@@ -190,7 +206,11 @@ async function readStudioImageSlots(input: {
         miss(
           item.directionId,
           fingerprint,
-          sidecar?.error === "not_configured" ? "not_configured" : "failed"
+          sidecar?.error === "not_configured"
+            ? "not_configured"
+            : sidecar?.error === "relevance"
+              ? "withheld"
+              : "failed"
         )
       )
       continue
@@ -271,6 +291,7 @@ async function executeStudioImageJob(input: {
   createAdapter: () => ImageGenerationAdapter
   slot: PreparedSlot
   now: () => Date
+  photoCheck?: StudioPhotoCheck
 }): Promise<void> {
   const { slot } = input
   const existing = await input.store.readSidecar(input.campaignId, slot.fileBase)
@@ -320,25 +341,58 @@ async function executeStudioImageJob(input: {
     }
 
     const adapter = input.createAdapter()
-    const generated = await generateImage(adapter, brief, {
+    const promptBrief =
+      existing?.error === "relevance"
+        ? {
+            ...brief,
+            correction:
+              "The previous photograph did not match this campaign's industry or audience. Replace it with a matching photograph. Do not repeat the mismatched subject.",
+          }
+        : brief
+    const generated = await generateImage(adapter, promptBrief, {
       tier: slot.item.tier,
       campaignId: input.campaignId,
       directionId: slot.item.directionId,
     })
+    const check = input.photoCheck ?? defaultPhotoCheck
+    const candidates = [generated.asset, ...generated.alternates]
+    const matched: GeneratedAsset[] = []
+    for (const candidate of candidates) {
+      const matches = await check({
+        src: candidate.src,
+        describedSubject: promptBrief.artDirection.subject,
+        campaign: input.campaignBrief,
+      })
+      if (matches) matched.push(candidate)
+    }
+    const chosenAsset = matched[0]
+    if (!chosenAsset) {
+      const exhausted = attempts >= MAX_ATTEMPTS
+      await input.store.writeSidecar(input.campaignId, slot.fileBase, {
+        fingerprint: slot.fingerprint,
+        tier: slot.item.tier,
+        status: exhausted ? "failed" : "queued",
+        attempts,
+        error: "relevance",
+        claim,
+        claimedAt,
+      })
+      return
+    }
     const asset = await persistGeneratedAsset(
-      generated.asset,
+      chosenAsset,
       input.store,
       input.campaignId,
       slot.fileBase
     )
     const alternates: GeneratedAsset[] = []
-    for (let index = 0; index < generated.alternates.length; index += 1) {
+    for (let index = 1; index < matched.length; index += 1) {
       alternates.push(
         await persistGeneratedAsset(
-          generated.alternates[index]!,
+          matched[index]!,
           input.store,
           input.campaignId,
-          `${slot.fileBase}--alt${index}`
+          `${slot.fileBase}--alt${index - 1}`
         )
       )
     }
@@ -372,6 +426,19 @@ async function executeStudioImageJob(input: {
       await input.store.deleteSidecar(input.campaignId, lockBase)
     }
   }
+}
+
+async function defaultPhotoCheck(input: StudioPhotoCheckInput): Promise<boolean> {
+  const expectation = photoExpectationForBrief(input.campaign)
+  const apiKey = process.env.OPENAI_API_KEY?.trim()
+  return photoMatchesCampaign(
+    { src: input.src, describedSubject: input.describedSubject },
+    expectation,
+    apiKey
+      ? ({ src, expectation: expected }) =>
+          openAIVisionPhotoCheck({ src, expectation: expected, apiKey })
+      : undefined
+  )
 }
 
 async function generateImage(

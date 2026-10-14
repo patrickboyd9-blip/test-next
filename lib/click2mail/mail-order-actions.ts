@@ -1,6 +1,7 @@
 "use server"
 
 import { isAtOrPastStatus } from "@/lib/campaign-creator/campaign-status"
+import { medicareDisclaimerFor } from "@/lib/campaign-creator/medicare-compliance"
 import { getCampaignRepository } from "@/lib/campaign-creator/repository"
 import { displayWebsite, postcardIdentityFromBrief, resolveStudioContact } from "@/lib/campaign-creator/studio-contact"
 import type { Campaign, CreativeSpec } from "@/lib/campaign-creator/types"
@@ -202,6 +203,7 @@ function printCopy(campaign: Campaign): PostcardPrintCopy {
     website: contact.website ? displayWebsite(contact.website) : undefined,
     qrPayload: contact.qrPayload ?? undefined,
     returnLines: address ? [address] : [],
+    disclaimer: medicareDisclaimerFor(campaign.brief) ?? undefined,
   }
 }
 

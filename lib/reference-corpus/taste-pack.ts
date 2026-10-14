@@ -1,3 +1,4 @@
+import { INSURANCE_REFERENCE_CARDS } from "./insurance-cards"
 import {
   assertReferenceCard,
   type ReferenceCard,
@@ -19,6 +20,7 @@ import {
  * - 4 local healthcare: dental, med spa, chiropractic, physical therapy.
  * - 3 hospitality: restaurant, pizza, foot-traffic.
  * - 3 craft exemplars: premium versus template, hierarchy, small-card restraint.
+ * - 21 Medicare and insurance readings, MMR-513 through MMR-533.
  */
 export const RESEARCH_TASTE_PACK: readonly ReferenceCard[] = [
   {
@@ -444,6 +446,7 @@ export const RESEARCH_TASTE_PACK: readonly ReferenceCard[] = [
     whyItWorks:
       "It looks like the object being sold, not like an advertisement for advertising.",
   },
+  ...INSURANCE_REFERENCE_CARDS,
 ]
 
 const EXPECTED_GROUP_COUNTS: Record<ReferenceCardPackGroup, number> = {
@@ -451,6 +454,7 @@ const EXPECTED_GROUP_COUNTS: Record<ReferenceCardPackGroup, number> = {
   local_healthcare: 4,
   hospitality: 3,
   craft_exemplar: 3,
+  insurance: 21,
 }
 
 const BANNED_IN_CARD_TEXT = [
@@ -476,8 +480,8 @@ const BANNED_IN_CARD_TEXT = [
 export function assertResearchTastePack(
   pack: readonly ReferenceCard[] = RESEARCH_TASTE_PACK
 ): void {
-  if (pack.length !== 20) {
-    throw new Error(`Taste pack must contain 20 cards (has ${pack.length}).`)
+  if (pack.length !== 41) {
+    throw new Error(`Taste pack must contain 41 cards (has ${pack.length}).`)
   }
   const ids = new Set<string>()
   const counts: Record<ReferenceCardPackGroup, number> = {
@@ -485,6 +489,7 @@ export function assertResearchTastePack(
     local_healthcare: 0,
     hospitality: 0,
     craft_exemplar: 0,
+    insurance: 0,
   }
   for (const card of pack) {
     assertReferenceCard(card)

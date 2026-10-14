@@ -327,6 +327,7 @@ export function CampaignCreatorView({
           direction={approvedDirection}
           spec={approvedSpec}
           identity={identity}
+          brief={campaign.brief}
           generatedAsset={approvedPhoto?.generatedAsset}
           allowLibraryFallback={approvedPhoto?.allowLibraryFallback ?? false}
           photoNote={approvedPhoto?.note}
