@@ -74,6 +74,7 @@ export function isCreativePhase(status: CampaignStatus): boolean {
 /**
  * Upload and template campaigns skip the strategy conversation.
  * Design is the upload proof, or the mailer in Studio.
+ * AI, including a campaign with no stored path, keeps the strategy step.
  */
 export function progressStepsForEntry(
   entry: CampaignEntry | undefined

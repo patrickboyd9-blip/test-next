@@ -2,6 +2,7 @@ import { getMailPiece } from "@/lib/mail-catalog/catalog"
 
 import { cloneSpec } from "./spec-diff"
 import { getActiveRevision, getActiveSpec } from "./creative-state"
+import { applyAiDesignOnStrategyConfirm } from "./start-path"
 import type { Campaign, MailPiece } from "./types"
 
 /**
@@ -30,6 +31,7 @@ export function assignDefaultMailPieceSpec(campaign: Campaign, now: string): voi
  */
 export function applyStrategyConfirmation(campaign: Campaign, now: string): void {
   assignDefaultMailPieceSpec(campaign, now)
+  applyAiDesignOnStrategyConfirm(campaign)
   campaign.status = "strategy_confirmed"
   campaign.updatedAt = now
 }

@@ -8,6 +8,7 @@ import { isAtOrPastStatus } from "@/lib/campaign-creator/campaign-status"
 import { toCreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import { getApprovedSpec } from "@/lib/campaign-creator/creative-state"
 import { postcardIdentityFromBrief } from "@/lib/campaign-creator/studio-contact"
+import { creativeSurfaceForCampaign } from "@/lib/campaign-creator/start-path"
 import { presentStudioPhoto } from "@/lib/campaign-creator/studio-photo"
 import {
   beginFromTemplate,
@@ -43,7 +44,6 @@ import { Composer } from "./Composer"
 import { ConversationThread } from "./ConversationThread"
 import { PrintMailTestStage } from "./PrintMailTestStage"
 import { QuantityTrackingStage } from "./QuantityTrackingStage"
-import { DesignPathChoice } from "./upload/DesignPathChoice"
 import { UploadDesign } from "./upload/UploadDesign"
 import { CreativeStudio } from "./studio/CreativeStudio"
 import { PersistentCreativeHeader } from "./studio/PersistentCreativeHeader"
@@ -218,12 +218,9 @@ export function CampaignCreatorView({
   const showComposer = campaign.status === "draft" && !awaitingFirstMessage
   const showCreativeStudio = isAtOrPastStatus(campaign.status, "strategy_confirmed")
   const isCreativeApproved = campaign.status === "creative_approved"
-  const uploadPath = campaign.designSource === "upload"
-  const studioStarted =
-    campaign.designSource === "studio" ||
-    campaign.creative.directions.length > 0 ||
-    campaign.status === "generating_creative"
-  const showDesignChoice = showCreativeStudio && !isCreativeApproved && !uploadPath && !studioStarted
+  const surface = creativeSurfaceForCampaign(campaign)
+  const uploadPath = surface === "upload"
+  const showStudio = showCreativeStudio && !isCreativeApproved && surface !== "upload"
   const showAudience = isAtOrPastStatus(campaign.status, "creative_approved")
   const showQuantityTracking = isAtOrPastStatus(campaign.status, "audience_confirmed")
   const hasPersistedCreative = campaign.creative.directions.length > 0
@@ -362,11 +359,7 @@ export function CampaignCreatorView({
         />
       )}
 
-      {showDesignChoice && (
-        <DesignPathChoice campaignId={campaign.id} onCampaign={handleCampaignUpdate} />
-      )}
-
-      {showCreativeStudio && !isCreativeApproved && !uploadPath && studioStarted && (
+      {showStudio && (
         <CreativeStudio
           key={resumeInRefinement ? "refine-resume" : "studio"}
           campaign={campaign}

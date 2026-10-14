@@ -377,10 +377,13 @@ export interface UploadedDesign {
 }
 
 /**
- * How the customer skipped the strategy conversation.
- * "upload" is their own artwork. "template" is a catalog mailer in Studio.
+ * How the campaign started.
+ * "ai" is the strategy conversation, then three directions.
+ * "upload" skips that conversation and Studio.
+ * "template" skips that conversation and opens a catalog mailer in Studio.
+ * Absent means the campaign predates the start grid and is treated as AI.
  */
-export type CampaignEntry = "upload" | "template"
+export type CampaignEntry = "ai" | "upload" | "template"
 
 export interface Campaign {
   id: string
@@ -388,9 +391,11 @@ export interface Campaign {
   /** Name the customer gave this campaign. Required on the upload path. */
   name?: string
   /**
-   * How the campaign started. Absent means the strategy conversation.
+   * How the campaign started.
+   * "ai" continues through strategy into generated directions.
    * "upload" skips that conversation and Studio.
    * "template" skips that conversation and opens the mailer in Studio.
+   * Absent on older campaigns: treat as AI.
    */
   entry?: CampaignEntry
   status: CampaignStatus
@@ -398,8 +403,10 @@ export interface Campaign {
   creative: CampaignCreative
   transcript: ConversationMessage[]
   /**
-   * How the postcard is designed. Absent until the customer chooses,
-   * and absent on campaigns created before this choice existed.
+   * How the postcard is designed.
+   * "studio" is AI or a template. "upload" is the customer's own art.
+   * Absent after strategy means the campaign predates the start grid;
+   * the creative step treats that as AI.
    */
   designSource?: DesignSource
   /** Present when designSource is "upload". */
