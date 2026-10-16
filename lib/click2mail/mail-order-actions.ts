@@ -8,6 +8,8 @@ import type { Campaign, CreativeSpec } from "@/lib/campaign-creator/types"
 import type { PostcardPrintCopy } from "@/lib/print-spec/render-campaign-postcard-pdf"
 import { loadApprovedUploadPdf } from "@/lib/bring-your-own-design/print-source"
 import { renderPostcardPrintPdf } from "@/lib/print-spec/render-campaign-postcard-pdf"
+import { renderTemplatedPostcardPdf } from "@/lib/print-spec/render-template-postcard-pdf"
+import { isPostcardTemplate, isVerticalPalette } from "@/lib/postcard-layouts/ids"
 
 import { assertClick2MailCallable, loadClick2MailConfig } from "./config"
 import { createClick2MailClient } from "./client"
@@ -138,11 +140,20 @@ async function runOrder(
         artwork = "uploaded-design"
       } else {
         const photo = await loadFinalPostcardPhoto(campaign)
-        const rendered = await renderPostcardPrintPdf({
-          copy: printCopy(campaign),
-          image: photo ?? undefined,
-          plateColor: plateFromSpec(campaign.mailPiece?.spec),
-        })
+        const templateId = campaign.mailPiece?.spec.layoutHints?.templateId
+        const paletteId = campaign.mailPiece?.spec.layoutHints?.verticalPalette
+        const rendered = isPostcardTemplate(templateId)
+          ? await renderTemplatedPostcardPdf({
+              copy: printCopy(campaign),
+              templateId,
+              paletteId: isVerticalPalette(paletteId) ? paletteId : undefined,
+              image: photo ?? undefined,
+            })
+          : await renderPostcardPrintPdf({
+              copy: printCopy(campaign),
+              image: photo ?? undefined,
+              plateColor: plateFromSpec(campaign.mailPiece?.spec),
+            })
         pdf = rendered.bytes
         artwork = rendered.artwork
       }

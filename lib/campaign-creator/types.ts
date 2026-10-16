@@ -3,6 +3,7 @@ import type {
   MailPieceCatalogId,
   MailPieceCatalogVersion,
 } from "@/lib/mail-catalog/types"
+import type { PostcardTemplateId, VerticalPaletteId } from "@/lib/postcard-layouts/ids"
 
 export type CampaignStatus =
   | "draft"
@@ -69,6 +70,8 @@ export interface BrandAsset {
   id: string
   type: "logo" | "photo" | "graphic" | "coupon" | "other"
   description: string
+  /** Set when the customer has already uploaded a photograph. */
+  fileUrl?: string
 }
 
 export interface CampaignBrief {
@@ -176,6 +179,10 @@ export interface LayoutHints {
   photoCrop?: ResearchPhotoCrop
   offerBadge?: OfferBadge
   colorBlock?: ColorBlock
+  /** Original composition painted for this direction. */
+  templateId?: PostcardTemplateId
+  /** Palette family. The painter checks contrast. */
+  verticalPalette?: VerticalPaletteId
 }
 
 export interface SpecDiffChange {
