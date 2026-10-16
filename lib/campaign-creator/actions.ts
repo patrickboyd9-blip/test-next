@@ -24,6 +24,7 @@ import {
   briefPatchFromPersonalization,
   personalizationFromPrompt,
 } from "./prompt-personalization"
+import { campaignForCustomer } from "./customer-campaign"
 import { getCampaignRepository } from "./repository"
 import { buildSpecDiff, cloneSpec } from "./spec-diff"
 import type { Campaign, CampaignBrief, CreativeRevision, MailPieceSpec } from "./types"
@@ -35,6 +36,11 @@ import { getMailPiece } from "@/lib/mail-catalog/catalog"
 import { generateCampaignStrategy } from "@/lib/campaign-strategy/strategy-generator"
 
 const repository = getCampaignRepository()
+
+/** Drop the private research score before a campaign reaches the browser. */
+function forCustomer(campaign: Campaign): Campaign {
+  return campaignForCustomer(campaign)
+}
 
 function requireCreativeCanvas(
   mailPieceSpec: MailPieceSpec | undefined,
@@ -55,7 +61,7 @@ function requireCreativeCanvas(
 }
 
 export async function createDraftCampaign(): Promise<Campaign> {
-  return repository.createCampaign(mockCurrentUser.email)
+  return forCustomer(await repository.createCampaign(mockCurrentUser.email))
 }
 
 /** Opens a catalog mailer in Studio on this draft. */
@@ -63,11 +69,12 @@ export async function beginFromTemplate(
   campaignId: string,
   templateId: string
 ): Promise<Campaign> {
-  return repository.beginTemplatePath(campaignId, templateId)
+  return forCustomer(await repository.beginTemplatePath(campaignId, templateId))
 }
 
 export async function getCampaign(campaignId: string): Promise<Campaign | null> {
-  return repository.getCampaign(campaignId)
+  const campaign = await repository.getCampaign(campaignId)
+  return campaign ? forCustomer(campaign) : null
 }
 
 export interface MailPieceFormatRecommendationView {
@@ -123,15 +130,15 @@ export async function sendCampaignMessage(
     await repository.updateBrief(campaignId, result.brief)
     await repository.setReadyForBriefReview(campaignId, result.readyForBriefReview)
 
-    return repository.appendMessage(campaignId, {
+    return forCustomer(await repository.appendMessage(campaignId, {
       id: randomUUID(),
       role: "assistant",
       content: result.reply,
       createdAt: new Date().toISOString(),
-    })
+    }))
   } catch (error) {
     if (error instanceof ConversationEngineNotConfiguredError) {
-      return repository.appendMessage(campaignId, {
+      return forCustomer(await repository.appendMessage(campaignId, {
         id: randomUUID(),
         role: "system",
         content:
@@ -139,18 +146,18 @@ export async function sendCampaignMessage(
           "intelligently to what you've written. You can fill in the campaign brief " +
           "manually below in the meantime.",
         createdAt: new Date().toISOString(),
-      })
+      }))
     }
 
     console.error("Campaign Creator conversation engine failed:", error)
-    return repository.appendMessage(campaignId, {
+    return forCustomer(await repository.appendMessage(campaignId, {
       id: randomUUID(),
       role: "system",
       content:
         "Something went wrong reaching Modern Mail's conversation engine. Please try " +
         "sending that again, or fill in the campaign brief manually below in the meantime.",
       createdAt: new Date().toISOString(),
-    })
+    }))
   }
 }
 
@@ -158,11 +165,11 @@ export async function updateCampaignBrief(
   campaignId: string,
   patch: Partial<CampaignBrief>
 ): Promise<Campaign> {
-  return repository.updateBrief(campaignId, patch)
+  return forCustomer(await repository.updateBrief(campaignId, patch))
 }
 
 export async function confirmCampaignStrategy(campaignId: string): Promise<Campaign> {
-  return repository.confirmStrategy(campaignId)
+  return forCustomer(await repository.confirmStrategy(campaignId))
 }
 
 /** @deprecated Prefer confirmCampaignStrategy — name retained for in-flight UI migration. */
@@ -171,22 +178,22 @@ export async function confirmCampaignBrief(campaignId: string): Promise<Campaign
 }
 
 export async function confirmCampaignAudience(campaignId: string): Promise<Campaign> {
-  return repository.confirmAudience(campaignId)
+  return forCustomer(await repository.confirmAudience(campaignId))
 }
 
 export async function confirmCampaignQuantity(campaignId: string): Promise<Campaign> {
-  return repository.confirmQuantity(campaignId)
+  return forCustomer(await repository.confirmQuantity(campaignId))
 }
 
 export async function launchCampaign(campaignId: string): Promise<Campaign> {
-  return repository.launch(campaignId)
+  return forCustomer(await repository.launch(campaignId))
 }
 
 const generationLocks = new Map<string, Promise<Campaign>>()
 
 export async function generateStudioCreative(campaignId: string): Promise<Campaign> {
   const inFlight = generationLocks.get(campaignId)
-  if (inFlight) return inFlight
+  if (inFlight) return forCustomer(await inFlight)
 
   const work = (async () => {
     const campaign = await repository.getCampaign(campaignId)
@@ -214,7 +221,7 @@ export async function generateStudioCreative(campaignId: string): Promise<Campai
 
   generationLocks.set(campaignId, work)
   try {
-    return await work
+    return forCustomer(await work)
   } finally {
     generationLocks.delete(campaignId)
   }
@@ -269,7 +276,7 @@ export async function selectCreativeDirection(
   campaignId: string,
   directionId: string
 ): Promise<Campaign> {
-  return repository.selectDirection(campaignId, directionId)
+  return forCustomer(await repository.selectDirection(campaignId, directionId))
 }
 
 export async function applyRefinement(
@@ -314,11 +321,11 @@ export async function applyRefinement(
         : getNextVersion(campaign.creative, directionId),
   }
   const saved = await repository.appendRevision(campaignId, revision, result.spec)
-  if (revision.type === "conflict") return saved
+  if (revision.type === "conflict") return forCustomer(saved)
 
   const briefPatch = briefPatchFromPersonalization(campaign.brief, personalization)
-  if (!briefPatch) return saved
-  return repository.updateBrief(campaignId, briefPatch)
+  if (!briefPatch) return forCustomer(saved)
+  return forCustomer(await repository.updateBrief(campaignId, briefPatch))
 }
 
 export async function restoreRevision(
@@ -353,19 +360,21 @@ export async function restoreRevision(
     createdAt: now,
   }
 
-  return repository.appendRevision(campaignId, revision, restoredSpec, { directionId })
+  return forCustomer(
+    await repository.appendRevision(campaignId, revision, restoredSpec, { directionId })
+  )
 }
 
 export async function approveCreative(campaignId: string): Promise<Campaign> {
-  return repository.approveCreative(campaignId)
+  return forCustomer(await repository.approveCreative(campaignId))
 }
 
 export async function unapproveCreative(campaignId: string): Promise<Campaign> {
-  return repository.unapproveCreative(campaignId)
+  return forCustomer(await repository.unapproveCreative(campaignId))
 }
 
 export async function recoverMissingMailPiece(
   campaignId: string
 ): Promise<Campaign> {
-  return repository.recoverMissingMailPiece(campaignId)
+  return forCustomer(await repository.recoverMissingMailPiece(campaignId))
 }

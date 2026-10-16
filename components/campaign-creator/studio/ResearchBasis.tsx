@@ -20,16 +20,18 @@ export function ResearchBasis({ research }: { research?: DirectionResearch }) {
         Based on research
       </summary>
       <ul className="mt-1.5 flex flex-col gap-1.5">
-        {research.sources.map((source) => (
-          <li key={source.mmrId}>
-            <span className="font-medium text-foreground/80">{source.mmrId}</span>
-            {" · "}
-            {source.title}
-            {source.whyItWorks !== source.title ? (
-              <span className="block">{source.whyItWorks}</span>
-            ) : null}
-          </li>
-        ))}
+        {research.sources.map((source) => {
+          const line = source.whyItWorks.startsWith(source.title)
+            ? source.whyItWorks
+            : source.title
+          return (
+            <li key={source.mmrId}>
+              <span className="font-medium text-foreground/80">{source.mmrId}</span>
+              {" · "}
+              {line}
+            </li>
+          )
+        })}
       </ul>
       {research.layoutSummary ? <p className="mt-1.5">{research.layoutSummary}</p> : null}
     </details>
