@@ -13,6 +13,7 @@ import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
 import { ConceptCard } from "./ConceptCard"
 import { PostcardPreview, PostcardSideToggle } from "./PostcardPreview"
+import { ResearchBasis } from "./ResearchBasis"
 import { StrategyTags } from "./StrategyTags"
 import { StudioPhotoNote } from "./StudioPhotoNote"
 
@@ -97,6 +98,7 @@ export function FocusView({
 
       <div className="flex max-w-lg flex-col gap-3">
         <p className="text-sm text-muted-foreground">{direction.rationale}</p>
+        <ResearchBasis research={direction.research} />
         <p className="text-sm">
           <span className="text-muted-foreground">Designed to drive: </span>
           <span className="font-medium">{direction.designedToDrive}</span>

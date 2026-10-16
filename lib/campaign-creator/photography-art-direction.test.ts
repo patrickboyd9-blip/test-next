@@ -1,6 +1,8 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
 
+import { layoutPolicyForBrief } from "@/lib/reference-corpus/research-layout"
+
 import { normalizeGenerationResult } from "./creative-engine-guards"
 import { toImageBrief } from "./image-brief"
 import { buildOpenAIImagePrompt } from "./openai-image-generation"
@@ -189,12 +191,15 @@ test("a weak text-only recommendation yields to a photographic direction for a l
     { stripInventedFacts: false }
   )
   const lead = result.directions.find((item) => item.recommended)
+  const policy = layoutPolicyForBrief(roofingBrief)
   assert.ok(lead)
   assert.notEqual(lead.spec.layoutVariant, "type_only")
   assert.notEqual(lead.spec.imageryRole, "none")
-  const demoted = result.directions.find((item) => item.spec.layoutVariant === "type_only")
-  assert.equal(demoted?.recommended, false)
-  assert.match(demoted?.oneLineDifference ?? "", /Type leads/)
+  assert.equal(lead.recommended, true)
+  for (const direction of result.directions) {
+    assert.equal(policy.allowed.includes(direction.spec.layoutVariant ?? "type_only"), true)
+  }
+  assert.ok(new Set(result.directions.map((direction) => direction.spec.layoutVariant)).size >= 2)
 })
 
 test("a deliberate type-led strategy can stay recommended", () => {
@@ -227,7 +232,11 @@ test("a deliberate type-led strategy can stay recommended", () => {
     { stripInventedFacts: false }
   )
   const lead = result.directions.find((item) => item.recommended)
-  assert.equal(lead?.spec.layoutVariant, "type_only")
+  const policy = layoutPolicyForBrief(roofingBrief)
+  assert.equal(lead?.recommended, true)
+  assert.notEqual(lead?.spec.layoutVariant, "type_only")
+  assert.equal(policy.allowed.includes(lead?.spec.layoutVariant ?? "type_only"), true)
+  assert.notEqual(lead?.spec.imageryRole, "none")
 })
 
 const medicareBrief: CampaignBrief = {

@@ -32,6 +32,8 @@ import {
   scrubMedicareLanguage,
 } from "./medicare-compliance"
 import { repairSpecHeadline } from "./headline-repair"
+import { applyResearchLayouts, applyResearchLayoutToSpec } from "@/lib/reference-corpus/research-layout"
+import { repairResearchQuality } from "./research-quality"
 import {
   IMAGE_PRESENCES,
   IMAGERY_ROLES,
@@ -397,13 +399,16 @@ export function finalizeRefinement(input: {
     )
   }
 
-  const spec = repairMedicareAgentSpec(
+  const spec = applyResearchLayoutToSpec(
     input.brief,
-    repairSpecCustomerVoice(
-      repairSpecHeadline(
-        preserveCreativeSemantics(
-          currentSpec,
-          applyFaithfulness(input.brief, input.proposed.spec)
+    repairMedicareAgentSpec(
+      input.brief,
+      repairSpecCustomerVoice(
+        repairSpecHeadline(
+          preserveCreativeSemantics(
+            currentSpec,
+            applyFaithfulness(input.brief, input.proposed.spec)
+          )
         )
       )
     )
@@ -488,15 +493,16 @@ export function normalizeGenerationResult(
     )
   )
 
-  const reasons = validateGenerationSet(brief, normalized)
+  const researched = repairResearchQuality(brief, applyResearchLayouts(brief, normalized))
+  const reasons = validateGenerationSet(brief, researched)
   if (reasons.length > 0) {
     throw new CreativeGenerationInvalidError(reasons)
   }
 
-  const lead = normalized.find((direction) => direction.recommended) ?? normalized[0]
+  const lead = researched.find((direction) => direction.recommended) ?? researched[0]
 
   return {
-    directions: normalized,
+    directions: researched,
     recommendation: {
       directionId: lead.id,
       headline: RECOMMENDATION_HEADLINE,

@@ -11,6 +11,7 @@ import type { CampaignBrief, CreativeDirection } from "@/lib/campaign-creator/ty
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
 import { PostcardPreview, type PostcardPreviewSize } from "./PostcardPreview"
+import { ResearchBasis } from "./ResearchBasis"
 import { StudioPhotoNote } from "./StudioPhotoNote"
 
 export type ConceptCardVariant = "hero" | "compact" | "strip"
@@ -59,16 +60,12 @@ export function ConceptCard({
       }
 
   return (
-    <motion.button
-      type="button"
-      onClick={onSelect}
-      disabled={!isInteractive}
+    <motion.div
       className={cn(
         "group relative flex flex-col gap-3 rounded-xl border border-border bg-card p-4 text-left transition-shadow",
-        isInteractive && "cursor-pointer hover:ring-2 hover:ring-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+        isInteractive && "hover:ring-2 hover:ring-primary/30",
         isSelected && "ring-2 ring-primary",
-        variant === "strip" && "w-[64px] shrink-0 p-1.5 gap-1",
-        !isInteractive && "cursor-default"
+        variant === "strip" && "w-[64px] shrink-0 p-1.5 gap-1"
       )}
       {...motionProps}
     >
@@ -77,27 +74,40 @@ export function ConceptCard({
           Recommended
         </Badge>
       )}
-      <div className={cn(variant === "strip" && "opacity-60 saturate-[0.6] group-hover:saturate-100 group-hover:opacity-100 transition-all")}>
-        <PostcardPreview
-          canvas={canvas}
-          spec={direction.spec}
-          size={size}
-          identity={identity}
-          brief={brief}
-          generatedAsset={generatedAsset}
-          allowLibraryFallback={allowLibraryFallback}
-          enableHoverTilt={variant !== "strip"}
-        />
-      </div>
-      {variant !== "strip" && (
-        <>
-          <StudioPhotoNote note={photoNote} />
-          <p className="text-sm font-semibold">{direction.name}</p>
-          <p className="line-clamp-2 text-xs text-muted-foreground">
-            {direction.oneLineDifference ?? direction.rationale}
-          </p>
-        </>
-      )}
-    </motion.button>
+      <button
+        type="button"
+        onClick={onSelect}
+        disabled={!isInteractive}
+        className={cn(
+          "flex flex-col gap-3 text-left",
+          isInteractive &&
+            "cursor-pointer rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+          !isInteractive && "cursor-default"
+        )}
+      >
+        <div className={cn(variant === "strip" && "opacity-60 saturate-[0.6] group-hover:saturate-100 group-hover:opacity-100 transition-all")}>
+          <PostcardPreview
+            canvas={canvas}
+            spec={direction.spec}
+            size={size}
+            identity={identity}
+            brief={brief}
+            generatedAsset={generatedAsset}
+            allowLibraryFallback={allowLibraryFallback}
+            enableHoverTilt={variant !== "strip"}
+          />
+        </div>
+        {variant !== "strip" && (
+          <>
+            <StudioPhotoNote note={photoNote} />
+            <p className="text-sm font-semibold">{direction.name}</p>
+            <p className="line-clamp-2 text-xs text-muted-foreground">
+              {direction.oneLineDifference ?? direction.rationale}
+            </p>
+          </>
+        )}
+      </button>
+      {variant !== "strip" ? <ResearchBasis research={direction.research} /> : null}
+    </motion.div>
   )
 }

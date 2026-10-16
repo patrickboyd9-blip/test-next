@@ -1,3 +1,5 @@
+import { layoutPolicyForBrief } from "@/lib/reference-corpus/research-layout"
+
 import type { CampaignBrief, CreativeSpec, ImageryRole, LayoutVariant } from "./types"
 
 /**
@@ -10,8 +12,18 @@ export const MEDICARE_AGENT_DISCLAIMER =
 
 export const MEDICARE_FREE_REVIEW = "Free plan review"
 
-const MEDICARE_LAYOUTS = ["peer_split", "image_grounded", "type_primary_split"] as const
+const MEDICARE_LAYOUT_FALLBACK = ["peer_split", "image_grounded", "type_primary_split"] as const
 const MEDICARE_ROLES = ["neighborhood", "crew", "consequence"] as const
+
+/** Layouts the Medicare cards support. Same safety set when the notes are missing. */
+function medicareLayouts(): readonly LayoutVariant[] {
+  const policy = layoutPolicyForBrief({ goal: "Medicare plan review" })
+  const allowed = policy.allowed.filter(
+    (layout) => layout !== "type_only" && layout !== "banded_split"
+  )
+  if (policy.mode === "research" && allowed.length >= 2) return allowed
+  return MEDICARE_LAYOUT_FALLBACK
+}
 
 const SCENES: Record<(typeof MEDICARE_ROLES)[number], string> = {
   neighborhood:
@@ -90,7 +102,8 @@ export function repairMedicareAgentSpec(
     !next.imageryRole
 
   if (textOnly) {
-    next.layoutVariant = MEDICARE_LAYOUTS[index % MEDICARE_LAYOUTS.length]
+    const layouts = medicareLayouts()
+    next.layoutVariant = layouts[index % layouts.length]
     next.imageryRole = role
     next.imagery =
       next.imagery && next.imagery !== "none" && next.imagery !== "logo_primary"
@@ -223,5 +236,6 @@ function wordCount(value: string): number {
 }
 
 export function medicareLayout(index: number): LayoutVariant {
-  return MEDICARE_LAYOUTS[index % MEDICARE_LAYOUTS.length]
+  const layouts = medicareLayouts()
+  return layouts[index % layouts.length]
 }

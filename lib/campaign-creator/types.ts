@@ -159,11 +159,23 @@ export const GENERATED_SPEC_TOOL_REQUIRED = [
 
 export type BackLayout = "standard_address"
 
-/** Positional / emphasis hints for template rendering — not customer-visible. */
+export type HeadlinePosition = "beside_photo" | "over_quiet_area" | "on_color_field" | "in_band"
+export type ResearchPhotoCrop = "tight" | "open" | "space_for_type"
+export type OfferBadge = "none" | "inline" | "band"
+export type ColorBlock = "none" | "field" | "band"
+
+/**
+ * Positional / emphasis hints for template rendering — not customer-visible.
+ * Research layout parameters ride here so the postcard painter can execute them.
+ */
 export interface LayoutHints {
   headlineScale?: number
   phonePosition?: "default" | "bottom-right"
   qrProminence?: "default" | "large"
+  headlinePosition?: HeadlinePosition
+  photoCrop?: ResearchPhotoCrop
+  offerBadge?: OfferBadge
+  colorBlock?: ColorBlock
 }
 
 export interface SpecDiffChange {
@@ -218,6 +230,53 @@ export interface CreativeSpec {
   layoutHints?: LayoutHints
 }
 
+export type PhotoToTypeBalance = "photo_led" | "balanced" | "type_led"
+
+/** Concrete composition taken from research notes. Not printed on the mail piece. */
+export interface ResearchLayoutParameters {
+  headlineScale: number
+  headlinePosition: HeadlinePosition
+  /** Target share of the front. The layout family paints the real rectangle. */
+  photoShare: number
+  photoCrop: ResearchPhotoCrop
+  offerBadge: OfferBadge
+  colorBlock: ColorBlock
+}
+
+/** One researched mailer cited on a direction. Customer-facing, short. */
+export interface ResearchSource {
+  mmrId: string
+  title: string
+  whyItWorks: string
+}
+
+/**
+ * Internal craft score. Persisted with the campaign. Never rendered in Studio
+ * and never printed. Absent on campaigns saved before this existed.
+ */
+export interface ResearchQuality {
+  /** 0–10, from the postcard rubric plus how closely the layout matches the research. */
+  score: number
+  rubricPassed: number
+  rubricTotal: number
+  hierarchy: number
+  legibility: number
+  offerClarity: number
+  photoRelevance: number
+  craftResemblance: number
+  attempts: number
+  notes: string[]
+}
+
+/** Which research informed this direction, and why the layout looks this way. */
+export interface DirectionResearch {
+  sources: ResearchSource[]
+  /** One or two friendly sentences. No scores and no QA labels. */
+  layoutSummary: string
+  parameters: ResearchLayoutParameters
+  quality?: ResearchQuality
+}
+
 /** A distinct creative direction presented to the customer for selection. */
 export interface CreativeDirection {
   id: string
@@ -229,6 +288,11 @@ export interface CreativeDirection {
   designedToDrive: string
   tags: string[]
   spec: CreativeSpec
+  /**
+   * Research citations and the layout reason. Optional so older campaigns load.
+   * `quality` on this object is internal and must not be shown.
+   */
+  research?: DirectionResearch
   /** True for the lead concept Modern Mail recommends first. */
   recommended: boolean
   createdAt: string
