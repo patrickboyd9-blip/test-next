@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, type SetStateAction } from "react"
 
 import { beginUploadedDesignPath } from "@/lib/bring-your-own-design/actions"
 import type { UploadPathBasics } from "@/lib/bring-your-own-design/upload-path"
@@ -8,6 +8,7 @@ import { isAtOrPastStatus } from "@/lib/campaign-creator/campaign-status"
 import { toCreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import { getApprovedSpec } from "@/lib/campaign-creator/creative-state"
 import { postcardIdentityFromBrief } from "@/lib/campaign-creator/studio-contact"
+import { campaignForCustomer } from "@/lib/campaign-creator/customer-campaign"
 import { creativeSurfaceForCampaign } from "@/lib/campaign-creator/start-path"
 import { presentStudioPhoto } from "@/lib/campaign-creator/studio-photo"
 import {
@@ -73,7 +74,13 @@ export function CampaignCreatorView({
   printMailMode,
   designReviewAvailable = false,
 }: CampaignCreatorViewProps) {
-  const [campaign, setCampaign] = useState<Campaign>(initialCampaign)
+  const [campaign, setCampaignState] = useState<Campaign>(() => campaignForCustomer(initialCampaign))
+  const setCampaign = (value: SetStateAction<Campaign>) => {
+    setCampaignState((prev) => {
+      const next = typeof value === "function" ? value(prev) : value
+      return campaignForCustomer(next)
+    })
+  }
   const [composerValue, setComposerValue] = useState("")
   const [pendingMessage, setPendingMessage] = useState<string | null>(null)
   const [isSending, setIsSending] = useState(false)

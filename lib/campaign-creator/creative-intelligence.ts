@@ -4,6 +4,11 @@ import {
   isMedicareAgentBrief,
 } from "./medicare-compliance"
 import {
+  formatResearchLayoutGuidance,
+  layoutPolicyForBrief,
+  type VerticalLayoutPolicy,
+} from "../reference-corpus/research-layout"
+import {
   formatReferenceCardSection,
   selectReferenceCards,
   type ReferenceCardMatch,
@@ -22,6 +27,8 @@ export interface CreativeIntelligenceContext {
   principles: readonly CreativePrinciple[]
   referenceCards?: readonly ReferenceCard[]
   referenceCardMatch?: ReferenceCardMatch
+  /** Present when the context was built from a brief. Open means no vertical cards. */
+  layoutPolicy?: VerticalLayoutPolicy
 }
 
 export const CREATIVE_PRINCIPLE_KINDS = [
@@ -368,6 +375,7 @@ export function buildCreativeIntelligenceContext(
     ],
     referenceCards: taste.cards,
     referenceCardMatch: taste.match,
+    layoutPolicy: layoutPolicyForBrief(brief),
   }
 }
 
@@ -399,6 +407,10 @@ ${formatPrincipleList(plumbing)}`
       : `Plumbing principles:
 None. No plumbing playbook matched this campaign. Do not invent plumbing knowledge.`
 
+  const layoutGuidance =
+    context.layoutPolicy?.mode === "research"
+      ? `\n\n${formatResearchLayoutGuidance(context.layoutPolicy)}`
+      : ""
   const taste =
     context.referenceCards && context.referenceCards.length > 0
       ? `\n\n${formatReferenceCardSection(
@@ -407,7 +419,7 @@ None. No plumbing playbook matched this campaign. Do not invent plumbing knowled
             (context.referenceCards.every((card) => card.packGroup === "craft_exemplar")
               ? "craft_only"
               : "vertical")
-        )}`
+        )}${layoutGuidance}`
       : ""
 
   const medicareBlock =

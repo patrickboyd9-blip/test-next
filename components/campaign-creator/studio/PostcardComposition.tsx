@@ -44,6 +44,12 @@ const CROP_CLASS: Record<CropPreset, string> = {
   open: "object-[50%_46%]",
 }
 
+function hintCrop(crop: string | undefined): CropPreset | undefined {
+  if (crop === "tight" || crop === "open") return crop
+  if (crop === "space_for_type") return "open"
+  return undefined
+}
+
 const ROLE_LABELS: Record<string, string> = {
   return_address: "Return address",
   postage_indicia: "Postage indicia",
@@ -117,6 +123,9 @@ export function PostcardFrontFace({
       data-image-plate={derivation.imagePlate}
       data-void={derivation.voidShape}
       data-safe-inset="0.25in"
+      data-offer-badge={spec.layoutHints?.offerBadge || undefined}
+      data-color-block={spec.layoutHints?.colorBlock || undefined}
+      data-headline-position={spec.layoutHints?.headlinePosition || undefined}
       data-type-measure={realization.typeMeasure}
       data-marks-region={realization.marksRegion}
       data-figure-source={realization.figureSource ?? undefined}
@@ -134,7 +143,10 @@ export function PostcardFrontFace({
             monogram={showMonogram && !contact.businessName ? monogramLetter(plan.hero) : null}
             fallback={plan.colors.field}
             primary={plan.colors.ink}
-            crop={treatment.cropPreset}
+            crop={hintCrop(spec.layoutHints?.photoCrop) ?? treatment.cropPreset}
+            objectPosition={
+              spec.layoutHints?.photoCrop === "space_for_type" ? "78% 42%" : undefined
+            }
           />
         </div>
       ) : null}
@@ -171,7 +183,7 @@ export function PostcardFrontFace({
               {wordmark}
             </p>
           ) : null}
-          <DisplayStack plan={plan} compact={compact} />
+          <DisplayStack plan={plan} compact={compact} hints={spec.layoutHints} />
         </div>
         <div
           data-region={
@@ -282,7 +294,20 @@ function readableDisclaimerInk(preferred: string, paper: string): string {
   return "#f7f6f2"
 }
 
-function DisplayStack({ plan, compact }: { plan: PostcardLayoutPlan; compact: boolean }) {
+function DisplayStack({
+  plan,
+  compact,
+  hints,
+}: {
+  plan: PostcardLayoutPlan
+  compact: boolean
+  hints?: CreativeSpec["layoutHints"]
+}) {
+  const scale =
+    typeof hints?.headlineScale === "number"
+      ? Math.min(1.08, Math.max(0.94, hints.headlineScale))
+      : 1
+  const colorBand = hints?.colorBlock === "band" || hints?.headlinePosition === "in_band"
   return (
     <div className="min-w-0">
       {plan.hero ? (
@@ -292,10 +317,13 @@ function DisplayStack({ plan, compact }: { plan: PostcardLayoutPlan; compact: bo
           style={{
             fontFamily: STUDIO_DISPLAY_CSS,
             fontWeight: plan.headlineWeight,
-            fontSize: pointsToCqw(plan.typePt.headline),
+            fontSize: pointsToCqw(plan.typePt.headline * scale),
             lineHeight: 1.02,
             letterSpacing: "-0.03em",
-            color: plan.colors.headline,
+            color: colorBand ? plan.colors.ctaInk : plan.colors.headline,
+            backgroundColor: colorBand ? plan.colors.ctaFill : undefined,
+            display: colorBand ? "inline" : undefined,
+            padding: colorBand ? "0.06em 0.28em" : undefined,
           }}
         >
           {plan.hero}
@@ -321,7 +349,10 @@ function DisplayStack({ plan, compact }: { plan: PostcardLayoutPlan; compact: bo
             fontSize: pointsToCqw(plan.typePt.offer),
             fontWeight: 700,
             lineHeight: 1.15,
-            color: plan.colors.ink,
+            color: hints?.offerBadge === "band" ? plan.colors.ctaInk : plan.colors.ink,
+            backgroundColor: hints?.offerBadge === "band" ? plan.colors.ctaFill : undefined,
+            display: hints?.offerBadge === "band" ? "inline-block" : undefined,
+            padding: hints?.offerBadge === "band" ? "0.08em 0.32em" : undefined,
           }}
         >
           {plan.offerLine}
@@ -532,6 +563,7 @@ function PhotoSlot({
   fallback,
   primary,
   crop = "default",
+  objectPosition,
 }: {
   src: string | null
   alt: string
@@ -540,6 +572,7 @@ function PhotoSlot({
   fallback: string
   primary: string
   crop?: CropPreset
+  objectPosition?: string
 }) {
   if (src) {
     return (
@@ -547,6 +580,7 @@ function PhotoSlot({
         src={src}
         alt={alt}
         className={cn("h-full w-full object-cover", CROP_CLASS[crop])}
+        style={objectPosition ? { objectPosition } : undefined}
         draggable={false}
       />
     )

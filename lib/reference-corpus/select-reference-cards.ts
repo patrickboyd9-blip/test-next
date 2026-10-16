@@ -160,7 +160,7 @@ How to use these cards:
 - Do not copy slogans, logos, layouts, trademarks, or artwork.
 - Do not treat a card as measured performance. Do not claim bookings, lift, or return on spend.
 - Do not make every direction a copy of the same card.
-- These cards do not choose the mail piece, the canvas, or a vendor option.
+- These cards do not choose the mail piece, the canvas, or a vendor option unless a later section names the layouts this research supports. That section chooses the layout family only. It still does not choose the physical mail piece, the canvas, or a vendor option.
 - These cards are not customer art. A stand-in shelf, including Pexels, is not the campaign photograph. Conceive an original situation. That shelf is only a labeled placeholder when a photograph cannot be made.
 - Do not spend money, print, or submit a mail job from this guidance.
 

@@ -42,7 +42,8 @@ Regeneration constraints (same as generation):
 - Do not invent facts missing from the brief
 - For a local service, the recommendation is photography-forward. Do not recommend a text-only direction unless the strategy truly has no honest image job
 - Headline is 3 to 6 words, never a sentence. Put the offer in the subheadline
-- Prefer image_grounded when the photograph should fill the card, or a split when type and photograph share it. A split gives the photograph at least half the card. Use type_only only when there is no honest image job. Use imagePresence accent only when the piece is deliberately type-led`
+- Prefer image_grounded when the photograph should fill the card, or a split when type and photograph share it. A split gives the photograph at least half the card. Use type_only only when there is no honest image job. Use imagePresence accent only when the piece is deliberately type-led
+- When Creative Intelligence names the layouts the matched research supports, use only those layouts. That list overrides this general preference. The three directions must still differ`
 }
 
 export function buildRegenerateUserMessage(input: {

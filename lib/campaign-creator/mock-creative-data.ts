@@ -1,8 +1,12 @@
+import { layoutPolicyForBrief } from "@/lib/reference-corpus/research-layout"
+import { referenceVerticalsForBrief } from "@/lib/reference-corpus/select-reference-cards"
+
 import { isMedicareAgentBrief } from "./medicare-compliance"
 import type {
   CampaignBrief,
   CreativeDirection,
   CreativeRecommendation,
+  LayoutVariant,
 } from "./types"
 
 const MOCK_CREATED_AT = "2026-01-01T00:00:00.000Z"
@@ -12,6 +16,9 @@ export function getMockCreativeDirections(
   brief: CampaignBrief = {}
 ): CreativeDirection[] {
   if (isMedicareAgentBrief(brief)) return medicareAgentDirections(brief)
+  const verticals = referenceVerticalsForBrief(brief)
+  if (verticals.includes("plumbing")) return plumbingDirections(brief)
+  if (verticals.includes("roofing")) return roofingDirections(brief)
 
   const business = brief.businessInfo?.name ?? "ABC Air Conditioning"
   const offer = brief.offer ?? "15% off your first service call"
@@ -108,6 +115,209 @@ export function getMockCreativeDirections(
         imagery: "stock_hvac",
         leadJob: "offer",
         imageryRole: "neighborhood",
+      },
+    },
+  ]
+}
+
+function researchLayouts(brief: CampaignBrief): LayoutVariant[] {
+  const policy = layoutPolicyForBrief(brief)
+  const preferred = policy.preferred
+  const ordered = [preferred, ...policy.allowed.filter((layout) => layout !== preferred)]
+  return [
+    ordered[0] ?? "peer_split",
+    ordered[1] ?? ordered[0] ?? "peer_split",
+    ordered[2] ?? ordered[1] ?? ordered[0] ?? "type_primary_split",
+  ]
+}
+
+function plumbingDirections(brief: CampaignBrief): CreativeDirection[] {
+  const business = brief.businessInfo?.name ?? "Harbor Plumbing"
+  const offer = brief.offer ?? "Free visit to find the leak"
+  const phone = brief.phone ?? brief.businessInfo?.phone ?? "(619) 555-0194"
+  const website = brief.website ?? brief.businessInfo?.website
+  const layouts = researchLayouts(brief)
+  const designedToDrive = brief.primarySuccessMetric?.description ?? "Service calls"
+  const contact = {
+    phone,
+    ...(website ? { website, qrDestination: brief.qrDestination ?? website } : {}),
+  }
+
+  return [
+    {
+      id: "dir-keep-number",
+      name: "Keep This Number",
+      recommended: true,
+      designedToDrive,
+      rationale:
+        "The card is meant to stay in the house until a pipe needs someone. The words lead, and the photograph sits beside them.",
+      tags: ["Trust-led", "Local", "Plain"],
+      createdAt: MOCK_CREATED_AT,
+      spec: {
+        layoutVariant: layouts[0],
+        headline: "Keep This Number",
+        subheadline: offer,
+        body: `${business} is the number you keep for the day a drain or a heater needs a look.`,
+        callToAction: "Call when you need us",
+        offer,
+        ...contact,
+        visualDirection:
+          "A calm kitchen sink in daylight, a single drop at the faucet, ordinary and specific, with open space beside the fixture for type.",
+        tone: "Calm, local, useful",
+        palette: ["#1f3a4d", "#d7e2ea", "#f4f1ea"],
+        imagery: "stock_generic_local",
+        leadJob: "trust",
+        imageryRole: "neighborhood",
+      },
+    },
+    {
+      id: "dir-slow-leak",
+      name: "Slow Leak First",
+      recommended: false,
+      oneLineDifference: "Shows the leak itself, before it becomes a repair.",
+      designedToDrive,
+      rationale:
+        "One photograph of water where it should not be carries the reason to call. The offer stays a single line.",
+      tags: ["Problem-led", "Clear", "Direct"],
+      createdAt: MOCK_CREATED_AT,
+      spec: {
+        layoutVariant: layouts[1],
+        headline: "A Slow Leak Costs",
+        subheadline: offer,
+        body: "You can see the drip now. Call and we will tell you what it is before it spreads.",
+        callToAction: "Call about the leak",
+        offer,
+        ...contact,
+        visualDirection:
+          "Water beading under a kitchen sink in ordinary daylight, a towel nearby, illustrative and not a ruined room.",
+        tone: "Direct, calm, specific",
+        palette: ["#243044", "#c4552a", "#f6f3ee"],
+        imagery: "stock_generic_local",
+        leadJob: "problem",
+        imageryRole: "consequence",
+      },
+    },
+    {
+      id: "dir-local-call",
+      name: "Local When It Breaks",
+      recommended: false,
+      oneLineDifference: "A person doing the work, with one way to reach them.",
+      designedToDrive,
+      rationale:
+        "A working plumber makes the trade obvious at a glance. The phone is the action, and nothing else competes with it.",
+      tags: ["Crew-led", "Phone", "Simple"],
+      createdAt: MOCK_CREATED_AT,
+      spec: {
+        layoutVariant: layouts[2],
+        headline: "We Are Already Local",
+        subheadline: offer,
+        body: `When something under your house gives way, ${business} is the call, not a search.`,
+        callToAction: "Call the local crew",
+        offer,
+        ...contact,
+        visualDirection:
+          "A plumber at a water heater in a normal garage, natural color, hands at the work, with room beside the figure for type.",
+        tone: "Capable, local, unhurried",
+        palette: ["#3f4f3a", "#efe6d6", "#f7f4ee"],
+        imagery: "stock_generic_local",
+        leadJob: "offer",
+        imageryRole: "crew",
+      },
+    },
+  ]
+}
+
+function roofingDirections(brief: CampaignBrief): CreativeDirection[] {
+  const business = brief.businessInfo?.name ?? "North Roofing"
+  const offer = brief.offer ?? "Free roof inspection"
+  const phone = brief.phone ?? brief.businessInfo?.phone ?? "(619) 555-0148"
+  const website = brief.website ?? brief.businessInfo?.website
+  const layouts = researchLayouts(brief)
+  const designedToDrive = brief.primarySuccessMetric?.description ?? "Inspection bookings"
+  const contact = {
+    phone,
+    ...(website ? { website, qrDestination: brief.qrDestination ?? website } : {}),
+  }
+
+  return [
+    {
+      id: "dir-visible-leak",
+      name: "The Visible Leak",
+      recommended: true,
+      designedToDrive,
+      rationale:
+        "The photograph and the headline share the card, so the cost of waiting is visible in one glance. One inspection is the only ask.",
+      tags: ["Problem-led", "Photo", "Direct"],
+      createdAt: MOCK_CREATED_AT,
+      spec: {
+        layoutVariant: layouts[0],
+        headline: "See The Ceiling Stain",
+        subheadline: offer,
+        body: `A stain on the ceiling is the roof talking. ${business} will look before the next rain.`,
+        callToAction: "Book the inspection",
+        offer,
+        ...contact,
+        visualDirection:
+          "A pale water stain on a living-room ceiling in daylight, a bucket just in frame, illustrative and not this house's documented damage, with quiet wall space for type.",
+        tone: "Plain, urgent, local",
+        palette: ["#1c1917", "#c4552a", "#f4f1ea"],
+        imagery: "stock_generic_local",
+        leadJob: "problem",
+        imageryRole: "consequence",
+      },
+    },
+    {
+      id: "dir-before-storm",
+      name: "Before The Rain",
+      recommended: false,
+      oneLineDifference: "The street of roofs leads, and the inspection stays easy.",
+      designedToDrive,
+      rationale:
+        "A row of roofs makes the neighborhood the subject. The inspection is the single next step, without a stack of offers.",
+      tags: ["Neighborhood", "Offer", "Calm"],
+      createdAt: MOCK_CREATED_AT,
+      spec: {
+        layoutVariant: layouts[1],
+        headline: "Before The Next Rain",
+        subheadline: offer,
+        body: "You can see the roofs on your street. Ask for a look while the weather is still quiet.",
+        callToAction: "Ask for a look",
+        offer,
+        ...contact,
+        visualDirection:
+          "Rooflines along a residential street in late-afternoon light, one ladder at a quiet eave, specific and unhurried, with open sky for type.",
+        tone: "Local, steady, clear",
+        palette: ["#243044", "#d9e2ec", "#f4f1ea"],
+        imagery: "stock_generic_local",
+        leadJob: "offer",
+        imageryRole: "neighborhood",
+      },
+    },
+    {
+      id: "dir-honest-look",
+      name: "One Honest Look",
+      recommended: false,
+      oneLineDifference: "Big type states the inspection, with the work beside the words.",
+      designedToDrive,
+      rationale:
+        "The words lead with the inspection, and a photograph of the work sits beside them. Nothing else is asked.",
+      tags: ["Type-led", "Inspection", "Clear"],
+      createdAt: MOCK_CREATED_AT,
+      spec: {
+        layoutVariant: layouts[2],
+        headline: "One Look At The Roof",
+        subheadline: offer,
+        body: `${business} will walk the roof and tell you what is there. You decide what happens next.`,
+        callToAction: "Schedule the look",
+        offer,
+        ...contact,
+        visualDirection:
+          "Hands setting underlayment at a roof edge in daylight, the street visible beyond, capable and ordinary, not a close-up of shingles.",
+        tone: "Direct, capable, adult",
+        palette: ["#3f4f3a", "#efe6d6", "#f7f4ee"],
+        imagery: "stock_generic_local",
+        leadJob: "trust",
+        imageryRole: "crew",
       },
     },
   ]
