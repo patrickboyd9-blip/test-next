@@ -8,6 +8,9 @@ export interface VerticalPalette {
   fieldInk: string
   accent: string
   accentInk: string
+  /** Dedicated offer tile. Medicare uses the calm accent, not alarm gold. */
+  offerTile: string
+  offerInk: string
   scrim: string
 }
 
@@ -18,13 +21,15 @@ export interface VerticalPalette {
 export const VERTICAL_PALETTES: Record<VerticalPaletteId, VerticalPalette> = {
   roofing: {
     id: "roofing",
-    paper: "#f4efe6",
-    ink: "#1c1917",
-    field: "#1c1917",
-    fieldInk: "#f6f1e7",
-    accent: "#9a4e1d",
-    accentInk: "#fff8f2",
-    scrim: "#1c1917",
+    paper: "#f3efe6",
+    ink: "#16191f",
+    field: "#12243f",
+    fieldInk: "#f6f3ec",
+    accent: "#c4371c",
+    accentInk: "#fff6f2",
+    offerTile: "#f0b429",
+    offerInk: "#1a1408",
+    scrim: "#0e1c33",
   },
   plumbing: {
     id: "plumbing",
@@ -34,6 +39,8 @@ export const VERTICAL_PALETTES: Record<VerticalPaletteId, VerticalPalette> = {
     fieldInk: "#f4f7f6",
     accent: "#7a5b0c",
     accentInk: "#fff8e8",
+    offerTile: "#e2a31a",
+    offerInk: "#1a1408",
     scrim: "#0c2c32",
   },
   hvac: {
@@ -44,6 +51,8 @@ export const VERTICAL_PALETTES: Record<VerticalPaletteId, VerticalPalette> = {
     fieldInk: "#f4f6f8",
     accent: "#8a5a10",
     accentInk: "#fff6e4",
+    offerTile: "#e2a31a",
+    offerInk: "#1a1408",
     scrim: "#102433",
   },
   medicare: {
@@ -54,6 +63,8 @@ export const VERTICAL_PALETTES: Record<VerticalPaletteId, VerticalPalette> = {
     fieldInk: "#f7f4ef",
     accent: "#2f6f68",
     accentInk: "#f7f4ef",
+    offerTile: "#2f6f68",
+    offerInk: "#f7f4ef",
     scrim: "#1a2428",
   },
   real_estate: {
@@ -64,6 +75,8 @@ export const VERTICAL_PALETTES: Record<VerticalPaletteId, VerticalPalette> = {
     fieldInk: "#f6f3ee",
     accent: "#2f5d50",
     accentInk: "#f6f3ee",
+    offerTile: "#e2a31a",
+    offerInk: "#1a1408",
     scrim: "#1c2822",
   },
   general: {
@@ -74,6 +87,8 @@ export const VERTICAL_PALETTES: Record<VerticalPaletteId, VerticalPalette> = {
     fieldInk: "#f5f3ef",
     accent: "#2f4f86",
     accentInk: "#f5f3ef",
+    offerTile: "#e2a31a",
+    offerInk: "#1a1408",
     scrim: "#1c2433",
   },
 }
