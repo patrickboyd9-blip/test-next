@@ -9,6 +9,8 @@ import {
   type ResearchSource,
 } from "@/lib/campaign-creator/types"
 
+import { assignTemplateToSpec, assignTemplates } from "@/lib/postcard-layouts/assign"
+
 import type { ReferenceCard } from "./reference-card"
 import {
   referenceVerticalsForBrief,
@@ -307,20 +309,23 @@ export function applyResearchLayouts(
 ): CreativeDirection[] {
   const policy = layoutPolicyForBrief(brief)
   if (policy.mode === "open") {
-    return directions.map((direction) => ({
-      ...direction,
-      research: {
-        sources: policy.sources,
-        layoutSummary: layoutSummaryFor(
-          normalizeLayoutVariant(direction.spec.layoutVariant) ?? "peer_split",
-          "open"
-        ),
-        parameters: parametersForLayout(
-          normalizeLayoutVariant(direction.spec.layoutVariant) ?? "peer_split",
-          policy
-        ),
-      },
-    }))
+    return assignTemplates(
+      brief,
+      directions.map((direction) => ({
+        ...direction,
+        research: {
+          sources: policy.sources,
+          layoutSummary: layoutSummaryFor(
+            normalizeLayoutVariant(direction.spec.layoutVariant) ?? "peer_split",
+            "open"
+          ),
+          parameters: parametersForLayout(
+            normalizeLayoutVariant(direction.spec.layoutVariant) ?? "peer_split",
+            policy
+          ),
+        },
+      }))
+    )
   }
 
   const ranked = directions
@@ -336,19 +341,22 @@ export function applyResearchLayouts(
     assigned.set(item.index, choice)
   }
 
-  return directions.map((direction, index) => {
-    const choice = assigned.get(index) ?? { layout: policy.preferred, adjusted: true }
-    const spec = specWithLayout(direction.spec, choice.layout, policy, choice.adjusted)
-    return {
-      ...direction,
-      spec,
-      research: {
-        sources: policy.sources,
-        layoutSummary: layoutSummaryFor(choice.layout, "research"),
-        parameters: parametersForLayout(choice.layout, policy),
-      },
-    }
-  })
+  return assignTemplates(
+    brief,
+    directions.map((direction, index) => {
+      const choice = assigned.get(index) ?? { layout: policy.preferred, adjusted: true }
+      const spec = specWithLayout(direction.spec, choice.layout, policy, choice.adjusted)
+      return {
+        ...direction,
+        spec,
+        research: {
+          sources: policy.sources,
+          layoutSummary: layoutSummaryFor(choice.layout, "research"),
+          parameters: parametersForLayout(choice.layout, policy),
+        },
+      }
+    })
+  )
 }
 
 /** One spec, used when a refinement picks a layout the research does not support. */
@@ -357,9 +365,9 @@ export function applyResearchLayoutToSpec(brief: CampaignBrief, spec: CreativeSp
   if (policy.mode !== "research") return spec
   const current = normalizeLayoutVariant(spec.layoutVariant)
   if (current && policy.allowed.includes(current)) {
-    return specWithLayout(spec, current, policy, false)
+    return assignTemplateToSpec(brief, specWithLayout(spec, current, policy, false))
   }
-  return specWithLayout(spec, policy.preferred, policy, true)
+  return assignTemplateToSpec(brief, specWithLayout(spec, policy.preferred, policy, true))
 }
 
 export function hintsForParameters(parameters: ResearchLayoutParameters): LayoutHints {

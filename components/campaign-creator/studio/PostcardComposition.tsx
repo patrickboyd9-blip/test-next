@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, type CSSProperties } from "react"
+import { useMemo, type CSSProperties, type ReactNode } from "react"
 
 import { cn } from "@/lib/utils"
 import type { CreativeSpec, LayoutVariant } from "@/lib/campaign-creator/types"
@@ -37,6 +37,8 @@ import {
   studioCompositionDerivation,
   typeOnlyRealization,
 } from "./studio-composition-derivation"
+import { PremiumPostcardFront } from "./PremiumPostcard"
+import { isPostcardTemplate, isVerticalPalette } from "@/lib/postcard-layouts/ids"
 
 const CROP_CLASS: Record<CropPreset, string> = {
   tight: "object-[68%_28%] scale-[1.12]",
@@ -62,6 +64,7 @@ export function PostcardFrontFace({
   layout,
   compact,
   photoSrc,
+  alternatePhotoSrc,
   showMonogram,
   contact,
   photoAlt,
@@ -70,10 +73,26 @@ export function PostcardFrontFace({
   layout: LayoutVariant
   compact: boolean
   photoSrc: string | null
+  alternatePhotoSrc?: string | null
   showMonogram: boolean
   contact: StudioContact
   photoAlt: string
 }) {
+  const templateId = spec.layoutHints?.templateId
+  if (isPostcardTemplate(templateId)) {
+    return (
+      <PremiumPostcardFront
+        templateId={templateId}
+        spec={spec}
+        contact={contact}
+        photoSrc={photoSrc}
+        alternatePhotoSrc={alternatePhotoSrc}
+        businessName={contact.businessName}
+        paletteId={isVerticalPalette(spec.layoutHints?.verticalPalette) ? spec.layoutHints.verticalPalette : undefined}
+        compact={compact}
+      />
+    )
+  }
   const wordmark = businessNameForCard(contact.businessName, spec.headline)
   const plan = resolvePostcardLayout({
     spec,
@@ -210,6 +229,7 @@ export function PostcardBackFace({
   reservedRoles,
   compact,
   disclaimer,
+  children,
 }: {
   primary: string
   secondary: string
@@ -217,6 +237,7 @@ export function PostcardBackFace({
   reservedRoles: readonly string[]
   compact: boolean
   disclaimer?: string | null
+  children?: ReactNode
 }) {
   const regions = postcardBackRegions()
   const has = (role: string) => reservedRoles.includes(role)
@@ -269,6 +290,7 @@ export function PostcardBackFace({
           rect={regions.barcodeStrip}
         />
       ) : null}
+      {children}
       {fitted && disclaimer ? (
         <p
           data-medicare-disclaimer=""

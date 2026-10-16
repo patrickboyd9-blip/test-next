@@ -21,6 +21,10 @@ import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
 import { ShimmerOverlay, SpecDiffHighlight } from "./SpecDiffHighlight"
 import { PostcardBackFace, PostcardFrontFace } from "./PostcardComposition"
+import { PremiumBackMessage } from "./PremiumPostcard"
+import { isPostcardTemplate, isVerticalPalette } from "@/lib/postcard-layouts/ids"
+import { slotPhotoSources } from "@/lib/postcard-layouts/photos"
+import { TEMPLATE_META } from "@/lib/postcard-layouts/templates"
 
 export type PostcardPreviewSize = "hero" | "medium" | "thumbnail"
 
@@ -89,6 +93,15 @@ export function PostcardPreview({
   )
   const contact = resolveStudioContact(spec, identity)
   const compact = size === "thumbnail"
+  const templateId = spec.layoutHints?.templateId
+  const template = isPostcardTemplate(templateId) ? templateId : undefined
+  const slotCount = template ? TEMPLATE_META[template].photoSlots : 1
+  const sources = slotPhotoSources({
+    slotCount,
+    generatedSrc: imagery.src,
+    assets: brief?.brandAssets,
+  })
+  const disclaimer = medicareDisclaimerFor(brief)
 
   const content = isAddressSide ? (
     <PostcardBackFace
@@ -97,14 +110,25 @@ export function PostcardPreview({
       accent={accent}
       reservedRoles={canvas.reservedRegionRoles}
       compact={compact}
-      disclaimer={medicareDisclaimerFor(brief)}
-    />
+      disclaimer={disclaimer}
+    >
+      {template ? (
+        <PremiumBackMessage
+          templateId={template}
+          spec={spec}
+          businessName={contact.businessName}
+          paletteId={isVerticalPalette(spec.layoutHints?.verticalPalette) ? spec.layoutHints.verticalPalette : undefined}
+          disclaimer={Boolean(disclaimer)}
+        />
+      ) : null}
+    </PostcardBackFace>
   ) : (
     <PostcardFrontFace
       spec={spec}
       layout={layout}
       compact={compact}
-      photoSrc={imagery.src}
+      photoSrc={sources[0] ?? imagery.src}
+      alternatePhotoSrc={sources[1] ?? null}
       showMonogram={imagery.showMonogram}
       contact={contact}
       photoAlt={spec.visualDirection?.trim() || "Campaign photography"}
