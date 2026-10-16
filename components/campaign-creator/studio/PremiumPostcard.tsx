@@ -7,7 +7,6 @@ import { displayWebsite } from "@/lib/campaign-creator/studio-contact"
 import type { CreativeSpec } from "@/lib/campaign-creator/types"
 import {
   composePostcardFace,
-  showsReviewStars,
   type PostcardFacePlan,
   type ShapePlan,
 } from "@/lib/postcard-layouts/compose"
@@ -74,7 +73,7 @@ export function PremiumPostcardFront({
       ))}
       <Shapes plan={plan} layer="mid" />
       <Shapes plan={plan} layer="front" />
-      {showsReviewStars(spec) ? <StarRow plan={plan} /> : null}
+      <TrustChips plan={plan} />
       {plan.texts.map((text) => (
         <Fitted key={`${text.role}-${text.rect.y}`} plan={plan} text={text} />
       ))}
@@ -192,11 +191,14 @@ function Shape({ plan, shape }: { plan: PostcardFacePlan; shape: ShapePlan }) {
         className="absolute"
         style={{
           ...style,
-          backgroundColor: plan.palette.paper,
+          backgroundColor: shape.fill,
           border: `1.5px dashed ${plan.palette.accent}`,
         }}
       />
     )
+  }
+  if (shape.role === "offer-tile") {
+    return <div data-region="offer-tile" className="absolute" style={{ ...style, backgroundColor: shape.fill }} />
   }
   if (shape.role === "rule") {
     return <div className="absolute" style={{ ...style, backgroundColor: plan.palette.accent }} />
@@ -249,6 +251,9 @@ function Fitted({ plan, text }: { plan: PostcardFacePlan; text: PostcardFacePlan
         lineHeight: lineHeightFor(text.font),
         letterSpacing: text.font === "display" ? "-0.03em" : "0",
         textAlign: text.align,
+        display: text.role === "offer" ? "flex" : "block",
+        flexDirection: "column",
+        justifyContent: "center",
       }}
     >
       {text.lines.map((line) => (
@@ -263,53 +268,84 @@ function Fitted({ plan, text }: { plan: PostcardFacePlan; text: PostcardFacePlan
 function Lockup({ plan, payload }: { plan: PostcardFacePlan; payload: string | null }) {
   const lockup = plan.lockup
   if (!lockup) return null
-  const trim = trimInches(plan.size)
-  const qrSize = `${(lockup.qrInches / trim.w) * 100}%`
   return (
-    <div className="absolute" data-contact-lockup="response" style={box(lockup.rect, plan.size)}>
-      <div className="flex h-full items-center" style={{ gap: "0.12in" }}>
-        {payload ? <QrMark payload={payload} label={lockup.qrLabel} width={qrSize} /> : null}
-        <div className="min-w-0">
-          {lockup.phone?.text ? (
-            <p
-              className="m-0 font-semibold leading-none"
-              data-contact-phone={lockup.phone.text}
-              style={{
-                color: lockup.phone.color,
-                fontFamily: TEXT_CSS,
-                fontSize: pointsToCqw(lockup.phone.fontPt, plan.size),
-              }}
-            >
-              {lockup.phone.text}
-            </p>
-          ) : null}
-          {lockup.website?.text ? (
-            <p
-              className="m-0 mt-[0.2em] font-medium leading-none"
-              data-contact-website={displayWebsite(lockup.website.text)}
-              style={{
-                color: lockup.website.color,
-                fontFamily: TEXT_CSS,
-                fontSize: pointsToCqw(lockup.website.fontPt, plan.size),
-              }}
-            >
-              {displayWebsite(lockup.website.text)}
-            </p>
-          ) : null}
+    <div data-contact-lockup="response">
+      {lockup.phoneBox ? (
+        <div
+          data-phone-box="yes"
+          className="absolute"
+          style={{ ...box(lockup.phoneBox.rect, plan.size), backgroundColor: lockup.phoneBox.fill }}
+        />
+      ) : null}
+      {payload ? (
+        <div className="absolute" style={box(lockup.qrRect, plan.size)}>
+          <QrMark payload={payload} label={lockup.qrLabel} />
         </div>
-      </div>
+      ) : null}
+      {lockup.phone?.text ? (
+        <p
+          className="absolute m-0 overflow-hidden font-semibold leading-none"
+          data-contact-phone={lockup.phone.text}
+          style={{
+            ...box(lockup.phone.rect, plan.size),
+            color: lockup.phone.color,
+            fontFamily: TEXT_CSS,
+            fontSize: pointsToCqw(lockup.phone.fontPt, plan.size),
+          }}
+        >
+          {lockup.phone.text}
+        </p>
+      ) : null}
+      {lockup.website?.text ? (
+        <p
+          className="absolute m-0 overflow-hidden font-medium leading-none"
+          data-contact-website={displayWebsite(lockup.website.text)}
+          style={{
+            ...box(lockup.website.rect, plan.size),
+            color: lockup.website.color,
+            fontFamily: TEXT_CSS,
+            fontSize: pointsToCqw(lockup.website.fontPt, plan.size),
+          }}
+        >
+          {displayWebsite(lockup.website.text)}
+        </p>
+      ) : null}
     </div>
   )
 }
 
-function QrMark({ payload, label, width }: { payload: string; label: string; width: string }) {
+function TrustChips({ plan }: { plan: PostcardFacePlan }) {
+  if (plan.trust.length === 0) return null
+  return (
+    <>
+      {plan.trust.map((chip) => (
+        <div
+          key={chip.id}
+          data-trust-chip={chip.label}
+          className="absolute flex items-center justify-center overflow-hidden font-semibold"
+          style={{
+            ...box(chip.rect, plan.size),
+            backgroundColor: chip.fill,
+            color: chip.color,
+            fontFamily: TEXT_CSS,
+            fontSize: pointsToCqw(8, plan.size),
+          }}
+        >
+          {chip.label}
+        </div>
+      ))}
+    </>
+  )
+}
+
+function QrMark({ payload, label }: { payload: string; label: string }) {
   const painted = useMemo(() => paintQr(payload), [payload])
   if (!painted) return null
   const total = painted.modules + painted.quiet * 2
   return (
-    <div className="shrink-0" style={{ width }}>
-      <div className="bg-white" data-qr-tile="rounded">
-        <svg viewBox={`0 0 ${total} ${total}`} role="img" aria-label={`QR code for ${payload}`} shapeRendering="crispEdges">
+    <div className="flex h-full w-full flex-col">
+      <div className="min-h-0 flex-1 bg-white" data-qr-tile="rounded">
+        <svg viewBox={`0 0 ${total} ${total}`} role="img" aria-label={`QR code for ${payload}`} shapeRendering="crispEdges" className="h-full w-full">
           <rect width={total} height={total} fill="#ffffff" />
           {painted.dark.map(([x, y]) => (
             <rect key={`${x}-${y}`} x={x + painted.quiet} y={y + painted.quiet} width={1} height={1} fill="#111111" />
@@ -317,24 +353,11 @@ function QrMark({ payload, label, width }: { payload: string; label: string; wid
         </svg>
       </div>
       {label ? (
-        <p data-qr-label={label} className="m-0 text-center font-semibold leading-none" style={{ color: "#14120f", background: "#fff", fontSize: "8px" }}>
+        <p data-qr-label={label} className="m-0 shrink-0 bg-white text-center font-semibold leading-none" style={{ color: "#14120f", fontSize: "8px" }}>
           {label}
         </p>
       ) : null}
     </div>
-  )
-}
-
-function StarRow({ plan }: { plan: PostcardFacePlan }) {
-  const proof = plan.texts.find((text) => text.role === "proof")
-  if (!proof) return null
-  const rect = { x: proof.rect.x, y: Math.max(0.25, proof.rect.y - 0.28), w: 1.3, h: 0.24 }
-  return (
-    <svg viewBox="0 0 120 24" className="absolute" style={box(rect, plan.size)} aria-hidden data-stars="review">
-      {Array.from({ length: 5 }, (_, index) => (
-        <polygon key={index} transform={`translate(${index * 24},0) scale(0.22)`} points={starPoints(5, 0.45)} fill={plan.palette.accent} />
-      ))}
-    </svg>
   )
 }
 

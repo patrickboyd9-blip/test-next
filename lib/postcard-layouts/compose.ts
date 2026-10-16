@@ -36,10 +36,20 @@ export interface ShapePlan {
 
 export interface LockupPlan {
   rect: InchRect
+  qrRect: InchRect
   qrInches: number
   qrLabel: string
   phone?: FittedText
   website?: FittedText
+  phoneBox?: { rect: InchRect; fill: string }
+}
+
+export interface TrustChipPlan {
+  id: string
+  label: string
+  rect: InchRect
+  fill: string
+  color: string
 }
 
 export interface PostcardFacePlan {
@@ -51,6 +61,7 @@ export interface PostcardFacePlan {
   photos: PhotoSlotPlan[]
   shapes: ShapePlan[]
   texts: FittedText[]
+  trust: TrustChipPlan[]
   lockup: LockupPlan | null
   overflows: boolean
   /** Phone, website, and a scan code are required on the front. */
@@ -95,6 +106,7 @@ function composeFront(
   const texts: FittedText[] = []
   const shapes: ShapePlan[] = []
   const photos: PhotoSlotPlan[] = []
+  const chips = trustChipsForCopy(copy.blob)
 
   for (const region of regions) {
     if (region.kind === "photo") {
@@ -106,7 +118,9 @@ function composeFront(
       })
       continue
     }
+    if (region.kind === "trust") continue
     if (region.kind === "shape") {
+      if ((region.role === "offer-tile" || region.role === "coupon") && !copy.offer) continue
       shapes.push({
         id: region.id,
         role: region.role,
@@ -120,6 +134,8 @@ function composeFront(
       if (fitted) texts.push(fitted)
     }
   }
+  const trustRegion = regions.find((region) => region.kind === "trust")
+  const trust = trustRegion ? placeTrustChips(trustRegion, chips, input.templateId, palette) : []
 
   const lockupRegion = regions.find((region) => region.kind === "lockup")
   const lockup = lockupRegion ? fitLockup(lockupRegion, input, copy, pairing, palette, size) : null
@@ -141,6 +157,7 @@ function composeFront(
     photos,
     shapes,
     texts: visible,
+    trust,
     lockup,
     overflows,
     missingContact,
@@ -197,6 +214,7 @@ function composeBack(
     photos: [],
     shapes,
     texts,
+    trust: [],
     lockup: null,
     overflows: texts.some((text) => text.overflows),
     missingContact: [],
@@ -218,7 +236,7 @@ function fitRegion(
   const color = textColor(template, role, region.id, palette)
   let maxPt = undefined as number | undefined
   if (role === "headline" && copy.offer && !same(copy.offer, copy.headline)) {
-    maxPt = undefined
+    maxPt = 24
   }
   return fitText({
     text,
@@ -264,32 +282,63 @@ function fitLockup(
   size: PostcardSizeId
 ): LockupPlan {
   const rect = clampToSafe(region, size)
-  const qrInches = Math.min(1.05, Math.max(0.78, Math.min(rect.h - 0.22, rect.w * 0.34)))
-  const textX = rect.x + qrInches + 0.12
-  const textW = Math.max(0.8, rect.w - qrInches - 0.12)
-  const color = lockupOnDark(input.templateId) ? palette.fieldInk : palette.ink
+  const labelH = 0.16
+  const qrInches = Math.min(1.02, Math.max(0.78, Math.min(rect.h - labelH, rect.w * 0.42)))
+  const qrRect = {
+    x: rect.x,
+    y: rect.y,
+    w: qrInches,
+    h: Math.min(rect.h, qrInches + labelH),
+  }
+  const textX = rect.x + qrInches + 0.1
+  const textW = Math.max(0.7, rect.w - qrInches - 0.1)
+  const onDark = lockupOnDark(input.templateId)
+  const phoneFill = onDark ? palette.offerTile : palette.field
+  const phoneInk = onDark ? palette.offerInk : palette.fieldInk
+  const websiteColor = onDark ? palette.fieldInk : palette.ink
+  const boxH = Math.min(0.42, Math.max(0.32, qrInches * 0.48))
+  const phoneBoxRect = { x: textX, y: qrRect.y, w: textW, h: boxH }
   const phone = copy.phone
     ? fitText({
         text: copy.phone,
-        rect: { x: textX, y: rect.y + 0.08, w: textW, h: 0.38 },
+        rect: {
+          x: phoneBoxRect.x + 0.08,
+          y: phoneBoxRect.y + 0.05,
+          w: Math.max(0.4, phoneBoxRect.w - 0.16),
+          h: Math.max(0.2, phoneBoxRect.h - 0.08),
+        },
         role: "contact",
         pairing,
-        color,
-        maxPt: 13,
+        color: phoneInk,
+        maxPt: 15,
       })
     : undefined
+  const websiteTop = phoneBoxRect.y + phoneBoxRect.h + 0.04
   const website = copy.website
     ? fitText({
         text: copy.website,
-        rect: { x: textX, y: rect.y + 0.46, w: textW, h: 0.32 },
+        rect: {
+          x: textX,
+          y: websiteTop,
+          w: textW,
+          h: Math.max(0.2, rect.y + rect.h - websiteTop),
+        },
         role: "contact",
         pairing,
-        color,
+        color: websiteColor,
         maxPt: 11,
       })
     : undefined
   const qrLabel = qrScanLabel(input.spec.callToAction, input.qrPayload ?? copy.qr)
-  return { rect, qrInches, qrLabel, phone, website }
+  return {
+    rect,
+    qrRect,
+    qrInches,
+    qrLabel,
+    phone,
+    website,
+    phoneBox: copy.phone ? { rect: phoneBoxRect, fill: phoneFill } : undefined,
+  }
 }
 
 interface CopyBlocks {
@@ -305,6 +354,7 @@ interface CopyBlocks {
   before: string
   after: string
   qr: string
+  blob: string
 }
 
 function resolveCopy(input: ComposeInput): CopyBlocks {
@@ -322,9 +372,9 @@ function resolveCopy(input: ComposeInput): CopyBlocks {
         ? `A note from ${business}`
         : "A note from a neighbor"
       : input.templateId === "deadline_coupon"
-        ? datedLine(subheadline) || "Your offer"
+        ? datedLine(subheadline)
         : input.templateId === "medicare_calm" || input.templateId === "portrait_aside"
-          ? business || "A local review"
+          ? business
           : ""
   return {
     offer,
@@ -335,11 +385,52 @@ function resolveCopy(input: ComposeInput): CopyBlocks {
     phone: clean(input.spec.phone),
     website: displayHost(input.spec.website),
     proof: proofLine(blob, subheadline, body),
-    badge: years ? years[1]! : "Local",
+    badge: years ? `${years[1]} years` : "",
     before: "Before",
     after: "After",
     qr: clean(input.qrPayload ?? input.spec.qrDestination ?? input.spec.website ?? ""),
+    blob,
   }
+}
+
+/**
+ * Trust chips repeat a claim the copy already makes.
+ * They never add a rating, a seal, or a badge the copy did not state.
+ */
+export function trustChipsForCopy(blob: string): Array<{ id: string; label: string }> {
+  const chips: Array<{ id: string; label: string }> = []
+  const years = blob.match(/\b(\d{1,3})\s*\+?\s*years\b/i)
+  if (years) chips.push({ id: "years", label: `${years[1]} years` })
+  if (/\blicen[sc]ed\b/i.test(blob)) chips.push({ id: "licensed", label: "Licensed" })
+  if (/\binsured\b/i.test(blob)) chips.push({ id: "insured", label: "Insured" })
+  if (/\bwarranty\b/i.test(blob)) chips.push({ id: "warranty", label: "Warranty" })
+  if (/\bbbb\b/i.test(blob)) chips.push({ id: "bbb", label: "BBB" })
+  if (/\b(5|five)[\s-]*stars?\b/i.test(blob)) chips.push({ id: "stars", label: "5-star" })
+  else if (/\breviews\b|\breviewed\b|\brated\b/i.test(blob)) chips.push({ id: "reviews", label: "Reviews" })
+  return chips.slice(0, 3)
+}
+
+function placeTrustChips(
+  region: DesignRegion,
+  chips: Array<{ id: string; label: string }>,
+  template: PostcardTemplateId,
+  palette: VerticalPalette
+): TrustChipPlan[] {
+  if (chips.length === 0) return []
+  const onDark = trustOnDark(template)
+  const fill = onDark ? palette.paper : palette.field
+  const color = onDark ? palette.ink : palette.fieldInk
+  const placed: TrustChipPlan[] = []
+  let x = region.x
+  const height = Math.min(region.h, 0.26)
+  const y = region.y + Math.max(0, (region.h - height) / 2)
+  for (const chip of chips) {
+    const w = Math.min(1.7, Math.max(0.78, chip.label.length * 0.072 + 0.28))
+    if (x + w > region.x + region.w + 0.02) break
+    placed.push({ id: chip.id, label: chip.label, rect: { x, y, w, h: height }, fill, color })
+    x += w + 0.08
+  }
+  return placed
 }
 
 function textForRole(role: TextRole, id: string, copy: CopyBlocks): string {
@@ -399,15 +490,27 @@ function lockupOnDark(template: PostcardTemplateId): boolean {
     template === "hero_scrim" ||
     template === "color_block" ||
     template === "offer_starburst" ||
+    template === "storm_alert" ||
+    template === "local_pride"
+  )
+}
+
+function trustOnDark(template: PostcardTemplateId): boolean {
+  return (
+    template === "hero_scrim" ||
+    template === "color_block" ||
+    template === "offer_starburst" ||
+    template === "storm_alert" ||
+    template === "local_pride" ||
     template === "before_after"
   )
 }
 
 function shapeFill(role: string, palette: VerticalPalette): string {
   if (role === "field" || role === "band" || role === "scrim") return palette.field
+  if (role === "offer-tile" || role === "coupon") return palette.offerTile
   if (role === "chip") return palette.paper
   if (role === "badge") return palette.accent
-  if (role === "coupon") return palette.paper
   if (role === "rule") return palette.accent
   return palette.paper
 }
@@ -420,13 +523,20 @@ function textColor(
 ): string {
   if (id === "badge-label") return palette.accentInk
   if (role === "label") return palette.ink
-  if (template === "offer_starburst" && role === "offer") return palette.accentInk
-  if (template === "hero_scrim" || template === "color_block") return palette.fieldInk
-  if (template === "offer_starburst" && role === "headline") return palette.fieldInk
-  if (template === "before_after" && (role === "offer" || role === "headline")) return palette.fieldInk
-  if (template === "service_band" && role === "offer") return palette.fieldInk
-  if (role === "offer") return palette.accent
+  if (role === "offer") return palette.offerInk
+  if (role === "eyebrow" || role === "proof") return darkType(template) ? palette.fieldInk : palette.ink
+  if (darkType(template) && (role === "headline" || role === "body")) return palette.fieldInk
   return palette.ink
+}
+
+function darkType(template: PostcardTemplateId): boolean {
+  return (
+    template === "hero_scrim" ||
+    template === "color_block" ||
+    template === "offer_starburst" ||
+    template === "storm_alert" ||
+    template === "local_pride"
+  )
 }
 
 function contrastSafe(preferred: string, background: string, fallback: string): string {
@@ -509,5 +619,5 @@ export function safeTrimRect(size: PostcardSizeId): InchRect {
 
 export function showsReviewStars(spec: ComposeInput["spec"]): boolean {
   const blob = [spec.headline, spec.subheadline, spec.body, spec.offer].filter(Boolean).join(" ")
-  return /\breviews?\b|\bstars?\b|\brated\b/i.test(blob)
+  return /\b(5|five)[\s-]*stars?\b/i.test(blob)
 }

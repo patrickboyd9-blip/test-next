@@ -12,6 +12,7 @@ import {
   contentTrimRect,
   safeTrimRect,
   trimKeepOuts,
+  trustChipsForCopy,
 } from "./compose"
 import { POSTCARD_TEMPLATE_IDS, type PostcardSizeId, type PostcardTemplateId } from "./ids"
 import { VERTICAL_PALETTES, contrastRatio } from "./palette"
@@ -91,9 +92,9 @@ function direction(index: number, layout: CreativeSpec["layoutVariant"]): Creati
   }
 }
 
-test("the catalog is 10 original compositions", () => {
-  assert.equal(POSTCARD_TEMPLATE_IDS.length, 10)
-  assert.equal(new Set(POSTCARD_TEMPLATE_IDS).size, 10)
+test("the catalog is 14 original compositions", () => {
+  assert.equal(POSTCARD_TEMPLATE_IDS.length, 14)
+  assert.equal(new Set(POSTCARD_TEMPLATE_IDS).size, 14)
   for (const id of POSTCARD_TEMPLATE_IDS) {
     assert.equal(TEMPLATE_META[id].id, id)
   }
@@ -105,7 +106,9 @@ test("palettes clear 4.5:1 for ink, field, and accent", () => {
     assert.ok(contrastRatio(palette.fieldInk, palette.field) >= 4.5, `${palette.id} field`)
     assert.ok(contrastRatio(palette.accentInk, palette.accent) >= 4.5, `${palette.id} accent`)
     assert.ok(contrastRatio(palette.accent, palette.paper) >= 4.5, `${palette.id} accent on paper`)
+    assert.ok(contrastRatio(palette.offerInk, palette.offerTile) >= 4.5, `${palette.id} offer tile`)
   }
+  assert.notEqual(VERTICAL_PALETTES.medicare.offerTile, VERTICAL_PALETTES.roofing.offerTile)
 })
 
 test("representative copy fits, stays in the safe zone, and keeps contact", () => {
@@ -129,8 +132,21 @@ test("representative copy fits, stays in the safe zone, and keeps contact", () =
         assert.equal(rectContains(safe, text.rect), true, `${id} ${size} ${text.role}`)
         assert.ok(text.fontPt >= 8, `${id} ${text.role}`)
       }
-      if (front.lockup) assert.equal(rectContains(safe, front.lockup.rect), true, `${id} lockup`)
+      if (front.lockup) {
+        assert.equal(rectContains(safe, front.lockup.rect), true, `${id} lockup`)
+        if (front.lockup.phoneBox) {
+          assert.equal(rectContains(safe, front.lockup.phoneBox.rect), true, `${id} phone`)
+          assert.equal(rectsOverlap(front.lockup.phoneBox.rect, front.lockup.qrRect), false, `${id} phone/qr`)
+          if (front.lockup.website) {
+            assert.equal(rectsOverlap(front.lockup.phoneBox.rect, front.lockup.website.rect, 0.02), false, `${id} phone/web`)
+          }
+        }
+        assert.equal(rectContains(safe, front.lockup.qrRect), true, `${id} qr`)
+      }
       const offer = front.texts.find((text) => text.role === "offer")
+      const tile = front.shapes.find((shape) => shape.role === "offer-tile" || shape.role === "coupon")
+      assert.ok(tile, `${id} offer tile`)
+      if (offer && tile) assert.equal(rectContains(tile.rect, offer.rect, 0.04), true, `${id} offer in tile`)
       const headline = front.texts.find((text) => text.role === "headline")
       const body = front.texts.find((text) => text.role === "body")
       if (offer && headline) assert.ok(offer.fontPt > headline.fontPt, `${id} offer hierarchy`)
@@ -226,8 +242,67 @@ test("each vertical gives the three directions different compositions", () => {
     if (name === "medicare") {
       assert.equal(templates.includes("deadline_coupon"), false)
       assert.equal(templates.includes("offer_starburst"), false)
+      assert.equal(templates.includes("storm_alert"), false)
+      assert.equal(templates.includes("financing_first"), false)
+    }
+    if (name === "roofing") {
+      assert.deepEqual(templates, ["storm_alert", "financing_first", "before_after"])
     }
   }
+})
+
+test("roofing copy can choose a matching composition without repeating one", () => {
+  const brief: CampaignBrief = { goal: "Book roof inspections" }
+  const storm = direction(0, "peer_split")
+  storm.spec.headline = "Hail moved through town"
+  storm.spec.offer = "Free roof inspection"
+  const price = direction(1, "image_grounded")
+  price.spec.headline = "A new roof on a payment"
+  price.spec.offer = "As low as $89 a month"
+  price.recommended = false
+  const commercial = direction(2, "type_primary_split")
+  commercial.spec.headline = "A commercial flat roof"
+  commercial.spec.offer = "Free roof inspection"
+  commercial.spec.body = "Membrane restoration for the building."
+  commercial.recommended = false
+  const applied = assignTemplates(brief, [storm, price, commercial])
+  assert.deepEqual(
+    applied.map((item) => item.spec.layoutHints?.templateId),
+    ["storm_alert", "financing_first", "commercial_restore"]
+  )
+})
+
+test("trust chips repeat claims and never invent a badge", () => {
+  assert.deepEqual(trustChipsForCopy("Free roof inspection"), [])
+  assert.deepEqual(trustChipsForCopy("Free plan review"), [])
+  assert.deepEqual(
+    trustChipsForCopy("Licensed and insured. 18 years in town."),
+    [
+      { id: "years", label: "18 years" },
+      { id: "licensed", label: "Licensed" },
+      { id: "insured", label: "Insured" },
+    ]
+  )
+  const plain = composePostcardFace({
+    templateId: "storm_alert",
+    paletteId: "roofing",
+    spec: SAMPLE.roofing,
+    qrPayload: SAMPLE.roofing.qrDestination,
+  })
+  assert.deepEqual(plain.trust, [])
+  assert.equal(plain.texts.some((text) => text.text === "Local"), false)
+  const supported = composePostcardFace({
+    templateId: "storm_alert",
+    paletteId: "roofing",
+    spec: { ...SAMPLE.roofing, subheadline: "Licensed and insured" },
+    qrPayload: SAMPLE.roofing.qrDestination,
+  })
+  assert.deepEqual(
+    supported.trust.map((chip) => chip.label),
+    ["Licensed", "Insured"]
+  )
+  const spoken = supported.texts.map((text) => text.text).join(" ")
+  assert.doesNotMatch(spoken, /official|government|final notice|act now|expires/i)
 })
 
 test("an uploaded photo fills the slot ahead of the generated one", () => {
@@ -252,7 +327,7 @@ test("an uploaded photo fills the slot ahead of the generated one", () => {
 
 test("print files keep the 5x8 and 6x9 page boxes and embedded fonts", async () => {
   for (const size of SIZES) {
-    for (const id of ["hero_scrim", "medicare_calm", "deadline_coupon"] as const) {
+    for (const id of ["hero_scrim", "medicare_calm", "deadline_coupon", "storm_alert"] as const) {
       const spec = specFor(id)
       const rendered = await renderTemplatedPostcardPdf({
         size,

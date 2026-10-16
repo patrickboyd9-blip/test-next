@@ -16,6 +16,10 @@ export const POSTCARD_TEMPLATE_IDS = [
   "neighbor_letter",
   "portrait_aside",
   "service_band",
+  "storm_alert",
+  "financing_first",
+  "local_pride",
+  "commercial_restore",
 ] as const
 
 export type PostcardTemplateId = (typeof POSTCARD_TEMPLATE_IDS)[number]

@@ -130,6 +130,7 @@ function drawFront(
   for (const shape of plan.shapes.filter((item) => item.role !== "paper" && item.role !== "field")) {
     drawShape(page, spec, plan, shape)
   }
+  drawTrust(page, spec, plan, strong)
   for (const line of plan.texts) drawFitted(page, spec, line, display, text)
   drawFrontLockup(page, spec, plan, qrPayload, display, strong, text)
 }
@@ -240,9 +241,14 @@ function drawPhoto(
 }
 
 function drawShape(page: PDFPage, spec: PostcardGeometry, plan: PostcardFacePlan, shape: ShapePlan) {
-  const expanded = shape.role === "field" || shape.role === "paper" || shape.role === "band" || shape.role === "scrim"
-    ? expandBleed(shape.rect, plan.size, spec.bleedInchesPerSide)
-    : shape.rect
+  const expanded =
+    shape.role === "field" ||
+    shape.role === "paper" ||
+    shape.role === "band" ||
+    shape.role === "scrim" ||
+    shape.role === "offer-tile"
+      ? expandBleed(shape.rect, plan.size, spec.bleedInchesPerSide)
+      : shape.rect
   const pdf = canvasRectToPdf(canvasRect(expanded, spec.bleedInchesPerSide), spec.artworkCanvasInches.heightInches)
   if (shape.role === "scrim") {
     drawScrim(page, pdf, plan.palette.scrim)
@@ -273,7 +279,7 @@ function drawShape(page: PDFPage, spec: PostcardGeometry, plan: PostcardFacePlan
       borderColor: paint(plan.palette.accent),
       borderWidth: 1.25,
       borderDashArray: [3, 2],
-      color: paint(plan.palette.paper),
+      color: paint(shape.fill),
     })
     return
   }
@@ -294,7 +300,9 @@ function drawFitted(page: PDFPage, spec: PostcardGeometry, line: FittedText, dis
   const widest = Math.max(...line.lines.map((item) => font.widthOfTextAtSize(item, size)))
   if (widest > pdf.widthPoints) size = fitWidth(line.lines.join(" "), font, size, pdf.widthPoints)
   const leading = size * (line.font === "display" ? 1.02 : 1.18)
-  let cursor = pdf.yPoints + pdf.heightPoints - size
+  const block = line.lines.length * leading
+  const spare = line.role === "offer" ? Math.max(0, pdf.heightPoints - block) / 2 : 0
+  let cursor = pdf.yPoints + pdf.heightPoints - spare - size
   for (const row of line.lines) {
     if (cursor < pdf.yPoints - 1) break
     const rowWidth = font.widthOfTextAtSize(row, size)
@@ -315,29 +323,61 @@ function drawFrontLockup(
 ) {
   const lockup = plan.lockup
   if (!lockup) return
+  if (lockup.phoneBox) {
+    const box = canvasRectToPdf(canvasRect(lockup.phoneBox.rect), spec.artworkCanvasInches.heightInches)
+    page.drawRectangle({
+      x: box.xPoints,
+      y: box.yPoints,
+      width: box.widthPoints,
+      height: box.heightPoints,
+      color: paint(lockup.phoneBox.fill),
+    })
+  }
   if (lockup.phone) drawFitted(page, spec, lockup.phone, display, strong)
   if (lockup.website) drawFitted(page, spec, lockup.website, display, text)
   if (!payload) return
-  const pdf = canvasRectToPdf(canvasRect(lockup.rect), spec.artworkCanvasInches.heightInches)
+  const pdf = canvasRectToPdf(canvasRect(lockup.qrRect), spec.artworkCanvasInches.heightInches)
   const labelSize = 8
-  const size = Math.min(lockup.qrInches * 72, pdf.heightPoints - labelSize - 2)
-  const qrY = pdf.yPoints + labelSize + 2
+  const size = Math.min(lockup.qrInches * 72, Math.max(12, pdf.heightPoints - labelSize - 2))
+  const qrY = pdf.yPoints + pdf.heightPoints - size
   drawQr(page, payload, pdf.xPoints, qrY, size)
   const labelWidth = strong.widthOfTextAtSize(lockup.qrLabel, labelSize)
   page.drawRectangle({
     x: pdf.xPoints,
     y: pdf.yPoints,
     width: Math.max(size, labelWidth),
-    height: labelSize + 1,
+    height: labelSize + 2,
     color: rgb(1, 1, 1),
   })
   page.drawText(lockup.qrLabel, {
     x: pdf.xPoints + Math.max(0, (size - labelWidth) / 2),
-    y: pdf.yPoints + 1,
+    y: pdf.yPoints + 1.5,
     size: labelSize,
     font: strong,
     color: paint("#14120f"),
   })
+}
+
+function drawTrust(page: PDFPage, spec: PostcardGeometry, plan: PostcardFacePlan, font: PDFFont) {
+  for (const chip of plan.trust) {
+    const pdf = canvasRectToPdf(canvasRect(chip.rect), spec.artworkCanvasInches.heightInches)
+    page.drawRectangle({
+      x: pdf.xPoints,
+      y: pdf.yPoints,
+      width: pdf.widthPoints,
+      height: pdf.heightPoints,
+      color: paint(chip.fill),
+    })
+    const size = 8
+    const width = font.widthOfTextAtSize(chip.label, size)
+    page.drawText(chip.label, {
+      x: pdf.xPoints + Math.max(2, (pdf.widthPoints - width) / 2),
+      y: pdf.yPoints + Math.max(1, (pdf.heightPoints - size) / 2),
+      size,
+      font,
+      color: paint(chip.color),
+    })
+  }
 }
 
 function drawScrim(

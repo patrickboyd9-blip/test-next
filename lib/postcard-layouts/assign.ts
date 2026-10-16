@@ -5,6 +5,18 @@ import { isPostcardTemplate, type PostcardTemplateId, type VerticalPaletteId } f
 import { templatesForPalette } from "./templates"
 
 /**
+ * Copy can pull a roofing composition forward. The cue has to name the idea.
+ * "Local" alone is too common to steal a direction.
+ */
+const TEMPLATE_CUES: Partial<Record<PostcardTemplateId, RegExp>> = {
+  storm_alert: /\bstorms?\b|\bhail\b|\bwind damage\b/i,
+  financing_first: /\bfinanc|\bmonthly\b|\bper month\b|\/mo\b|\ba month\b|\$\s?\d/i,
+  before_after: /\bbefore\b|\bafter\b/i,
+  commercial_restore: /\bcommercial\b|\brestoration\b|\bflat roof\b|\bmembrane\b/i,
+  local_pride: /\bhometown\b|\bour town\b|\blocal pride\b|\bneighbor(?:hood)?\b/i,
+}
+
+/**
  * Each vertical keeps the compositions that fit it.
  * Medicare and other insurance stay on the calm set: no perforated offer,
  * no seal, and no alarm color. Three directions receive three different compositions.
@@ -52,6 +64,12 @@ export function assignTemplates<T extends CreativeDirection>(
       chosen.set(item.index, current)
       continue
     }
+    const cued = cuedTemplate(item.direction, allowed, used)
+    if (cued) {
+      used.add(cued)
+      chosen.set(item.index, cued)
+      continue
+    }
     const next = allowed.find((template) => !used.has(template)) ?? allowed[0]
     used.add(next)
     chosen.set(item.index, next)
@@ -72,6 +90,17 @@ export function assignTemplateToSpec(brief: CampaignBrief, spec: CreativeSpec): 
   const current = spec.layoutHints?.templateId
   const templateId = current && allowed.includes(current) ? current : allowed[0]
   return withTemplate(spec, templateId, palette)
+}
+
+function cuedTemplate(
+  direction: CreativeDirection,
+  allowed: readonly PostcardTemplateId[],
+  used: Set<PostcardTemplateId>
+): PostcardTemplateId | undefined {
+  const blob = [direction.name, direction.spec.headline, direction.spec.subheadline, direction.spec.offer, direction.spec.body]
+    .filter((value): value is string => Boolean(value?.trim()))
+    .join(" ")
+  return allowed.find((id) => !used.has(id) && TEMPLATE_CUES[id]?.test(blob))
 }
 
 function withTemplate(
