@@ -29,18 +29,23 @@ const FONTS = {
   text: path.join(process.cwd(), "lib/print-spec/fonts/SourceSans3-Semibold.ttf"),
 }
 
-export function printPixels(size: TrimSize): { width: number; height: number } {
+export function printPixels(size: TrimSize, ppi = PRINT_PPI): { width: number; height: number } {
+  const scale = Math.max(36, Math.min(PRINT_PPI, Math.round(ppi)))
   const trim = trimInches(size)
-  return { width: Math.round(trim.w * PRINT_PPI), height: Math.round(trim.h * PRINT_PPI) }
+  return { width: Math.round(trim.w * scale), height: Math.round(trim.h * scale) }
 }
 
-export async function renderStudioCardPng(plan: PostcardFacePlan, qrPayload: string): Promise<Buffer> {
-  const size = printPixels(plan.size)
+export async function renderStudioCardPng(
+  plan: PostcardFacePlan,
+  qrPayload: string,
+  options?: { ppi?: number }
+): Promise<Buffer> {
+  const size = printPixels(plan.size, options?.ppi)
   const directory = await mkdtemp(path.join(os.tmpdir(), "studio-card-"))
   const htmlPath = path.join(directory, "card.html")
   const pngPath = path.join(directory, "card.png")
   try {
-    await writeFile(htmlPath, cardHtml(plan, qrPayload), "utf8")
+    await writeFile(htmlPath, cardHtml(plan, qrPayload, options?.ppi), "utf8")
     await runChrome(htmlPath, pngPath, size.width, size.height)
     const png = await readFile(pngPath)
     const actual = pngSize(png)
@@ -53,9 +58,9 @@ export async function renderStudioCardPng(plan: PostcardFacePlan, qrPayload: str
   }
 }
 
-function cardHtml(plan: PostcardFacePlan, qrPayload: string): string {
+function cardHtml(plan: PostcardFacePlan, qrPayload: string, ppi?: number): string {
   const trim = trimInches(plan.size)
-  const size = printPixels(plan.size)
+  const size = printPixels(plan.size, ppi)
   const photo = standInPhotoJpeg().toString("base64")
   const cutout = standInCutoutPng().toString("base64")
   const displayFamily = plan.pairing === "letter" ? "Fraunces" : plan.pairing === "signal" ? "Barlow Condensed" : "Archivo"

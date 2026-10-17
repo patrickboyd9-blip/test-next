@@ -28,6 +28,8 @@ export async function requestModelRationale(input: {
   selection: ReferenceSelection
   trim: TrimSize
   env: NodeJS.ProcessEnv
+  /** Principles from the taste retrieval for this brief. Optional. */
+  guidance?: string
 }): Promise<ModelRationaleResult> {
   const apiKey = input.env.ANTHROPIC_API_KEY?.trim()
   if (!apiKey) return { rationale: null, usage: null }
@@ -46,7 +48,7 @@ export async function requestModelRationale(input: {
             ...images,
             {
               type: "text",
-              text: directorUser(input.brief, input.selection, input.trim),
+              text: directorUser(input.brief, input.selection, input.trim, input.guidance),
             },
           ],
         },
@@ -141,7 +143,12 @@ function directorSystem(): string {
   ].join("\n\n")
 }
 
-function directorUser(brief: CampaignBrief, selection: ReferenceSelection, trim: TrimSize): string {
+function directorUser(
+  brief: CampaignBrief,
+  selection: ReferenceSelection,
+  trim: TrimSize,
+  guidance?: string
+): string {
   const lines = [
     `Trim: ${trim} landscape.`,
     `Vertical: ${selection.vertical}.`,
@@ -157,6 +164,10 @@ function directorUser(brief: CampaignBrief, selection: ReferenceSelection, trim:
     ...selection.donts.slice(0, 4).map((item) => `- ${item.id}: ${item.doNotCopy}`),
     "Return JSON matching the Design Rationale schema version 1.0.0.",
   ]
+  if (guidance?.trim()) {
+    lines.push("Retrieved principles for this brief. Reason from these. Do not cite anything that is not in this list.")
+    lines.push(guidance.trim())
+  }
   return lines.join("\n")
 }
 

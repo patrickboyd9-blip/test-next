@@ -14,7 +14,7 @@ import {
   normalizeGenerationResult,
   withGenerationRetryFeedback,
 } from "./creative-engine-guards"
-import { applyDesignIntelligence } from "@/lib/design-intelligence/pipeline"
+import { applyStudioBoard } from "@/lib/design-intelligence/candidate-board"
 
 import { buildCreativeIntelligenceContext } from "./creative-intelligence"
 import { loadReferenceMailerImages, type ReferenceMailerImage } from "@/lib/reference-corpus/mailer-images"
@@ -263,7 +263,7 @@ export class AnthropicCreativeEngine implements CreativeEngine {
     const images = await loadReferenceMailerImages(
       (intelligence.referenceCards ?? []).map((card) => card.mmrId)
     )
-    return this.generateWithRetry(input.brief, input.canvas, images, (reasons) =>
+    return this.generateWithRetry(input.brief, input.canvas, images, input.ownerId, (reasons) =>
       this.requestDirections({
         system: buildGenerateSystemPrompt(input.canvas, intelligence),
         user: withGenerationRetryFeedback(
@@ -304,7 +304,7 @@ export class AnthropicCreativeEngine implements CreativeEngine {
     const images = await loadReferenceMailerImages(
       (intelligence.referenceCards ?? []).map((card) => card.mmrId)
     )
-    return this.generateWithRetry(input.brief, input.canvas, images, (reasons) =>
+    return this.generateWithRetry(input.brief, input.canvas, images, input.ownerId, (reasons) =>
       this.requestDirections({
         system: buildRegenerateSystemPrompt(input.canvas, intelligence),
         user: withGenerationRetryFeedback(buildRegenerateUserMessage(input), reasons),
@@ -317,6 +317,7 @@ export class AnthropicCreativeEngine implements CreativeEngine {
     brief: GenerateDirectionsInput["brief"],
     canvas: GenerateDirectionsInput["canvas"],
     images: ReferenceMailerImage[],
+    ownerId: string | undefined,
     request: (reasons?: string[]) => Promise<CreativeDirection[]>
   ): Promise<GenerateDirectionsResult> {
     let reasons: string[] | undefined
@@ -343,17 +344,17 @@ export class AnthropicCreativeEngine implements CreativeEngine {
           best = result
           continue
         }
-        return applyDesignIntelligence(brief, result, canvas)
+        return applyStudioBoard(brief, result, canvas, { ownerId })
       } catch (error) {
         lastError = error
         if (!(error instanceof CreativeGenerationInvalidError) || attempt === 1) {
-          if (best) return applyDesignIntelligence(brief, best, canvas)
+          if (best) return applyStudioBoard(brief, best, canvas, { ownerId })
           throw error
         }
         reasons = error.reasons
       }
     }
-    if (best) return applyDesignIntelligence(brief, best, canvas)
+    if (best) return applyStudioBoard(brief, best, canvas, { ownerId })
     throw lastError instanceof Error
       ? lastError
       : new CreativeGenerationInvalidError(["generation failed"])

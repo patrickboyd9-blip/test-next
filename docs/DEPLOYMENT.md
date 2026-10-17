@@ -63,8 +63,14 @@ Optional. Leave them blank unless you need to change a default.
 | `DESIGN_CRITIC` | the vision model when `ANTHROPIC_API_KEY` is set, otherwise a machine estimate | Set to `machine` to score from measurements only. A machine score is labeled "machine estimate" until the vision critic runs. The vision critic scores the print-resolution card. If that render cannot be produced, the score stays a machine estimate. |
 | `DESIGN_CRITIC_ROUNDS` | `3` | How many layout repairs to try. The app will not go past 3. |
 | `DESIGN_SYNC_BATCH` | `40` | How many new mailers one daily run downloads. |
-| `DESIGN_ANALYZE_CAP` | `8` | How many ungraded mailers one run sends to the vision model. |
-| `DESIGN_MODEL` | `claude-sonnet-5` | The model that directs and critiques. |
+| `DESIGN_ANALYZE_CAP` | `8` | How many ungraded mailers one run sends to the vision model for a short written grade. |
+| `VISION_TASTE_BATCH` | `4` | How many reference photographs one run reads with the vision model for the taste library. The daily job and “sync now” both do this batch. A separate backfill clears the rest. |
+| `VISION_TASTE_PASSES` | `8` | How many batches `scripts/backfill-vision-taste.ts` will run before it stops. |
+| `DESIGN_CANDIDATE_COUNT` | `12` | How many compositions Studio tries before it keeps the best three. |
+| `DESIGN_CANDIDATE_BOARD` | on | Set to `off` to skip the twelve-up board and use the earlier one-layout path. |
+| `DESIGN_CANDIDATE_RENDERS` | on, when the vision critic is on | Set to `off` to rank from measurements only and skip the preview renders. |
+| `DESIGN_BOARD_BUDGET_MS` | `75000` | How long the vision ranking may run before it keeps the measurement scores. It will not go past 90 seconds. |
+| `DESIGN_MODEL` | `claude-sonnet-5` | The model that directs, reads reference photographs, and critiques. |
 | `DESIGN_INPUT_USD_PER_MTOK` | `3` | Estimate used only in the cost log. Not a bill. |
 | `DESIGN_OUTPUT_USD_PER_MTOK` | `15` | Estimate used only in the cost log. Not a bill. |
 | `DESIGN_INTELLIGENCE` | on | Set to `off` to return to the previous layout path. |
@@ -72,6 +78,12 @@ Optional. Leave them blank unless you need to change a default.
 The daily job runs at 17:45 UTC. That is 9:45am during Pacific Standard Time and 10:45am during Pacific Daylight Time, so it is always after 9:30am Pacific. Vercel calls `GET /api/cron/design-library`.
 
 To pull immediately, send a POST to `https://test-next-modern-mail2.vercel.app/api/design-library/sync` with the header `Authorization: Bearer` and the `CRON_SECRET` value. The benchmark is the same header on `POST /api/design-benchmark`.
+
+The same header on `POST /api/design-library/vision-taste` reads the next batch of reference photographs and stores a design reading for each one (eye path, focal element, scale, whitespace, palette roles, how type sits with the picture, the response block, what works, and a grade). Send `{ "limit": 4 }` to change the batch. Run it again until `pending` is 0. On a laptop, the same job is `npx tsx scripts/backfill-vision-taste.ts`. Photographs stay in `.data/reference-library` or Blob. The readings go to Neon when `DATABASE_URL` is set, and to `.data/vision-taste` otherwise. Neither folder is committed.
+
+Thumbs in Studio are stored per campaign and per the campaign’s owner, in the `concept_feedback` table (or `.data/concept-feedback` on a laptop). The next generation for that owner uses those likes and dislikes when it chooses references.
+
+The fixed exam is `npx tsx scripts/design-exam.ts --mode baseline` and `--mode after`. It writes scores and images under `artifacts/design-exam/`, which is not committed. Without `ANTHROPIC_API_KEY` those scores are machine estimates.
 
 On a laptop, put the photographs in `.data/reference-library` (that folder is not committed) and run `npx tsx scripts/seed-reference-library.ts`. If the Blob token is present, the script also uploads them. If it is not, the benchmark reads the local files.
 

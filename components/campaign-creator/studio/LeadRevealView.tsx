@@ -7,9 +7,11 @@ import { Button } from "@/components/ui/button"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import type { GeneratedAsset } from "@/lib/campaign-creator/image-generation"
 import type { PostcardIdentity } from "@/lib/campaign-creator/studio-contact"
+import type { ConceptFeedbackView } from "@/lib/campaign-creator/actions"
 import type { CampaignBrief, CreativeDirection } from "@/lib/campaign-creator/types"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
+import { ConceptFeedback } from "./ConceptFeedback"
 import { PostcardPreview, PostcardSideToggle } from "./PostcardPreview"
 import { ResearchBasis } from "./ResearchBasis"
 import { StrategyTags } from "./StrategyTags"
@@ -26,6 +28,8 @@ interface LeadRevealViewProps {
   photoNote?: string | null
   identity?: PostcardIdentity
   brief?: CampaignBrief
+  campaignId?: string
+  feedback?: ConceptFeedbackView
 }
 
 export function LeadRevealView({
@@ -39,6 +43,8 @@ export function LeadRevealView({
   photoNote,
   identity,
   brief,
+  campaignId,
+  feedback,
 }: LeadRevealViewProps) {
   const reducedMotion = useReducedMotion()
   const [side, setSide] = useState<"front" | "back">("front")
@@ -91,6 +97,9 @@ export function LeadRevealView({
         <h3 className="text-xl font-semibold">{direction.name}</h3>
         <p className="text-sm text-muted-foreground">{direction.rationale}</p>
         <ResearchBasis research={direction.research} />
+        {campaignId ? (
+          <ConceptFeedback campaignId={campaignId} directionId={direction.id} initial={feedback} />
+        ) : null}
         <p className="text-sm">
           <span className="text-muted-foreground">Designed to drive: </span>
           <span className="font-medium">{direction.designedToDrive}</span>
