@@ -20,12 +20,12 @@ export interface SqlExecutor {
   ): Promise<T[]>
 }
 
-export type DocumentCollection = "campaigns" | "reference_corpus" | "design_library"
+export type DocumentCollection = "campaigns" | "reference_corpus" | "design_library" | "design_taste" | "design_feedback"
 
 const SAFE_FILE_ID = /^[A-Za-z0-9_-]{1,200}$/
 
 interface CollectionSql {
-  table: "campaigns" | "reference_corpus" | "design_library"
+  table: "campaigns" | "reference_corpus" | "design_library" | "design_taste" | "design_feedback"
   ddl: string
 }
 
@@ -57,6 +57,24 @@ const COLLECTIONS: Record<DocumentCollection, CollectionSql> = {
       updated_at timestamptz NOT NULL DEFAULT now()
     )`,
   },
+  design_taste: {
+    table: "design_taste",
+    ddl: `CREATE TABLE IF NOT EXISTS design_taste (
+      id text PRIMARY KEY,
+      data jsonb NOT NULL,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      updated_at timestamptz NOT NULL DEFAULT now()
+    )`,
+  },
+  design_feedback: {
+    table: "design_feedback",
+    ddl: `CREATE TABLE IF NOT EXISTS design_feedback (
+      id text PRIMARY KEY,
+      data jsonb NOT NULL,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      updated_at timestamptz NOT NULL DEFAULT now()
+    )`,
+  },
 }
 
 export function postgresUrl(env: NodeJS.ProcessEnv = process.env): string | null {
@@ -77,6 +95,12 @@ export function defaultDocumentDirectory(collection: DocumentCollection): string
   }
   if (collection === "design_library") {
     return path.join(process.cwd(), ".data", "design-library")
+  }
+  if (collection === "design_taste") {
+    return path.join(process.cwd(), ".data", "design-taste")
+  }
+  if (collection === "design_feedback") {
+    return path.join(process.cwd(), ".data", "design-feedback")
   }
   return path.join(process.cwd(), ".data", "reference-corpus")
 }

@@ -3,6 +3,9 @@ import type { CampaignBrief } from "@/lib/campaign-creator/types"
 import { readSeedText } from "./library"
 import type { TrimSize } from "./rationale"
 import type { ReferenceSelection } from "./select"
+import type { RetrievedTaste } from "./taste-retrieval"
+import type { TasteSignal } from "./feedback"
+import { visionCriticSystem } from "./taste-vision"
 
 /**
  * Vision-model calls for the art director and the critic.
@@ -28,6 +31,8 @@ export async function requestModelRationale(input: {
   selection: ReferenceSelection
   trim: TrimSize
   env: NodeJS.ProcessEnv
+  retrieved?: readonly RetrievedTaste[]
+  signals?: readonly TasteSignal[]
 }): Promise<ModelRationaleResult> {
   const apiKey = input.env.ANTHROPIC_API_KEY?.trim()
   if (!apiKey) return { rationale: null, usage: null }
@@ -46,7 +51,7 @@ export async function requestModelRationale(input: {
             ...images,
             {
               type: "text",
-              text: directorUser(input.brief, input.selection, input.trim),
+              text: directorUser(input.brief, input.selection, input.trim, input.retrieved, input.signals),
             },
           ],
         },
@@ -72,11 +77,20 @@ export async function requestModelRationale(input: {
   }
 }
 
+export interface VisionCritiqueResult {
+  score: number
+  letter: string
+  explanation: string
+  edit: string
+  usage: ModelUsage
+}
+
 export async function requestVisionCritique(input: {
   png: Buffer
   env: NodeJS.ProcessEnv
   vertical: string
-}): Promise<{ score: number; edit: string; usage: ModelUsage } | null> {
+  references?: Array<{ id: string; bytes: Buffer; mediaType: "image/jpeg" | "image/png" | "image/webp" }>
+}): Promise<VisionCritiqueResult | null> {
   const apiKey = input.env.ANTHROPIC_API_KEY?.trim()
   if (!apiKey || input.env.DESIGN_CRITIC === "machine") return null
   try {
@@ -84,20 +98,32 @@ export async function requestVisionCritique(input: {
     const client = new Anthropic({ apiKey })
     const response = await client.messages.create({
       model: input.env.DESIGN_MODEL?.trim() || MODEL,
-      max_tokens: 400,
-      system:
-        "You score a postcard render against an A+ direct-mail rubric. Return JSON only: {\"score\": number 0-100, \"edit\": \"one structural edit\"}. Do not suggest copying any reference brand, photo, or wording. Medicare must stay calm: no seal, no eagle, no fake deadline.",
+      max_tokens: 500,
+      system: visionCriticSystem(),
       messages: [
         {
           role: "user",
           content: [
+            ...(input.references ?? []).slice(0, 3).map((reference) => ({
+              type: "image" as const,
+              source: {
+                type: "base64" as const,
+                media_type: reference.mediaType,
+                data: reference.bytes.toString("base64"),
+              },
+            })),
             {
-              type: "image",
-              source: { type: "base64", media_type: "image/png", data: input.png.toString("base64") },
+              type: "image" as const,
+              source: { type: "base64" as const, media_type: "image/png" as const, data: input.png.toString("base64") },
             },
             {
-              type: "text",
-              text: `Vertical: ${input.vertical}. Score focal dominance, type scale, one response lockup, calm field, and whether this could be mistaken for a government notice. Anchors are a finished-house card with one numeral (A), a product card with one discount (A-), and a photo with one percent on a white field (A-). Anti-examples wear an official-notice costume.`,
+              type: "text" as const,
+              text: [
+                `The last image is the card to grade. The earlier images are A-grade references for ${input.vertical}.`,
+                "Use them as principles only.",
+                "Medicare must stay calm: no seal, no eagle, no fake deadline.",
+                "Explain the score in two sentences.",
+              ].join(" "),
             },
           ],
         },
@@ -105,11 +131,13 @@ export async function requestVisionCritique(input: {
     })
     const parsed = parseJson(
       response.content.filter((block) => block.type === "text").map((block) => block.text).join("\n")
-    ) as { score?: unknown; edit?: unknown } | null
+    ) as { score?: unknown; edit?: unknown; letter?: unknown; explanation?: unknown } | null
     const score = typeof parsed?.score === "number" ? Math.max(0, Math.min(100, parsed.score)) : null
     if (score === null) return null
     return {
       score,
+      letter: typeof parsed?.letter === "string" ? parsed.letter : "",
+      explanation: typeof parsed?.explanation === "string" ? parsed.explanation : "The vision critic did not explain the score.",
       edit: typeof parsed?.edit === "string" ? parsed.edit : "One structural edit.",
       usage: {
         model: response.model,
@@ -141,7 +169,14 @@ function directorSystem(): string {
   ].join("\n\n")
 }
 
-function directorUser(brief: CampaignBrief, selection: ReferenceSelection, trim: TrimSize): string {
+function directorUser(
+  brief: CampaignBrief,
+  selection: ReferenceSelection,
+  trim: TrimSize,
+  retrieved?: readonly RetrievedTaste[],
+  signals?: readonly TasteSignal[]
+): string {
+  const studied = retrieved ?? []
   const lines = [
     `Trim: ${trim} landscape.`,
     `Vertical: ${selection.vertical}.`,
@@ -149,15 +184,19 @@ function directorUser(brief: CampaignBrief, selection: ReferenceSelection, trim:
     `Offer: ${brief.offer ?? "none stated"}.`,
     `Goal: ${brief.goal ?? ""}.`,
     `Audience: ${brief.audience?.description ?? ""}.`,
-    "Quality anchors:",
-    ...selection.anchors.map((item) => `- ${item.id} (${item.grade ?? "anchor"}): ${item.principle} Do not copy: ${item.doNotCopy}`),
-    "Peers:",
-    ...selection.peers.map((item) => `- ${item.id} (${item.grade ?? "peer"}): ${item.principle}`),
+    "Reason from these retrieved readings. Cite nothing you were not shown.",
+    ...studied.map((item) => `- ${item.id} (${item.grade}, ${item.groundedBy}): ${item.principle} Do not copy: ${item.doNotCopy}`),
+    studied.length === 0 ? "No vision reading was retrieved. Use the house rules." : "",
+    "Liked compositions:",
+    ...(signals ?? []).filter((signal) => signal.vote === "up").slice(0, 4).map((signal) => `- ${signal.family ?? signal.feel ?? "open"}: ${signal.reason || signal.principle || "The customer kept this."}`),
+    "Disliked compositions:",
+    ...(signals ?? []).filter((signal) => signal.vote === "down").slice(0, 4).map((signal) => `- ${signal.family ?? signal.feel ?? "panel"}: ${signal.reason || "The customer set this aside."}`),
     "Do not:",
     ...selection.donts.slice(0, 4).map((item) => `- ${item.id}: ${item.doNotCopy}`),
+    "Prefer type on an open light ground, one hero offer, and a cut-out subject. A slab of type beside the photo is the weak default.",
     "Return JSON matching the Design Rationale schema version 1.0.0.",
   ]
-  return lines.join("\n")
+  return lines.filter((line) => line !== "").join("\n")
 }
 
 async function imageBlocks(selection: ReferenceSelection, env: NodeJS.ProcessEnv) {

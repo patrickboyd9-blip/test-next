@@ -8,6 +8,7 @@ import {
 import { buildPostcard6x9PrintSpec } from "@/lib/print-spec/postcard-6x9-print-spec"
 
 import { measureBackdropContrast } from "./backdrop"
+import { calibrateCritique, type LetterGrade } from "./critic-calibration"
 import { normalizedPanel, textInsideSafe, type GridCard } from "./grid-composer"
 import type { DesignRationale, GridName } from "./rationale"
 
@@ -33,6 +34,10 @@ export interface Critique {
   passed: boolean
   edit: string | null
   brokenRule: string | null
+  /** Letter on the rubric. B is the bar. Anything under it is redesigned or dropped. */
+  letter: LetterGrade
+  /** Why the score is what it is. Internal. Not printed on the card. */
+  explanation: string
   /** "vision" only after the vision critic has scored this card. */
   scoreKind: "machine estimate" | "vision"
 }
@@ -110,19 +115,21 @@ export function critiqueCard(card: GridCard, rationale: DesignRationale, copy: s
     Object.entries(VISION_WEIGHTS).reduce((sum, [id, weight]) => sum + ((vision[id] ?? 1) / 5) * weight, 0)
   )
   if (worstContrast < 4.5) visionScore = Math.min(visionScore, 40)
-  const passed = uniqueFails.length === 0 && weighted >= WEIGHTED_PASS && visionScore >= VISION_PASS
   const brokenRule = uniqueFails[0] ?? lowestVision(vision)
-  return {
+  const draft = {
     autoFails: uniqueFails,
     dimensions,
     weighted,
     vision,
     visionScore,
-    passed,
-    brokenRule: passed ? null : brokenRule,
-    edit: passed ? null : editFor(brokenRule, rationale),
-    scoreKind: "machine estimate",
+    passed: false,
+    brokenRule,
+    edit: editFor(brokenRule, rationale),
+    letter: "C" as LetterGrade,
+    explanation: "",
+    scoreKind: "machine estimate" as const,
   }
+  return calibrateCritique(draft, card)
 }
 
 export function applyStructuralEdit(rationale: DesignRationale, editRule: string | null): DesignRationale {

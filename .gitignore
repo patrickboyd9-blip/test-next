@@ -43,4 +43,6 @@ next-env.d.ts
 .data/
 # Reference scans stay out of git. scripts/seed-reference-library.ts registers them.
 /reference-library/
+# Exam renders and dated reports. scripts/design-exam.ts writes these.
+/artifacts/
 tailwindcss-*.log

@@ -271,7 +271,8 @@ export class AnthropicCreativeEngine implements CreativeEngine {
           reasons
         ),
         images,
-      })
+      }),
+      { ownerId: input.ownerId, campaignId: input.campaignId }
     )
   }
 
@@ -309,7 +310,8 @@ export class AnthropicCreativeEngine implements CreativeEngine {
         system: buildRegenerateSystemPrompt(input.canvas, intelligence),
         user: withGenerationRetryFeedback(buildRegenerateUserMessage(input), reasons),
         images,
-      })
+      }),
+      { ownerId: input.ownerId, campaignId: input.campaignId }
     )
   }
 
@@ -317,7 +319,8 @@ export class AnthropicCreativeEngine implements CreativeEngine {
     brief: GenerateDirectionsInput["brief"],
     canvas: GenerateDirectionsInput["canvas"],
     images: ReferenceMailerImage[],
-    request: (reasons?: string[]) => Promise<CreativeDirection[]>
+    request: (reasons?: string[]) => Promise<CreativeDirection[]>,
+    context?: { ownerId?: string; campaignId?: string }
   ): Promise<GenerateDirectionsResult> {
     let reasons: string[] | undefined
     let lastError: unknown
@@ -343,17 +346,17 @@ export class AnthropicCreativeEngine implements CreativeEngine {
           best = result
           continue
         }
-        return applyDesignIntelligence(brief, result, canvas)
+        return applyDesignIntelligence(brief, result, canvas, process.env, context)
       } catch (error) {
         lastError = error
         if (!(error instanceof CreativeGenerationInvalidError) || attempt === 1) {
-          if (best) return applyDesignIntelligence(brief, best, canvas)
+          if (best) return applyDesignIntelligence(brief, best, canvas, process.env, context)
           throw error
         }
         reasons = error.reasons
       }
     }
-    if (best) return applyDesignIntelligence(brief, best, canvas)
+    if (best) return applyDesignIntelligence(brief, best, canvas, process.env, context)
     throw lastError instanceof Error
       ? lastError
       : new CreativeGenerationInvalidError(["generation failed"])

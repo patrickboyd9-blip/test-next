@@ -246,6 +246,7 @@ export function CreativeStudio({
           setSubPhase("focus")
         }}
         onCompare={() => setSubPhase("compare")}
+        campaignId={hasPersistedDirections ? campaign.id : undefined}
       />
     )
   } else if (subPhase === "compare") {
@@ -262,6 +263,7 @@ export function CreativeStudio({
           setSubPhase("focus")
         }}
         onBack={() => setSubPhase(hasPersistedDirections ? "focus" : "lead")}
+        campaignId={hasPersistedDirections ? campaign.id : undefined}
       />
     )
   } else if (subPhase === "refine") {
@@ -297,6 +299,7 @@ export function CreativeStudio({
         }}
         onStartRefining={() => setSubPhase("refine")}
         onApproveAsIs={() => openApproval("focus")}
+        campaignId={hasPersistedDirections ? campaign.id : undefined}
       />
     )
   }
