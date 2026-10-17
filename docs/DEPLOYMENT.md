@@ -59,8 +59,8 @@ Optional. Leave them blank unless you need to change a default.
 | `RESEARCH_GITHUB_REPO` | `patrickboyd9-blip/modern-mail-research` | The private repo. |
 | `RESEARCH_MANDO_REF` | `main` | Branch for the vendor library (`images/index.json`). |
 | `RESEARCH_C3PO_REF` | `cursor/visual-reference-corpus-3752` | Branch for Patrick’s mailbox pieces (`assets/physical/`). Anything inside a `private/` folder is skipped. |
-| `DESIGN_DIRECTOR` | model, when the Anthropic key is set | Set to `rules` to skip the vision art director and use the written rules only. |
-| `DESIGN_CRITIC` | one vision look at the lead card when the key is set | Set to `machine` to score from measurements only. |
+| `DESIGN_DIRECTOR` | the vision model when `ANTHROPIC_API_KEY` is set, otherwise the written rules | Set to `rules` to skip the vision art director. |
+| `DESIGN_CRITIC` | the vision model when `ANTHROPIC_API_KEY` is set, otherwise a machine estimate | Set to `machine` to score from measurements only. A machine score is labeled "machine estimate" until the vision critic runs. The vision critic scores the print-resolution card. If that render cannot be produced, the score stays a machine estimate. |
 | `DESIGN_CRITIC_ROUNDS` | `3` | How many layout repairs to try. The app will not go past 3. |
 | `DESIGN_SYNC_BATCH` | `40` | How many new mailers one daily run downloads. |
 | `DESIGN_ANALYZE_CAP` | `8` | How many ungraded mailers one run sends to the vision model. |

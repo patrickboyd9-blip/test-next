@@ -6,10 +6,9 @@ import { assignTemplateToSpec, verticalPaletteForBrief } from "@/lib/postcard-la
 import { composePostcardFace } from "@/lib/postcard-layouts/compose"
 
 import { critiqueCard } from "./critic"
-import { composeGridCard } from "./grid-composer"
 import { loadLibrary, loadSeedAnalyses } from "./library"
 import { directOneCard, type DirectedCard } from "./pipeline"
-import { renderCardPng } from "./render-png"
+import { renderStudioCardPng } from "./studio-render"
 import type { TrimSize } from "./rationale"
 
 export interface BenchmarkBrief {
@@ -24,8 +23,8 @@ export interface BenchmarkRow {
   id: string
   label: string
   trim: TrimSize
-  before: { weighted: number; visionScore: number; autoFails: string[] }
-  after: { weighted: number; visionScore: number; autoFails: string[]; passed: boolean; rounds: number }
+  before: { weighted: number; visionScore: number; autoFails: string[]; scoreKind: string }
+  after: { weighted: number; visionScore: number; autoFails: string[]; passed: boolean; rounds: number; scoreKind: string }
   viewed: string[]
   letter: string
 }
@@ -135,7 +134,7 @@ export async function runBenchmark(options?: {
       spec: item.spec,
       trim: item.trim,
       records,
-      env: { ...options?.env, DESIGN_DIRECTOR: "rules", DESIGN_CRITIC: "machine" } as NodeJS.ProcessEnv,
+      env: options?.env ?? process.env,
       businessName: item.brief.businessInfo?.name,
       cardId: item.id,
     })
@@ -156,6 +155,7 @@ export async function runBenchmark(options?: {
         weighted: beforeCritique.weighted,
         visionScore: beforeCritique.visionScore,
         autoFails: beforeCritique.autoFails,
+        scoreKind: beforeCritique.scoreKind,
       },
       after: {
         weighted: directed.critique.weighted,
@@ -163,6 +163,7 @@ export async function runBenchmark(options?: {
         autoFails: directed.critique.autoFails,
         passed: directed.shown,
         rounds: directed.rounds,
+        scoreKind: directed.critique.scoreKind,
       },
       viewed: directed.viewed.map((view) => `${view.id} ${view.width}×${view.height}`),
       letter: letterFor(directed),
@@ -193,19 +194,9 @@ async function writePair(
   beforePlan: ReturnType<typeof composePostcardFace>
 ): Promise<void> {
   await mkdir(outDir, { recursive: true })
-  const beforeCard = composeGridCard({
-    rationale: directed.rationale,
-    spec: item.spec,
-    businessName: item.brief.businessInfo?.name,
-  })
-  // The before file is the current template painter's geometry, drawn with the same renderer.
-  const beforeDrawn = {
-    ...beforeCard,
-    front: beforePlan,
-    panel: beforePlan.shapes.find((shape) => shape.role === "field")?.rect ?? beforeCard.panel,
-  }
-  await writeFile(path.join(outDir, `${item.id}-before.png`), renderCardPng(beforeDrawn))
-  await writeFile(path.join(outDir, `${item.id}-after.png`), renderCardPng(directed.card))
+  const payload = item.brief.qrDestination ?? item.brief.website ?? "https://example.com/book"
+  await writeFile(path.join(outDir, `${item.id}-before.png`), await renderStudioCardPng(beforePlan, payload))
+  await writeFile(path.join(outDir, `${item.id}-after.png`), await renderStudioCardPng(directed.card.front, payload))
 }
 
 function letterFor(directed: DirectedCard): string {
@@ -219,19 +210,32 @@ function renderReport(rows: BenchmarkRow[], before: number, after: number): stri
   const lines = [
     "# Postcard benchmark",
     "",
-    `Average vision score before (current templates): ${before}. After (grid from a Design Rationale): ${after}.`,
+    `Average score before (current templates): ${before}. After (grid from a Design Rationale): ${after}.`,
     "",
-    "| Brief | Trim | Before | After | Auto-fails after | Images the art director opened | Letter |",
-    "| --- | --- | --- | --- | --- | --- | --- |",
-    ...rows.map((row) => `| ${row.label} | ${row.trim} | ${row.before.visionScore} | ${row.after.visionScore} | ${row.after.autoFails.join(", ") || "none"} | ${row.viewed.join("; ")} | ${row.letter} |`),
+    scoreNote(rows),
     "",
-    "Before is the template the product paints today, with the same words. After is the grid composer. Scores are internal. A card is shown when auto-fails are clear, the weighted rubric is at least 8, and the vision score is at least 80.",
+    `| Brief | Trim | Before | After | Score | Auto-fails after | Images the art director opened | ${letterHeading(rows)} |`,
+    "| --- | --- | --- | --- | --- | --- | --- | --- |",
+    ...rows.map((row) => `| ${row.label} | ${row.trim} | ${row.before.visionScore} | ${row.after.visionScore} | ${row.after.scoreKind} | ${row.after.autoFails.join(", ") || "none"} | ${row.viewed.join("; ")} | ${row.letter} |`),
+    "",
+    "Before is the template the product paints today, with the same words. After is the grid composer. Both files are the Studio card at 300 pixels per inch, with the Studio fonts and a labeled stand-in photograph. Scores stay off the customer screen. A card is shown when auto-fails are clear, the weighted rubric is at least 8, and the score is at least 80.",
     "",
     `Library seed: ${loadSeedAnalyses().length} analyses. Every brief opens PM-047, PM-054, and PM-022, the mailbox anchors, and does not open the anti-examples.`,
     "",
-    "This run measures those images on disk. When ANTHROPIC_API_KEY is set and DESIGN_DIRECTOR is not rules, the same files are sent to the vision model. This report does not copy their artwork or wording.",
+    "When ANTHROPIC_API_KEY is set, the art director and the critic use the vision model on their own. Without that key, both fall back to the written rules and the score is a machine estimate.",
   ]
   return lines.join("\n")
+}
+
+function letterHeading(rows: BenchmarkRow[]): string {
+  const vision = rows.every((row) => row.after.scoreKind === "vision")
+  return vision ? "Letter" : "Machine letter"
+}
+
+function scoreNote(rows: BenchmarkRow[]): string {
+  const kinds = new Set(rows.map((row) => row.after.scoreKind))
+  if (kinds.size === 1 && kinds.has("vision")) return "The after scores are from the vision critic."
+  return "The scores in this table are a machine estimate. The vision critic has not scored these cards."
 }
 
 function average(values: number[]): number {

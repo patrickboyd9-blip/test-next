@@ -89,6 +89,6 @@ async function normalizeMockGeneration(
       ...recommendation,
       rationale: result.recommendation.rationale,
     },
-  }, input.canvas, { ...process.env, DESIGN_DIRECTOR: "rules", DESIGN_CRITIC: "machine" })
+  }, input.canvas)
   return designed
 }

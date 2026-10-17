@@ -11,9 +11,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   try {
-    const report = await runBenchmark({
-      env: { ...process.env, DESIGN_CRITIC: process.env.DESIGN_CRITIC ?? "machine" },
-    })
+    const report = await runBenchmark()
     return NextResponse.json({
       averageBefore: report.averageBefore,
       averageAfter: report.averageAfter,

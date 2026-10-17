@@ -7,7 +7,7 @@ import {
 } from "@/lib/print-spec/postcard-5x8-print-spec"
 import { buildPostcard6x9PrintSpec } from "@/lib/print-spec/postcard-6x9-print-spec"
 
-import { contrastRatio } from "./contrast"
+import { measureBackdropContrast } from "./backdrop"
 import { normalizedPanel, textInsideSafe, type GridCard } from "./grid-composer"
 import type { DesignRationale, GridName } from "./rationale"
 
@@ -33,6 +33,8 @@ export interface Critique {
   passed: boolean
   edit: string | null
   brokenRule: string | null
+  /** "vision" only after the vision critic has scored this card. */
+  scoreKind: "machine estimate" | "vision"
 }
 
 const VISION_WEIGHTS: Record<string, number> = {
@@ -47,10 +49,9 @@ export function critiqueCard(card: GridCard, rationale: DesignRationale, copy: s
   const phone = card.front.lockup?.phone
   const words = (headline?.text ?? "").split(/\s+/).filter(Boolean)
 
-  const headlineContrast = headline ? contrastRatio(headline.color, panelFill(card)) : 1
-  const offerContrast = offer ? contrastRatio(offer.color, panelFill(card)) : 1
-  const phoneContrast = phone ? contrastRatio(phone.color, panelFill(card)) : 1
-  if (headlineContrast < 4.5 || offerContrast < 4.5 || phoneContrast < 4.5) autoFails.push("AF1")
+  const backdrop = measureBackdropContrast(card)
+  const worstContrast = backdrop.worst
+  if (worstContrast < 4.5) autoFails.push("AF1")
   if (card.front.overflows || words.some((word) => word.includes("-") && word.length > 12)) autoFails.push("AF2")
   if (words.length > 8) autoFails.push("AF3")
   if (card.photoAreaPct < 40 && rationale.photo_brief.placement !== "none") autoFails.push("AF4")
@@ -65,7 +66,7 @@ export function critiqueCard(card: GridCard, rationale: DesignRationale, copy: s
   if (!phone?.text || phonePt < phoneFloor || (card.front.lockup?.qrInches ?? 0) < 0.75 || card.front.lockup?.qrLabel !== "Scan to book") {
     autoFails.push("AF7")
   }
-  const boxed = card.front.shapes.filter((shape) => shape.role === "field" || shape.role === "offer-tile" || shape.role === "coupon" || shape.role === "badge" || shape.role === "starburst")
+  const boxed = card.front.shapes.filter((shape) => shape.role === "field" || shape.role === "type-panel" || shape.role === "offer-tile" || shape.role === "coupon" || shape.role === "badge" || shape.role === "starburst")
   const bursts = card.front.shapes.filter((shape) => shape.role === "starburst")
   if (boxed.length >= 4 || bursts.length > 1) autoFails.push("AF8")
   if (backViolatesKeepOut(card)) autoFails.push("AF10")
@@ -81,15 +82,14 @@ export function critiqueCard(card: GridCard, rationale: DesignRationale, copy: s
   const d1 = hierarchyScore(rationale, offerToHeadline, headline?.fontPt ?? 0, body, phonePt, offer?.fontPt ?? 0)
   const d2 = words.length >= 3 && words.length <= 6 ? 9 : words.length <= 8 ? 6 : 3
   const d3 = card.photoAreaPct >= 55 ? 9 : card.photoAreaPct >= 40 ? 6 : 3
-  const worstContrast = Math.min(headlineContrast, offerContrast, phoneContrast)
-  const d4 = worstContrast >= 7 ? 9 : worstContrast >= 4.5 ? 6 : 3
+  const d4 = worstContrast >= 7 ? 9 : worstContrast >= 4.5 ? 6 : 2
   const d5 = card.calmFieldPct >= 25 && boxed.length <= 2 && bursts.length === 0 ? 9 : boxed.length <= 3 ? 6 : 3
   const d6 = phone?.text && card.front.lockup?.qrLabel === "Scan to book" && phonePt >= phoneFloor ? 9 : phone?.text ? 6 : 3
   const dimensions = { D1: d1, D2: d2, D3: d3, D4: d4, D5: d5, D6: d6 }
   const weighted = round2(d1 * 0.25 + d2 * 0.15 + d3 * 0.2 + d4 * 0.15 + d5 * 0.15 + d6 * 0.1)
 
   const vision: Record<string, number> = {
-    V1: card.front.shapes.filter((shape) => shape.role === "field").length === 1 ? 5 : 2,
+    V1: card.front.shapes.filter((shape) => shape.role === "field" || shape.role === "type-panel").length === 1 ? 5 : 2,
     V2: rationale.scale_ratios.hero === "offer"
       ? (offerToHeadline >= 1.55 ? 5 : 2)
       : ((headline?.fontPt ?? 0) >= body * 2.5 ? 5 : 2),
@@ -106,9 +106,10 @@ export function critiqueCard(card: GridCard, rationale: DesignRationale, copy: s
     V13: GOVERNMENT.test(copy) ? 1 : 5,
   }
   if (rationale.vertical === "medicare_insurance" && rationale.palette.emotion !== "compliance_calm") vision.V8 = 1
-  const visionScore = round2(
+  let visionScore = round2(
     Object.entries(VISION_WEIGHTS).reduce((sum, [id, weight]) => sum + ((vision[id] ?? 1) / 5) * weight, 0)
   )
+  if (worstContrast < 4.5) visionScore = Math.min(visionScore, 40)
   const passed = uniqueFails.length === 0 && weighted >= WEIGHTED_PASS && visionScore >= VISION_PASS
   const brokenRule = uniqueFails[0] ?? lowestVision(vision)
   return {
@@ -120,6 +121,7 @@ export function critiqueCard(card: GridCard, rationale: DesignRationale, copy: s
     passed,
     brokenRule: passed ? null : brokenRule,
     edit: passed ? null : editFor(brokenRule, rationale),
+    scoreKind: "machine estimate",
   }
 }
 
@@ -207,10 +209,6 @@ function liveTexts(plan: PostcardFacePlan) {
     ...(plan.lockup?.phone ? [plan.lockup.phone] : []),
     ...(plan.lockup?.website ? [plan.lockup.website] : []),
   ]
-}
-
-function panelFill(card: GridCard): string {
-  return card.front.shapes.find((shape) => shape.role === "field")?.fill ?? card.front.palette.paper
 }
 
 function backViolatesKeepOut(card: GridCard): boolean {

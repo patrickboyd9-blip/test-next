@@ -18,7 +18,7 @@ import type { DesignRationale, TrimSize } from "./rationale"
 import { selectReferences, type ReferenceSelection } from "./select"
 import { checkSimilarity, type SimilarityResult } from "./similarity"
 import { requestModelRationale, requestVisionCritique, type ModelUsage } from "./model"
-import { renderCardPng } from "./render-png"
+import { renderStudioCardPng } from "./studio-render"
 import { viewSelection, type ImageView } from "./view-images"
 
 export interface DirectedCard {
@@ -192,7 +192,7 @@ export async function applyDesignIntelligence(
       env,
       cardId: direction.id,
     })
-    if (index === leadIndex && env.ANTHROPIC_API_KEY?.trim() && env.DESIGN_CRITIC !== "machine") {
+    if (index === leadIndex && criticUsesVision(env)) {
       directed = await applyVisionRound(directed, brief, direction.spec, env)
     } else {
       logTokenCost(emptyCost(direction.id, "critic"))
@@ -285,9 +285,12 @@ export function trimFromCanvas(canvas?: CreativeCanvas): TrimSize {
 
 export function directorMode(env: NodeJS.ProcessEnv): "rules" | "model" {
   if (env.DESIGN_DIRECTOR === "rules") return "rules"
-  if (env.DESIGN_DIRECTOR === "model" && env.ANTHROPIC_API_KEY?.trim()) return "model"
-  if (env.ANTHROPIC_API_KEY?.trim() && env.DESIGN_DIRECTOR !== "rules") return "model"
+  if (env.ANTHROPIC_API_KEY?.trim()) return "model"
   return "rules"
+}
+
+export function criticUsesVision(env: NodeJS.ProcessEnv): boolean {
+  return Boolean(env.ANTHROPIC_API_KEY?.trim()) && env.DESIGN_CRITIC !== "machine"
 }
 
 export function criticCap(env: NodeJS.ProcessEnv): number {
@@ -329,7 +332,15 @@ async function applyVisionRound(
   spec: CreativeDirection["spec"],
   env: NodeJS.ProcessEnv
 ): Promise<DirectedCard> {
-  const png = renderCardPng(directed.card)
+  let png: Buffer
+  try {
+    png = await renderStudioCardPng(directed.card.front, spec.qrDestination ?? spec.website ?? spec.phone ?? "https://example.com/book")
+  } catch (error) {
+    console.info(
+      `[design-intelligence] ${JSON.stringify({ step: "critic", error: error instanceof Error ? error.message : "render failed" })}`
+    )
+    return directed
+  }
   const vision = await requestVisionCritique({ png, env, vertical: directed.rationale.vertical })
   if (!vision) return directed
   const cost = usageCost(directed.costs[0]?.cardId ?? "card", "critic", vision.usage, env)
@@ -341,7 +352,7 @@ async function applyVisionRound(
       ...directed,
       shown: true,
       costs: [...directed.costs, cost],
-      critique: { ...directed.critique, visionScore, passed: true, edit: null },
+      critique: { ...directed.critique, visionScore, passed: true, edit: null, scoreKind: "vision" },
     }
   }
   const shifted = repairCard({
@@ -358,5 +369,6 @@ async function applyVisionRound(
     shown: shifted.shown && vision.score >= VISION_PASS,
     edits: [...directed.edits, vision.edit, ...shifted.edits],
     costs: [...shifted.costs, cost],
+    critique: { ...shifted.critique, scoreKind: "vision" },
   }
 }

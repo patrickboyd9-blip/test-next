@@ -9,6 +9,7 @@ import type { Campaign, CampaignBrief, CreativeSpec } from "@/lib/campaign-creat
 import { createFileDocumentStore } from "@/lib/storage/document-store"
 
 import { directDesign } from "./art-director"
+import { critiqueCard } from "./critic"
 import { BENCHMARK_BRIEFS } from "./benchmark"
 import { composeGridCard, textInsideSafe } from "./grid-composer"
 import {
@@ -16,7 +17,7 @@ import {
   loadSeedAnalyses,
   localReferenceRoot,
 } from "./library"
-import { directOneCard } from "./pipeline"
+import { criticUsesVision, directOneCard, directorMode } from "./pipeline"
 import { validateDesignRationale } from "./rationale"
 import { selectReferences } from "./select"
 import { checkSimilarity } from "./similarity"
@@ -32,6 +33,16 @@ import plumbingExample from "./seed/examples/plumbing.json"
 import medicareExample from "./seed/examples/medicare.json"
 
 const rulesEnv = { DESIGN_DIRECTOR: "rules", DESIGN_CRITIC: "machine" } as unknown as NodeJS.ProcessEnv
+
+test("the vision director and critic run when the API key is set", () => {
+  const key = { ANTHROPIC_API_KEY: "test-key" } as unknown as NodeJS.ProcessEnv
+  assert.equal(directorMode(key), "model")
+  assert.equal(criticUsesVision(key), true)
+  assert.equal(directorMode({} as NodeJS.ProcessEnv), "rules")
+  assert.equal(criticUsesVision({} as NodeJS.ProcessEnv), false)
+  assert.equal(directorMode({ ...key, DESIGN_DIRECTOR: "rules" }), "rules")
+  assert.equal(criticUsesVision({ ...key, DESIGN_CRITIC: "machine" }), false)
+})
 
 test("the seed holds every written analysis", () => {
   const analyses = loadSeedAnalyses()
@@ -124,12 +135,63 @@ test("the grid card keeps phone, website, scan line, ratio, and safe type", asyn
   assert.ok(offer.fontPt >= headline.fontPt * 1.55)
   assert.equal(card.front.shapes.some((shape) => shape.role === "starburst"), false)
   assert.equal(directed.critique.autoFails.includes("AF10"), false)
+  assert.equal(directed.critique.autoFails.includes("AF1"), false)
+  assert.equal(directed.critique.scoreKind, "machine estimate")
+  assert.ok(directed.critique.visionScore > 40)
   const wide = composeGridCard({
     rationale: { ...directed.rationale, format: { trim: "6x9", orientation: "landscape" } },
     spec,
     businessName: "Northline Roofing",
   })
   assert.ok(wide.back.texts.every((text) => textInsideSafe(text.rect, "6x9")))
+})
+
+test("dark type on the photograph hard-fails and scores well below an A", async () => {
+  const brief: CampaignBrief = {
+    goal: "Book roof replacement estimates",
+    offer: "$500 off",
+    phone: "(619) 555-0148",
+    website: "northline.example/book",
+  }
+  const directed = await directOneCard({
+    brief,
+    spec: {
+      headline: "See The Ceiling Stain",
+      offer: "$500 off",
+      phone: brief.phone,
+      website: brief.website,
+    },
+    trim: "5x8",
+    records: [],
+    env: rulesEnv,
+    cardId: "ceiling",
+  })
+  const trim = { x: 0, y: 0, w: 8, h: 5 }
+  const covered = {
+    ...directed.card,
+    front: {
+      ...directed.card.front,
+      photos: [{ id: "photo", role: "photo" as const, rect: trim, bleed: true }],
+      shapes: directed.card.front.shapes.filter((shape) => shape.role !== "type-panel"),
+      texts: directed.card.front.texts.map((text) => ({ ...text, color: "#3a3a3a" })),
+      lockup: directed.card.front.lockup
+        ? {
+            ...directed.card.front.lockup,
+            phone: directed.card.front.lockup.phone
+              ? { ...directed.card.front.lockup.phone, color: "#3a3a3a" }
+              : undefined,
+            website: directed.card.front.lockup.website
+              ? { ...directed.card.front.lockup.website, color: "#3a3a3a" }
+              : undefined,
+          }
+        : null,
+    },
+  }
+  const critique = critiqueCard(covered, directed.rationale, "See The Ceiling Stain $500 off")
+  assert.ok(critique.autoFails.includes("AF1"))
+  assert.ok(critique.visionScore <= 40)
+  assert.equal(critique.scoreKind, "machine estimate")
+  assert.equal(critique.passed, false)
 })
 
 test("a copied benchmark phone is rejected", async () => {

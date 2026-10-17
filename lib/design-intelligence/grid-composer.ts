@@ -134,7 +134,7 @@ export function composeGridCard(input: GridComposeInput): GridCard {
 
   const shapes: ShapePlan[] = [
     { id: "paper", role: "paper", rect: { x: 0, y: 0, w: trim.w, h: trim.h }, fill: palette.field },
-    { id: "panel", role: "field", rect: regions.panel, fill: panelFill },
+    { id: "panel", role: "type-panel", rect: regions.panel, fill: panelFill },
   ]
 
   const photoArea = (regions.photo.w * regions.photo.h) / (trim.w * trim.h)

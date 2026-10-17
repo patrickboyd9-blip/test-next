@@ -16,6 +16,7 @@ import { trimInches } from "@/lib/postcard-layouts/templates"
 import type { InchRect } from "@/lib/postcard-layouts/typefit"
 import { lineHeightFor } from "@/lib/postcard-layouts/typefit"
 import { paintQr } from "@/lib/campaign-creator/studio-qr"
+import { studioShapeLayer } from "@/lib/design-intelligence/studio-layer"
 
 const DISPLAY_CSS = {
   trade: 'var(--font-display-family), "Arial Black", "Helvetica Neue", Helvetica, Arial, sans-serif',
@@ -159,9 +160,7 @@ function Shapes({ plan, layer }: { plan: PostcardFacePlan; layer: "back" | "mid"
 }
 
 function shapeLayer(role: string): "back" | "mid" | "front" {
-  if (role === "paper" || role === "field") return "back"
-  if (role === "scrim" || role === "band") return "mid"
-  return "front"
+  return studioShapeLayer(role)
 }
 
 function Shape({ plan, shape }: { plan: PostcardFacePlan; shape: ShapePlan }) {

@@ -8,7 +8,7 @@ async function main(): Promise<void> {
   await mkdir(out, { recursive: true })
   const report = await runBenchmark({
     outDir: out,
-    env: { ...process.env, DESIGN_DIRECTOR: process.env.DESIGN_DIRECTOR ?? "rules", DESIGN_CRITIC: "machine" },
+    env: process.env,
   })
   console.log(report.summary)
 }
