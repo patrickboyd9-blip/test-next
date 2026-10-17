@@ -1,0 +1,109 @@
+{
+  "id": "MMR-397-2",
+  "corpus": "mmr",
+  "research_ref": "modern-mail-research images @ 599bf1c",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "secondary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B+",
+  "focal_point": "A neighborhood or job-site photograph, large, with a short local line.",
+  "eye_path": "Z through the street into the line and the mark.",
+  "grid": "Full-bleed with a type corner.",
+  "visual_weight_pct": {
+    "photo": 70,
+    "text": 14,
+    "offer": 6,
+    "white_space": 10
+  },
+  "scale_ratios": "Headline modest against the photo. Few sizes.",
+  "type_choices": "One family, short line.",
+  "palette_hex": [
+    "#E7E0D4",
+    "#2C2C2C",
+    "#8A9A7B"
+  ],
+  "photo_art_direction": "Real street or job, daylight, local rather than studio.",
+  "offer_placement": "Awareness more than a hard number. The next step is softer than MMR-397.",
+  "trust_and_cta": "Local mark. Phone quieter than on the first piece.",
+  "scores": {
+    "focal": {
+      "score": 4,
+      "reason": "The place is the figure."
+    },
+    "hierarchy": {
+      "score": 4,
+      "reason": "Short type ladder."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Photo-heavy, stable."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "Simple bleed."
+    },
+    "eye_path": {
+      "score": 4,
+      "reason": "Clear and short."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "One type group."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Type placed on quieter area."
+    },
+    "whitespace": {
+      "score": 4,
+      "reason": "The scene provides air."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Subject separates."
+    },
+    "color": {
+      "score": 4,
+      "reason": "Local color."
+    },
+    "type": {
+      "score": 4,
+      "reason": "Few sizes."
+    },
+    "photo": {
+      "score": 5,
+      "reason": "The right kind of local photo."
+    },
+    "offer": {
+      "score": 3,
+      "reason": "Soft offer."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Response is quieter than the picture."
+    },
+    "trust": {
+      "score": 4,
+      "reason": "Locality is the trust."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "Glance gets a place, less a next step."
+    }
+  },
+  "emulate": [
+    "Use a real nearby job as the picture, then still put a hard next step on it."
+  ],
+  "do_not_copy": [
+    "The photos, mark, and lines."
+  ],
+  "anti_patterns": [
+    "Awareness with no response."
+  ],
+  "summary": "Style reference. Strong local photography, slightly soft on the ask."
+}

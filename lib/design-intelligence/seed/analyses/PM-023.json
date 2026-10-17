@@ -1,0 +1,112 @@
+{
+  "id": "PM-023",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "D",
+  "focal_point": "Four fireboxes and a gold headline. The offer is a parenthetical.",
+  "eye_path": "Header, then a wander across four fires.",
+  "grid": "Header plus four cells. A sticker on the gutter.",
+  "visual_weight_pct": {
+    "photo": 60,
+    "text": 22,
+    "offer": 6,
+    "white_space": 12
+  },
+  "scale_ratios": "Headline and four photos share weight. The offer is far smaller.",
+  "type_choices": "Gold display, a serif mark, small sans. Two families.",
+  "palette_hex": [
+    "#1A120C",
+    "#D4A017",
+    "#E07A2F",
+    "#F3EDE4"
+  ],
+  "photo_art_direction": "Catalog fireboxes, practical firelight, no people. Warm and repetitive.",
+  "offer_placement": "A special-offer line points to the other side. The front never states the deal.",
+  "trust_and_cta": "Two manufacturer badges. No phone. The action is to flip.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Fires tie."
+    },
+    "hierarchy": {
+      "score": 2,
+      "reason": "Offer is a whisper."
+    },
+    "balance": {
+      "score": 3,
+      "reason": "Even grid."
+    },
+    "grid": {
+      "score": 3,
+      "reason": "Four cells."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "No end to the path."
+    },
+    "gestalt": {
+      "score": 3,
+      "reason": "Sticker is an orphan."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Gold on black holds."
+    },
+    "whitespace": {
+      "score": 2,
+      "reason": "Cells are tight."
+    },
+    "figure_ground": {
+      "score": 3,
+      "reason": "Fires are the figure."
+    },
+    "color": {
+      "score": 4,
+      "reason": "Black and gold fit the product."
+    },
+    "type": {
+      "score": 3,
+      "reason": "Two families."
+    },
+    "photo": {
+      "score": 3,
+      "reason": "Warm catalog."
+    },
+    "offer": {
+      "score": 1,
+      "reason": "Deal deferred."
+    },
+    "cta": {
+      "score": 1,
+      "reason": "No front response."
+    },
+    "trust": {
+      "score": 2,
+      "reason": "Partner logos."
+    },
+    "glance_3s": {
+      "score": 2,
+      "reason": "Glance gets fire, not an offer."
+    }
+  },
+  "emulate": [
+    "Black-and-gold header only if the deal is in the header, in one line, with a phone."
+  ],
+  "do_not_copy": [
+    "Shop mark and manufacturer badges."
+  ],
+  "anti_patterns": [
+    "Offer deferred to the back",
+    "four equal photos",
+    "no front CTA"
+  ],
+  "summary": "Mailbox fireplace card. A catalog cover. The deal is a parenthetical."
+}

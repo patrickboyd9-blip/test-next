@@ -3,6 +3,7 @@ import type {
   MailPieceCatalogId,
   MailPieceCatalogVersion,
 } from "@/lib/mail-catalog/types"
+import type { DesignRationale } from "@/lib/design-intelligence/rationale"
 import type { PostcardTemplateId, VerticalPaletteId } from "@/lib/postcard-layouts/ids"
 
 export type CampaignStatus =
@@ -235,6 +236,11 @@ export interface CreativeSpec {
   imagePresence?: ImagePresence
   backLayout?: BackLayout
   layoutHints?: LayoutHints
+  /**
+   * Art-director decision for this card. The painter follows it.
+   * The critic score is not stored here.
+   */
+  designRationale?: DesignRationale
 }
 
 export type PhotoToTypeBalance = "photo_led" | "balanced" | "type_led"

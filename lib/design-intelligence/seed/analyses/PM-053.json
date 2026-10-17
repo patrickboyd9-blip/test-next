@@ -1,0 +1,113 @@
+{
+  "id": "PM-053",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "healthcare",
+  "faces": [
+    "front",
+    "back"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B",
+  "focal_point": "Front: a black-and-white laugh and a giant percent on an orange panel. Back: a small clinician portrait on a faded landscape.",
+  "eye_path": "Front: face, percent, small booking lines. Back: centered gray lines, then the portrait.",
+  "grid": "Front is a hard vertical split. Back is a loose header over a photo.",
+  "visual_weight_pct": {
+    "photo": 52,
+    "text": 22,
+    "offer": 16,
+    "white_space": 10
+  },
+  "scale_ratios": "The percent is the largest type on the front. Back type is all small.",
+  "type_choices": "Bold condensed sans and a display percent. A vertical wordmark on the split. Back is light gray.",
+  "palette_hex": [
+    "#F5A623",
+    "#1A1A1A",
+    "#F3F1EC",
+    "#C4A35A"
+  ],
+  "photo_art_direction": "Front is fashion-wellness, open laugh, no clinic. Back adds a real clinician outdoors, which is the useful picture, too small.",
+  "offer_placement": "The whole orange panel is a percent off a first visit. The back drops the offer.",
+  "trust_and_cta": "Two phones. A code on the photo points somewhere else. Back has tenure and still-small phones. Clinical trust is missing on the front.",
+  "scores": {
+    "focal": {
+      "score": 4,
+      "reason": "Percent and face, percent wins the type."
+    },
+    "hierarchy": {
+      "score": 4,
+      "reason": "Front ladder is clear; the back collapses."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Split balances."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "Hard split."
+    },
+    "eye_path": {
+      "score": 4,
+      "reason": "Front path is short."
+    },
+    "gestalt": {
+      "score": 3,
+      "reason": "Vertical wordmark is decoration."
+    },
+    "contrast": {
+      "score": 5,
+      "reason": "Black on orange."
+    },
+    "whitespace": {
+      "score": 2,
+      "reason": "Orange panel has no margin."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Panel is the figure."
+    },
+    "color": {
+      "score": 4,
+      "reason": "One orange."
+    },
+    "type": {
+      "score": 3,
+      "reason": "Three ideas in the panel."
+    },
+    "photo": {
+      "score": 4,
+      "reason": "Emotion is immediate; clinic is absent."
+    },
+    "offer": {
+      "score": 4,
+      "reason": "One percent."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Two phones and a second code."
+    },
+    "trust": {
+      "score": 2,
+      "reason": "No clinician on the front."
+    },
+    "glance_3s": {
+      "score": 4,
+      "reason": "Glance gets a mood and a percent."
+    }
+  },
+  "emulate": [
+    "Monochrome emotion against one saturated panel and one giant percent. Put one clinician and one phone on that same face."
+  ],
+  "do_not_copy": [
+    "The portrait, the wordmark, the phones. Back is redacted."
+  ],
+  "anti_patterns": [
+    "Two phones",
+    "clinical service with no credibility on the front",
+    "offer dropped on the back"
+  ],
+  "summary": "Mailbox telehealth card. Front is a B. The back is a C and does not repeat the offer. Together, a B."
+}

@@ -1,0 +1,111 @@
+{
+  "id": "PM-033",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B-",
+  "focal_point": "An aerial estate and pool. Type sits on a darkened scrim.",
+  "eye_path": "Sky line, house, scrim tagline, icon row.",
+  "grid": "Type at the top edge and a bottom scrim.",
+  "visual_weight_pct": {
+    "photo": 78,
+    "text": 14,
+    "offer": 0,
+    "white_space": 8
+  },
+  "scale_ratios": "House dominates. No price. Tagline is the largest type.",
+  "type_choices": "Small caps on the hill, a larger serif on the scrim. Three sizes.",
+  "palette_hex": [
+    "#C4653A",
+    "#F0E2CC",
+    "#3EC0D8",
+    "#E0B15A"
+  ],
+  "photo_art_direction": "Golden-hour aerial, high production. Scrim makes type possible.",
+  "offer_placement": "No offer. A capability line on the scrim.",
+  "trust_and_cta": "Mark only. No phone or code.",
+  "scores": {
+    "focal": {
+      "score": 5,
+      "reason": "The house is the one shape."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "No offer step."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Aerial balance."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "Scrim is a band."
+    },
+    "eye_path": {
+      "score": 4,
+      "reason": "Path ends at the mark."
+    },
+    "gestalt": {
+      "score": 5,
+      "reason": "Icon row groups."
+    },
+    "contrast": {
+      "score": 3,
+      "reason": "Top line is on a busy hill."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Scrim is the margin."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Scrim separates the tagline."
+    },
+    "color": {
+      "score": 5,
+      "reason": "Golden hour palette."
+    },
+    "type": {
+      "score": 4,
+      "reason": "Serif on the scrim works."
+    },
+    "photo": {
+      "score": 5,
+      "reason": "Excellent aerial."
+    },
+    "offer": {
+      "score": 1,
+      "reason": "No offer."
+    },
+    "cta": {
+      "score": 1,
+      "reason": "No response."
+    },
+    "trust": {
+      "score": 3,
+      "reason": "The property is the proof."
+    },
+    "glance_3s": {
+      "score": 4,
+      "reason": "Glance gets a house."
+    }
+  },
+  "emulate": [
+    "Type only on a darkened scrim. Then add one phone on that scrim."
+  ],
+  "do_not_copy": [
+    "Mark and aerial."
+  ],
+  "anti_patterns": [
+    "Brand face with no response",
+    "small type on detailed hillside"
+  ],
+  "summary": "Mailbox outdoor-living card. The aerial and scrim are excellent. There is no next step."
+}

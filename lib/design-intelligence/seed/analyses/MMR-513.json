@@ -1,0 +1,110 @@
+{
+  "id": "MMR-513",
+  "corpus": "mmr",
+  "research_ref": "modern-mail-research images @ 599bf1c",
+  "use_class": "anti_example",
+  "mailbox_weight": "secondary",
+  "vertical": "medicare_insurance",
+  "faces": [
+    "front"
+  ],
+  "low_res": true,
+  "shared_vendor_style": false,
+  "grade": "F",
+  "focal_point": "A fake enrollment notice. The page is designed to look like official mail, including a short response window.",
+  "eye_path": "Notice header, instruction, deadline.",
+  "grid": "Letter stack, centered authority.",
+  "visual_weight_pct": {
+    "photo": 0,
+    "text": 60,
+    "offer": 15,
+    "white_space": 25
+  },
+  "scale_ratios": "Deadline and header dominate. The scale is the trap.",
+  "type_choices": "Official grotesque and form labels. Multiple sizes.",
+  "palette_hex": [
+    "#F7F4EC",
+    "#1A1A1A",
+    "#8B1E1E"
+  ],
+  "photo_art_direction": "None. The absence of a person is part of the disguise.",
+  "offer_placement": "A few-day response demand. Forbidden as a device.",
+  "trust_and_cta": "False authority. A small disclaimer would not fix the costume.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "One official block, wrongly."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "Scale serves the notice."
+    },
+    "balance": {
+      "score": 2,
+      "reason": "Symmetric authority."
+    },
+    "grid": {
+      "score": 3,
+      "reason": "Form grid."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "Ends on the window."
+    },
+    "gestalt": {
+      "score": 2,
+      "reason": "Grouped as a letter."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Ink contrast is not the problem."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Letter margins."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "The header bar is the figure."
+    },
+    "color": {
+      "score": 1,
+      "reason": "Notice palette."
+    },
+    "type": {
+      "score": 2,
+      "reason": "Form type."
+    },
+    "photo": {
+      "score": 1,
+      "reason": "No advisor, on purpose."
+    },
+    "offer": {
+      "score": 1,
+      "reason": "Fake deadline."
+    },
+    "cta": {
+      "score": 2,
+      "reason": "Coerced response."
+    },
+    "trust": {
+      "score": 1,
+      "reason": "Government look."
+    },
+    "glance_3s": {
+      "score": 1,
+      "reason": "Glance recalls an obligation."
+    }
+  },
+  "emulate": [
+    "Nothing."
+  ],
+  "do_not_copy": [
+    "The entire notice, including any timing device."
+  ],
+  "anti_patterns": [
+    "Government-notice look",
+    "fake deadline"
+  ],
+  "summary": "Anti-example. Medicare mail that mimics an enrollment notice and a short deadline. Automatic F."
+}

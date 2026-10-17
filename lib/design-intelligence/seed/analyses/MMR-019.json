@@ -1,0 +1,113 @@
+{
+  "id": "MMR-019",
+  "corpus": "mmr",
+  "research_ref": "modern-mail-research images @ 599bf1c",
+  "use_class": "research_reference",
+  "mailbox_weight": "secondary",
+  "vertical": "plumbing",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B",
+  "focal_point": "The technician kneeling at a fixture is the mass; a vertical price rail on the right is the second pull and almost ties.",
+  "eye_path": "Z from the worker to the price rail to the phone along the bottom.",
+  "grid": "Photo left, identity center, scalloped price column right, under a dark header.",
+  "visual_weight_pct": {
+    "photo": 38,
+    "text": 18,
+    "offer": 32,
+    "white_space": 12
+  },
+  "scale_ratios": "Three prices are nearly equal. None is 1.6\u00d7 the header. The rail as a whole is larger than the headline.",
+  "type_choices": "Condensed header, a serif wordmark, heavy price figures. More than three sizes.",
+  "palette_hex": [
+    "#111111",
+    "#FFFFFF",
+    "#E31C79",
+    "#6B8F4E"
+  ],
+  "photo_art_direction": "Job-site, worker looking at the task, natural side light. Documentary and credible.",
+  "offer_placement": "The rail is in the right place and would work if it held one price. Three matched prices flatten it.",
+  "trust_and_cta": "A founding line, a phone, a URL, and a captioned code. Three responses.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Worker and pink rail share the punch."
+    },
+    "hierarchy": {
+      "score": 2,
+      "reason": "Three prices at one size erase the ladder."
+    },
+    "balance": {
+      "score": 3,
+      "reason": "The dark header steadies an otherwise loud right edge."
+    },
+    "grid": {
+      "score": 3,
+      "reason": "Three columns read, and the scallops break them."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "Z works until the rail offers three stops."
+    },
+    "gestalt": {
+      "score": 3,
+      "reason": "Prices are one group; responses are not."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Pink on white is immediate."
+    },
+    "whitespace": {
+      "score": 2,
+      "reason": "The center stack is cramped."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "The rail is a clear figure."
+    },
+    "color": {
+      "score": 3,
+      "reason": "Hot pink is a coupon accent, used honestly and loudly."
+    },
+    "type": {
+      "score": 3,
+      "reason": "Too many voices for three sizes."
+    },
+    "photo": {
+      "score": 4,
+      "reason": "Gaze-on-the-work is the right plumbing picture."
+    },
+    "offer": {
+      "score": 3,
+      "reason": "Right rail, wrong count of prices."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Code is labeled; phone and URL duplicate it."
+    },
+    "trust": {
+      "score": 3,
+      "reason": "Years are present and small, which is right, beside extra chrome."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "Glance gets plumbing and 'a discount,' not which one."
+    }
+  },
+  "emulate": [
+    "Crop a tech mid-task with eyes on the tool.",
+    "Put prices in one saturated rail, then keep a single figure."
+  ],
+  "do_not_copy": [
+    "The wordmark, the three price points, the scalloped edge."
+  ],
+  "anti_patterns": [
+    "Triple offer",
+    "multiple equal CTAs",
+    "coupon-rail template"
+  ],
+  "summary": "The strongest plumbing photograph in the vendor set. It stays a B because three prices and three responses keep it a coupon sheet."
+}

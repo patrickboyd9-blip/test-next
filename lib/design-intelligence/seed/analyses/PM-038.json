@@ -1,0 +1,111 @@
+{
+  "id": "PM-038",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "C",
+  "focal_point": "A center job photo and a red savings bar on cyan. The top edge of the snapshot crops the piece.",
+  "eye_path": "Job photos left to right, red bar, logo card.",
+  "grid": "Photo strip over a lower band.",
+  "visual_weight_pct": {
+    "photo": 40,
+    "text": 25,
+    "offer": 10,
+    "white_space": 25
+  },
+  "scale_ratios": "Photos are equal tiles. The red bar is similar to the headline.",
+  "type_choices": "White on cyan, red bar, a seal. About four sizes.",
+  "palette_hex": [
+    "#4AA3C4",
+    "#E10600",
+    "#FFFFFF",
+    "#3E6B3A"
+  ],
+  "photo_art_direction": "Faded job shots of a truck and trees. An illustrated seal beside them.",
+  "offer_placement": "Solid red bar, a percent, no phone beside it.",
+  "trust_and_cta": "Tenure under the seal. No phone visible in the crop.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Bar and photos tie."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "Bar is clear."
+    },
+    "balance": {
+      "score": 3,
+      "reason": "Even."
+    },
+    "grid": {
+      "score": 3,
+      "reason": "Strip plus band."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "No phone at the end."
+    },
+    "gestalt": {
+      "score": 3,
+      "reason": "Logo sits on a white card, which is good."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Red on cyan."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Cyan is open."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Bar separates."
+    },
+    "color": {
+      "score": 3,
+      "reason": "Two brights."
+    },
+    "type": {
+      "score": 3,
+      "reason": "Ordinary."
+    },
+    "photo": {
+      "score": 3,
+      "reason": "Equal jobs."
+    },
+    "offer": {
+      "score": 3,
+      "reason": "Percent with no phone."
+    },
+    "cta": {
+      "score": 1,
+      "reason": "No visible response."
+    },
+    "trust": {
+      "score": 3,
+      "reason": "Tenure line."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "Glance gets a red bar."
+    }
+  },
+  "emulate": [
+    "One field color, a solid offer bar, logo on a white card. Put the phone in the bar."
+  ],
+  "do_not_copy": [
+    "Seal and photos."
+  ],
+  "anti_patterns": [
+    "Three equal job photos",
+    "offer with no phone"
+  ],
+  "summary": "Mailbox tree card. The red bar is legible. Equal photos and no phone leave a template."
+}

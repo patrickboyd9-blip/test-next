@@ -1,0 +1,110 @@
+{
+  "id": "PM-018",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "finance",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B-",
+  "focal_point": "A large headline on gold, with a parent-and-child photo as the emotional stop.",
+  "eye_path": "Z across the headline into the photo, stopped by a legal band.",
+  "grid": "Diagonal split plus a full-width legal band.",
+  "visual_weight_pct": {
+    "photo": 30,
+    "text": 28,
+    "offer": 18,
+    "white_space": 24
+  },
+  "scale_ratios": "Headline is the hero. The dollar ceiling sits inside the sentence, not as a numeral hero.",
+  "type_choices": "One sans. Legal line is as heavy as display. About four sizes.",
+  "palette_hex": [
+    "#E6B23C",
+    "#FFF8EC",
+    "#1C2740"
+  ],
+  "photo_art_direction": "Stock parent and child, mutual gaze, warm window light. Cheerful and generic.",
+  "offer_placement": "The deal is the headline on gold. It works. Legal type flattens the bottom.",
+  "trust_and_cta": "Code, URL, and phone share one white card. The card is a real lockup.",
+  "scores": {
+    "focal": {
+      "score": 4,
+      "reason": "Headline on gold leads."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "Legal line is too heavy."
+    },
+    "balance": {
+      "score": 3,
+      "reason": "Diagonal balance."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "Split is clear."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "Legal band stops the path."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Response card is one group."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Gold and navy separate."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Legal eats the margin."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Gold field is the figure."
+    },
+    "color": {
+      "score": 4,
+      "reason": "One warm accent."
+    },
+    "type": {
+      "score": 3,
+      "reason": "Legal set as display."
+    },
+    "photo": {
+      "score": 3,
+      "reason": "Generic family stock."
+    },
+    "offer": {
+      "score": 4,
+      "reason": "One sentence offer."
+    },
+    "cta": {
+      "score": 4,
+      "reason": "One response card."
+    },
+    "trust": {
+      "score": 2,
+      "reason": "Required line, no human proof."
+    },
+    "glance_3s": {
+      "score": 4,
+      "reason": "Glance gets the gold sentence."
+    }
+  },
+  "emulate": [
+    "Offer as one sentence on a color field. QR, link, and phone in a single quiet card."
+  ],
+  "do_not_copy": [
+    "The equity mark and the disclaimer wording."
+  ],
+  "anti_patterns": [
+    "Legal copy at display weight",
+    "happy-family stock as proof"
+  ],
+  "summary": "Mailbox equity card. One sentence works. The legal strip is too loud."
+}

@@ -1,0 +1,111 @@
+{
+  "id": "MMR-577",
+  "corpus": "mmr",
+  "research_ref": "modern-mail-research images @ 599bf1c",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "secondary",
+  "vertical": "roofing",
+  "faces": [
+    "front",
+    "back"
+  ],
+  "low_res": false,
+  "shared_vendor_style": true,
+  "grade": "B-",
+  "focal_point": "A composite of both faces. The front's offer band is the loudest single element in the file.",
+  "eye_path": "Read the front band first; the back is a second, denser path.",
+  "grid": "Two faces shown together. Judge them as a pair that shares the vendor grid.",
+  "visual_weight_pct": {
+    "photo": 35,
+    "text": 30,
+    "offer": 20,
+    "white_space": 15
+  },
+  "scale_ratios": "Offer band large on the front. Back is smaller proof type.",
+  "type_choices": "Same grotesque on both faces. More sizes once both faces are counted; the front itself is tighter.",
+  "palette_hex": [
+    "#102A43",
+    "#F5C518",
+    "#FFFFFF",
+    "#E10600"
+  ],
+  "photo_art_direction": "Job or house imagery consistent with the series.",
+  "offer_placement": "Front band. Back adds proof rather than a second campaign. That role split is right.",
+  "trust_and_cta": "Phone on the front. Back holds extra claims.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "The composite shows two faces, so focus splits."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "Front band is clear."
+    },
+    "balance": {
+      "score": 3,
+      "reason": "Vendor balance."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "Shared grid across faces."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "Front path is short."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Bands repeat."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Contrast is the system."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Back is denser."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Yellow or red figure."
+    },
+    "color": {
+      "score": 3,
+      "reason": "Series palette."
+    },
+    "type": {
+      "score": 3,
+      "reason": "One family."
+    },
+    "photo": {
+      "score": 3,
+      "reason": "Series photography."
+    },
+    "offer": {
+      "score": 4,
+      "reason": "One front offer."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Phone on the front."
+    },
+    "trust": {
+      "score": 3,
+      "reason": "Extra claims pushed toward the back."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "Front glance works; the composite is busy."
+    }
+  },
+  "emulate": [
+    "Front offer, back proof, same colors."
+  ],
+  "do_not_copy": [
+    "The contractor mark, phone, headlines, and the vendor's repeated yellow-or-red tile system. Style reference only. This series shares one house style, so repetition is not independent proof."
+  ],
+  "anti_patterns": [
+    "Designing from a flattened composite as if it were one face."
+  ],
+  "summary": "Style reference composite of a front and back. The role split is the lesson."
+}

@@ -1,0 +1,109 @@
+{
+  "id": "MMR-032-back",
+  "corpus": "mmr",
+  "research_ref": "modern-mail-research images @ 599bf1c",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "secondary",
+  "vertical": "medicare_insurance",
+  "faces": [
+    "back"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B-",
+  "focal_point": "A proof grid: several small panels rather than one hero. Appropriate for a back, soft as a standalone.",
+  "eye_path": "F across panels: a heading, then a scan of benefits or steps.",
+  "grid": "Regular multi-panel grid. Even gutters.",
+  "visual_weight_pct": {
+    "photo": 25,
+    "text": 40,
+    "offer": 5,
+    "white_space": 30
+  },
+  "scale_ratios": "Headings repeat at one size. No numeral hero. Fine for proof, flat if this were the front.",
+  "type_choices": "Consistent family, small body, headings one step up.",
+  "palette_hex": [
+    "#F4F0E6",
+    "#1E2A3A",
+    "#8AA0B4"
+  ],
+  "photo_art_direction": "Supporting pictures, smaller than the front portrait, same calm grade.",
+  "offer_placement": "The back does not introduce a new deal. It explains. That role split is the lesson.",
+  "trust_and_cta": "Marks repeat. Legal-scale lines are present. Do not copy the carrier system.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Panels are even, which a back can survive."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "Flat by front standards, ordered as proof."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Symmetric and calm on purpose."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "The grid is the point of this face."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "F-pattern matches a list of proof."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Repeated panels read as one system."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Body contrast holds."
+    },
+    "whitespace": {
+      "score": 4,
+      "reason": "Margins stay open."
+    },
+    "figure_ground": {
+      "score": 3,
+      "reason": "No single figure, by role."
+    },
+    "color": {
+      "score": 4,
+      "reason": "Same restrained palette as the front."
+    },
+    "type": {
+      "score": 4,
+      "reason": "One family, disciplined."
+    },
+    "photo": {
+      "score": 3,
+      "reason": "Pictures support; they do not argue."
+    },
+    "offer": {
+      "score": 3,
+      "reason": "No second offer, which is correct."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Response repeats without a new campaign."
+    },
+    "trust": {
+      "score": 4,
+      "reason": "Brand trust, not a badge wall we can reuse."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "A glance does not need to; this is the flip side."
+    }
+  },
+  "emulate": [
+    "A proof back in the same palette and grid as the front, with no new offer."
+  ],
+  "do_not_copy": [
+    "Every mark, layout detail, and line of this carrier piece."
+  ],
+  "anti_patterns": [
+    "Using a proof grid as a front."
+  ],
+  "summary": "The back of the same style-reference piece. It shows the proof role. It is not a front to imitate."
+}

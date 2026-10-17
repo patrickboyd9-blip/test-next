@@ -1,0 +1,110 @@
+{
+  "id": "MMR-574",
+  "corpus": "mmr",
+  "research_ref": "modern-mail-research images @ 599bf1c",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "secondary",
+  "vertical": "roofing",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": true,
+  "grade": "B+",
+  "focal_point": "An aerial of a whole roof, with an offer tile as the second shape. The roof is larger; the tile is the message.",
+  "eye_path": "Diagonal along the roof into the tile and the phone.",
+  "grid": "Full-bleed aerial plus a corner or band tile. One break where the tile sits.",
+  "visual_weight_pct": {
+    "photo": 58,
+    "text": 14,
+    "offer": 18,
+    "white_space": 10
+  },
+  "scale_ratios": "The tile numeral is strong and still not a clean 1.6\u00d7 over the headline. Closer than the rest of this series.",
+  "type_choices": "Heavy grotesque in the tile, smaller headline. About four sizes.",
+  "palette_hex": [
+    "#1B3A4B",
+    "#F5C518",
+    "#FFFFFF",
+    "#8C6239"
+  ],
+  "photo_art_direction": "Aerial roof plane, useful crop for a trade you cannot see from the curb. Vendor lighting, clean.",
+  "offer_placement": "Tile on a quieter area. This is the pattern to steal as a principle: one first-step figure on the photo.",
+  "trust_and_cta": "Phone with the tile. Local claims stay on the card and are not ours.",
+  "scores": {
+    "focal": {
+      "score": 4,
+      "reason": "Roof leads, tile is close."
+    },
+    "hierarchy": {
+      "score": 4,
+      "reason": "Numeral is large, not quite isolated."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Photo-heavy balance."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "Bleed plus one tile."
+    },
+    "eye_path": {
+      "score": 4,
+      "reason": "Path ends at the phone."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Tile is one group."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Tile contrast is the point."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Sky is limited."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Tile separates from shingles."
+    },
+    "color": {
+      "score": 3,
+      "reason": "Navy and yellow, their system."
+    },
+    "type": {
+      "score": 4,
+      "reason": "Few voices."
+    },
+    "photo": {
+      "score": 4,
+      "reason": "Aerial is the right subject."
+    },
+    "offer": {
+      "score": 4,
+      "reason": "One first step, well placed."
+    },
+    "cta": {
+      "score": 4,
+      "reason": "Phone joined to the tile."
+    },
+    "trust": {
+      "score": 3,
+      "reason": "Proof is the roof, not badges."
+    },
+    "glance_3s": {
+      "score": 4,
+      "reason": "Glance gets a roof and a free step."
+    }
+  },
+  "emulate": [
+    "Aerial or high angle of the actual roof plane, one offer tile on the quiet part, phone in that tile."
+  ],
+  "do_not_copy": [
+    "The contractor mark, phone, headlines, and the vendor's repeated yellow-or-red tile system. Style reference only. This series shares one house style, so repetition is not independent proof."
+  ],
+  "anti_patterns": [
+    "Copying the tile chrome instead of the structure."
+  ],
+  "summary": "Best of the shared roofing series. Style reference only. One roof, one first step. Still a B+ because the tile system is template grammar."
+}

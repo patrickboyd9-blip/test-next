@@ -1,0 +1,110 @@
+{
+  "id": "PM-046",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "education",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "A-",
+  "focal_point": "One oversized question. The key line is in a second color and is the loudest mark.",
+  "eye_path": "Question top to bottom, a small burst, two proof bars, a footer phone.",
+  "grid": "Full-width bands. Left-aligned question. Footer splits mark and phone.",
+  "visual_weight_pct": {
+    "photo": 0,
+    "text": 58,
+    "offer": 12,
+    "white_space": 30
+  },
+  "scale_ratios": "The question is enormous. The phone is the largest type in the footer. About three sizes plus the bars.",
+  "type_choices": "Heavy condensed sans, two colors in the question, white on solid bars.",
+  "palette_hex": [
+    "#FFFFFF",
+    "#1F7A40",
+    "#C2185B",
+    "#14998A"
+  ],
+  "photo_art_direction": "None. The piece is type and flat color.",
+  "offer_placement": "A small burst with a credit toward an evaluation. The question is the real offer. The burst is the only extra.",
+  "trust_and_cta": "Service modes on a bar. Phone large in the footer. A web address smaller beside it.",
+  "scores": {
+    "focal": {
+      "score": 5,
+      "reason": "One question."
+    },
+    "hierarchy": {
+      "score": 4,
+      "reason": "Color split creates the second step."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Bands balance."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "Full-width grid."
+    },
+    "eye_path": {
+      "score": 5,
+      "reason": "The path cannot be missed."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Bars are one system."
+    },
+    "contrast": {
+      "score": 5,
+      "reason": "Ink on white and on bars."
+    },
+    "whitespace": {
+      "score": 4,
+      "reason": "Real paper around the question."
+    },
+    "figure_ground": {
+      "score": 5,
+      "reason": "The colored line is the figure."
+    },
+    "color": {
+      "score": 4,
+      "reason": "Three flat colors, controlled."
+    },
+    "type": {
+      "score": 4,
+      "reason": "One family."
+    },
+    "photo": {
+      "score": 3,
+      "reason": "No photo, and it does not need one."
+    },
+    "offer": {
+      "score": 4,
+      "reason": "Burst is secondary."
+    },
+    "cta": {
+      "score": 4,
+      "reason": "Phone in the brand bar."
+    },
+    "trust": {
+      "score": 4,
+      "reason": "The question is specific."
+    },
+    "glance_3s": {
+      "score": 5,
+      "reason": "Three seconds is the whole card."
+    }
+  },
+  "emulate": [
+    "One question, one colored key line, two proof bars, a phone set large in the footer."
+  ],
+  "do_not_copy": [
+    "The mark and the burst amount."
+  ],
+  "anti_patterns": [
+    "A coupon burst on an education piece. Minor."
+  ],
+  "summary": "Mailbox tutoring card, bottom of the shared photo. Type-led and almost an A. One question and one phone."
+}

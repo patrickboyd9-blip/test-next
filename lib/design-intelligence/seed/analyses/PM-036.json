@@ -1,0 +1,110 @@
+{
+  "id": "PM-036",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "A-",
+  "focal_point": "A finished patio and spa, then a full-height burgundy panel whose percent is the largest glyph.",
+  "eye_path": "Photo, percent, footer phone. Header bullets are a small early distraction.",
+  "grid": "Header, equal-height photo and offer columns, footer. Thin rules.",
+  "visual_weight_pct": {
+    "photo": 32,
+    "text": 28,
+    "offer": 22,
+    "white_space": 18
+  },
+  "scale_ratios": "The percent is larger than the logo line. Photo and panel share the middle. Close to one hero.",
+  "type_choices": "Script mark with structured sans in the panel. About five sizes. High contrast.",
+  "palette_hex": [
+    "#7A2E32",
+    "#F6F1EA",
+    "#2E6FA8",
+    "#1A1A1A"
+  ],
+  "photo_art_direction": "Elevated desert patio, curved seat, spa, daylight. One accreditation badge in the corner.",
+  "offer_placement": "Full-height right column: a percent plus free removal of the old surface. Two parts, one panel. The clearest offer block in the local set.",
+  "trust_and_cta": "Large phone and URL in the footer. License near the mark. Two accreditation marks.",
+  "scores": {
+    "focal": {
+      "score": 4,
+      "reason": "Percent leads; header bullets tug."
+    },
+    "hierarchy": {
+      "score": 4,
+      "reason": "Percent is the largest glyph."
+    },
+    "balance": {
+      "score": 5,
+      "reason": "Columns balance."
+    },
+    "grid": {
+      "score": 5,
+      "reason": "The grid is the lesson."
+    },
+    "eye_path": {
+      "score": 4,
+      "reason": "Path ends at the phone."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Panel is one group."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Cream on burgundy."
+    },
+    "whitespace": {
+      "score": 4,
+      "reason": "Footer has air."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Panel separates."
+    },
+    "color": {
+      "score": 4,
+      "reason": "One deep accent."
+    },
+    "type": {
+      "score": 4,
+      "reason": "Script is limited to the mark."
+    },
+    "photo": {
+      "score": 4,
+      "reason": "Finished hardscape."
+    },
+    "offer": {
+      "score": 5,
+      "reason": "One panel, two perks."
+    },
+    "cta": {
+      "score": 4,
+      "reason": "Phone in a quiet footer."
+    },
+    "trust": {
+      "score": 5,
+      "reason": "License and the photo."
+    },
+    "glance_3s": {
+      "score": 4,
+      "reason": "Glance gets a patio and a percent."
+    }
+  },
+  "emulate": [
+    "Equal-height photo and offer columns. Percent as the largest glyph. Phone in a quiet footer. Keep a second perk in the qualifier size."
+  ],
+  "do_not_copy": [
+    "Mark, badges, percent."
+  ],
+  "anti_patterns": [
+    "A header of small benefit bullets ahead of the picture."
+  ],
+  "summary": "Mailbox paver card. The closest local-service piece to an A after PM-047. Photo, offer column, and phone are in the right relationship."
+}

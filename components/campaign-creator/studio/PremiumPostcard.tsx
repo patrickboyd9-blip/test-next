@@ -34,6 +34,7 @@ export function PremiumPostcardFront({
   businessName,
   paletteId,
   compact,
+  plan: prepared,
 }: {
   templateId: PostcardTemplateId
   spec: CreativeSpec
@@ -43,8 +44,9 @@ export function PremiumPostcardFront({
   businessName?: string
   paletteId?: VerticalPaletteId
   compact?: boolean
+  plan?: PostcardFacePlan
 }) {
-  const plan = composePostcardFace({
+  const plan = prepared ?? composePostcardFace({
     templateId,
     spec: {
       ...spec,

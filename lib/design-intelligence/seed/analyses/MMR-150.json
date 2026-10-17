@@ -1,0 +1,111 @@
+{
+  "id": "MMR-150",
+  "corpus": "mmr",
+  "research_ref": "modern-mail-research images @ 599bf1c",
+  "use_class": "research_reference",
+  "mailbox_weight": "secondary",
+  "vertical": "hvac",
+  "faces": [
+    "front"
+  ],
+  "low_res": true,
+  "shared_vendor_style": false,
+  "grade": "C",
+  "focal_point": "A duct or equipment photo beside a coupon offer. Neither dominates cleanly.",
+  "eye_path": "Photo to offer to phone.",
+  "grid": "Split panel, coupon proportions.",
+  "visual_weight_pct": {
+    "photo": 40,
+    "text": 25,
+    "offer": 22,
+    "white_space": 13
+  },
+  "scale_ratios": "Offer and headline close in size.",
+  "type_choices": "Bold sans, coupon numerals, extra sizes.",
+  "palette_hex": [
+    "#F5C518",
+    "#1A1A1A",
+    "#FFFFFF",
+    "#4A90A4"
+  ],
+  "photo_art_direction": "Equipment or duct close-up. Useful subject, small and boxed.",
+  "offer_placement": "Coupon position, readable, generic.",
+  "trust_and_cta": "Phone present. Little else.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Photo and coupon tie."
+    },
+    "hierarchy": {
+      "score": 2,
+      "reason": "Flat type scale."
+    },
+    "balance": {
+      "score": 3,
+      "reason": "Even split."
+    },
+    "grid": {
+      "score": 3,
+      "reason": "Template split."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "Three stops, all similar."
+    },
+    "gestalt": {
+      "score": 3,
+      "reason": "Coupon is one group."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Yellow and black hold."
+    },
+    "whitespace": {
+      "score": 2,
+      "reason": "Cramped."
+    },
+    "figure_ground": {
+      "score": 3,
+      "reason": "Coupon figure is clear."
+    },
+    "color": {
+      "score": 3,
+      "reason": "Coupon colors."
+    },
+    "type": {
+      "score": 3,
+      "reason": "Too many sizes."
+    },
+    "photo": {
+      "score": 3,
+      "reason": "Right subject, slot-sized."
+    },
+    "offer": {
+      "score": 3,
+      "reason": "Visible and ordinary."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Phone in the coupon zone."
+    },
+    "trust": {
+      "score": 2,
+      "reason": "Weak."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "Glance gets a duct coupon."
+    }
+  },
+  "emulate": [
+    "Show the equipment large, then one price."
+  ],
+  "do_not_copy": [
+    "The coupon art and any code."
+  ],
+  "anti_patterns": [
+    "AP-001 small photo slot",
+    "flat hierarchy"
+  ],
+  "summary": "Low-resolution HVAC coupon. The subject is right and the layout is a template."
+}

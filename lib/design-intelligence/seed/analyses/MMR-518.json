@@ -1,0 +1,111 @@
+{
+  "id": "MMR-518",
+  "corpus": "mmr",
+  "research_ref": "modern-mail-research images @ 599bf1c",
+  "use_class": "research_reference",
+  "mailbox_weight": "secondary",
+  "vertical": "medicare_insurance",
+  "faces": [
+    "front"
+  ],
+  "low_res": true,
+  "shared_vendor_style": false,
+  "grade": "C+",
+  "focal_point": "A meal or seminar scene. The event is the picture; the invitation is smaller.",
+  "eye_path": "Food or room, then the date line, then a phone.",
+  "grid": "Photo with an invitation band.",
+  "visual_weight_pct": {
+    "photo": 50,
+    "text": 25,
+    "offer": 12,
+    "white_space": 13
+  },
+  "scale_ratios": "Date and headline compete with the photo.",
+  "type_choices": "Sans plus the restaurant's own marks in frame.",
+  "palette_hex": [
+    "#FFFFFF",
+    "#1F4E79",
+    "#C4A574",
+    "#EFE6D6"
+  ],
+  "photo_art_direction": "A real meal setting. A visible restaurant brand is theirs, not ours.",
+  "offer_placement": "An event invitation. Legitimate if the event is real. Craft is average.",
+  "trust_and_cta": "Place and phone. Busy.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Scene and invitation tie."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "Date and headline close."
+    },
+    "balance": {
+      "score": 3,
+      "reason": "Photo-heavy."
+    },
+    "grid": {
+      "score": 3,
+      "reason": "Band under a photo."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "Path is a bit crowded."
+    },
+    "gestalt": {
+      "score": 3,
+      "reason": "Invitation is one group, logos intrude."
+    },
+    "contrast": {
+      "score": 3,
+      "reason": "Some type on a busy photo."
+    },
+    "whitespace": {
+      "score": 2,
+      "reason": "Tight."
+    },
+    "figure_ground": {
+      "score": 3,
+      "reason": "Food is the figure."
+    },
+    "color": {
+      "score": 3,
+      "reason": "Warm and ordinary."
+    },
+    "type": {
+      "score": 3,
+      "reason": "Extra sizes."
+    },
+    "photo": {
+      "score": 3,
+      "reason": "Specific place, slightly catalog."
+    },
+    "offer": {
+      "score": 3,
+      "reason": "Event is a real kind of offer."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Phone present."
+    },
+    "trust": {
+      "score": 3,
+      "reason": "The place is proof of a real meeting."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "Glance gets a meal."
+    }
+  },
+  "emulate": [
+    "If the event is real, show the room and put one time and one phone on a solid band."
+  ],
+  "do_not_copy": [
+    "The restaurant marks and the invitation copy."
+  ],
+  "anti_patterns": [
+    "Type on a busy table",
+    "partner logo as design"
+  ],
+  "summary": "Seminar meal card. The event photo is a valid subject. The layout is C+."
+}

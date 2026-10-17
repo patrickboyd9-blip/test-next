@@ -1,0 +1,110 @@
+{
+  "id": "PM-002",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9 (branch cursor/visual-reference-corpus-3752)",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B-",
+  "focal_point": "A dollar tune-up figure on a bright header, over a garage-door photo.",
+  "eye_path": "Stacked: figure, door photo, phone.",
+  "grid": "Header band plus photo.",
+  "visual_weight_pct": {
+    "photo": 45,
+    "text": 20,
+    "offer": 22,
+    "white_space": 13
+  },
+  "scale_ratios": "The price is large and near the headline, not isolated at 1.6\u00d7.",
+  "type_choices": "Bold sans, about four sizes, coupon energy.",
+  "palette_hex": [
+    "#F6E56B",
+    "#111111",
+    "#FFFFFF",
+    "#3D6EA8"
+  ],
+  "photo_art_direction": "A residential door, straightforward, daylight. Product visible.",
+  "offer_placement": "Header price works. A second line of services softens it.",
+  "trust_and_cta": "Phone is findable. Local area named in type we will not copy.",
+  "scores": {
+    "focal": {
+      "score": 4,
+      "reason": "The price leads."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "Headline is close behind."
+    },
+    "balance": {
+      "score": 3,
+      "reason": "Header-heavy."
+    },
+    "grid": {
+      "score": 3,
+      "reason": "Simple bands."
+    },
+    "eye_path": {
+      "score": 4,
+      "reason": "Short path."
+    },
+    "gestalt": {
+      "score": 3,
+      "reason": "Header is one group."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Black on yellow holds."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Some air in the photo."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Price separates."
+    },
+    "color": {
+      "score": 3,
+      "reason": "Yellow coupon field."
+    },
+    "type": {
+      "score": 3,
+      "reason": "A few extra sizes."
+    },
+    "photo": {
+      "score": 3,
+      "reason": "Door is shown plainly."
+    },
+    "offer": {
+      "score": 4,
+      "reason": "One tune-up price."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Phone present."
+    },
+    "trust": {
+      "score": 3,
+      "reason": "Local line only."
+    },
+    "glance_3s": {
+      "score": 4,
+      "reason": "Glance gets a price and a door."
+    }
+  },
+  "emulate": [
+    "Price in a band above the product photo, one job only."
+  ],
+  "do_not_copy": [
+    "Mark, price, phone, city line."
+  ],
+  "anti_patterns": [
+    "Yellow template header."
+  ],
+  "summary": "Mailbox garage-door tune-up. Clear price, coupon grammar. A later card from the same advertiser is a separate piece."
+}

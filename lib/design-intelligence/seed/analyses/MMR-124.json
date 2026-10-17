@@ -1,0 +1,110 @@
+{
+  "id": "MMR-124",
+  "corpus": "mmr",
+  "research_ref": "modern-mail-research images @ 599bf1c",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "secondary",
+  "vertical": "medicare_insurance",
+  "faces": [
+    "front"
+  ],
+  "low_res": true,
+  "shared_vendor_style": false,
+  "grade": "B-",
+  "focal_point": "A member and a national mark share a small landscape card. The mark is doing brand work we cannot reuse.",
+  "eye_path": "Z from mark to face to a short line.",
+  "grid": "Split brand and portrait.",
+  "visual_weight_pct": {
+    "photo": 40,
+    "text": 25,
+    "offer": 8,
+    "white_space": 27
+  },
+  "scale_ratios": "Headline moderate. Brand lockup is large for a card. No numeral hero.",
+  "type_choices": "Brand family, few sizes, low-res limits fine judgment.",
+  "palette_hex": [
+    "#F2F2F2",
+    "#E31837",
+    "#1A1A1A",
+    "#003366"
+  ],
+  "photo_art_direction": "Member portrait, even light. The national identity is the art direction as much as the photo.",
+  "offer_placement": "An invitation or benefit line, subordinate to the brand.",
+  "trust_and_cta": "The mark is the trust. Response is present and brand-owned.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Mark and face compete."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "Order is clear at this size."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Split is stable."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "Simple two-zone grid."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "Short path."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Brand group is tight."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Known brand colors separate."
+    },
+    "whitespace": {
+      "score": 4,
+      "reason": "Some paper remains."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Face and mark both figure."
+    },
+    "color": {
+      "score": 3,
+      "reason": "Brand red and blue, not ours to adopt."
+    },
+    "type": {
+      "score": 4,
+      "reason": "Disciplined brand type."
+    },
+    "photo": {
+      "score": 3,
+      "reason": "Portrait is generic-professional."
+    },
+    "offer": {
+      "score": 3,
+      "reason": "Offer is a brand line."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Response follows the brand system."
+    },
+    "trust": {
+      "score": 3,
+      "reason": "Trust is the borrowed mark."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "Glance gets the brand first."
+    }
+  },
+  "emulate": [
+    "A recognizable human next to a short line, with the mark kept smaller than we see here."
+  ],
+  "do_not_copy": [
+    "The national marks, colors, portrait, and wording. Style reference only."
+  ],
+  "anti_patterns": [
+    "Letting the logo outrank the offer."
+  ],
+  "summary": "Style reference only. A national Medicare piece. Study the restraint, do not trace the brand."
+}

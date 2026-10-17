@@ -1,0 +1,111 @@
+{
+  "id": "PM-054",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front",
+    "back"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "A-",
+  "focal_point": "Front: very long hair filling the left half, one product name, one circular percent on the seam. Back: a before-and-after pair and one code bar.",
+  "eye_path": "Front: hair, name, badge, wordmark. Back: proof on the left, headline and code on the right.",
+  "grid": "Front is half photo, half black field. Back is about 40% black proof and 60% white sales, one column.",
+  "visual_weight_pct": {
+    "photo": 52,
+    "text": 28,
+    "offer": 8,
+    "white_space": 12
+  },
+  "scale_ratios": "Hair is the largest form. The product name is the largest type. The percent badge is medium. About three sizes. Back headline is largest on that face, then one offer line.",
+  "type_choices": "One geometric sans. Caps for the name, light body, a tracked wordmark. The back uses the same family.",
+  "palette_hex": [
+    "#1C1C1E",
+    "#FFFFFF",
+    "#C4A07A",
+    "#F7F6F4"
+  ],
+  "photo_art_direction": "Studio beauty, dark ground, direct gaze, hair lit to show length. Back is evidence: swatches and a matched before-and-after, even light. Address areas on the back are redacted.",
+  "offer_placement": "One circular percent on the front seam. The back repeats one percent, one code bar, one deadline.",
+  "trust_and_cta": "A rank line under the wordmark. The site is quieter than the name. The back's code bar is the action. No second color system.",
+  "scores": {
+    "focal": {
+      "score": 5,
+      "reason": "Hair and the name, one idea."
+    },
+    "hierarchy": {
+      "score": 4,
+      "reason": "Name, then badge, then a quiet shop line."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Dark field balances the hair."
+    },
+    "grid": {
+      "score": 5,
+      "reason": "The seam is the grid break, once."
+    },
+    "eye_path": {
+      "score": 5,
+      "reason": "Path ends at the badge."
+    },
+    "gestalt": {
+      "score": 5,
+      "reason": "Badge, name, and hair are one group."
+    },
+    "contrast": {
+      "score": 5,
+      "reason": "White on black."
+    },
+    "whitespace": {
+      "score": 4,
+      "reason": "The black field is margin."
+    },
+    "figure_ground": {
+      "score": 5,
+      "reason": "Hair is the figure."
+    },
+    "color": {
+      "score": 5,
+      "reason": "Black, white, and the hair's own color."
+    },
+    "type": {
+      "score": 5,
+      "reason": "One family, three sizes."
+    },
+    "photo": {
+      "score": 5,
+      "reason": "The hair is the product."
+    },
+    "offer": {
+      "score": 4,
+      "reason": "One percent, repeated once on the back."
+    },
+    "cta": {
+      "score": 4,
+      "reason": "Shop line is quiet; the back code finishes it."
+    },
+    "trust": {
+      "score": 4,
+      "reason": "Before-and-after is the proof."
+    },
+    "glance_3s": {
+      "score": 5,
+      "reason": "Glance gets the hair and one badge."
+    }
+  },
+  "emulate": [
+    "Dark field, the product filling one half, one name, one circular discount on the seam. Back: proof left, one code right."
+  ],
+  "do_not_copy": [
+    "The mark, the hair, the percent, the code. Style reference only."
+  ],
+  "anti_patterns": [
+    "A second badge. A long spec list that shrinks the code."
+  ],
+  "summary": "Mailbox beauty card, both faces. One of the three best-designed pieces. Product, one name, one badge, proof on the back."
+}

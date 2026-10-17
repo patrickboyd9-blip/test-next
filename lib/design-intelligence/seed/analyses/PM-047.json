@@ -1,0 +1,111 @@
+{
+  "id": "PM-047",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front",
+    "back"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "A",
+  "focal_point": "A giant per-opening savings figure on the front, over a full-bleed photo of the finished windows in a real house. The figure is the only type event.",
+  "eye_path": "Diagonal from the house to the figure to one phone. The back switches to proof and the same phone.",
+  "grid": "Full-bleed photo plus one offer band. Back is a simpler proof stack in the same palette.",
+  "visual_weight_pct": {
+    "photo": 55,
+    "text": 12,
+    "offer": 25,
+    "white_space": 8
+  },
+  "scale_ratios": "The offer numerals are far larger than the short headline. This is the hero-numeral rule, at or above 1.6\u00d7. Front uses about three sizes.",
+  "type_choices": "One heavy grotesque. Numeral, short headline, phone. No script.",
+  "palette_hex": [
+    "#F4F1EA",
+    "#1A1A1A",
+    "#8C6239",
+    "#EFE6D6"
+  ],
+  "photo_art_direction": "Finished exterior, natural light, the product in use on a local house. No stock family. Back continues the same material story.",
+  "offer_placement": "One offer architecture: amount off each window, a related amount off each door, and a small whole-job qualifier. It is still one offer, stated as a pair of figures in one lockup, not two campaigns.",
+  "trust_and_cta": "One phone on the front. Back repeats the phone, a license, and an end date that is printed as a real date rather than a fake official fuse.",
+  "scores": {
+    "focal": {
+      "score": 5,
+      "reason": "One numeral lockup."
+    },
+    "hierarchy": {
+      "score": 5,
+      "reason": "Numeral, then a short line, then the phone."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Photo and band balance."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "Bleed plus one band."
+    },
+    "eye_path": {
+      "score": 5,
+      "reason": "Three stops, then the back is proof."
+    },
+    "gestalt": {
+      "score": 5,
+      "reason": "The figures and the phone are one group."
+    },
+    "contrast": {
+      "score": 5,
+      "reason": "Dark type on a light band."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "The sky in the photo is the calm field."
+    },
+    "figure_ground": {
+      "score": 5,
+      "reason": "The numerals separate immediately."
+    },
+    "color": {
+      "score": 4,
+      "reason": "Colors come from the house plus one dark band."
+    },
+    "type": {
+      "score": 5,
+      "reason": "Three sizes, one family."
+    },
+    "photo": {
+      "score": 5,
+      "reason": "Result photography, correct crop."
+    },
+    "offer": {
+      "score": 5,
+      "reason": "One offer, clearly built."
+    },
+    "cta": {
+      "score": 5,
+      "reason": "One phone."
+    },
+    "trust": {
+      "score": 4,
+      "reason": "License on the back, photo on the front."
+    },
+    "glance_3s": {
+      "score": 5,
+      "reason": "Glance gets the number and the house."
+    }
+  },
+  "emulate": [
+    "Result photo full-bleed. One numeral lockup at least 1.6\u00d7 the headline. One phone. Proof and license on the back."
+  ],
+  "do_not_copy": [
+    "The mark, the amounts, the phone, the photos, the end date."
+  ],
+  "anti_patterns": [
+    "Do not split the window figure and the door figure into two equal columns."
+  ],
+  "summary": "Best-designed piece in the mailbox, and the top of the whole corpus. A finished house, one savings lockup, one phone. Style reference only: copy the structure, not the brand."
+}

@@ -1,3 +1,5 @@
+import { isDesignRationale } from "@/lib/design-intelligence/rationale"
+
 import type {
   GenerateDirectionsResult,
   RefineDirectionInput,
@@ -595,6 +597,9 @@ function preserveCreativeSemantics(
   }
   if (!isImagePresence(next.imagePresence) && isImagePresence(current.imagePresence)) {
     next.imagePresence = current.imagePresence
+  }
+  if (!isDesignRationale(next.designRationale) && isDesignRationale(current.designRationale)) {
+    next.designRationale = current.designRationale
   }
   return next
 }

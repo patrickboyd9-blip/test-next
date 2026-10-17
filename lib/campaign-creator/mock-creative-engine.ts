@@ -15,6 +15,8 @@ import {
   getMockCreativeDirections,
   getMockRecommendation,
 } from "./mock-creative-data"
+import { applyDesignIntelligence } from "@/lib/design-intelligence/pipeline"
+
 import { applyMockRefinement } from "./mock-refinement-engine"
 
 /**
@@ -73,19 +75,20 @@ export class MockCreativeEngine implements CreativeEngine {
   }
 }
 
-function normalizeMockGeneration(
+async function normalizeMockGeneration(
   input: GenerateDirectionsInput
-): GenerateDirectionsResult {
+): Promise<GenerateDirectionsResult> {
   const directions = getMockCreativeDirections(input.brief)
   const result = normalizeGenerationResult(input.brief, directions, {
     stripInventedFacts: false,
   })
   const recommendation = getMockRecommendation(result.directions)
-  return {
+  const designed = await applyDesignIntelligence(input.brief, {
     ...result,
     recommendation: {
       ...recommendation,
       rationale: result.recommendation.rationale,
     },
-  }
+  }, input.canvas, { ...process.env, DESIGN_DIRECTOR: "rules", DESIGN_CRITIC: "machine" })
+  return designed
 }

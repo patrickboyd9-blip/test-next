@@ -1,0 +1,109 @@
+{
+  "id": "MMR-397-2-back",
+  "corpus": "mmr",
+  "research_ref": "modern-mail-research images @ 599bf1c",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "secondary",
+  "vertical": "general_local_service",
+  "faces": [
+    "back"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B",
+  "focal_point": "A before-and-after or process sequence. The after should lead; here the frames are closer to equal.",
+  "eye_path": "Left to right across the process.",
+  "grid": "Sequential panels.",
+  "visual_weight_pct": {
+    "photo": 60,
+    "text": 20,
+    "offer": 5,
+    "white_space": 15
+  },
+  "scale_ratios": "Labels equal. No hero numeral.",
+  "type_choices": "Caption sans, consistent.",
+  "palette_hex": [
+    "#E7E0D4",
+    "#2C2C2C",
+    "#8A9A7B"
+  ],
+  "photo_art_direction": "Process photography, real site. Labels small.",
+  "offer_placement": "Process, not a new price. Right role for a back.",
+  "trust_and_cta": "Contact repeated modestly.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Sequence, not one frame."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "Labels match."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Even panels."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "Clear sequence grid."
+    },
+    "eye_path": {
+      "score": 4,
+      "reason": "Left to right works."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Panels group."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Labels hold."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Gutters exist."
+    },
+    "figure_ground": {
+      "score": 3,
+      "reason": "After is not yet the single figure."
+    },
+    "color": {
+      "score": 4,
+      "reason": "Consistent."
+    },
+    "type": {
+      "score": 4,
+      "reason": "One family."
+    },
+    "photo": {
+      "score": 4,
+      "reason": "Real process."
+    },
+    "offer": {
+      "score": 3,
+      "reason": "No extra deal."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Quiet contact."
+    },
+    "trust": {
+      "score": 4,
+      "reason": "The work sequence is proof."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "Not a front glance."
+    }
+  },
+  "emulate": [
+    "Before/after on the back, with the after larger than the before."
+  ],
+  "do_not_copy": [
+    "The site photos and captions."
+  ],
+  "anti_patterns": [
+    "Equal before and after."
+  ],
+  "summary": "Style reference back. Process proof. Make the after the only large frame."
+}

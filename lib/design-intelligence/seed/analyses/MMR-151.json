@@ -1,0 +1,112 @@
+{
+  "id": "MMR-151",
+  "corpus": "mmr",
+  "research_ref": "modern-mail-research images @ 599bf1c",
+  "use_class": "research_reference",
+  "mailbox_weight": "secondary",
+  "vertical": "hvac",
+  "faces": [
+    "front"
+  ],
+  "low_res": true,
+  "shared_vendor_style": false,
+  "grade": "D",
+  "focal_point": "A door-hanger stack of offers. Nothing is allowed to win.",
+  "eye_path": "Top to bottom through competing coupons. An F-pattern of deals.",
+  "grid": "Narrow vertical bands, many boxes.",
+  "visual_weight_pct": {
+    "photo": 15,
+    "text": 40,
+    "offer": 30,
+    "white_space": 15
+  },
+  "scale_ratios": "Several prices at similar size. Far more than three type sizes.",
+  "type_choices": "Impact and grotesque mix, stars, bursts.",
+  "palette_hex": [
+    "#E10600",
+    "#F5C518",
+    "#FFFFFF",
+    "#1F4E79"
+  ],
+  "photo_art_direction": "Tiny icons or small photos. Not art direction.",
+  "offer_placement": "Multiple deals stacked. The opposite of one offer.",
+  "trust_and_cta": "Several phones or repeated numbers. No lockup.",
+  "scores": {
+    "focal": {
+      "score": 1,
+      "reason": "No dominant element."
+    },
+    "hierarchy": {
+      "score": 1,
+      "reason": "Prices tie."
+    },
+    "balance": {
+      "score": 2,
+      "reason": "A column of noise."
+    },
+    "grid": {
+      "score": 2,
+      "reason": "Boxes, not a grid."
+    },
+    "eye_path": {
+      "score": 2,
+      "reason": "The eye hunts."
+    },
+    "gestalt": {
+      "score": 1,
+      "reason": "Every deal is its own group."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Primary colors separate and shout."
+    },
+    "whitespace": {
+      "score": 1,
+      "reason": "No calm field."
+    },
+    "figure_ground": {
+      "score": 3,
+      "reason": "Each box is a figure."
+    },
+    "color": {
+      "score": 2,
+      "reason": "Red, yellow, and blue together."
+    },
+    "type": {
+      "score": 1,
+      "reason": "Too many faces and sizes."
+    },
+    "photo": {
+      "score": 1,
+      "reason": "No real subject."
+    },
+    "offer": {
+      "score": 1,
+      "reason": "Many offers."
+    },
+    "cta": {
+      "score": 2,
+      "reason": "No single action."
+    },
+    "trust": {
+      "score": 2,
+      "reason": "Claims without proof."
+    },
+    "glance_3s": {
+      "score": 2,
+      "reason": "Glance remembers clutter."
+    }
+  },
+  "emulate": [
+    "Nothing from the stack. A hanger can still have one price."
+  ],
+  "do_not_copy": [
+    "The hanger art and every offer."
+  ],
+  "anti_patterns": [
+    "AP-006 widget stack",
+    "AP-008 bursts",
+    "multiple heroes"
+  ],
+  "summary": "A door hanger that fails the single-idea test. Useful only as a picture of density gone wrong."
+}

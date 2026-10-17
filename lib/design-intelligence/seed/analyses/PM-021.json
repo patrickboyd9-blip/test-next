@@ -1,0 +1,111 @@
+{
+  "id": "PM-021",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "insurance",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "C",
+  "focal_point": "A travel photograph and an oversized location pin. No offer.",
+  "eye_path": "Stacked: headline in the sky, pin, navy footer.",
+  "grid": "Full-bleed photo, type top-left, one footer band.",
+  "visual_weight_pct": {
+    "photo": 68,
+    "text": 16,
+    "offer": 0,
+    "white_space": 16
+  },
+  "scale_ratios": "The pin is larger than the headline. There is no price.",
+  "type_choices": "One sans, about three sizes. Calm.",
+  "palette_hex": [
+    "#7EB4C9",
+    "#0E3A6B",
+    "#E23B4A",
+    "#FFFFFF"
+  ],
+  "photo_art_direction": "Polished vacation stock, POV arm, saturated. Campaign crop.",
+  "offer_placement": "No offer. A category line only.",
+  "trust_and_cta": "A parent lockup in the footer. No phone, no code, no URL.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Pin and swimmer tie."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "Quiet type."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Photo-heavy."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "Full bleed plus footer."
+    },
+    "eye_path": {
+      "score": 4,
+      "reason": "Pretty path, no ask."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Footer is one group."
+    },
+    "contrast": {
+      "score": 3,
+      "reason": "Type in the sky is soft."
+    },
+    "whitespace": {
+      "score": 4,
+      "reason": "Sky and footer are air."
+    },
+    "figure_ground": {
+      "score": 3,
+      "reason": "Pin separates."
+    },
+    "color": {
+      "score": 4,
+      "reason": "Travel color."
+    },
+    "type": {
+      "score": 4,
+      "reason": "Three sizes."
+    },
+    "photo": {
+      "score": 4,
+      "reason": "Polished stock."
+    },
+    "offer": {
+      "score": 1,
+      "reason": "No offer."
+    },
+    "cta": {
+      "score": 1,
+      "reason": "No response."
+    },
+    "trust": {
+      "score": 3,
+      "reason": "Parent mark only."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "Glance gets a vacation."
+    }
+  },
+  "emulate": [
+    "Type only in open sky. One footer band. Then put an action in it."
+  ],
+  "do_not_copy": [
+    "The pin mark and the scene."
+  ],
+  "anti_patterns": [
+    "Logo larger than the message",
+    "no CTA"
+  ],
+  "summary": "Mailbox travel-insurance card. Confident photo, nothing to do."
+}

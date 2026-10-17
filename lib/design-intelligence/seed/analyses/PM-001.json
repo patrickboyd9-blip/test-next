@@ -1,0 +1,112 @@
+{
+  "id": "PM-001",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9 (branch cursor/visual-reference-corpus-3752)",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front",
+    "detail"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B",
+  "focal_point": "A pest photograph fills the left; a yellow offer panel with one code-like figure is the right-hand punch. The photo is larger, the panel is louder.",
+  "eye_path": "Z from the creature to the panel to the phone at the foot of the panel.",
+  "grid": "Vertical split, photo bleed, solid panel. A detail photo shows the same piece closer.",
+  "visual_weight_pct": {
+    "photo": 48,
+    "text": 16,
+    "offer": 24,
+    "white_space": 12
+  },
+  "scale_ratios": "The offer figure is large inside the panel and close to the headline size, not a clean 1.6\u00d7.",
+  "type_choices": "One grotesque family, heavy panel type, about four sizes.",
+  "palette_hex": [
+    "#F5C518",
+    "#111111",
+    "#FFFFFF",
+    "#6B4A2A"
+  ],
+  "photo_art_direction": "Tight creature crop, high detail, slightly sensational. Gaze is the subject staring out. Effective and a bit tabloid.",
+  "offer_placement": "Right panel isolates one seasonal deal and a code. It works, and the code is a second step.",
+  "trust_and_cta": "Phone at the bottom of the panel. A URL. Two responses.",
+  "scores": {
+    "focal": {
+      "score": 4,
+      "reason": "Panel is the figure; the creature is close."
+    },
+    "hierarchy": {
+      "score": 4,
+      "reason": "Figure is big, headline still shouts."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Split is stable."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "Clean two zones."
+    },
+    "eye_path": {
+      "score": 4,
+      "reason": "Path ends at the phone."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Panel is one group."
+    },
+    "contrast": {
+      "score": 5,
+      "reason": "Black on yellow is immediate."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Panel is full."
+    },
+    "figure_ground": {
+      "score": 5,
+      "reason": "Figure-ground is the lesson."
+    },
+    "color": {
+      "score": 4,
+      "reason": "Yellow used as the offer field."
+    },
+    "type": {
+      "score": 4,
+      "reason": "Few voices."
+    },
+    "photo": {
+      "score": 4,
+      "reason": "Subject is impossible to miss."
+    },
+    "offer": {
+      "score": 4,
+      "reason": "One deal, plus a code."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Phone and URL both ask."
+    },
+    "trust": {
+      "score": 3,
+      "reason": "Little proof beyond the picture."
+    },
+    "glance_3s": {
+      "score": 4,
+      "reason": "Glance gets the pest and a deal."
+    }
+  },
+  "emulate": [
+    "A full-bleed problem photo and one solid panel that holds a single figure and the phone."
+  ],
+  "do_not_copy": [
+    "The mark, the creature treatment, the code, the phone."
+  ],
+  "anti_patterns": [
+    "A promo code as a second step.",
+    "Sensational crop without local proof."
+  ],
+  "summary": "Mailbox weight, style reference. A clear split. It is a B because the code and the URL join the phone."
+}

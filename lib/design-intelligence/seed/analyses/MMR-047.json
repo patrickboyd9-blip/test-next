@@ -1,0 +1,112 @@
+{
+  "id": "MMR-047",
+  "corpus": "mmr",
+  "research_ref": "modern-mail-research images @ 599bf1c",
+  "use_class": "anti_example",
+  "mailbox_weight": "secondary",
+  "vertical": "medicare_insurance",
+  "faces": [
+    "front"
+  ],
+  "low_res": true,
+  "shared_vendor_style": false,
+  "grade": "F",
+  "focal_point": "A red official-looking notice bar and a deadline claim. The design wants to be a government letter.",
+  "eye_path": "Stacked bands that imitate a notice: header, threat, response window.",
+  "grid": "Centered notice stack. Symmetry used to look official.",
+  "visual_weight_pct": {
+    "photo": 5,
+    "text": 55,
+    "offer": 15,
+    "white_space": 25
+  },
+  "scale_ratios": "The deadline and the header shout. Body is dense. Hierarchy serves the disguise.",
+  "type_choices": "Heavy notice type, several sizes, official cadence.",
+  "palette_hex": [
+    "#F4F1E8",
+    "#8B1E1E",
+    "#1A1A1A",
+    "#C4A35A"
+  ],
+  "photo_art_direction": "Little or no documentary person. The graphic system is the picture, and it borrows official cues. Red annotation marks from the source file are not part of the design.",
+  "offer_placement": "A short response window is the 'offer.' A fake deadline on a government-like piece is the failure, not a craft miss.",
+  "trust_and_cta": "Response is urgent by design. Any disclaimer is too small to undo the look.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Loud, and loud in the wrong costume."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "Scale works and is aimed at pressure."
+    },
+    "balance": {
+      "score": 2,
+      "reason": "Official symmetry."
+    },
+    "grid": {
+      "score": 3,
+      "reason": "Notice stack is deliberate."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "The path ends in a deadline."
+    },
+    "gestalt": {
+      "score": 2,
+      "reason": "Bands group into a fake form."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Red on cream reads; that is not a virtue here."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Paper is used to look like a letter."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "The red bar separates, like a form."
+    },
+    "color": {
+      "score": 1,
+      "reason": "Official red, cream, and gold."
+    },
+    "type": {
+      "score": 2,
+      "reason": "Notice typography."
+    },
+    "photo": {
+      "score": 1,
+      "reason": "No honest human subject."
+    },
+    "offer": {
+      "score": 1,
+      "reason": "Fake deadline, not an offer."
+    },
+    "cta": {
+      "score": 2,
+      "reason": "The action is pressure."
+    },
+    "trust": {
+      "score": 1,
+      "reason": "Impersonates authority."
+    },
+    "glance_3s": {
+      "score": 2,
+      "reason": "You remember a threat, not a company."
+    }
+  },
+  "emulate": [
+    "Nothing. Use it only as a negative check for government-notice cues."
+  ],
+  "do_not_copy": [
+    "Every graphic, color, seal-like device, and line."
+  ],
+  "anti_patterns": [
+    "Government-notice look",
+    "fake deadline",
+    "AP official mimicry"
+  ],
+  "summary": "Anti-example. A final-expense piece dressed as an official notice with a fake deadline. Hierarchy does not save it."
+}

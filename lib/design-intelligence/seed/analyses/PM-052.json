@@ -1,0 +1,111 @@
+{
+  "id": "PM-052",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front",
+    "back"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "A-",
+  "focal_point": "On the front, a cluster ring at the center of two hands. On the back, one stone on a dark green field.",
+  "eye_path": "Front: mark, ring, one script line. Back: ring, a short invitation, a code. Postal half stays empty.",
+  "grid": "Front is one center axis. Back is a 45/55 split, product and postal panel.",
+  "visual_weight_pct": {
+    "photo": 70,
+    "text": 12,
+    "offer": 4,
+    "white_space": 14
+  },
+  "scale_ratios": "The ring is the hero, not a numeral. Front type is two lines. Back headline is quieter than the stone.",
+  "type_choices": "Wide-tracked small caps and one script line on the front. Serif on the back. Restraint.",
+  "palette_hex": [
+    "#6B3040",
+    "#F2F2F4",
+    "#163E36",
+    "#F6F5F1"
+  ],
+  "photo_art_direction": "Low-key editorial crop, jewelry as the highlight, no faces. Back is a studio stone on a seamless. The committed back is redacted where an address was.",
+  "offer_placement": "No discount on the front. The back carries a visit invitation and a short benefit stack, not a scream.",
+  "trust_and_cta": "Front has no device, which is the gap for mail. Back has a code and a showroom line, quiet and matched to the category.",
+  "scores": {
+    "focal": {
+      "score": 5,
+      "reason": "The ring is the only object."
+    },
+    "hierarchy": {
+      "score": 5,
+      "reason": "Two lines, correct scale."
+    },
+    "balance": {
+      "score": 5,
+      "reason": "Centered and stable."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "One axis, one break none."
+    },
+    "eye_path": {
+      "score": 5,
+      "reason": "Hands lead inward."
+    },
+    "gestalt": {
+      "score": 5,
+      "reason": "Type stays out of the product."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Metal on dark cloth."
+    },
+    "whitespace": {
+      "score": 4,
+      "reason": "Edges are clear."
+    },
+    "figure_ground": {
+      "score": 5,
+      "reason": "The stone is the figure."
+    },
+    "color": {
+      "score": 5,
+      "reason": "Wine, metal, and a deep green back."
+    },
+    "type": {
+      "score": 5,
+      "reason": "Two faces, both restrained."
+    },
+    "photo": {
+      "score": 5,
+      "reason": "Editorial crop."
+    },
+    "offer": {
+      "score": 3,
+      "reason": "No hard offer, by luxury choice."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Front is silent; back has a code."
+    },
+    "trust": {
+      "score": 4,
+      "reason": "The object is the proof."
+    },
+    "glance_3s": {
+      "score": 4,
+      "reason": "Glance gets the ring. The action takes the flip."
+    }
+  },
+  "emulate": [
+    "Full-bleed crop, product at the optical center, two lines of type. On a local-service card, put the phone in one of those lines."
+  ],
+  "do_not_copy": [
+    "The mark, the ring, the script line, the showroom. Style reference only."
+  ],
+  "anti_patterns": [
+    "A silent front, if the back might be missed."
+  ],
+  "summary": "Mailbox jewelry card, both faces. Among the best-designed pieces for restraint. For our generator it teaches the crop and the quiet back, not the missing front action."
+}

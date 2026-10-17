@@ -1,0 +1,270 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://modernmail.local/schemas/design-rationale.schema.json",
+  "title": "Design Rationale",
+  "description": "What the art-director step decides before any layout. Principles and targets only. No rendered geometry, no copied mailer wording, no brand marks from the reference corpus.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "vertical",
+    "format",
+    "audience_moment",
+    "focal_element",
+    "eye_path",
+    "grid",
+    "scale_ratios",
+    "palette",
+    "type_pairing",
+    "photo_brief",
+    "offer_treatment",
+    "density_targets",
+    "response",
+    "trust",
+    "principles_invoked"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "vertical": {
+      "type": "string",
+      "enum": [
+        "roofing",
+        "plumbing",
+        "hvac",
+        "medicare_insurance",
+        "real_estate",
+        "general_local_service"
+      ]
+    },
+    "format": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["trim", "orientation"],
+      "properties": {
+        "trim": { "type": "string", "enum": ["5x8", "6x9"] },
+        "orientation": { "type": "string", "enum": ["landscape", "portrait"] }
+      }
+    },
+    "audience_moment": {
+      "type": "string",
+      "minLength": 8,
+      "description": "One situation this card is for. Not a service list."
+    },
+    "focal_element": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "description", "visual_weight_pct", "lead_modality", "lead_modality_area_pct"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["offer_numeral", "headline", "photograph_subject", "face", "product"]
+        },
+        "description": { "type": "string", "minLength": 8 },
+        "visual_weight_pct": { "type": "number", "minimum": 35, "maximum": 50 },
+        "lead_modality": {
+          "type": "string",
+          "enum": ["image", "type", "offer_field"]
+        },
+        "lead_modality_area_pct": { "type": "number", "minimum": 60, "maximum": 80 }
+      }
+    },
+    "eye_path": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pattern", "stops"],
+      "properties": {
+        "pattern": { "type": "string", "enum": ["Z", "F", "diagonal", "stacked-bands"] },
+        "stops": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "type": "string", "minLength": 3 },
+          "description": "Entry, offer or promise, response. Three stops."
+        }
+      }
+    },
+    "grid": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "alignment", "intentional_break"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "enum": ["thirds", "split-40-60", "bands", "full-bleed-plus-panel", "centered-stack"]
+        },
+        "alignment": { "type": "string", "enum": ["left", "center"] },
+        "intentional_break": {
+          "type": "string",
+          "description": "The one allowed break, or 'none'."
+        }
+      }
+    },
+    "scale_ratios": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hero",
+        "offer_to_headline_cap",
+        "headline_to_body_cap",
+        "offer_to_body",
+        "front_type_size_count"
+      ],
+      "properties": {
+        "hero": { "type": "string", "enum": ["offer", "headline"] },
+        "offer_to_headline_cap": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "When hero is offer, must be >= 1.6. When hero is headline, must be < 1."
+        },
+        "headline_to_body_cap": { "type": "number", "minimum": 2.5 },
+        "offer_to_body": {
+          "type": "number",
+          "minimum": 1.5,
+          "description": "Required whenever an offer numeral exists."
+        },
+        "front_type_size_count": { "type": "integer", "minimum": 2, "maximum": 3 }
+      }
+    },
+    "palette": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["neutral_hex", "accent_hex", "emotion", "banned"],
+      "properties": {
+        "neutral_hex": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2,
+          "items": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" }
+        },
+        "accent_hex": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "second_accent_hex": {
+          "type": ["string", "null"],
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "emotion": {
+          "type": "string",
+          "enum": ["trust", "urgency_real", "craft", "compliance_calm", "appetite"]
+        },
+        "banned": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Looks this card must not take. Always includes government-notice cues for regulated verticals."
+        }
+      }
+    },
+    "type_pairing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["family_count", "display", "body", "script_role"],
+      "properties": {
+        "family_count": { "type": "integer", "minimum": 1, "maximum": 2 },
+        "display": { "type": "string", "description": "Role and weight, not a copyrighted font name required." },
+        "body": { "type": "string" },
+        "script_role": { "type": "string", "enum": ["none", "logo_only"] }
+      }
+    },
+    "photo_brief": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "subject", "crop", "gaze", "lighting", "placement"],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["documentary_job", "result", "advisor_portrait", "none"]
+        },
+        "subject": { "type": "string" },
+        "crop": { "type": "string" },
+        "gaze": { "type": "string" },
+        "lighting": { "type": "string" },
+        "placement": {
+          "type": "string",
+          "enum": ["full_bleed", "panel_bleed_two_edges", "none"]
+        }
+      }
+    },
+    "offer_treatment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "placement", "qualifier", "expiry"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["numeral_hero", "concrete_step_no_discount", "headline_is_the_offer"]
+        },
+        "placement": { "type": "string" },
+        "qualifier": { "type": "string", "description": "One short condition, or 'none'." },
+        "expiry": { "type": "string", "description": "A real date policy, or 'none'. Never a fake deadline." }
+      }
+    },
+    "density_targets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "calm_field_pct_min",
+        "front_fact_budget",
+        "boxed_modules_max",
+        "starbursts_max"
+      ],
+      "properties": {
+        "calm_field_pct_min": { "type": "number", "minimum": 25, "maximum": 50 },
+        "front_fact_budget": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 5,
+          "items": { "type": "string" }
+        },
+        "boxed_modules_max": { "type": "integer", "const": 3 },
+        "starbursts_max": { "type": "integer", "const": 1 }
+      }
+    },
+    "response": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["primary", "secondary", "lockup"],
+      "properties": {
+        "primary": { "type": "string", "enum": ["phone", "qr", "mail_back"] },
+        "secondary": { "type": "string", "enum": ["phone", "qr", "none"] },
+        "lockup": { "type": "string" }
+      }
+    },
+    "trust": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["front_line", "back_only"],
+      "properties": {
+        "front_line": { "type": "string" },
+        "back_only": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "principles_invoked": {
+      "type": "array",
+      "minItems": 3,
+      "items": { "type": "string" },
+      "description": "IDs such as P1, TP-04, AF8."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "scale_ratios": { "properties": { "hero": { "const": "offer" } }, "required": ["hero"] } },
+        "required": ["scale_ratios"]
+      },
+      "then": {
+        "properties": {
+          "scale_ratios": {
+            "properties": { "offer_to_headline_cap": { "minimum": 1.6 } }
+          }
+        }
+      }
+    }
+  ]
+}

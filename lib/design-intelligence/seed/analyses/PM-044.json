@@ -1,0 +1,110 @@
+{
+  "id": "PM-044",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "roofing",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B-",
+  "focal_point": "A center arch with the mark, phone, and a labeled code. Two outer offers match.",
+  "eye_path": "Left deal, center phone, right deal. The symmetry is the problem.",
+  "grid": "Three columns. Offer bands aligned at the bottom.",
+  "visual_weight_pct": {
+    "photo": 35,
+    "text": 30,
+    "offer": 20,
+    "white_space": 15
+  },
+  "scale_ratios": "Two headlines match and two offers match. No single hero.",
+  "type_choices": "Condensed sans, script sale labels, about six sizes.",
+  "palette_hex": [
+    "#C0272D",
+    "#E6EEF4",
+    "#2E5FA8",
+    "#FFFFFF"
+  ],
+  "photo_art_direction": "Small aerial of a complex roof, muddy; a cleaner house elevation. Uneven.",
+  "offer_placement": "A flat amount off a roof and a percent off coating, equal weight.",
+  "trust_and_cta": "Phone centered. Code below with a short caption, so it is labeled. Two warranty claims.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Two offers tie."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "No ladder between them."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Symmetry without a reason."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "The center spine is useful."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "The path forks."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Each column is a group."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Red bands separate."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Pale ground helps."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Arch is a third figure."
+    },
+    "color": {
+      "score": 3,
+      "reason": "Red and blue both shout."
+    },
+    "type": {
+      "score": 3,
+      "reason": "Script labels are weaker than the prices."
+    },
+    "photo": {
+      "score": 3,
+      "reason": "Photos are uneven."
+    },
+    "offer": {
+      "score": 3,
+      "reason": "Two deals."
+    },
+    "cta": {
+      "score": 4,
+      "reason": "Labeled code and a phone, which is right."
+    },
+    "trust": {
+      "score": 3,
+      "reason": "Warranty claims in the headlines."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "Glance cannot pick a trade."
+    }
+  },
+  "emulate": [
+    "A center spine for mark, phone, and a captioned code. One offer, not two."
+  ],
+  "do_not_copy": [
+    "Mark, both offers, phone."
+  ],
+  "anti_patterns": [
+    "Symmetrical dual offer"
+  ],
+  "summary": "Mailbox roofing-and-coating card. The response spine is sound. Two equal offers leave it without one idea."
+}

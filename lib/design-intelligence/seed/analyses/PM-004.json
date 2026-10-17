@@ -1,0 +1,110 @@
+{
+  "id": "PM-004",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9 (branch cursor/visual-reference-corpus-3752)",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B+",
+  "focal_point": "A large device or service photograph and a short price or plan line. The picture leads.",
+  "eye_path": "Diagonal from the product to a price and a single response.",
+  "grid": "Full-bleed or wide photo with a type panel.",
+  "visual_weight_pct": {
+    "photo": 55,
+    "text": 18,
+    "offer": 15,
+    "white_space": 12
+  },
+  "scale_ratios": "Price is clear and not fully isolated from the headline.",
+  "type_choices": "One grotesque, few sizes, brand discipline.",
+  "palette_hex": [
+    "#FFFFFF",
+    "#009FDB",
+    "#1A1A1A",
+    "#F2F2F2"
+  ],
+  "photo_art_direction": "Polished product or lifestyle, brand-controlled, not a local job.",
+  "offer_placement": "One plan figure on a clean field. Works.",
+  "trust_and_cta": "One brand response. National, not local proof.",
+  "scores": {
+    "focal": {
+      "score": 4,
+      "reason": "Product leads."
+    },
+    "hierarchy": {
+      "score": 4,
+      "reason": "Price steps down cleanly."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Designed balance."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "Simple grid."
+    },
+    "eye_path": {
+      "score": 4,
+      "reason": "Short path."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Offer and response group."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Clean contrast."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Tight but ordered."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Product separates."
+    },
+    "color": {
+      "score": 4,
+      "reason": "One accent."
+    },
+    "type": {
+      "score": 4,
+      "reason": "One family."
+    },
+    "photo": {
+      "score": 3,
+      "reason": "Polished, not local."
+    },
+    "offer": {
+      "score": 4,
+      "reason": "One plan figure."
+    },
+    "cta": {
+      "score": 4,
+      "reason": "One response."
+    },
+    "trust": {
+      "score": 3,
+      "reason": "Brand trust only."
+    },
+    "glance_3s": {
+      "score": 4,
+      "reason": "Glance gets the product and a price."
+    }
+  },
+  "emulate": [
+    "One product photo, one figure, one response, lots of alignment."
+  ],
+  "do_not_copy": [
+    "The carrier mark, device art, and plan."
+  ],
+  "anti_patterns": [
+    "National polish with no local proof, if used for a contractor."
+  ],
+  "summary": "Mailbox telecom piece. B+ craft. The cleanliness is the lesson, not the brand."
+}

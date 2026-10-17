@@ -1,0 +1,111 @@
+{
+  "id": "MMR-068",
+  "corpus": "mmr",
+  "research_ref": "modern-mail-research images @ 599bf1c",
+  "use_class": "research_reference",
+  "mailbox_weight": "secondary",
+  "vertical": "plumbing",
+  "faces": [
+    "front"
+  ],
+  "low_res": true,
+  "shared_vendor_style": false,
+  "grade": "C",
+  "focal_point": "A coupon block and a small job photo share a crowded front.",
+  "eye_path": "Header, coupon, photo, phone. Four stops.",
+  "grid": "Stacked coupon bands. Template gutters.",
+  "visual_weight_pct": {
+    "photo": 22,
+    "text": 34,
+    "offer": 28,
+    "white_space": 16
+  },
+  "scale_ratios": "Offer and headline are close. More than three sizes.",
+  "type_choices": "Bold grotesque, several sizes, coupon numerals.",
+  "palette_hex": [
+    "#F5D90A",
+    "#111111",
+    "#FFFFFF",
+    "#C41230"
+  ],
+  "photo_art_direction": "Small service photo, hard to judge at this resolution, reads as a stock or catalog insert.",
+  "offer_placement": "Coupon zone is obvious and generic. Conditions are tiny.",
+  "trust_and_cta": "Phone in the coupon. Little local proof.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Coupon block leads by volume."
+    },
+    "hierarchy": {
+      "score": 2,
+      "reason": "Flat scale between headline and price."
+    },
+    "balance": {
+      "score": 3,
+      "reason": "Stacked and even."
+    },
+    "grid": {
+      "score": 3,
+      "reason": "Band grid, template."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "Stops at every band."
+    },
+    "gestalt": {
+      "score": 3,
+      "reason": "Coupon groups the deal and the phone."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Black on yellow works and looks cheap."
+    },
+    "whitespace": {
+      "score": 2,
+      "reason": "Bands fill the card."
+    },
+    "figure_ground": {
+      "score": 3,
+      "reason": "Yellow field, black figure."
+    },
+    "color": {
+      "score": 2,
+      "reason": "Yellow-red coupon palette."
+    },
+    "type": {
+      "score": 3,
+      "reason": "Too many sizes."
+    },
+    "photo": {
+      "score": 2,
+      "reason": "Photo is a slot, not an argument."
+    },
+    "offer": {
+      "score": 3,
+      "reason": "One coupon, weakly qualified."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Phone is inside the coupon, unlabeled as a lockup."
+    },
+    "trust": {
+      "score": 2,
+      "reason": "Almost no local proof."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "Glance gets a coupon, not a company."
+    }
+  },
+  "emulate": [
+    "A single price can live in a high-contrast block if the photo is then cut loose and enlarged."
+  ],
+  "do_not_copy": [
+    "The coupon frame and any phone or code."
+  ],
+  "anti_patterns": [
+    "AP-001 template coupon",
+    "photo as a small slot"
+  ],
+  "summary": "Low-resolution plumbing coupon. Competent and generic."
+}

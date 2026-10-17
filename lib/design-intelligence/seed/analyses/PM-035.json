@@ -1,0 +1,112 @@
+{
+  "id": "PM-035",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "C+",
+  "focal_point": "A tilted fumigation tent with an orange stamp, plus a giant lettermark.",
+  "eye_path": "Header, outlined headline, photo, lettermark, a leaf offer.",
+  "grid": "Header, photo left, identity right.",
+  "visual_weight_pct": {
+    "photo": 28,
+    "text": 32,
+    "offer": 10,
+    "white_space": 30
+  },
+  "scale_ratios": "Stamp, lettermark, and outlined headline are all large.",
+  "type_choices": "Outlined display, filled orange, green footer. About seven sizes.",
+  "palette_hex": [
+    "#F15A22",
+    "#FFFFFF",
+    "#111111",
+    "#5E9A32"
+  ],
+  "photo_art_direction": "Documentary tent, snapshot border. Cartoon pests in the margins, a second style.",
+  "offer_placement": "A leaf percent with details on the back. A free inspection line is clearer under the phone.",
+  "trust_and_cta": "Bold phone. A since-line. No code.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Three loud marks."
+    },
+    "hierarchy": {
+      "score": 2,
+      "reason": "Outlined type flattens the ladder."
+    },
+    "balance": {
+      "score": 3,
+      "reason": "Loose."
+    },
+    "grid": {
+      "score": 3,
+      "reason": "Basic split."
+    },
+    "eye_path": {
+      "score": 2,
+      "reason": "Several stops."
+    },
+    "gestalt": {
+      "score": 3,
+      "reason": "Cartoons are orphans."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Orange on white."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "White field helps."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Stamp separates."
+    },
+    "color": {
+      "score": 4,
+      "reason": "One orange, then a green."
+    },
+    "type": {
+      "score": 2,
+      "reason": "Outlined face."
+    },
+    "photo": {
+      "score": 3,
+      "reason": "Tent photo is right; cartoons are not."
+    },
+    "offer": {
+      "score": 3,
+      "reason": "Offer says see the back."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Phone is clear."
+    },
+    "trust": {
+      "score": 3,
+      "reason": "Since-line."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "Glance gets orange."
+    }
+  },
+  "emulate": [
+    "One documentary photo and one diagonal stamp. No cartoons, no outlined type."
+  ],
+  "do_not_copy": [
+    "Lettermark and cartoons."
+  ],
+  "anti_patterns": [
+    "Outlined headline",
+    "illustration mixed with a serious photo",
+    "offer deferred"
+  ],
+  "summary": "Mailbox termite card. The tent-and-stamp idea is sharp. The rest shouts."
+}

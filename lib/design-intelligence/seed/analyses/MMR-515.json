@@ -1,0 +1,109 @@
+{
+  "id": "MMR-515",
+  "corpus": "mmr",
+  "research_ref": "modern-mail-research images @ 599bf1c",
+  "use_class": "research_reference",
+  "mailbox_weight": "secondary",
+  "vertical": "medicare_insurance",
+  "faces": [
+    "front"
+  ],
+  "low_res": true,
+  "shared_vendor_style": false,
+  "grade": "C",
+  "focal_point": "A benefit coupon or savings claim, with a small portrait.",
+  "eye_path": "Offer to face to phone.",
+  "grid": "Coupon split.",
+  "visual_weight_pct": {
+    "photo": 25,
+    "text": 35,
+    "offer": 25,
+    "white_space": 15
+  },
+  "scale_ratios": "Offer and headline close.",
+  "type_choices": "Bold sans, extra sizes.",
+  "palette_hex": [
+    "#FFFFFF",
+    "#0B3A66",
+    "#F5C518"
+  ],
+  "photo_art_direction": "Small portrait, stock feel.",
+  "offer_placement": "A benefit number or savings line, coupon-placed.",
+  "trust_and_cta": "Phone in the footer area.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Offer and face compete."
+    },
+    "hierarchy": {
+      "score": 2,
+      "reason": "Flat scale."
+    },
+    "balance": {
+      "score": 3,
+      "reason": "Coupon balance."
+    },
+    "grid": {
+      "score": 3,
+      "reason": "Template."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "Ordinary path."
+    },
+    "gestalt": {
+      "score": 3,
+      "reason": "Loose groups."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Contrast holds."
+    },
+    "whitespace": {
+      "score": 2,
+      "reason": "Tight."
+    },
+    "figure_ground": {
+      "score": 3,
+      "reason": "Yellow or blue figure."
+    },
+    "color": {
+      "score": 3,
+      "reason": "Category colors."
+    },
+    "type": {
+      "score": 3,
+      "reason": "Too many sizes."
+    },
+    "photo": {
+      "score": 2,
+      "reason": "Photo is a slot."
+    },
+    "offer": {
+      "score": 3,
+      "reason": "Coupon offer."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Phone detached."
+    },
+    "trust": {
+      "score": 2,
+      "reason": "Thin."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "Glance gets a benefit claim."
+    }
+  },
+  "emulate": [
+    "One benefit figure, if true, on a calm field with a real face larger than a stamp."
+  ],
+  "do_not_copy": [
+    "Any plan claim or portrait."
+  ],
+  "anti_patterns": [
+    "Coupon template on a trust category"
+  ],
+  "summary": "Low-resolution Medicare coupon. Average."
+}

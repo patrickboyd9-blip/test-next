@@ -1,0 +1,109 @@
+{
+  "id": "MMR-397-back",
+  "corpus": "mmr",
+  "research_ref": "modern-mail-research images @ 599bf1c",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "secondary",
+  "vertical": "general_local_service",
+  "faces": [
+    "back"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B",
+  "focal_point": "A six-panel service grid. Even on purpose, which makes it a catalog back rather than a hero.",
+  "eye_path": "F across panels.",
+  "grid": "Regular tiles.",
+  "visual_weight_pct": {
+    "photo": 55,
+    "text": 25,
+    "offer": 5,
+    "white_space": 15
+  },
+  "scale_ratios": "Captions equal. No numeral. Correct for a menu, wrong if used as a front.",
+  "type_choices": "One family, caption size plus a small heading.",
+  "palette_hex": [
+    "#F4F1EA",
+    "#1A1A1A",
+    "#6E8B74"
+  ],
+  "photo_art_direction": "Real project tiles, consistent light. Good proof, equal weight.",
+  "offer_placement": "No new deal. The front's step should be assumed, not restarted.",
+  "trust_and_cta": "Mark repeats. Contact repeats.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Six equals."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "Flat, as a menu."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Even and stable."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "The grid is clear."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "Scanning, not a story."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Tiles repeat as one system."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Captions readable."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Gutters help."
+    },
+    "figure_ground": {
+      "score": 3,
+      "reason": "No single figure."
+    },
+    "color": {
+      "score": 4,
+      "reason": "Same palette as the front."
+    },
+    "type": {
+      "score": 4,
+      "reason": "Consistent."
+    },
+    "photo": {
+      "score": 4,
+      "reason": "Real work, tiled small."
+    },
+    "offer": {
+      "score": 3,
+      "reason": "No second offer."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Contact is present."
+    },
+    "trust": {
+      "score": 3,
+      "reason": "The projects are the proof."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "Not a glance face."
+    }
+  },
+  "emulate": [
+    "Proof on the back as a consistent tile set, not on the front."
+  ],
+  "do_not_copy": [
+    "The panel photos and the service names."
+  ],
+  "anti_patterns": [
+    "Promoting this grid to the front."
+  ],
+  "summary": "Style reference back. A clean service menu. Keep menus off the front."
+}

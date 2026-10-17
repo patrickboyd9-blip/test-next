@@ -1,0 +1,110 @@
+{
+  "id": "MMR-576",
+  "corpus": "mmr",
+  "research_ref": "modern-mail-research images @ 599bf1c",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "secondary",
+  "vertical": "roofing",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": true,
+  "grade": "B",
+  "focal_point": "Real job photographs, more than one, with an offer tile. The work is credible and split.",
+  "eye_path": "Across the job photos, then to the tile.",
+  "grid": "Photo row plus an offer band.",
+  "visual_weight_pct": {
+    "photo": 50,
+    "text": 18,
+    "offer": 18,
+    "white_space": 14
+  },
+  "scale_ratios": "Tile is strong. Photos are equal to each other, so no single crop wins.",
+  "type_choices": "Grotesque tile, captions smaller.",
+  "palette_hex": [
+    "#1A1A1A",
+    "#F5C518",
+    "#FFFFFF",
+    "#8C4A2F"
+  ],
+  "photo_art_direction": "Real tear-off or crew, the right mode for trust. Several frames.",
+  "offer_placement": "Tile or band after the photos. Right order, slightly even.",
+  "trust_and_cta": "The work is the trust. Phone with the offer.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Several job frames tie."
+    },
+    "hierarchy": {
+      "score": 4,
+      "reason": "Offer steps up from captions."
+    },
+    "balance": {
+      "score": 3,
+      "reason": "Even photo row."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "Row plus band."
+    },
+    "eye_path": {
+      "score": 4,
+      "reason": "Path reaches the offer."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Offer group is clear."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Tile contrast holds."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Moderate."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Tile separates."
+    },
+    "color": {
+      "score": 3,
+      "reason": "Vendor palette."
+    },
+    "type": {
+      "score": 4,
+      "reason": "Controlled."
+    },
+    "photo": {
+      "score": 4,
+      "reason": "Real work, divided."
+    },
+    "offer": {
+      "score": 4,
+      "reason": "One first step."
+    },
+    "cta": {
+      "score": 4,
+      "reason": "Phone with the offer."
+    },
+    "trust": {
+      "score": 4,
+      "reason": "Job photos carry trust."
+    },
+    "glance_3s": {
+      "score": 4,
+      "reason": "Glance gets work and a step."
+    }
+  },
+  "emulate": [
+    "Use real job photos, and make one of them large instead of a row of equals."
+  ],
+  "do_not_copy": [
+    "The contractor mark, phone, headlines, and the vendor's repeated yellow-or-red tile system. Style reference only. This series shares one house style, so repetition is not independent proof."
+  ],
+  "anti_patterns": [
+    "Equal photo strips."
+  ],
+  "summary": "Style reference. Real roofing work, which is the right picture, split into equals."
+}

@@ -20,12 +20,12 @@ export interface SqlExecutor {
   ): Promise<T[]>
 }
 
-export type DocumentCollection = "campaigns" | "reference_corpus"
+export type DocumentCollection = "campaigns" | "reference_corpus" | "design_library"
 
 const SAFE_FILE_ID = /^[A-Za-z0-9_-]{1,200}$/
 
 interface CollectionSql {
-  table: "campaigns" | "reference_corpus"
+  table: "campaigns" | "reference_corpus" | "design_library"
   ddl: string
 }
 
@@ -42,6 +42,15 @@ const COLLECTIONS: Record<DocumentCollection, CollectionSql> = {
   reference_corpus: {
     table: "reference_corpus",
     ddl: `CREATE TABLE IF NOT EXISTS reference_corpus (
+      id text PRIMARY KEY,
+      data jsonb NOT NULL,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      updated_at timestamptz NOT NULL DEFAULT now()
+    )`,
+  },
+  design_library: {
+    table: "design_library",
+    ddl: `CREATE TABLE IF NOT EXISTS design_library (
       id text PRIMARY KEY,
       data jsonb NOT NULL,
       created_at timestamptz NOT NULL DEFAULT now(),
@@ -65,6 +74,9 @@ export function storageMode(env: NodeJS.ProcessEnv = process.env): "postgres" | 
 export function defaultDocumentDirectory(collection: DocumentCollection): string {
   if (collection === "campaigns") {
     return path.join(process.cwd(), ".data", "campaigns")
+  }
+  if (collection === "design_library") {
+    return path.join(process.cwd(), ".data", "design-library")
   }
   return path.join(process.cwd(), ".data", "reference-corpus")
 }

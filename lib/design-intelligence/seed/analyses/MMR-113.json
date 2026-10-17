@@ -1,0 +1,109 @@
+{
+  "id": "MMR-113",
+  "corpus": "mmr",
+  "research_ref": "modern-mail-research images @ 599bf1c",
+  "use_class": "research_reference",
+  "mailbox_weight": "secondary",
+  "vertical": "medicare_insurance",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B",
+  "focal_point": "A wide photograph of a capable older adult dominates. Type is a short quiet stack.",
+  "eye_path": "Diagonal along the portrait into a short headline and one next step.",
+  "grid": "Full-bleed photo with type in a calm corner or band.",
+  "visual_weight_pct": {
+    "photo": 62,
+    "text": 16,
+    "offer": 6,
+    "white_space": 16
+  },
+  "scale_ratios": "Headline is the type hero. No discount numeral. Sizes stay few.",
+  "type_choices": "One family, large headline, small support.",
+  "palette_hex": [
+    "#F3EFE6",
+    "#243044",
+    "#C4B59A"
+  ],
+  "photo_art_direction": "Natural light, one person, active rather than frail. The right Medicare picture direction.",
+  "offer_placement": "Help, not a price. Clear enough, and slightly soft as a response.",
+  "trust_and_cta": "A phone or URL is present without badge clutter. No government cues.",
+  "scores": {
+    "focal": {
+      "score": 4,
+      "reason": "The person is the figure."
+    },
+    "hierarchy": {
+      "score": 4,
+      "reason": "Headline over small support."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Photo weight balanced by open type."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "Bleed plus one type axis."
+    },
+    "eye_path": {
+      "score": 4,
+      "reason": "Short path."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Type is one cluster."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Type sits on a calmer region."
+    },
+    "whitespace": {
+      "score": 4,
+      "reason": "Sky or paper gives air."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Person separates."
+    },
+    "color": {
+      "score": 4,
+      "reason": "Warm neutral, little accent."
+    },
+    "type": {
+      "score": 4,
+      "reason": "Few sizes."
+    },
+    "photo": {
+      "score": 4,
+      "reason": "Capable subject, one crop."
+    },
+    "offer": {
+      "score": 3,
+      "reason": "No numeral; the help is the offer and it is quiet."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Response exists and is not dominant."
+    },
+    "trust": {
+      "score": 4,
+      "reason": "Human trust, no seals."
+    },
+    "glance_3s": {
+      "score": 4,
+      "reason": "Glance gets a person and a category."
+    }
+  },
+  "emulate": [
+    "One capable person, full-bleed, short type on a calm field, no official chrome."
+  ],
+  "do_not_copy": [
+    "The portrait and any agency line printed on it."
+  ],
+  "anti_patterns": [
+    "None major. Do not add a deadline to this kind of calm."
+  ],
+  "summary": "A research Medicare front that already understands compliance-calm. It is a B because the next step is softer than the portrait."
+}

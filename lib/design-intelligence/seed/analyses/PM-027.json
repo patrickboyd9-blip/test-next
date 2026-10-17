@@ -1,0 +1,111 @@
+{
+  "id": "PM-027",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "D",
+  "focal_point": "A gold frame around an interior. As photographed, the room reads sideways relative to the upright header, so there is no usable focal point.",
+  "eye_path": "Header is upright; the sofa, lamp, and a vertical tenure line run the other way.",
+  "grid": "Header plus a gold mat. The photo's axis disagrees.",
+  "visual_weight_pct": {
+    "photo": 70,
+    "text": 14,
+    "offer": 0,
+    "white_space": 16
+  },
+  "scale_ratios": "No price. The tenure line is small and vertical.",
+  "type_choices": "Script mark, sans header, a second orientation.",
+  "palette_hex": [
+    "#C4A15A",
+    "#F3E6C8",
+    "#E07A3D",
+    "#3A4E8C"
+  ],
+  "photo_art_direction": "Warm interior with louvers. If the print itself is rotated, the card fails. If only the snapshot is rotated, re-score the interior as a B\u2212 for the frame alone.",
+  "offer_placement": "No priced offer.",
+  "trust_and_cta": "A small tenure line. No phone.",
+  "scores": {
+    "focal": {
+      "score": 2,
+      "reason": "Axes fight."
+    },
+    "hierarchy": {
+      "score": 2,
+      "reason": "No ladder."
+    },
+    "balance": {
+      "score": 2,
+      "reason": "The frame cannot balance a rotated room."
+    },
+    "grid": {
+      "score": 2,
+      "reason": "Mat is fine; the photo is not."
+    },
+    "eye_path": {
+      "score": 1,
+      "reason": "Two reading directions."
+    },
+    "gestalt": {
+      "score": 2,
+      "reason": "Header and photo do not group."
+    },
+    "contrast": {
+      "score": 3,
+      "reason": "Gold frame separates."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Mat is the margin."
+    },
+    "figure_ground": {
+      "score": 3,
+      "reason": "Frame is the figure."
+    },
+    "color": {
+      "score": 4,
+      "reason": "Gold and cream fit shutters."
+    },
+    "type": {
+      "score": 2,
+      "reason": "Two orientations."
+    },
+    "photo": {
+      "score": 2,
+      "reason": "Interior would be fine upright."
+    },
+    "offer": {
+      "score": 1,
+      "reason": "No offer."
+    },
+    "cta": {
+      "score": 1,
+      "reason": "No response."
+    },
+    "trust": {
+      "score": 2,
+      "reason": "Tenure only."
+    },
+    "glance_3s": {
+      "score": 1,
+      "reason": "A glance cannot settle."
+    }
+  },
+  "emulate": [
+    "A metallic mat around one product interior, with the photo's horizon parallel to the type."
+  ],
+  "do_not_copy": [
+    "Mark and the room."
+  ],
+  "anti_patterns": [
+    "Two reading directions",
+    "no response device"
+  ],
+  "summary": "Mailbox shutter card. The gold frame is a good idea. As committed, the room and the type disagree. Patrick may say the photo was turned; the file is scored as it reads."
+}

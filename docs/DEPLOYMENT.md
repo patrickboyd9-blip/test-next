@@ -38,6 +38,43 @@ The Blob store must stay **Private**. That is the setting Vercel picks when you 
 
 Without the two API keys, campaign pages still open. The writing and the photographs fall back to the built-in practice behavior instead of calling Anthropic or OpenAI.
 
+## Reference library
+
+Studio already knows the written grades for the mailbox and vendor pieces. Those notes ship with the app. The photographs of those pieces do not. They stay out of git.
+
+To let the live site keep learning from new mail, add these in **Settings → Environment Variables** for Production (and Preview if you use preview links):
+
+| Variable | Required | What to put |
+| --- | --- | --- |
+| `RESEARCH_GITHUB_TOKEN` | Yes, for the daily pull | A GitHub personal access token that can read the private `patrickboyd9-blip/modern-mail-research` repository. Classic token: `repo` scope. Fine-grained token: contents read on that repo only. |
+| `CRON_SECRET` | Yes, for the daily pull and the on-demand buttons | A long random string you invent. Vercel sends it as the cron password. The same value unlocks “sync now” and the benchmark. |
+| `ANTHROPIC_API_KEY` | Already listed above | Also scores a new mailer that arrives without a written grade, and lets the art director look at the reference photographs. Without it, the app still lays out cards from the written rules. |
+| `BLOB_READ_WRITE_TOKEN` | Already created by Blob | Where the downloaded photographs are stored. The store stays private. |
+| `DATABASE_URL` or `POSTGRES_URL` | Already created by Neon | Where the mailer index is stored. |
+
+Optional. Leave them blank unless you need to change a default.
+
+| Variable | Default | What it changes |
+| --- | --- | --- |
+| `RESEARCH_GITHUB_REPO` | `patrickboyd9-blip/modern-mail-research` | The private repo. |
+| `RESEARCH_MANDO_REF` | `main` | Branch for the vendor library (`images/index.json`). |
+| `RESEARCH_C3PO_REF` | `cursor/visual-reference-corpus-3752` | Branch for Patrick’s mailbox pieces (`assets/physical/`). Anything inside a `private/` folder is skipped. |
+| `DESIGN_DIRECTOR` | model, when the Anthropic key is set | Set to `rules` to skip the vision art director and use the written rules only. |
+| `DESIGN_CRITIC` | one vision look at the lead card when the key is set | Set to `machine` to score from measurements only. |
+| `DESIGN_CRITIC_ROUNDS` | `3` | How many layout repairs to try. The app will not go past 3. |
+| `DESIGN_SYNC_BATCH` | `40` | How many new mailers one daily run downloads. |
+| `DESIGN_ANALYZE_CAP` | `8` | How many ungraded mailers one run sends to the vision model. |
+| `DESIGN_MODEL` | `claude-sonnet-5` | The model that directs and critiques. |
+| `DESIGN_INPUT_USD_PER_MTOK` | `3` | Estimate used only in the cost log. Not a bill. |
+| `DESIGN_OUTPUT_USD_PER_MTOK` | `15` | Estimate used only in the cost log. Not a bill. |
+| `DESIGN_INTELLIGENCE` | on | Set to `off` to return to the previous layout path. |
+
+The daily job runs at 17:45 UTC. That is 9:45am during Pacific Standard Time and 10:45am during Pacific Daylight Time, so it is always after 9:30am Pacific. Vercel calls `GET /api/cron/design-library`.
+
+To pull immediately, send a POST to `https://test-next-modern-mail2.vercel.app/api/design-library/sync` with the header `Authorization: Bearer` and the `CRON_SECRET` value. The benchmark is the same header on `POST /api/design-benchmark`.
+
+On a laptop, put the photographs in `.data/reference-library` (that folder is not committed) and run `npx tsx scripts/seed-reference-library.ts`. If the Blob token is present, the script also uploads them. If it is not, the benchmark reads the local files.
+
 ## How long the AI calls can run
 
 Conversation, concept writing, and photograph generation are allowed **60 seconds** per click. That is the Hobby plan maximum on projects that do not have Fluid Compute turned on. Setting a higher limit makes the deploy fail with “maxDuration must be between 1 and 60.”
@@ -48,9 +85,9 @@ One concept-writing click is usually inside 60 seconds. Photographs do not wait 
 
 ## What you do not configure
 
-The research cards Studio reads are part of the application code. They are not a folder you upload, and they are not in the database. Nothing else is read from a loose file when the site runs on Vercel.
+The written grades for the research cards ship in the application code. The photographs do not. The "Reference library" section above is where the token, the daily pull, and those photographs are set.
 
-Local `npm run dev` needs none of the variables above. Campaigns and photographs are written under `.data/` in the project folder. That folder is not committed.
+Local `npm run dev` needs none of the variables above. Campaigns and photographs are written under `.data/` in the project folder. That folder is not committed. A local reference library, if you extracted one, lives in `.data/reference-library` and is not committed either.
 
 ## After you redeploy
 

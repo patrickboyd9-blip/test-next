@@ -1,0 +1,112 @@
+{
+  "id": "PM-016",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "C+",
+  "focal_point": "A full-height navy headline. The dollar-off on the white side is smaller.",
+  "eye_path": "F down the navy headline, then the offer and a phone bar.",
+  "grid": "Two columns. Navy block and a stacked white side.",
+  "visual_weight_pct": {
+    "photo": 0,
+    "text": 46,
+    "offer": 16,
+    "white_space": 38
+  },
+  "scale_ratios": "Headline dominates. Offer is smaller than the headline, so this is a headline-led card whose offer lost.",
+  "type_choices": "Condensed sans, several sizes. Serious and shouty.",
+  "palette_hex": [
+    "#0E2244",
+    "#F7F7F5",
+    "#8AA4B8"
+  ],
+  "photo_art_direction": "None. A foundation problem with no picture of a house or a crack.",
+  "offer_placement": "Upper right, same weight as a service list. A second inspection line sits in the navy.",
+  "trust_and_cta": "A certified claim and a small mark. Phone in a bar. Tiny bare code.",
+  "scores": {
+    "focal": {
+      "score": 4,
+      "reason": "The navy headline leads."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "The offer is quieter than the category."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Heavy left, light right."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "Clear split."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "F-path through a list."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "List and offer blur."
+    },
+    "contrast": {
+      "score": 5,
+      "reason": "White on navy."
+    },
+    "whitespace": {
+      "score": 4,
+      "reason": "The white side has air."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Navy block is the figure."
+    },
+    "color": {
+      "score": 3,
+      "reason": "Institutional navy."
+    },
+    "type": {
+      "score": 3,
+      "reason": "Condensed and loud."
+    },
+    "photo": {
+      "score": 1,
+      "reason": "No photo."
+    },
+    "offer": {
+      "score": 2,
+      "reason": "Two offers, both quiet."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Phone bar works; code is a speck."
+    },
+    "trust": {
+      "score": 3,
+      "reason": "A claim, not a job."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "Glance gets a category, not a price."
+    }
+  },
+  "emulate": [
+    "A full-height color block for one sentence. Then put the numeral in it, and add a photo."
+  ],
+  "do_not_copy": [
+    "Mark and certification."
+  ],
+  "anti_patterns": [
+    "Limited-time flag",
+    "two offers",
+    "bare tiny QR",
+    "no photo on a trust trade"
+  ],
+  "summary": "Mailbox foundation card. Serious split, offer too quiet, no photograph."
+}

@@ -1,0 +1,111 @@
+{
+  "id": "MMR-147",
+  "corpus": "mmr",
+  "research_ref": "modern-mail-research images @ 599bf1c",
+  "use_class": "research_reference",
+  "mailbox_weight": "secondary",
+  "vertical": "roofing",
+  "faces": [
+    "front"
+  ],
+  "low_res": true,
+  "shared_vendor_style": false,
+  "grade": "C+",
+  "focal_point": "A house photo and a storm headline share the card with an offer tile.",
+  "eye_path": "Z: headline, roof, offer tile, phone.",
+  "grid": "Photo with a corner or band offer. Vendor-typical.",
+  "visual_weight_pct": {
+    "photo": 48,
+    "text": 22,
+    "offer": 18,
+    "white_space": 12
+  },
+  "scale_ratios": "Headline and offer tile are close. Not a 1.6\u00d7 numeral.",
+  "type_choices": "Bold sans, several sizes, high-contrast tile.",
+  "palette_hex": [
+    "#102A43",
+    "#F5C518",
+    "#FFFFFF",
+    "#8C4A2F"
+  ],
+  "photo_art_direction": "Whole house or roof, somewhat generic at this resolution. Not a crew close-up.",
+  "offer_placement": "Tile is visible and is the right idea, crowded by the headline.",
+  "trust_and_cta": "Phone near the tile. Limited proof.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Photo and tile tie."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "Tile is not clearly larger than the headline."
+    },
+    "balance": {
+      "score": 3,
+      "reason": "Standard split."
+    },
+    "grid": {
+      "score": 3,
+      "reason": "Usable and ordinary."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "Path reaches the phone."
+    },
+    "gestalt": {
+      "score": 3,
+      "reason": "Tile groups the deal."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Yellow on dark works."
+    },
+    "whitespace": {
+      "score": 2,
+      "reason": "Little leftover field."
+    },
+    "figure_ground": {
+      "score": 3,
+      "reason": "Tile separates from the roof."
+    },
+    "color": {
+      "score": 3,
+      "reason": "Navy and yellow category code."
+    },
+    "type": {
+      "score": 3,
+      "reason": "Several sizes."
+    },
+    "photo": {
+      "score": 3,
+      "reason": "Roof is shown; crop is average."
+    },
+    "offer": {
+      "score": 3,
+      "reason": "One tile, not dominant enough."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Phone is near the deal."
+    },
+    "trust": {
+      "score": 2,
+      "reason": "Thin local proof."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "Glance gets storm plus a deal."
+    }
+  },
+  "emulate": [
+    "An offer tile on the quiet part of a roof photo, then make the numeral actually bigger than the headline."
+  ],
+  "do_not_copy": [
+    "Headline wording, phone, any storm claim."
+  ],
+  "anti_patterns": [
+    "Category-standard storm card",
+    "flat scale"
+  ],
+  "summary": "Low-resolution storm roofing card. The tile idea is right and the execution is template."
+}

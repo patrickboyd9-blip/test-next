@@ -1,0 +1,110 @@
+{
+  "id": "PM-008",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "plumbing",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B-",
+  "focal_point": "A technician at work and a coupon rail. The person is the better idea; the rail is louder.",
+  "eye_path": "Worker to rail to phone.",
+  "grid": "Photo, identity, coupon column.",
+  "visual_weight_pct": {
+    "photo": 36,
+    "text": 22,
+    "offer": 28,
+    "white_space": 14
+  },
+  "scale_ratios": "Rail prices are large. More than one price.",
+  "type_choices": "Sans plus heavy numerals. Several sizes.",
+  "palette_hex": [
+    "#FFFFFF",
+    "#E10600",
+    "#1A1A1A",
+    "#F4F1EA"
+  ],
+  "photo_art_direction": "Worker on a job, gaze toward the work. Credible.",
+  "offer_placement": "Rail holds the deal and also a second number.",
+  "trust_and_cta": "Phone and a local URL. Busy.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Rail and worker tie."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "Prices are the type event."
+    },
+    "balance": {
+      "score": 3,
+      "reason": "Split is ok."
+    },
+    "grid": {
+      "score": 3,
+      "reason": "Three zones."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "Path works."
+    },
+    "gestalt": {
+      "score": 3,
+      "reason": "Rail is one group."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Red on white."
+    },
+    "whitespace": {
+      "score": 2,
+      "reason": "Tight center."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Rail figure."
+    },
+    "color": {
+      "score": 3,
+      "reason": "Red accent."
+    },
+    "type": {
+      "score": 3,
+      "reason": "Extra sizes."
+    },
+    "photo": {
+      "score": 4,
+      "reason": "Good job photo."
+    },
+    "offer": {
+      "score": 3,
+      "reason": "More than one price."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Two responses."
+    },
+    "trust": {
+      "score": 3,
+      "reason": "The worker is the proof."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "Glance gets plumbing and a coupon."
+    }
+  },
+  "emulate": [
+    "Job photo plus one price, not a rail of them."
+  ],
+  "do_not_copy": [
+    "Mark, prices, phone."
+  ],
+  "anti_patterns": [
+    "Multi-price rail"
+  ],
+  "summary": "Mailbox plumbing card. The worker is right. The rail is the C+ habit."
+}

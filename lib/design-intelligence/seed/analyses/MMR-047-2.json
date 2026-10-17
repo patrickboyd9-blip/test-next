@@ -1,0 +1,110 @@
+{
+  "id": "MMR-047-2",
+  "corpus": "mmr",
+  "research_ref": "modern-mail-research images @ 599bf1c",
+  "use_class": "anti_example",
+  "mailbox_weight": "secondary",
+  "vertical": "medicare_insurance",
+  "faces": [
+    "front"
+  ],
+  "low_res": true,
+  "shared_vendor_style": false,
+  "grade": "F",
+  "focal_point": "The same official-notice idea, with a proof watermark from the source. The design still reads as a government form.",
+  "eye_path": "Notice stack, deadline, response.",
+  "grid": "Centered official bands.",
+  "visual_weight_pct": {
+    "photo": 5,
+    "text": 50,
+    "offer": 15,
+    "white_space": 30
+  },
+  "scale_ratios": "Deadline and header dominate. Same pressure scale as the companion file.",
+  "type_choices": "Notice faces, multiple sizes.",
+  "palette_hex": [
+    "#F7F3EA",
+    "#7A1C1C",
+    "#111111"
+  ],
+  "photo_art_direction": "No job or advisor. Graphic official cues. A source watermark crosses the file and is not a design element.",
+  "offer_placement": "Short fuse response window. Treat as forbidden, not as urgency craft.",
+  "trust_and_cta": "Urgency replaces trust.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "One loud official block."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "Pressure scale, not a service ladder."
+    },
+    "balance": {
+      "score": 2,
+      "reason": "Symmetry as costume."
+    },
+    "grid": {
+      "score": 3,
+      "reason": "Form grid."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "Ends on the deadline."
+    },
+    "gestalt": {
+      "score": 2,
+      "reason": "Grouped like a notice."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "High contrast used to alarm."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Empty paper imitates a letter."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Figure is the red rule."
+    },
+    "color": {
+      "score": 1,
+      "reason": "Official palette."
+    },
+    "type": {
+      "score": 2,
+      "reason": "Form type."
+    },
+    "photo": {
+      "score": 1,
+      "reason": "No person."
+    },
+    "offer": {
+      "score": 1,
+      "reason": "Fake deadline."
+    },
+    "cta": {
+      "score": 2,
+      "reason": "Threatened response."
+    },
+    "trust": {
+      "score": 1,
+      "reason": "False authority."
+    },
+    "glance_3s": {
+      "score": 2,
+      "reason": "Glance recalls a notice, not a brand."
+    }
+  },
+  "emulate": [
+    "Nothing."
+  ],
+  "do_not_copy": [
+    "The notice system, the watermarked proof, all wording."
+  ],
+  "anti_patterns": [
+    "Government-notice look",
+    "fake deadline"
+  ],
+  "summary": "Second file of the same anti-example. A proof watermark does not change the design verdict."
+}

@@ -1,0 +1,110 @@
+{
+  "id": "PM-014",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "finance",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B",
+  "focal_point": "A rounded price tile on a lot of paper. The figure is the only loud object.",
+  "eye_path": "Z from the tile to a short stack to a framed code.",
+  "grid": "Two columns, wide margins.",
+  "visual_weight_pct": {
+    "photo": 0,
+    "text": 38,
+    "offer": 30,
+    "white_space": 32
+  },
+  "scale_ratios": "The dollar figure is much larger than the headline. This meets the hero-numeral idea.",
+  "type_choices": "One sans, about four or five sizes. Even pairing.",
+  "palette_hex": [
+    "#F4F1EC",
+    "#5C2E91",
+    "#C46A4A"
+  ],
+  "photo_art_direction": "None.",
+  "offer_placement": "The tile works. A code step adds friction. No phone backup.",
+  "trust_and_cta": "Code only. Footnotes. No reviews.",
+  "scores": {
+    "focal": {
+      "score": 4,
+      "reason": "One tile."
+    },
+    "hierarchy": {
+      "score": 4,
+      "reason": "Numeral over headline."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Open and weighted left."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "Wide grid."
+    },
+    "eye_path": {
+      "score": 4,
+      "reason": "Tile then code."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Tile is one group."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Purple on cream holds."
+    },
+    "whitespace": {
+      "score": 5,
+      "reason": "Real paper."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Tile separates."
+    },
+    "color": {
+      "score": 4,
+      "reason": "One accent."
+    },
+    "type": {
+      "score": 4,
+      "reason": "One family."
+    },
+    "photo": {
+      "score": 1,
+      "reason": "No photo on a money offer."
+    },
+    "offer": {
+      "score": 4,
+      "reason": "One figure."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Code without a phone."
+    },
+    "trust": {
+      "score": 2,
+      "reason": "Footnotes only."
+    },
+    "glance_3s": {
+      "score": 4,
+      "reason": "Glance gets a dollar figure."
+    }
+  },
+  "emulate": [
+    "One price tile, bullets in one size, brand color only on the deal."
+  ],
+  "do_not_copy": [
+    "The lender mark and the bonus."
+  ],
+  "anti_patterns": [
+    "Code with no phone",
+    "no human proof on a finance offer"
+  ],
+  "summary": "Mailbox home-equity card. The single tile is an A move. The missing phone and photo keep it a B."
+}
