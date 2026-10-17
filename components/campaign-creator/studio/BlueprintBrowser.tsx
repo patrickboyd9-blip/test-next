@@ -10,10 +10,9 @@ import {
 } from "@/lib/campaign-creator/actions"
 import type { Campaign } from "@/lib/campaign-creator/types"
 
-import { BlueprintWireframe } from "./BlueprintWireframe"
+import { BLUEPRINT_TAG_CONFIG, tagLabel } from "@/lib/design-intelligence/blueprint-tags"
 
-const VERTICALS = ["roofing", "hvac", "plumbing", "real_estate", "medicare", "solar", "dental", "pest_control", "landscaping", "restaurant", "home_services", "general"]
-const TONES = ["urgent", "professional", "fearful", "joyful", "luxury", "friendly", "scarcity", "calm"]
+import { BlueprintWireframe } from "./BlueprintWireframe"
 
 /**
  * Browse structure, then rebuild the selected concept from it.
@@ -29,17 +28,25 @@ export function BlueprintBrowser({
   const [open, setOpen] = useState(false)
   const [vertical, setVertical] = useState("")
   const [tone, setTone] = useState("")
+  const [offerType, setOfferType] = useState("")
+  const [copyPattern, setCopyPattern] = useState("")
   const [cards, setCards] = useState<BlueprintBrowseCard[]>([])
   const [status, setStatus] = useState("")
   const [busy, setBusy] = useState(false)
 
-  async function load(nextVertical = vertical, nextTone = tone) {
+  async function load(next: { vertical?: string; tone?: string; offerType?: string; copyPattern?: string } = {}) {
+    const filters = {
+      vertical: next.vertical ?? vertical,
+      tone: next.tone ?? tone,
+      offerType: next.offerType ?? offerType,
+      copyPattern: next.copyPattern ?? copyPattern,
+    }
     setBusy(true)
     setStatus("")
     try {
-      const next = await browseBlueprints({ campaignId, vertical: nextVertical, tone: nextTone })
-      setCards(next)
-      if (next.length === 0) setStatus("No blueprints match that filter yet.")
+      const found = await browseBlueprints({ campaignId, ...filters })
+      setCards(found)
+      if (found.length === 0) setStatus("No blueprints match that filter yet.")
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "The library could not be opened.")
     } finally {
@@ -87,34 +94,42 @@ export function BlueprintBrowser({
         The structure of a real mailer, rebuilt with this campaign&apos;s words, colors, and a new photograph.
       </p>
       <div className="flex flex-wrap gap-2">
-        <select
-          className="rounded-md border border-border bg-background px-2 py-1 text-sm"
+        <FilterSelect
+          label="Vertical"
           value={vertical}
-          onChange={(event) => {
-            setVertical(event.target.value)
-            void load(event.target.value, tone)
+          options={BLUEPRINT_TAG_CONFIG.verticals}
+          onChange={(value) => {
+            setVertical(value)
+            void load({ vertical: value })
           }}
-          aria-label="Vertical"
-        >
-          <option value="">Any vertical</option>
-          {VERTICALS.map((item) => (
-            <option key={item} value={item}>{item.replaceAll("_", " ")}</option>
-          ))}
-        </select>
-        <select
-          className="rounded-md border border-border bg-background px-2 py-1 text-sm"
+        />
+        <FilterSelect
+          label="Tone"
           value={tone}
-          onChange={(event) => {
-            setTone(event.target.value)
-            void load(vertical, event.target.value)
+          options={BLUEPRINT_TAG_CONFIG.tones}
+          onChange={(value) => {
+            setTone(value)
+            void load({ tone: value })
           }}
-          aria-label="Tone"
-        >
-          <option value="">Any tone</option>
-          {TONES.map((item) => (
-            <option key={item} value={item}>{item}</option>
-          ))}
-        </select>
+        />
+        <FilterSelect
+          label="Offer type"
+          value={offerType}
+          options={BLUEPRINT_TAG_CONFIG.offerTypes}
+          onChange={(value) => {
+            setOfferType(value)
+            void load({ offerType: value })
+          }}
+        />
+        <FilterSelect
+          label="Copy pattern"
+          value={copyPattern}
+          options={BLUEPRINT_TAG_CONFIG.copyPatterns}
+          onChange={(value) => {
+            setCopyPattern(value)
+            void load({ copyPattern: value })
+          }}
+        />
       </div>
       {status ? <p className="text-xs text-muted-foreground">{status}</p> : null}
       <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -130,7 +145,15 @@ export function BlueprintBrowser({
               <BlueprintWireframe boxes={card.boxes} />
             )}
             <p className="text-xs font-medium">Blueprint: {card.id}</p>
-            <p className="text-xs text-muted-foreground">{card.tone} · {card.vertical.replaceAll("_", " ")} · {card.grade}</p>
+            <p className="text-xs text-muted-foreground">
+              {[
+                tagLabel("tones", card.tone),
+                tagLabel("verticals", card.vertical),
+                card.offerType ? tagLabel("offerTypes", card.offerType) : "",
+                card.copyPattern ? tagLabel("copyPatterns", card.copyPattern) : "",
+                card.grade,
+              ].filter(Boolean).join(" · ")}
+            </p>
             <Button size="sm" disabled={busy} onClick={() => void generateFromBlueprint(card.id)}>
               Generate from this
             </Button>
@@ -138,5 +161,31 @@ export function BlueprintBrowser({
         ))}
       </ul>
     </section>
+  )
+}
+
+function FilterSelect({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string
+  value: string
+  options: readonly { id: string; label: string }[]
+  onChange: (value: string) => void
+}) {
+  return (
+    <select
+      className="rounded-md border border-border bg-background px-2 py-1 text-sm"
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      aria-label={label}
+    >
+      <option value="">Any {label.toLowerCase()}</option>
+      {options.map((item) => (
+        <option key={item.id} value={item.id}>{item.label}</option>
+      ))}
+    </select>
   )
 }

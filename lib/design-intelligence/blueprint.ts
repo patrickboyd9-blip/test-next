@@ -1,6 +1,29 @@
 import { gradeRank, isAntiExample, type LibraryRecord, type MailerAnalysis } from "./library"
 import { isForbiddenResearchPath } from "./images"
 import { ownerFavoriteIds } from "./owner-favorites"
+import {
+  BLUEPRINT_TAG_CONFIG,
+  classifyOfferAndCopy,
+  classifyVisionTags,
+  COPY_PATTERNS,
+  matchTagRules,
+  TONE_TAGS,
+  VERTICAL_TAGS,
+  verticalFromAnalysis,
+  type CopyPattern,
+  type OfferType,
+  type ProposedTag,
+  type ToneTag,
+  type VerticalTag,
+} from "./blueprint-tags"
+
+export {
+  BLUEPRINT_TAG_CONFIG,
+  COPY_PATTERNS,
+  TONE_TAGS,
+  VERTICAL_TAGS,
+}
+export type { CopyPattern, OfferType, ProposedTag, ToneTag, VerticalTag }
 
 /**
  * A mailer's structure, separated from its art and its words.
@@ -8,7 +31,7 @@ import { ownerFavoriteIds } from "./owner-favorites"
  * Source photographs, marks, and slogans are not part of the blueprint a customer sees.
  */
 
-export const BLUEPRINT_VERSION = "1.0.0" as const
+export const BLUEPRINT_VERSION = "1.1.0" as const
 
 export const BLUEPRINT_ROLES = [
   "photo",
@@ -36,41 +59,6 @@ export type BlueprintDevice = (typeof BLUEPRINT_DEVICES)[number]
 
 export const TYPE_CLASSES = ["condensed-display", "humanist-sans", "serif"] as const
 export type TypeClass = (typeof TYPE_CLASSES)[number]
-
-export const COPY_PATTERNS = ["problem-led", "two-line-headline", "question", "offer-led", "invitation"] as const
-export type CopyPattern = (typeof COPY_PATTERNS)[number]
-
-export const TONE_TAGS = [
-  "urgent",
-  "professional",
-  "fearful",
-  "joyful",
-  "luxury",
-  "friendly",
-  "scarcity",
-  "calm",
-] as const
-export type ToneTag = (typeof TONE_TAGS)[number]
-
-export const VERTICAL_TAGS = [
-  "real_estate",
-  "health_insurance",
-  "medicare",
-  "skincare",
-  "roofing",
-  "hvac",
-  "solar",
-  "dental",
-  "home_services",
-  "financial",
-  "retail",
-  "restaurant",
-  "pest_control",
-  "plumbing",
-  "landscaping",
-  "general",
-] as const
-export type VerticalTag = (typeof VERTICAL_TAGS)[number]
 
 export interface NormBox {
   role: BlueprintRole
@@ -113,6 +101,14 @@ export interface MailerBlueprint {
   typeClass: TypeClass
   devices: BlueprintDevice[]
   copyPattern: CopyPattern
+  /** Confident offer tags. Empty when the piece needs a new tag. */
+  offerTypes: ConfidenceTag<OfferType>[]
+  /** Confident wording patterns. Empty when the piece needs a new tag. */
+  copyPatterns: ConfidenceTag<CopyPattern>[]
+  /** Abstract slots only. Never the source headline. */
+  copyTemplate: string
+  /** New tags the extractor suggested. Not merged into the vocabulary. */
+  proposedTags: ProposedTag[]
   front: string
   back: string
   tones: ConfidenceTag<ToneTag>[]
@@ -127,56 +123,12 @@ export interface BlueprintCard {
   grade: string
   tone: string
   vertical: string
+  offerType: string
+  copyPattern: string
   devices: BlueprintDevice[]
   boxes: NormBox[]
   /** Set only for an internal owner, and only when a source photograph is on file. */
   thumb: { mediaType: string; base64: string } | null
-}
-
-const TONE_PATTERNS: ReadonlyArray<[ToneTag, RegExp]> = [
-  ["urgent", /urgent|storm|leak|now|deadline|emergency|today/gi],
-  ["fearful", /fear|damage|worry|problem|before it|risk|ants|slow drain/gi],
-  ["joyful", /joy|smile|spring|celebrat|fresh|lifestyle|appetite|supper/gi],
-  ["luxury", /luxury|premium|studio|quiet black|gold/gi],
-  ["friendly", /friendly|neighbor|local|kitchen|yard/gi],
-  ["scarcity", /scarcity|only \d|last chance|limited|two for one/gi],
-  ["calm", /calm|medicare|invitation|advisor/gi],
-  ["professional", /professional|licensed|trust|proof|inspection/gi],
-]
-
-const VERTICAL_PATTERNS: ReadonlyArray<[VerticalTag, RegExp]> = [
-  ["medicare", /\bmedicare\b|\bmedicaid\b/gi],
-  ["health_insurance", /\binsurance\b|\bsupplement\b/gi],
-  ["real_estate", /real estate|realtor|listing|we buy/gi],
-  ["skincare", /skin|beauty|serum|hair/gi],
-  ["roofing", /\broof/gi],
-  ["hvac", /\bhvac\b|air condition|furnace|tune-up/gi],
-  ["solar", /\bsolar\b/gi],
-  ["dental", /\bdental\b|\bdentist\b/gi],
-  ["plumbing", /\bplumb|\bdrain\b/gi],
-  ["pest_control", /\bpest\b|\bmosquito\b|\btick\b|\bant\b/gi],
-  ["landscaping", /landscap|lawn|yard|cleanup/gi],
-  ["restaurant", /restaurant|supper|table|menu/gi],
-  ["financial", /mortgage|loan|financial|tax/gi],
-  ["retail", /\bretail\b|\bstore\b|\bshop\b/gi],
-  ["home_services", /home service|local service|cleanup/gi],
-]
-
-const VERTICAL_FROM_ANALYSIS: Record<string, VerticalTag> = {
-  pest_control: "pest_control",
-  pest: "pest_control",
-  roofing: "roofing",
-  plumbing: "plumbing",
-  hvac: "hvac",
-  real_estate: "real_estate",
-  medicare: "medicare",
-  medicare_insurance: "medicare",
-  solar: "solar",
-  dental: "dental",
-  restaurant: "restaurant",
-  landscaping: "landscaping",
-  general_local_service: "home_services",
-  general: "general",
 }
 
 export function isInternalOwner(ownerId: string | undefined, env: NodeJS.ProcessEnv = process.env): boolean {
@@ -193,6 +145,7 @@ export function structuralBlueprint(record: LibraryRecord, extractedAt = "1970-0
   const faces = (analysis?.faces ?? ["front"]).filter((face): face is "front" | "back" => face === "front" || face === "back")
   const verticals = verticalTags(analysis?.vertical, text)
   const tones = toneTags(text)
+  const tagged = classifyOfferAndCopy(text)
   return {
     version: BLUEPRINT_VERSION,
     id: record.id,
@@ -204,7 +157,11 @@ export function structuralBlueprint(record: LibraryRecord, extractedAt = "1970-0
     paletteRoles: rolesFrom(text),
     typeClass: typeClassFrom(text),
     devices,
-    copyPattern: copyPatternFrom(text),
+    copyPattern: tagged.copyPattern,
+    offerTypes: tagged.offerTypes,
+    copyPatterns: tagged.copyPatterns,
+    copyTemplate: tagged.copyTemplate,
+    proposedTags: tagged.proposedTags,
     front: frontLine(devices),
     back: backLine(devices),
     tones: tones.length > 0 ? tones : [{ tag: "professional", confidence: 0.35 }],
@@ -233,7 +190,6 @@ export function parseVisionBlueprint(raw: unknown, id: string): MailerBlueprint 
   if (boxes.length < 2) return null
   const devices = parseDevices(row.devices)
   const typeClass = includes(TYPE_CLASSES, row.typeClass) ? row.typeClass : "humanist-sans"
-  const copyPattern = includes(COPY_PATTERNS, row.copyPattern) ? row.copyPattern : "offer-led"
   const grade = typeof row.grade === "string" && row.grade.trim() ? row.grade.trim() : "B"
   const guard = record(row.guard)
   const phrases = Array.isArray(guard?.sourcePhrases)
@@ -242,6 +198,13 @@ export function parseVisionBlueprint(raw: unknown, id: string): MailerBlueprint 
   const paletteHex = Array.isArray(guard?.paletteHex)
     ? guard.paletteHex.filter((item): item is string => typeof item === "string" && /^#[0-9A-Fa-f]{6}$/.test(item)).slice(0, 4)
     : []
+  const tagged = classifyVisionTags({
+    offerTypes: row.offerTypes,
+    copyPatterns: row.copyPatterns,
+    copyPattern: row.copyPattern,
+    proposedTags: row.proposedTags,
+    sourcePhrases: phrases,
+  })
   return {
     version: BLUEPRINT_VERSION,
     id,
@@ -261,7 +224,11 @@ export function parseVisionBlueprint(raw: unknown, id: string): MailerBlueprint 
     },
     typeClass,
     devices: devices.length > 0 ? devices : ["full-bleed"],
-    copyPattern,
+    copyPattern: tagged.copyPattern,
+    offerTypes: tagged.offerTypes,
+    copyPatterns: tagged.copyPatterns,
+    copyTemplate: tagged.copyTemplate,
+    proposedTags: tagged.proposedTags,
     front: clip(stringField(row, "front") || frontLine(devices)),
     back: clip(stringField(row, "back") || backLine(devices)),
     tones: parseTags(row.tones, TONE_TAGS),
@@ -280,22 +247,34 @@ export function selectBlueprints(input: {
   blueprints: readonly MailerBlueprint[]
   vertical: string
   tone: string
+  /** Omit when the brief does not name an offer. Matching then skips this dimension. */
+  offerType?: string
+  /** Omit when the brief does not name a wording pattern. */
+  copyPattern?: string
   favorites?: readonly string[]
   limit?: number
 }): MailerBlueprint[] {
   const favorites = new Set(input.favorites ?? ownerFavoriteIds())
   const vertical = normalizeVerticalTag(input.vertical)
   const tone = normalizeToneTag(input.tone)
-  const ranked = input.blueprints.map((blueprint) => ({
-    blueprint,
-    vertical: tagConfidence(blueprint.verticals, vertical),
-    tone: tagConfidence(blueprint.tones, tone),
-    score: blueprintScore(blueprint, favorites) + tagConfidence(blueprint.verticals, vertical) * 10 + tagConfidence(blueprint.tones, tone) * 10,
-  }))
-  const primary = ranked.filter((item) => item.vertical >= 0.35 && item.tone >= 0.35)
-  const toneOnly = ranked.filter((item) => item.tone >= 0.35 && item.vertical < 0.35)
-  const rest = ranked.filter((item) => item.tone < 0.35)
-  const ordered = [...sortRanked(primary), ...sortRanked(toneOnly), ...sortRanked(rest)]
+  const offer = normalizeOffer(input.offerType)
+  const pattern = normalizePattern(input.copyPattern)
+  const ranked = input.blueprints.map((blueprint) => {
+    const verticalHit = tagConfidence(blueprint.verticals, vertical)
+    const toneHit = tagConfidence(blueprint.tones, tone)
+    const offerHit = offer ? tagConfidence(blueprint.offerTypes, offer) : 0
+    const patternHit = pattern ? tagConfidence(blueprint.copyPatterns, pattern) : 0
+    return {
+      blueprint,
+      vertical: verticalHit,
+      tone: toneHit,
+      offer: offerHit,
+      pattern: patternHit,
+      score: blueprintScore(blueprint, favorites) + verticalHit * 10 + toneHit * 10 + (offer ? offerHit * 8 : 0) + (pattern ? patternHit * 8 : 0),
+      band: matchBand({ vertical: verticalHit, tone: toneHit, offer: offerHit, pattern: patternHit, wantOffer: Boolean(offer), wantPattern: Boolean(pattern) }),
+    }
+  })
+  const ordered = [...ranked].sort((a, b) => a.band - b.band || b.score - a.score || a.blueprint.id.localeCompare(b.blueprint.id))
   const limit = Math.max(1, Math.min(12, input.limit ?? 6))
   const seen = new Set<string>()
   const chosen: MailerBlueprint[] = []
@@ -314,6 +293,8 @@ export function blueprintCard(blueprint: MailerBlueprint, thumb: BlueprintCard["
     grade: blueprint.grade,
     tone: blueprint.tones[0]?.tag ?? "professional",
     vertical: blueprint.verticals[0]?.tag ?? "general",
+    offerType: blueprint.offerTypes[0]?.tag ?? "",
+    copyPattern: blueprint.copyPatterns[0]?.tag ?? "",
     devices: blueprint.devices,
     boxes: blueprint.boxes,
     thumb,
@@ -340,9 +321,7 @@ export function normalizeToneTag(value: string | undefined): ToneTag {
 }
 
 export function normalizeVerticalTag(value: string | undefined): VerticalTag {
-  const key = (value ?? "").toLowerCase().replace(/[\s-]+/g, "_")
-  if ((VERTICAL_TAGS as readonly string[]).includes(key)) return key as VerticalTag
-  return VERTICAL_FROM_ANALYSIS[key] ?? "general"
+  return verticalFromAnalysis(value) ?? "general"
 }
 
 export function eligibleRecord(record: Pick<LibraryRecord, "id" | "analysis" | "images">): boolean {
@@ -365,12 +344,41 @@ function blueprintScore(blueprint: MailerBlueprint, favorites: ReadonlySet<strin
   return score
 }
 
-function sortRanked<T extends { score: number; blueprint: MailerBlueprint }>(items: T[]): T[] {
-  return [...items].sort((a, b) => b.score - a.score || a.blueprint.id.localeCompare(b.blueprint.id))
+const MATCH_FLOOR = 0.35
+
+function matchBand(input: {
+  vertical: number
+  tone: number
+  offer: number
+  pattern: number
+  wantOffer: boolean
+  wantPattern: boolean
+}): number {
+  const vertical = input.vertical >= MATCH_FLOOR
+  const tone = input.tone >= MATCH_FLOOR
+  const offer = input.offer >= MATCH_FLOOR
+  const pattern = input.pattern >= MATCH_FLOOR
+  if (input.wantOffer && input.wantPattern && vertical && tone && offer && pattern) return 0
+  if (input.wantOffer && vertical && tone && offer) return 1
+  if (vertical && tone) return 2
+  if (input.wantOffer && tone && offer && !vertical) return 3
+  if (input.wantPattern && tone && pattern && !vertical) return 4
+  if (tone) return 5
+  return 6
 }
 
-function tagConfidence<T extends string>(tags: readonly ConfidenceTag<T>[], wanted: T): number {
-  return tags.find((tag) => tag.tag === wanted)?.confidence ?? 0
+function normalizeOffer(value: string | undefined): OfferType | undefined {
+  if (!value) return undefined
+  return (BLUEPRINT_TAG_CONFIG.offerTypes.some((rule) => rule.id === value) ? value : undefined) as OfferType | undefined
+}
+
+function normalizePattern(value: string | undefined): CopyPattern | undefined {
+  if (!value) return undefined
+  return (COPY_PATTERNS.includes(value as CopyPattern) ? value : undefined) as CopyPattern | undefined
+}
+
+function tagConfidence<T extends string>(tags: readonly ConfidenceTag<T>[] | undefined, wanted: T): number {
+  return tags?.find((tag) => tag.tag === wanted)?.confidence ?? 0
 }
 
 function analysisText(analysis: MailerAnalysis | undefined): string {
@@ -408,14 +416,6 @@ function typeClassFrom(text: string): TypeClass {
   return "humanist-sans"
 }
 
-function copyPatternFrom(text: string): CopyPattern {
-  if (/\?/.test(text)) return "question"
-  if (/problem|leak|damage|worry/i.test(text)) return "problem-led"
-  if (/two-line|two line/i.test(text)) return "two-line-headline"
-  if (/invitation|calm/i.test(text)) return "invitation"
-  return "offer-led"
-}
-
 function scaleFrom(text: string, devices: readonly BlueprintDevice[]): MailerBlueprint["scale"] {
   const loud = /1\.6|larger than|numeral|loud/i.test(text)
   return {
@@ -436,27 +436,17 @@ function rolesFrom(text: string): MailerBlueprint["paletteRoles"] {
 }
 
 function toneTags(text: string): ConfidenceTag<ToneTag>[] {
-  return matchTags(text, TONE_PATTERNS)
+  return matchTagRules(text, BLUEPRINT_TAG_CONFIG.tones)
 }
 
 function verticalTags(vertical: string | undefined, text: string): ConfidenceTag<VerticalTag>[] {
-  const fromField = vertical ? VERTICAL_FROM_ANALYSIS[vertical.toLowerCase().replace(/[\s-]+/g, "_")] : undefined
-  const matched = matchTags(text, VERTICAL_PATTERNS)
+  const fromField = verticalFromAnalysis(vertical)
+  const matched = matchTagRules(text, BLUEPRINT_TAG_CONFIG.verticals)
   if (fromField && !matched.some((tag) => tag.tag === fromField)) {
     matched.unshift({ tag: fromField, confidence: 0.9 })
   }
   if (matched.length === 0) return [{ tag: "general", confidence: 0.4 }]
   return matched.slice(0, 4)
-}
-
-function matchTags<T extends string>(text: string, table: ReadonlyArray<[T, RegExp]>): ConfidenceTag<T>[] {
-  const found: ConfidenceTag<T>[] = []
-  for (const [tag, pattern] of table) {
-    const matches = text.match(pattern)
-    if (!matches) continue
-    found.push({ tag, confidence: Math.min(0.95, 0.45 + (matches.length - 1) * 0.15) })
-  }
-  return found.sort((a, b) => b.confidence - a.confidence)
 }
 
 function boxesFor(devices: readonly BlueprintDevice[], faces: readonly ("front" | "back")[]): NormBox[] {

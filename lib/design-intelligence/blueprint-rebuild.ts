@@ -7,6 +7,7 @@ import {
   type MailerBlueprint,
   type TypeClass,
 } from "./blueprint"
+import { freshCopy } from "./blueprint-tags"
 import { guardRebuild } from "./blueprint-guard"
 import { validateDesignRationale, type DesignRationale, type GridName } from "./rationale"
 
@@ -42,6 +43,15 @@ export function rebuildFromBlueprint(input: {
   const grid = gridFor(mode)
   const hero = medicare || input.blueprint.scale.offerToHeadline < 1.6 ? "headline" : "offer"
   const mapped = mapClientColors(clientColors(input.spec, input.rationale), input.blueprint.paletteRoles)
+  const offerType = input.blueprint.offerTypes[0]?.tag
+  const copyPattern = input.blueprint.copyPatterns[0]?.tag
+  const written = freshCopy({
+    template: input.blueprint.copyTemplate,
+    offerType,
+    goal: input.brief.goal,
+    offer: input.spec.offer || input.brief.offer,
+    businessName: input.brief.businessInfo?.name,
+  })
   const guarded = guardRebuild({
     sourceId: input.blueprint.sourceId,
     boxes: input.blueprint.boxes,
@@ -49,7 +59,11 @@ export function rebuildFromBlueprint(input: {
     guard: input.blueprint.guard,
     neutrals: mapped.neutrals,
     accent: mapped.accent,
-    spec: input.spec,
+    spec: {
+      ...input.spec,
+      headline: written.headline,
+      subheadline: written.subheadline,
+    },
   })
   const font = medicare ? FONT_CLASS.serif : FONT_CLASS[input.blueprint.typeClass]
   const tone = topTone(input.blueprint)
@@ -102,7 +116,12 @@ export function rebuildFromBlueprint(input: {
     ...guarded.spec,
     tone,
     palette: [guarded.neutrals[0] ?? "#F4F1EA", guarded.neutrals[1] ?? "#1A1A1A", guarded.accent],
-    blueprint: { sourceId: input.blueprint.sourceId, tone },
+    blueprint: {
+      sourceId: input.blueprint.sourceId,
+      tone,
+      offerType,
+      copyPattern,
+    },
     visualDirection: "A new photograph for this business. Do not reuse a reference photograph, illustration, logo, or icon.",
   }
   return {

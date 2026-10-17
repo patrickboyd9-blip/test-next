@@ -11,6 +11,7 @@ import type { CampaignBrief, CreativeDirection } from "@/lib/campaign-creator/ty
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
 import type { ConceptFeedbackView } from "@/lib/campaign-creator/actions"
+import { blueprintMatchLine } from "@/lib/design-intelligence/blueprint-tags"
 
 import { ConceptFeedback } from "./ConceptFeedback"
 import { PostcardPreview, type PostcardPreviewSize } from "./PostcardPreview"
@@ -113,7 +114,7 @@ export function ConceptCard({
             <p className="text-sm font-semibold">{direction.name}</p>
             {direction.spec.blueprint ? (
               <p className="text-xs font-medium">
-                Blueprint: {direction.spec.blueprint.sourceId} · {direction.spec.blueprint.tone}
+                Blueprint: {blueprintMatchLine(direction.spec.blueprint)}
               </p>
             ) : null}
             <p className="line-clamp-2 text-xs text-muted-foreground">

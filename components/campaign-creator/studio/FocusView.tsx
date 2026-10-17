@@ -12,6 +12,8 @@ import type { ConceptFeedbackView } from "@/lib/campaign-creator/actions"
 import type { Campaign, CampaignBrief, CreativeDirection, CreativeSpec } from "@/lib/campaign-creator/types"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
+import { blueprintMatchLine } from "@/lib/design-intelligence/blueprint-tags"
+
 import { BlueprintBrowser } from "./BlueprintBrowser"
 import { ConceptCard } from "./ConceptCard"
 import { ConceptFeedback } from "./ConceptFeedback"
@@ -112,7 +114,7 @@ export function FocusView({
         <p className="text-sm text-muted-foreground">{direction.rationale}</p>
         <ResearchBasis research={direction.research} />
         {spec.blueprint ? (
-          <p className="text-xs font-medium">Blueprint: {spec.blueprint.sourceId} · {spec.blueprint.tone}</p>
+          <p className="text-xs font-medium">Blueprint: {blueprintMatchLine(spec.blueprint)}</p>
         ) : null}
         {campaignId ? (
           <ConceptFeedback campaignId={campaignId} directionId={direction.id} initial={feedback} />

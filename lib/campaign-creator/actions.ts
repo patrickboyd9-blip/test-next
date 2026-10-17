@@ -462,6 +462,8 @@ export interface BlueprintBrowseCard {
   grade: string
   tone: string
   vertical: string
+  offerType: string
+  copyPattern: string
   devices: string[]
   boxes: Array<{ role: string; face: "front" | "back"; x: number; y: number; w: number; h: number }>
   thumb: { mediaType: string; base64: string } | null
@@ -472,10 +474,13 @@ export async function browseBlueprints(input: {
   campaignId: string
   vertical?: string
   tone?: string
+  offerType?: string
+  copyPattern?: string
 }): Promise<BlueprintBrowseCard[]> {
   const campaign = await repository.getCampaign(input.campaignId)
   if (!campaign) return []
   const { blueprintCard, isInternalOwner, normalizeToneTag, normalizeVerticalTag, selectBlueprints } = await import("@/lib/design-intelligence/blueprint")
+  const { normalizeCopyPattern, normalizeOfferType } = await import("@/lib/design-intelligence/blueprint-tags")
   const { loadBlueprintCorpus } = await import("@/lib/design-intelligence/blueprint-store")
   const { loadLibrary } = await import("@/lib/design-intelligence/library")
   const { readRecordImage } = await import("@/lib/design-intelligence/images")
@@ -483,7 +488,9 @@ export async function browseBlueprints(input: {
   const corpus = await loadBlueprintCorpus({ records })
   const vertical = normalizeVerticalTag(input.vertical || campaign.brief.goal)
   const tone = normalizeToneTag(input.tone || campaign.brief.emotionalTone || campaign.brief.goal)
-  const picked = selectBlueprints({ blueprints: corpus, vertical, tone, limit: 12 })
+  const offerType = input.offerType ? normalizeOfferType(input.offerType) : undefined
+  const copyPattern = input.copyPattern ? normalizeCopyPattern(input.copyPattern) : undefined
+  const picked = selectBlueprints({ blueprints: corpus, vertical, tone, offerType, copyPattern, limit: 12 })
   const internal = isInternalOwner(campaign.ownerId)
   const cards: BlueprintBrowseCard[] = []
   for (const blueprint of picked) {
@@ -501,6 +508,8 @@ export async function browseBlueprints(input: {
       grade: card.grade,
       tone: card.tone,
       vertical: card.vertical,
+      offerType: card.offerType,
+      copyPattern: card.copyPattern,
       devices: card.devices,
       boxes: card.boxes.filter((box) => box.face === "front"),
       thumb: card.thumb,

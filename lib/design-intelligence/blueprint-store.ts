@@ -9,6 +9,7 @@ import {
   structuralBlueprints,
   type MailerBlueprint,
 } from "./blueprint"
+import { BLUEPRINT_TAG_CONFIG } from "./blueprint-tags"
 import { averageHashImage } from "./blueprint-guard"
 import { estimateUsd, logTokenCost } from "./cost"
 import { isForbiddenResearchPath } from "./images"
@@ -144,7 +145,7 @@ export async function analyzeBlueprintImage(input: {
     const client = new Anthropic({ apiKey })
     const response = await client.messages.create({
       model: input.env.DESIGN_MODEL?.trim() || MODEL,
-      max_tokens: 1400,
+      max_tokens: 1800,
       system: blueprintSystem(),
       messages: [
         {
@@ -186,6 +187,10 @@ export function parseStoredBlueprint(raw: unknown): MailerBlueprint | null {
 }
 
 function blueprintSystem(): string {
+  const tones = BLUEPRINT_TAG_CONFIG.tones.map((rule) => rule.id).join(", ")
+  const verticals = BLUEPRINT_TAG_CONFIG.verticals.map((rule) => rule.id).join(", ")
+  const offers = BLUEPRINT_TAG_CONFIG.offerTypes.map((rule) => rule.id).join(", ")
+  const patterns = BLUEPRINT_TAG_CONFIG.copyPatterns.map((rule) => `${rule.id} = ${rule.template}`).join(" | ")
   return [
     "You extract a reusable layout blueprint from one reference mailer.",
     "Return JSON only. Describe structure. Do not transcribe the brand name, slogan, phone, URL, or price into front, back, or any field except guard.",
@@ -193,14 +198,19 @@ function blueprintSystem(): string {
     "paletteRoles uses dominant (dark, light, or saturated), accent (saturated or muted), and neutral (light or dark). Do not put brand hex in paletteRoles.",
     "typeClass is condensed-display, humanist-sans, or serif.",
     "devices is any of pill-code, burst-badge, icon-grid, color-blocked-offer, thumbnail-strip, cut-out-subject, full-bleed.",
-    "copyPattern is problem-led, two-line-headline, question, offer-led, or invitation.",
-    "tones and verticals are lists of {tag, confidence}. confidence is 0 to 1. A mailer may have several.",
-    "Tone tags: urgent, professional, fearful, joyful, luxury, friendly, scarcity, calm.",
-    "Vertical tags: real_estate, health_insurance, medicare, skincare, roofing, hvac, solar, dental, home_services, financial, retail, restaurant, pest_control, plumbing, landscaping, general.",
+    "tones, verticals, offerTypes, and copyPatterns are lists of {tag, confidence}. confidence is 0 to 1. A mailer may have several of each.",
+    `Tone tags: ${tones}.`,
+    `Vertical tags: ${verticals}.`,
+    `Offer type tags: ${offers}.`,
+    `Copy pattern tags, with the abstract template the product will fill: ${patterns}.`,
+    "copyPattern is the single best copyPatterns id. Do not write a copyTemplate. Do not put the mailer's words into any template.",
+    "If none of the tags in a list fit, leave that list empty and add proposedTags: {kind, tag, reason}. kind is tone, vertical, offer_type, or copy_pattern.",
+    "A proposed tag is new snake_case. It is not a word from the mailer, and it is not added to the vocabulary for you.",
+    "reason is one short sentence and does not quote the mailer. For a proposed copy_pattern you may add template, using only slots such as [Deadline], [benefit], [Offer], [Problem], [Proof], and [Next step], plus a few connecting words.",
     "grade is a letter such as A, A-, B+, B, B-, C.",
     "guard.sourcePhrases is the visible headline and slogan, for an overlap check only.",
     "guard.paletteHex is up to four hex colors from the piece, for a trade-dress check only.",
-    "Keys: boxes, scale {offerToHeadline, headlineToBody, photoShare}, paletteRoles, typeClass, devices, copyPattern, front, back, tones, verticals, grade, guard.",
+    "Keys: boxes, scale {offerToHeadline, headlineToBody, photoShare}, paletteRoles, typeClass, devices, copyPattern, offerTypes, copyPatterns, proposedTags, front, back, tones, verticals, grade, guard.",
   ].join(" ")
 }
 

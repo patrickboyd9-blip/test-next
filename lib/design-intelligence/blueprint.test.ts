@@ -14,6 +14,7 @@ import {
   structuralBlueprint,
   type MailerBlueprint,
 } from "./blueprint"
+import { templateFor } from "./blueprint-tags"
 import { backfillBlueprints } from "./blueprint-store"
 import { guardRebuild, matchesTradeDress, ngramOverlap } from "./blueprint-guard"
 import { rebuildFromBlueprint } from "./blueprint-rebuild"
@@ -40,6 +41,11 @@ test("Wondercide becomes a structure, not a copy of the mailer", () => {
   assert.equal(blueprint.devices.includes("icon-grid"), true)
   assert.equal(blueprint.devices.includes("color-blocked-offer"), true)
   assert.equal(blueprint.verticals.some((tag) => tag.tag === "pest_control"), true)
+  assert.equal(blueprint.offerTypes.some((tag) => tag.tag === "percent_off"), true)
+  assert.equal(blueprint.copyPatterns.some((tag) => tag.tag === "benefit_checklist"), true)
+  assert.equal(blueprint.copyTemplate, templateFor("benefit_checklist"))
+  assert.equal(/wondercide/i.test(blueprint.copyTemplate), false)
+  assert.match(blueprint.copyTemplate, /\[[A-Za-z ]+\]/)
   assert.ok(blueprint.tones.length > 1 || blueprint.tones[0])
   assert.equal(blueprint.guard.paletteHex.length, 0)
   const card = blueprintCard(blueprint)
@@ -98,7 +104,7 @@ test("a copied phrase, a protected color pair, or a too-close card is perturbed"
   assert.ok(guarded.similarity.score < 0.95)
 })
 
-test("a rebuilt card keeps the font class and the campaign's words", () => {
+test("a rebuilt card keeps the font class and writes the offer into the copy pattern", () => {
   const brief = { goal: "Book a free roof inspection", offer: "$0 inspection", businessInfo: { name: "Northline Roofing" } }
   const selection = selectReferences([], brief)
   const rationale = directDesign({ brief, selection, trim: "5x8" }).rationale
@@ -112,7 +118,9 @@ test("a rebuilt card keeps the font class and the campaign's words", () => {
   })
   assert.ok(rebuilt)
   assert.equal(rebuilt.spec.blueprint?.sourceId, "PM-056")
-  assert.equal(rebuilt.spec.headline, "See the roof before it leaks")
+  assert.equal(rebuilt.spec.headline, "FREE inspection.")
+  assert.equal(rebuilt.spec.subheadline, "Call today.")
+  assert.equal(rebuilt.spec.headline?.includes("See the roof"), false)
   assert.equal(rebuilt.rationale.font_pairing, "signal")
   assert.match(rebuilt.rationale.type_pairing.display, /Barlow Condensed/)
   assert.equal(rebuilt.rationale.palette.accent_hex.toLowerCase(), "#c4552a")
@@ -172,6 +180,7 @@ test("a vision payload becomes a blueprint and drops nothing required", () => {
     typeClass: "condensed-display",
     devices: ["color-blocked-offer", "icon-grid"],
     copyPattern: "offer-led",
+    copyTemplate: "Maximum protection for your yard",
     front: "A photograph beside one offer.",
     back: "A benefit grid.",
     tones: [{ tag: "friendly", confidence: 0.8 }, { tag: "joyful", confidence: 0.4 }],
@@ -180,9 +189,91 @@ test("a vision payload becomes a blueprint and drops nothing required", () => {
   }, "PM-056")
   assert.ok(parsed)
   assert.equal(parsed.origin, "vision")
+  assert.equal(parsed.copyPattern, "direct_offer")
+  assert.equal(parsed.copyTemplate, templateFor("direct_offer"))
+  assert.equal(parsed.copyTemplate.includes("Maximum"), false)
   assert.equal(parsed.tones.length, 2)
   assert.equal(parsed.guard.sourcePhrases[0], "Maximum protection for your yard")
   assert.equal(blueprintCard(parsed).thumb, null)
+})
+
+test("an urgent Medicare enrollment mailer drives a new urgent Medicare enrollment card", () => {
+  const enrollment = tagged(fixture("MMR-M1", "medicare", "urgent", "B"), "enrollment_window", "deadline_warning")
+  enrollment.guard.sourcePhrases = ["Don't miss AEP or lose your doctor"]
+  const percent = tagged(fixture("MMR-M2", "medicare", "urgent", "A"), "percent_off", "direct_offer")
+  const roof = tagged(fixture("MMR-R", "roofing", "urgent", "A"), "enrollment_window", "deadline_warning")
+  const picked = selectBlueprints({
+    blueprints: [percent, roof, enrollment],
+    vertical: "medicare",
+    tone: "urgent",
+    offerType: "enrollment_window",
+    copyPattern: "deadline_warning",
+    limit: 3,
+  })
+  assert.equal(picked[0]?.id, "MMR-M1")
+  assert.equal(picked[1]?.id, "MMR-M2")
+  const fallback = selectBlueprints({
+    blueprints: [enrollment, percent, roof],
+    vertical: "medicare",
+    tone: "urgent",
+    offerType: "percent_off",
+    copyPattern: "proof_led",
+    limit: 1,
+  })
+  assert.equal(fallback[0]?.id, "MMR-M2")
+  const brief = {
+    goal: "Help neighbors enroll in Medicare",
+    offer: "your current coverage",
+    emotionalTone: "urgent",
+    businessInfo: { name: "Harbor Benefits" },
+  }
+  const selection = selectReferences([], brief)
+  const rationale = directDesign({ brief, selection, trim: "5x8" }).rationale
+  const rebuilt = rebuildFromBlueprint({
+    rationale,
+    blueprint: enrollment,
+    spec: { headline: "Don't miss AEP or lose your doctor", offer: "your current coverage", phone: "(619) 555-0148" },
+    brief,
+  })
+  assert.ok(rebuilt)
+  assert.equal(rebuilt.spec.headline, "Annual enrollment is coming.")
+  assert.equal(rebuilt.spec.subheadline, "Don't lose your current coverage.")
+  assert.equal(rebuilt.spec.blueprint?.offerType, "enrollment_window")
+  assert.equal(rebuilt.spec.blueprint?.copyPattern, "deadline_warning")
+  assert.equal(rebuilt.rationale.font_pairing, "letter")
+  const written = `${rebuilt.spec.headline} ${rebuilt.spec.subheadline}`
+  assert.equal(ngramOverlap(written, enrollment.guard.sourcePhrases), 0)
+  assert.equal(/aep|doctor/i.test(written), false)
+})
+
+test("a vision reading can propose a tag and cannot store the source wording as the template", () => {
+  const parsed = parseVisionBlueprint({
+    grade: "B",
+    boxes: [
+      { role: "photo", face: "front", x: 0, y: 0, w: 1, h: 1 },
+      { role: "headline", face: "front", x: 0.08, y: 0.1, w: 0.5, h: 0.2 },
+    ],
+    devices: ["full-bleed"],
+    copyPattern: "mystery-launch",
+    offerTypes: [],
+    copyPatterns: [],
+    proposedTags: [
+      { kind: "offer_type", tag: "trial_period", reason: "A short trial that is not in the list." },
+      { kind: "copy_pattern", tag: "AEP slogan", reason: "Don't miss AEP" },
+      { kind: "copy_pattern", tag: "trial_countdown", reason: "A countdown.", template: "Don't miss AEP today" },
+      { kind: "copy_pattern", tag: "countdown_line", reason: "A countdown with no listed pattern.", template: "[Deadline] is coming. Call today." },
+    ],
+    tones: [{ tag: "urgent", confidence: 0.8 }],
+    verticals: [{ tag: "medicare", confidence: 0.9 }],
+    guard: { sourcePhrases: ["Don't miss AEP"] },
+  }, "MMR-9")
+  assert.ok(parsed)
+  assert.equal(parsed.offerTypes.length, 0)
+  assert.equal(parsed.proposedTags.some((tag) => tag.tag === "trial_period"), true)
+  assert.equal(parsed.proposedTags.some((tag) => /aep/i.test(tag.tag)), false)
+  assert.equal(parsed.proposedTags.some((tag) => tag.tag === "countdown_line" && tag.template?.includes("[Deadline]")), true)
+  assert.equal(parsed.copyTemplate, "[Deadline] is coming. Call today.")
+  assert.equal(/aep/i.test(parsed.copyTemplate), false)
 })
 
 test("the exam adds one tone variant for each standard brief", () => {
@@ -222,6 +313,19 @@ test("backfill stores structural blueprints without a vision key", async () => {
 
 function record(id: string, analysis: LibraryRecord["analysis"]): LibraryRecord {
   return { id, source: "seed", analysis, images: [], needsAnalysis: false }
+}
+
+function tagged(
+  blueprint: MailerBlueprint,
+  offer: MailerBlueprint["offerTypes"][number]["tag"],
+  pattern: MailerBlueprint["copyPatterns"][number]["tag"],
+): MailerBlueprint {
+  blueprint.offerTypes = [{ tag: offer, confidence: 0.9 }]
+  blueprint.copyPatterns = [{ tag: pattern, confidence: 0.9 }]
+  blueprint.copyPattern = pattern
+  blueprint.copyTemplate = templateFor(pattern)
+  blueprint.proposedTags = []
+  return blueprint
 }
 
 function fixture(id: string, vertical: MailerBlueprint["verticals"][number]["tag"], tone: MailerBlueprint["tones"][number]["tag"], grade: string): MailerBlueprint {

@@ -5,6 +5,7 @@ import { MEDICARE_AGENT_DISCLAIMER, isMedicareAgentBrief } from "@/lib/campaign-
 
 import { directDesign, usesSeparatedPanel, type CompositionMode } from "./art-director"
 import { normalizeToneTag, normalizeVerticalTag, selectBlueprints, type MailerBlueprint } from "./blueprint"
+import { blueprintMatchLine, copyPatternFromText, offerTypeFromText } from "./blueprint-tags"
 import { ownerFavoriteIds } from "./owner-favorites"
 import { loadBlueprintCorpus } from "./blueprint-store"
 import { rebuildFromBlueprint } from "./blueprint-rebuild"
@@ -88,7 +89,7 @@ export interface ScoredCandidate {
   /** The single biggest weakness the vision critic named, when it ran. */
   weakness?: string
   /** Set when this candidate was rebuilt from a mailer blueprint. */
-  blueprint?: { sourceId: string; tone: string; similarity: number }
+  blueprint?: { sourceId: string; tone: string; similarity: number; offerType?: string; copyPattern?: string }
 }
 
 export interface BoardResult {
@@ -176,10 +177,13 @@ export async function rankCandidates(input: {
   const families = orderFamilies(tasteQueryForBrief(input.brief).feel, signals).slice(0, candidateCount(env))
   const blueprints = input.blueprints ?? await safeBlueprints(records, env)
   const blueprintSlots = Math.ceil(families.length / 2)
+  const briefText = [input.brief.offer, input.brief.goal, input.brief.desiredRecipientAction, input.brief.emotionalTone].filter(Boolean).join(" ")
   const pickedBlueprints = selectBlueprints({
     blueprints,
     vertical: normalizeVerticalTag(selection.vertical),
     tone: normalizeToneTag(input.brief.emotionalTone ?? input.brief.goal),
+    offerType: offerTypeFromText(briefText),
+    copyPattern: copyPatternFromText(briefText),
     favorites: ownerFavoriteIds(env),
     limit: Math.max(1, blueprintSlots),
   })
@@ -247,7 +251,13 @@ function scoreFamily(input: {
     if (rebuilt) {
       rationale = rebuilt.rationale
       spec = rebuilt.spec
-      blueprintMeta = { sourceId: input.blueprint.sourceId, tone: rebuilt.tone, similarity: rebuilt.similarity }
+      blueprintMeta = {
+        sourceId: input.blueprint.sourceId,
+        tone: rebuilt.tone,
+        similarity: rebuilt.similarity,
+        offerType: rebuilt.spec.blueprint?.offerType,
+        copyPattern: rebuilt.spec.blueprint?.copyPattern,
+      }
     }
   }
   const card = composeGridCard({
@@ -270,7 +280,7 @@ function scoreFamily(input: {
     familyId: input.family.id,
     grid: rationale.grid.name,
     feel: input.family.feel,
-    summary: blueprintMeta ? `Blueprint: ${blueprintMeta.sourceId} · ${blueprintMeta.tone}` : input.family.summary,
+    summary: blueprintMeta ? `Blueprint: ${blueprintMatchLine(blueprintMeta)}` : input.family.summary,
     directionIndex: input.directionIndex,
     rationale,
     card,
@@ -356,7 +366,12 @@ function applyBoard(result: GenerateDirectionsResult, board: BoardResult): Gener
           winner.rationale.palette.accent_hex,
         ],
         blueprint: winner.blueprint
-          ? { sourceId: winner.blueprint.sourceId, tone: winner.blueprint.tone }
+          ? {
+              sourceId: winner.blueprint.sourceId,
+              tone: winner.blueprint.tone,
+              offerType: winner.blueprint.offerType,
+              copyPattern: winner.blueprint.copyPattern,
+            }
           : undefined,
       },
       research: {

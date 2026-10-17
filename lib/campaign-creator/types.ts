@@ -248,6 +248,8 @@ export interface CreativeSpec {
   blueprint?: {
     sourceId: string
     tone: string
+    offerType?: string
+    copyPattern?: string
   }
 }
 
