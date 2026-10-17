@@ -11,6 +11,8 @@ import type {
 export interface GenerateDirectionsInput {
   brief: CampaignBrief
   canvas: CreativeCanvas
+  ownerId?: string
+  campaignId?: string
 }
 
 export interface GenerateDirectionsResult {
@@ -42,6 +44,8 @@ export interface RegenerateDirectionsInput {
   canvas: CreativeCanvas
   feedback: string
   previousDirections: CreativeDirection[]
+  ownerId?: string
+  campaignId?: string
 }
 
 export interface CreativeEngine {

@@ -37,7 +37,7 @@ import {
   studioCompositionDerivation,
   typeOnlyRealization,
 } from "./studio-composition-derivation"
-import { composeGridCard } from "@/lib/design-intelligence/grid-composer"
+import { composeDirectedCard } from "@/lib/design-intelligence/composition-family"
 import { isDesignRationale } from "@/lib/design-intelligence/rationale"
 import { PremiumPostcardFront } from "./PremiumPostcard"
 import { isPostcardTemplate, isVerticalPalette } from "@/lib/postcard-layouts/ids"
@@ -82,7 +82,7 @@ export function PostcardFrontFace({
 }) {
   const templateId = spec.layoutHints?.templateId
   if (isDesignRationale(spec.designRationale)) {
-    const card = composeGridCard({
+    const card = composeDirectedCard({
       rationale: spec.designRationale,
       spec: {
         ...spec,

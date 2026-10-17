@@ -19,6 +19,7 @@ interface CompareViewProps {
   studioPhotos?: StudioImageState
   onSelect: (directionId: string) => void
   onBack: () => void
+  campaignId?: string
 }
 
 export function CompareView({
@@ -30,6 +31,7 @@ export function CompareView({
   studioPhotos,
   onSelect,
   onBack,
+  campaignId,
 }: CompareViewProps) {
   const reducedMotion = useReducedMotion()
 
@@ -75,6 +77,7 @@ export function CompareView({
                 photoNote={photo.note}
                 onSelect={() => onSelect(direction.id)}
                 index={direction.id === recommendedId ? 0 : index}
+                campaignId={campaignId}
               />
             </motion.div>
           )

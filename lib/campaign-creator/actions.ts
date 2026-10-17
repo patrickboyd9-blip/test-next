@@ -34,6 +34,7 @@ import type {
 } from "@/lib/mail-catalog/types"
 import { getMailPiece } from "@/lib/mail-catalog/catalog"
 import { generateCampaignStrategy } from "@/lib/campaign-strategy/strategy-generator"
+import { saveConceptVote } from "@/lib/design-intelligence/feedback"
 
 const repository = getCampaignRepository()
 
@@ -211,6 +212,8 @@ export async function generateStudioCreative(campaignId: string): Promise<Campai
     const result = await engine.generateDirections({
       brief: latest.brief,
       canvas,
+      ownerId: latest.ownerId,
+      campaignId: latest.id,
     })
     return repository.initializeStudioCreative(
       campaignId,
@@ -377,4 +380,26 @@ export async function recoverMissingMailPiece(
   campaignId: string
 ): Promise<Campaign> {
   return forCustomer(await repository.recoverMissingMailPiece(campaignId))
+}
+
+export async function voteOnConcept(
+  campaignId: string,
+  directionId: string,
+  vote: "up" | "down" | "clear",
+  reason?: string
+): Promise<void> {
+  const campaign = await repository.getCampaign(campaignId)
+  if (!campaign) throw new Error("Campaign not found.")
+  const direction = campaign.creative.directions.find((item) => item.id === directionId)
+  if (!direction && vote !== "clear") throw new Error("Concept not found.")
+  await saveConceptVote({
+    userId: campaign.ownerId,
+    campaignId,
+    directionId,
+    vote,
+    reason,
+    brief: campaign.brief,
+    rationale: direction?.spec.designRationale,
+    principle: direction?.research?.layoutSummary,
+  })
 }

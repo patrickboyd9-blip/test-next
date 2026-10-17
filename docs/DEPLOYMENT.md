@@ -68,12 +68,21 @@ Optional. Leave them blank unless you need to change a default.
 | `DESIGN_INPUT_USD_PER_MTOK` | `3` | Estimate used only in the cost log. Not a bill. |
 | `DESIGN_OUTPUT_USD_PER_MTOK` | `15` | Estimate used only in the cost log. Not a bill. |
 | `DESIGN_INTELLIGENCE` | on | Set to `off` to return to the previous layout path. |
+| `DESIGN_CANDIDATE_COUNT` | `12` | How many compositions to try before keeping the best three. The app will not go past 12. |
+| `DESIGN_VISION_CAP` | `4` | How many of those compositions the vision critic grades, in parallel. |
+| `DESIGN_CANDIDATE_BUDGET_MS` | `75000` | Stops further vision grading once this many milliseconds have passed. The target for a generation is under about 90 seconds. |
+| `DESIGN_TASTE_CAP` | `4` | How many new reference images the daily sync sends to the vision model for a design reading. |
+| `DESIGN_TASTE_BATCH` | `4` | How many images one backfill call analyzes. Repeat the call until the backlog is gone. |
+| `DESIGN_TASTE_MODEL` | same as `DESIGN_MODEL` | The vision model that reads reference mailers. |
+| `DESIGN_TASTE` | on | Set to `off` to skip the taste reading during the daily sync. |
+
+The daily sync also reads any new mailer that does not yet have a vision design reading, up to `DESIGN_TASTE_CAP` images. To catch up the whole library, send a POST to `https://test-next-modern-mail2.vercel.app/api/design-taste/backfill` with the header `Authorization: Bearer` and the `CRON_SECRET` value. Add `?batch=4` to change the batch. Call it again until `remaining` is 0. The same secret protects that route. Images under a `private/` folder are never analyzed and never stored.
 
 The daily job runs at 17:45 UTC. That is 9:45am during Pacific Standard Time and 10:45am during Pacific Daylight Time, so it is always after 9:30am Pacific. Vercel calls `GET /api/cron/design-library`.
 
 To pull immediately, send a POST to `https://test-next-modern-mail2.vercel.app/api/design-library/sync` with the header `Authorization: Bearer` and the `CRON_SECRET` value. The benchmark is the same header on `POST /api/design-benchmark`.
 
-On a laptop, put the photographs in `.data/reference-library` (that folder is not committed) and run `npx tsx scripts/seed-reference-library.ts`. If the Blob token is present, the script also uploads them. If it is not, the benchmark reads the local files.
+On a laptop, put the photographs in `.data/reference-library` (that folder is not committed) and run `npx tsx scripts/seed-reference-library.ts`. If the Blob token is present, the script also uploads them. If it is not, the benchmark reads the local files. `npx tsx scripts/backfill-design-taste.ts` writes vision readings for those local images when `ANTHROPIC_API_KEY` is set. Without the key it reports how many are waiting and does not invent grades.
 
 ## How long the AI calls can run
 

@@ -3,22 +3,23 @@ import type { GenerateDirectionsResult } from "@/lib/campaign-creator/creative-e
 import { MEDICARE_AGENT_DISCLAIMER, isMedicareAgentBrief } from "@/lib/campaign-creator/medicare-compliance"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 
-import { directDesign, siblingGrid } from "./art-director"
+import { directDesign } from "./art-director"
 import { emptyCost, estimateUsd, logTokenCost, type TokenCost } from "./cost"
 import {
   CRITIC_ROUND_CAP,
-  VISION_PASS,
   applyStructuralEdit,
   critiqueCard,
   type Critique,
 } from "./critic"
-import { composeGridCard, type GridCard } from "./grid-composer"
+import { scoreCandidates } from "./candidates"
+import { composeDirectedCard } from "./composition-family"
+import { type GridCard } from "./grid-composer"
 import { loadLibrary, type LibraryRecord } from "./library"
 import type { DesignRationale, TrimSize } from "./rationale"
-import { selectReferences, type ReferenceSelection } from "./select"
+import { selectReferences } from "./select"
+import type { RetrievedTaste } from "./taste-retrieval"
 import { checkSimilarity, type SimilarityResult } from "./similarity"
-import { requestModelRationale, requestVisionCritique, type ModelUsage } from "./model"
-import { renderStudioCardPng } from "./studio-render"
+import { requestModelRationale, type ModelUsage } from "./model"
 import { viewSelection, type ImageView } from "./view-images"
 
 export interface DirectedCard {
@@ -92,7 +93,7 @@ export function repairCard(input: {
   let best: DirectedCard | null = null
   const rounds = Math.max(1, cap)
   for (let round = 1; round <= rounds; round += 1) {
-    const card = composeGridCard({
+    const card = composeDirectedCard({
       rationale,
       spec,
       businessName: input.businessName,
@@ -148,7 +149,8 @@ export async function applyDesignIntelligence(
   brief: CampaignBrief,
   result: GenerateDirectionsResult,
   canvas?: CreativeCanvas,
-  env: NodeJS.ProcessEnv = process.env
+  env: NodeJS.ProcessEnv = process.env,
+  context?: { ownerId?: string; campaignId?: string }
 ): Promise<GenerateDirectionsResult> {
   if (env.DESIGN_INTELLIGENCE === "off") return result
   let records: LibraryRecord[] = []
@@ -159,48 +161,41 @@ export async function applyDesignIntelligence(
   }
   const selection = records.length > 0 ? selectReferences(records, brief) : null
   const trim = trimFromCanvas(canvas)
-  const leadIndex = Math.max(0, result.directions.findIndex((direction) => direction.recommended))
-  let leadRationale: DesignRationale | null = null
-  const costs: TokenCost[] = []
-  if (selection && directorMode(env) === "model") {
-    const model = await requestModelRationale({ brief, selection, trim, env })
-    const cost = usageCost("generation", "art-director", model.usage, env)
-    costs.push(cost)
-    logTokenCost(cost)
-    leadRationale = directDesign({ brief, selection, trim, proposed: model.rationale }).rationale
-  }
-
   const viewed = selection ? await viewSelection(records, selection, env) : []
-  const siblingSlots = result.directions.map((_, index) => index).filter((index) => index !== leadIndex)
-  const directions: GenerateDirectionsResult["directions"] = []
-  for (const [index, direction] of result.directions.entries()) {
-    const base = leadRationale ?? directDesign({
-      brief,
-      selection: selection ?? selectReferences([], brief),
-      trim,
-    }).rationale
-    const slot = siblingSlots.indexOf(index)
-    const rationale = slot < 0
-      ? base
-      : { ...base, grid: { ...base.grid, name: siblingGrid(base.vertical, slot, base.grid.name) } }
-    let directed = repairCard({
-      brief,
-      spec: direction.spec,
-      businessName: brief.businessInfo?.name,
-      rationale,
-      costs: index === leadIndex ? costs : [emptyCost(direction.id, "art-director")],
-      env,
-      cardId: direction.id,
-    })
-    if (index === leadIndex && criticUsesVision(env)) {
-      directed = await applyVisionRound(directed, brief, direction.spec, env)
-    } else {
-      logTokenCost(emptyCost(direction.id, "critic"))
-    }
-    directions.push(attachDirection(direction, noteViews(directed, viewed), selection))
+  const surfaced = await scoreCandidates({
+    brief,
+    directions: result.directions,
+    trim,
+    records,
+    env,
+    ownerId: context?.ownerId,
+    businessName: brief.businessInfo?.name,
+  })
+  if (surfaced.candidates.length === 0) return result
+  const directions = surfaced.candidates.map((candidate) => {
+    const directed = noteViews({
+      rationale: candidate.rationale,
+      card: candidate.card,
+      critique: candidate.critique,
+      similarity: checkSimilarity(candidate.card, cardCopy(candidate.source.spec, brief.businessInfo?.name), brief),
+      rounds: 1,
+      edits: candidate.edits,
+      costs: candidate.costs,
+      shown: candidate.critique.passed,
+      viewed,
+    }, viewed)
+    for (const cost of directed.costs) logTokenCost(cost)
+    return attachDirection(withCandidateId(candidate.source, candidate.sourceId), directed, selection, candidate.cites, candidate.recommended)
+  })
+  const recommended = directions.find((direction) => direction.recommended) ?? directions[0]
+  return {
+    ...result,
+    directions,
+    recommendedDirectionId: recommended?.id ?? result.recommendedDirectionId,
+    recommendation: recommended
+      ? { ...result.recommendation, directionId: recommended.id }
+      : result.recommendation,
   }
-
-  return { ...result, directions }
 }
 
 function noteViews(directed: DirectedCard, viewed: ImageView[]): DirectedCard {
@@ -213,16 +208,23 @@ function noteViews(directed: DirectedCard, viewed: ImageView[]): DirectedCard {
   }
 }
 
+function withCandidateId(direction: CreativeDirection, id: string): CreativeDirection {
+  if (direction.id === id) return direction
+  return { ...direction, id }
+}
+
 function attachDirection(
   direction: CreativeDirection,
   directed: DirectedCard,
-  selection: ReferenceSelection | null
+  _selection: unknown,
+  cites: RetrievedTaste[] = [],
+  recommended = direction.recommended
 ): CreativeDirection {
   const quality = qualityFrom(directed)
-  const sources = (selection?.anchors ?? []).slice(0, 3).map((anchor) => ({
-    mmrId: anchor.id,
-    title: anchor.principle.split(".")[0] || anchor.principle,
-    whyItWorks: anchor.principle,
+  const sources = cites.map((cite) => ({
+    mmrId: cite.id,
+    title: cite.principle,
+    whyItWorks: cite.principle,
   }))
   return {
     ...direction,
@@ -236,7 +238,7 @@ function attachDirection(
       ],
     },
     research: {
-      sources: sources.length > 0 ? sources : direction.research?.sources ?? [],
+      sources,
       layoutSummary: layoutSentence(directed.rationale),
       parameters: direction.research?.parameters ?? {
         headlineScale: directed.rationale.scale_ratios.headline_to_body_cap,
@@ -248,7 +250,17 @@ function attachDirection(
       },
       quality,
     },
+    recommended,
+    oneLineDifference: recommended ? direction.oneLineDifference : familyLine(directed.rationale),
   }
+}
+
+function familyLine(rationale: DesignRationale): string {
+  const family = rationale.grid.intentional_break.replace(/^family:/, "").replaceAll("-", " ")
+  if (family.startsWith("cutout") || family === "offer float" || family === "stacked open") {
+    return "Type sits on the open ground, with the subject cut into the layout."
+  }
+  return "A different arrangement of the same offer."
 }
 
 export function qualityFrom(directed: DirectedCard): ResearchQuality {
@@ -263,7 +275,8 @@ export function qualityFrom(directed: DirectedCard): ResearchQuality {
     craftResemblance: directed.similarity.tooClose ? 0 : 2,
     attempts: directed.rounds,
     notes: [
-      `Internal vision score ${directed.critique.visionScore}. Weighted ${directed.critique.weighted}.`,
+      `Internal vision score ${directed.critique.visionScore}. Letter ${directed.critique.letter}. Weighted ${directed.critique.weighted}.`,
+      directed.critique.explanation,
       directed.shown ? "Cleared the ship gate." : "Best attempt. Score stays off the card.",
       ...directed.edits,
       ...directed.costs.map((cost) => `Cost ${cost.step} ${cost.model}: ${cost.inputTokens}+${cost.outputTokens} tokens, about $${cost.estimatedUsd.toFixed(4)}.`),
@@ -272,6 +285,10 @@ export function qualityFrom(directed: DirectedCard): ResearchQuality {
 }
 
 export function layoutSentence(rationale: DesignRationale): string {
+  const family = rationale.grid.intentional_break
+  if (/family:(cutout|offer-float|stacked-open)/.test(family)) {
+    return "The offer and the headline sit on the open ground. The subject is cut into the layout, and the response is one group."
+  }
   const hero = rationale.scale_ratios.hero === "offer" ? "One figure leads." : "One short headline leads."
   return `${hero} The photograph and the response sit on a ${rationale.grid.name.replaceAll("-", " ")} grid.`
 }
@@ -324,51 +341,4 @@ function shortenHeadline(headline: string | undefined): string {
 
 function critiquePasses(critique: Critique, similarity: SimilarityResult): boolean {
   return critique.passed && !similarity.tooClose
-}
-
-async function applyVisionRound(
-  directed: DirectedCard,
-  brief: CampaignBrief,
-  spec: CreativeDirection["spec"],
-  env: NodeJS.ProcessEnv
-): Promise<DirectedCard> {
-  let png: Buffer
-  try {
-    png = await renderStudioCardPng(directed.card.front, spec.qrDestination ?? spec.website ?? spec.phone ?? "https://example.com/book")
-  } catch (error) {
-    console.info(
-      `[design-intelligence] ${JSON.stringify({ step: "critic", error: error instanceof Error ? error.message : "render failed" })}`
-    )
-    return directed
-  }
-  const vision = await requestVisionCritique({ png, env, vertical: directed.rationale.vertical })
-  if (!vision) return directed
-  const cost = usageCost(directed.costs[0]?.cardId ?? "card", "critic", vision.usage, env)
-  logTokenCost(cost)
-  const visionScore = Math.min(directed.critique.visionScore, vision.score)
-  const passed = directed.critique.autoFails.length === 0 && directed.critique.weighted >= 8 && visionScore >= VISION_PASS && !directed.similarity.tooClose
-  if (passed) {
-    return {
-      ...directed,
-      shown: true,
-      costs: [...directed.costs, cost],
-      critique: { ...directed.critique, visionScore, passed: true, edit: null, scoreKind: "vision" },
-    }
-  }
-  const shifted = repairCard({
-    brief,
-    spec,
-    businessName: brief.businessInfo?.name,
-    rationale: applyStructuralEdit(directed.rationale, "V4"),
-    costs: [...directed.costs, cost],
-    env,
-    cardId: directed.costs[0]?.cardId,
-  })
-  return {
-    ...shifted,
-    shown: shifted.shown && vision.score >= VISION_PASS,
-    edits: [...directed.edits, vision.edit, ...shifted.edits],
-    costs: [...shifted.costs, cost],
-    critique: { ...shifted.critique, scoreKind: "vision" },
-  }
 }

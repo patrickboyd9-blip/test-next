@@ -1,5 +1,6 @@
 import type { DocumentStore } from "@/lib/storage/document-store"
 
+import { backfillDesignTaste, type TasteBackfillReport } from "./taste-backfill"
 import { isForbiddenResearchPath, saveLibraryImage } from "./images"
 import {
   designLibraryStore,
@@ -49,6 +50,7 @@ export interface SyncReport {
   analyzed: string[]
   skippedPrivate: string[]
   errors: string[]
+  taste?: TasteBackfillReport
 }
 
 export function entriesFromMandoIndex(index: unknown): SyncEntry[] {
@@ -91,6 +93,7 @@ export async function syncReferenceLibraries(input: {
   store?: DocumentStore
   analyze?: (entry: SyncEntry, bytes: Buffer) => Promise<MailerAnalysis | null>
   now?: string
+  includeTaste?: boolean
 }): Promise<SyncReport> {
   const env = input.env ?? process.env
   const token = env.RESEARCH_GITHUB_TOKEN?.trim()
@@ -214,6 +217,18 @@ export async function syncReferenceLibraries(input: {
   }
   await store.put("index", { ids: kept })
   if (report.errors.length > 0) report.status = report.added.length > 0 ? "partial" : "partial"
+  if (input.includeTaste !== false && env.DESIGN_TASTE !== "off") {
+    try {
+      const cap = Number(env.DESIGN_TASTE_CAP ?? 4)
+      report.taste = await backfillDesignTaste({
+        env,
+        batch: Number.isFinite(cap) ? Math.max(1, Math.min(8, Math.round(cap))) : 4,
+        now: input.now,
+      })
+    } catch (error) {
+      report.errors.push(error instanceof Error ? error.message : "Taste backfill failed.")
+    }
+  }
   return report
 }
 

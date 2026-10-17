@@ -10,6 +10,7 @@ import type { PostcardIdentity } from "@/lib/campaign-creator/studio-contact"
 import type { CampaignBrief, CreativeDirection } from "@/lib/campaign-creator/types"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
+import { ConceptFeedback } from "./ConceptFeedback"
 import { PostcardPreview, type PostcardPreviewSize } from "./PostcardPreview"
 import { ResearchBasis } from "./ResearchBasis"
 import { StudioPhotoNote } from "./StudioPhotoNote"
@@ -30,6 +31,7 @@ interface ConceptCardProps {
   photoNote?: string | null
   onSelect?: () => void
   index?: number
+  campaignId?: string
 }
 
 export function ConceptCard({
@@ -46,6 +48,7 @@ export function ConceptCard({
   photoNote,
   onSelect,
   index = 0,
+  campaignId,
 }: ConceptCardProps) {
   const reducedMotion = useReducedMotion()
   const isInteractive = Boolean(onSelect)
@@ -111,6 +114,9 @@ export function ConceptCard({
         )}
       </button>
       {variant !== "strip" ? <ResearchBasis research={direction.research} /> : null}
+      {variant !== "strip" && campaignId ? (
+        <ConceptFeedback campaignId={campaignId} directionId={direction.id} />
+      ) : null}
     </motion.div>
   )
 }

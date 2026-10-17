@@ -71,6 +71,8 @@ export class MockCreativeEngine implements CreativeEngine {
     return normalizeMockGeneration({
       brief: input.brief,
       canvas: input.canvas,
+      ownerId: input.ownerId,
+      campaignId: input.campaignId,
     })
   }
 }
@@ -89,6 +91,6 @@ async function normalizeMockGeneration(
       ...recommendation,
       rationale: result.recommendation.rationale,
     },
-  }, input.canvas)
+  }, input.canvas, process.env, { ownerId: input.ownerId, campaignId: input.campaignId })
   return designed
 }

@@ -12,6 +12,7 @@ import type { CampaignBrief, CreativeDirection, CreativeSpec } from "@/lib/campa
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
 import { ConceptCard } from "./ConceptCard"
+import { ConceptFeedback } from "./ConceptFeedback"
 import { PostcardPreview, PostcardSideToggle } from "./PostcardPreview"
 import { ResearchBasis } from "./ResearchBasis"
 import { StrategyTags } from "./StrategyTags"
@@ -33,6 +34,7 @@ interface FocusViewProps {
   onSwitch: (directionId: string) => void
   onStartRefining: () => void
   onApproveAsIs: () => void
+  campaignId?: string
 }
 
 function buildFocusCaption(direction: CreativeDirection): string {
@@ -59,6 +61,7 @@ export function FocusView({
   onSwitch,
   onStartRefining,
   onApproveAsIs,
+  campaignId,
 }: FocusViewProps) {
   const reducedMotion = useReducedMotion()
   const [side, setSide] = useState<"front" | "back">("front")
@@ -102,6 +105,7 @@ export function FocusView({
       <div className="flex max-w-lg flex-col gap-3">
         <p className="text-sm text-muted-foreground">{direction.rationale}</p>
         <ResearchBasis research={direction.research} />
+        {campaignId ? <ConceptFeedback campaignId={campaignId} directionId={direction.id} /> : null}
         <p className="text-sm">
           <span className="text-muted-foreground">Designed to drive: </span>
           <span className="font-medium">{direction.designedToDrive}</span>
