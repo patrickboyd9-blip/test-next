@@ -138,6 +138,10 @@ test("the grid card keeps phone, website, scan line, ratio, and safe type", asyn
   const headline = card.front.texts.find((text) => text.role === "headline")
   assert.ok(offer && headline)
   assert.ok(offer.fontPt >= headline.fontPt * 1.55)
+  const qualifier = card.front.texts.find((text) => text.role === "body")
+  assert.ok(qualifier)
+  assert.ok(qualifier.rect.y <= offer.rect.y + offer.rect.h + 0.08)
+  assert.equal(card.front.texts.filter((text) => text.text === "Northline Roofing").length, 1)
   assert.equal(card.front.shapes.some((shape) => shape.role === "starburst"), false)
   assert.equal(directed.critique.autoFails.includes("AF10"), false)
   assert.equal(directed.critique.autoFails.includes("AF1"), false)
@@ -186,7 +190,15 @@ test("three directions do not share a grid and proportions", () => {
   assert.equal(lead.photos.filter((slot) => slot.treatment === "cutout").length, 1)
   assert.equal(lead.photos.filter((slot) => slot.treatment === "thumbnail").length, 4)
   assert.equal(new Set(leadHeadlines.map((text) => text.color)).size, 2)
-  assert.equal(lead.texts.filter((text) => text.text === "Northline Roofing").length, 2)
+  assert.equal(lead.texts.filter((text) => text.text === "Northline Roofing").length, 1)
+  const qr = lead.lockup?.qrRect
+  const phone = lead.lockup?.phone
+  assert.ok(qr && phone)
+  assert.ok(Math.abs(qr.y - phone.rect.y) < 0.05)
+  assert.ok(qr.x <= phone.rect.x + phone.rect.w + 0.2)
+  assert.ok(qr.x >= phone.rect.x + phone.rect.w)
+  const subject = lead.photos.find((slot) => slot.treatment === "cutout")
+  assert.ok(subject && subject.rect.x < 2.4)
   assert.equal(cards[1]!.front.shapes.some((shape) => shape.role === "type-panel" || shape.role === "offer-tile"), false)
   assert.ok(cards[2]!.front.shapes.some((shape) => shape.role === "type-panel"))
   for (const card of cards) {

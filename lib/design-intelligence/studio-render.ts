@@ -66,7 +66,7 @@ function cardHtml(plan: PostcardFacePlan, qrPayload: string): string {
   for (const slot of plan.photos) {
     if (slot.treatment === "cutout") {
       parts.push(
-        `<img alt="Stand-in cut-out" src="data:image/png;base64,${cutout}" style="${box(slot.rect, trim)}object-fit:contain;object-position:right center;" />`
+        `<img alt="Stand-in cut-out" src="data:image/png;base64,${cutout}" style="${box(slot.rect, trim)}object-fit:contain;object-position:left center;" />`
       )
     } else {
       parts.push(
@@ -90,9 +90,10 @@ function cardHtml(plan: PostcardFacePlan, qrPayload: string): string {
     if (!text.text.trim() || text.lines.length === 0) continue
     const family = text.font === "display" ? displayFamily : "Source Sans 3"
     const weight = text.font === "display" ? 800 : 600
+    const lineHeight = text.role === "offer" ? 0.8 : lineHeightFor(text.font)
     const lines = text.lines.map((line) => `<span style="display:block">${escapeHtml(line)}</span>`).join("")
     parts.push(
-      `<p style="${box(text.rect, trim)}margin:0;color:${text.color};font-family:'${family}',sans-serif;font-weight:${weight};font-size:${pointsToCqw(text.fontPt, trim.w)};line-height:${lineHeightFor(text.font)};letter-spacing:${text.font === "display" ? "-0.03em" : "0"};text-align:${text.align};">${lines}</p>`
+      `<p style="${box(text.rect, trim)}margin:0;color:${text.color};font-family:'${family}',sans-serif;font-weight:${weight};font-size:${pointsToCqw(text.fontPt, trim.w)};line-height:${lineHeight};letter-spacing:${text.font === "display" ? "-0.03em" : "0"};text-align:${text.align};">${lines}</p>`
     )
   }
   const lockup = plan.lockup

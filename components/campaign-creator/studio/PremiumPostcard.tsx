@@ -254,7 +254,7 @@ function PhotoSlot({
         <img
           src={src}
           alt={alt}
-          className={cutout ? "h-full w-full object-contain object-right" : "h-full w-full object-cover"}
+          className={cutout ? "h-full w-full object-contain object-left" : "h-full w-full object-cover"}
           draggable={false}
         />
       ) : (
@@ -277,7 +277,7 @@ function Fitted({ plan, text }: { plan: PostcardFacePlan; text: PostcardFacePlan
         fontFamily: family,
         fontWeight: text.font === "display" ? 800 : 600,
         fontSize: pointsToCqw(text.fontPt, plan.size),
-        lineHeight: lineHeightFor(text.font),
+        lineHeight: text.role === "offer" ? 0.8 : lineHeightFor(text.font),
         letterSpacing: text.font === "display" ? "-0.03em" : "0",
         textAlign: text.align,
         display: text.role === "offer" || text.role === "label" ? "flex" : "block",

@@ -122,15 +122,20 @@ function blitCover(
   const y1 = clamp(Math.ceil((rect.y + rect.h) * PPI), y0, height)
   const destW = Math.max(1, x1 - x0)
   const destH = Math.max(1, y1 - y0)
-  const scale = Math.max(destW / photo.width, destH / photo.height)
-  const cropW = destW / scale
-  const cropH = destH / scale
-  const originX = (photo.width - cropW) / 2
-  const originY = (photo.height - cropH) / 2
+  const scale = respectAlpha
+    ? Math.min(destW / photo.width, destH / photo.height)
+    : Math.max(destW / photo.width, destH / photo.height)
+  const drawnW = photo.width * scale
+  const drawnH = photo.height * scale
+  const padX = respectAlpha ? 0 : (destW - drawnW) / 2
+  const padY = (destH - drawnH) / 2
   for (let y = y0; y < y1; y += 1) {
     for (let x = x0; x < x1; x += 1) {
-      const sx = clamp(Math.floor(originX + ((x - x0) / destW) * cropW), 0, photo.width - 1)
-      const sy = clamp(Math.floor(originY + ((y - y0) / destH) * cropH), 0, photo.height - 1)
+      const localX = x - x0 - padX
+      const localY = y - y0 - padY
+      if (localX < 0 || localY < 0 || localX >= drawnW || localY >= drawnH) continue
+      const sx = clamp(Math.floor(localX / scale), 0, photo.width - 1)
+      const sy = clamp(Math.floor(localY / scale), 0, photo.height - 1)
       const source = (sy * photo.width + sx) * 4
       const alpha = photo.rgba[source + 3] ?? 255
       if (respectAlpha && alpha < 8) continue

@@ -58,21 +58,26 @@ export function knockOutRgba(rgba: Buffer, width: number, height: number): Buffe
 let cachedCutout: Raster | null = null
 let cachedCutoutPng: Buffer | null = null
 
-/** A labeled subject on a transparent ground. The left of the frame stays empty. */
+/**
+ * A subject on a transparent ground. The lower mass reaches toward the type.
+ * The upper mass stays further right, clear of a two-line headline.
+ */
 export function standInCutout(): Raster {
   if (cachedCutout) return cachedCutout
   const width = 640
-  const height = 460
+  const height = 400
   const rgba = Buffer.alloc(width * height * 4, 0)
-  const left = Math.round(width * 0.55)
-  fill(rgba, width, left, 180, width - left - 24, 150, 27, 58, 74, 255)
-  fill(rgba, width, left + 36, 150, 150, 40, 46, 107, 74, 255)
-  fill(rgba, width, left + 210, 80, 70, 250, 27, 58, 74, 255)
-  fill(rgba, width, left + 230, 40, 36, 40, 196, 122, 74, 255)
-  disc(rgba, width, height, left + 70, 340, 28, 27, 58, 74)
-  disc(rgba, width, height, left + 150, 340, 28, 27, 58, 74)
-  fill(rgba, width, left + 48, 300, 44, 40, 196, 122, 74, 255)
-  fill(rgba, width, left + 128, 300, 44, 40, 196, 122, 74, 255)
+  // Lower body reaches toward the offer. Upper figures stay clear of the response cluster.
+  fill(rgba, width, 120, 248, 490, 110, 27, 58, 74, 255)
+  fill(rgba, width, 250, 175, 200, 80, 46, 107, 74, 255)
+  fill(rgba, width, 430, 36, 72, 250, 27, 58, 74, 255)
+  fill(rgba, width, 446, 12, 38, 34, 196, 122, 74, 255)
+  fill(rgba, width, 300, 48, 64, 220, 27, 58, 74, 255)
+  fill(rgba, width, 314, 20, 34, 32, 196, 122, 74, 255)
+  disc(rgba, width, height, 190, 348, 30, 27, 58, 74)
+  disc(rgba, width, height, 430, 348, 30, 27, 58, 74)
+  fill(rgba, width, 166, 308, 46, 42, 196, 122, 74, 255)
+  fill(rgba, width, 406, 308, 46, 42, 196, 122, 74, 255)
   cachedCutout = { width, height, rgba }
   return cachedCutout
 }

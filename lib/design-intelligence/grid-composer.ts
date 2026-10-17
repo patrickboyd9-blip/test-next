@@ -2,7 +2,7 @@ import type { CreativeSpec } from "@/lib/campaign-creator/types"
 import type { PostcardFacePlan, PhotoSlotPlan, ShapePlan } from "@/lib/postcard-layouts/compose"
 import type { FontPairingId, PostcardTemplateId, VerticalPaletteId } from "@/lib/postcard-layouts/ids"
 import type { VerticalPalette } from "@/lib/postcard-layouts/palette"
-import { fitText, type FittedText, type InchRect } from "@/lib/postcard-layouts/typefit"
+import { fitText, PAIRING_MEASURE, type FittedText, type InchRect } from "@/lib/postcard-layouts/typefit"
 import { addressSideContentRect } from "@/lib/print-spec/address-side-content"
 import {
   buildPostcard5x8PrintSpec,
@@ -222,61 +222,77 @@ function composeIntegrated(
     pairing,
     align: "left",
   })
-  const headlineBottom = stacked.texts.reduce((bottom, text) => Math.max(bottom, text.rect.y + text.rect.h), column.y)
-  const phoneText = fitText({
+  const headlineTexts = stacked.texts.map((text) => shrinkToInk(text, pairing))
+  const headlineBottom = headlineTexts.reduce((bottom, text) => Math.max(bottom, text.rect.y + text.rect.h), column.y)
+  const clusterTop = round2(headlineBottom + 0.08)
+  const responseWidth = round2(Math.min(2.7, column.w * 0.58))
+  const phoneText = shrinkToInk(fitText({
     text: phone,
-    rect: { x: column.x, y: headlineBottom + 0.08, w: column.w, h: 0.38 },
+    rect: { x: column.x, y: clusterTop, w: responseWidth, h: 0.36 },
     role: "contact",
     pairing,
     color: ink,
     minPt: 16,
     maxPt: column.w >= 6 ? 22 : 20,
-  })
-  const websiteText = fitText({
+  }), pairing)
+  const websiteText = shrinkToInk(fitText({
     text: website,
-    rect: { x: column.x, y: phoneText.rect.y + phoneText.rect.h + 0.04, w: column.w, h: 0.26 },
+    rect: { x: column.x, y: round2(phoneText.rect.y + phoneText.rect.h + 0.03), w: responseWidth, h: 0.24 },
     role: "label",
     pairing,
     color: ink,
     minPt: URL_MIN_PT,
     maxPt: 12,
-  })
-  const offerTop = websiteText.rect.y + websiteText.rect.h + 0.12
-  const offerWidth = Math.min(column.w * 0.62, Math.max(1.5, offerParts.numeral.length * (sizes.offer / 72) * 0.7 + 0.2))
-  const offerBlocks: StackBlock[] = [
-    { text: offerParts.numeral, role: "offer", pt: sizes.offer, floor: offerIsHero ? sizes.headline * 1.6 : (input.rationale.format.trim === "6x9" ? 12 : 11) * 1.5, color: offerColor, width: offerWidth },
-  ]
-  if (offerParts.rest) {
-    offerBlocks.push({ text: offerParts.rest, role: "body", pt: 13, floor: 11, color: ink, width: offerWidth })
-  }
-  const repeatH = 0.2
-  const pairTop = round2(geometry.thumbTop - 0.06 - repeatH * 2 - 0.06)
-  const offerStack = placeStack({
-    blocks: offerBlocks,
-    cursor: offerTop,
-    bottom: pairTop - 0.06,
-    content: { ...column, w: Math.max(offerWidth, column.w * 0.7) },
-    pairing,
-    align: "left",
-  })
-  const wordmark = (y: number) =>
-    fitText({
-      text: name,
-      rect: { x: column.x, y, w: offerWidth, h: repeatH },
-      role: "label",
-      pairing,
-      color: ink,
-      minPt: 11,
-      maxPt: 11,
-    })
-  const wordmarks = [wordmark(pairTop), wordmark(round2(pairTop + repeatH + 0.06))]
-  const texts = [...stacked.texts, ...offerStack.texts, ...wordmarks].filter((text) => text.text)
+  }), pairing)
+  const responseInk = Math.max(phoneText.rect.w, websiteText.rect.w, 1.4)
   const qrRect: InchRect = {
-    x: round2(Math.min(column.x + offerWidth + 0.16, trim.w - SAFE_IN - QR_IN)),
-    y: round2(Math.min(offerTop, geometry.thumbTop - QR_IN - 0.08)),
+    x: round2(column.x + responseInk + 0.1),
+    y: clusterTop,
     w: QR_IN,
     h: QR_IN,
   }
+  const clusterBottom = Math.max(qrRect.y + qrRect.h, websiteText.rect.y + websiteText.rect.h)
+  const offerTop = round2(clusterBottom + 0.12)
+  const offerWidth = round2(Math.min(3.3, trim.w - column.x - SAFE_IN))
+  const offerFloor = offerIsHero ? sizes.headline * 1.6 : (input.rationale.format.trim === "6x9" ? 12 : 11) * 1.5
+  const aboveThumbs = round2(geometry.thumbTop - 0.1)
+  const trailing = (offerParts.rest ? 0.3 : 0) + 0.26
+  const offerRoom = Math.max(0.55, aboveThumbs - offerTop - trailing)
+  const offerCap = Math.max(offerFloor, Math.min(sizes.offer, Math.floor(((offerRoom / 1.08) * 72) * 2) / 2))
+  const offerLine = shrinkToInk(fitText({
+    text: offerParts.numeral,
+    rect: { x: column.x, y: offerTop, w: offerWidth, h: offerRoom },
+    role: "offer",
+    pairing,
+    color: offerColor,
+    minPt: Math.min(offerFloor, offerCap),
+    maxPt: offerCap,
+  }), pairing)
+  const texts = [...headlineTexts, offerLine].filter((text) => text.text)
+  let cursor = round2(offerLine.rect.y + offerLine.rect.h + 0.02)
+  if (offerParts.rest) {
+    const rest = shrinkToInk(fitText({
+      text: offerParts.rest,
+      rect: { x: column.x, y: cursor, w: offerWidth, h: 0.26 },
+      role: "body",
+      pairing,
+      color: ink,
+      minPt: 12,
+      maxPt: 14,
+    }), pairing)
+    if (rest.text) texts.push(rest)
+    cursor = round2((rest.text ? rest.rect.y + rest.rect.h : cursor) + 0.04)
+  }
+  const wordmark = shrinkToInk(fitText({
+    text: name,
+    rect: { x: column.x, y: cursor, w: offerWidth, h: 0.22 },
+    role: "label",
+    pairing,
+    color: ink,
+    minPt: 11,
+    maxPt: 12,
+  }), pairing)
+  if (wordmark.text) texts.push(wordmark)
   const photos = thumbnailRow(geometry, trim)
   photos.unshift({ id: "subject", role: "photo", rect: geometry.photo, bleed: false, treatment: "cutout" })
   const shapes: ShapePlan[] = [
@@ -297,9 +313,9 @@ function composeIntegrated(
     lockup: {
       rect: {
         x: column.x,
-        y: phoneText.rect.y,
-        w: column.w,
-        h: round2(websiteText.rect.y + websiteText.rect.h - phoneText.rect.y),
+        y: clusterTop,
+        w: round2(qrRect.x + qrRect.w - column.x),
+        h: round2(clusterBottom - clusterTop),
       },
       qrRect,
       qrInches: QR_IN,
@@ -340,6 +356,24 @@ function composeIntegrated(
   }
 }
 
+/** The box the critic samples is the ink, so a cut-out can sit in the empty margin. */
+function shrinkToInk(text: FittedText, pairing: FontPairingId): FittedText {
+  if (!text.text || text.lines.length === 0) return text
+  const em = text.font === "display" ? PAIRING_MEASURE[pairing].display : PAIRING_MEASURE[pairing].text
+  const lineHeight = text.role === "offer" ? 0.8 : text.font === "display" ? 1.02 : 1.18
+  const width = text.lines.reduce((max, line) => Math.max(max, line.length * (text.fontPt / 72) * em), 0.4)
+  const height = text.lines.length * (text.fontPt / 72) * lineHeight * 1.04
+  return {
+    ...text,
+    rect: {
+      x: text.rect.x,
+      y: text.rect.y,
+      w: round2(Math.min(text.rect.w, width + 0.04)),
+      h: round2(Math.max(0.16, height)),
+    },
+  }
+}
+
 function integratedGeometry(trim: { w: number; h: number }): {
   photo: InchRect
   column: InchRect
@@ -350,10 +384,10 @@ function integratedGeometry(trim: { w: number; h: number }): {
   const thumbTop = round2(trim.h - SAFE_IN - thumbH)
   return {
     photo: {
-      x: round2(trim.w * 0.32),
-      y: 0.06,
-      w: round2(trim.w * 0.68),
-      h: round2(Math.max(1.6, thumbTop - 0.14)),
+      x: round2(trim.w * 0.2),
+      y: 0.04,
+      w: round2(trim.w * 0.8),
+      h: round2(Math.max(1.8, thumbTop - 0.1)),
     },
     column: {
       x: SAFE_IN,
