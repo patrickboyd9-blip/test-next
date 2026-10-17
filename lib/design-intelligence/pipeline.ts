@@ -3,7 +3,7 @@ import type { GenerateDirectionsResult } from "@/lib/campaign-creator/creative-e
 import { MEDICARE_AGENT_DISCLAIMER, isMedicareAgentBrief } from "@/lib/campaign-creator/medicare-compliance"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 
-import { directDesign, siblingGrid } from "./art-director"
+import { directDesign, directionRecipe } from "./art-director"
 import { emptyCost, estimateUsd, logTokenCost, type TokenCost } from "./cost"
 import {
   CRITIC_ROUND_CAP,
@@ -15,7 +15,7 @@ import {
 import { composeGridCard, type GridCard } from "./grid-composer"
 import { loadLibrary, type LibraryRecord } from "./library"
 import type { DesignRationale, TrimSize } from "./rationale"
-import { selectReferences, type ReferenceSelection } from "./select"
+import { citationsForDirection, selectReferences, type DirectionCitation } from "./select"
 import { checkSimilarity, type SimilarityResult } from "./similarity"
 import { requestModelRationale, requestVisionCritique, type ModelUsage } from "./model"
 import { renderStudioCardPng } from "./studio-render"
@@ -47,11 +47,12 @@ export async function directOneCard(input: {
   const selection = selectReferences(records, input.brief)
   const trim = input.trim ?? "5x8"
   const cardId = input.cardId ?? "card"
+  const cited = citationsForDirection(records, input.brief, directionRecipe({ brief: input.brief, selection, trim }, 0).mode)
   const costs: TokenCost[] = []
   let proposed: unknown
   let modelNote: TokenCost | null = null
   if (directorMode(env) === "model") {
-    const model = await requestModelRationale({ brief: input.brief, selection, trim, env })
+    const model = await requestModelRationale({ brief: input.brief, selection: { ...selection, imageIds: cited.map((item) => item.mmrId) }, trim, env })
     proposed = model.rationale
     modelNote = usageCost(cardId, "art-director", model.usage, env)
     costs.push(modelNote)
@@ -61,8 +62,8 @@ export async function directOneCard(input: {
     costs.push(rules)
     logTokenCost(rules)
   }
-  const viewed = await viewSelection(records, selection, env)
-  const directed = directDesign({ brief: input.brief, selection, trim, proposed })
+  const viewed = await viewSelection(records, { ...selection, imageIds: cited.map((item) => item.mmrId) }, env)
+  const directed = directDesign({ brief: input.brief, selection, trim, proposed, slot: 0 })
   const repaired = repairCard({
     brief: input.brief,
     spec: input.spec,
@@ -163,26 +164,36 @@ export async function applyDesignIntelligence(
   let leadRationale: DesignRationale | null = null
   const costs: TokenCost[] = []
   if (selection && directorMode(env) === "model") {
-    const model = await requestModelRationale({ brief, selection, trim, env })
+    const leadCited = citationsForDirection(records, brief, directionRecipe({ brief, selection, trim }, 0).mode)
+    const model = await requestModelRationale({
+      brief,
+      selection: { ...selection, imageIds: leadCited.map((item) => item.mmrId) },
+      trim,
+      env,
+    })
     const cost = usageCost("generation", "art-director", model.usage, env)
     costs.push(cost)
     logTokenCost(cost)
     leadRationale = directDesign({ brief, selection, trim, proposed: model.rationale }).rationale
   }
 
-  const viewed = selection ? await viewSelection(records, selection, env) : []
-  const siblingSlots = result.directions.map((_, index) => index).filter((index) => index !== leadIndex)
   const directions: GenerateDirectionsResult["directions"] = []
   for (const [index, direction] of result.directions.entries()) {
-    const base = leadRationale ?? directDesign({
+    const slot = directionSlot(index, leadIndex, result.directions.length)
+    const selectionForSlot = selection ?? selectReferences(records, brief)
+    const cited = citationsForDirection(
+      records,
       brief,
-      selection: selection ?? selectReferences([], brief),
+      directionRecipe({ brief, selection: selectionForSlot, trim }, slot).mode
+    )
+    const viewed = await viewSelection(records, { ...selectionForSlot, imageIds: cited.map((item) => item.mmrId) }, env)
+    const rationale = directDesign({
+      brief,
+      selection: selectionForSlot,
       trim,
+      proposed: index === leadIndex ? leadRationale ?? undefined : undefined,
+      slot,
     }).rationale
-    const slot = siblingSlots.indexOf(index)
-    const rationale = slot < 0
-      ? base
-      : { ...base, grid: { ...base.grid, name: siblingGrid(base.vertical, slot, base.grid.name) } }
     let directed = repairCard({
       brief,
       spec: direction.spec,
@@ -197,7 +208,7 @@ export async function applyDesignIntelligence(
     } else {
       logTokenCost(emptyCost(direction.id, "critic"))
     }
-    directions.push(attachDirection(direction, noteViews(directed, viewed), selection))
+    directions.push(attachDirection(direction, noteViews(directed, viewed), cited))
   }
 
   return { ...result, directions }
@@ -213,16 +224,26 @@ function noteViews(directed: DirectedCard, viewed: ImageView[]): DirectedCard {
   }
 }
 
+function directionSlot(index: number, leadIndex: number, count: number): number {
+  if (index === leadIndex) return 0
+  let slot = 1
+  for (let cursor = 0; cursor < index; cursor += 1) {
+    if (cursor === leadIndex) continue
+    slot += 1
+  }
+  return Math.min(slot, Math.max(0, count - 1))
+}
+
 function attachDirection(
   direction: CreativeDirection,
   directed: DirectedCard,
-  selection: ReferenceSelection | null
+  citations: DirectionCitation[]
 ): CreativeDirection {
   const quality = qualityFrom(directed)
-  const sources = (selection?.anchors ?? []).slice(0, 3).map((anchor) => ({
-    mmrId: anchor.id,
-    title: anchor.principle.split(".")[0] || anchor.principle,
-    whyItWorks: anchor.principle,
+  const sources = citations.map((citation) => ({
+    mmrId: citation.mmrId,
+    title: citation.title,
+    whyItWorks: citation.whyItWorks,
   }))
   return {
     ...direction,
@@ -272,6 +293,27 @@ export function qualityFrom(directed: DirectedCard): ResearchQuality {
 }
 
 export function layoutSentence(rationale: DesignRationale): string {
+  if (rationale.grid.intentional_break === "integrated") {
+    return "Type sits on the open canvas in two colors. The subject is cut out, and the offer floats with no tile."
+  }
+  if (rationale.grid.intentional_break === "full-bleed") {
+    return "The photograph runs to the edge. Type sits on the picture, not in a panel."
+  }
+  if (rationale.grid.intentional_break === "panel") {
+    return "One text panel holds the type. The other directions do not use a panel."
+  }
+  if (rationale.grid.intentional_break === "dark-offer-field") {
+    return "The offer is the largest type, on a dark field beside the photograph."
+  }
+  if (rationale.grid.intentional_break === "overlapping-card") {
+    return "A full-bleed photograph carries an overlapping card. The offer is type on that card, with no tile."
+  }
+  if (rationale.grid.intentional_break === "type-led") {
+    return "The headline leads on a wide type field, with the photograph in a band above it."
+  }
+  if (rationale.grid.intentional_break === "calm-column") {
+    return "A quiet column of type sits beside one photograph."
+  }
   const hero = rationale.scale_ratios.hero === "offer" ? "One figure leads." : "One short headline leads."
   return `${hero} The photograph and the response sit on a ${rationale.grid.name.replaceAll("-", " ")} grid.`
 }

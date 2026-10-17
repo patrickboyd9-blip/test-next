@@ -62,12 +62,11 @@ export function standInPhotoJpeg(): Buffer {
 
 function stampLabel(rgba: Buffer, width: number, height: number): void {
   const scale = 3
+  // Keep the left half a calm dark field. Full-bleed type sits there.
   const positions = [
-    [24, 20],
-    [210, 150],
-    [40, 280],
-    [360, 48],
-    [300, 240],
+    [360, 24],
+    [360, 150],
+    [360, 270],
   ]
   for (const [x, y] of positions) {
     const textWidth = LABEL.length * 6 * scale

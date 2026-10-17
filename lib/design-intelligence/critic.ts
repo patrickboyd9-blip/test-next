@@ -44,7 +44,7 @@ const VISION_WEIGHTS: Record<string, number> = {
 export function critiqueCard(card: GridCard, rationale: DesignRationale, copy: string): Critique {
   const autoFails: string[] = []
   const size = rationale.format.trim
-  const headline = textByRole(card.front, "headline")
+  const headline = combinedText(card.front, "headline")
   const offer = textByRole(card.front, "offer")
   const phone = card.front.lockup?.phone
   const words = (headline?.text ?? "").split(/\s+/).filter(Boolean)
@@ -201,6 +201,18 @@ function lowestVision(vision: Record<string, number>): string {
 
 function textByRole(plan: PostcardFacePlan, role: string) {
   return plan.texts.find((text) => text.role === role)
+}
+
+function combinedText(plan: PostcardFacePlan, role: string) {
+  const parts = plan.texts.filter((text) => text.role === role && text.text.trim().length > 0)
+  const first = parts[0]
+  if (!first || parts.length === 1) return first
+  return {
+    ...first,
+    text: parts.map((part) => part.text).join(" "),
+    fontPt: Math.max(...parts.map((part) => part.fontPt)),
+    lines: parts.flatMap((part) => part.lines),
+  }
 }
 
 function liveTexts(plan: PostcardFacePlan) {

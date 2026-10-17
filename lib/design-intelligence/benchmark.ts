@@ -138,13 +138,15 @@ export async function runBenchmark(options?: {
       businessName: item.brief.businessInfo?.name,
       cardId: item.id,
     })
-    const missingAnchors = ["PM-047", "PM-054", "PM-022"].filter(
-      (id) => !directed.viewed.some((view) => view.id === id && view.width > 0 && view.bytes > 0)
-    )
-    if (missingAnchors.length > 0) {
+    const opened = directed.viewed.filter((view) => view.width > 0 && view.bytes > 0)
+    const antiExamples = opened.filter((view) => view.id === "MMR-513" || view.id === "MMR-047" || view.id === "PM-011")
+    if (opened.length < 1) {
       throw new Error(
-        `The art director did not open ${missingAnchors.join(", ")}. Keep the reference images in .data/reference-library (gitignored) or set REFERENCE_LIBRARY_DIR.`
+        "The art director did not open a reference image. Keep the reference images in .data/reference-library (gitignored) or set REFERENCE_LIBRARY_DIR."
       )
+    }
+    if (antiExamples.length > 0) {
+      throw new Error(`The art director opened an anti-example: ${antiExamples.map((view) => view.id).join(", ")}.`)
     }
     const beforeCritique = critiqueCard(beforeCard, directed.rationale, beforeCopy)
     rows.push({
@@ -220,7 +222,7 @@ function renderReport(rows: BenchmarkRow[], before: number, after: number): stri
     "",
     "Before is the template the product paints today, with the same words. After is the grid composer. Both files are the Studio card at 300 pixels per inch, with the Studio fonts and a labeled stand-in photograph. Scores stay off the customer screen. A card is shown when auto-fails are clear, the weighted rubric is at least 8, and the score is at least 80.",
     "",
-    `Library seed: ${loadSeedAnalyses().length} analyses. Every brief opens PM-047, PM-054, and PM-022, the mailbox anchors, and does not open the anti-examples.`,
+    `Library seed: ${loadSeedAnalyses().length} analyses. Each brief opens the mailers that informed that card, from both libraries, and does not open the anti-examples.`,
     "",
     "When ANTHROPIC_API_KEY is set, the art director and the critic use the vision model on their own. Without that key, both fall back to the written rules and the score is a machine estimate.",
   ]

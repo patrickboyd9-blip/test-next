@@ -32,6 +32,8 @@ export function PremiumPostcardFront({
   contact,
   photoSrc,
   alternatePhotoSrc,
+  cutoutSrc,
+  thumbnailSrc,
   businessName,
   paletteId,
   compact,
@@ -42,6 +44,8 @@ export function PremiumPostcardFront({
   contact: StudioContact
   photoSrc: string | null
   alternatePhotoSrc?: string | null
+  cutoutSrc?: string | null
+  thumbnailSrc?: string | null
   businessName?: string
   paletteId?: VerticalPaletteId
   compact?: boolean
@@ -68,9 +72,16 @@ export function PremiumPostcardFront({
           key={slot.id}
           rect={slot.rect}
           size={plan.size}
-          src={photos[index] ?? null}
+          src={
+            slot.treatment === "cutout"
+              ? cutoutSrc ?? null
+              : slot.treatment === "thumbnail"
+                ? thumbnailSrc ?? null
+                : photos[index] ?? null
+          }
           alt={spec.visualDirection?.trim() || "Campaign photograph"}
           paper={plan.palette.paper}
+          treatment={slot.treatment}
         />
       ))}
       <Shapes plan={plan} layer="mid" />
@@ -221,17 +232,31 @@ function PhotoSlot({
   src,
   alt,
   paper,
+  treatment,
 }: {
   rect: InchRect
   size: PostcardFacePlan["size"]
   src: string | null
   alt: string
   paper: string
+  treatment?: "cover" | "cutout" | "thumbnail"
 }) {
+  const cutout = treatment === "cutout"
+  if (cutout && !src) return null
   return (
-    <div className="absolute overflow-hidden" data-photo-slot={src ? "filled" : "empty"} style={box(rect, size)}>
+    <div
+      className={cutout ? "absolute overflow-visible" : "absolute overflow-hidden"}
+      data-photo-slot={src ? "filled" : "empty"}
+      data-photo-treatment={treatment ?? "cover"}
+      style={box(rect, size)}
+    >
       {src ? (
-        <img src={src} alt={alt} className="h-full w-full object-cover" draggable={false} />
+        <img
+          src={src}
+          alt={alt}
+          className={cutout ? "h-full w-full object-contain object-left" : "h-full w-full object-cover"}
+          draggable={false}
+        />
       ) : (
         <div className="h-full w-full" style={{ backgroundColor: paper }} />
       )}
@@ -252,7 +277,7 @@ function Fitted({ plan, text }: { plan: PostcardFacePlan; text: PostcardFacePlan
         fontFamily: family,
         fontWeight: text.font === "display" ? 800 : 600,
         fontSize: pointsToCqw(text.fontPt, plan.size),
-        lineHeight: lineHeightFor(text.font),
+        lineHeight: text.role === "offer" ? 0.8 : lineHeightFor(text.font),
         letterSpacing: text.font === "display" ? "-0.03em" : "0",
         textAlign: text.align,
         display: text.role === "offer" || text.role === "label" ? "flex" : "block",

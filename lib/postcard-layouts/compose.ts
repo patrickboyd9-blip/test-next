@@ -26,6 +26,8 @@ export interface PhotoSlotPlan {
   role: string
   rect: InchRect
   bleed: boolean
+  /** cover fills a frame. cutout sits on the canvas. thumbnail is one cell in the bottom row. */
+  treatment?: "cover" | "cutout" | "thumbnail"
 }
 
 export interface ShapePlan {

@@ -67,6 +67,8 @@ export function PostcardFrontFace({
   compact,
   photoSrc,
   alternatePhotoSrc,
+  cutoutSrc,
+  thumbnailSrc,
   showMonogram,
   contact,
   photoAlt,
@@ -76,6 +78,10 @@ export function PostcardFrontFace({
   compact: boolean
   photoSrc: string | null
   alternatePhotoSrc?: string | null
+  /** A generated subject with the background removed. A scene photo does not belong here. */
+  cutoutSrc?: string | null
+  /** One scene, repeated in the small boxed row. */
+  thumbnailSrc?: string | null
   showMonogram: boolean
   contact: StudioContact
   photoAlt: string
@@ -98,6 +104,8 @@ export function PostcardFrontFace({
         contact={contact}
         photoSrc={photoSrc}
         alternatePhotoSrc={alternatePhotoSrc}
+        cutoutSrc={cutoutSrc}
+        thumbnailSrc={thumbnailSrc}
         businessName={contact.businessName}
         compact={compact}
         plan={card.front}

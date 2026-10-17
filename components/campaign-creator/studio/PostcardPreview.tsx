@@ -133,6 +133,8 @@ export function PostcardPreview({
       compact={compact}
       photoSrc={sources[0] ?? imagery.src}
       alternatePhotoSrc={sources[1] ?? null}
+      cutoutSrc={generatedAsset?.src ?? null}
+      thumbnailSrc={imagery.src && imagery.src !== generatedAsset?.src ? imagery.src : null}
       showMonogram={imagery.showMonogram}
       contact={contact}
       photoAlt={spec.visualDirection?.trim() || "Campaign photography"}

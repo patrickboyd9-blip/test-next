@@ -8,10 +8,11 @@ import { campaignForCustomer } from "@/lib/campaign-creator/customer-campaign"
 import type { Campaign, CampaignBrief, CreativeSpec } from "@/lib/campaign-creator/types"
 import { createFileDocumentStore } from "@/lib/storage/document-store"
 
-import { directDesign } from "./art-director"
+import { directDesign, directionRecipe, sameComposition, usesSeparatedPanel } from "./art-director"
+import { decodePng, knockOutPlainBackground, knockOutRgba, plainBackdropJpeg } from "./cutout"
 import { critiqueCard } from "./critic"
 import { BENCHMARK_BRIEFS } from "./benchmark"
-import { composeGridCard, textInsideSafe } from "./grid-composer"
+import { composeGridCard, paintedTextRects, rectsIntersect, textInsideSafe, URL_MIN_PT } from "./grid-composer"
 import {
   discoverLocalImages,
   loadSeedAnalyses,
@@ -19,7 +20,7 @@ import {
 } from "./library"
 import { criticUsesVision, directOneCard, directorMode } from "./pipeline"
 import { validateDesignRationale } from "./rationale"
-import { selectReferences } from "./select"
+import { citationsForDirection, selectReferences } from "./select"
 import { checkSimilarity } from "./similarity"
 import {
   entriesFromC3poManifest,
@@ -126,13 +127,21 @@ test("the grid card keeps phone, website, scan line, ratio, and safe type", asyn
   assert.equal(card.front.lockup?.qrLabel, "Scan to book")
   assert.ok((card.front.lockup?.qrInches ?? 0) >= 0.75)
   assert.match(card.front.lockup?.phone?.text ?? "", /555-0148/)
-  assert.match(card.front.texts.map((text) => text.text).join(" "), /northline\.example\/book/)
+  assert.match(card.front.lockup?.website?.text ?? "", /northline\.example\/book/)
+  assert.ok((card.front.lockup?.website?.fontPt ?? 0) >= URL_MIN_PT)
+  assert.equal(card.front.lockup?.website?.lines.length, 1)
+  assert.ok((card.front.lockup?.phone?.fontPt ?? 0) > (card.front.lockup?.website?.fontPt ?? 0))
   assert.ok(card.front.texts.every((text) => textInsideSafe(text.rect, "5x8")))
+  assert.equal(intersectingPairs(card.front).length, 0)
   assert.ok(textInsideSafe(card.front.lockup!.rect, "5x8"))
   const offer = card.front.texts.find((text) => text.role === "offer")
   const headline = card.front.texts.find((text) => text.role === "headline")
   assert.ok(offer && headline)
   assert.ok(offer.fontPt >= headline.fontPt * 1.55)
+  const qualifier = card.front.texts.find((text) => text.role === "body")
+  assert.ok(qualifier)
+  assert.ok(qualifier.rect.y <= offer.rect.y + offer.rect.h + 0.08)
+  assert.equal(card.front.texts.filter((text) => text.text === "Northline Roofing").length, 1)
   assert.equal(card.front.shapes.some((shape) => shape.role === "starburst"), false)
   assert.equal(directed.critique.autoFails.includes("AF10"), false)
   assert.equal(directed.critique.autoFails.includes("AF1"), false)
@@ -144,6 +153,116 @@ test("the grid card keeps phone, website, scan line, ratio, and safe type", asyn
     businessName: "Northline Roofing",
   })
   assert.ok(wide.back.texts.every((text) => textInsideSafe(text.rect, "6x9")))
+})
+
+test("three directions do not share a grid and proportions", () => {
+  const brief: CampaignBrief = {
+    goal: "Book roof inspections",
+    offer: "Free",
+    phone: "(619) 555-0148",
+    website: "northline.example/book",
+    businessInfo: { name: "Northline Roofing" },
+    audience: { description: "Homeowners who have not had anyone on the roof" },
+  }
+  const selection = selectReferences([], brief)
+  const rationales = [0, 1, 2].map((slot) => directDesign({ brief, selection, trim: "5x8", slot }).rationale)
+  for (let index = 0; index < rationales.length; index += 1) {
+    for (let other = index + 1; other < rationales.length; other += 1) {
+      assert.equal(sameComposition(rationales[index]!, rationales[other]!), false)
+    }
+  }
+  const cards = rationales.map((rationale) =>
+    composeGridCard({
+      rationale,
+      spec: { headline: "Wind damage? Free roof check.", offer: "Free", phone: brief.phone, website: brief.website },
+      businessName: "Northline Roofing",
+    })
+  )
+  const modes = rationales.map((rationale) => rationale.grid.intentional_break)
+  assert.deepEqual(modes, ["integrated", "full-bleed", "panel"])
+  assert.equal(modes.filter((mode) => usesSeparatedPanel(mode)).length, 1)
+  const lead = cards[0]!.front
+  const leadOffer = lead.texts.find((text) => text.role === "offer")
+  const leadHeadlines = lead.texts.filter((text) => text.role === "headline")
+  assert.ok(leadOffer && leadHeadlines[0])
+  assert.ok(leadOffer.fontPt >= leadHeadlines[0].fontPt * 1.55)
+  assert.equal(lead.shapes.some((shape) => shape.role === "offer-tile" || shape.role === "type-panel"), false)
+  assert.equal(lead.photos.filter((slot) => slot.treatment === "cutout").length, 1)
+  assert.equal(lead.photos.filter((slot) => slot.treatment === "thumbnail").length, 4)
+  assert.equal(new Set(leadHeadlines.map((text) => text.color)).size, 2)
+  assert.equal(lead.texts.filter((text) => text.text === "Northline Roofing").length, 1)
+  const qr = lead.lockup?.qrRect
+  const phone = lead.lockup?.phone
+  assert.ok(qr && phone)
+  assert.ok(Math.abs(qr.y - phone.rect.y) < 0.05)
+  assert.ok(qr.x <= phone.rect.x + phone.rect.w + 0.2)
+  assert.ok(qr.x >= phone.rect.x + phone.rect.w)
+  const subject = lead.photos.find((slot) => slot.treatment === "cutout")
+  assert.ok(subject && subject.rect.x < 2.4)
+  assert.equal(cards[1]!.front.shapes.some((shape) => shape.role === "type-panel" || shape.role === "offer-tile"), false)
+  assert.ok(cards[2]!.front.shapes.some((shape) => shape.role === "type-panel"))
+  for (const card of cards) {
+    assert.equal(card.front.shapes.some((shape) => shape.role === "offer-tile"), false)
+    assert.equal(intersectingPairs(card.front).length, 0, intersectingPairs(card.front).join(", "))
+    assert.ok((card.front.lockup?.phone?.fontPt ?? 0) > (card.front.lockup?.website?.fontPt ?? 99))
+    assert.equal(card.front.lockup?.website?.lines.length, 1)
+    assert.ok((card.front.lockup?.website?.fontPt ?? 0) >= URL_MIN_PT)
+  }
+})
+
+test("a flat backdrop knocks out and a real scene stays", () => {
+  const jpeg = plainBackdropJpeg(48, 32, { x: 16, y: 8, w: 16, h: 14 })
+  const knocked = knockOutPlainBackground(jpeg)
+  assert.equal(knocked.changed, true)
+  const png = decodePng(knocked.bytes)
+  assert.ok(png)
+  assert.equal(png.rgba[3], 0)
+  const subject = (10 * 48 + 24) * 4
+  assert.equal(png.rgba[subject + 3], 255)
+  const scene = Buffer.alloc(16 * 16 * 4, 255)
+  const corner = (2 * 16 + 2) * 4
+  scene[corner] = 10
+  scene[corner + 1] = 20
+  scene[corner + 2] = 30
+  assert.equal(knockOutRgba(scene, 16, 16), null)
+})
+
+test("each direction cites different mailers from the library", () => {
+  const records = loadSeedAnalyses().map((analysis) => ({
+    id: analysis.id,
+    source: "seed" as const,
+    analysis,
+    images: [],
+    vertical: analysis.vertical,
+    grade: analysis.grade,
+    needsAnalysis: false,
+  }))
+  const brief: CampaignBrief = { goal: "Book roof inspections", offer: "Free" }
+  const selection = selectReferences(records, brief)
+  const cited = [0, 1, 2].map((slot) =>
+    citationsForDirection(records, brief, directionRecipe({ brief, selection, trim: "5x8" }, slot).mode)
+  )
+  const ids = cited.map((items) => items.map((item) => item.mmrId).join(","))
+  assert.equal(new Set(ids).size, 3)
+  assert.ok(cited[0]?.some((item) => item.mmrId === "PM-047"))
+  assert.ok(cited[0]?.some((item) => item.mmrId === "PM-041"))
+  assert.match(cited[0]?.find((item) => item.mmrId === "PM-047")?.whyItWorks ?? "", /1\.6/)
+  assert.equal(cited[1]?.some((item) => item.mmrId === "PM-047"), false)
+  assert.ok(cited[1]?.some((item) => item.mmrId === "PM-052"))
+  assert.ok(cited[2]?.some((item) => item.mmrId === "PM-022"))
+  assert.equal(
+    cited.some((items) => ["PM-047", "PM-054", "PM-022"].every((id) => items.some((item) => item.mmrId === id))),
+    false
+  )
+  for (const items of cited) {
+    assert.ok(items.length >= 1)
+    for (const item of items) {
+      assert.match(item.whyItWorks, /[.!?]$/)
+      assert.doesNotMatch(item.whyItWorks, /\bcopy\b/i)
+      assert.equal(["MMR-513", "MMR-047", "MMR-047-2", "PM-011"].includes(item.mmrId), false)
+      assert.equal(/private/i.test(item.mmrId), false)
+    }
+  }
 })
 
 test("dark type on the photograph hard-fails and scores well below an A", async () => {
@@ -365,3 +484,16 @@ test("the benchmark set is the eight briefs and scores stay off the customer cam
   assert.equal(customer.creative.directions[0]?.research?.quality, undefined)
   assert.ok(customer.creative.directions[0]?.spec.designRationale)
 })
+
+function intersectingPairs(plan: Parameters<typeof paintedTextRects>[0]): string[] {
+  const boxes = paintedTextRects(plan)
+  const hits: string[] = []
+  for (let index = 0; index < boxes.length; index += 1) {
+    for (let other = index + 1; other < boxes.length; other += 1) {
+      if (rectsIntersect(boxes[index]!.rect, boxes[other]!.rect)) {
+        hits.push(`${boxes[index]!.role}+${boxes[other]!.role}`)
+      }
+    }
+  }
+  return hits
+}

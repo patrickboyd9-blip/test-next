@@ -9,6 +9,7 @@ import { lineHeightFor } from "@/lib/postcard-layouts/typefit"
 import { paintQr } from "@/lib/campaign-creator/studio-qr"
 
 import { trimInches } from "./grid-composer"
+import { standInCutoutPng } from "./cutout"
 import { standInPhotoJpeg } from "./stand-in-photo"
 import { studioShapeLayer } from "./studio-layer"
 import type { TrimSize } from "./rationale"
@@ -56,15 +57,22 @@ function cardHtml(plan: PostcardFacePlan, qrPayload: string): string {
   const trim = trimInches(plan.size)
   const size = printPixels(plan.size)
   const photo = standInPhotoJpeg().toString("base64")
+  const cutout = standInCutoutPng().toString("base64")
   const displayFamily = plan.pairing === "letter" ? "Fraunces" : plan.pairing === "signal" ? "Barlow Condensed" : "Archivo"
   const parts: string[] = []
   for (const shape of plan.shapes.filter((item) => studioShapeLayer(item.role) === "back")) {
     parts.push(shapeDiv(shape.rect, trim, shape.fill, shape.role))
   }
   for (const slot of plan.photos) {
-    parts.push(
-      `<img alt="Stand-in photo" src="data:image/jpeg;base64,${photo}" style="${box(slot.rect, trim)}object-fit:cover;" />`
-    )
+    if (slot.treatment === "cutout") {
+      parts.push(
+        `<img alt="Stand-in cut-out" src="data:image/png;base64,${cutout}" style="${box(slot.rect, trim)}object-fit:contain;object-position:left center;" />`
+      )
+    } else {
+      parts.push(
+        `<img alt="Stand-in photo" src="data:image/jpeg;base64,${photo}" style="${box(slot.rect, trim)}object-fit:cover;" />`
+      )
+    }
   }
   for (const shape of plan.shapes.filter((item) => studioShapeLayer(item.role) === "mid")) {
     if (shape.role === "scrim") {
@@ -82,9 +90,10 @@ function cardHtml(plan: PostcardFacePlan, qrPayload: string): string {
     if (!text.text.trim() || text.lines.length === 0) continue
     const family = text.font === "display" ? displayFamily : "Source Sans 3"
     const weight = text.font === "display" ? 800 : 600
+    const lineHeight = text.role === "offer" ? 0.8 : lineHeightFor(text.font)
     const lines = text.lines.map((line) => `<span style="display:block">${escapeHtml(line)}</span>`).join("")
     parts.push(
-      `<p style="${box(text.rect, trim)}margin:0;color:${text.color};font-family:'${family}',sans-serif;font-weight:${weight};font-size:${pointsToCqw(text.fontPt, trim.w)};line-height:${lineHeightFor(text.font)};letter-spacing:${text.font === "display" ? "-0.03em" : "0"};text-align:${text.align};">${lines}</p>`
+      `<p style="${box(text.rect, trim)}margin:0;color:${text.color};font-family:'${family}',sans-serif;font-weight:${weight};font-size:${pointsToCqw(text.fontPt, trim.w)};line-height:${lineHeight};letter-spacing:${text.font === "display" ? "-0.03em" : "0"};text-align:${text.align};">${lines}</p>`
     )
   }
   const lockup = plan.lockup
