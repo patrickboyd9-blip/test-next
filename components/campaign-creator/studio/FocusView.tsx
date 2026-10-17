@@ -9,9 +9,10 @@ import type { GeneratedAsset } from "@/lib/campaign-creator/image-generation"
 import type { PostcardIdentity } from "@/lib/campaign-creator/studio-contact"
 import { presentStudioPhoto, type StudioImageState } from "@/lib/campaign-creator/studio-photo"
 import type { ConceptFeedbackView } from "@/lib/campaign-creator/actions"
-import type { CampaignBrief, CreativeDirection, CreativeSpec } from "@/lib/campaign-creator/types"
+import type { Campaign, CampaignBrief, CreativeDirection, CreativeSpec } from "@/lib/campaign-creator/types"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
+import { BlueprintBrowser } from "./BlueprintBrowser"
 import { ConceptCard } from "./ConceptCard"
 import { ConceptFeedback } from "./ConceptFeedback"
 import { PostcardPreview, PostcardSideToggle } from "./PostcardPreview"
@@ -37,6 +38,7 @@ interface FocusViewProps {
   onApproveAsIs: () => void
   campaignId?: string
   feedback?: ConceptFeedbackView
+  onBlueprintApplied?: (campaign: Campaign) => void
 }
 
 function buildFocusCaption(direction: CreativeDirection): string {
@@ -65,6 +67,7 @@ export function FocusView({
   onApproveAsIs,
   campaignId,
   feedback,
+  onBlueprintApplied,
 }: FocusViewProps) {
   const reducedMotion = useReducedMotion()
   const [side, setSide] = useState<"front" | "back">("front")
@@ -108,6 +111,9 @@ export function FocusView({
       <div className="flex max-w-lg flex-col gap-3">
         <p className="text-sm text-muted-foreground">{direction.rationale}</p>
         <ResearchBasis research={direction.research} />
+        {spec.blueprint ? (
+          <p className="text-xs font-medium">Blueprint: {spec.blueprint.sourceId} · {spec.blueprint.tone}</p>
+        ) : null}
         {campaignId ? (
           <ConceptFeedback campaignId={campaignId} directionId={direction.id} initial={feedback} />
         ) : null}
@@ -133,6 +139,9 @@ export function FocusView({
           Approve as-is
         </Button>
       </div>
+      {campaignId && onBlueprintApplied ? (
+        <BlueprintBrowser campaignId={campaignId} onApplied={onBlueprintApplied} />
+      ) : null}
 
       <div className="flex flex-col gap-3">
         <p className="text-xs text-muted-foreground">or switch</p>

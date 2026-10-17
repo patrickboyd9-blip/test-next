@@ -317,6 +317,7 @@ export function CreativeStudio({
         }}
         onStartRefining={() => setSubPhase("refine")}
         onApproveAsIs={() => openApproval("focus")}
+        onBlueprintApplied={onCampaignUpdate}
         campaignId={hasPersistedDirections ? campaign.id : undefined}
         feedback={feedback.find((item) => item.directionId === selectedDirection.id)}
       />

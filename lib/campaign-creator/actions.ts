@@ -456,3 +456,89 @@ export async function saveConceptFeedback(input: {
   })
   return { directionId: saved.directionId, vote: saved.vote, reason: saved.reason }
 }
+
+export interface BlueprintBrowseCard {
+  id: string
+  grade: string
+  tone: string
+  vertical: string
+  devices: string[]
+  boxes: Array<{ role: string; face: "front" | "back"; x: number; y: number; w: number; h: number }>
+  thumb: { mediaType: string; base64: string } | null
+}
+
+/** Wireframes for customers. Source thumbnails only when the campaign owner is internal. */
+export async function browseBlueprints(input: {
+  campaignId: string
+  vertical?: string
+  tone?: string
+}): Promise<BlueprintBrowseCard[]> {
+  const campaign = await repository.getCampaign(input.campaignId)
+  if (!campaign) return []
+  const { blueprintCard, isInternalOwner, normalizeToneTag, normalizeVerticalTag, selectBlueprints } = await import("@/lib/design-intelligence/blueprint")
+  const { loadBlueprintCorpus } = await import("@/lib/design-intelligence/blueprint-store")
+  const { loadLibrary } = await import("@/lib/design-intelligence/library")
+  const { readRecordImage } = await import("@/lib/design-intelligence/images")
+  const records = await loadLibrary()
+  const corpus = await loadBlueprintCorpus({ records })
+  const vertical = normalizeVerticalTag(input.vertical || campaign.brief.goal)
+  const tone = normalizeToneTag(input.tone || campaign.brief.emotionalTone || campaign.brief.goal)
+  const picked = selectBlueprints({ blueprints: corpus, vertical, tone, limit: 12 })
+  const internal = isInternalOwner(campaign.ownerId)
+  const cards: BlueprintBrowseCard[] = []
+  for (const blueprint of picked) {
+    let thumb: BlueprintBrowseCard["thumb"] = null
+    if (internal) {
+      const record = records.find((item) => item.id === blueprint.id)
+      const image = record ? await readRecordImage(record) : null
+      if (image && image.bytes.length > 0 && image.bytes.length <= 400_000) {
+        thumb = { mediaType: image.mediaType, base64: image.bytes.toString("base64") }
+      }
+    }
+    const card = blueprintCard(blueprint, thumb)
+    cards.push({
+      id: card.id,
+      grade: card.grade,
+      tone: card.tone,
+      vertical: card.vertical,
+      devices: card.devices,
+      boxes: card.boxes.filter((box) => box.face === "front"),
+      thumb: card.thumb,
+    })
+  }
+  return cards
+}
+
+/** Rebuilds the selected concept from one blueprint, with this campaign's words and colors. */
+export async function applyCampaignBlueprint(campaignId: string, blueprintId: string): Promise<Campaign> {
+  const campaign = await repository.getCampaign(campaignId)
+  if (!campaign) throw new Error(`Campaign ${campaignId} not found`)
+  const directionId = campaign.creative.selectedDirectionId
+  if (!directionId) throw new Error("No direction selected")
+  const direction = campaign.creative.directions.find((item) => item.id === directionId)
+  if (!direction) throw new Error("Selected direction not found")
+  const current = campaign.creative.activeSpec ?? direction.spec
+  const { loadBlueprintCorpus } = await import("@/lib/design-intelligence/blueprint-store")
+  const { rebuildFromBlueprint } = await import("@/lib/design-intelligence/blueprint-rebuild")
+  const { directDesign } = await import("@/lib/design-intelligence/art-director")
+  const { selectReferences } = await import("@/lib/design-intelligence/select")
+  const { loadLibrary } = await import("@/lib/design-intelligence/library")
+  const records = await loadLibrary()
+  const blueprint = (await loadBlueprintCorpus({ records })).find((item) => item.id === blueprintId)
+  if (!blueprint) throw new Error("That blueprint is not in the library.")
+  const selection = selectReferences(records, campaign.brief)
+  const base = current.designRationale ?? directDesign({
+    brief: campaign.brief,
+    selection,
+    trim: "5x8",
+  }).rationale
+  const rebuilt = rebuildFromBlueprint({
+    rationale: base,
+    blueprint,
+    spec: current,
+    brief: campaign.brief,
+  })
+  if (!rebuilt) throw new Error("That blueprint could not be rebuilt for this campaign.")
+  const note = `Blueprint: ${rebuilt.spec.blueprint?.sourceId} · ${rebuilt.tone}`
+  return forCustomer(await repository.replaceDirectionSpec(campaignId, directionId, rebuilt.spec, note))
+}

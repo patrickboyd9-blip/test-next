@@ -111,6 +111,11 @@ export function ConceptCard({
           <>
             <StudioPhotoNote note={photoNote} />
             <p className="text-sm font-semibold">{direction.name}</p>
+            {direction.spec.blueprint ? (
+              <p className="text-xs font-medium">
+                Blueprint: {direction.spec.blueprint.sourceId} · {direction.spec.blueprint.tone}
+              </p>
+            ) : null}
             <p className="line-clamp-2 text-xs text-muted-foreground">
               {direction.oneLineDifference ?? direction.rationale}
             </p>
