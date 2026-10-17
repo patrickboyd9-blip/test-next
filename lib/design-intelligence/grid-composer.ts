@@ -345,7 +345,7 @@ export function rectsIntersect(a: InchRect, b: InchRect): boolean {
 
 /** Every text box the front actually paints, including the scan line under the code. */
 export function paintedTextRects(plan: PostcardFacePlan): Array<{ role: string; rect: InchRect }> {
-  const items = plan.texts
+  const items: Array<{ role: string; rect: InchRect }> = plan.texts
     .filter((text) => text.text.trim().length > 0 && text.lines.length > 0)
     .map((text) => ({ role: text.role, rect: text.rect }))
   if (plan.lockup?.phone?.text && plan.lockup.phone.lines.length > 0) {
