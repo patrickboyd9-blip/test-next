@@ -29,7 +29,19 @@ export interface ArtDirectorInput {
   slot?: number
 }
 
-export type CompositionMode = "dark-offer-field" | "overlapping-card" | "type-led" | "calm-column"
+export type CompositionMode =
+  | "integrated"
+  | "full-bleed"
+  | "panel"
+  | "dark-offer-field"
+  | "overlapping-card"
+  | "type-led"
+  | "calm-column"
+
+/** A separated text panel is the exception. Integrated and full-bleed are not one. */
+export function usesSeparatedPanel(mode: string): boolean {
+  return mode === "panel" || mode === "dark-offer-field" || mode === "overlapping-card" || mode === "type-led" || mode === "calm-column"
+}
 
 export interface DirectionRecipe {
   grid: GridName
@@ -75,38 +87,38 @@ export function directionRecipe(input: ArtDirectorInput, slot: number): Directio
   const offer = hasConcreteOffer(input.brief)
   if (vertical === "medicare_insurance") {
     const calm: DirectionRecipe[] = [
-      { grid: "full-bleed-plus-panel", mode: "overlapping-card", hero: "headline", offerToHeadline: 0.55, headlineToBody: 3, offerToBody: 1.65, alignment: "left" },
-      { grid: "thirds", mode: "calm-column", hero: "headline", offerToHeadline: 0.5, headlineToBody: 2.8, offerToBody: 1.6, alignment: "left" },
-      { grid: "centered-stack", mode: "type-led", hero: "headline", offerToHeadline: 0.45, headlineToBody: 3.6, offerToBody: 1.62, alignment: "left" },
+      { grid: "centered-stack", mode: "integrated", hero: "headline", offerToHeadline: 0.5, headlineToBody: 3.1, offerToBody: 1.6, alignment: "left" },
+      { grid: "full-bleed-plus-panel", mode: "full-bleed", hero: "headline", offerToHeadline: 0.42, headlineToBody: 2.8, offerToBody: 1.55, alignment: "left" },
+      { grid: "thirds", mode: "panel", hero: "headline", offerToHeadline: 0.58, headlineToBody: 3.6, offerToBody: 1.7, alignment: "left" },
     ]
     return calm[slot] ?? calm[0]!
   }
   const recipes: DirectionRecipe[] = [
     {
-      grid: "thirds",
-      mode: "dark-offer-field",
+      grid: "centered-stack",
+      mode: "integrated",
       hero: offer ? "offer" : "headline",
-      offerToHeadline: offer ? 1.8 : 0.55,
+      offerToHeadline: offer ? 1.8 : 0.5,
       headlineToBody: 3.2,
-      offerToBody: offer ? 5.7 : 1.8,
+      offerToBody: offer ? 5.7 : 1.7,
       alignment: "left",
     },
     {
       grid: "full-bleed-plus-panel",
-      mode: "overlapping-card",
+      mode: "full-bleed",
       hero: "headline",
-      offerToHeadline: 0.62,
-      headlineToBody: 3.4,
-      offerToBody: 2.1,
+      offerToHeadline: 0.5,
+      headlineToBody: 2.7,
+      offerToBody: 1.55,
       alignment: "left",
     },
     {
-      grid: "centered-stack",
-      mode: "type-led",
+      grid: "thirds",
+      mode: "panel",
       hero: "headline",
-      offerToHeadline: 0.48,
+      offerToHeadline: 0.7,
       headlineToBody: 4,
-      offerToBody: 1.9,
+      offerToBody: 2.2,
       alignment: "left",
     },
   ]
@@ -129,17 +141,18 @@ function applyRecipe(rationale: DesignRationale, recipe: DirectionRecipe): Desig
     ...rationale,
     focal_element: {
       ...rationale.focal_element,
-      kind: offerHero ? "offer_numeral" : recipe.mode === "type-led" ? "headline" : rationale.focal_element.kind,
-      lead_modality: offerHero ? "offer_field" : recipe.mode === "type-led" ? "type" : "image",
-      lead_modality_area_pct: recipe.mode === "dark-offer-field" ? 62 : recipe.mode === "type-led" ? 66 : recipe.mode === "calm-column" ? 64 : 74,
+      kind: offerHero ? "offer_numeral" : recipe.mode === "integrated" || recipe.mode === "type-led" ? "headline" : rationale.focal_element.kind,
+      lead_modality: offerHero ? "offer_field" : recipe.mode === "full-bleed" ? "image" : "type",
+      lead_modality_area_pct: recipe.mode === "full-bleed" ? 74 : recipe.mode === "panel" ? 64 : 70,
       visual_weight_pct: offerHero ? 46 : 40,
-      description: offerHero
-        ? "One offer word, large enough to survive a blur, on a dark field beside the work."
-        : recipe.mode === "overlapping-card"
-          ? "A full-bleed photograph with one overlapping card. The offer is a tile, not the headline."
-          : recipe.mode === "type-led"
-            ? "The headline is the largest type, on a wide field under a photograph."
-            : rationale.focal_element.description,
+      description:
+        recipe.mode === "integrated"
+          ? "Type sits on the open canvas in two brand colors. The subject is a cut-out, and the offer floats with no tile."
+          : recipe.mode === "full-bleed"
+            ? "The photograph is full-bleed. Type sits on a calm area of the picture, not in a panel."
+            : recipe.mode === "panel"
+              ? "One text panel, used once across the directions. The offer is type, not a tile."
+              : rationale.focal_element.description,
     },
     grid: { name: recipe.grid, alignment: recipe.alignment, intentional_break: recipe.mode },
     scale_ratios: {
@@ -153,10 +166,8 @@ function applyRecipe(rationale: DesignRationale, recipe: DirectionRecipe): Desig
       ...rationale.offer_treatment,
       kind: offerHero ? "numeral_hero" : rationale.vertical === "medicare_insurance" ? "concrete_step_no_discount" : "headline_is_the_offer",
       placement: offerHero
-        ? "One offer lockup on the dark field, larger than the headline"
-        : recipe.mode === "overlapping-card" || recipe.mode === "type-led"
-          ? "A distinct offer tile, smaller than the headline"
-          : rationale.offer_treatment.placement,
+        ? "A free-floating offer lockup, larger than the headline, with no tile behind it"
+        : "The offer is type on the canvas, smaller than the headline, with no tile",
     },
   }
 }

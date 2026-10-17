@@ -8,7 +8,8 @@ import { campaignForCustomer } from "@/lib/campaign-creator/customer-campaign"
 import type { Campaign, CampaignBrief, CreativeSpec } from "@/lib/campaign-creator/types"
 import { createFileDocumentStore } from "@/lib/storage/document-store"
 
-import { directDesign, directionRecipe, sameComposition } from "./art-director"
+import { directDesign, directionRecipe, sameComposition, usesSeparatedPanel } from "./art-director"
+import { decodePng, knockOutPlainBackground, knockOutRgba, plainBackdropJpeg } from "./cutout"
 import { critiqueCard } from "./critic"
 import { BENCHMARK_BRIEFS } from "./benchmark"
 import { composeGridCard, paintedTextRects, rectsIntersect, textInsideSafe, URL_MIN_PT } from "./grid-composer"
@@ -173,16 +174,45 @@ test("three directions do not share a grid and proportions", () => {
       businessName: "Northline Roofing",
     })
   )
-  const leadOffer = cards[0]!.front.texts.find((text) => text.role === "offer")
-  const leadHeadline = cards[0]!.front.texts.find((text) => text.role === "headline")
-  assert.ok(leadOffer && leadHeadline)
-  assert.ok(leadOffer.fontPt >= leadHeadline.fontPt * 1.55)
-  assert.ok(cards[1]!.front.shapes.some((shape) => shape.role === "offer-tile"))
-  assert.ok(cards[2]!.front.shapes.some((shape) => shape.role === "offer-tile"))
+  const modes = rationales.map((rationale) => rationale.grid.intentional_break)
+  assert.deepEqual(modes, ["integrated", "full-bleed", "panel"])
+  assert.equal(modes.filter((mode) => usesSeparatedPanel(mode)).length, 1)
+  const lead = cards[0]!.front
+  const leadOffer = lead.texts.find((text) => text.role === "offer")
+  const leadHeadlines = lead.texts.filter((text) => text.role === "headline")
+  assert.ok(leadOffer && leadHeadlines[0])
+  assert.ok(leadOffer.fontPt >= leadHeadlines[0].fontPt * 1.55)
+  assert.equal(lead.shapes.some((shape) => shape.role === "offer-tile" || shape.role === "type-panel"), false)
+  assert.equal(lead.photos.filter((slot) => slot.treatment === "cutout").length, 1)
+  assert.equal(lead.photos.filter((slot) => slot.treatment === "thumbnail").length, 4)
+  assert.equal(new Set(leadHeadlines.map((text) => text.color)).size, 2)
+  assert.equal(lead.texts.filter((text) => text.text === "Northline Roofing").length, 2)
+  assert.equal(cards[1]!.front.shapes.some((shape) => shape.role === "type-panel" || shape.role === "offer-tile"), false)
+  assert.ok(cards[2]!.front.shapes.some((shape) => shape.role === "type-panel"))
   for (const card of cards) {
-    assert.equal(intersectingPairs(card.front).length, 0)
+    assert.equal(card.front.shapes.some((shape) => shape.role === "offer-tile"), false)
+    assert.equal(intersectingPairs(card.front).length, 0, intersectingPairs(card.front).join(", "))
     assert.ok((card.front.lockup?.phone?.fontPt ?? 0) > (card.front.lockup?.website?.fontPt ?? 99))
+    assert.equal(card.front.lockup?.website?.lines.length, 1)
+    assert.ok((card.front.lockup?.website?.fontPt ?? 0) >= URL_MIN_PT)
   }
+})
+
+test("a flat backdrop knocks out and a real scene stays", () => {
+  const jpeg = plainBackdropJpeg(48, 32, { x: 16, y: 8, w: 16, h: 14 })
+  const knocked = knockOutPlainBackground(jpeg)
+  assert.equal(knocked.changed, true)
+  const png = decodePng(knocked.bytes)
+  assert.ok(png)
+  assert.equal(png.rgba[3], 0)
+  const subject = (10 * 48 + 24) * 4
+  assert.equal(png.rgba[subject + 3], 255)
+  const scene = Buffer.alloc(16 * 16 * 4, 255)
+  const corner = (2 * 16 + 2) * 4
+  scene[corner] = 10
+  scene[corner + 1] = 20
+  scene[corner + 2] = 30
+  assert.equal(knockOutRgba(scene, 16, 16), null)
 })
 
 test("each direction cites different mailers from the library", () => {
@@ -203,9 +233,11 @@ test("each direction cites different mailers from the library", () => {
   const ids = cited.map((items) => items.map((item) => item.mmrId).join(","))
   assert.equal(new Set(ids).size, 3)
   assert.ok(cited[0]?.some((item) => item.mmrId === "PM-047"))
+  assert.ok(cited[0]?.some((item) => item.mmrId === "PM-041"))
   assert.match(cited[0]?.find((item) => item.mmrId === "PM-047")?.whyItWorks ?? "", /1\.6/)
   assert.equal(cited[1]?.some((item) => item.mmrId === "PM-047"), false)
-  assert.ok(cited[1]?.some((item) => item.mmrId === "PM-022"))
+  assert.ok(cited[1]?.some((item) => item.mmrId === "PM-052"))
+  assert.ok(cited[2]?.some((item) => item.mmrId === "PM-022"))
   assert.equal(
     cited.some((items) => ["PM-047", "PM-054", "PM-022"].every((id) => items.some((item) => item.mmrId === id))),
     false

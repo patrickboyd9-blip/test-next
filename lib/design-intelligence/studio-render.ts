@@ -9,6 +9,7 @@ import { lineHeightFor } from "@/lib/postcard-layouts/typefit"
 import { paintQr } from "@/lib/campaign-creator/studio-qr"
 
 import { trimInches } from "./grid-composer"
+import { standInCutoutPng } from "./cutout"
 import { standInPhotoJpeg } from "./stand-in-photo"
 import { studioShapeLayer } from "./studio-layer"
 import type { TrimSize } from "./rationale"
@@ -56,15 +57,22 @@ function cardHtml(plan: PostcardFacePlan, qrPayload: string): string {
   const trim = trimInches(plan.size)
   const size = printPixels(plan.size)
   const photo = standInPhotoJpeg().toString("base64")
+  const cutout = standInCutoutPng().toString("base64")
   const displayFamily = plan.pairing === "letter" ? "Fraunces" : plan.pairing === "signal" ? "Barlow Condensed" : "Archivo"
   const parts: string[] = []
   for (const shape of plan.shapes.filter((item) => studioShapeLayer(item.role) === "back")) {
     parts.push(shapeDiv(shape.rect, trim, shape.fill, shape.role))
   }
   for (const slot of plan.photos) {
-    parts.push(
-      `<img alt="Stand-in photo" src="data:image/jpeg;base64,${photo}" style="${box(slot.rect, trim)}object-fit:cover;" />`
-    )
+    if (slot.treatment === "cutout") {
+      parts.push(
+        `<img alt="Stand-in cut-out" src="data:image/png;base64,${cutout}" style="${box(slot.rect, trim)}object-fit:contain;object-position:right center;" />`
+      )
+    } else {
+      parts.push(
+        `<img alt="Stand-in photo" src="data:image/jpeg;base64,${photo}" style="${box(slot.rect, trim)}object-fit:cover;" />`
+      )
+    }
   }
   for (const shape of plan.shapes.filter((item) => studioShapeLayer(item.role) === "mid")) {
     if (shape.role === "scrim") {

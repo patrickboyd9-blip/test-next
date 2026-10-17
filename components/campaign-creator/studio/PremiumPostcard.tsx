@@ -71,6 +71,7 @@ export function PremiumPostcardFront({
           src={photos[index] ?? null}
           alt={spec.visualDirection?.trim() || "Campaign photograph"}
           paper={plan.palette.paper}
+          treatment={slot.treatment}
         />
       ))}
       <Shapes plan={plan} layer="mid" />
@@ -221,17 +222,31 @@ function PhotoSlot({
   src,
   alt,
   paper,
+  treatment,
 }: {
   rect: InchRect
   size: PostcardFacePlan["size"]
   src: string | null
   alt: string
   paper: string
+  treatment?: "cover" | "cutout" | "thumbnail"
 }) {
+  const cutout = treatment === "cutout"
+  if (cutout && !src) return null
   return (
-    <div className="absolute overflow-hidden" data-photo-slot={src ? "filled" : "empty"} style={box(rect, size)}>
+    <div
+      className={cutout ? "absolute overflow-visible" : "absolute overflow-hidden"}
+      data-photo-slot={src ? "filled" : "empty"}
+      data-photo-treatment={treatment ?? "cover"}
+      style={box(rect, size)}
+    >
       {src ? (
-        <img src={src} alt={alt} className="h-full w-full object-cover" draggable={false} />
+        <img
+          src={src}
+          alt={alt}
+          className={cutout ? "h-full w-full object-contain object-right" : "h-full w-full object-cover"}
+          draggable={false}
+        />
       ) : (
         <div className="h-full w-full" style={{ backgroundColor: paper }} />
       )}

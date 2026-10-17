@@ -122,14 +122,18 @@ function preferredIds(mode: string, vertical: DesignVertical): string[] {
     if (mode === "type-led") return ["PM-046", "MMR-397"]
     return ["MMR-113", "PM-020"]
   }
+  if (mode === "integrated") return ["PM-041", "PM-047"]
+  if (mode === "full-bleed") return ["PM-052", "MMR-397"]
   if (mode === "dark-offer-field") return ["PM-047", "PM-054"]
   if (mode === "type-led") return ["MMR-397", "PM-046"]
   if (mode === "calm-column") return ["MMR-032", "MMR-113"]
-  return ["PM-022", "PM-052"]
+  return ["PM-022", "PM-001"]
 }
 
 const BORROWED: Record<string, string> = {
+  "PM-041": "Borrowed a cut-out subject on an open ground, with the price as the largest glyph and no photo box.",
   "PM-047": "Borrowed one offer lockup at least 1.6× the headline, and left this mailer's bottom band behind.",
+  "PM-001": "Borrowed one solid panel for a single figure and the phone, and left that mailer's scene behind.",
   "PM-054": "Borrowed a dark field beside the work, and did not use this mailer's right-half split or circular badge.",
   "PM-022": "Borrowed an overlapping card on a full-bleed photograph, and moved the card off this mailer's footprint.",
   "PM-052": "Borrowed a full-bleed crop with only a few lines of type, and put the phone in one of those lines.",
@@ -142,10 +146,12 @@ const BORROWED: Record<string, string> = {
 }
 
 function lessonPattern(mode: string): RegExp {
+  if (mode === "integrated") return /cutout|cut-out|white|numeral|1\.6|glyph/i
   if (mode === "dark-offer-field") return /numeral|1\.6|dark field/i
   if (mode === "type-led") return /headline|question|quiet band|type/i
   if (mode === "calm-column") return /calm|invitation|person|advisor/i
-  return /overlapping|full-bleed|full bleed/i
+  if (mode === "full-bleed") return /full-bleed|full bleed|crop/i
+  return /overlapping|panel|figure/i
 }
 
 function recordText(record: LibraryRecord): string {

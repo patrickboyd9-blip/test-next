@@ -1,3 +1,5 @@
+import { cutoutSubjectLine, cutoutSubjectRequested } from "@/lib/design-intelligence/cutout"
+
 import { buildCampaignLookBlock } from "./campaign-look"
 import { roofSlotForTemplate, ROOF_SLOT_BRIEFS, ROOF_SLOT_NEGATIVE_SPACE } from "./roof-photo-slots"
 import {
@@ -156,6 +158,15 @@ export function toImageBrief(
     if (roofSlot === "after") brief.imageryRole = "neighborhood"
     if (roofSlot === "before") {
       brief.doNotInvent = brief.doNotInvent.filter((item) => item !== "invented property damage")
+    }
+  }
+
+  if (cutoutSubjectRequested(spec)) {
+    brief.artDirection = {
+      ...brief.artDirection,
+      subject: cutoutSubjectLine(brief.artDirection.subject),
+      framing: "The subject sits alone on a flat light-gray background. No room, no sky, no frame.",
+      negativeSpace: "Empty flat background around the subject so it can be cut out onto the card.",
     }
   }
 

@@ -293,11 +293,20 @@ export function qualityFrom(directed: DirectedCard): ResearchQuality {
 }
 
 export function layoutSentence(rationale: DesignRationale): string {
+  if (rationale.grid.intentional_break === "integrated") {
+    return "Type sits on the open canvas in two colors. The subject is cut out, and the offer floats with no tile."
+  }
+  if (rationale.grid.intentional_break === "full-bleed") {
+    return "The photograph runs to the edge. Type sits on the picture, not in a panel."
+  }
+  if (rationale.grid.intentional_break === "panel") {
+    return "One text panel holds the type. The other directions do not use a panel."
+  }
   if (rationale.grid.intentional_break === "dark-offer-field") {
     return "The offer is the largest type, on a dark field beside the photograph."
   }
   if (rationale.grid.intentional_break === "overlapping-card") {
-    return "A full-bleed photograph carries an overlapping card, and the offer sits in its own tile."
+    return "A full-bleed photograph carries an overlapping card. The offer is type on that card, with no tile."
   }
   if (rationale.grid.intentional_break === "type-led") {
     return "The headline leads on a wide type field, with the photograph in a band above it."

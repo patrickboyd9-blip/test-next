@@ -1,5 +1,7 @@
 import { randomUUID } from "crypto"
 
+import { cutoutSubjectRequested, knockOutPlainBackground } from "@/lib/design-intelligence/cutout"
+
 import { getActiveSpec, getApprovedSpec } from "./creative-state"
 import { toImageBrief, type ImageBrief } from "./image-brief"
 import type {
@@ -397,7 +399,7 @@ async function executeStudioImageJob(input: {
       return
     }
     const asset = await persistGeneratedAsset(
-      chosenAsset,
+      assetForLayout(chosenAsset, slot.item.spec),
       input.store,
       input.campaignId,
       slot.fileBase
@@ -406,7 +408,7 @@ async function executeStudioImageJob(input: {
     for (let index = 1; index < matched.length; index += 1) {
       alternates.push(
         await persistGeneratedAsset(
-          matched[index]!,
+          assetForLayout(matched[index]!, slot.item.spec),
           input.store,
           input.campaignId,
           `${slot.fileBase}--alt${index - 1}`
@@ -443,6 +445,16 @@ async function executeStudioImageJob(input: {
       await input.store.deleteSidecar(input.campaignId, lockBase)
     }
   }
+}
+
+/** Integrated layouts ask for a flat backdrop, then drop it so the subject sits on the card. */
+function assetForLayout(asset: GeneratedAsset, spec: CreativeSpec): GeneratedAsset {
+  if (!cutoutSubjectRequested(spec) || !asset.src.startsWith("data:image/")) return asset
+  const comma = asset.src.indexOf(",")
+  if (comma < 0) return asset
+  const knocked = knockOutPlainBackground(Buffer.from(asset.src.slice(comma + 1), "base64"))
+  if (!knocked.changed) return asset
+  return { ...asset, src: `data:image/png;base64,${knocked.bytes.toString("base64")}` }
 }
 
 async function defaultPhotoCheck(input: StudioPhotoCheckInput): Promise<boolean> {

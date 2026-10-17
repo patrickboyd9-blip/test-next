@@ -49,16 +49,16 @@ export function composeGridCard(input: GridComposeInput): GridCard {
   const pairing: FontPairingId = input.rationale.vertical === "medicare_insurance" ? "letter" : "trade"
   const palette = paletteFromRationale(input.rationale)
   const mode = compositionMode(input.rationale)
+  if (mode === "integrated") return composeIntegrated(input, trim, pairing, palette)
   const regions = panelLayout(mode, trim)
   const paper = isLight(palette.paper) ? palette.paper : "#F4F1EA"
   const darkField = mode === "dark-offer-field"
+  const onPhotograph = mode === "full-bleed"
   const panelFill = darkField ? palette.field : paper
-  const ink = inkForBackground(panelFill)
+  const typeBackdrop = onPhotograph ? "#141414" : panelFill
+  const ink = inkForBackground(typeBackdrop)
   const accent = input.rationale.palette.accent_hex
   const offerIsHero = input.rationale.scale_ratios.hero === "offer"
-  const offerIsTile = !offerIsHero && (mode === "overlapping-card" || mode === "type-led")
-  const tileFill = contrastRatio(accent, inkForBackground(accent)) >= 4.5 ? accent : ink
-  const tileInk = inkForBackground(tileFill)
   const responseOnPhoto = mode === "type-led"
   const responseFill = "#1A1A1A"
   const content = clampRect(inset(regions.panel, responseOnPhoto ? 0.1 : 0.16), trim)
@@ -74,7 +74,7 @@ export function composeGridCard(input: GridComposeInput): GridCard {
   const response = placeResponse({ content: responseContent, phone, website, pairing, ink: responseInk })
   const stackRoom = responseBand ? content.h : response.stackRoom
   const sizes = typeSizes(input.rationale, stackRoom)
-  const offerColor = offerIsTile ? tileInk : offerIsHero && contrastRatio(accent, panelFill) >= 4.5 ? accent : ink
+  const offerColor = offerIsHero && contrastRatio(accent, typeBackdrop) >= 4.5 ? accent : ink
   const bodyFloor = input.rationale.format.trim === "6x9" ? 12 : 11
   const headlineFloor = bodyFloor * 2.5
   const offerFloor = offerIsHero ? headlineFloor * 1.6 : bodyFloor * 1.5
@@ -103,23 +103,17 @@ export function composeGridCard(input: GridComposeInput): GridCard {
 
   const photos: PhotoSlotPlan[] = input.rationale.photo_brief.placement === "none"
     ? []
-    : [{ id: "photo", role: "photo", rect: regions.photo, bleed: true }]
+    : [{ id: "photo", role: "photo", rect: regions.photo, bleed: true, treatment: "cover" }]
 
   const offerText = texts.find((text) => text.role === "offer")
   const shapes: ShapePlan[] = [
     { id: "paper", role: "paper", rect: { x: 0, y: 0, w: trim.w, h: trim.h }, fill: darkField ? palette.field : palette.paper },
-    { id: "panel", role: "type-panel", rect: regions.panel, fill: panelFill },
   ]
+  if (!onPhotograph) {
+    shapes.push({ id: "panel", role: "type-panel", rect: regions.panel, fill: panelFill })
+  }
   if (responseBand) {
     shapes.push({ id: "response-band", role: "band", rect: responseBand, fill: responseFill })
-  }
-  if (offerIsTile && offerText) {
-    shapes.push({
-      id: "offer-tile",
-      role: "offer-tile",
-      rect: offerText.rect,
-      fill: tileFill,
-    })
   }
 
   const photoArea = (regions.photo.w * regions.photo.h) / (trim.w * trim.h)
@@ -179,6 +173,232 @@ export function composeGridCard(input: GridComposeInput): GridCard {
     calmFieldPct: calm,
     panel: regions.panel,
   }
+}
+
+/**
+ * Light open canvas. Headline in two brand colors, the contact line under it,
+ * a cut-out subject on the right, a floating offer, and one row of thumbnails.
+ */
+function composeIntegrated(
+  input: GridComposeInput,
+  trim: { w: number; h: number },
+  pairing: FontPairingId,
+  palette: VerticalPalette
+): GridCard {
+  const paper = isLight(palette.paper) ? palette.paper : "#F7F4EE"
+  const ink = inkForBackground(paper)
+  const accent = input.rationale.palette.accent_hex
+  const accentOnPaper = contrastRatio(accent, paper) >= 4.5 ? accent : ink
+  const headlineInk = ink
+  const offerIsHero = input.rationale.scale_ratios.hero === "offer"
+  const geometry = integratedGeometry(trim)
+  const headline = clean(input.spec.headline) || "One clear next step"
+  const [firstLine, secondLine] = splitHeadline(headline)
+  const offerSource = clean(input.spec.offer) || clean(input.spec.callToAction) || "Call today"
+  const offerParts = offerIsHero ? splitOffer(offerSource) : { numeral: offerSource, rest: "" }
+  const phone = clean(input.spec.phone) || ""
+  const website = displayHost(input.spec.website || input.spec.qrDestination || "")
+  const name = clean(input.businessName) || "Local crew"
+  const column = geometry.column
+  const sizes = typeSizes(input.rationale, column.h * 0.72)
+  const offerColor = offerIsHero && contrastRatio(accent, paper) >= 4.5 ? accent : accentOnPaper
+  const blocks: StackBlock[] = [
+    { text: firstLine, role: "headline", pt: sizes.headline, floor: (input.rationale.format.trim === "6x9" ? 12 : 11) * 2.5, color: headlineInk },
+  ]
+  if (secondLine) {
+    blocks.push({
+      text: secondLine,
+      role: "headline",
+      pt: sizes.headline,
+      floor: (input.rationale.format.trim === "6x9" ? 12 : 11) * 2.5,
+      color: accentOnPaper === headlineInk ? ink : accentOnPaper,
+    })
+  }
+  const stacked = placeStack({
+    blocks,
+    cursor: column.y,
+    bottom: column.y + column.h * 0.42,
+    content: column,
+    pairing,
+    align: "left",
+  })
+  const headlineBottom = stacked.texts.reduce((bottom, text) => Math.max(bottom, text.rect.y + text.rect.h), column.y)
+  const phoneText = fitText({
+    text: phone,
+    rect: { x: column.x, y: headlineBottom + 0.08, w: column.w, h: 0.38 },
+    role: "contact",
+    pairing,
+    color: ink,
+    minPt: 16,
+    maxPt: column.w >= 6 ? 22 : 20,
+  })
+  const websiteText = fitText({
+    text: website,
+    rect: { x: column.x, y: phoneText.rect.y + phoneText.rect.h + 0.04, w: column.w, h: 0.26 },
+    role: "label",
+    pairing,
+    color: ink,
+    minPt: URL_MIN_PT,
+    maxPt: 12,
+  })
+  const offerTop = websiteText.rect.y + websiteText.rect.h + 0.12
+  const offerWidth = Math.min(column.w * 0.62, Math.max(1.5, offerParts.numeral.length * (sizes.offer / 72) * 0.7 + 0.2))
+  const offerBlocks: StackBlock[] = [
+    { text: offerParts.numeral, role: "offer", pt: sizes.offer, floor: offerIsHero ? sizes.headline * 1.6 : (input.rationale.format.trim === "6x9" ? 12 : 11) * 1.5, color: offerColor, width: offerWidth },
+  ]
+  if (offerParts.rest) {
+    offerBlocks.push({ text: offerParts.rest, role: "body", pt: 13, floor: 11, color: ink, width: offerWidth })
+  }
+  const repeatH = 0.2
+  const pairTop = round2(geometry.thumbTop - 0.06 - repeatH * 2 - 0.06)
+  const offerStack = placeStack({
+    blocks: offerBlocks,
+    cursor: offerTop,
+    bottom: pairTop - 0.06,
+    content: { ...column, w: Math.max(offerWidth, column.w * 0.7) },
+    pairing,
+    align: "left",
+  })
+  const wordmark = (y: number) =>
+    fitText({
+      text: name,
+      rect: { x: column.x, y, w: offerWidth, h: repeatH },
+      role: "label",
+      pairing,
+      color: ink,
+      minPt: 11,
+      maxPt: 11,
+    })
+  const wordmarks = [wordmark(pairTop), wordmark(round2(pairTop + repeatH + 0.06))]
+  const texts = [...stacked.texts, ...offerStack.texts, ...wordmarks].filter((text) => text.text)
+  const qrRect: InchRect = {
+    x: round2(Math.min(column.x + offerWidth + 0.16, trim.w - SAFE_IN - QR_IN)),
+    y: round2(Math.min(offerTop, geometry.thumbTop - QR_IN - 0.08)),
+    w: QR_IN,
+    h: QR_IN,
+  }
+  const photos = thumbnailRow(geometry, trim)
+  photos.unshift({ id: "subject", role: "photo", rect: geometry.photo, bleed: false, treatment: "cutout" })
+  const shapes: ShapePlan[] = [
+    { id: "paper", role: "paper", rect: { x: 0, y: 0, w: trim.w, h: trim.h }, fill: paper },
+    ...thumbnailFrames(geometry, trim, ink),
+  ]
+  const photoArea = (geometry.photo.w * geometry.photo.h) / (trim.w * trim.h)
+  const front: PostcardFacePlan = {
+    templateId: scaffoldFor(input.rationale.vertical),
+    size: input.rationale.format.trim,
+    face: "front",
+    pairing,
+    palette,
+    photos: input.rationale.photo_brief.placement === "none" ? [] : photos,
+    shapes,
+    texts,
+    trust: [],
+    lockup: {
+      rect: {
+        x: column.x,
+        y: phoneText.rect.y,
+        w: column.w,
+        h: round2(websiteText.rect.y + websiteText.rect.h - phoneText.rect.y),
+      },
+      qrRect,
+      qrInches: QR_IN,
+      qrLabel: SCAN_LABEL,
+      qrLabelPt: 9,
+      phone: phoneText.text ? phoneText : undefined,
+      website: websiteText.text ? websiteText : undefined,
+    },
+    overflows: [...texts, phoneText, websiteText].some((text) => text.overflows),
+    missingContact: [phoneText.text ? "" : "phone", websiteText.text ? "" : "website"].filter((item) => item.length > 0),
+  }
+  const back = composeBack({
+    trim: input.rationale.format.trim,
+    geometry: input.rationale.format.trim === "6x9" ? buildPostcard6x9PrintSpec() : buildPostcard5x8PrintSpec(),
+    palette,
+    pairing,
+    ink,
+    businessName: name,
+    phone,
+    website,
+    proof: input.rationale.trust.back_only[0] ?? "Proof stays on this side",
+    disclaimer: input.disclaimer ?? null,
+  })
+  const offerText = texts.find((text) => text.role === "offer")
+  const headlineText = texts.find((text) => text.role === "headline")
+  return {
+    front,
+    back,
+    typePt: {
+      offer: offerText?.fontPt ?? sizes.offer,
+      headline: headlineText?.fontPt ?? sizes.headline,
+      support: texts.find((text) => text.role === "body")?.fontPt ?? 12,
+      phone: phoneText.fontPt || sizes.phone,
+    },
+    photoAreaPct: Math.round(photoArea * 100),
+    calmFieldPct: 55,
+    panel: column,
+  }
+}
+
+function integratedGeometry(trim: { w: number; h: number }): {
+  photo: InchRect
+  column: InchRect
+  thumbTop: number
+  thumbH: number
+} {
+  const thumbH = round2(Math.min(0.7, trim.h * 0.13))
+  const thumbTop = round2(trim.h - SAFE_IN - thumbH)
+  return {
+    photo: {
+      x: round2(trim.w * 0.32),
+      y: 0.06,
+      w: round2(trim.w * 0.68),
+      h: round2(Math.max(1.6, thumbTop - 0.14)),
+    },
+    column: {
+      x: SAFE_IN,
+      y: SAFE_IN,
+      w: round2(trim.w * 0.56),
+      h: round2(thumbTop - SAFE_IN - 0.1),
+    },
+    thumbTop,
+    thumbH,
+  }
+}
+
+function thumbnailRow(geometry: { thumbTop: number; thumbH: number }, trim: { w: number; h: number }): PhotoSlotPlan[] {
+  const count = 4
+  const gap = 0.08
+  const left = SAFE_IN
+  const right = trim.w - SAFE_IN
+  const width = round2((right - left - gap * (count - 1)) / count)
+  return Array.from({ length: count }, (_, index) => ({
+    id: `thumb-${index + 1}`,
+    role: "photo",
+    rect: { x: round2(left + index * (width + gap)), y: geometry.thumbTop, w: width, h: geometry.thumbH },
+    bleed: false,
+    treatment: "thumbnail" as const,
+  }))
+}
+
+function thumbnailFrames(
+  geometry: { thumbTop: number; thumbH: number },
+  trim: { w: number; h: number },
+  ink: string
+): ShapePlan[] {
+  return thumbnailRow(geometry, trim).map((slot, index) => ({
+    id: `thumb-frame-${index + 1}`,
+    role: "thumbnail",
+    rect: { x: slot.rect.x - 0.02, y: slot.rect.y - 0.02, w: slot.rect.w + 0.04, h: slot.rect.h + 0.04 },
+    fill: ink,
+  }))
+}
+
+function splitHeadline(headline: string): [string, string] {
+  const words = headline.split(/\s+/).filter(Boolean)
+  if (words.length < 2) return [headline, ""]
+  const mid = Math.ceil(words.length / 2)
+  return [words.slice(0, mid).join(" "), words.slice(mid).join(" ")]
 }
 
 function composeBack(input: {
@@ -270,7 +490,15 @@ export function textInsideSafe(rect: InchRect, size: TrimSize): boolean {
 
 export function compositionMode(rationale: DesignRationale): CompositionMode {
   const mode = rationale.grid.intentional_break
-  if (mode === "dark-offer-field" || mode === "overlapping-card" || mode === "type-led" || mode === "calm-column") {
+  if (
+    mode === "integrated" ||
+    mode === "full-bleed" ||
+    mode === "panel" ||
+    mode === "dark-offer-field" ||
+    mode === "overlapping-card" ||
+    mode === "type-led" ||
+    mode === "calm-column"
+  ) {
     return mode
   }
   return "overlapping-card"
@@ -317,6 +545,19 @@ export function panelLayout(mode: CompositionMode, trim: { w: number; h: number 
     return {
       photo: { x: 0, y: 0, w, h: photoH },
       panel: { x: 0, y: photoH, w, h: round2(h - photoH) },
+    }
+  }
+  if (mode === "full-bleed") {
+    return {
+      photo: { x: 0, y: 0, w, h },
+      panel: { x: round2(w * 0.04), y: round2(h * 0.08), w: round2(w * 0.48), h: round2(h * 0.78) },
+    }
+  }
+  if (mode === "panel") {
+    const panelW = round2(w * 0.46)
+    return {
+      photo: { x: panelW, y: 0, w: round2(w - panelW), h },
+      panel: { x: 0, y: 0, w: panelW, h },
     }
   }
   if (mode === "calm-column") {
@@ -448,6 +689,7 @@ interface StackBlock {
   pt: number
   floor: number
   color: string
+  width?: number
 }
 
 /**
@@ -483,7 +725,7 @@ function placeStack(input: {
     if (roomLeft < 0.22) break
     const fitted = fitText({
       text: block.text,
-      rect: { x: input.content.x, y: cursor, w: input.content.w, h: Math.min(natural + 0.02, roomLeft) },
+      rect: { x: input.content.x, y: cursor, w: block.width ?? input.content.w, h: Math.min(natural + 0.02, roomLeft) },
       role: block.role,
       pairing: input.pairing,
       color: block.color,
@@ -502,7 +744,7 @@ function placeStack(input: {
 function measuredHeight(block: StackBlock, input: { content: InchRect; pairing: FontPairingId; align: "left" | "center" }): number {
   const fitted = fitText({
     text: block.text,
-    rect: { x: 0, y: 0, w: input.content.w, h: 12 },
+    rect: { x: 0, y: 0, w: block.width ?? input.content.w, h: 12 },
     role: block.role,
     pairing: input.pairing,
     color: block.color,
@@ -517,7 +759,7 @@ function measuredHeight(block: StackBlock, input: { content: InchRect; pairing: 
 function measuredOverflow(block: StackBlock, input: { content: InchRect; pairing: FontPairingId; align: "left" | "center" }): boolean {
   return fitText({
     text: block.text,
-    rect: { x: 0, y: 0, w: input.content.w, h: 12 },
+    rect: { x: 0, y: 0, w: block.width ?? input.content.w, h: 12 },
     role: block.role,
     pairing: input.pairing,
     color: block.color,

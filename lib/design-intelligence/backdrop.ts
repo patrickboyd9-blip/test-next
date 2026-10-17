@@ -4,6 +4,7 @@ import type { FittedText } from "@/lib/postcard-layouts/typefit"
 import { contrastRatio, hexToRgb } from "./contrast"
 import type { GridCard } from "./grid-composer"
 import { trimInches } from "./grid-composer"
+import { standInCutout } from "./cutout"
 import { standInPhoto } from "./stand-in-photo"
 import { studioShapeLayer } from "./studio-layer"
 
@@ -54,8 +55,9 @@ function compositePlan(plan: PostcardFacePlan): Raster {
     fillRect(rgb, width, height, shape.rect, hexToRgb(shape.fill), trim)
   }
   const photo = standInPhoto()
+  const cutout = standInCutout()
   for (const slot of plan.photos) {
-    blitCover(rgb, width, height, slot.rect, photo, trim)
+    blitCover(rgb, width, height, slot.rect, slot.treatment === "cutout" ? cutout : photo, trim, slot.treatment === "cutout")
   }
   for (const shape of plan.shapes.filter((item) => studioShapeLayer(item.role) === "mid")) {
     if (shape.role === "scrim") paintScrim(rgb, width, height, shape.rect, hexToRgb(plan.palette.scrim), trim)
@@ -111,7 +113,8 @@ function blitCover(
   height: number,
   rect: FittedText["rect"],
   photo: { width: number; height: number; rgba: Buffer },
-  trim: { w: number; h: number }
+  trim: { w: number; h: number },
+  respectAlpha = false
 ): void {
   const x0 = clamp(Math.floor(rect.x * PPI), 0, width)
   const y0 = clamp(Math.floor(rect.y * PPI), 0, height)
@@ -129,10 +132,13 @@ function blitCover(
       const sx = clamp(Math.floor(originX + ((x - x0) / destW) * cropW), 0, photo.width - 1)
       const sy = clamp(Math.floor(originY + ((y - y0) / destH) * cropH), 0, photo.height - 1)
       const source = (sy * photo.width + sx) * 4
+      const alpha = photo.rgba[source + 3] ?? 255
+      if (respectAlpha && alpha < 8) continue
       const index = (y * width + x) * 3
-      rgb[index] = photo.rgba[source] ?? 0
-      rgb[index + 1] = photo.rgba[source + 1] ?? 0
-      rgb[index + 2] = photo.rgba[source + 2] ?? 0
+      const blend = respectAlpha ? alpha / 255 : 1
+      rgb[index] = Math.round((photo.rgba[source] ?? 0) * blend + (rgb[index] ?? 0) * (1 - blend))
+      rgb[index + 1] = Math.round((photo.rgba[source + 1] ?? 0) * blend + (rgb[index + 1] ?? 0) * (1 - blend))
+      rgb[index + 2] = Math.round((photo.rgba[source + 2] ?? 0) * blend + (rgb[index + 2] ?? 0) * (1 - blend))
     }
   }
   void trim
