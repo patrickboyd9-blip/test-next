@@ -1,4 +1,5 @@
 import { buildCampaignLookBlock } from "./campaign-look"
+import { roofSlotForTemplate, ROOF_SLOT_BRIEFS, ROOF_SLOT_NEGATIVE_SPACE } from "./roof-photo-slots"
 import {
   buildPhotographyArtDirection,
   type ImageBriefArtDirection,
@@ -51,6 +52,8 @@ export interface ImageBriefContext {
   campaign?: CampaignBrief
   /** Stable per direction so three directions do not share one scene. */
   variationKey?: string
+  /** Before/after compositions ask for a second, different photograph. */
+  photoSlot?: "primary" | "before" | "after"
 }
 
 export interface ImageBrief {
@@ -137,6 +140,23 @@ export function toImageBrief(
 
   if (spec.tone?.trim()) {
     brief.tone = spec.tone
+  }
+
+  const roofSlot = roofSlotForTemplate(spec.layoutHints?.templateId, context.photoSlot)
+  if (roofSlot) {
+    const slot = ROOF_SLOT_BRIEFS[roofSlot]
+    brief.artDirection = {
+      ...brief.artDirection,
+      subject: slot.subject,
+      refuse: slot.refuseLine,
+      negativeSpace: ROOF_SLOT_NEGATIVE_SPACE,
+      craft: slot.craft,
+    }
+    brief.visualDirection = slot.subject
+    if (roofSlot === "after") brief.imageryRole = "neighborhood"
+    if (roofSlot === "before") {
+      brief.doNotInvent = brief.doNotInvent.filter((item) => item !== "invented property damage")
+    }
   }
 
   return brief

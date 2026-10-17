@@ -26,6 +26,7 @@ interface FocusViewProps {
   brief?: CampaignBrief
   studioPhotos?: StudioImageState
   generatedAsset?: GeneratedAsset | null
+  alternateGeneratedAsset?: GeneratedAsset | null
   allowLibraryFallback?: boolean
   photoNote?: string | null
   onCompare: () => void
@@ -51,6 +52,7 @@ export function FocusView({
   brief,
   studioPhotos,
   generatedAsset,
+  alternateGeneratedAsset,
   allowLibraryFallback = false,
   photoNote,
   onCompare,
@@ -88,6 +90,7 @@ export function FocusView({
             identity={identity}
             brief={brief}
             generatedAsset={generatedAsset}
+            alternateGeneratedAsset={alternateGeneratedAsset}
             allowLibraryFallback={allowLibraryFallback}
             ariaLabel={`Postcard: ${spec.headline ?? direction.name}`}
           />
@@ -128,7 +131,7 @@ export function FocusView({
           {otherDirections.map((other) => {
             const photo = studioPhotos
               ? presentStudioPhoto(studioPhotos, other.id, other.spec, brief)
-              : { generatedAsset: null, allowLibraryFallback: false, note: null }
+              : { generatedAsset: null, alternateAsset: null, allowLibraryFallback: false, note: null }
             return (
               <ConceptCard
                 key={other.id}
@@ -138,6 +141,7 @@ export function FocusView({
                 identity={identity}
                 brief={brief}
                 generatedAsset={photo.generatedAsset}
+                alternateGeneratedAsset={photo.alternateAsset}
                 allowLibraryFallback={photo.allowLibraryFallback}
                 onSelect={() => onSwitch(other.id)}
               />

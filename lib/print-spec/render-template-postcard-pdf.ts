@@ -124,7 +124,7 @@ function drawFront(
     drawShape(page, spec, plan, shape)
   }
   plan.photos.forEach((slot, index) => {
-    const image = index === 0 ? images.primary : images.alternate ?? images.primary
+    const image = index === 0 ? images.primary : images.alternate
     drawPhoto(page, spec, plan, slot, image, plan.palette.field)
   })
   for (const shape of plan.shapes.filter((item) => item.role !== "paper" && item.role !== "field")) {
@@ -270,6 +270,12 @@ function drawShape(page: PDFPage, spec: PostcardGeometry, plan: PostcardFacePlan
     })
     return
   }
+  if (shape.role === "chip") {
+    page.drawSvgPath(pillPath(pdf.xPoints, pdf.yPoints, pdf.widthPoints, pdf.heightPoints), {
+      color: paint(shape.fill),
+    })
+    return
+  }
   if (shape.role === "coupon") {
     page.drawRectangle({
       x: pdf.xPoints,
@@ -301,7 +307,10 @@ function drawFitted(page: PDFPage, spec: PostcardGeometry, line: FittedText, dis
   if (widest > pdf.widthPoints) size = fitWidth(line.lines.join(" "), font, size, pdf.widthPoints)
   const leading = size * (line.font === "display" ? 1.02 : 1.18)
   const block = line.lines.length * leading
-  const spare = line.role === "offer" ? Math.max(0, pdf.heightPoints - block) / 2 : 0
+  const spare =
+    line.role === "offer" || line.role === "label" || line.role === "contact"
+      ? Math.max(0, pdf.heightPoints - block) / 2
+      : 0
   let cursor = pdf.yPoints + pdf.heightPoints - spare - size
   for (const row of line.lines) {
     if (cursor < pdf.yPoints - 1) break
@@ -337,7 +346,7 @@ function drawFrontLockup(
   if (lockup.website) drawFitted(page, spec, lockup.website, display, text)
   if (!payload) return
   const pdf = canvasRectToPdf(canvasRect(lockup.qrRect), spec.artworkCanvasInches.heightInches)
-  const labelSize = 8
+  const labelSize = lockup.qrLabelPt
   const size = Math.min(lockup.qrInches * 72, Math.max(12, pdf.heightPoints - labelSize - 2))
   const qrY = pdf.yPoints + pdf.heightPoints - size
   drawQr(page, payload, pdf.xPoints, qrY, size)
@@ -361,14 +370,10 @@ function drawFrontLockup(
 function drawTrust(page: PDFPage, spec: PostcardGeometry, plan: PostcardFacePlan, font: PDFFont) {
   for (const chip of plan.trust) {
     const pdf = canvasRectToPdf(canvasRect(chip.rect), spec.artworkCanvasInches.heightInches)
-    page.drawRectangle({
-      x: pdf.xPoints,
-      y: pdf.yPoints,
-      width: pdf.widthPoints,
-      height: pdf.heightPoints,
+    page.drawSvgPath(pillPath(pdf.xPoints, pdf.yPoints, pdf.widthPoints, pdf.heightPoints), {
       color: paint(chip.fill),
     })
-    const size = 8
+    const size = chip.fontPt
     const width = font.widthOfTextAtSize(chip.label, size)
     page.drawText(chip.label, {
       x: pdf.xPoints + Math.max(2, (pdf.widthPoints - width) / 2),
@@ -491,6 +496,23 @@ function expandBleed(rect: InchRect, size: PostcardSizeId, bleed: number): InchR
   if (x + w >= trim.w - 0.02) w += bleed
   if (y + h >= trim.h - 0.02) h += bleed
   return { x, y, w, h }
+}
+
+function pillPath(x: number, y: number, w: number, h: number): string {
+  const r = Math.min(h / 2, w / 2)
+  const k = r * 0.5522847498
+  return [
+    `M ${(x + r).toFixed(2)} ${y.toFixed(2)}`,
+    `L ${(x + w - r).toFixed(2)} ${y.toFixed(2)}`,
+    `C ${(x + w - r + k).toFixed(2)} ${y.toFixed(2)} ${x + w} ${(y + r - k).toFixed(2)} ${x + w} ${(y + r).toFixed(2)}`,
+    `L ${x + w} ${(y + h - r).toFixed(2)}`,
+    `C ${x + w} ${(y + h - r + k).toFixed(2)} ${(x + w - r + k).toFixed(2)} ${y + h} ${(x + w - r).toFixed(2)} ${y + h}`,
+    `L ${(x + r).toFixed(2)} ${y + h}`,
+    `C ${(x + r - k).toFixed(2)} ${y + h} ${x} ${(y + h - r + k).toFixed(2)} ${x} ${(y + h - r).toFixed(2)}`,
+    `L ${x} ${(y + r).toFixed(2)}`,
+    `C ${x} ${(y + r - k).toFixed(2)} ${(x + r - k).toFixed(2)} ${y.toFixed(2)} ${(x + r).toFixed(2)} ${y.toFixed(2)}`,
+    "Z",
+  ].join(" ")
 }
 
 function starPath(x: number, y: number, w: number, h: number): string {

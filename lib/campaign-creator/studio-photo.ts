@@ -25,6 +25,8 @@ export interface StudioImageState {
 
 export interface StudioPhotoPresentation {
   generatedAsset: GeneratedAsset | null
+  /** Second photograph for a before/after composition. Null on every other card. */
+  alternateAsset: GeneratedAsset | null
   allowLibraryFallback: boolean
   note: string | null
 }
@@ -41,8 +43,12 @@ export function presentStudioPhoto(
     spec,
     campaign
   )
+  const alternateAsset =
+    spec.layoutHints?.templateId === "before_after"
+      ? lookupStudioImage(state.records, directionId, spec, campaign, "after")
+      : null
   if (generatedAsset) {
-    return { generatedAsset, allowLibraryFallback: false, note: null }
+    return { generatedAsset, alternateAsset, allowLibraryFallback: false, note: null }
   }
 
   const fingerprint = fingerprintForSpec(
@@ -50,18 +56,19 @@ export function presentStudioPhoto(
     imageBriefContextFor(directionId, campaign)
   )
   if (!fingerprint) {
-    return { generatedAsset: null, allowLibraryFallback: false, note: null }
+    return { generatedAsset: null, alternateAsset, allowLibraryFallback: false, note: null }
   }
 
   const miss = state.misses.find(
     (item) => item.directionId === directionId && item.fingerprint === fingerprint
   )
   if (miss?.fallback === "withheld") {
-    return { generatedAsset: null, allowLibraryFallback: true, note: null }
+    return { generatedAsset: null, alternateAsset, allowLibraryFallback: true, note: null }
   }
   if (miss) {
     return {
       generatedAsset: null,
+      alternateAsset,
       allowLibraryFallback: true,
       note: STUDIO_PHOTO_NOTE[miss.fallback],
     }
@@ -70,6 +77,7 @@ export function presentStudioPhoto(
   if (state.requestFailed) {
     return {
       generatedAsset: null,
+      alternateAsset,
       allowLibraryFallback: true,
       note: STUDIO_PHOTO_NOTE.failed,
     }
@@ -78,10 +86,11 @@ export function presentStudioPhoto(
   if (state.phase === "loading") {
     return {
       generatedAsset: null,
+      alternateAsset,
       allowLibraryFallback: false,
       note: STUDIO_PHOTO_NOTE.making,
     }
   }
 
-  return { generatedAsset: null, allowLibraryFallback: false, note: null }
+  return { generatedAsset: null, alternateAsset, allowLibraryFallback: false, note: null }
 }

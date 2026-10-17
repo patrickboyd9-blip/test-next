@@ -100,7 +100,7 @@ export function selectReferenceCards(
   const groups = new Set(nonCraftExact.map((card) => card.packGroup))
 
   const selected: ReferenceCard[] = []
-  for (const card of nonCraftExact) {
+  for (const card of diverseQueue(nonCraftExact)) {
     if (selected.length >= REFERENCE_CARD_VERTICAL_SLOTS) break
     selected.push(card)
   }
@@ -220,6 +220,27 @@ function takeCraft(
     chosen.push(card)
   }
   return chosen
+}
+
+/**
+ * When a vertical has several pattern notes, take one of each pattern
+ * before repeating a pattern or falling back to an untagged card.
+ * A vertical with no pattern tags keeps pack order.
+ */
+function diverseQueue(cards: readonly ReferenceCard[]): ReferenceCard[] {
+  if (!cards.some((card) => (card.patterns?.length ?? 0) > 0)) return [...cards]
+  const picked: ReferenceCard[] = []
+  const seen = new Set<string>()
+  for (const card of cards) {
+    const tag = card.patterns?.[0]
+    if (!tag || seen.has(tag)) continue
+    seen.add(tag)
+    picked.push(card)
+  }
+  for (const card of cards) {
+    if (!picked.some((item) => item.mmrId === card.mmrId)) picked.push(card)
+  }
+  return picked
 }
 
 function briefSearchText(brief: CampaignBrief): string {

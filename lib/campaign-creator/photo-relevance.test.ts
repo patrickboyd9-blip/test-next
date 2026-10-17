@@ -98,6 +98,53 @@ test("the vision check asks for MATCH or MISMATCH and fails open on a bad respon
   assert.equal(closed, null)
 })
 
+test("roofing before and after slots reject the wrong subject", () => {
+  const before = photoExpectationForBrief(roofing, "before")
+  const after = photoExpectationForBrief(roofing, "after")
+  assert.equal(
+    matchPhotoTags(
+      { describedSubject: "an interior ceiling stain with a bucket underneath" },
+      before
+    ),
+    "mismatch"
+  )
+  assert.equal(
+    matchPhotoTags(
+      { describedSubject: "empty sky with no roof in the frame" },
+      after
+    ),
+    "mismatch"
+  )
+  assert.equal(
+    matchPhotoTags(
+      { describedSubject: "a finished roof on a house, clean and intact" },
+      before
+    ),
+    "mismatch"
+  )
+  assert.equal(
+    matchPhotoTags(
+      { describedSubject: "missing shingles and curled shingles on an exterior roof with exposed underlayment" },
+      before
+    ),
+    "match"
+  )
+  assert.equal(
+    matchPhotoTags(
+      { describedSubject: "a house with a finished roof and an intact ridge" },
+      after
+    ),
+    "match"
+  )
+  assert.equal(
+    matchPhotoTags(
+      { describedSubject: "missing shingles on a damaged roof" },
+      after
+    ),
+    "mismatch"
+  )
+})
+
 test("final expense refuses a casket description", () => {
   const expectation = photoExpectationForBrief({ goal: "Final expense insurance" })
   assert.equal(

@@ -25,6 +25,7 @@ interface RefinementViewProps {
   activeSpec: CreativeSpec
   identity?: PostcardIdentity
   generatedAsset?: GeneratedAsset | null
+  alternateGeneratedAsset?: GeneratedAsset | null
   allowLibraryFallback?: boolean
   photoNote?: string | null
   onCompare: () => void
@@ -47,6 +48,7 @@ export function RefinementView({
   activeSpec,
   identity,
   generatedAsset,
+  alternateGeneratedAsset,
   allowLibraryFallback = false,
   photoNote,
   onCompare,
@@ -212,6 +214,7 @@ export function RefinementView({
               identity={identity}
               brief={campaign.brief}
               generatedAsset={generatedAsset}
+              alternateGeneratedAsset={alternateGeneratedAsset}
               allowLibraryFallback={allowLibraryFallback}
               highlightRegions={highlightRegions}
               isShimmering={isShimmering}

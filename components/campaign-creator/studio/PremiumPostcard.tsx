@@ -65,9 +65,8 @@ export function PremiumPostcardFront({
           key={slot.id}
           rect={slot.rect}
           size={plan.size}
-          src={photos[index] ?? (index === 0 ? photoSrc : null)}
+          src={photos[index] ?? null}
           alt={spec.visualDirection?.trim() || "Campaign photograph"}
-          wash={plan.palette.field}
           paper={plan.palette.paper}
         />
       ))}
@@ -203,6 +202,15 @@ function Shape({ plan, shape }: { plan: PostcardFacePlan; shape: ShapePlan }) {
   if (shape.role === "rule") {
     return <div className="absolute" style={{ ...style, backgroundColor: plan.palette.accent }} />
   }
+  if (shape.role === "chip") {
+    return (
+      <div
+        data-region="chip"
+        className="absolute rounded-full"
+        style={{ ...style, backgroundColor: shape.fill }}
+      />
+    )
+  }
   return <div className="absolute" style={{ ...style, backgroundColor: shape.fill }} />
 }
 
@@ -211,14 +219,12 @@ function PhotoSlot({
   size,
   src,
   alt,
-  wash,
   paper,
 }: {
   rect: InchRect
   size: PostcardFacePlan["size"]
   src: string | null
   alt: string
-  wash: string
   paper: string
 }) {
   return (
@@ -226,10 +232,7 @@ function PhotoSlot({
       {src ? (
         <img src={src} alt={alt} className="h-full w-full object-cover" draggable={false} />
       ) : (
-        <div
-          className="h-full w-full"
-          style={{ background: `linear-gradient(160deg, ${wash} 0%, ${paper} 78%)` }}
-        />
+        <div className="h-full w-full" style={{ backgroundColor: paper }} />
       )}
     </div>
   )
@@ -251,7 +254,7 @@ function Fitted({ plan, text }: { plan: PostcardFacePlan; text: PostcardFacePlan
         lineHeight: lineHeightFor(text.font),
         letterSpacing: text.font === "display" ? "-0.03em" : "0",
         textAlign: text.align,
-        display: text.role === "offer" ? "flex" : "block",
+        display: text.role === "offer" || text.role === "label" ? "flex" : "block",
         flexDirection: "column",
         justifyContent: "center",
       }}
@@ -279,12 +282,12 @@ function Lockup({ plan, payload }: { plan: PostcardFacePlan; payload: string | n
       ) : null}
       {payload ? (
         <div className="absolute" style={box(lockup.qrRect, plan.size)}>
-          <QrMark payload={payload} label={lockup.qrLabel} />
+          <QrMark payload={payload} label={lockup.qrLabel} labelPt={lockup.qrLabelPt} size={plan.size} />
         </div>
       ) : null}
       {lockup.phone?.text ? (
         <p
-          className="absolute m-0 overflow-hidden font-semibold leading-none"
+          className="absolute m-0 flex items-center overflow-hidden font-semibold leading-none"
           data-contact-phone={lockup.phone.text}
           style={{
             ...box(lockup.phone.rect, plan.size),
@@ -322,13 +325,13 @@ function TrustChips({ plan }: { plan: PostcardFacePlan }) {
         <div
           key={chip.id}
           data-trust-chip={chip.label}
-          className="absolute flex items-center justify-center overflow-hidden font-semibold"
+          className="absolute flex items-center justify-center overflow-hidden rounded-full font-semibold"
           style={{
             ...box(chip.rect, plan.size),
             backgroundColor: chip.fill,
             color: chip.color,
             fontFamily: TEXT_CSS,
-            fontSize: pointsToCqw(8, plan.size),
+            fontSize: pointsToCqw(chip.fontPt, plan.size),
           }}
         >
           {chip.label}
@@ -338,7 +341,17 @@ function TrustChips({ plan }: { plan: PostcardFacePlan }) {
   )
 }
 
-function QrMark({ payload, label }: { payload: string; label: string }) {
+function QrMark({
+  payload,
+  label,
+  labelPt,
+  size,
+}: {
+  payload: string
+  label: string
+  labelPt: number
+  size: PostcardFacePlan["size"]
+}) {
   const painted = useMemo(() => paintQr(payload), [payload])
   if (!painted) return null
   const total = painted.modules + painted.quiet * 2
@@ -353,7 +366,7 @@ function QrMark({ payload, label }: { payload: string; label: string }) {
         </svg>
       </div>
       {label ? (
-        <p data-qr-label={label} className="m-0 shrink-0 bg-white text-center font-semibold leading-none" style={{ color: "#14120f", fontSize: "8px" }}>
+        <p data-qr-label={label} className="m-0 shrink-0 bg-white text-center font-semibold leading-none" style={{ color: "#14120f", fontSize: pointsToCqw(labelPt, size) }}>
           {label}
         </p>
       ) : null}

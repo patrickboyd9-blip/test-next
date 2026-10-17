@@ -1,5 +1,6 @@
 import type { CampaignBrief } from "./types"
 import { isFinalExpenseBrief, isMedicareAgentBrief } from "./medicare-compliance"
+import { ROOF_SLOT_BRIEFS, type RoofPhotoSlot } from "./roof-photo-slots"
 import { referenceVerticalsForBrief } from "../reference-corpus/select-reference-cards"
 
 /**
@@ -13,6 +14,8 @@ export interface PhotoExpectation {
   audience: string
   accept: readonly string[]
   refuse: readonly string[]
+  /** When set, this slot's subject wins over a generic industry match. */
+  slot?: RoofPhotoSlot
 }
 
 export interface PhotoCandidate {
@@ -37,7 +40,10 @@ const SIGNATURES: Record<string, RegExp> = {
   life_insurance: /\b(famil(?:y|ies)|generations?)\b/i,
 }
 
-export function photoExpectationForBrief(brief: CampaignBrief | undefined): PhotoExpectation {
+export function photoExpectationForBrief(
+  brief: CampaignBrief | undefined,
+  slot?: "primary" | RoofPhotoSlot
+): PhotoExpectation {
   if (isFinalExpenseBrief(brief)) {
     return {
       industry: "final_expense",
@@ -70,12 +76,17 @@ export function photoExpectationForBrief(brief: CampaignBrief | undefined): Phot
   }
 
   const industry = referenceVerticalsForBrief(brief ?? {}).find((vertical) => vertical) ?? "local-service"
-  return {
+  const base: PhotoExpectation = {
     industry,
     audience: "local",
     accept: acceptFor(industry),
     refuse: industry === "restaurant" ? ["construction", "hard hat"] : ["casket", "capitol"],
   }
+  if ((slot === "before" || slot === "after") && industry === "roofing") {
+    const roof = ROOF_SLOT_BRIEFS[slot]
+    return { ...base, slot, accept: roof.accept, refuse: roof.refuse }
+  }
+  return base
 }
 
 /**
@@ -90,6 +101,10 @@ export function matchPhotoTags(
   if (!blob.trim()) return "unknown"
 
   if (expectation.refuse.some((term) => includesTerm(blob, term))) return "mismatch"
+
+  if (expectation.slot) {
+    return expectation.accept.some((term) => includesTerm(blob, term)) ? "match" : "mismatch"
+  }
 
   const expectedSignature = SIGNATURES[expectation.industry]
   if (expectedSignature?.test(blob)) return "match"
@@ -185,8 +200,12 @@ export async function openAIVisionPhotoCheck(input: {
               type: "text",
               text: [
                 "Does this photograph match the campaign?",
+                input.expectation.slot
+                  ? `This is the ${input.expectation.slot} photograph.`
+                  : "This is the campaign photograph.",
                 `Industry: ${input.expectation.industry}.`,
                 `Audience: ${input.expectation.audience}.`,
+                `It must show: ${input.expectation.accept.join(", ") || "the industry"}.`,
                 `It must not show: ${input.expectation.refuse.join(", ")}.`,
                 "Answer with one word, MATCH or MISMATCH.",
               ].join(" "),

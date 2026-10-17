@@ -41,6 +41,7 @@ export interface StudioPhotoCheckInput {
   src: string
   describedSubject: string
   campaign?: CampaignBrief
+  slot?: "primary" | "before" | "after"
 }
 
 export type StudioPhotoCheck = (input: StudioPhotoCheckInput) => Promise<boolean>
@@ -76,6 +77,7 @@ interface WorkItem {
   directionId: string
   spec: CreativeSpec
   tier: StudioImageTier
+  photoSlot?: "primary" | "before" | "after"
 }
 
 interface PreparedSlot {
@@ -172,7 +174,11 @@ async function readStudioImageSlots(input: {
 
   for (const item of workItems(input.creative, input.campaignBrief)) {
     if (!isSafeStudioId(item.directionId)) continue
-    const context = imageBriefContextFor(item.directionId, input.campaignBrief)
+    const context = imageBriefContextFor(
+      item.directionId,
+      input.campaignBrief,
+      item.photoSlot ?? (item.spec.layoutHints?.templateId === "before_after" ? "before" : "primary")
+    )
     const brief = toImageBrief(item.spec, context)
     if (!brief) continue
     const fingerprint = imageBriefFingerprint(brief)
@@ -232,16 +238,26 @@ function workItems(
   creative: CampaignCreative,
   brief: CampaignBrief | undefined
 ): WorkItem[] {
-  const previews: WorkItem[] = studioImageEntries(creative, brief).map((entry) => ({
-    directionId: entry.directionId,
-    spec: entry.spec,
-    tier: "preview",
-  }))
+  const previews: WorkItem[] = studioImageEntries(creative, brief).flatMap((entry) =>
+    expandPhotoSlots({
+      directionId: entry.directionId,
+      spec: entry.spec,
+      tier: "preview",
+    })
+  )
   const selected = creative.selectedDirectionId
   if (!selected) return previews
   const spec = getApprovedSpec(creative) ?? getActiveSpec(creative, selected)
   if (!spec) return previews
-  return [...previews, { directionId: selected, spec, tier: "final" }]
+  return [...previews, ...expandPhotoSlots({ directionId: selected, spec, tier: "final" })]
+}
+
+function expandPhotoSlots(item: WorkItem): WorkItem[] {
+  if (item.spec.layoutHints?.templateId !== "before_after") return [item]
+  return [
+    { ...item, photoSlot: "before" },
+    { ...item, photoSlot: "after" },
+  ]
 }
 
 function phaseFor(
@@ -328,7 +344,7 @@ async function executeStudioImageJob(input: {
   try {
     const brief = toImageBrief(
       slot.item.spec,
-      imageBriefContextFor(slot.item.directionId, input.campaignBrief)
+      imageBriefContextFor(slot.item.directionId, input.campaignBrief, slot.item.photoSlot)
     )
     if (!brief) {
       await input.store.writeSidecar(input.campaignId, slot.fileBase, {
@@ -346,7 +362,7 @@ async function executeStudioImageJob(input: {
         ? {
             ...brief,
             correction:
-              "The previous photograph did not match this campaign's industry or audience. Replace it with a matching photograph. Do not repeat the mismatched subject.",
+              "The previous photograph did not match this slot. Replace it with the requested subject. Do not repeat an interior ceiling, empty sky, or the other state of the roof.",
           }
         : brief
     const generated = await generateImage(adapter, promptBrief, {
@@ -362,6 +378,7 @@ async function executeStudioImageJob(input: {
         src: candidate.src,
         describedSubject: promptBrief.artDirection.subject,
         campaign: input.campaignBrief,
+        slot: slot.item.photoSlot,
       })
       if (matches) matched.push(candidate)
     }
@@ -429,7 +446,7 @@ async function executeStudioImageJob(input: {
 }
 
 async function defaultPhotoCheck(input: StudioPhotoCheckInput): Promise<boolean> {
-  const expectation = photoExpectationForBrief(input.campaign)
+  const expectation = photoExpectationForBrief(input.campaign, input.slot)
   const apiKey = process.env.OPENAI_API_KEY?.trim()
   return photoMatchesCampaign(
     { src: input.src, describedSubject: input.describedSubject },

@@ -56,7 +56,7 @@ export function CompareView({
         {directions.map((direction, index) => {
           const photo = studioPhotos
             ? presentStudioPhoto(studioPhotos, direction.id, direction.spec, brief)
-            : { generatedAsset: null, allowLibraryFallback: false, note: null }
+            : { generatedAsset: null, alternateAsset: null, allowLibraryFallback: false, note: null }
           return (
             <motion.div
               key={direction.id}
@@ -70,6 +70,7 @@ export function CompareView({
                 identity={identity}
                 brief={brief}
                 generatedAsset={photo.generatedAsset}
+                alternateGeneratedAsset={photo.alternateAsset}
                 allowLibraryFallback={photo.allowLibraryFallback}
                 photoNote={photo.note}
                 onSelect={() => onSelect(direction.id)}

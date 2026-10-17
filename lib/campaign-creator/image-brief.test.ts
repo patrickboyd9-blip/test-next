@@ -119,6 +119,29 @@ test("returned brief keeps conceived visualDirection unchanged", () => {
   assert.equal(brief.visualDirection, visualDirection)
 })
 
+test("a before/after card asks for two different exterior roofs", () => {
+  const shared = spec({
+    layoutVariant: "peer_split",
+    imageryRole: "consequence",
+    leadJob: "problem",
+    visualDirection: "A drip from a ceiling into a bucket.",
+    layoutHints: { templateId: "before_after" },
+  })
+  const before = toImageBrief(shared, { photoSlot: "before", campaign: { goal: "Book roof inspections" } })
+  const after = toImageBrief(shared, { photoSlot: "after", campaign: { goal: "Book roof inspections" } })
+  assert.ok(before)
+  assert.ok(after)
+  assert.match(before.artDirection.subject, /missing shingles/)
+  assert.match(before.artDirection.subject, /exterior roof/)
+  assert.doesNotMatch(before.artDirection.subject, /ceiling/)
+  assert.equal(before.doNotInvent.includes("invented property damage"), false)
+  assert.match(after.artDirection.subject, /finished roof/)
+  assert.match(after.artDirection.subject, /intact ridge/)
+  assert.doesNotMatch(after.artDirection.subject, /missing shingles/)
+  assert.equal(after.imageryRole, "neighborhood")
+  assert.notEqual(before.artDirection.subject, after.artDirection.subject)
+})
+
 test("returned brief has no provider, model, prompt, layout, crop, or position fields", () => {
   const brief = toImageBrief(spec())
   assert.ok(brief)
