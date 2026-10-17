@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 
 import { Button } from "@/components/ui/button"
-import { getActiveVersion } from "@/lib/campaign-creator/creative-state"
+import { getActiveVersion, getDirectionRevisions } from "@/lib/campaign-creator/creative-state"
 import { STUDIO_REFINEMENT } from "@/lib/campaign-creator/studio-config"
 import { REFINEMENT_SLOW_NETWORK_LINE } from "@/lib/campaign-creator/studio-copy"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
@@ -71,6 +71,8 @@ export function RefinementView({
   const slowTimerRef = useRef<number | null>(null)
 
   const version = getActiveVersion(campaign.creative, direction.id)
+  const history = getDirectionRevisions(campaign.creative, direction.id).filter((revision) => revision.version !== null)
+  const previous = history[1]
 
   const clearHighlight = useCallback(() => {
     window.setTimeout(() => setHighlightRegions([]), reducedMotion ? 1000 : 1500)
@@ -186,7 +188,19 @@ export function RefinementView({
     <div className="flex flex-col gap-6 pb-24 md:pb-20">
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-lg font-semibold">Refining: {direction.name}</h2>
-        <span className="rounded bg-muted px-2 py-0.5 text-xs font-medium">v{version} current</span>
+        <div className="flex items-center gap-3">
+          {previous ? (
+            <Button
+              variant="outline"
+              className="h-8 px-3 text-xs"
+              disabled={isRestoring}
+              onClick={() => void handleRestore(previous.id)}
+            >
+              Undo
+            </Button>
+          ) : null}
+          <span className="rounded bg-muted px-2 py-0.5 text-xs font-medium">v{version} current</span>
+        </div>
       </div>
 
       {campaign.entry === "template" && (
@@ -206,20 +220,57 @@ export function RefinementView({
           className="grid gap-6 md:grid-cols-[1fr_280px]"
         >
           <div className="flex flex-col items-center gap-2">
-            <PostcardPreview
-              canvas={canvas}
-              spec={activeSpec}
-              side={side}
-              size="hero"
-              identity={identity}
-              brief={campaign.brief}
-              generatedAsset={generatedAsset}
-              alternateGeneratedAsset={alternateGeneratedAsset}
-              allowLibraryFallback={allowLibraryFallback}
-              highlightRegions={highlightRegions}
-              isShimmering={isShimmering}
-              ariaLabel={`Postcard front: ${activeSpec.headline ?? direction.name}`}
-            />
+            {previous ? (
+              <div className="grid w-full gap-4 sm:grid-cols-2">
+                <div className="flex flex-col items-center gap-2">
+                  <p className="text-xs font-medium text-muted-foreground">Before</p>
+                  <PostcardPreview
+                    canvas={canvas}
+                    spec={previous.spec}
+                    side={side}
+                    size="medium"
+                    identity={identity}
+                    brief={campaign.brief}
+                    generatedAsset={generatedAsset}
+                    alternateGeneratedAsset={alternateGeneratedAsset}
+                    allowLibraryFallback={allowLibraryFallback}
+                    ariaLabel={`Postcard before: ${previous.spec.headline ?? direction.name}`}
+                  />
+                </div>
+                <div className="flex flex-col items-center gap-2">
+                  <p className="text-xs font-medium text-muted-foreground">After</p>
+                  <PostcardPreview
+                    canvas={canvas}
+                    spec={activeSpec}
+                    side={side}
+                    size="medium"
+                    identity={identity}
+                    brief={campaign.brief}
+                    generatedAsset={generatedAsset}
+                    alternateGeneratedAsset={alternateGeneratedAsset}
+                    allowLibraryFallback={allowLibraryFallback}
+                    highlightRegions={highlightRegions}
+                    isShimmering={isShimmering}
+                    ariaLabel={`Postcard after: ${activeSpec.headline ?? direction.name}`}
+                  />
+                </div>
+              </div>
+            ) : (
+              <PostcardPreview
+                canvas={canvas}
+                spec={activeSpec}
+                side={side}
+                size="hero"
+                identity={identity}
+                brief={campaign.brief}
+                generatedAsset={generatedAsset}
+                alternateGeneratedAsset={alternateGeneratedAsset}
+                allowLibraryFallback={allowLibraryFallback}
+                highlightRegions={highlightRegions}
+                isShimmering={isShimmering}
+                ariaLabel={`Postcard front: ${activeSpec.headline ?? direction.name}`}
+              />
+            )}
             <StudioPhotoNote note={photoNote} />
             <PostcardSideToggle side={side} onSideChange={setSide} />
           </div>

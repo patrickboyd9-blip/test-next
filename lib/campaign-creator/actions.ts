@@ -35,6 +35,7 @@ import type {
 import { getMailPiece } from "@/lib/mail-catalog/catalog"
 import { generateCampaignStrategy } from "@/lib/campaign-strategy/strategy-generator"
 import { listCampaignVotes, saveConceptVote } from "@/lib/design-intelligence/concept-feedback"
+import { reviseFromNote } from "@/lib/design-intelligence/refine-note"
 
 const repository = getCampaignRepository()
 
@@ -303,6 +304,39 @@ export async function applyRefinement(
   if (!currentSpec) throw new Error("No active spec")
 
   const canvas = requireCreativeCanvas(campaign.mailPieceSpec, campaignId)
+  const design = reviseFromNote(currentSpec, trimmed)
+  if (design.handled) {
+    let applied = design.ok
+    let spec = design.spec
+    let explanation = design.explanation
+    if (applied) {
+      const { reviewRefinementNote } = await import("@/lib/design-intelligence/vision-critic")
+      const review = await reviewRefinementNote({
+        before: currentSpec,
+        after: design.spec,
+        note: trimmed,
+        businessName: campaign.brief.businessInfo?.name,
+      })
+      if (review && (!review.addressed || review.regression.trim())) {
+        applied = false
+        spec = currentSpec
+        explanation = review.regression.trim() || "The note was not visible on the card, so it was not applied."
+      }
+    }
+    const now = new Date().toISOString()
+    const revision: CreativeRevision = {
+      id: randomUUID(),
+      directionId,
+      version: applied ? getNextVersion(campaign.creative, directionId) : null,
+      spec,
+      customerPrompt: trimmed,
+      studioResponse: explanation,
+      type: applied ? "refinement" : "conflict",
+      specDiff: buildSpecDiff(currentSpec, spec),
+      createdAt: now,
+    }
+    return forCustomer(await repository.appendRevision(campaignId, revision, applied ? spec : currentSpec))
+  }
   const engine = await getCreativeEngine()
   const result = await engine.refineDirection({
     brief: campaign.brief,

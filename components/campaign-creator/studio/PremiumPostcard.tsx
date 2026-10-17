@@ -185,6 +185,16 @@ function Shape({ plan, shape }: { plan: PostcardFacePlan; shape: ShapePlan }) {
       />
     )
   }
+  if (shape.role === "local-scrim") {
+    const fromRight = shape.rect.x > trimInches(plan.size).w * 0.45
+    return (
+      <div
+        data-region="local-scrim"
+        className="pointer-events-none absolute"
+        style={{ ...style, background: localScrimGradient(shape.fill, fromRight) }}
+      />
+    )
+  }
   if (shape.role === "starburst") {
     return (
       <svg viewBox="0 0 100 100" className="absolute" style={style} aria-hidden>
@@ -280,6 +290,9 @@ function Fitted({ plan, text }: { plan: PostcardFacePlan; text: PostcardFacePlan
         lineHeight: text.role === "offer" ? 0.8 : lineHeightFor(text.font),
         letterSpacing: text.font === "display" ? "-0.03em" : "0",
         textAlign: text.align,
+        textShadow: plan.shapes.some((shape) => shape.role === "local-scrim")
+          ? "0 1px 1px rgba(20, 18, 15, 0.35)"
+          : undefined,
         display: text.role === "offer" || text.role === "label" ? "flex" : "block",
         flexDirection: "column",
         justifyContent: "center",
@@ -418,6 +431,14 @@ function pointsToCqw(points: number, size: PostcardFacePlan["size"]): string {
 
 function scrimGradient(color: string): string {
   return `linear-gradient(to bottom, ${withAlpha(color, 0)} 0%, ${withAlpha(color, 0.5)} 30%, ${withAlpha(color, 0.9)} 68%, ${withAlpha(color, 0.94)} 100%)`
+}
+
+function localScrimGradient(color: string, fromRight: boolean): string {
+  const solid = withAlpha(color, 0.4)
+  const clear = withAlpha(color, 0)
+  return fromRight
+    ? `linear-gradient(to left, ${solid} 0%, ${solid} 62%, ${clear} 100%)`
+    : `linear-gradient(to right, ${solid} 0%, ${solid} 62%, ${clear} 100%)`
 }
 
 function withAlpha(hex: string, alpha: number): string {

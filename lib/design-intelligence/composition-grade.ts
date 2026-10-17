@@ -310,5 +310,7 @@ export const VISION_GRADE_ANCHOR = [
   "A panel-style card is not an A. Do not reward it for being tidy.",
   "Repeating the offer in the headline and the lockup is at most a B-. A free offer is the word FREE, never a $0 figure, and the headline then has to say something else.",
   "A code that floats away from the phone and the URL, or a band of the card left empty between the type, is at most a B-.",
-  "Contrast below 4.5:1 or type that overflows is a hard fail regardless of the composition.",
+  "Calibrate against the top of the library: PM-047, PM-054, and PM-022, and the highest-graded vision-taste readings. Name the single biggest weakness.",
+  "Type on a photograph sits on a calm patch of sky or wall. It does not sit on a face, a person, or a ladder. Small type under 14pt needs 7:1. A stock portrait, or a cluttered background behind the type, is a weakness.",
+  "Contrast below 4.5:1, or below 7:1 for type under 14pt, or type that overflows, is a hard fail regardless of the composition.",
 ].join(" ")

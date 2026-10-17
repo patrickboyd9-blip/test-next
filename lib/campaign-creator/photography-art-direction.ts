@@ -357,7 +357,7 @@ export function negativeSpaceForLayout(
     return "Keep the frame quiet and secondary, with no faces or tools crowding the edges. Type leads the card, so this stays a small witness rather than a hero picture."
   }
   if (layout === "image_grounded" || occupancy === "field") {
-    return "Leave the upper-left third of the frame calm and low-detail, empty of faces, hands, and tools. The headline will sit there."
+    return "Leave the upper-left third of the frame, or the right third when the work needs the left, as calm sky, siding, or an empty wall. Keep faces, hands, ladders, and tools out of that calm third. A real lived-in house, shot slightly off-axis in ordinary daylight, not a centered stock portrait. The type will sit in that quiet third."
   }
   if (layout === "banded_split") {
     return "Keep a calm horizontal band across the top of the frame, low-detail sky or wall, empty of faces and tools. Type will sit in that band."

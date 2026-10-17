@@ -99,7 +99,7 @@ function shotLine(brief: ImageBrief): string {
   if (trade === "final_expense") {
     return "Shot: One photograph of a living family together, well and connected. Natural skin, contemporary color. No casket, funeral, cemetery, or grief."
   }
-  return `Shot: One documentary photograph, taken mid-task. Nobody is looking at the camera. If a person is in frame, they are an ordinary adult about 30 to 55, with natural skin. ${ROLE_SHOT[brief.imageryRole]}`
+  return `Shot: One documentary photograph, taken mid-task. Nobody is looking at the camera. If a person is in frame, they are an ordinary adult about 30 to 55, with natural skin. Not a stock photograph and not a centered catalog pose. ${ROLE_SHOT[brief.imageryRole]}`
 }
 
 function cameraLine(brief: ImageBrief): string {
@@ -110,5 +110,5 @@ function cameraLine(brief: ImageBrief): string {
   if (brief.imageryRole === "crew") {
     return `Full-frame, 50mm, eye level. ${grade}`
   }
-  return `Full-frame, 35mm at f/4, eye level. ${grade}`
+  return `Full-frame, 35mm at f/4, eye level, slightly off-axis. No catalog lighting. ${grade}`
 }

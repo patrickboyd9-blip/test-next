@@ -14,7 +14,7 @@ import { buildPostcard6x9PrintSpec } from "@/lib/print-spec/postcard-6x9-print-s
 import type { CompositionMode } from "./art-director"
 import { resolveFrontCopy } from "./offer-copy"
 import { contrastRatio, inkForBackground, isLight, relativeLuminance } from "./contrast"
-import type { DesignRationale, DesignVertical, TrimSize } from "./rationale"
+import type { DesignRationale, DesignVertical, TrimSize, TypeSeat } from "./rationale"
 
 /**
  * Places the front (and the address-side proof) on a real grid from a
@@ -51,12 +51,13 @@ export function composeGridCard(input: GridComposeInput): GridCard {
   const palette = paletteFromRationale(input.rationale)
   const mode = compositionMode(input.rationale)
   if (mode === "integrated") return composeIntegrated(input, trim, pairing, palette)
-  const regions = panelLayout(mode, trim)
+  const seat = mode === "full-bleed" ? input.rationale.type_seat : undefined
+  const regions = panelLayout(mode, trim, seat)
   const paper = isLight(palette.paper) ? palette.paper : "#F4F1EA"
   const darkField = mode === "dark-offer-field"
   const onPhotograph = mode === "full-bleed"
   const panelFill = darkField ? palette.field : paper
-  const typeBackdrop = onPhotograph ? "#141414" : panelFill
+  const typeBackdrop = onPhotograph ? (seat?.ink === "dark" ? "#F4F1EA" : "#141414") : panelFill
   const ink = inkForBackground(typeBackdrop)
   const accent = input.rationale.palette.accent_hex
   const responseOnPhoto = mode === "type-led"
@@ -74,23 +75,32 @@ export function composeGridCard(input: GridComposeInput): GridCard {
   const trust = trustLine(input)
   const phone = clean(input.spec.phone) || ""
   const website = displayHost(input.spec.website || input.spec.qrDestination || "")
-  const response = placeResponse({ content: responseContent, phone, website, pairing, ink: responseInk })
+  const response = placeResponse({
+    content: responseContent,
+    phone,
+    website,
+    pairing,
+    ink: responseInk,
+    urlMin: onPhotograph ? 12 : URL_MIN_PT,
+  })
   const stackRoom = responseBand ? content.h : response.stackRoom
   const sizes = typeSizes(input.rationale, stackRoom, offerIsHero ? "offer" : "headline")
-  const offerColor = offerIsHero && contrastRatio(accent, typeBackdrop) >= 4.5 ? accent : ink
+  const offerContrastFloor = onPhotograph ? 7 : 4.5
+  const offerColor = offerIsHero && contrastRatio(accent, typeBackdrop) >= offerContrastFloor ? accent : ink
   const bodyFloor = input.rationale.format.trim === "6x9" ? 12 : 11
+  const smallFloor = onPhotograph ? 12 : bodyFloor
   const headlineFloor = bodyFloor * 2.5
   const offerFloor = offerIsHero ? headlineFloor * 1.6 : bodyFloor * 1.5
   const blocks: StackBlock[] = []
   if (offerIsHero) {
     blocks.push({ text: offerParts.numeral, role: "offer", pt: sizes.offer, floor: offerFloor, color: offerColor })
-    if (offerParts.rest) blocks.push({ text: offerParts.rest, role: "body", pt: sizes.support, floor: 11, color: ink })
+    if (offerParts.rest) blocks.push({ text: offerParts.rest, role: "body", pt: sizes.support, floor: smallFloor, color: ink })
     blocks.push({ text: headline, role: "headline", pt: sizes.headline, floor: headlineFloor, color: ink })
   } else {
     blocks.push({ text: headline, role: "headline", pt: sizes.headline, floor: headlineFloor, color: ink })
     blocks.push({ text: offerParts.numeral, role: "offer", pt: sizes.offer, floor: offerFloor, color: offerColor })
   }
-  if (trust) blocks.push({ text: trust, role: "proof", pt: Math.min(sizes.support, 13), floor: 11, color: ink })
+  if (trust) blocks.push({ text: trust, role: "proof", pt: Math.min(sizes.support, 13), floor: smallFloor, color: ink })
   const stacked = placeStack({
     blocks,
     cursor: content.y,
@@ -117,6 +127,14 @@ export function composeGridCard(input: GridComposeInput): GridCard {
   }
   if (responseBand) {
     shapes.push({ id: "response-band", role: "band", rect: responseBand, fill: responseFill })
+  }
+  if (seat?.scrim) {
+    shapes.push({
+      id: "type-scrim",
+      role: "local-scrim",
+      rect: regions.panel,
+      fill: seat.ink === "dark" ? "#F7F4EE" : "#14120F",
+    })
   }
 
   const photoArea = (regions.photo.w * regions.photo.h) / (trim.w * trim.h)
@@ -573,7 +591,34 @@ function lockupBounds(
   }
 }
 
-export function panelLayout(mode: CompositionMode, trim: { w: number; h: number }): { photo: InchRect; panel: InchRect } {
+function fullBleedColumn(trim: { w: number; h: number }, seat?: TypeSeat | null): InchRect {
+  if (!seat) {
+    return {
+      x: round2(trim.w * 0.04),
+      y: round2(trim.h * 0.08),
+      w: round2(trim.w * 0.48),
+      h: round2(trim.h * 0.78),
+    }
+  }
+  const width = round2(Math.min(trim.w * 0.5, Math.max(2.8, seat.rect.w * trim.w)))
+  const height = round2(Math.min(trim.h - SAFE_IN * 2, Math.max(3.15, seat.rect.h * trim.h)))
+  let x = round2(seat.rect.x * trim.w)
+  let y = round2(seat.rect.y * trim.h)
+  if (x + width > trim.w - SAFE_IN) x = round2(trim.w - SAFE_IN - width)
+  if (y + height > trim.h - SAFE_IN) y = round2(trim.h - SAFE_IN - height)
+  return {
+    x: round2(Math.max(SAFE_IN, x)),
+    y: round2(Math.max(SAFE_IN, y)),
+    w: width,
+    h: height,
+  }
+}
+
+export function panelLayout(
+  mode: CompositionMode,
+  trim: { w: number; h: number },
+  seat?: TypeSeat | null
+): { photo: InchRect; panel: InchRect } {
   const { w, h } = trim
   if (mode === "dark-offer-field") {
     const panelW = round2(w * 0.58)
@@ -592,7 +637,7 @@ export function panelLayout(mode: CompositionMode, trim: { w: number; h: number 
   if (mode === "full-bleed") {
     return {
       photo: { x: 0, y: 0, w, h },
-      panel: { x: round2(w * 0.04), y: round2(h * 0.08), w: round2(w * 0.48), h: round2(h * 0.78) },
+      panel: fullBleedColumn(trim, seat),
     }
   }
   if (mode === "panel") {
@@ -658,6 +703,7 @@ function placeResponse(input: {
   website: string
   pairing: FontPairingId
   ink: string
+  urlMin?: number
 }): { qrRect: InchRect; phone: FittedText; website: FittedText; stackBottom: number; stackRoom: number } {
   const websiteH = 0.26
   const gap = 0.08
@@ -683,8 +729,8 @@ function placeResponse(input: {
     role: "label",
     pairing: input.pairing,
     color: input.ink,
-    minPt: URL_MIN_PT,
-    maxPt: 12,
+    minPt: input.urlMin ?? URL_MIN_PT,
+    maxPt: Math.max(12, input.urlMin ?? URL_MIN_PT),
   })
   return {
     qrRect,

@@ -1,6 +1,9 @@
 import { randomUUID } from "crypto"
 
 import { cutoutSubjectRequested, knockOutPlainBackground } from "@/lib/design-intelligence/cutout"
+import { finishCardOnPhoto } from "@/lib/design-intelligence/improve-once"
+import { rasterFromDataUrl, readingFromDataUrl } from "@/lib/design-intelligence/photo-bytes"
+import { isDesignRationale } from "@/lib/design-intelligence/rationale"
 
 import { getActiveSpec, getApprovedSpec } from "./creative-state"
 import { toImageBrief, type ImageBrief } from "./image-brief"
@@ -384,7 +387,45 @@ async function executeStudioImageJob(input: {
       })
       if (matches) matched.push(candidate)
     }
-    const chosenAsset = matched[0]
+    let chosenAsset = matched[0]
+    if (chosenAsset) {
+      const firstReading = readingFromDataUrl(chosenAsset.src)
+      if (firstReading && (firstReading.cluttered || firstReading.stocky)) {
+        const retake = await generateImage(adapter, {
+          ...promptBrief,
+          correction: "The previous frame was cluttered behind the type, or it looked like a stock portrait. Leave one third of the frame as calm sky or a plain wall. Put the person, the face, and any ladder on the other side. Off-axis, a real lived-in house, ordinary daylight.",
+        }, {
+          tier: slot.item.tier,
+          campaignId: input.campaignId,
+          directionId: slot.item.directionId,
+        })
+        const retakeMatches = await check({
+          src: retake.asset.src,
+          describedSubject: promptBrief.artDirection.subject,
+          campaign: input.campaignBrief,
+          slot: slot.item.photoSlot,
+        })
+        const retakeReading = readingFromDataUrl(retake.asset.src)
+        if (retakeMatches && retakeReading && retakeReading.edge < firstReading.edge) {
+          chosenAsset = retake.asset
+        }
+      }
+      const raster = rasterFromDataUrl(chosenAsset.src)
+      const rationale = slot.item.spec.designRationale
+      if (raster && isDesignRationale(rationale)) {
+        const finished = finishCardOnPhoto({
+          rationale,
+          spec: slot.item.spec,
+          photo: raster,
+        })
+        if (finished.rationale.type_seat) {
+          chosenAsset = { ...chosenAsset, typeSeat: finished.rationale.type_seat }
+        }
+      } else {
+        const seated = readingFromDataUrl(chosenAsset.src)
+        if (seated) chosenAsset = { ...chosenAsset, typeSeat: seated.seat }
+      }
+    }
     if (!chosenAsset) {
       const exhausted = attempts >= MAX_ATTEMPTS
       await input.store.writeSidecar(input.campaignId, slot.fileBase, {

@@ -100,6 +100,20 @@ export interface DesignRationale {
     back_only: string[]
   }
   principles_invoked: string[]
+  /**
+   * Where type sits on a full-bleed photograph.
+   * Measured from the real photo. Absent until a photograph has been read.
+   */
+  type_seat?: TypeSeat
+}
+
+/** A calm patch of a photograph, in fractions of the frame. */
+export interface TypeSeat {
+  side: "left" | "right"
+  ink: "light" | "dark"
+  scrim: boolean
+  shadow: boolean
+  rect: { x: number; y: number; w: number; h: number }
 }
 
 const HEX = /^#[0-9A-Fa-f]{6}$/

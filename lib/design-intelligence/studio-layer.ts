@@ -6,7 +6,7 @@
 
 export function studioShapeLayer(role: string): "back" | "mid" | "front" {
   if (role === "paper" || role === "field" || role === "thumbnail") return "back"
-  if (role === "scrim" || role === "band") return "mid"
+  if (role === "scrim" || role === "local-scrim" || role === "band") return "mid"
   if (role === "type-panel") return "front"
   return "front"
 }
