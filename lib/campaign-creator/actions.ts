@@ -541,7 +541,7 @@ export async function applyCampaignBlueprint(campaignId: string, blueprintId: st
     selection,
     trim: "5x8",
   }).rationale
-  const rebuilt = rebuildFromBlueprint({
+  const rebuilt = await rebuildFromBlueprint({
     rationale: base,
     blueprint,
     spec: current,

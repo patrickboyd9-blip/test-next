@@ -115,6 +115,30 @@ export function templateFor(id: string): string {
   return rule?.template ?? BLUEPRINT_TAG_CONFIG.copyPatterns.find((item) => item.id === "direct_offer")!.template
 }
 
+/**
+ * Deadline-loss framing ("Don't lose [benefit].") only fits an offer the reader
+ * can already lose, such as enrollment or eligibility. It does not fit a free
+ * inspection, a free quote, a consultation, or a gift they never had.
+ */
+const DEADLINE_LOSS_FITS: readonly OfferType[] = ["enrollment_window", "see_if_you_qualify"]
+
+export function patternFitsOffer(pattern: CopyPattern, offerType: OfferType | undefined): boolean {
+  if (pattern !== "deadline_warning") return true
+  if (!offerType) return false
+  return DEADLINE_LOSS_FITS.includes(offerType)
+}
+
+/** Fitting patterns in confidence order, with a direct offer ready if the editor rejects the first. */
+export function patternsToTry(
+  patterns: readonly { tag: CopyPattern; confidence: number }[],
+  offerType: OfferType | undefined,
+): CopyPattern[] {
+  const ordered = [...patterns].sort((a, b) => b.confidence - a.confidence)
+  const fitting = [...new Set(ordered.filter((item) => patternFitsOffer(item.tag, offerType)).map((item) => item.tag))]
+  if (!fitting.includes("direct_offer")) fitting.push("direct_offer")
+  return fitting
+}
+
 export function matchTagRules<T extends string>(
   text: string,
   rules: readonly { id: T; match: RegExp }[],

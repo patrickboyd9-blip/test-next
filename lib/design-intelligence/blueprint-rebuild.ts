@@ -7,7 +7,8 @@ import {
   type MailerBlueprint,
   type TypeClass,
 } from "./blueprint"
-import { freshCopy } from "./blueprint-tags"
+import { editFilledCopy, type CopyEditor } from "./blueprint-copy-edit"
+import { freshCopy, offerTypeFromText, patternsToTry, templateFor } from "./blueprint-tags"
 import { guardRebuild } from "./blueprint-guard"
 import { validateDesignRationale, type DesignRationale, type GridName } from "./rationale"
 
@@ -32,26 +33,33 @@ export interface RebuiltBlueprint {
   perturbed: boolean
 }
 
-export function rebuildFromBlueprint(input: {
+export async function rebuildFromBlueprint(input: {
   rationale: DesignRationale
   blueprint: MailerBlueprint
   spec: CreativeSpec
   brief: CampaignBrief
-}): RebuiltBlueprint | null {
+  env?: NodeJS.ProcessEnv
+  /** Test double for the copy editor. Production calls the model when a key is set. */
+  edit?: CopyEditor
+}): Promise<RebuiltBlueprint | null> {
   const medicare = input.rationale.vertical === "medicare_insurance"
   const mode = medicare ? "calm-column" : modeFor(input.blueprint.devices)
   const grid = gridFor(mode)
   const hero = medicare || input.blueprint.scale.offerToHeadline < 1.6 ? "headline" : "offer"
   const mapped = mapClientColors(clientColors(input.spec, input.rationale), input.blueprint.paletteRoles)
-  const offerType = input.blueprint.offerTypes[0]?.tag
-  const copyPattern = input.blueprint.copyPatterns[0]?.tag
-  const written = freshCopy({
-    template: input.blueprint.copyTemplate,
+  const offer = input.spec.offer || input.brief.offer || ""
+  const offerType = offerTypeFromText([offer, input.brief.offer, input.brief.goal].filter(Boolean).join(" "))
+    ?? input.blueprint.offerTypes[0]?.tag
+  const written = await writeFittingCopy({
+    patterns: input.blueprint.copyPatterns,
     offerType,
+    offer,
     goal: input.brief.goal,
-    offer: input.spec.offer || input.brief.offer,
     businessName: input.brief.businessInfo?.name,
+    env: input.env,
+    edit: input.edit,
   })
+  const copyPattern = written.pattern
   const guarded = guardRebuild({
     sourceId: input.blueprint.sourceId,
     boxes: input.blueprint.boxes,
@@ -141,6 +149,47 @@ export function modeFor(devices: readonly BlueprintDevice[]): CompositionMode {
   if (devices.includes("thumbnail-strip")) return "full-bleed"
   if (devices.includes("icon-grid")) return "type-led"
   return "overlapping-card"
+}
+
+async function writeFittingCopy(input: {
+  patterns: MailerBlueprint["copyPatterns"]
+  offerType: MailerBlueprint["offerTypes"][number]["tag"] | undefined
+  offer: string
+  goal?: string
+  businessName?: string
+  env?: NodeJS.ProcessEnv
+  edit?: CopyEditor
+}): Promise<{ headline: string; subheadline?: string; pattern: MailerBlueprint["copyPattern"] }> {
+  const patterns = patternsToTry(input.patterns, input.offerType)
+  for (const pattern of patterns) {
+    const filled = freshCopy({
+      template: templateFor(pattern),
+      offerType: input.offerType,
+      goal: input.goal,
+      offer: input.offer,
+      businessName: input.businessName,
+    })
+    const review = await editFilledCopy({
+      ...filled,
+      offer: input.offer,
+      offerType: input.offerType,
+      pattern,
+      goal: input.goal,
+      env: input.env,
+      edit: input.edit,
+    })
+    if (review.ok && review.headline) {
+      return { headline: review.headline, subheadline: review.subheadline, pattern }
+    }
+  }
+  const safe = freshCopy({
+    template: templateFor("direct_offer"),
+    offerType: input.offerType,
+    goal: input.goal,
+    offer: input.offer,
+    businessName: input.businessName,
+  })
+  return { headline: safe.headline, subheadline: safe.subheadline, pattern: "direct_offer" }
 }
 
 function gridFor(mode: CompositionMode): GridName {

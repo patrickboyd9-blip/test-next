@@ -14,7 +14,8 @@ import {
   structuralBlueprint,
   type MailerBlueprint,
 } from "./blueprint"
-import { templateFor } from "./blueprint-tags"
+import { parseCopyEdit, rulesCopyEdit } from "./blueprint-copy-edit"
+import { patternFitsOffer, templateFor } from "./blueprint-tags"
 import { backfillBlueprints } from "./blueprint-store"
 import { guardRebuild, matchesTradeDress, ngramOverlap } from "./blueprint-guard"
 import { rebuildFromBlueprint } from "./blueprint-rebuild"
@@ -104,13 +105,13 @@ test("a copied phrase, a protected color pair, or a too-close card is perturbed"
   assert.ok(guarded.similarity.score < 0.95)
 })
 
-test("a rebuilt card keeps the font class and writes the offer into the copy pattern", () => {
+test("a rebuilt card keeps the font class and writes the offer into the copy pattern", async () => {
   const brief = { goal: "Book a free roof inspection", offer: "$0 inspection", businessInfo: { name: "Northline Roofing" } }
   const selection = selectReferences([], brief)
   const rationale = directDesign({ brief, selection, trim: "5x8" }).rationale
   const blueprint = fixture("PM-056", "pest_control", "friendly", "A-")
   blueprint.typeClass = "condensed-display"
-  const rebuilt = rebuildFromBlueprint({
+  const rebuilt = await rebuildFromBlueprint({
     rationale,
     blueprint,
     spec: { headline: "See the roof before it leaks", offer: "FREE inspection", phone: "(619) 555-0148", palette: ["#F4F1EA", "#1C1C1C", "#C4552A"] },
@@ -197,7 +198,7 @@ test("a vision payload becomes a blueprint and drops nothing required", () => {
   assert.equal(blueprintCard(parsed).thumb, null)
 })
 
-test("an urgent Medicare enrollment mailer drives a new urgent Medicare enrollment card", () => {
+test("an urgent Medicare enrollment mailer drives a new urgent Medicare enrollment card", async () => {
   const enrollment = tagged(fixture("MMR-M1", "medicare", "urgent", "B"), "enrollment_window", "deadline_warning")
   enrollment.guard.sourcePhrases = ["Don't miss AEP or lose your doctor"]
   const percent = tagged(fixture("MMR-M2", "medicare", "urgent", "A"), "percent_off", "direct_offer")
@@ -229,7 +230,7 @@ test("an urgent Medicare enrollment mailer drives a new urgent Medicare enrollme
   }
   const selection = selectReferences([], brief)
   const rationale = directDesign({ brief, selection, trim: "5x8" }).rationale
-  const rebuilt = rebuildFromBlueprint({
+  const rebuilt = await rebuildFromBlueprint({
     rationale,
     blueprint: enrollment,
     spec: { headline: "Don't miss AEP or lose your doctor", offer: "your current coverage", phone: "(619) 555-0148" },
@@ -244,6 +245,83 @@ test("an urgent Medicare enrollment mailer drives a new urgent Medicare enrollme
   const written = `${rebuilt.spec.headline} ${rebuilt.spec.subheadline}`
   assert.equal(ngramOverlap(written, enrollment.guard.sourcePhrases), 0)
   assert.equal(/aep|doctor/i.test(written), false)
+})
+
+test("deadline-loss framing is not forced onto a free inspection", async () => {
+  assert.equal(patternFitsOffer("deadline_warning", "free_inspection"), false)
+  assert.equal(patternFitsOffer("deadline_warning", "enrollment_window"), true)
+  const rejected = rulesCopyEdit({
+    headline: "The deadline is coming.",
+    subheadline: "Don't lose FREE inspection.",
+    offer: "FREE inspection",
+    offerType: "free_inspection",
+    pattern: "deadline_warning",
+  })
+  assert.equal(rejected.ok, false)
+  const kept = rulesCopyEdit({
+    headline: "Annual enrollment is coming.",
+    subheadline: "Don't lose your current coverage.",
+    offer: "your current coverage",
+    offerType: "enrollment_window",
+    pattern: "deadline_warning",
+  })
+  assert.equal(kept.ok, true)
+  const deadline = tagged(fixture("PM-054", "home_services", "professional", "A-"), "percent_off", "deadline_warning")
+  const brief = { goal: "Book a free roof inspection", offer: "FREE inspection", businessInfo: { name: "Northline Roofing" } }
+  const selection = selectReferences([], brief)
+  const rationale = directDesign({ brief, selection, trim: "5x8" }).rationale
+  const seen: string[] = []
+  const rebuilt = await rebuildFromBlueprint({
+    rationale,
+    blueprint: deadline,
+    spec: { headline: "See the roof before it leaks", offer: "FREE inspection", phone: "(619) 555-0148" },
+    brief,
+    edit: async (draft) => {
+      seen.push(`${draft.headline} ${draft.subheadline ?? ""}`)
+      return { ok: true, headline: "A free roof inspection.", subheadline: "Call today." }
+    },
+  })
+  assert.ok(rebuilt)
+  const written = `${rebuilt.spec.headline} ${rebuilt.spec.subheadline ?? ""}`
+  assert.equal(/don'?t lose/i.test(written), false)
+  assert.match(written, /inspection/i)
+  assert.equal(rebuilt.spec.blueprint?.copyPattern === "deadline_warning", false)
+  assert.equal(seen.some((line) => /don'?t lose/i.test(line)), false)
+  assert.equal(rebuilt.spec.headline, "A free roof inspection.")
+})
+
+test("a copy editor can reject one pattern and the next fitting pattern is used", async () => {
+  const blueprint = tagged(fixture("MMR-Q", "roofing", "urgent", "B"), "free_inspection", "question_headline")
+  blueprint.copyPatterns.push({ tag: "direct_offer", confidence: 0.4 })
+  const brief = { goal: "Book a free roof inspection", offer: "FREE inspection" }
+  const selection = selectReferences([], brief)
+  const rationale = directDesign({ brief, selection, trim: "5x8" }).rationale
+  let calls = 0
+  const rebuilt = await rebuildFromBlueprint({
+    rationale,
+    blueprint,
+    spec: { offer: "FREE inspection" },
+    brief,
+    edit: async (draft) => {
+      calls += 1
+      if (draft.pattern === "question_headline") return { ok: false, reason: "A question does not fit this inspection offer." }
+      return { ok: true, headline: draft.headline, subheadline: "Call today to book it." }
+    },
+  })
+  assert.ok(rebuilt)
+  assert.equal(calls >= 2, true)
+  assert.equal(rebuilt.spec.blueprint?.copyPattern, "direct_offer")
+  assert.equal(rebuilt.spec.subheadline, "Call today to book it.")
+  assert.equal(/don'?t lose/i.test(`${rebuilt.spec.headline} ${rebuilt.spec.subheadline}`), false)
+})
+
+test("a copy-editor response parses a rewrite and a rejection", () => {
+  const rewrite = parseCopyEdit({ ok: true, headline: "A free roof inspection.", subheadline: "Call today." })
+  assert.equal(rewrite?.ok, true)
+  assert.equal(rewrite?.headline, "A free roof inspection.")
+  const rejection = parseCopyEdit({ ok: false, reason: "Loss framing does not fit a free inspection." })
+  assert.equal(rejection?.ok, false)
+  assert.match(rejection?.reason ?? "", /free inspection/)
 })
 
 test("a vision reading can propose a tag and cannot store the source wording as the template", () => {

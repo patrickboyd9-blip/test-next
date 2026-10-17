@@ -5,7 +5,7 @@ import { MEDICARE_AGENT_DISCLAIMER, isMedicareAgentBrief } from "@/lib/campaign-
 
 import { directDesign, usesSeparatedPanel, type CompositionMode } from "./art-director"
 import { normalizeToneTag, normalizeVerticalTag, selectBlueprints, type MailerBlueprint } from "./blueprint"
-import { blueprintMatchLine, copyPatternFromText, offerTypeFromText } from "./blueprint-tags"
+import { blueprintMatchLine, copyPatternFromText, offerTypeFromText, patternFitsOffer } from "./blueprint-tags"
 import { ownerFavoriteIds } from "./owner-favorites"
 import { loadBlueprintCorpus } from "./blueprint-store"
 import { rebuildFromBlueprint } from "./blueprint-rebuild"
@@ -178,16 +178,18 @@ export async function rankCandidates(input: {
   const blueprints = input.blueprints ?? await safeBlueprints(records, env)
   const blueprintSlots = Math.ceil(families.length / 2)
   const briefText = [input.brief.offer, input.brief.goal, input.brief.desiredRecipientAction, input.brief.emotionalTone].filter(Boolean).join(" ")
+  const offerType = offerTypeFromText(briefText)
+  const inferredPattern = copyPatternFromText(briefText)
   const pickedBlueprints = selectBlueprints({
     blueprints,
     vertical: normalizeVerticalTag(selection.vertical),
     tone: normalizeToneTag(input.brief.emotionalTone ?? input.brief.goal),
-    offerType: offerTypeFromText(briefText),
-    copyPattern: copyPatternFromText(briefText),
+    offerType,
+    copyPattern: inferredPattern && patternFitsOffer(inferredPattern, offerType) ? inferredPattern : undefined,
     favorites: ownerFavoriteIds(env),
     limit: Math.max(1, blueprintSlots),
   })
-  const built = families.map((family, index) => {
+  const built = await Promise.all(families.map((family, index) => {
     const directionIndex = index % input.directions.length
     const spec = input.directions[directionIndex]?.spec ?? {}
     const blueprint = index < blueprintSlots && pickedBlueprints.length > 0
@@ -205,13 +207,19 @@ export async function rankCandidates(input: {
       costs,
       retrieved,
       blueprint,
+      env,
     })
-  })
-  const revised = built.flatMap((candidate) => {
-    if (candidate.grade.cleared) return [candidate]
-    const redesigned = redesignOnce(candidate, input, selection, base, retrieved)
-    return redesigned.familyId === candidate.familyId ? [candidate] : [candidate, redesigned]
-  })
+  }))
+  const revised: ScoredCandidate[] = []
+  for (const candidate of built) {
+    if (candidate.grade.cleared) {
+      revised.push(candidate)
+      continue
+    }
+    const redesigned = await redesignOnce(candidate, input, selection, base, retrieved)
+    revised.push(candidate)
+    if (redesigned.familyId !== candidate.familyId) revised.push(redesigned)
+  }
   const visioned = await maybeVision(revised, retrieved, records, input.brief, env)
   const improved = visioned.map((candidate) =>
     applyVisionImprovement(candidate, input.brief.businessInfo?.name)
@@ -225,7 +233,7 @@ export async function rankCandidates(input: {
   }
 }
 
-function scoreFamily(input: {
+async function scoreFamily(input: {
   family: Family
   brief: CampaignBrief
   selection: ReferenceSelection
@@ -237,16 +245,18 @@ function scoreFamily(input: {
   retrieved: TastePick[]
   redesigned?: boolean
   blueprint?: MailerBlueprint
-}): ScoredCandidate {
+  env?: NodeJS.ProcessEnv
+}): Promise<ScoredCandidate> {
   let rationale = rationaleForFamily(input.base, input.family, input)
   let spec = input.spec
   let blueprintMeta: ScoredCandidate["blueprint"]
   if (input.blueprint) {
-    const rebuilt = rebuildFromBlueprint({
+    const rebuilt = await rebuildFromBlueprint({
       rationale,
       blueprint: input.blueprint,
       spec,
       brief: input.brief,
+      env: input.env,
     })
     if (rebuilt) {
       rationale = rebuilt.rationale
@@ -292,13 +302,13 @@ function scoreFamily(input: {
   }
 }
 
-function redesignOnce(
+async function redesignOnce(
   candidate: ScoredCandidate,
   input: { brief: CampaignBrief; trim: TrimSize },
   selection: ReferenceSelection,
   base: DesignRationale,
   retrieved: TastePick[]
-): ScoredCandidate {
+): Promise<ScoredCandidate> {
   const separated = usesSeparatedPanel(candidate.rationale.grid.intentional_break)
   const next = (separated
     ? COMPOSITION_FAMILIES.find((family) => family.mode === "integrated" && family.hero === "offer" && family.id !== candidate.familyId)
@@ -306,7 +316,7 @@ function redesignOnce(
     ?? COMPOSITION_FAMILIES.find((family) => family.mode === "full-bleed" && family.id !== candidate.familyId)
     ?? COMPOSITION_FAMILIES.find((family) => family.id !== candidate.familyId)
     ?? COMPOSITION_FAMILIES[0]!
-  const revised = scoreFamily({
+  const revised = await scoreFamily({
     family: next,
     brief: input.brief,
     selection,
