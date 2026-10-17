@@ -1,0 +1,112 @@
+{
+  "id": "PM-051",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B",
+  "focal_point": "A coiled spring and a wrench, sharp, with a red emergency rail.",
+  "eye_path": "Script question, tools, then a crowded panel: phone, reviews, code, ticket.",
+  "grid": "Photo half, steel-blue panel half, red bar full height.",
+  "visual_weight_pct": {
+    "photo": 42,
+    "text": 22,
+    "offer": 16,
+    "white_space": 20
+  },
+  "scale_ratios": "Tools are hero-scale. Rail type is very large. Coupon price is large inside a small ticket.",
+  "type_choices": "White script over the photo, bold sans, heavy ticket price. Script loses to the dark garage.",
+  "palette_hex": [
+    "#1A2438",
+    "#E23C33",
+    "#C5D0DA",
+    "#7A5A32"
+  ],
+  "photo_art_direction": "Shallow-focus still life of the broken part and the tool. Technician soft behind. Gritty.",
+  "offer_placement": "Emergency along the rail. A package price in a ticket. Two ideas, the rail clearer.",
+  "trust_and_cta": "Review chip, phone, code, ticket, and a mascot share the panel.",
+  "scores": {
+    "focal": {
+      "score": 4,
+      "reason": "Tools lead."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "Panel is crowded."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Rail balances the photo."
+    },
+    "grid": {
+      "score": 3,
+      "reason": "Panel has no internal grid."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "Script is off the path."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Too many panel objects."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Red rail separates."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Panel is full."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Tools separate from the dark."
+    },
+    "color": {
+      "score": 4,
+      "reason": "Red on steel blue."
+    },
+    "type": {
+      "score": 3,
+      "reason": "Script on a dark photo."
+    },
+    "photo": {
+      "score": 4,
+      "reason": "The part is the right subject."
+    },
+    "offer": {
+      "score": 4,
+      "reason": "Rail plus ticket."
+    },
+    "cta": {
+      "score": 4,
+      "reason": "Several devices."
+    },
+    "trust": {
+      "score": 4,
+      "reason": "Reviews and the part."
+    },
+    "glance_3s": {
+      "score": 4,
+      "reason": "Glance gets a spring and an emergency."
+    }
+  },
+  "emulate": [
+    "Photograph the broken part. Run one urgency the full height. Keep one priced package."
+  ],
+  "do_not_copy": [
+    "Mascot, mark, phone. Same advertiser as PM-002, newer art."
+  ],
+  "anti_patterns": [
+    "Script on a dark photo",
+    "mascot plus photo",
+    "too many response devices"
+  ],
+  "summary": "Mailbox garage card, newer than PM-002. The tool photo is the lesson. The lower panel is a junk drawer."
+}

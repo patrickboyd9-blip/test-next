@@ -1,0 +1,76 @@
+{
+  "version": "1.0.0",
+  "vertical": "plumbing",
+  "format": { "trim": "6x9", "orientation": "landscape" },
+  "audience_moment": "Household with a slow drain that has not called anyone yet this week.",
+  "focal_element": {
+    "kind": "offer_numeral",
+    "description": "One service price, set as a single figure on a white field beside a tight photo of gloved hands and a tool.",
+    "visual_weight_pct": 42,
+    "lead_modality": "image",
+    "lead_modality_area_pct": 62
+  },
+  "eye_path": {
+    "pattern": "Z",
+    "stops": [
+      "the hands and the tool",
+      "the single price",
+      "the phone directly under the price"
+    ]
+  },
+  "grid": {
+    "name": "split-40-60",
+    "alignment": "left",
+    "intentional_break": "none"
+  },
+  "scale_ratios": {
+    "hero": "offer",
+    "offer_to_headline_cap": 1.6,
+    "headline_to_body_cap": 2.8,
+    "offer_to_body": 4.2,
+    "front_type_size_count": 3
+  },
+  "palette": {
+    "neutral_hex": ["#F7F4EE", "#1C1C1C"],
+    "accent_hex": "#0E6B6B",
+    "second_accent_hex": null,
+    "emotion": "trust",
+    "banned": ["full-bleed coupon yellow", "cartoon water drops", "scalloped triple-price rail"]
+  },
+  "type_pairing": {
+    "family_count": 1,
+    "display": "Heavy grotesque for the price and a three-word job headline",
+    "body": "Same family, regular, for the one condition under the price",
+    "script_role": "logo_only"
+  },
+  "photo_brief": {
+    "mode": "documentary_job",
+    "subject": "Gloved hands and one tool at a drain or fixture, technician's face optional and looking down",
+    "crop": "Mid-task, subject fills the photo half, no thumbs-up",
+    "gaze": "At the work",
+    "lighting": "Available room light, one direction",
+    "placement": "panel_bleed_two_edges"
+  },
+  "offer_treatment": {
+    "kind": "numeral_hero",
+    "placement": "On the white half, top of the stack, alone",
+    "qualifier": "Which single job the price includes",
+    "expiry": "none"
+  },
+  "density_targets": {
+    "calm_field_pct_min": 28,
+    "front_fact_budget": ["headline", "offer", "response lockup", "license line"],
+    "boxed_modules_max": 3,
+    "starbursts_max": 1
+  },
+  "response": {
+    "primary": "phone",
+    "secondary": "qr",
+    "lockup": "Phone under the qualifier at the print floor for 6x9; code smaller, labeled, same column"
+  },
+  "trust": {
+    "front_line": "License number under the mark",
+    "back_only": ["what the visit includes", "hours"]
+  },
+  "principles_invoked": ["P3", "P4", "P6", "P9", "TP-02", "TP-04", "TP-07", "AF5", "AF7", "AF8"]
+}

@@ -1,0 +1,111 @@
+{
+  "id": "PM-049",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "healthcare",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B+",
+  "focal_point": "A smile close-up, then a blue price circle.",
+  "eye_path": "Face, circle, italic line, large phone. A side rail repeats the price vertically.",
+  "grid": "Photo bleed, centered lower stack, full-height rail.",
+  "visual_weight_pct": {
+    "photo": 42,
+    "text": 22,
+    "offer": 18,
+    "white_space": 18
+  },
+  "scale_ratios": "Face dominates. Circle price is large. Phone is the largest lower type. Rail repeats the price.",
+  "type_choices": "Soft italic, heavy phone, sans in the circle. The rail is rotated.",
+  "palette_hex": [
+    "#2456A0",
+    "#3E86C4",
+    "#FFFFFF",
+    "#1A1A1A"
+  ],
+  "photo_art_direction": "Studio smile, direct gaze, blue seamless. Commercial and slightly generic.",
+  "offer_placement": "One procedure price in the circle and again in the rail. Once would do.",
+  "trust_and_cta": "Two practice names, a large phone, a site. No review on this face.",
+  "scores": {
+    "focal": {
+      "score": 4,
+      "reason": "Smile leads, circle is close."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "Price is repeated instead of stepped."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Rail balances."
+    },
+    "grid": {
+      "score": 3,
+      "reason": "Rail is a second column."
+    },
+    "eye_path": {
+      "score": 4,
+      "reason": "Face to phone works."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Circle and rail duplicate a group."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Blue on white."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Lower half has air."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Circle separates."
+    },
+    "color": {
+      "score": 4,
+      "reason": "One blue."
+    },
+    "type": {
+      "score": 3,
+      "reason": "Rotated rail type."
+    },
+    "photo": {
+      "score": 4,
+      "reason": "Smile reads; it is generic."
+    },
+    "offer": {
+      "score": 5,
+      "reason": "One price, printed twice."
+    },
+    "cta": {
+      "score": 4,
+      "reason": "Phone is large."
+    },
+    "trust": {
+      "score": 3,
+      "reason": "Names, no credential."
+    },
+    "glance_3s": {
+      "score": 5,
+      "reason": "Glance gets a smile and a price."
+    }
+  },
+  "emulate": [
+    "Hero smile, one circular price, phone larger than the address. Do not rotate a second copy of the price."
+  ],
+  "do_not_copy": [
+    "The practices, the price, the portrait."
+  ],
+  "anti_patterns": [
+    "Printing the price twice",
+    "generic stock smile"
+  ],
+  "summary": "Mailbox dental card. Smile plus one price is instant. The repeated rail is the extra."
+}

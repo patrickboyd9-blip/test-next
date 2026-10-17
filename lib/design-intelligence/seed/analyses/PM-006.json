@@ -1,0 +1,110 @@
+{
+  "id": "PM-006",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9 (branch cursor/visual-reference-corpus-3752)",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B-",
+  "focal_point": "Product photos of screens or shades, several, plus a headline.",
+  "eye_path": "Across products, then to a phone.",
+  "grid": "Photo row and a type band. Busy.",
+  "visual_weight_pct": {
+    "photo": 50,
+    "text": 24,
+    "offer": 12,
+    "white_space": 14
+  },
+  "scale_ratios": "Headline and product labels compete. Offer is a consult, small.",
+  "type_choices": "Sans plus a mark, several sizes.",
+  "palette_hex": [
+    "#FFFFFF",
+    "#1F4E79",
+    "#E8EEF2",
+    "#C4A574"
+  ],
+  "photo_art_direction": "Product-in-place, daylight, catalog-clean. Several subjects.",
+  "offer_placement": "A consult or savings line under the products. Secondary.",
+  "trust_and_cta": "Phone present. Several product claims.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Products tie."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "Labels and headline close."
+    },
+    "balance": {
+      "score": 3,
+      "reason": "Even."
+    },
+    "grid": {
+      "score": 3,
+      "reason": "Row grid."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "Wandering path."
+    },
+    "gestalt": {
+      "score": 3,
+      "reason": "Loose groups."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Adequate."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Some margin."
+    },
+    "figure_ground": {
+      "score": 3,
+      "reason": "Products separate."
+    },
+    "color": {
+      "score": 3,
+      "reason": "Safe blues."
+    },
+    "type": {
+      "score": 3,
+      "reason": "Extra sizes."
+    },
+    "photo": {
+      "score": 3,
+      "reason": "Good products, too many."
+    },
+    "offer": {
+      "score": 3,
+      "reason": "Soft offer."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Phone findable."
+    },
+    "trust": {
+      "score": 3,
+      "reason": "Catalog trust."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "Glance gets shades."
+    }
+  },
+  "emulate": [
+    "One installed product, full-bleed, not a row."
+  ],
+  "do_not_copy": [
+    "Mark and product photos."
+  ],
+  "anti_patterns": [
+    "Catalog row on the front."
+  ],
+  "summary": "Mailbox screens card. Good material photos, too many of them."
+}

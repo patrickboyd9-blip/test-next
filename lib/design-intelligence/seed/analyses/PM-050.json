@@ -1,0 +1,111 @@
+{
+  "id": "PM-050",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "auto_service",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B-",
+  "focal_point": "A child and a giant dollar-off coupon split the card. A red rail is a third edge.",
+  "eye_path": "Headline, child, then the coupon. The rail reads at the same time.",
+  "grid": "Upper story, lower coupon, full-height rail.",
+  "visual_weight_pct": {
+    "photo": 22,
+    "text": 28,
+    "offer": 32,
+    "white_space": 18
+  },
+  "scale_ratios": "Coupon numerals are the largest type. The story and the coupon are both campaigns.",
+  "type_choices": "Bold sans, ultra-bold numerals, micro legal. Several voices.",
+  "palette_hex": [
+    "#1F5AA8",
+    "#E31C23",
+    "#FFFFFF",
+    "#E7A0B4"
+  ],
+  "photo_art_direction": "A child in a bright hallway, used as cause proof. Specific and human.",
+  "offer_placement": "Lower half is a full coupon. Upper half is a donation story. Two actions.",
+  "trust_and_cta": "A hospital mark and a service brand. Barcode. Two asks.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Child and coupon tie."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "Two campaigns."
+    },
+    "balance": {
+      "score": 3,
+      "reason": "Split down the middle."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "Coupon grid is clear."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "The path forks."
+    },
+    "gestalt": {
+      "score": 2,
+      "reason": "Cause and coupon do not group."
+    },
+    "contrast": {
+      "score": 5,
+      "reason": "Red numerals are impossible to miss."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Legal is tiny."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Coupon is the figure."
+    },
+    "color": {
+      "score": 3,
+      "reason": "Red and blue both shout."
+    },
+    "type": {
+      "score": 3,
+      "reason": "Three voices."
+    },
+    "photo": {
+      "score": 4,
+      "reason": "The child is human and specific."
+    },
+    "offer": {
+      "score": 4,
+      "reason": "The coupon is clear and stapled to a second story."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Give and redeem compete."
+    },
+    "trust": {
+      "score": 4,
+      "reason": "Two brands."
+    },
+    "glance_3s": {
+      "score": 4,
+      "reason": "Glance gets the coupon, then confusion."
+    }
+  },
+  "emulate": [
+    "A full-width coupon with giant numerals and one human photo. Do not staple a second cause to it."
+  ],
+  "do_not_copy": [
+    "Both marks, the child, the amount."
+  ],
+  "anti_patterns": [
+    "Two calls to action",
+    "cause and coupon in one gestalt"
+  ],
+  "summary": "Mailbox oil-change card with a charity story. The coupon works. The second story costs the grade."
+}

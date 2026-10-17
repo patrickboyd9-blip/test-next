@@ -1,0 +1,109 @@
+{
+  "id": "MMR-032",
+  "corpus": "mmr",
+  "research_ref": "modern-mail-research images @ 599bf1c",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "secondary",
+  "vertical": "medicare_insurance",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B",
+  "focal_point": "A calm member portrait and a short headline share a quiet field. The portrait is the larger shape; the headline is the message.",
+  "eye_path": "Z across a wide landscape: face, headline, one invitation, small mark.",
+  "grid": "Asymmetric split, lots of paper, one axis for type.",
+  "visual_weight_pct": {
+    "photo": 40,
+    "text": 22,
+    "offer": 8,
+    "white_space": 30
+  },
+  "scale_ratios": "Headline leads. There is no discount numeral. Sizes are few and separated.",
+  "type_choices": "One or two families, large headline, small support. Close to the three-size rule.",
+  "palette_hex": [
+    "#F4F0E6",
+    "#1E2A3A",
+    "#8AA0B4"
+  ],
+  "photo_art_direction": "A real-looking member, still and capable, soft light, plain ground. Not a laptop stock scene.",
+  "offer_placement": "The offer is the invitation to get help, not a price. It is clear and quiet. National branding is the part that must not be copied.",
+  "trust_and_cta": "Carrier and plan marks do trust work. Response is present and not shouted. Style reference only.",
+  "scores": {
+    "focal": {
+      "score": 4,
+      "reason": "The face leads; the headline is a close second."
+    },
+    "hierarchy": {
+      "score": 4,
+      "reason": "Few sizes, headline clearly above body."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Asymmetry with a heavy calm side."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "One axis, wide margins."
+    },
+    "eye_path": {
+      "score": 4,
+      "reason": "Short path, easy to finish."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Type sits in one group."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Ink on paper is comfortable."
+    },
+    "whitespace": {
+      "score": 5,
+      "reason": "This is the calm-field lesson."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Face separates from the paper."
+    },
+    "color": {
+      "score": 4,
+      "reason": "Neutral and one cool accent."
+    },
+    "type": {
+      "score": 4,
+      "reason": "Restrained pairing."
+    },
+    "photo": {
+      "score": 4,
+      "reason": "The person matches a trust sale."
+    },
+    "offer": {
+      "score": 3,
+      "reason": "No numeral, by design; the help line is soft."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Response is findable and not a lockup we should trace."
+    },
+    "trust": {
+      "score": 4,
+      "reason": "Trust is the brand system, which we do not reuse."
+    },
+    "glance_3s": {
+      "score": 4,
+      "reason": "Glance gets a person and an invitation."
+    }
+  },
+  "emulate": [
+    "Large paper, one real person, one short invitation, no urgency chrome."
+  ],
+  "do_not_copy": [
+    "Carrier marks, plan names, the portrait, the headline, the color system as a brand."
+  ],
+  "anti_patterns": [
+    "None of the government-notice kind. Do not treat the brand system as a template to trace."
+  ],
+  "summary": "Style reference only. A calm insurance front with a real person and room to breathe. Useful for Medicare tone, not for artwork."
+}

@@ -1,0 +1,111 @@
+{
+  "id": "PM-043",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B+",
+  "focal_point": "A blue banner with two large free offers, then a burgundy action bar.",
+  "eye_path": "Headline, four steps, banner, phones.",
+  "grid": "Four photos, a full-width offer band, a split footer.",
+  "visual_weight_pct": {
+    "photo": 22,
+    "text": 40,
+    "offer": 20,
+    "white_space": 18
+  },
+  "scale_ratios": "The word free is the largest type, larger than the headline.",
+  "type_choices": "Serif headline, dense captions, large phones. About five sizes.",
+  "palette_hex": [
+    "#FFFFFF",
+    "#3A2A22",
+    "#3E5C8A",
+    "#7A2E32"
+  ],
+  "photo_art_direction": "Process close-ups: consult, drawings, shop, install. No finished closet.",
+  "offer_placement": "Full-width band, two gifts. The band works and the pair splits attention.",
+  "trust_and_cta": "Two large phones with locations and hours. License by the mark. The bar is type, not a pill button.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Two frees tie."
+    },
+    "hierarchy": {
+      "score": 4,
+      "reason": "Free is larger than the headline."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Bands balance."
+    },
+    "grid": {
+      "score": 5,
+      "reason": "The structure is sound."
+    },
+    "eye_path": {
+      "score": 4,
+      "reason": "Ends at the phones."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Band is one group."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Ink on the band holds."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Captions are dense."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Band separates."
+    },
+    "color": {
+      "score": 3,
+      "reason": "Blue and burgundy are two accents."
+    },
+    "type": {
+      "score": 4,
+      "reason": "Mostly controlled."
+    },
+    "photo": {
+      "score": 3,
+      "reason": "Process, no result."
+    },
+    "offer": {
+      "score": 4,
+      "reason": "Two gifts."
+    },
+    "cta": {
+      "score": 5,
+      "reason": "Phones are the model lockup."
+    },
+    "trust": {
+      "score": 5,
+      "reason": "Hours and license."
+    },
+    "glance_3s": {
+      "score": 4,
+      "reason": "Glance gets free and a phone."
+    }
+  },
+  "emulate": [
+    "Numbered steps, one full-width offer band, then phones. Show the finished closet, not only the process."
+  ],
+  "do_not_copy": [
+    "Mark, addresses, phones."
+  ],
+  "anti_patterns": [
+    "Instructions before the result",
+    "two gifts side by side"
+  ],
+  "summary": "Mailbox closet card. The band-and-phone structure is worth copying. The photos never show the result."
+}

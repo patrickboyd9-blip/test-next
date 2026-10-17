@@ -14,6 +14,8 @@ import {
   normalizeGenerationResult,
   withGenerationRetryFeedback,
 } from "./creative-engine-guards"
+import { applyDesignIntelligence } from "@/lib/design-intelligence/pipeline"
+
 import { buildCreativeIntelligenceContext } from "./creative-intelligence"
 import { loadReferenceMailerImages, type ReferenceMailerImage } from "@/lib/reference-corpus/mailer-images"
 import { RESEARCH_QUALITY_THRESHOLD } from "./research-quality"
@@ -261,7 +263,7 @@ export class AnthropicCreativeEngine implements CreativeEngine {
     const images = await loadReferenceMailerImages(
       (intelligence.referenceCards ?? []).map((card) => card.mmrId)
     )
-    return this.generateWithRetry(input.brief, images, (reasons) =>
+    return this.generateWithRetry(input.brief, input.canvas, images, (reasons) =>
       this.requestDirections({
         system: buildGenerateSystemPrompt(input.canvas, intelligence),
         user: withGenerationRetryFeedback(
@@ -302,7 +304,7 @@ export class AnthropicCreativeEngine implements CreativeEngine {
     const images = await loadReferenceMailerImages(
       (intelligence.referenceCards ?? []).map((card) => card.mmrId)
     )
-    return this.generateWithRetry(input.brief, images, (reasons) =>
+    return this.generateWithRetry(input.brief, input.canvas, images, (reasons) =>
       this.requestDirections({
         system: buildRegenerateSystemPrompt(input.canvas, intelligence),
         user: withGenerationRetryFeedback(buildRegenerateUserMessage(input), reasons),
@@ -313,6 +315,7 @@ export class AnthropicCreativeEngine implements CreativeEngine {
 
   private async generateWithRetry(
     brief: GenerateDirectionsInput["brief"],
+    canvas: GenerateDirectionsInput["canvas"],
     images: ReferenceMailerImage[],
     request: (reasons?: string[]) => Promise<CreativeDirection[]>
   ): Promise<GenerateDirectionsResult> {
@@ -340,17 +343,17 @@ export class AnthropicCreativeEngine implements CreativeEngine {
           best = result
           continue
         }
-        return result
+        return applyDesignIntelligence(brief, result, canvas)
       } catch (error) {
         lastError = error
         if (!(error instanceof CreativeGenerationInvalidError) || attempt === 1) {
-          if (best) return best
+          if (best) return applyDesignIntelligence(brief, best, canvas)
           throw error
         }
         reasons = error.reasons
       }
     }
-    if (best) return best
+    if (best) return applyDesignIntelligence(brief, best, canvas)
     throw lastError instanceof Error
       ? lastError
       : new CreativeGenerationInvalidError(["generation failed"])

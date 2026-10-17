@@ -1,0 +1,110 @@
+{
+  "id": "MMR-575",
+  "corpus": "mmr",
+  "research_ref": "modern-mail-research images @ 599bf1c",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "secondary",
+  "vertical": "roofing",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": true,
+  "grade": "B-",
+  "focal_point": "Stacked color bands with a roof photo. The bands and the photo tie.",
+  "eye_path": "Stacked bands: headline, photo, offer, phone.",
+  "grid": "Horizontal bands. Vendor default.",
+  "visual_weight_pct": {
+    "photo": 40,
+    "text": 25,
+    "offer": 20,
+    "white_space": 15
+  },
+  "scale_ratios": "Offer band is large. Headline is also large. Not a single ladder.",
+  "type_choices": "Condensed grotesque, band type, more than three sizes.",
+  "palette_hex": [
+    "#102A43",
+    "#E10600",
+    "#F5C518",
+    "#FFFFFF"
+  ],
+  "photo_art_direction": "House or roof, competent, not a close documentary crop.",
+  "offer_placement": "A band, which works, inside a repeated vendor frame.",
+  "trust_and_cta": "Phone in a band. Trust line small.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Bands tie with the photo."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "Two loud bands."
+    },
+    "balance": {
+      "score": 3,
+      "reason": "Even stack."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "Band grid is clear."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "Stacked path."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Bands group."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "High contrast."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Some band padding."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Color blocks are figures."
+    },
+    "color": {
+      "score": 3,
+      "reason": "Red, navy, yellow system."
+    },
+    "type": {
+      "score": 3,
+      "reason": "Extra sizes."
+    },
+    "photo": {
+      "score": 3,
+      "reason": "Adequate roof photo."
+    },
+    "offer": {
+      "score": 4,
+      "reason": "Offer band is readable."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Phone in a band, slightly separate."
+    },
+    "trust": {
+      "score": 3,
+      "reason": "Small trust line."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "Glance gets an offer and a roof."
+    }
+  },
+  "emulate": [
+    "A single offer band under a photo, then delete the extra color bands."
+  ],
+  "do_not_copy": [
+    "The contractor mark, phone, headlines, and the vendor's repeated yellow-or-red tile system. Style reference only. This series shares one house style, so repetition is not independent proof."
+  ],
+  "anti_patterns": [
+    "Repeated vendor bands treated as a rule."
+  ],
+  "summary": "Style reference. Banded roofing card from the same house style. Clear and templated."
+}

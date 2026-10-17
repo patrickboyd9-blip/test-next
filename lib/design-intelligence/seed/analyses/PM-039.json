@@ -1,0 +1,111 @@
+{
+  "id": "PM-039",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "hvac",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B-",
+  "focal_point": "A yellow service van, three-quarter, filling the right. The truck is instant.",
+  "eye_path": "Van lettering, a yellow wedge of copy, a dark duct pair at the bottom.",
+  "grid": "Diagonal wedge over a fleet photo, proof strip along the bottom.",
+  "visual_weight_pct": {
+    "photo": 70,
+    "text": 15,
+    "offer": 5,
+    "white_space": 10
+  },
+  "scale_ratios": "The van is the only dominant object. No price. The availability badge is small.",
+  "type_choices": "Fleet lettering is the real type. Captions are small.",
+  "palette_hex": [
+    "#FFD100",
+    "#111111",
+    "#E10600",
+    "#8EC6E8"
+  ],
+  "photo_art_direction": "Sunny street. Bottom macros of ducts are both dark, so the change is subtle.",
+  "offer_placement": "A speed badge, not a price. Proof strip is correctly last and too muddy.",
+  "trust_and_cta": "Phone is painted on the door. No separate lockup.",
+  "scores": {
+    "focal": {
+      "score": 5,
+      "reason": "The van is one shape."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "Door lettering is the ladder."
+    },
+    "balance": {
+      "score": 3,
+      "reason": "Van-heavy."
+    },
+    "grid": {
+      "score": 3,
+      "reason": "Wedge is loose."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "Proof strip is easy to miss."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Van is one group."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Yellow separates."
+    },
+    "whitespace": {
+      "score": 2,
+      "reason": "Little air."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Van is the figure."
+    },
+    "color": {
+      "score": 4,
+      "reason": "Fleet yellow."
+    },
+    "type": {
+      "score": 3,
+      "reason": "Lettering is not a system."
+    },
+    "photo": {
+      "score": 4,
+      "reason": "Vehicle as hero works."
+    },
+    "offer": {
+      "score": 2,
+      "reason": "No price."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Phone only on the door."
+    },
+    "trust": {
+      "score": 3,
+      "reason": "The truck is local proof."
+    },
+    "glance_3s": {
+      "score": 4,
+      "reason": "Glance gets the van."
+    }
+  },
+  "emulate": [
+    "The service vehicle as the hero, plus a bottom proof strip with one arrow, and the phone set in type."
+  ],
+  "do_not_copy": [
+    "Fleet lettering and phone."
+  ],
+  "anti_patterns": [
+    "Phone only as door lettering",
+    "a before/after that stays muddy"
+  ],
+  "summary": "Mailbox duct card. The truck identifies instantly. The proof pair does not show a result."
+}

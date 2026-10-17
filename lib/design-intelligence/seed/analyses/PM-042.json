@@ -1,0 +1,110 @@
+{
+  "id": "PM-042",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B",
+  "focal_point": "A 3\u00d73 of rooms. The center cell holds the mark and a magenta phone. The offer is the last cell.",
+  "eye_path": "The grid invites roaming. The phone is the hottest small color.",
+  "grid": "Even 3\u00d73.",
+  "visual_weight_pct": {
+    "photo": 62,
+    "text": 18,
+    "offer": 12,
+    "white_space": 8
+  },
+  "scale_ratios": "Cells are equal, so nothing dominates. Inside the offer cell the percent is largest.",
+  "type_choices": "Controlled sans, about four sizes. Photo labels are fragile.",
+  "palette_hex": [
+    "#1F6B45",
+    "#C9D7A8",
+    "#E23A8A",
+    "#FFFFFF"
+  ],
+  "photo_art_direction": "Soft daylight rooms, consistent catalog.",
+  "offer_placement": "Last cell, which is the right Z-scan end, and the same size as a thumbnail.",
+  "trust_and_cta": "Magenta phone on sage is the most findable number in the set. No code.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Equal cells."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "Phone color creates a step the sizes do not."
+    },
+    "balance": {
+      "score": 5,
+      "reason": "Even balance."
+    },
+    "grid": {
+      "score": 5,
+      "reason": "The grid is disciplined."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "Roaming path."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Offer cell is one group."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Magenta separates."
+    },
+    "whitespace": {
+      "score": 2,
+      "reason": "Little air."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Cells separate."
+    },
+    "color": {
+      "score": 5,
+      "reason": "One accent reserved for the phone."
+    },
+    "type": {
+      "score": 4,
+      "reason": "One family."
+    },
+    "photo": {
+      "score": 4,
+      "reason": "Consistent rooms."
+    },
+    "offer": {
+      "score": 3,
+      "reason": "Offer is the same size as a photo."
+    },
+    "cta": {
+      "score": 4,
+      "reason": "Phone color is correct."
+    },
+    "trust": {
+      "score": 2,
+      "reason": "No tenure."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "Glance gets a grid."
+    }
+  },
+  "emulate": [
+    "Identity in the center, offer in the last cell, one accent only on the phone. Make the offer cell bigger."
+  ],
+  "do_not_copy": [
+    "Mark and room photos."
+  ],
+  "anti_patterns": [
+    "Uniform tiles flatten hierarchy"
+  ],
+  "summary": "Mailbox shade card. The phone color is disciplined. Equal cells keep the offer from winning."
+}

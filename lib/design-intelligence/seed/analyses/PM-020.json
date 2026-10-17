@@ -1,0 +1,110 @@
+{
+  "id": "PM-020",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "finance",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B",
+  "focal_point": "A person looking at a phone, then a short headline. The gaze teaches the action.",
+  "eye_path": "Z from the face to three checks to a captioned code.",
+  "grid": "Two columns plus a dark footer.",
+  "visual_weight_pct": {
+    "photo": 40,
+    "text": 30,
+    "offer": 8,
+    "white_space": 22
+  },
+  "scale_ratios": "Face leads, headline second. No separate price larger than the headline.",
+  "type_choices": "One sans, checks matched, about four sizes.",
+  "palette_hex": [
+    "#D7E7F2",
+    "#16324F",
+    "#FFFFFF"
+  ],
+  "photo_art_direction": "Cool daylight, gaze on the device rather than the lens. Supports a phone or scan action.",
+  "offer_placement": "A relief promise beside the face. Clear. The footer repeats the response.",
+  "trust_and_cta": "Captioned code. Phone and URL in the footer, a second zone. No reviews on a high-stakes offer.",
+  "scores": {
+    "focal": {
+      "score": 4,
+      "reason": "The face leads."
+    },
+    "hierarchy": {
+      "score": 4,
+      "reason": "Checks are one size."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Columns balance."
+    },
+    "grid": {
+      "score": 5,
+      "reason": "Grid is disciplined."
+    },
+    "eye_path": {
+      "score": 4,
+      "reason": "Face, checks, code."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Code has a caption group."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Navy on pale blue."
+    },
+    "whitespace": {
+      "score": 4,
+      "reason": "Real margin."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Face separates."
+    },
+    "color": {
+      "score": 4,
+      "reason": "Calm cool palette."
+    },
+    "type": {
+      "score": 4,
+      "reason": "One family."
+    },
+    "photo": {
+      "score": 4,
+      "reason": "Gaze matches the action."
+    },
+    "offer": {
+      "score": 3,
+      "reason": "Promise, not a number."
+    },
+    "cta": {
+      "score": 4,
+      "reason": "Two zones."
+    },
+    "trust": {
+      "score": 2,
+      "reason": "No proof on a debt offer."
+    },
+    "glance_3s": {
+      "score": 4,
+      "reason": "Glance gets a person and a promise."
+    }
+  },
+  "emulate": [
+    "A face looking at the device you want used. Three checks. A two-word caption under the code."
+  ],
+  "do_not_copy": [
+    "The mark and the qualifier."
+  ],
+  "anti_patterns": [
+    "Two CTA zones",
+    "no trust marks on a high-stakes offer"
+  ],
+  "summary": "Mailbox debt piece. The path is calm. Proof is missing."
+}

@@ -1,0 +1,76 @@
+{
+  "version": "1.0.0",
+  "vertical": "roofing",
+  "format": { "trim": "6x9", "orientation": "landscape" },
+  "audience_moment": "Homeowner after a named local wind event who has not yet had anyone on the roof.",
+  "focal_element": {
+    "kind": "offer_numeral",
+    "description": "A zero-dollar inspection figure on a flat near-black panel, large enough to be the only thing left when the card is blurred.",
+    "visual_weight_pct": 40,
+    "lead_modality": "image",
+    "lead_modality_area_pct": 70
+  },
+  "eye_path": {
+    "pattern": "diagonal",
+    "stops": [
+      "the roof plane running toward the quiet sky",
+      "the inspection figure on the dark panel",
+      "the phone and labeled code in the same panel"
+    ]
+  },
+  "grid": {
+    "name": "full-bleed-plus-panel",
+    "alignment": "left",
+    "intentional_break": "none"
+  },
+  "scale_ratios": {
+    "hero": "offer",
+    "offer_to_headline_cap": 1.7,
+    "headline_to_body_cap": 3.2,
+    "offer_to_body": 5.0,
+    "front_type_size_count": 3
+  },
+  "palette": {
+    "neutral_hex": ["#1A1A1A", "#F4F1EA"],
+    "accent_hex": "#E23B1A",
+    "second_accent_hex": null,
+    "emotion": "craft",
+    "banned": ["government seal colors", "stock lightning glow", "gold script"]
+  },
+  "type_pairing": {
+    "family_count": 1,
+    "display": "Heavy grotesque for the figure and the four-word headline",
+    "body": "Same family at regular weight for one qualifier line",
+    "script_role": "none"
+  },
+  "photo_brief": {
+    "mode": "documentary_job",
+    "subject": "A completed asphalt roof on a local house, one crew member small in frame looking at the ridge, not at the camera",
+    "crop": "Full-bleed, ridge on a third, open sky in the panel's corner",
+    "gaze": "At the work",
+    "lighting": "Late-day side light, one direction, no HDR",
+    "placement": "full_bleed"
+  },
+  "offer_treatment": {
+    "kind": "numeral_hero",
+    "placement": "Left or lower third, on a solid panel that replaces the sky, not on the shingles",
+    "qualifier": "What the zero dollars covers, in one line under the figure",
+    "expiry": "none"
+  },
+  "density_targets": {
+    "calm_field_pct_min": 30,
+    "front_fact_budget": ["headline", "offer", "response lockup", "one trust line"],
+    "boxed_modules_max": 3,
+    "starbursts_max": 1
+  },
+  "response": {
+    "primary": "phone",
+    "secondary": "qr",
+    "lockup": "Phone in bold under the qualifier; code on an opaque plate with a two-word scan verb, same panel"
+  },
+  "trust": {
+    "front_line": "License number, smaller than the phone",
+    "back_only": ["one job photo sequence", "review count", "manufacturer marks if any"]
+  },
+  "principles_invoked": ["P1", "P4", "P5", "P6", "P7", "TP-01", "TP-04", "TP-05", "TP-09", "AF4", "AF5", "AF8"]
+}

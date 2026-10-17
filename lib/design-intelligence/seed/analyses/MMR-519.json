@@ -1,0 +1,110 @@
+{
+  "id": "MMR-519",
+  "corpus": "mmr",
+  "research_ref": "modern-mail-research images @ 599bf1c",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "secondary",
+  "vertical": "medicare_insurance",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B",
+  "focal_point": "A self-mailer composite: panels of a national brand, calm and systematic. Not a single postcard face.",
+  "eye_path": "Across panels in reading order. Several F-paths.",
+  "grid": "Multi-panel brand grid.",
+  "visual_weight_pct": {
+    "photo": 30,
+    "text": 35,
+    "offer": 10,
+    "white_space": 25
+  },
+  "scale_ratios": "Brand headlines repeat. No one numeral. System scale, not postcard scale.",
+  "type_choices": "Brand sans, consistent, many panels so many apparent sizes.",
+  "palette_hex": [
+    "#FFFFFF",
+    "#007A33",
+    "#111111",
+    "#E6F2EA"
+  ],
+  "photo_art_direction": "Brand photography, diverse members, controlled light. Their system.",
+  "offer_placement": "Plan information, not a local offer. Study the spacing only.",
+  "trust_and_cta": "The brand is the trust. Do not borrow it.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Several panels, one brand."
+    },
+    "hierarchy": {
+      "score": 4,
+      "reason": "System scale is consistent."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Designed balance."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "Real grid."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "Longer than a postcard glance."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Repeated modules."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Brand contrast is built."
+    },
+    "whitespace": {
+      "score": 4,
+      "reason": "Margins are part of the system."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Panels separate."
+    },
+    "color": {
+      "score": 4,
+      "reason": "Their green, not a local accent to copy."
+    },
+    "type": {
+      "score": 4,
+      "reason": "One brand family."
+    },
+    "photo": {
+      "score": 3,
+      "reason": "Polished and not local."
+    },
+    "offer": {
+      "score": 3,
+      "reason": "Information, not one offer."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Brand response system."
+    },
+    "trust": {
+      "score": 3,
+      "reason": "National trust we cannot claim."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "Too much for three seconds, by format."
+    }
+  },
+  "emulate": [
+    "Consistent margins and one family across panels. Then reduce to a single postcard idea."
+  ],
+  "do_not_copy": [
+    "The carrier identity, color, photography, and copy. Style reference only."
+  ],
+  "anti_patterns": [
+    "Tracing a national self-mailer into a local postcard."
+  ],
+  "summary": "Style reference only. A national self-mailer composite. Spacing lessons, not artwork."
+}

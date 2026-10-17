@@ -1,0 +1,110 @@
+{
+  "id": "MMR-397",
+  "corpus": "mmr",
+  "research_ref": "modern-mail-research images @ 599bf1c",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "secondary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "A-",
+  "focal_point": "A large photograph of a finished exterior or window opening. Type is a short stack that does not compete.",
+  "eye_path": "Diagonal through the architecture into a short offer and a phone.",
+  "grid": "Full-bleed photo, type on a quiet band or in the sky. One axis.",
+  "visual_weight_pct": {
+    "photo": 68,
+    "text": 12,
+    "offer": 10,
+    "white_space": 10
+  },
+  "scale_ratios": "Headline and offer are separated. The photo is the lead modality. Type sizes stay few.",
+  "type_choices": "One grotesque, heavy headline, small support. Near the three-size rule.",
+  "palette_hex": [
+    "#F4F1EA",
+    "#1A1A1A",
+    "#6E8B74",
+    "#C4A574"
+  ],
+  "photo_art_direction": "Real exterior, natural light, material visible, no stock family. The crop is the argument.",
+  "offer_placement": "A concrete first step sits on a calm field and does not fight the photo.",
+  "trust_and_cta": "Local mark and a phone. Partner-brand window marks, if present, stay small. Style reference only.",
+  "scores": {
+    "focal": {
+      "score": 5,
+      "reason": "The opening or the finished wall is the one shape."
+    },
+    "hierarchy": {
+      "score": 4,
+      "reason": "Type steps down cleanly."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Heavy photo, light type."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "Bleed and one band."
+    },
+    "eye_path": {
+      "score": 4,
+      "reason": "The architecture points at the type."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Offer and phone sit together."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Type is on a calm field."
+    },
+    "whitespace": {
+      "score": 4,
+      "reason": "The photo's quiet area is the margin."
+    },
+    "figure_ground": {
+      "score": 5,
+      "reason": "Material separates from type."
+    },
+    "color": {
+      "score": 4,
+      "reason": "Colors come from the building."
+    },
+    "type": {
+      "score": 4,
+      "reason": "Few sizes."
+    },
+    "photo": {
+      "score": 5,
+      "reason": "Documentary exterior, right crop."
+    },
+    "offer": {
+      "score": 4,
+      "reason": "One step, clearly placed."
+    },
+    "cta": {
+      "score": 4,
+      "reason": "One phone, findable."
+    },
+    "trust": {
+      "score": 4,
+      "reason": "The work is the trust."
+    },
+    "glance_3s": {
+      "score": 4,
+      "reason": "Glance gets the trade and a next step."
+    }
+  },
+  "emulate": [
+    "Full-bleed result photo, type only on a quiet band, one next step, mark kept small."
+  ],
+  "do_not_copy": [
+    "The remodeler's mark, any manufacturer logo, the photos, the lines. Style reference only."
+  ],
+  "anti_patterns": [
+    "Do not add a second trade or a burst to this structure."
+  ],
+  "summary": "Style reference only. The closest vendor piece to an A: one exterior, one step, type out of the way."
+}

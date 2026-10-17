@@ -1,0 +1,82 @@
+{
+  "version": "1.0.0",
+  "vertical": "medicare_insurance",
+  "format": { "trim": "6x9", "orientation": "landscape" },
+  "audience_moment": "A person new to a plan year who wants a local human to explain choices, not a government notice.",
+  "focal_element": {
+    "kind": "face",
+    "description": "A real advisor, named in the data, photographed simply, large enough to be the person you would call.",
+    "visual_weight_pct": 45,
+    "lead_modality": "image",
+    "lead_modality_area_pct": 65
+  },
+  "eye_path": {
+    "pattern": "Z",
+    "stops": [
+      "the advisor's face",
+      "a short plain-language headline",
+      "one phone in a quiet band"
+    ]
+  },
+  "grid": {
+    "name": "split-40-60",
+    "alignment": "left",
+    "intentional_break": "none"
+  },
+  "scale_ratios": {
+    "hero": "headline",
+    "offer_to_headline_cap": 0.45,
+    "headline_to_body_cap": 3.0,
+    "offer_to_body": 1.6,
+    "front_type_size_count": 3
+  },
+  "palette": {
+    "neutral_hex": ["#F3F0E8", "#1E2A3A"],
+    "accent_hex": "#3E6B8A",
+    "second_accent_hex": null,
+    "emotion": "compliance_calm",
+    "banned": [
+      "eagle or seal",
+      "official-notice folio",
+      "blackletter",
+      "fake response window",
+      "treasury engraving"
+    ]
+  },
+  "type_pairing": {
+    "family_count": 1,
+    "display": "Heavy grotesque or a sturdy serif for one short headline",
+    "body": "Same family, regular, open leading, for one sentence and the required disclaimer",
+    "script_role": "none"
+  },
+  "photo_brief": {
+    "mode": "advisor_portrait",
+    "subject": "The actual local advisor, capable and still, not a stock couple at a laptop",
+    "crop": "Head and shoulders, eyes available to the reader, plain wall behind",
+    "gaze": "Toward the reader",
+    "lighting": "Soft daylight, one direction, no glamour retouch",
+    "placement": "panel_bleed_two_edges"
+  },
+  "offer_treatment": {
+    "kind": "concrete_step_no_discount",
+    "placement": "The headline states the help. No discount numeral. No deadline badge.",
+    "qualifier": "That the conversation is no-cost and no-obligation, in one line",
+    "expiry": "none"
+  },
+  "density_targets": {
+    "calm_field_pct_min": 35,
+    "front_fact_budget": ["headline", "advisor name", "response lockup", "disclaimer"],
+    "boxed_modules_max": 3,
+    "starbursts_max": 1
+  },
+  "response": {
+    "primary": "phone",
+    "secondary": "qr",
+    "lockup": "One phone, large; code on a light plate with a verb such as scheduling a review. No second agency phone."
+  },
+  "trust": {
+    "front_line": "The advisor's name and the agency name, set smaller than the headline",
+    "back_only": ["required plan disclaimer in readable type", "what the meeting covers"]
+  },
+  "principles_invoked": ["P5", "P6", "P8", "P9", "TP-06", "TP-08", "TP-11", "AF1", "AF3", "AF8"]
+}

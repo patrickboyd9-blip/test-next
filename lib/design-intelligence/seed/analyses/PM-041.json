@@ -1,0 +1,110 @@
+{
+  "id": "PM-041",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B+",
+  "focal_point": "A cutout truck and two people on white, then a green price that is the largest type.",
+  "eye_path": "Headline, truck, price, six labeled thumbnails.",
+  "grid": "Centered header, cutout, right price, bottom strip.",
+  "visual_weight_pct": {
+    "photo": 40,
+    "text": 22,
+    "offer": 15,
+    "white_space": 23
+  },
+  "scale_ratios": "Truck dominates the picture. The dollar amount is larger than the headline.",
+  "type_choices": "One rounded sans, about five sizes. The contact line is caption-small.",
+  "palette_hex": [
+    "#6BAF2E",
+    "#1E4FA8",
+    "#FFFFFF",
+    "#E6E6E6"
+  ],
+  "photo_art_direction": "Studio cutout of truck and crew. Bottom strip is real jobs with label bars.",
+  "offer_placement": "Upper right, a savings ceiling. The number lands. A short code sits under it.",
+  "trust_and_cta": "Phone and URL exist in a line smaller than the price. No code image.",
+  "scores": {
+    "focal": {
+      "score": 4,
+      "reason": "Price and truck, price wins the type."
+    },
+    "hierarchy": {
+      "score": 4,
+      "reason": "Numeral over headline."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "White space balances."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "Clear axes."
+    },
+    "eye_path": {
+      "score": 4,
+      "reason": "Path hits the price."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Cutout is one group."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Green on white."
+    },
+    "whitespace": {
+      "score": 4,
+      "reason": "Real margin."
+    },
+    "figure_ground": {
+      "score": 5,
+      "reason": "Cutout on white is the figure-ground lesson."
+    },
+    "color": {
+      "score": 4,
+      "reason": "One green accent."
+    },
+    "type": {
+      "score": 4,
+      "reason": "One family."
+    },
+    "photo": {
+      "score": 3,
+      "reason": "Cutout is clean and a bit stock."
+    },
+    "offer": {
+      "score": 4,
+      "reason": "One ceiling."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Phone is too small."
+    },
+    "trust": {
+      "score": 3,
+      "reason": "Crew uniforms."
+    },
+    "glance_3s": {
+      "score": 4,
+      "reason": "Glance gets a truck and a number."
+    }
+  },
+  "emulate": [
+    "Cutout crew and truck on white. Price as the largest glyph. Phone at least as large as the qualifier."
+  ],
+  "do_not_copy": [
+    "Mark, truck, amount."
+  ],
+  "anti_patterns": [
+    "Contact line smaller than the price"
+  ],
+  "summary": "Mailbox junk-removal card. Picture, price, and white space are clear. The phone is shy."
+}

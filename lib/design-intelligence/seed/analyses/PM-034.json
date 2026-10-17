@@ -1,0 +1,110 @@
+{
+  "id": "PM-034",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "plumbing",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B",
+  "focal_point": "Two magenta circles over a technician and a water heater. The larger circle is the deal.",
+  "eye_path": "Headline, bullets, then the circles.",
+  "grid": "Curved split, copy and photo.",
+  "visual_weight_pct": {
+    "photo": 48,
+    "text": 22,
+    "offer": 18,
+    "white_space": 12
+  },
+  "scale_ratios": "Headline is large. The bigger circle is the offer and overlaps a second, smaller deal.",
+  "type_choices": "One sans, about five sizes. White on magenta is clearest.",
+  "palette_hex": [
+    "#E2186A",
+    "#FFFFFF",
+    "#111111",
+    "#C0C4C8"
+  ],
+  "photo_art_direction": "In-home technician beside the equipment, direct gaze. Tank labels add noise.",
+  "offer_placement": "Overlapping circles. Two discounts fight and cover the person.",
+  "trust_and_cta": "Phone and URL under the mark. No code.",
+  "scores": {
+    "focal": {
+      "score": 4,
+      "reason": "The big circle leads."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "A second circle ties it."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Curve balances."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "Split is clear."
+    },
+    "eye_path": {
+      "score": 4,
+      "reason": "Ends at the circles."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Circles should be one group and are two."
+    },
+    "contrast": {
+      "score": 5,
+      "reason": "Magenta contrast."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Copy side has air."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Circles separate."
+    },
+    "color": {
+      "score": 4,
+      "reason": "One accent."
+    },
+    "type": {
+      "score": 4,
+      "reason": "One family."
+    },
+    "photo": {
+      "score": 3,
+      "reason": "Person plus product, gaze at camera."
+    },
+    "offer": {
+      "score": 3,
+      "reason": "Two discounts."
+    },
+    "cta": {
+      "score": 4,
+      "reason": "Phone is findable."
+    },
+    "trust": {
+      "score": 4,
+      "reason": "Equipment in the home."
+    },
+    "glance_3s": {
+      "score": 4,
+      "reason": "Glance gets a magenta number."
+    }
+  },
+  "emulate": [
+    "A curved edge between copy and a person-plus-product photo. One price circle."
+  ],
+  "do_not_copy": [
+    "Mark and both circles."
+  ],
+  "anti_patterns": [
+    "Two sticker prices on one body"
+  ],
+  "summary": "Mailbox water-treatment card. The split is fast. Two circles split the offer."
+}

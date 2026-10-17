@@ -1,0 +1,112 @@
+{
+  "id": "PM-011",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "D",
+  "focal_point": "A gold burst, several seals, and an event date. Everything shouts.",
+  "eye_path": "Burst to seals to a date to a location. No rest.",
+  "grid": "Centered pile. Axes do not hold.",
+  "visual_weight_pct": {
+    "photo": 10,
+    "text": 40,
+    "offer": 25,
+    "white_space": 25
+  },
+  "scale_ratios": "Burst, seals, and date are all display size.",
+  "type_choices": "Gold serif, burst type, blackletter pressure. Many families.",
+  "palette_hex": [
+    "#C4A35A",
+    "#1A1A1A",
+    "#F4F1EA",
+    "#8B1E1E"
+  ],
+  "photo_art_direction": "Little photography. Coin or metal graphics. Decorative.",
+  "offer_placement": "An event window and a buying claim, split across seals.",
+  "trust_and_cta": "Seals substitute for proof. A phone is one of many elements.",
+  "scores": {
+    "focal": {
+      "score": 1,
+      "reason": "No single element."
+    },
+    "hierarchy": {
+      "score": 1,
+      "reason": "Display sizes tie."
+    },
+    "balance": {
+      "score": 2,
+      "reason": "Centered noise."
+    },
+    "grid": {
+      "score": 1,
+      "reason": "No grid."
+    },
+    "eye_path": {
+      "score": 2,
+      "reason": "The eye hunts."
+    },
+    "gestalt": {
+      "score": 1,
+      "reason": "Each seal is its own group."
+    },
+    "contrast": {
+      "score": 3,
+      "reason": "Gold on cream is soft."
+    },
+    "whitespace": {
+      "score": 2,
+      "reason": "Gaps do not group."
+    },
+    "figure_ground": {
+      "score": 2,
+      "reason": "No clear figure."
+    },
+    "color": {
+      "score": 2,
+      "reason": "Gold-and-seal palette."
+    },
+    "type": {
+      "score": 1,
+      "reason": "Many families."
+    },
+    "photo": {
+      "score": 1,
+      "reason": "No documentary subject."
+    },
+    "offer": {
+      "score": 2,
+      "reason": "Several claims."
+    },
+    "cta": {
+      "score": 2,
+      "reason": "Phone is lost."
+    },
+    "trust": {
+      "score": 1,
+      "reason": "Fake-official seals."
+    },
+    "glance_3s": {
+      "score": 2,
+      "reason": "Glance gets gold, not a next step."
+    }
+  },
+  "emulate": [
+    "Nothing from the pile. An event can be one date and one address in two sizes."
+  ],
+  "do_not_copy": [
+    "Seals, burst, mark, dates."
+  ],
+  "anti_patterns": [
+    "AP-008 starburst pile",
+    "seal costume",
+    "many display sizes"
+  ],
+  "summary": "Weak mailbox piece. A buying-event card where seals and a burst replace a design. A calibration D."
+}

@@ -1,0 +1,110 @@
+{
+  "id": "MMR-584",
+  "corpus": "mmr",
+  "research_ref": "modern-mail-research images @ 599bf1c",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "secondary",
+  "vertical": "roofing",
+  "faces": [
+    "front"
+  ],
+  "low_res": true,
+  "shared_vendor_style": true,
+  "grade": "C+",
+  "focal_point": "Residential job photo in the series frame.",
+  "eye_path": "Stacked bands or a split into an offer tile, the default path of this vendor series.",
+  "grid": "Bands or a split panel. Shared house grid, not an original composition.",
+  "visual_weight_pct": {
+    "photo": 42,
+    "text": 24,
+    "offer": 20,
+    "white_space": 14
+  },
+  "scale_ratios": "Offer tile is large and usually close to the headline, not a clean 1.6\u00d7.",
+  "type_choices": "Condensed grotesque, tile numerals, more than three sizes, repeated from card to card.",
+  "palette_hex": [
+    "#102A43",
+    "#F5C518",
+    "#E10600",
+    "#FFFFFF"
+  ],
+  "photo_art_direction": "Real residential work, low resolution.",
+  "offer_placement": "First-step tile.",
+  "trust_and_cta": "Phone near the offer. A small trust stack. All of it is this sender's, not reusable.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Photo and tile tie."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "Scale is loud and flat."
+    },
+    "balance": {
+      "score": 3,
+      "reason": "Vendor balance."
+    },
+    "grid": {
+      "score": 3,
+      "reason": "Shared grid."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "Band path."
+    },
+    "gestalt": {
+      "score": 3,
+      "reason": "Tile groups the deal."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "High contrast."
+    },
+    "whitespace": {
+      "score": 2,
+      "reason": "Little calm field."
+    },
+    "figure_ground": {
+      "score": 3,
+      "reason": "Tile separates."
+    },
+    "color": {
+      "score": 3,
+      "reason": "Series colors."
+    },
+    "type": {
+      "score": 3,
+      "reason": "Repeated sizes."
+    },
+    "photo": {
+      "score": 3,
+      "reason": "See the photo note."
+    },
+    "offer": {
+      "score": 3,
+      "reason": "One first step, templated."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Phone attached."
+    },
+    "trust": {
+      "score": 3,
+      "reason": "Small trust stack."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "Glance gets a roof deal."
+    }
+  },
+  "emulate": [
+    "Keep one first-step tile and one job photo; drop the repeated chrome."
+  ],
+  "do_not_copy": [
+    "The contractor mark, phone, headlines, and the vendor's repeated yellow-or-red tile system. Style reference only. This series shares one house style, so repetition is not independent proof."
+  ],
+  "anti_patterns": [
+    "Shared template"
+  ],
+  "summary": "Style reference. Standard residential tile card."
+}

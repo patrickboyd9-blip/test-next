@@ -1,0 +1,109 @@
+{
+  "id": "MMR-516",
+  "corpus": "mmr",
+  "research_ref": "modern-mail-research images @ 599bf1c",
+  "use_class": "research_reference",
+  "mailbox_weight": "secondary",
+  "vertical": "medicare_insurance",
+  "faces": [
+    "front"
+  ],
+  "low_res": true,
+  "shared_vendor_style": false,
+  "grade": "B",
+  "focal_point": "A named local advisor's face. The person is the offer of help.",
+  "eye_path": "Face, name, phone.",
+  "grid": "Portrait plus a type column.",
+  "visual_weight_pct": {
+    "photo": 45,
+    "text": 25,
+    "offer": 8,
+    "white_space": 22
+  },
+  "scale_ratios": "Name and headline are clear. Phone is secondary. Few sizes.",
+  "type_choices": "Sans, readable, not clever.",
+  "palette_hex": [
+    "#F7F4EE",
+    "#1E3A5F",
+    "#333333"
+  ],
+  "photo_art_direction": "Real local headshot, plain background. Do not reuse the person or the license details.",
+  "offer_placement": "A no-pressure consult, not a deadline. Right kind of Medicare offer.",
+  "trust_and_cta": "Name, local number, license energy. One action.",
+  "scores": {
+    "focal": {
+      "score": 4,
+      "reason": "The face leads."
+    },
+    "hierarchy": {
+      "score": 4,
+      "reason": "Name, then phone."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Portrait weight is balanced by type."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "Simple split."
+    },
+    "eye_path": {
+      "score": 4,
+      "reason": "Three stops."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Name and phone group."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Ink on a light field."
+    },
+    "whitespace": {
+      "score": 4,
+      "reason": "Enough paper."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Face separates."
+    },
+    "color": {
+      "score": 4,
+      "reason": "Calm neutrals."
+    },
+    "type": {
+      "score": 4,
+      "reason": "Plain and few."
+    },
+    "photo": {
+      "score": 4,
+      "reason": "Real person, right gaze."
+    },
+    "offer": {
+      "score": 4,
+      "reason": "Consult, not a fake clock."
+    },
+    "cta": {
+      "score": 4,
+      "reason": "One phone."
+    },
+    "trust": {
+      "score": 4,
+      "reason": "A named human is the trust line."
+    },
+    "glance_3s": {
+      "score": 4,
+      "reason": "Glance gets a person you could call."
+    }
+  },
+  "emulate": [
+    "A real advisor, plain ground, one phone, no official costume. Never reuse this sitter."
+  ],
+  "do_not_copy": [
+    "The face, name, license, and phone. Personal data."
+  ],
+  "anti_patterns": [
+    "Reusing a private sitter as stock."
+  ],
+  "summary": "A named-advisor Medicare card. The pattern is an A direction; this file is a B because it is small and slightly plain. Do not copy the person."
+}

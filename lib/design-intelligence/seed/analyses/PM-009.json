@@ -1,0 +1,111 @@
+{
+  "id": "PM-009",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "healthcare",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "C",
+  "focal_point": "A dense type field for a medical-alert product. No photograph leads.",
+  "eye_path": "F down a long headline into features and a phone.",
+  "grid": "Centered or left type stack. Little structure beyond bands.",
+  "visual_weight_pct": {
+    "photo": 5,
+    "text": 60,
+    "offer": 10,
+    "white_space": 25
+  },
+  "scale_ratios": "Headline is large. Feature lines multiply sizes.",
+  "type_choices": "Heavy sans, many lines, more than three sizes.",
+  "palette_hex": [
+    "#FFFFFF",
+    "#C41230",
+    "#1A1A1A",
+    "#F4F1EA"
+  ],
+  "photo_art_direction": "Almost none. A product icon at most.",
+  "offer_placement": "The product claim is the offer and it is a paragraph.",
+  "trust_and_cta": "Phone is present. Urgency language is the trust substitute.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Headline leads by default."
+    },
+    "hierarchy": {
+      "score": 2,
+      "reason": "Feature lines flatten it."
+    },
+    "balance": {
+      "score": 3,
+      "reason": "Type-heavy."
+    },
+    "grid": {
+      "score": 2,
+      "reason": "Weak grid."
+    },
+    "eye_path": {
+      "score": 2,
+      "reason": "Long F-path."
+    },
+    "gestalt": {
+      "score": 2,
+      "reason": "Lines do not group."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Red and black work."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Some margin, then a wall."
+    },
+    "figure_ground": {
+      "score": 3,
+      "reason": "Headline is the figure."
+    },
+    "color": {
+      "score": 3,
+      "reason": "Alarm red."
+    },
+    "type": {
+      "score": 2,
+      "reason": "Too many sizes."
+    },
+    "photo": {
+      "score": 1,
+      "reason": "No person or product photo."
+    },
+    "offer": {
+      "score": 2,
+      "reason": "Claim, not one number."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Phone exists."
+    },
+    "trust": {
+      "score": 2,
+      "reason": "Urgency instead of proof."
+    },
+    "glance_3s": {
+      "score": 2,
+      "reason": "Glance gets alarm, not a step."
+    }
+  },
+  "emulate": [
+    "If the product is a button, show a person using it and one phone. Do not set a paragraph as the hero."
+  ],
+  "do_not_copy": [
+    "Mark and claims."
+  ],
+  "anti_patterns": [
+    "Type wall",
+    "fear without a picture"
+  ],
+  "summary": "Mailbox alert piece. Loud type, no picture, too many facts."
+}

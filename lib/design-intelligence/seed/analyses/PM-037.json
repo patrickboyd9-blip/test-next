@@ -1,0 +1,111 @@
+{
+  "id": "PM-037",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "C+",
+  "focal_point": "A styled kitchen. A small red consult box is easy to skip.",
+  "eye_path": "Header, kitchen, three labeled thumbnails.",
+  "grid": "White header, full-bleed hero, three photos.",
+  "visual_weight_pct": {
+    "photo": 70,
+    "text": 18,
+    "offer": 6,
+    "white_space": 6
+  },
+  "scale_ratios": "Kitchen dominates. The consult box is smaller than the headline.",
+  "type_choices": "Condensed sans, about four sizes. Red captions.",
+  "palette_hex": [
+    "#F4F1EA",
+    "#C4342A",
+    "#C0C4C8",
+    "#C4A574"
+  ],
+  "photo_art_direction": "Editorial kitchen, plus a bath, a modern unit, and an addition.",
+  "offer_placement": "Red box for a free consult, no method. Red is also used for captions, so the offer does not separate.",
+  "trust_and_cta": "No phone, no code, no URL.",
+  "scores": {
+    "focal": {
+      "score": 4,
+      "reason": "Kitchen leads."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "Consult is a label."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Photo-heavy."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "Hero plus row."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "No response at the end."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Red is used twice."
+    },
+    "contrast": {
+      "score": 3,
+      "reason": "Red on white is fine and repeated."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Header is thin."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Kitchen separates."
+    },
+    "color": {
+      "score": 4,
+      "reason": "Material color."
+    },
+    "type": {
+      "score": 3,
+      "reason": "Consistent sans."
+    },
+    "photo": {
+      "score": 4,
+      "reason": "Strong interiors."
+    },
+    "offer": {
+      "score": 2,
+      "reason": "Offer has no action."
+    },
+    "cta": {
+      "score": 1,
+      "reason": "No device."
+    },
+    "trust": {
+      "score": 2,
+      "reason": "No local proof."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "Glance gets a kitchen."
+    }
+  },
+  "emulate": [
+    "One hero interior plus a labeled row. The offer box must contain a phone."
+  ],
+  "do_not_copy": [
+    "Photos and the red box."
+  ],
+  "anti_patterns": [
+    "Offer flag with no contact",
+    "accent color reused for captions"
+  ],
+  "summary": "Mailbox remodel card. Project photography is clear. There is no way to respond."
+}

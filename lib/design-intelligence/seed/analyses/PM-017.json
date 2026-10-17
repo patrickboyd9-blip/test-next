@@ -1,0 +1,112 @@
+{
+  "id": "PM-017",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "D+",
+  "focal_point": "Script wordmark, an arched window, a yellow product cluster, and a starburst. No single figure.",
+  "eye_path": "A crowded Z with a diagonal through the arch.",
+  "grid": "Three loose zones broken by seals.",
+  "visual_weight_pct": {
+    "photo": 28,
+    "text": 34,
+    "offer": 18,
+    "white_space": 20
+  },
+  "scale_ratios": "Nothing is 1.6\u00d7 anything. Several display sizes.",
+  "type_choices": "Script, sans, condensed burst, a chalky spec panel. Many families.",
+  "palette_hex": [
+    "#0D3C8C",
+    "#F5C518",
+    "#FFFFFF",
+    "#1FA37A"
+  ],
+  "photo_art_direction": "Stock view through glass to palms. Illustration on the other side. Two styles.",
+  "offer_placement": "A free-upgrade line tucked under a sun badge, smaller than the script.",
+  "trust_and_cta": "Warranty seal and a one-day burst. Phone is large and still lost.",
+  "scores": {
+    "focal": {
+      "score": 2,
+      "reason": "Four heroes."
+    },
+    "hierarchy": {
+      "score": 2,
+      "reason": "No ladder."
+    },
+    "balance": {
+      "score": 2,
+      "reason": "Unstable."
+    },
+    "grid": {
+      "score": 2,
+      "reason": "Zones leak."
+    },
+    "eye_path": {
+      "score": 2,
+      "reason": "No single path."
+    },
+    "gestalt": {
+      "score": 2,
+      "reason": "Seals are orphans."
+    },
+    "contrast": {
+      "score": 3,
+      "reason": "Blue and yellow separate."
+    },
+    "whitespace": {
+      "score": 2,
+      "reason": "Little air."
+    },
+    "figure_ground": {
+      "score": 3,
+      "reason": "Too many figures."
+    },
+    "color": {
+      "score": 3,
+      "reason": "Tropical template."
+    },
+    "type": {
+      "score": 2,
+      "reason": "Script headline."
+    },
+    "photo": {
+      "score": 3,
+      "reason": "Stock view plus illustration."
+    },
+    "offer": {
+      "score": 2,
+      "reason": "Offer is buried."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Phone is one of many."
+    },
+    "trust": {
+      "score": 3,
+      "reason": "Badge pile."
+    },
+    "glance_3s": {
+      "score": 2,
+      "reason": "Glance gets blue and gold noise."
+    }
+  },
+  "emulate": [
+    "One arched view of the result, type in one column. Delete the seals."
+  ],
+  "do_not_copy": [
+    "Script mark, sun badge, seals, palm art."
+  ],
+  "anti_patterns": [
+    "AP-006 clutter",
+    "AP-008 starburst",
+    "photo plus illustration"
+  ],
+  "summary": "Mailbox glass card. Color is strong and every device shouts. A weak piece for calibration."
+}

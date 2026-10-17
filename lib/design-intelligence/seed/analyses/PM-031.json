@@ -1,0 +1,111 @@
+{
+  "id": "PM-031",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B",
+  "focal_point": "A bright after-kitchen, with a small framed before inset.",
+  "eye_path": "Headline band, island, inset, then a burst and a phone.",
+  "grid": "Full-bleed photo, white footer, burst overlapping the corner.",
+  "visual_weight_pct": {
+    "photo": 58,
+    "text": 18,
+    "offer": 12,
+    "white_space": 12
+  },
+  "scale_ratios": "Kitchen dominates. Phone and burst are secondary and similar.",
+  "type_choices": "Bold sans, italic subhead, serif mark. Curved burst type.",
+  "palette_hex": [
+    "#F4F1EA",
+    "#1E4E8C",
+    "#7FDEE4",
+    "#C0C4C8"
+  ],
+  "photo_art_direction": "Bright finished kitchen. Darker inset reads as the old room. After label is tiny.",
+  "offer_placement": "A pricing promise in the burst plus a free visit by the phone. Two offers.",
+  "trust_and_cta": "Large phone. No code.",
+  "scores": {
+    "focal": {
+      "score": 4,
+      "reason": "The kitchen leads."
+    },
+    "hierarchy": {
+      "score": 4,
+      "reason": "Phone is clear."
+    },
+    "balance": {
+      "score": 3,
+      "reason": "Burst pulls the corner."
+    },
+    "grid": {
+      "score": 3,
+      "reason": "Bleed plus footer."
+    },
+    "eye_path": {
+      "score": 4,
+      "reason": "Inset then phone."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Burst is a second group."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Blue on cream."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Footer is tight."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Kitchen separates."
+    },
+    "color": {
+      "score": 4,
+      "reason": "One blue accent."
+    },
+    "type": {
+      "score": 3,
+      "reason": "Curved burst type."
+    },
+    "photo": {
+      "score": 4,
+      "reason": "Before inset is the right device."
+    },
+    "offer": {
+      "score": 4,
+      "reason": "Two offers in the footer."
+    },
+    "cta": {
+      "score": 4,
+      "reason": "Phone is findable."
+    },
+    "trust": {
+      "score": 3,
+      "reason": "The comparison is the proof."
+    },
+    "glance_3s": {
+      "score": 4,
+      "reason": "Glance gets a new kitchen."
+    }
+  },
+  "emulate": [
+    "A small labeled before on a large after. One accent shape for one offer."
+  ],
+  "do_not_copy": [
+    "Mark and burst."
+  ],
+  "anti_patterns": [
+    "Two offers in one footer",
+    "curved type"
+  ],
+  "summary": "Mailbox cabinet card. The inset comparison is the lesson. The footer holds two deals."
+}

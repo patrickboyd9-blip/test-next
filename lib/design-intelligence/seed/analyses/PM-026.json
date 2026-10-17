@@ -1,0 +1,112 @@
+{
+  "id": "PM-026",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "C-",
+  "focal_point": "An elevated patio. A thin script title sits on it. The percent is low contrast at the lower right.",
+  "eye_path": "Script, hero patio, three insets. The offer is off the path.",
+  "grid": "Hero plus a right column of details.",
+  "visual_weight_pct": {
+    "photo": 70,
+    "text": 16,
+    "offer": 6,
+    "white_space": 8
+  },
+  "scale_ratios": "Photo, then script. Percent is smaller and weak.",
+  "type_choices": "Script title, gold serif mark, small condensed offer. Three families.",
+  "palette_hex": [
+    "#F4F1EA",
+    "#2F5F9E",
+    "#C4B8A4",
+    "#1A1A1A"
+  ],
+  "photo_art_direction": "The strongest hardscape photo in the mailbox: overhead patio, daylight, no people. Insets are small.",
+  "offer_placement": "Lower right on the stone. Does not survive a glance.",
+  "trust_and_cta": "Tiny URL. No phone, no code.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "The patio leads."
+    },
+    "hierarchy": {
+      "score": 2,
+      "reason": "Script and offer fail the ladder."
+    },
+    "balance": {
+      "score": 3,
+      "reason": "Photo-heavy."
+    },
+    "grid": {
+      "score": 3,
+      "reason": "Hero plus column."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "Offer is off the path."
+    },
+    "gestalt": {
+      "score": 3,
+      "reason": "Insets are a group; type is not."
+    },
+    "contrast": {
+      "score": 2,
+      "reason": "Type on stone fails."
+    },
+    "whitespace": {
+      "score": 2,
+      "reason": "Little paper."
+    },
+    "figure_ground": {
+      "score": 2,
+      "reason": "Script disappears."
+    },
+    "color": {
+      "score": 4,
+      "reason": "Material color is good."
+    },
+    "type": {
+      "score": 2,
+      "reason": "Script headline."
+    },
+    "photo": {
+      "score": 5,
+      "reason": "Excellent hero."
+    },
+    "offer": {
+      "score": 2,
+      "reason": "Buried percent."
+    },
+    "cta": {
+      "score": 1,
+      "reason": "No response."
+    },
+    "trust": {
+      "score": 2,
+      "reason": "Logo only."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "Glance gets a patio."
+    }
+  },
+  "emulate": [
+    "One elevated hero. Put type on sky or stucco, never on the texture, and give it a phone."
+  ],
+  "do_not_copy": [
+    "Script title and mark."
+  ],
+  "anti_patterns": [
+    "AF9 type on a busy photo",
+    "script as the headline",
+    "no CTA"
+  ],
+  "summary": "Mailbox paver card. The overhead photo is the best picture here. The type fails on top of it."
+}

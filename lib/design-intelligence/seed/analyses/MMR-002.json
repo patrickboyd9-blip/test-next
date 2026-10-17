@@ -1,0 +1,112 @@
+{
+  "id": "MMR-002",
+  "corpus": "mmr",
+  "research_ref": "modern-mail-research images @ 599bf1c",
+  "use_class": "research_reference",
+  "mailbox_weight": "secondary",
+  "vertical": "hvac",
+  "faces": [
+    "front"
+  ],
+  "low_res": true,
+  "shared_vendor_style": false,
+  "grade": "C+",
+  "focal_point": "A family grouped at the left and a blue header fight a yellow savings badge on the right. No single element holds 35\u201350%.",
+  "eye_path": "Z that stalls: header, family, badge, then a pile of small service lines.",
+  "grid": "Loose two-column split under a full-width header. Many alignments.",
+  "visual_weight_pct": {
+    "photo": 35,
+    "text": 30,
+    "offer": 18,
+    "white_space": 17
+  },
+  "scale_ratios": "Headline, badge, and phone are within a narrow band. The offer is not 1.6\u00d7 the headline.",
+  "type_choices": "Several sizes in one grotesque plus a script logo. More than three sizes.",
+  "palette_hex": [
+    "#1F4E79",
+    "#F5C518",
+    "#FFFFFF",
+    "#E87722"
+  ],
+  "photo_art_direction": "Staged indoor family, all looking at camera. Stock-tell smiles, even light, no equipment.",
+  "offer_placement": "Yellow badge on the right is the deal, but a second seasonal line and a service list compete with it.",
+  "trust_and_cta": "Phone is present and reasonably large. Badges and small print share the bottom. More than one action energy.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Family and yellow badge tie."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "No clear size ladder from offer to body."
+    },
+    "balance": {
+      "score": 3,
+      "reason": "Left photo and right badge are both heavy."
+    },
+    "grid": {
+      "score": 3,
+      "reason": "Header plus two columns, alignments drift."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "Path has four stops of similar weight."
+    },
+    "gestalt": {
+      "score": 3,
+      "reason": "Offer, list, and phone are separate groups."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Blue, yellow, and white separate well enough."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Little calm field once the list starts."
+    },
+    "figure_ground": {
+      "score": 3,
+      "reason": "Badge separates; type on the photo is mixed."
+    },
+    "color": {
+      "score": 3,
+      "reason": "Blue plus yellow is a coupon code, not a palette."
+    },
+    "type": {
+      "score": 3,
+      "reason": "Script logo plus too many sizes."
+    },
+    "photo": {
+      "score": 2,
+      "reason": "Stock family does not show the trade."
+    },
+    "offer": {
+      "score": 3,
+      "reason": "Savings badge is visible and not alone."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Phone exists; it is not one lockup with a verb."
+    },
+    "trust": {
+      "score": 3,
+      "reason": "Small trust clutter rather than one line."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "A glance gets HVAC and a discount, not one next step."
+    }
+  },
+  "emulate": [
+    "A full-height photo of people only if they are the customer of a comfort product, with type on a solid field."
+  ],
+  "do_not_copy": [
+    "The family photograph, the badge shape, the script mark, the seasonal line."
+  ],
+  "anti_patterns": [
+    "AP-005 stock family",
+    "AP-006 module pile",
+    "two offers sharing the front"
+  ],
+  "summary": "A low-resolution HVAC front in the common coupon split. Readable, and it behaves like a template: stock family, yellow badge, service list."
+}

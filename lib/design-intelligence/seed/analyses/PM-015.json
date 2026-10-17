@@ -1,0 +1,111 @@
+{
+  "id": "PM-015",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "plumbing",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "C+",
+  "focal_point": "A hot-pink scalloped rail of three prices, plus a kneeling tech.",
+  "eye_path": "Z from the worker to the rail.",
+  "grid": "Photo, name, coupon column.",
+  "visual_weight_pct": {
+    "photo": 30,
+    "text": 20,
+    "offer": 38,
+    "white_space": 12
+  },
+  "scale_ratios": "Three prices, nearly equal. No single dominant figure.",
+  "type_choices": "Condensed header, serif mark, heavy pink numerals. Many sizes.",
+  "palette_hex": [
+    "#111111",
+    "#FFFFFF",
+    "#E31C79",
+    "#6B8F4E"
+  ],
+  "photo_art_direction": "Tech in the grass with a machine, gaze on the work. Documentary.",
+  "offer_placement": "Right rail, three prices. The top one should have been the only large figure.",
+  "trust_and_cta": "Years, phone, URL, captioned code. Three ways.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Rail and tech tie."
+    },
+    "hierarchy": {
+      "score": 2,
+      "reason": "Three prices."
+    },
+    "balance": {
+      "score": 3,
+      "reason": "Split ok."
+    },
+    "grid": {
+      "score": 3,
+      "reason": "Three columns."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "Path works."
+    },
+    "gestalt": {
+      "score": 3,
+      "reason": "Rail groups too much."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Pink separates."
+    },
+    "whitespace": {
+      "score": 2,
+      "reason": "Cramped center."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Rail is the figure."
+    },
+    "color": {
+      "score": 3,
+      "reason": "Pink coupon."
+    },
+    "type": {
+      "score": 3,
+      "reason": "Many voices."
+    },
+    "photo": {
+      "score": 4,
+      "reason": "Good job photo."
+    },
+    "offer": {
+      "score": 3,
+      "reason": "Three prices."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Three responses."
+    },
+    "trust": {
+      "score": 3,
+      "reason": "A years line."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "Glance gets a pink coupon."
+    }
+  },
+  "emulate": [
+    "The kneeling tech. One price in that rail."
+  ],
+  "do_not_copy": [
+    "Mark and the three prices."
+  ],
+  "anti_patterns": [
+    "Triple offer",
+    "scalloped coupon template"
+  ],
+  "summary": "Mailbox plumbing and air card. Good photo, three prices. This is the C+ the generator must beat."
+}

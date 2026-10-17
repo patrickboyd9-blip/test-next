@@ -1,0 +1,111 @@
+{
+  "id": "PM-029",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B-",
+  "focal_point": "A dusk house with the door lights on. A phone in the yellow header is the type hero.",
+  "eye_path": "Header, three elevations, footer code.",
+  "grid": "Yellow bands, three photo widths.",
+  "visual_weight_pct": {
+    "photo": 48,
+    "text": 22,
+    "offer": 8,
+    "white_space": 22
+  },
+  "scale_ratios": "Center photo dominates. Phone and headline are similar. Badge is small.",
+  "type_choices": "Condensed sans, script in the mark, cramped footer.",
+  "palette_hex": [
+    "#F6E56B",
+    "#2E7FBF",
+    "#111111",
+    "#5C4A6B"
+  ],
+  "photo_art_direction": "Three real elevations at dusk. Center is wet and specific.",
+  "offer_placement": "A small free-estimate badge. Coupon action is microtype.",
+  "trust_and_cta": "Large header phone. Bare code in the footer. License in fine print.",
+  "scores": {
+    "focal": {
+      "score": 4,
+      "reason": "Center house leads."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "Phone ties the headline."
+    },
+    "balance": {
+      "score": 3,
+      "reason": "Header-heavy."
+    },
+    "grid": {
+      "score": 3,
+      "reason": "Bands."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "Three houses stall the path."
+    },
+    "gestalt": {
+      "score": 3,
+      "reason": "Header groups the phone."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Yellow contrast."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Footer cramped."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "House lights separate."
+    },
+    "color": {
+      "score": 3,
+      "reason": "Coupon yellow."
+    },
+    "type": {
+      "score": 3,
+      "reason": "Footer is small."
+    },
+    "photo": {
+      "score": 3,
+      "reason": "Real dusk doors."
+    },
+    "offer": {
+      "score": 3,
+      "reason": "Badge is small."
+    },
+    "cta": {
+      "score": 4,
+      "reason": "Phone works."
+    },
+    "trust": {
+      "score": 4,
+      "reason": "License present."
+    },
+    "glance_3s": {
+      "score": 4,
+      "reason": "Glance gets a door and a phone."
+    }
+  },
+  "emulate": [
+    "One dusk door, phone on the band, code labeled."
+  ],
+  "do_not_copy": [
+    "Mark and phone. Same trade as PM-007, different art."
+  ],
+  "anti_patterns": [
+    "Bare QR",
+    "near-duplicate elevations"
+  ],
+  "summary": "Another mailbox garage card. Better dusk photo, same template habits."
+}

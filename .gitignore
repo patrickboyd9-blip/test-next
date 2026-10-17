@@ -41,4 +41,6 @@ yarn-error.log*
 next-env.d.ts
 # local application data
 .data/
+# Reference scans stay out of git. scripts/seed-reference-library.ts registers them.
+/reference-library/
 tailwindcss-*.log

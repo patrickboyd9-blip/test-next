@@ -1,0 +1,111 @@
+{
+  "id": "MMR-581",
+  "corpus": "mmr",
+  "research_ref": "modern-mail-research images @ 599bf1c",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "secondary",
+  "vertical": "roofing",
+  "faces": [
+    "front"
+  ],
+  "low_res": true,
+  "shared_vendor_style": true,
+  "grade": "C",
+  "focal_point": "A joke or character treatment leads. No clear offer figure.",
+  "eye_path": "Stacked bands or a split into an offer tile, the default path of this vendor series.",
+  "grid": "Bands or a split panel. Shared house grid, not an original composition.",
+  "visual_weight_pct": {
+    "photo": 42,
+    "text": 24,
+    "offer": 20,
+    "white_space": 14
+  },
+  "scale_ratios": "Offer tile is large and usually close to the headline, not a clean 1.6\u00d7.",
+  "type_choices": "Condensed grotesque, tile numerals, more than three sizes, repeated from card to card.",
+  "palette_hex": [
+    "#102A43",
+    "#F5C518",
+    "#E10600",
+    "#FFFFFF"
+  ],
+  "photo_art_direction": "Humorous or character image. A third-party credit sits on the picture and is not our art.",
+  "offer_placement": "No visible first-step tile. Humor replaced the offer.",
+  "trust_and_cta": "Phone near the offer. A small trust stack. All of it is this sender's, not reusable.",
+  "scores": {
+    "focal": {
+      "score": 2,
+      "reason": "No single hero."
+    },
+    "hierarchy": {
+      "score": 2,
+      "reason": "Many sizes."
+    },
+    "balance": {
+      "score": 3,
+      "reason": "Even."
+    },
+    "grid": {
+      "score": 3,
+      "reason": "Template grid."
+    },
+    "eye_path": {
+      "score": 2,
+      "reason": "Path wanders."
+    },
+    "gestalt": {
+      "score": 3,
+      "reason": "Several groups."
+    },
+    "contrast": {
+      "score": 3,
+      "reason": "Contrast varies."
+    },
+    "whitespace": {
+      "score": 2,
+      "reason": "Dense."
+    },
+    "figure_ground": {
+      "score": 3,
+      "reason": "Weak figure."
+    },
+    "color": {
+      "score": 3,
+      "reason": "Too many series colors."
+    },
+    "type": {
+      "score": 2,
+      "reason": "Extra faces."
+    },
+    "photo": {
+      "score": 2,
+      "reason": "Photo problem noted."
+    },
+    "offer": {
+      "score": 2,
+      "reason": "Offer missing or split."
+    },
+    "cta": {
+      "score": 2,
+      "reason": "Response weak."
+    },
+    "trust": {
+      "score": 2,
+      "reason": "Thin or gimmick trust."
+    },
+    "glance_3s": {
+      "score": 2,
+      "reason": "Glance misses a next step."
+    }
+  },
+  "emulate": [
+    "Keep one first-step tile and one job photo; drop the repeated chrome."
+  ],
+  "do_not_copy": [
+    "The contractor mark, phone, headlines, and the vendor's repeated yellow-or-red tile system. Style reference only. This series shares one house style, so repetition is not independent proof."
+  ],
+  "anti_patterns": [
+    "Humor with no offer",
+    "third-party art credit"
+  ],
+  "summary": "Style reference. The joke is memorable and there is nothing to do. That is a C, not a voice to copy."
+}

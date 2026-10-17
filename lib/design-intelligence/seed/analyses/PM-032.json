@@ -1,0 +1,111 @@
+{
+  "id": "PM-032",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "D",
+  "focal_point": "One heavy black line on a diagonal across a yellow field. It may be an address face, not a designed front.",
+  "eye_path": "Mark, diagonal line, white mailing panel. A redaction bar covers part of the panel and was not read.",
+  "grid": "Almost none.",
+  "visual_weight_pct": {
+    "photo": 0,
+    "text": 25,
+    "offer": 0,
+    "white_space": 75
+  },
+  "scale_ratios": "The diagonal line is the only large element. No price.",
+  "type_choices": "A custom mark and one line. Three sizes at most, used without a structure.",
+  "palette_hex": [
+    "#F3E56B",
+    "#C4202A",
+    "#111111",
+    "#FFFFFF"
+  ],
+  "photo_art_direction": "None.",
+  "offer_placement": "No priced offer. The line is a slogan floating on empty field.",
+  "trust_and_cta": "A license line. No phone on the visible field. The white panel is postal, not a CTA.",
+  "scores": {
+    "focal": {
+      "score": 2,
+      "reason": "A line is not a focal idea."
+    },
+    "hierarchy": {
+      "score": 2,
+      "reason": "No ladder."
+    },
+    "balance": {
+      "score": 2,
+      "reason": "Empty weight."
+    },
+    "grid": {
+      "score": 1,
+      "reason": "No grid."
+    },
+    "eye_path": {
+      "score": 2,
+      "reason": "Diagonal goes nowhere."
+    },
+    "gestalt": {
+      "score": 2,
+      "reason": "The line is alone."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Black on yellow is loud."
+    },
+    "whitespace": {
+      "score": 2,
+      "reason": "Empty is not designed space."
+    },
+    "figure_ground": {
+      "score": 3,
+      "reason": "The line separates and says little."
+    },
+    "color": {
+      "score": 2,
+      "reason": "Coupon yellow with no coupon."
+    },
+    "type": {
+      "score": 2,
+      "reason": "One line, no system."
+    },
+    "photo": {
+      "score": 1,
+      "reason": "No photo."
+    },
+    "offer": {
+      "score": 1,
+      "reason": "No offer."
+    },
+    "cta": {
+      "score": 1,
+      "reason": "No response."
+    },
+    "trust": {
+      "score": 2,
+      "reason": "License only."
+    },
+    "glance_3s": {
+      "score": 2,
+      "reason": "Glance gets yellow."
+    }
+  },
+  "emulate": [
+    "Nothing, unless this is confirmed as an address face, in which case judge the other face instead."
+  ],
+  "do_not_copy": [
+    "The line, the mark, and anything under the redaction."
+  ],
+  "anti_patterns": [
+    "Type on a diagonal with no job",
+    "a slogan in place of an offer"
+  ],
+  "summary": "Mailbox piece, role uncertain. Scored as a marketing face it is a D: yellow, a slogan, no picture, no next step. If Patrick calls it the address side, drop it from the weak-front list."
+}

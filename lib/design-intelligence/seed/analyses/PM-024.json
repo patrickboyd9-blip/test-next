@@ -1,0 +1,112 @@
+{
+  "id": "PM-024",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B-",
+  "focal_point": "A large dollar figure on a left panel over a house with new garage doors.",
+  "eye_path": "F down the panel: category, figure, qualifier, code.",
+  "grid": "Full-bleed photo, left text column.",
+  "visual_weight_pct": {
+    "photo": 48,
+    "text": 16,
+    "offer": 24,
+    "white_space": 12
+  },
+  "scale_ratios": "The dollar amount is larger than the headline. Close to the hero rule.",
+  "type_choices": "One sans, one red word, a small script tagline. About five sizes.",
+  "palette_hex": [
+    "#F4F7FB",
+    "#3D6EA8",
+    "#C41230",
+    "#8C6239"
+  ],
+  "photo_art_direction": "Suburban exterior, doors centered. Listing-photo light.",
+  "offer_placement": "Left column, huge, works. The panel is slightly translucent, so siding shows through type.",
+  "trust_and_cta": "A bare code at the foot. No phone.",
+  "scores": {
+    "focal": {
+      "score": 4,
+      "reason": "The figure leads."
+    },
+    "hierarchy": {
+      "score": 4,
+      "reason": "Numeral over headline."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Left panel balances the house."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "One column on a bleed."
+    },
+    "eye_path": {
+      "score": 4,
+      "reason": "Path ends at the code."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Panel is one group."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Mostly solid."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Translucent panel muddies type."
+    },
+    "figure_ground": {
+      "score": 3,
+      "reason": "Figure-ground slips where the panel is sheer."
+    },
+    "color": {
+      "score": 4,
+      "reason": "One red accent."
+    },
+    "type": {
+      "score": 4,
+      "reason": "Script tagline is extra."
+    },
+    "photo": {
+      "score": 3,
+      "reason": "Doors are centered, which is right."
+    },
+    "offer": {
+      "score": 4,
+      "reason": "One rebate."
+    },
+    "cta": {
+      "score": 2,
+      "reason": "Bare code, no phone."
+    },
+    "trust": {
+      "score": 2,
+      "reason": "Header claim only."
+    },
+    "glance_3s": {
+      "score": 4,
+      "reason": "Glance gets the rebate."
+    }
+  },
+  "emulate": [
+    "One number on a solid panel over the finished exterior. Add a phone next to the code."
+  ],
+  "do_not_copy": [
+    "Mark, script tagline, amount."
+  ],
+  "anti_patterns": [
+    "Bare QR",
+    "translucent panel",
+    "no second way to respond"
+  ],
+  "summary": "Mailbox garage rebate. The number is right. The code is bare and the panel is sheer."
+}

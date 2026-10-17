@@ -37,6 +37,8 @@ import {
   studioCompositionDerivation,
   typeOnlyRealization,
 } from "./studio-composition-derivation"
+import { composeGridCard } from "@/lib/design-intelligence/grid-composer"
+import { isDesignRationale } from "@/lib/design-intelligence/rationale"
 import { PremiumPostcardFront } from "./PremiumPostcard"
 import { isPostcardTemplate, isVerticalPalette } from "@/lib/postcard-layouts/ids"
 
@@ -79,6 +81,29 @@ export function PostcardFrontFace({
   photoAlt: string
 }) {
   const templateId = spec.layoutHints?.templateId
+  if (isDesignRationale(spec.designRationale)) {
+    const card = composeGridCard({
+      rationale: spec.designRationale,
+      spec: {
+        ...spec,
+        phone: contact.phone ?? spec.phone,
+        website: contact.website ?? spec.website,
+      },
+      businessName: contact.businessName,
+    })
+    return (
+      <PremiumPostcardFront
+        templateId={card.front.templateId}
+        spec={spec}
+        contact={contact}
+        photoSrc={photoSrc}
+        alternatePhotoSrc={alternatePhotoSrc}
+        businessName={contact.businessName}
+        compact={compact}
+        plan={card.front}
+      />
+    )
+  }
   if (isPostcardTemplate(templateId)) {
     return (
       <PremiumPostcardFront

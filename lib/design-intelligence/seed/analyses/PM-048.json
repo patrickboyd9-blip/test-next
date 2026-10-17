@@ -1,0 +1,111 @@
+{
+  "id": "PM-048",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B-",
+  "focal_point": "A giant season title, then a mosaic of performance photos. A date list is a second system.",
+  "eye_path": "Title, mosaic, and a calendar column that splits the path.",
+  "grid": "Header, mosaic plus a right list, a footer band the list overflows.",
+  "visual_weight_pct": {
+    "photo": 40,
+    "text": 32,
+    "offer": 5,
+    "white_space": 23
+  },
+  "scale_ratios": "Title dominates. Calendar names are small. Repertoire is micro.",
+  "type_choices": "Condensed title, small caps, bold event names. The list is too small for mail.",
+  "palette_hex": [
+    "#F7F6F3",
+    "#1E7A45",
+    "#C9DDD2",
+    "#1A1A1A"
+  ],
+  "photo_art_direction": "Documentary concert photography: hands, harp, singers, conductors. No single hero.",
+  "offer_placement": "The season is the offer. Dates only in the list.",
+  "trust_and_cta": "Venue and a site. Both quiet.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Title and mosaic tie."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "List is too small."
+    },
+    "balance": {
+      "score": 3,
+      "reason": "Two systems."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "Mosaic grid is even."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "The list forks the path."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Photos repeat."
+    },
+    "contrast": {
+      "score": 3,
+      "reason": "Small type is soft."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Footer is interrupted."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Title separates."
+    },
+    "color": {
+      "score": 4,
+      "reason": "One green."
+    },
+    "type": {
+      "score": 3,
+      "reason": "List fails the size floor."
+    },
+    "photo": {
+      "score": 4,
+      "reason": "Good documentary tiles."
+    },
+    "offer": {
+      "score": 2,
+      "reason": "No single date."
+    },
+    "cta": {
+      "score": 2,
+      "reason": "Site is quiet."
+    },
+    "trust": {
+      "score": 4,
+      "reason": "The organization is named."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "Glance gets the season, not a date."
+    }
+  },
+  "emulate": [
+    "One oversized season word and a tight photo mosaic. Keep the date list off the front or at a readable size."
+  ],
+  "do_not_copy": [
+    "The title treatment and photos."
+  ],
+  "anti_patterns": [
+    "Two focal systems",
+    "microtype schedule"
+  ],
+  "summary": "Mailbox concert card. The title is strong. The tiny six-program list splits it."
+}

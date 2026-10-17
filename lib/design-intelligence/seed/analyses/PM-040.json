@@ -1,0 +1,111 @@
+{
+  "id": "PM-040",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B-",
+  "focal_point": "A crew in front of vans, then a red price box.",
+  "eye_path": "Headline, crew, six service tiles, price box, phone.",
+  "grid": "Header, left photo, 3\u00d72 tiles, right rail.",
+  "visual_weight_pct": {
+    "photo": 45,
+    "text": 25,
+    "offer": 10,
+    "white_space": 20
+  },
+  "scale_ratios": "No single dominant element. The price is the strongest type and smaller than the crew.",
+  "type_choices": "Rust serif headline, small labels, heavy price. About five sizes.",
+  "palette_hex": [
+    "#C46A2D",
+    "#C5282F",
+    "#E3A008",
+    "#F4F1EA"
+  ],
+  "photo_art_direction": "Casual crew documentary. Small fireplace photos. Autumn leaves are clip art.",
+  "offer_placement": "Lower-right price for an inspection, details on the back. Corner placement works.",
+  "trust_and_cta": "Phone under the wordmark. Tenure in the subhead. No code.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Crew and price tie."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "Price is clear and not isolated."
+    },
+    "balance": {
+      "score": 3,
+      "reason": "Catalog balance."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "The rail is ordered."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "Six tiles stall it."
+    },
+    "gestalt": {
+      "score": 3,
+      "reason": "Leaves are an orphan."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Red box separates."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Some white."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Price box is the figure."
+    },
+    "color": {
+      "score": 4,
+      "reason": "Rust and red fit fire."
+    },
+    "type": {
+      "score": 3,
+      "reason": "Several sizes."
+    },
+    "photo": {
+      "score": 3,
+      "reason": "Crew is real; tiles are small."
+    },
+    "offer": {
+      "score": 4,
+      "reason": "One inspection price."
+    },
+    "cta": {
+      "score": 4,
+      "reason": "Phone under the mark."
+    },
+    "trust": {
+      "score": 4,
+      "reason": "Tenure and the crew."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "Glance is split."
+    }
+  },
+  "emulate": [
+    "Price in a corner box, phone directly under the wordmark. Cut the tile count to three."
+  ],
+  "do_not_copy": [
+    "Mark and leaf art."
+  ],
+  "anti_patterns": [
+    "Six equal tiles",
+    "seasonal clip art"
+  ],
+  "summary": "Mailbox chimney card. Price and phone are findable. Six services make a catalog."
+}

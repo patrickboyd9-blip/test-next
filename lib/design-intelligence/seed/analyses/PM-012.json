@@ -1,0 +1,110 @@
+{
+  "id": "PM-012",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B+",
+  "focal_point": "A prepared meal, large and appetizing. A price sits in a corner and is readable.",
+  "eye_path": "Food first, price second, small menu items third.",
+  "grid": "Hero food plus a side rail of dishes.",
+  "visual_weight_pct": {
+    "photo": 60,
+    "text": 16,
+    "offer": 14,
+    "white_space": 10
+  },
+  "scale_ratios": "The meal is the hero. Prices are the largest type and there are several.",
+  "type_choices": "Sans numerals, a script mark, several sizes.",
+  "palette_hex": [
+    "#FFFFFF",
+    "#E23B1A",
+    "#2E6B3A",
+    "#F4E1C1"
+  ],
+  "photo_art_direction": "Commercial food, tight, warm light. Appetite works.",
+  "offer_placement": "One lead price, then more dishes. The second and third prices cost the grade.",
+  "trust_and_cta": "A code or URL more than a phone. Retail, not a call.",
+  "scores": {
+    "focal": {
+      "score": 4,
+      "reason": "The meal leads."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "Several prices."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Photo-heavy."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "Hero plus rail."
+    },
+    "eye_path": {
+      "score": 4,
+      "reason": "Food then price."
+    },
+    "gestalt": {
+      "score": 3,
+      "reason": "Rail items are extra groups."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Price contrast holds."
+    },
+    "whitespace": {
+      "score": 2,
+      "reason": "Rail is dense."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Food is the figure."
+    },
+    "color": {
+      "score": 4,
+      "reason": "Appetite color."
+    },
+    "type": {
+      "score": 3,
+      "reason": "Script mark plus sans."
+    },
+    "photo": {
+      "score": 5,
+      "reason": "Excellent food photo."
+    },
+    "offer": {
+      "score": 3,
+      "reason": "Too many prices."
+    },
+    "cta": {
+      "score": 3,
+      "reason": "Redemption is small."
+    },
+    "trust": {
+      "score": 3,
+      "reason": "Brand food is the trust."
+    },
+    "glance_3s": {
+      "score": 4,
+      "reason": "Glance gets dinner and a price."
+    }
+  },
+  "emulate": [
+    "One hero dish and one price. Move the rest of the menu off the front."
+  ],
+  "do_not_copy": [
+    "Mark, dishes, prices."
+  ],
+  "anti_patterns": [
+    "A second and third price on the rail."
+  ],
+  "summary": "Mailbox meal kit. Photography is excellent. One price would make it an A-."
+}

@@ -1,0 +1,111 @@
+{
+  "id": "PM-028",
+  "corpus": "pm",
+  "research_ref": "modern-mail-research assets/physical @ 267e5e9",
+  "use_class": "style_reference_only",
+  "mailbox_weight": "primary",
+  "vertical": "general_local_service",
+  "faces": [
+    "front"
+  ],
+  "low_res": false,
+  "shared_vendor_style": false,
+  "grade": "B-",
+  "focal_point": "A red-glow cabin in a dark grid, tied with a gold ring that holds a dollar ceiling.",
+  "eye_path": "Ring, then the 2\u00d72. They pull together.",
+  "grid": "Left rail, right 2\u00d72 with hairline rules.",
+  "visual_weight_pct": {
+    "photo": 50,
+    "text": 16,
+    "offer": 12,
+    "white_space": 22
+  },
+  "scale_ratios": "Four equal tiles. The figure inside the ring is larger than the sale line.",
+  "type_choices": "One sans, about five sizes. Captions on photos are weak.",
+  "palette_hex": [
+    "#1B1440",
+    "#E0A24A",
+    "#E23B1A",
+    "#FFFFFF"
+  ],
+  "photo_art_direction": "Dark product light, infrared glow, plunge, a second sauna. Controlled.",
+  "offer_placement": "Gold ring in the rail. Details deferred. No way to respond on this face.",
+  "trust_and_cta": "No phone, no code, no URL.",
+  "scores": {
+    "focal": {
+      "score": 3,
+      "reason": "Ring and glow tie."
+    },
+    "hierarchy": {
+      "score": 3,
+      "reason": "Ring figure is clear."
+    },
+    "balance": {
+      "score": 4,
+      "reason": "Dark field balances."
+    },
+    "grid": {
+      "score": 4,
+      "reason": "Hairline grid."
+    },
+    "eye_path": {
+      "score": 3,
+      "reason": "Path dead-ends."
+    },
+    "gestalt": {
+      "score": 4,
+      "reason": "Tiles repeat."
+    },
+    "contrast": {
+      "score": 4,
+      "reason": "Gold on navy."
+    },
+    "whitespace": {
+      "score": 3,
+      "reason": "Navy is the air."
+    },
+    "figure_ground": {
+      "score": 4,
+      "reason": "Glow separates."
+    },
+    "color": {
+      "score": 5,
+      "reason": "Best palette in the home set."
+    },
+    "type": {
+      "score": 3,
+      "reason": "Captions slip."
+    },
+    "photo": {
+      "score": 4,
+      "reason": "Product light is intentional."
+    },
+    "offer": {
+      "score": 3,
+      "reason": "Ring works, then stops."
+    },
+    "cta": {
+      "score": 1,
+      "reason": "No response."
+    },
+    "trust": {
+      "score": 2,
+      "reason": "No proof beyond product."
+    },
+    "glance_3s": {
+      "score": 3,
+      "reason": "Glance gets a glow and a ring."
+    }
+  },
+  "emulate": [
+    "One saturated product on a dark field and a circular figure. Put a phone in the ring's column."
+  ],
+  "do_not_copy": [
+    "Mark and product photos."
+  ],
+  "anti_patterns": [
+    "Four equal tiles",
+    "no response on the deal face"
+  ],
+  "summary": "Mailbox sauna card. Color and glow are controlled. The front cannot be answered."
+}
