@@ -8,10 +8,12 @@ import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import type { GeneratedAsset } from "@/lib/campaign-creator/image-generation"
 import type { PostcardIdentity } from "@/lib/campaign-creator/studio-contact"
 import { presentStudioPhoto, type StudioImageState } from "@/lib/campaign-creator/studio-photo"
+import type { ConceptFeedbackView } from "@/lib/campaign-creator/actions"
 import type { CampaignBrief, CreativeDirection, CreativeSpec } from "@/lib/campaign-creator/types"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
 import { ConceptCard } from "./ConceptCard"
+import { ConceptFeedback } from "./ConceptFeedback"
 import { PostcardPreview, PostcardSideToggle } from "./PostcardPreview"
 import { ResearchBasis } from "./ResearchBasis"
 import { StrategyTags } from "./StrategyTags"
@@ -33,6 +35,8 @@ interface FocusViewProps {
   onSwitch: (directionId: string) => void
   onStartRefining: () => void
   onApproveAsIs: () => void
+  campaignId?: string
+  feedback?: ConceptFeedbackView
 }
 
 function buildFocusCaption(direction: CreativeDirection): string {
@@ -59,6 +63,8 @@ export function FocusView({
   onSwitch,
   onStartRefining,
   onApproveAsIs,
+  campaignId,
+  feedback,
 }: FocusViewProps) {
   const reducedMotion = useReducedMotion()
   const [side, setSide] = useState<"front" | "back">("front")
@@ -102,6 +108,9 @@ export function FocusView({
       <div className="flex max-w-lg flex-col gap-3">
         <p className="text-sm text-muted-foreground">{direction.rationale}</p>
         <ResearchBasis research={direction.research} />
+        {campaignId ? (
+          <ConceptFeedback campaignId={campaignId} directionId={direction.id} initial={feedback} />
+        ) : null}
         <p className="text-sm">
           <span className="text-muted-foreground">Designed to drive: </span>
           <span className="font-medium">{direction.designedToDrive}</span>

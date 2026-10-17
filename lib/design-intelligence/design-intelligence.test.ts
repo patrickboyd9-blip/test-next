@@ -193,12 +193,18 @@ test("three directions do not share a grid and proportions", () => {
   assert.equal(lead.texts.filter((text) => text.text === "Northline Roofing").length, 1)
   const qr = lead.lockup?.qrRect
   const phone = lead.lockup?.phone
-  assert.ok(qr && phone)
-  assert.ok(Math.abs(qr.y - phone.rect.y) < 0.05)
-  assert.ok(qr.x <= phone.rect.x + phone.rect.w + 0.2)
-  assert.ok(qr.x >= phone.rect.x + phone.rect.w)
+  const website = lead.lockup?.website
   const subject = lead.photos.find((slot) => slot.treatment === "cutout")
-  assert.ok(subject && subject.rect.x < 2.4)
+  assert.ok(qr && phone && website && subject)
+  assert.ok(qr.y >= website.rect.y + website.rect.h - 0.02)
+  assert.ok(qr.y - (website.rect.y + website.rect.h) <= 0.16)
+  assert.ok(Math.abs(qr.x - phone.rect.x) < 0.08)
+  assert.ok(qr.x + qr.w <= subject.rect.x)
+  assert.ok(phone.rect.x + phone.rect.w <= subject.rect.x + 0.04)
+  assert.equal(lead.texts.some((text) => /\$\s*0\b/.test(text.text)), false)
+  assert.equal(lead.texts.some((text) => text.role === "offer" && text.text === "FREE"), true)
+  assert.equal(lead.texts.some((text) => text.role === "headline" && /\bfree\b/i.test(text.text)), false)
+  assert.ok(subject.rect.x < 2.4)
   assert.equal(cards[1]!.front.shapes.some((shape) => shape.role === "type-panel" || shape.role === "offer-tile"), false)
   assert.ok(cards[2]!.front.shapes.some((shape) => shape.role === "type-panel"))
   for (const card of cards) {
@@ -207,6 +213,11 @@ test("three directions do not share a grid and proportions", () => {
     assert.ok((card.front.lockup?.phone?.fontPt ?? 0) > (card.front.lockup?.website?.fontPt ?? 99))
     assert.equal(card.front.lockup?.website?.lines.length, 1)
     assert.ok((card.front.lockup?.website?.fontPt ?? 0) >= URL_MIN_PT)
+    const offer = card.front.texts.find((text) => text.role === "offer")
+    const headline = card.front.texts.find((text) => text.role === "headline")
+    assert.equal(offer?.text, "FREE")
+    assert.equal(card.front.texts.some((text) => /\$\s*0\b/.test(text.text)), false)
+    assert.ok(offer && headline && offer.fontPt >= headline.fontPt * 1.55)
   }
 })
 

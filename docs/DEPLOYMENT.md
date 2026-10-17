@@ -14,9 +14,9 @@ Do these in order. Connecting storage does not update the site that is already r
 4. Choose **Create** (or **Connect Store** / **Browse Marketplace**, depending on what the tab shows) and pick **Neon**. Neon is the Postgres database. Create a database if you do not already have one, then connect it to this project. Include **Production**. Include **Preview** as well if you use preview links.
 5. Back on the **Storage** tab, create or connect **Blob** the same way, and connect that store to this project (Production, and Preview if you use it).
 6. Open **Settings**, then **Environment Variables**. Add:
-   - `ANTHROPIC_API_KEY` — writes the campaign conversation and the postcard concepts.
+   - `ANTHROPIC_API_KEY` — writes the campaign conversation and the postcard concepts, and runs the art director and the critic. Add it for **Production and Preview**. A preview without this key lays cards out from the written rules, so it cannot be the vision test.
    - `OPENAI_API_KEY` — makes the photographs inside Studio.
-   Add both for Production (and Preview if you use it).
+   Add both for Production and Preview.
 7. Open **Deployments**, open the latest production deployment, and choose **Redeploy**. Environment variables are picked up on a new deployment. A refresh of the old deployment is not enough.
 
 You do not create tables, run SQL, or copy database passwords into the project by hand. The Neon and Blob connections create the variables below. The app creates its tables the first time someone opens or saves a campaign, and the first time someone sends a design request.
@@ -42,7 +42,7 @@ Without the two API keys, campaign pages still open. The writing and the photogr
 
 Studio already knows the written grades for the mailbox and vendor pieces. Those notes ship with the app. The photographs of those pieces do not. They stay out of git.
 
-To let the live site keep learning from new mail, add these in **Settings → Environment Variables** for Production (and Preview if you use preview links):
+To let the live site keep learning from new mail, add these in **Settings → Environment Variables** for **Production and Preview**:
 
 | Variable | Required | What to put |
 | --- | --- | --- |
@@ -63,8 +63,14 @@ Optional. Leave them blank unless you need to change a default.
 | `DESIGN_CRITIC` | the vision model when `ANTHROPIC_API_KEY` is set, otherwise a machine estimate | Set to `machine` to score from measurements only. A machine score is labeled "machine estimate" until the vision critic runs. The vision critic scores the print-resolution card. If that render cannot be produced, the score stays a machine estimate. |
 | `DESIGN_CRITIC_ROUNDS` | `3` | How many layout repairs to try. The app will not go past 3. |
 | `DESIGN_SYNC_BATCH` | `40` | How many new mailers one daily run downloads. |
-| `DESIGN_ANALYZE_CAP` | `8` | How many ungraded mailers one run sends to the vision model. |
-| `DESIGN_MODEL` | `claude-sonnet-5` | The model that directs and critiques. |
+| `DESIGN_ANALYZE_CAP` | `8` | How many ungraded mailers one run sends to the vision model for a short written grade. |
+| `VISION_TASTE_BATCH` | `4` | How many reference photographs one run reads with the vision model for the taste library. The daily job and “sync now” both do this batch. A separate backfill clears the rest. |
+| `VISION_TASTE_PASSES` | `8` | How many batches `scripts/backfill-vision-taste.ts` will run before it stops. |
+| `DESIGN_CANDIDATE_COUNT` | `12` | How many compositions Studio tries before it keeps the best three. Those layouts span the postcard families — integrated, full-bleed, panel, and the other composition modes — varied by whether the offer or the headline leads. |
+| `DESIGN_CANDIDATE_BOARD` | on | Set to `off` to skip the twelve-up board and use the earlier one-layout path. |
+| `DESIGN_CANDIDATE_RENDERS` | on, when the vision critic is on | Set to `off` to rank from measurements only and skip the preview renders. |
+| `DESIGN_BOARD_BUDGET_MS` | `75000` | How long the vision ranking may run before it keeps the measurement scores. It will not go past 90 seconds. |
+| `DESIGN_MODEL` | `claude-sonnet-5` | The model that directs, reads reference photographs, and critiques. |
 | `DESIGN_INPUT_USD_PER_MTOK` | `3` | Estimate used only in the cost log. Not a bill. |
 | `DESIGN_OUTPUT_USD_PER_MTOK` | `15` | Estimate used only in the cost log. Not a bill. |
 | `DESIGN_INTELLIGENCE` | on | Set to `off` to return to the previous layout path. |
@@ -72,6 +78,24 @@ Optional. Leave them blank unless you need to change a default.
 The daily job runs at 17:45 UTC. That is 9:45am during Pacific Standard Time and 10:45am during Pacific Daylight Time, so it is always after 9:30am Pacific. Vercel calls `GET /api/cron/design-library`.
 
 To pull immediately, send a POST to `https://test-next-modern-mail2.vercel.app/api/design-library/sync` with the header `Authorization: Bearer` and the `CRON_SECRET` value. The benchmark is the same header on `POST /api/design-benchmark`.
+
+The same header on `POST /api/design-library/vision-taste` reads the next batch of reference photographs and stores a design reading for each one (eye path, focal element, scale, whitespace, palette roles, how type sits with the picture, the response block, what works, and a grade). Send `{ "limit": 4 }` to change the batch. Run it again until `pending` is 0. The response includes `anthropicConfigured`, `director`, and `critic`. `director` is `model` and `critic` is `vision` when `ANTHROPIC_API_KEY` is present. `GET` with the same header returns that status and does not start a batch. On a laptop, the same job is `npx tsx scripts/backfill-vision-taste.ts`. Photographs stay in `.data/reference-library` or Blob. The readings go to Neon when `DATABASE_URL` is set, and to `.data/vision-taste` otherwise. Neither folder is committed.
+
+Preview links use Vercel Authentication. A script has to send the automation bypass as well as the cron secret, or the request stops at the login wall and never reaches the route:
+
+```bash
+curl -X POST "$PREVIEW_URL/api/design-library/vision-taste" \
+  -H "Authorization: Bearer $CRON_SECRET" \
+  -H "x-vercel-protection-bypass: $VERCEL_AUTOMATION_BYPASS_SECRET" \
+  -H "content-type: application/json" \
+  -d '{"limit":1}'
+```
+
+`VERCEL_AUTOMATION_BYPASS_SECRET` is the Protection Bypass for Automation secret from the project settings. A 200 with `anthropicConfigured: true` means the preview can run the vision test.
+
+Thumbs in Studio are stored per campaign and per the campaign’s owner, in the `concept_feedback` table (or `.data/concept-feedback` on a laptop). The next generation for that owner uses those likes and dislikes when it chooses references.
+
+The fixed exam is `npx tsx scripts/design-exam.ts --mode baseline` and `--mode after`. It writes scores and images under `artifacts/design-exam/`, which is not committed. Without `ANTHROPIC_API_KEY` those scores are machine estimates.
 
 On a laptop, put the photographs in `.data/reference-library` (that folder is not committed) and run `npx tsx scripts/seed-reference-library.ts`. If the Blob token is present, the script also uploads them. If it is not, the benchmark reads the local files.
 

@@ -6,8 +6,10 @@ import {
   applyRefinement,
   approveCreative,
   generateStudioCreative,
+  loadConceptFeedback,
   restoreRevision,
   selectCreativeDirection,
+  type ConceptFeedbackView,
 } from "@/lib/campaign-creator/actions"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import { getActiveSpec } from "@/lib/campaign-creator/creative-state"
@@ -77,6 +79,7 @@ export function CreativeStudio({
   const [generationFailed, setGenerationFailed] = useState(false)
   const [isApproving, setIsApproving] = useState(false)
   const [approvalSettled, setApprovalSettled] = useState(false)
+  const [feedback, setFeedback] = useState<ConceptFeedbackView[]>([])
   const generationStartedRef = useRef(false)
   const generationRequestIdRef = useRef(0)
   const identity = postcardIdentityFromBrief(campaign.brief)
@@ -133,6 +136,19 @@ export function CreativeStudio({
     if (hasPersistedDirections || generationStartedRef.current) return
     void runGeneration()
   }, [campaign.id, hasPersistedDirections, runGeneration])
+
+  useEffect(() => {
+    if (!hasPersistedDirections) return
+    let cancelled = false
+    void loadConceptFeedback(campaign.id).then((votes) => {
+      if (!cancelled) setFeedback(votes)
+    }).catch(() => {
+      if (!cancelled) setFeedback([])
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [campaign.id, hasPersistedDirections])
 
   useEffect(() => {
     if (hasPersistedDirections || generationFailed || !isInitializing) return
@@ -246,6 +262,8 @@ export function CreativeStudio({
           setSubPhase("focus")
         }}
         onCompare={() => setSubPhase("compare")}
+        campaignId={hasPersistedDirections ? campaign.id : undefined}
+        feedback={feedback.find((item) => item.directionId === leadDirection.id)}
       />
     )
   } else if (subPhase === "compare") {
@@ -262,6 +280,8 @@ export function CreativeStudio({
           setSubPhase("focus")
         }}
         onBack={() => setSubPhase(hasPersistedDirections ? "focus" : "lead")}
+        campaignId={hasPersistedDirections ? campaign.id : undefined}
+        feedback={feedback}
       />
     )
   } else if (subPhase === "refine") {
@@ -297,6 +317,8 @@ export function CreativeStudio({
         }}
         onStartRefining={() => setSubPhase("refine")}
         onApproveAsIs={() => openApproval("focus")}
+        campaignId={hasPersistedDirections ? campaign.id : undefined}
+        feedback={feedback.find((item) => item.directionId === selectedDirection.id)}
       />
     )
   }

@@ -12,6 +12,7 @@ import {
 import { buildPostcard6x9PrintSpec } from "@/lib/print-spec/postcard-6x9-print-spec"
 
 import type { CompositionMode } from "./art-director"
+import { resolveFrontCopy } from "./offer-copy"
 import { contrastRatio, inkForBackground, isLight, relativeLuminance } from "./contrast"
 import type { DesignRationale, DesignVertical, TrimSize } from "./rationale"
 
@@ -58,22 +59,24 @@ export function composeGridCard(input: GridComposeInput): GridCard {
   const typeBackdrop = onPhotograph ? "#141414" : panelFill
   const ink = inkForBackground(typeBackdrop)
   const accent = input.rationale.palette.accent_hex
-  const offerIsHero = input.rationale.scale_ratios.hero === "offer"
   const responseOnPhoto = mode === "type-led"
   const responseFill = "#1A1A1A"
   const content = clampRect(inset(regions.panel, responseOnPhoto ? 0.1 : 0.16), trim)
   const responseBand = responseOnPhoto ? photoResponseBand(regions.photo) : null
   const responseContent = responseBand ? clampRect(inset(responseBand, 0.06), trim) : content
   const responseInk = responseBand ? inkForBackground(responseFill) : ink
-  const headline = clean(input.spec.headline) || "One clear next step"
-  const offerSource = clean(input.spec.offer) || clean(input.spec.callToAction) || "Call today"
-  const offerParts = offerIsHero ? splitOffer(offerSource) : { numeral: offerSource, rest: "" }
+  const spoken = spokenCopy(input)
+  const offerIsHero = leadsWithOffer(input.rationale.scale_ratios.hero, spoken.numeral)
+  const headline = spoken.headline
+  const offerParts = offerIsHero
+    ? { numeral: spoken.numeral, rest: spoken.rest }
+    : { numeral: [spoken.numeral, spoken.rest].filter(Boolean).join(" "), rest: "" }
   const trust = trustLine(input)
   const phone = clean(input.spec.phone) || ""
   const website = displayHost(input.spec.website || input.spec.qrDestination || "")
   const response = placeResponse({ content: responseContent, phone, website, pairing, ink: responseInk })
   const stackRoom = responseBand ? content.h : response.stackRoom
-  const sizes = typeSizes(input.rationale, stackRoom)
+  const sizes = typeSizes(input.rationale, stackRoom, offerIsHero ? "offer" : "headline")
   const offerColor = offerIsHero && contrastRatio(accent, typeBackdrop) >= 4.5 ? accent : ink
   const bodyFloor = input.rationale.format.trim === "6x9" ? 12 : 11
   const headlineFloor = bodyFloor * 2.5
@@ -190,17 +193,19 @@ function composeIntegrated(
   const accent = input.rationale.palette.accent_hex
   const accentOnPaper = contrastRatio(accent, paper) >= 4.5 ? accent : ink
   const headlineInk = ink
-  const offerIsHero = input.rationale.scale_ratios.hero === "offer"
   const geometry = integratedGeometry(trim)
-  const headline = clean(input.spec.headline) || "One clear next step"
+  const spoken = spokenCopy(input)
+  const offerIsHero = leadsWithOffer(input.rationale.scale_ratios.hero, spoken.numeral)
+  const headline = spoken.headline
   const [firstLine, secondLine] = splitHeadline(headline)
-  const offerSource = clean(input.spec.offer) || clean(input.spec.callToAction) || "Call today"
-  const offerParts = offerIsHero ? splitOffer(offerSource) : { numeral: offerSource, rest: "" }
+  const offerParts = offerIsHero
+    ? { numeral: spoken.numeral, rest: spoken.rest }
+    : { numeral: [spoken.numeral, spoken.rest].filter(Boolean).join(" "), rest: "" }
   const phone = clean(input.spec.phone) || ""
   const website = displayHost(input.spec.website || input.spec.qrDestination || "")
   const name = clean(input.businessName) || "Local crew"
   const column = geometry.column
-  const sizes = typeSizes(input.rationale, column.h * 0.72)
+  const sizes = typeSizes(input.rationale, column.h * 0.72, offerIsHero ? "offer" : "headline")
   const offerColor = offerIsHero && contrastRatio(accent, paper) >= 4.5 ? accent : accentOnPaper
   const blocks: StackBlock[] = [
     { text: firstLine, role: "headline", pt: sizes.headline, floor: (input.rationale.format.trim === "6x9" ? 12 : 11) * 2.5, color: headlineInk },
@@ -224,40 +229,13 @@ function composeIntegrated(
   })
   const headlineTexts = stacked.texts.map((text) => shrinkToInk(text, pairing))
   const headlineBottom = headlineTexts.reduce((bottom, text) => Math.max(bottom, text.rect.y + text.rect.h), column.y)
-  const clusterTop = round2(headlineBottom + 0.08)
-  const responseWidth = round2(Math.min(2.7, column.w * 0.58))
-  const phoneText = shrinkToInk(fitText({
-    text: phone,
-    rect: { x: column.x, y: clusterTop, w: responseWidth, h: 0.36 },
-    role: "contact",
-    pairing,
-    color: ink,
-    minPt: 16,
-    maxPt: column.w >= 6 ? 22 : 20,
-  }), pairing)
-  const websiteText = shrinkToInk(fitText({
-    text: website,
-    rect: { x: column.x, y: round2(phoneText.rect.y + phoneText.rect.h + 0.03), w: responseWidth, h: 0.24 },
-    role: "label",
-    pairing,
-    color: ink,
-    minPt: URL_MIN_PT,
-    maxPt: 12,
-  }), pairing)
-  const responseInk = Math.max(phoneText.rect.w, websiteText.rect.w, 1.4)
-  const qrRect: InchRect = {
-    x: round2(column.x + responseInk + 0.1),
-    y: clusterTop,
-    w: QR_IN,
-    h: QR_IN,
-  }
-  const clusterBottom = Math.max(qrRect.y + qrRect.h, websiteText.rect.y + websiteText.rect.h)
-  const offerTop = round2(clusterBottom + 0.12)
-  const offerWidth = round2(Math.min(3.3, trim.w - column.x - SAFE_IN))
+  const offerTop = round2(headlineBottom + 0.1)
+  const offerWidth = round2(Math.min(3.3, geometry.photo.x - column.x - 0.08))
   const offerFloor = offerIsHero ? sizes.headline * 1.6 : (input.rationale.format.trim === "6x9" ? 12 : 11) * 1.5
   const aboveThumbs = round2(geometry.thumbTop - 0.1)
+  const clusterReserve = QR_IN + 0.28
   const trailing = (offerParts.rest ? 0.3 : 0) + 0.26
-  const offerRoom = Math.max(0.55, aboveThumbs - offerTop - trailing)
+  const offerRoom = Math.max(0.55, aboveThumbs - offerTop - trailing - clusterReserve)
   const offerCap = Math.max(offerFloor, Math.min(sizes.offer, Math.floor(((offerRoom / 1.08) * 72) * 2) / 2))
   const offerLine = shrinkToInk(fitText({
     text: offerParts.numeral,
@@ -292,7 +270,37 @@ function composeIntegrated(
     minPt: 11,
     maxPt: 12,
   }), pairing)
-  if (wordmark.text) texts.push(wordmark)
+  if (wordmark.text) {
+    texts.push(wordmark)
+    cursor = round2(wordmark.rect.y + wordmark.rect.h + 0.06)
+  }
+  const responseWidth = round2(Math.max(1.4, geometry.photo.x - column.x - 0.08))
+  const phoneText = shrinkToInk(fitText({
+    text: phone,
+    rect: { x: column.x, y: cursor, w: responseWidth, h: 0.36 },
+    role: "contact",
+    pairing,
+    color: ink,
+    minPt: 16,
+    maxPt: column.w >= 6 ? 22 : 20,
+  }), pairing)
+  const websiteText = shrinkToInk(fitText({
+    text: website,
+    rect: { x: column.x, y: round2(phoneText.rect.y + phoneText.rect.h + 0.03), w: responseWidth, h: 0.24 },
+    role: "label",
+    pairing,
+    color: ink,
+    minPt: URL_MIN_PT,
+    maxPt: 12,
+  }), pairing)
+  const qrRect: InchRect = {
+    x: column.x,
+    y: round2(websiteText.rect.y + websiteText.rect.h + 0.06),
+    w: QR_IN,
+    h: QR_IN,
+  }
+  const clusterTop = phoneText.rect.y
+  const clusterBottom = Math.max(qrRect.y + qrRect.h, websiteText.rect.y + websiteText.rect.h)
   const photos = thumbnailRow(geometry, trim)
   photos.unshift({ id: "subject", role: "photo", rect: geometry.photo, bleed: false, treatment: "cutout" })
   const shapes: ShapePlan[] = [
@@ -384,9 +392,9 @@ function integratedGeometry(trim: { w: number; h: number }): {
   const thumbTop = round2(trim.h - SAFE_IN - thumbH)
   return {
     photo: {
-      x: round2(trim.w * 0.2),
+      x: round2(Math.min(trim.w * 0.29, 2.32)),
       y: 0.04,
-      w: round2(trim.w * 0.8),
+      w: round2(trim.w - Math.min(trim.w * 0.29, 2.32)),
       h: round2(Math.max(1.8, thumbTop - 0.1)),
     },
     column: {
@@ -687,9 +695,15 @@ function placeResponse(input: {
   }
 }
 
+/** A free offer is the word FREE, and that word is the hero even when the family asked for a headline. */
+function leadsWithOffer(hero: "offer" | "headline", numeral: string): boolean {
+  return hero === "offer" || numeral === "FREE"
+}
+
 function typeSizes(
   rationale: DesignRationale,
-  stackRoom: number
+  stackRoom: number,
+  hero: "offer" | "headline" = rationale.scale_ratios.hero
 ): { offer: number; headline: number; support: number; phone: number } {
   const body = rationale.format.trim === "6x9" ? 12 : 11
   let headline = body * rationale.scale_ratios.headline_to_body_cap
@@ -702,7 +716,7 @@ function typeSizes(
     offer *= scale
     headline *= scale
   }
-  if (rationale.scale_ratios.hero === "offer") {
+  if (hero === "offer") {
     headline = Math.max(headline, body * 2.5)
     offer = Math.max(offer, headline * 1.6)
   } else {
@@ -836,14 +850,13 @@ function scaffoldFor(vertical: DesignVertical): PostcardTemplateId {
   return "hero_scrim"
 }
 
-function splitOffer(offer: string): { numeral: string; rest: string } {
-  const priced = offer.match(/^(\$?\d[\d,]*(?:\.\d+)?%?)\b\s*(.*)$/)
-  if (priced) return { numeral: priced[1] ?? offer, rest: (priced[2] ?? "").trim() }
-  const words = offer.split(/\s+/).filter(Boolean)
-  if (words.length > 1 && (words[0] ?? "").length <= 12) {
-    return { numeral: words[0] ?? offer, rest: words.slice(1).join(" ") }
-  }
-  return { numeral: offer, rest: "" }
+function spokenCopy(input: GridComposeInput): { headline: string; numeral: string; rest: string } {
+  return resolveFrontCopy({
+    headline: clean(input.spec.headline) || "One clear next step",
+    offer: clean(input.spec.offer) || clean(input.spec.callToAction) || "Call today",
+    moment: input.rationale.audience_moment,
+    vertical: input.rationale.vertical,
+  })
 }
 
 function trustLine(input: GridComposeInput): string {

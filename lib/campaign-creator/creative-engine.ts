@@ -11,6 +11,8 @@ import type {
 export interface GenerateDirectionsInput {
   brief: CampaignBrief
   canvas: CreativeCanvas
+  /** Campaign owner. Taste feedback for this person is included when set. */
+  ownerId?: string
 }
 
 export interface GenerateDirectionsResult {
@@ -42,6 +44,7 @@ export interface RegenerateDirectionsInput {
   canvas: CreativeCanvas
   feedback: string
   previousDirections: CreativeDirection[]
+  ownerId?: string
 }
 
 export interface CreativeEngine {
