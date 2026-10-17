@@ -10,7 +10,7 @@ import {
   validateDesignRationale,
 } from "./rationale"
 import type { ReferenceSelection } from "./select"
-import { briefHasNumeralOffer } from "./vertical"
+import { briefHasNumeralOffer, verticalForBrief } from "./vertical"
 
 /**
  * Art director. The rules path is the default and the fallback: it writes a
@@ -25,6 +25,20 @@ export interface ArtDirectorInput {
   trim: TrimSize
   /** When set, the caller already asked a model. Invalid output is discarded. */
   proposed?: unknown
+  /** 0 is the lead. Each slot is a different composition. */
+  slot?: number
+}
+
+export type CompositionMode = "dark-offer-field" | "overlapping-card" | "type-led" | "calm-column"
+
+export interface DirectionRecipe {
+  grid: GridName
+  mode: CompositionMode
+  hero: "offer" | "headline"
+  offerToHeadline: number
+  headlineToBody: number
+  offerToBody: number
+  alignment: "left" | "center"
 }
 
 export interface ArtDirectorResult {
@@ -34,20 +48,117 @@ export interface ArtDirectorResult {
 }
 
 export function directDesign(input: ArtDirectorInput): ArtDirectorResult {
-  if (input.proposed) {
+  const slot = input.slot ?? 0
+  let source: "rules" | "model" = "rules"
+  let drafted = rulesRationale(input)
+  if (slot === 0 && input.proposed) {
     const validated = validateDesignRationale(input.proposed)
     if (validated.ok) {
-      const rationale = enforceHouseRules(validated.rationale, input)
-      const again = validateDesignRationale(rationale)
-      if (again.ok) return { rationale: again.rationale, source: "model", errors: [] }
+      drafted = validated.rationale
+      source = "model"
     }
   }
-  const rationale = enforceHouseRules(rulesRationale(input), input)
-  const validated = validateDesignRationale(rationale)
-  if (!validated.ok) {
-    throw new Error(`Rules rationale failed validation: ${validated.errors.join(" ")}`)
+  const rationale = enforceHouseRules(applyRecipe(drafted, directionRecipe(input, slot)), input)
+  const checked = validateDesignRationale(rationale)
+  if (!checked.ok) {
+    throw new Error(`Rules rationale failed validation: ${checked.errors.join(" ")}`)
   }
-  return { rationale: validated.rationale, source: "rules", errors: [] }
+  return { rationale: checked.rationale, source, errors: [] }
+}
+
+export function hasConcreteOffer(brief: CampaignBrief): boolean {
+  return Boolean(brief.offer?.trim()) && verticalForBrief(brief) !== "medicare_insurance"
+}
+
+export function directionRecipe(input: ArtDirectorInput, slot: number): DirectionRecipe {
+  const vertical = input.selection.vertical
+  const offer = hasConcreteOffer(input.brief)
+  if (vertical === "medicare_insurance") {
+    const calm: DirectionRecipe[] = [
+      { grid: "full-bleed-plus-panel", mode: "overlapping-card", hero: "headline", offerToHeadline: 0.55, headlineToBody: 3, offerToBody: 1.65, alignment: "left" },
+      { grid: "thirds", mode: "calm-column", hero: "headline", offerToHeadline: 0.5, headlineToBody: 2.8, offerToBody: 1.6, alignment: "left" },
+      { grid: "centered-stack", mode: "type-led", hero: "headline", offerToHeadline: 0.45, headlineToBody: 3.6, offerToBody: 1.62, alignment: "left" },
+    ]
+    return calm[slot] ?? calm[0]!
+  }
+  const recipes: DirectionRecipe[] = [
+    {
+      grid: "thirds",
+      mode: "dark-offer-field",
+      hero: offer ? "offer" : "headline",
+      offerToHeadline: offer ? 1.8 : 0.55,
+      headlineToBody: 3.2,
+      offerToBody: offer ? 5.7 : 1.8,
+      alignment: "left",
+    },
+    {
+      grid: "full-bleed-plus-panel",
+      mode: "overlapping-card",
+      hero: "headline",
+      offerToHeadline: 0.62,
+      headlineToBody: 3.4,
+      offerToBody: 2.1,
+      alignment: "left",
+    },
+    {
+      grid: "centered-stack",
+      mode: "type-led",
+      hero: "headline",
+      offerToHeadline: 0.48,
+      headlineToBody: 4,
+      offerToBody: 1.9,
+      alignment: "left",
+    },
+  ]
+  return recipes[slot] ?? recipes[0]!
+}
+
+/** True when two directions would paint the same grid at the same scale. */
+export function sameComposition(a: DesignRationale, b: DesignRationale): boolean {
+  if (a.grid.name !== b.grid.name || a.grid.intentional_break !== b.grid.intentional_break) return false
+  if (a.scale_ratios.hero !== b.scale_ratios.hero) return false
+  return (
+    Math.abs(a.scale_ratios.offer_to_headline_cap - b.scale_ratios.offer_to_headline_cap) < 0.12 &&
+    Math.abs(a.scale_ratios.headline_to_body_cap - b.scale_ratios.headline_to_body_cap) < 0.15
+  )
+}
+
+function applyRecipe(rationale: DesignRationale, recipe: DirectionRecipe): DesignRationale {
+  const offerHero = recipe.hero === "offer"
+  return {
+    ...rationale,
+    focal_element: {
+      ...rationale.focal_element,
+      kind: offerHero ? "offer_numeral" : recipe.mode === "type-led" ? "headline" : rationale.focal_element.kind,
+      lead_modality: offerHero ? "offer_field" : recipe.mode === "type-led" ? "type" : "image",
+      lead_modality_area_pct: recipe.mode === "dark-offer-field" ? 62 : recipe.mode === "type-led" ? 66 : recipe.mode === "calm-column" ? 64 : 74,
+      visual_weight_pct: offerHero ? 46 : 40,
+      description: offerHero
+        ? "One offer word, large enough to survive a blur, on a dark field beside the work."
+        : recipe.mode === "overlapping-card"
+          ? "A full-bleed photograph with one overlapping card. The offer is a tile, not the headline."
+          : recipe.mode === "type-led"
+            ? "The headline is the largest type, on a wide field under a photograph."
+            : rationale.focal_element.description,
+    },
+    grid: { name: recipe.grid, alignment: recipe.alignment, intentional_break: recipe.mode },
+    scale_ratios: {
+      hero: recipe.hero,
+      offer_to_headline_cap: recipe.offerToHeadline,
+      headline_to_body_cap: recipe.headlineToBody,
+      offer_to_body: recipe.offerToBody,
+      front_type_size_count: 3,
+    },
+    offer_treatment: {
+      ...rationale.offer_treatment,
+      kind: offerHero ? "numeral_hero" : rationale.vertical === "medicare_insurance" ? "concrete_step_no_discount" : "headline_is_the_offer",
+      placement: offerHero
+        ? "One offer lockup on the dark field, larger than the headline"
+        : recipe.mode === "overlapping-card" || recipe.mode === "type-led"
+          ? "A distinct offer tile, smaller than the headline"
+          : rationale.offer_treatment.placement,
+    },
+  }
 }
 
 export function rulesRationale(input: ArtDirectorInput): DesignRationale {
@@ -55,8 +166,6 @@ export function rulesRationale(input: ArtDirectorInput): DesignRationale {
   const numeral = briefHasNumeralOffer(input.brief) && vertical !== "medicare_insurance"
   const moment = audienceMoment(input.brief, vertical)
   const palette = paletteFor(vertical)
-  // Left panel. A right half or a bottom band repeats PM-054 or PM-047.
-  const grid: GridName = "full-bleed-plus-panel"
   const hero = numeral ? "offer" : "headline"
   return {
     version: DESIGN_RATIONALE_VERSION,
@@ -74,12 +183,12 @@ export function rulesRationale(input: ArtDirectorInput): DesignRationale {
       pattern: "Z",
       stops: eyeStops(vertical, numeral),
     },
-    grid: { name: grid, alignment: "left", intentional_break: "none" },
+    grid: { name: "thirds", alignment: "left", intentional_break: "dark-offer-field" },
     scale_ratios: {
       hero,
-      offer_to_headline_cap: hero === "offer" ? 1.7 : 0.55,
-      headline_to_body_cap: 3,
-      offer_to_body: hero === "offer" ? 5 : 1.6,
+      offer_to_headline_cap: hero === "offer" ? 1.8 : 0.55,
+      headline_to_body_cap: 3.2,
+      offer_to_body: hero === "offer" ? 5.7 : 1.8,
       front_type_size_count: 3,
     },
     palette,

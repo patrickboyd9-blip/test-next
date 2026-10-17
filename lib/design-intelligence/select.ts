@@ -1,5 +1,6 @@
 import type { CampaignBrief } from "@/lib/campaign-creator/types"
 
+import { isForbiddenResearchPath } from "./images"
 import {
   BENCHMARK_ANCHOR_IDS,
   gradeRank,
@@ -25,6 +26,12 @@ export interface ReferencePick {
   mailbox: boolean
   principle: string
   doNotCopy: string
+}
+
+export interface DirectionCitation {
+  mmrId: string
+  title: string
+  whyItWorks: string
 }
 
 export interface ReferenceSelection {
@@ -70,6 +77,100 @@ export function selectReferences(
   }
 
   return { vertical, anchors, peers, donts, imageIds }
+}
+
+/**
+ * The mailers whose principles this composition actually uses.
+ * The sentence is the borrowed reasoning. The geometry of those mailers is not copied.
+ * Anti-examples and anything under private/ stay out.
+ */
+export function citationsForDirection(
+  records: readonly LibraryRecord[],
+  brief: CampaignBrief,
+  mode: string
+): DirectionCitation[] {
+  const vertical = verticalForBrief(brief)
+  const byId = new Map(records.map((record) => [record.id, record]))
+  const chosen: LibraryRecord[] = []
+  for (const id of preferredIds(mode, vertical)) {
+    const record = byId.get(id)
+    if (!record || isAntiExample(record) || isPrivateRecord(record)) continue
+    chosen.push(record)
+  }
+  if (chosen.length < 2) {
+    const pattern = lessonPattern(mode)
+    const extras = records
+      .filter((record) => !isAntiExample(record) && !isPrivateRecord(record) && !chosen.some((item) => item.id === record.id))
+      .map((record) => ({ record, score: peerScore(record, vertical, brief) }))
+      .filter((item) => item.score > 0 && pattern.test(recordText(item.record)))
+      .sort((a, b) => b.score - a.score || a.record.id.localeCompare(b.record.id))
+    for (const extra of extras) {
+      if (chosen.length >= 2) break
+      chosen.push(extra.record)
+    }
+  }
+  return chosen.slice(0, 2).map((record) => ({
+    mmrId: record.id,
+    title: record.grade ? `${record.grade} reference` : "Reference",
+    whyItWorks: borrowedSentence(record, mode),
+  }))
+}
+
+function preferredIds(mode: string, vertical: DesignVertical): string[] {
+  if (vertical === "medicare_insurance") {
+    if (mode === "calm-column") return ["MMR-032", "MMR-514"]
+    if (mode === "type-led") return ["PM-046", "MMR-397"]
+    return ["MMR-113", "PM-020"]
+  }
+  if (mode === "dark-offer-field") return ["PM-047", "PM-054"]
+  if (mode === "type-led") return ["MMR-397", "PM-046"]
+  if (mode === "calm-column") return ["MMR-032", "MMR-113"]
+  return ["PM-022", "PM-052"]
+}
+
+const BORROWED: Record<string, string> = {
+  "PM-047": "Borrowed one offer lockup at least 1.6× the headline, and left this mailer's bottom band behind.",
+  "PM-054": "Borrowed a dark field beside the work, and did not use this mailer's right-half split or circular badge.",
+  "PM-022": "Borrowed an overlapping card on a full-bleed photograph, and moved the card off this mailer's footprint.",
+  "PM-052": "Borrowed a full-bleed crop with only a few lines of type, and put the phone in one of those lines.",
+  "MMR-397": "Borrowed holding the type to one quiet band under the photograph, with a single next step.",
+  "PM-046": "Borrowed one question as the type event and a phone set large in the footer.",
+  "MMR-113": "Borrowed one person full-bleed with short type on a calm field, and none of the official chrome.",
+  "MMR-032": "Borrowed large paper, one real person, and one short invitation, with no urgency.",
+  "PM-020": "Borrowed a face looking at the reader and a short caption under the code.",
+  "MMR-514": "Borrowed the lack of official cues, then enlarged one element and named a real person.",
+}
+
+function lessonPattern(mode: string): RegExp {
+  if (mode === "dark-offer-field") return /numeral|1\.6|dark field/i
+  if (mode === "type-led") return /headline|question|quiet band|type/i
+  if (mode === "calm-column") return /calm|invitation|person|advisor/i
+  return /overlapping|full-bleed|full bleed/i
+}
+
+function recordText(record: LibraryRecord): string {
+  const analysis = record.analysis
+  return `${analysis?.emulate?.join(" ") ?? ""} ${analysis?.focal_point ?? ""} ${analysis?.summary ?? ""}`
+}
+
+function borrowedSentence(record: LibraryRecord, mode: string): string {
+  const written = BORROWED[record.id]
+  if (written) return written
+  const pattern = lessonPattern(mode)
+  const lines = [...(record.analysis?.emulate ?? []), record.analysis?.focal_point ?? ""].filter((line) => line.trim().length > 0)
+  const hit = lines.find((line) => pattern.test(line)) ?? lines[0] ?? "One subject and one response, with room around both."
+  return citationSentence(hit)
+}
+
+function isPrivateRecord(record: LibraryRecord): boolean {
+  if (/(^|\/)private(\/|$)/i.test(record.id)) return true
+  return record.images.some((image) => isForbiddenResearchPath(image.path))
+}
+
+function citationSentence(raw: string): string {
+  const sentence = raw.split(/(?<=\.)\s+/)[0]?.replace(/\s+/g, " ").trim() || raw
+  const borrowed = sentence.replace(/\bcopy\b/gi, "borrow")
+  return /[.!?]$/.test(borrowed) ? borrowed : `${borrowed}.`
 }
 
 function peerScore(record: LibraryRecord, vertical: DesignVertical, brief: CampaignBrief): number {

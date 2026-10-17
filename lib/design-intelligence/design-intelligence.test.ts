@@ -8,10 +8,10 @@ import { campaignForCustomer } from "@/lib/campaign-creator/customer-campaign"
 import type { Campaign, CampaignBrief, CreativeSpec } from "@/lib/campaign-creator/types"
 import { createFileDocumentStore } from "@/lib/storage/document-store"
 
-import { directDesign } from "./art-director"
+import { directDesign, directionRecipe, sameComposition } from "./art-director"
 import { critiqueCard } from "./critic"
 import { BENCHMARK_BRIEFS } from "./benchmark"
-import { composeGridCard, textInsideSafe } from "./grid-composer"
+import { composeGridCard, paintedTextRects, rectsIntersect, textInsideSafe, URL_MIN_PT } from "./grid-composer"
 import {
   discoverLocalImages,
   loadSeedAnalyses,
@@ -19,7 +19,7 @@ import {
 } from "./library"
 import { criticUsesVision, directOneCard, directorMode } from "./pipeline"
 import { validateDesignRationale } from "./rationale"
-import { selectReferences } from "./select"
+import { citationsForDirection, selectReferences } from "./select"
 import { checkSimilarity } from "./similarity"
 import {
   entriesFromC3poManifest,
@@ -126,8 +126,12 @@ test("the grid card keeps phone, website, scan line, ratio, and safe type", asyn
   assert.equal(card.front.lockup?.qrLabel, "Scan to book")
   assert.ok((card.front.lockup?.qrInches ?? 0) >= 0.75)
   assert.match(card.front.lockup?.phone?.text ?? "", /555-0148/)
-  assert.match(card.front.texts.map((text) => text.text).join(" "), /northline\.example\/book/)
+  assert.match(card.front.lockup?.website?.text ?? "", /northline\.example\/book/)
+  assert.ok((card.front.lockup?.website?.fontPt ?? 0) >= URL_MIN_PT)
+  assert.equal(card.front.lockup?.website?.lines.length, 1)
+  assert.ok((card.front.lockup?.phone?.fontPt ?? 0) > (card.front.lockup?.website?.fontPt ?? 0))
   assert.ok(card.front.texts.every((text) => textInsideSafe(text.rect, "5x8")))
+  assert.equal(intersectingPairs(card.front).length, 0)
   assert.ok(textInsideSafe(card.front.lockup!.rect, "5x8"))
   const offer = card.front.texts.find((text) => text.role === "offer")
   const headline = card.front.texts.find((text) => text.role === "headline")
@@ -144,6 +148,77 @@ test("the grid card keeps phone, website, scan line, ratio, and safe type", asyn
     businessName: "Northline Roofing",
   })
   assert.ok(wide.back.texts.every((text) => textInsideSafe(text.rect, "6x9")))
+})
+
+test("three directions do not share a grid and proportions", () => {
+  const brief: CampaignBrief = {
+    goal: "Book roof inspections",
+    offer: "Free",
+    phone: "(619) 555-0148",
+    website: "northline.example/book",
+    businessInfo: { name: "Northline Roofing" },
+    audience: { description: "Homeowners who have not had anyone on the roof" },
+  }
+  const selection = selectReferences([], brief)
+  const rationales = [0, 1, 2].map((slot) => directDesign({ brief, selection, trim: "5x8", slot }).rationale)
+  for (let index = 0; index < rationales.length; index += 1) {
+    for (let other = index + 1; other < rationales.length; other += 1) {
+      assert.equal(sameComposition(rationales[index]!, rationales[other]!), false)
+    }
+  }
+  const cards = rationales.map((rationale) =>
+    composeGridCard({
+      rationale,
+      spec: { headline: "Wind damage? Free roof check.", offer: "Free", phone: brief.phone, website: brief.website },
+      businessName: "Northline Roofing",
+    })
+  )
+  const leadOffer = cards[0]!.front.texts.find((text) => text.role === "offer")
+  const leadHeadline = cards[0]!.front.texts.find((text) => text.role === "headline")
+  assert.ok(leadOffer && leadHeadline)
+  assert.ok(leadOffer.fontPt >= leadHeadline.fontPt * 1.55)
+  assert.ok(cards[1]!.front.shapes.some((shape) => shape.role === "offer-tile"))
+  assert.ok(cards[2]!.front.shapes.some((shape) => shape.role === "offer-tile"))
+  for (const card of cards) {
+    assert.equal(intersectingPairs(card.front).length, 0)
+    assert.ok((card.front.lockup?.phone?.fontPt ?? 0) > (card.front.lockup?.website?.fontPt ?? 99))
+  }
+})
+
+test("each direction cites different mailers from the library", () => {
+  const records = loadSeedAnalyses().map((analysis) => ({
+    id: analysis.id,
+    source: "seed" as const,
+    analysis,
+    images: [],
+    vertical: analysis.vertical,
+    grade: analysis.grade,
+    needsAnalysis: false,
+  }))
+  const brief: CampaignBrief = { goal: "Book roof inspections", offer: "Free" }
+  const selection = selectReferences(records, brief)
+  const cited = [0, 1, 2].map((slot) =>
+    citationsForDirection(records, brief, directionRecipe({ brief, selection, trim: "5x8" }, slot).mode)
+  )
+  const ids = cited.map((items) => items.map((item) => item.mmrId).join(","))
+  assert.equal(new Set(ids).size, 3)
+  assert.ok(cited[0]?.some((item) => item.mmrId === "PM-047"))
+  assert.match(cited[0]?.find((item) => item.mmrId === "PM-047")?.whyItWorks ?? "", /1\.6/)
+  assert.equal(cited[1]?.some((item) => item.mmrId === "PM-047"), false)
+  assert.ok(cited[1]?.some((item) => item.mmrId === "PM-022"))
+  assert.equal(
+    cited.some((items) => ["PM-047", "PM-054", "PM-022"].every((id) => items.some((item) => item.mmrId === id))),
+    false
+  )
+  for (const items of cited) {
+    assert.ok(items.length >= 1)
+    for (const item of items) {
+      assert.match(item.whyItWorks, /[.!?]$/)
+      assert.doesNotMatch(item.whyItWorks, /\bcopy\b/i)
+      assert.equal(["MMR-513", "MMR-047", "MMR-047-2", "PM-011"].includes(item.mmrId), false)
+      assert.equal(/private/i.test(item.mmrId), false)
+    }
+  }
 })
 
 test("dark type on the photograph hard-fails and scores well below an A", async () => {
@@ -365,3 +440,16 @@ test("the benchmark set is the eight briefs and scores stay off the customer cam
   assert.equal(customer.creative.directions[0]?.research?.quality, undefined)
   assert.ok(customer.creative.directions[0]?.spec.designRationale)
 })
+
+function intersectingPairs(plan: Parameters<typeof paintedTextRects>[0]): string[] {
+  const boxes = paintedTextRects(plan)
+  const hits: string[] = []
+  for (let index = 0; index < boxes.length; index += 1) {
+    for (let other = index + 1; other < boxes.length; other += 1) {
+      if (rectsIntersect(boxes[index]!.rect, boxes[other]!.rect)) {
+        hits.push(`${boxes[index]!.role}+${boxes[other]!.role}`)
+      }
+    }
+  }
+  return hits
+}
