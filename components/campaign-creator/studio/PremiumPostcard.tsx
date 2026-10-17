@@ -17,6 +17,7 @@ import type { InchRect } from "@/lib/postcard-layouts/typefit"
 import { lineHeightFor } from "@/lib/postcard-layouts/typefit"
 import { paintQr } from "@/lib/campaign-creator/studio-qr"
 import { studioShapeLayer } from "@/lib/design-intelligence/studio-layer"
+import { planWithRealThumbnails } from "./photo-plan"
 
 const DISPLAY_CSS = {
   trade: 'var(--font-display-family), "Arial Black", "Helvetica Neue", Helvetica, Arial, sans-serif',
@@ -64,19 +65,21 @@ export function PremiumPostcardFront({
     face: "front",
   })
   const photos = [photoSrc, alternatePhotoSrc ?? null]
+  const thumbFill = thumbnailSrc ?? photoSrc ?? alternatePhotoSrc ?? cutoutSrc ?? null
+  const painted = planWithRealThumbnails(plan, thumbFill)
   return (
-    <FaceFrame plan={plan} compact={Boolean(compact)}>
-      <Shapes plan={plan} layer="back" />
-      {plan.photos.map((slot, index) => (
+    <FaceFrame plan={painted} compact={Boolean(compact)}>
+      <Shapes plan={painted} layer="back" />
+      {painted.photos.map((slot, index) => (
         <PhotoSlot
           key={slot.id}
           rect={slot.rect}
-          size={plan.size}
+          size={painted.size}
           src={
             slot.treatment === "cutout"
               ? cutoutSrc ?? null
               : slot.treatment === "thumbnail"
-                ? thumbnailSrc ?? null
+                ? thumbFill
                 : photos[index] ?? null
           }
           alt={spec.visualDirection?.trim() || "Campaign photograph"}
@@ -84,13 +87,13 @@ export function PremiumPostcardFront({
           treatment={slot.treatment}
         />
       ))}
-      <Shapes plan={plan} layer="mid" />
-      <Shapes plan={plan} layer="front" />
-      <TrustChips plan={plan} />
-      {plan.texts.map((text) => (
-        <Fitted key={`${text.role}-${text.rect.y}`} plan={plan} text={text} />
+      <Shapes plan={painted} layer="mid" />
+      <Shapes plan={painted} layer="front" />
+      <TrustChips plan={painted} />
+      {painted.texts.map((text) => (
+        <Fitted key={`${text.role}-${text.rect.y}`} plan={painted} text={text} />
       ))}
-      {plan.lockup ? <Lockup plan={plan} payload={contact.qrPayload} /> : null}
+      {painted.lockup ? <Lockup plan={painted} payload={contact.qrPayload} /> : null}
     </FaceFrame>
   )
 }
@@ -279,7 +282,7 @@ function Fitted({ plan, text }: { plan: PostcardFacePlan; text: PostcardFacePlan
   const family = text.font === "display" ? DISPLAY_CSS[plan.pairing] : TEXT_CSS
   return (
     <p
-      className="absolute m-0 overflow-hidden"
+      className="absolute m-0"
       data-role={text.role}
       style={{
         ...box(text.rect, plan.size),
@@ -326,7 +329,7 @@ function Lockup({ plan, payload }: { plan: PostcardFacePlan; payload: string | n
       ) : null}
       {lockup.phone?.text ? (
         <p
-          className="absolute m-0 flex items-center overflow-hidden font-semibold leading-none"
+          className="absolute m-0 flex items-center font-semibold leading-none"
           data-contact-phone={lockup.phone.text}
           style={{
             ...box(lockup.phone.rect, plan.size),
@@ -340,7 +343,7 @@ function Lockup({ plan, payload }: { plan: PostcardFacePlan; payload: string | n
       ) : null}
       {lockup.website?.text ? (
         <p
-          className="absolute m-0 overflow-hidden font-medium leading-none"
+          className="absolute m-0 font-medium leading-none"
           data-contact-website={displayWebsite(lockup.website.text)}
           style={{
             ...box(lockup.website.rect, plan.size),

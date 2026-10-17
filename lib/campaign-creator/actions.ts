@@ -304,7 +304,9 @@ export async function applyRefinement(
   if (!currentSpec) throw new Error("No active spec")
 
   const canvas = requireCreativeCanvas(campaign.mailPieceSpec, campaignId)
-  const design = reviseFromNote(currentSpec, trimmed)
+  const design = reviseFromNote(currentSpec, trimmed, {
+    businessName: campaign.brief.businessInfo?.name,
+  })
   if (design.handled) {
     let applied = design.ok
     let spec = design.spec

@@ -38,6 +38,7 @@ import {
   typeOnlyRealization,
 } from "./studio-composition-derivation"
 import { composeGridCard } from "@/lib/design-intelligence/grid-composer"
+import { skyRail } from "@/lib/design-intelligence/refine-note"
 import { isDesignRationale, type TypeSeat } from "@/lib/design-intelligence/rationale"
 import { useTypeSeat } from "./use-type-seat"
 import { PremiumPostcardFront } from "./PremiumPostcard"
@@ -93,7 +94,10 @@ export function PostcardFrontFace({
   const measuredSeat = useTypeSeat(photoSrc)
   const templateId = spec.layoutHints?.templateId
   if (isDesignRationale(spec.designRationale)) {
-    const seat = spec.designRationale.type_seat ?? photoSeat ?? measuredSeat ?? undefined
+    const measured = photoSeat ?? measuredSeat ?? null
+    const seat = spec.designRationale.refine?.skySide
+      ? skyRail(measured ?? spec.designRationale.type_seat)
+      : spec.designRationale.type_seat ?? measured ?? undefined
     const card = composeGridCard({
       rationale: seat ? { ...spec.designRationale, type_seat: seat } : spec.designRationale,
       spec: {

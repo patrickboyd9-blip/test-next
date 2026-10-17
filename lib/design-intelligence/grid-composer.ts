@@ -91,14 +91,15 @@ export function composeGridCard(input: GridComposeInput): GridCard {
   const smallFloor = onPhotograph ? 12 : bodyFloor
   const headlineFloor = bodyFloor * 2.5
   const offerFloor = offerIsHero ? headlineFloor * 1.6 : bodyFloor * 1.5
+  const protectOffer = Boolean(input.rationale.refine?.minOfferPt)
   const blocks: StackBlock[] = []
   if (offerIsHero) {
-    blocks.push({ text: offerParts.numeral, role: "offer", pt: sizes.offer, floor: offerFloor, color: offerColor })
+    blocks.push({ text: offerParts.numeral, role: "offer", pt: sizes.offer, floor: offerFloor, color: offerColor, protect: protectOffer })
     if (offerParts.rest) blocks.push({ text: offerParts.rest, role: "body", pt: sizes.support, floor: smallFloor, color: ink })
     blocks.push({ text: headline, role: "headline", pt: sizes.headline, floor: headlineFloor, color: ink })
   } else {
     blocks.push({ text: headline, role: "headline", pt: sizes.headline, floor: headlineFloor, color: ink })
-    blocks.push({ text: offerParts.numeral, role: "offer", pt: sizes.offer, floor: offerFloor, color: offerColor })
+    blocks.push({ text: offerParts.numeral, role: "offer", pt: sizes.offer, floor: offerFloor, color: offerColor, protect: protectOffer })
   }
   if (trust) blocks.push({ text: trust, role: "proof", pt: Math.min(sizes.support, 13), floor: smallFloor, color: ink })
   const stacked = placeStack({
@@ -160,7 +161,7 @@ export function composeGridCard(input: GridComposeInput): GridCard {
       phone: phoneText.text ? phoneText : undefined,
       website: websiteText.text ? websiteText : undefined,
     },
-    overflows: [...texts, phoneText, websiteText].some((text) => text.overflows),
+    overflows: faceOverflows(texts, [phoneText, websiteText]),
     missingContact: [
       phoneText.text ? "" : "phone",
       websiteText.text ? "" : "website",
@@ -253,8 +254,9 @@ function composeIntegrated(
   const aboveThumbs = round2(geometry.thumbTop - 0.1)
   const clusterReserve = QR_IN + 0.28
   const trailing = (offerParts.rest ? 0.3 : 0) + 0.26
-  const offerRoom = Math.max(0.55, aboveThumbs - offerTop - trailing - clusterReserve)
-  const offerCap = Math.max(offerFloor, Math.min(sizes.offer, Math.floor(((offerRoom / 1.08) * 72) * 2) / 2))
+  const offerRoom = Math.max(0.42, aboveThumbs - offerTop - trailing - clusterReserve)
+  const roomPt = Math.floor(((Math.max(0.2, offerRoom) / 0.84) * 72) * 2) / 2
+  const offerCap = Math.max(18, Math.min(sizes.offer, roomPt))
   const offerLine = shrinkToInk(fitText({
     text: offerParts.numeral,
     rect: { x: column.x, y: offerTop, w: offerWidth, h: offerRoom },
@@ -350,7 +352,7 @@ function composeIntegrated(
       phone: phoneText.text ? phoneText : undefined,
       website: websiteText.text ? websiteText : undefined,
     },
-    overflows: [...texts, phoneText, websiteText].some((text) => text.overflows),
+    overflows: faceOverflows(texts, [phoneText, websiteText]),
     missingContact: [phoneText.text ? "" : "phone", websiteText.text ? "" : "website"].filter((item) => item.length > 0),
   }
   const back = composeBack({
@@ -386,16 +388,21 @@ function composeIntegrated(
 function shrinkToInk(text: FittedText, pairing: FontPairingId): FittedText {
   if (!text.text || text.lines.length === 0) return text
   const em = text.font === "display" ? PAIRING_MEASURE[pairing].display : PAIRING_MEASURE[pairing].text
-  const lineHeight = text.role === "offer" ? 0.8 : text.font === "display" ? 1.02 : 1.18
+  const factor = paintedLineFactor(text)
   const width = text.lines.reduce((max, line) => Math.max(max, line.length * (text.fontPt / 72) * em), 0.4)
-  const height = text.lines.length * (text.fontPt / 72) * lineHeight * 1.04
+  const painted = text.lines.length * (text.fontPt / 72) * factor
+  const words = text.lines.join(" ").replace(/\s+/g, " ").trim()
+  const widthOk = width <= text.rect.w + 0.04
+  const heightOk = painted <= text.rect.h + 0.04
+  const wordsOk = words === text.text.replace(/\s+/g, " ").trim()
   return {
     ...text,
+    overflows: !(widthOk && heightOk && wordsOk),
     rect: {
       x: text.rect.x,
       y: text.rect.y,
       w: round2(Math.min(text.rect.w, width + 0.04)),
-      h: round2(Math.max(0.16, height)),
+      h: round2(Math.max(0.16, painted * 1.04)),
     },
   }
 }
@@ -600,10 +607,10 @@ function fullBleedColumn(trim: { w: number; h: number }, seat?: TypeSeat | null)
       h: round2(trim.h * 0.78),
     }
   }
-  const width = round2(Math.min(trim.w * 0.5, Math.max(2.8, seat.rect.w * trim.w)))
-  const height = round2(Math.min(trim.h - SAFE_IN * 2, Math.max(3.15, seat.rect.h * trim.h)))
+  const width = round2(Math.min(trim.w * 0.56, Math.max(3.2, seat.rect.w * trim.w)))
+  const height = round2(trim.h - SAFE_IN * 2)
   let x = round2(seat.rect.x * trim.w)
-  let y = round2(seat.rect.y * trim.h)
+  let y = SAFE_IN
   if (x + width > trim.w - SAFE_IN) x = round2(trim.w - SAFE_IN - width)
   if (y + height > trim.h - SAFE_IN) y = round2(trim.h - SAFE_IN - height)
   return {
@@ -769,6 +776,7 @@ function typeSizes(
     headline = Math.max(headline, body * 2.5)
     offer = Math.min(Math.max(offer, body * 1.5), headline * 0.9)
   }
+  if (rationale.refine?.minOfferPt) offer = Math.max(offer, rationale.refine.minOfferPt)
   return {
     offer: roundPt(offer),
     headline: roundPt(headline),
@@ -784,12 +792,15 @@ interface StackBlock {
   floor: number
   color: string
   width?: number
+  /** Keep this line large, and shrink the lines under it first. */
+  protect?: boolean
 }
 
 /**
- * Gives each line the height its words actually need. The point size steps
- * down, together, until the stack fits above the response lockup. Floors keep
- * the offer and the headline on the rubric's scale.
+ * Gives each line the height its words actually need. Point size steps down
+ * to the legibility minimum until the stack fits. A line is never given a
+ * box shorter than its words, and a line that still will not fit is marked
+ * as overflow instead of being dropped or clipped.
  */
 function placeStack(input: {
   blocks: StackBlock[]
@@ -800,39 +811,112 @@ function placeStack(input: {
   align: "left" | "center"
 }): { texts: FittedText[] } {
   const room = input.bottom - input.cursor
-  const live = input.blocks.filter((block) => block.text.trim().length > 0)
-  let scale = 1
-  let chosen = live
-  for (let attempt = 0; attempt < 28; attempt += 1) {
-    chosen = live.map((block) => ({ ...block, pt: roundPt(Math.max(block.floor, block.pt * scale)) }))
-    const total = chosen.reduce((sum, block) => sum + measuredHeight(block, input) + 0.08, 0)
+  const live = input.blocks.filter((block) => block.text.trim().length > 0).map((block) => ({ ...block }))
+  const chosen = live
+  let belowFloor = false
+  for (let attempt = 0; attempt < 64; attempt += 1) {
+    const total = chosen.reduce((sum, block) => sum + measuredHeight(block, input) + 0.06, 0)
     const tooWide = chosen.some((block) => measuredOverflow(block, input))
     if (total <= room + 0.02 && !tooWide) break
-    if (chosen.every((block) => block.pt <= block.floor + 0.01)) break
-    scale *= 0.92
+    const victim = shrinkTarget(chosen, belowFloor)
+    if (victim < 0) {
+      if (!belowFloor) {
+        belowFloor = true
+        continue
+      }
+      break
+    }
+    const block = chosen[victim]!
+    chosen[victim] = { ...block, pt: roundPt(Math.max(shrinkStop(block, belowFloor), block.pt - 1)) }
   }
   const texts: FittedText[] = []
   let cursor = input.cursor
   for (const block of chosen) {
     const natural = measuredHeight(block, input)
     const roomLeft = input.bottom - cursor
-    if (roomLeft < 0.22) break
+    const height = round2(natural + 0.04)
     const fitted = fitText({
       text: block.text,
-      rect: { x: input.content.x, y: cursor, w: block.width ?? input.content.w, h: Math.min(natural + 0.02, roomLeft) },
+      rect: { x: input.content.x, y: cursor, w: block.width ?? input.content.w, h: height },
       role: block.role,
       pairing: input.pairing,
       color: block.color,
       align: input.align,
-      minPt: Math.min(block.pt, block.floor),
+      minPt: Math.min(block.pt, legibilityMin(block)),
       maxPt: block.pt,
     })
     if (!fitted.text) continue
-    texts.push(fitted)
     const used = measuredHeight({ ...block, pt: fitted.fontPt }, input)
-    cursor += used + 0.08
+    const rectH = round2(Math.max(used + 0.02, fitted.rect.h))
+    const placed = { ...fitted, rect: { ...fitted.rect, h: rectH } }
+    texts.push({
+      ...placed,
+      overflows: fitted.overflows || textIsClipped(placed) || used > roomLeft + 0.08,
+    })
+    cursor += used + 0.06
   }
   return { texts }
+}
+
+function shrinkTarget(blocks: StackBlock[], belowFloor: boolean): number {
+  let best = -1
+  let slack = 0
+  const rank = (block: StackBlock, index: number, protectedOnly: boolean) => {
+    if (protectedOnly !== Boolean(block.protect)) return
+    if (belowFloor && wouldBreakOfferRatio(blocks, index)) return
+    const room = block.pt - shrinkStop(block, belowFloor)
+    if (room > slack + 0.01) {
+      slack = room
+      best = index
+    }
+  }
+  blocks.forEach((block, index) => rank(block, index, false))
+  if (best >= 0) return best
+  slack = 0
+  blocks.forEach((block, index) => rank(block, index, true))
+  return best
+}
+
+function shrinkStop(block: StackBlock, belowFloor: boolean): number {
+  const legibility = legibilityMin(block)
+  if (belowFloor) return legibility
+  return Math.max(legibility, block.floor)
+}
+
+/** FREE stays at least 1.55× the headline while either line can still shrink. */
+function wouldBreakOfferRatio(blocks: StackBlock[], index: number): boolean {
+  const block = blocks[index]
+  if (!block || block.role !== "offer") return false
+  const headline = blocks.find((item) => item.role === "headline")
+  if (!headline) return false
+  if (headline.pt - shrinkStop(headline, true) <= 0.01) return false
+  return block.pt - 1 < headline.pt * 1.55
+}
+
+function legibilityMin(block: StackBlock): number {
+  if (block.role === "offer") return 18
+  if (block.role === "headline") return 14
+  return 11
+}
+
+function faceOverflows(texts: FittedText[], extra: FittedText[]): boolean {
+  return [...texts, ...extra].some((text) => text.overflows || textIsClipped(text))
+}
+
+/** The line height the postcard painter actually uses. */
+export function paintedLineFactor(text: Pick<FittedText, "role" | "font">): number {
+  if (text.role === "offer") return 0.8
+  return text.font === "display" ? 1.02 : 1.18
+}
+
+/** A line that does not fit its box, or that drops a word, is clipped. */
+export function textIsClipped(text: FittedText): boolean {
+  if (!text.text.trim()) return false
+  const source = text.text.split(/\s+/).filter(Boolean).join(" ")
+  const painted = text.lines.join(" ").split(/\s+/).filter(Boolean).join(" ")
+  if (!painted || source !== painted) return true
+  const block = text.lines.length * (text.fontPt / 72) * paintedLineFactor(text)
+  return block > text.rect.h + 0.08
 }
 
 function measuredHeight(block: StackBlock, input: { content: InchRect; pairing: FontPairingId; align: "left" | "center" }): number {
