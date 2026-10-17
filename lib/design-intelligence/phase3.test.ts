@@ -8,6 +8,7 @@ import { createFileDocumentStore } from "@/lib/storage/document-store"
 
 import { COMPOSITION_FAMILIES, rankCandidates } from "./candidate-board"
 import {
+  judgeCraft,
   letterFor,
   scoreDesignPattern,
   scoreReferenceWriteup,
@@ -199,9 +200,34 @@ test("a separated panel roofing card lands at B- or C+, and an integrated card c
   const openReading = readComposition(openCard, open.rationale)
   assert.equal(open.rationale.grid.intentional_break, "integrated")
   assert.equal(openReading.typePanel, false)
+  assert.equal(openCard.front.texts.some((text) => /\$\s*0\b/.test(text.text)), false)
+  assert.equal(openCard.front.texts.some((text) => text.role === "offer" && text.text === "FREE"), true)
+  assert.equal(openCard.front.texts.some((text) => text.role === "headline" && /\bfree\b|inspection/i.test(text.text)), false)
+  const qr = openCard.front.lockup?.qrRect
+  const phone = openCard.front.lockup?.phone?.rect
+  const subject = openCard.front.photos.find((photo) => photo.treatment === "cutout")?.rect
+  assert.ok(qr && phone && subject)
+  assert.equal(qr.x + qr.w <= subject.x, true)
+  assert.ok(Math.abs(qr.x - phone.x) < 0.08)
   assert.equal(openGrade.cleared, true)
   assert.ok(openGrade.score > panelGrade.score)
   assert.equal(openGrade.scoreKind, "machine estimate")
+
+  const bleed = directDesign({ brief, selection, trim: "5x8", slot: 1 })
+  const bleedCard = composeGridCard({ rationale: bleed.rationale, spec, businessName: "Northline Roofing" })
+  const bleedOffer = bleedCard.front.texts.find((text) => text.role === "offer")
+  const bleedHeadline = bleedCard.front.texts.find((text) => text.role === "headline")
+  assert.equal(bleed.rationale.scale_ratios.hero, "headline")
+  assert.equal(bleedOffer?.text, "FREE")
+  assert.equal(bleedCard.front.texts.some((text) => text.role === "body" && /inspection/i.test(text.text)), true)
+  assert.equal(bleedCard.front.texts.some((text) => /\$\s*0\b/.test(text.text)), false)
+  assert.ok(bleedOffer && bleedHeadline && bleedOffer.fontPt >= bleedHeadline.fontPt * 1.55)
+  const bleedQr = bleedCard.front.lockup?.qrRect
+  const bleedPhone = bleedCard.front.lockup?.phone?.rect
+  const bleedSite = bleedCard.front.lockup?.website?.rect
+  assert.ok(bleedQr && bleedPhone && bleedSite)
+  assert.ok(bleedQr.x + bleedQr.w <= bleedPhone.x + 0.2)
+  assert.ok(bleedSite.y >= bleedQr.y + bleedQr.h - 0.2)
 
   const integrated = scoreDesignPattern({
     typeOnCanvas: true,
@@ -223,6 +249,40 @@ test("a separated panel roofing card lands at B- or C+, and an integrated card c
   })
   const panelLetter = letterFor(panelPattern)
   assert.ok(panelLetter === "B-" || panelLetter === "C+", panelLetter)
+})
+
+test("the reviewed roofing card is redundant and orphaned, so it cannot clear B", () => {
+  const faults = judgeCraft({
+    headline: "Free roof inspection",
+    offer: "$0 inspection",
+    qr: { x: 2.33, y: 1.45, w: 0.8, h: 0.8 },
+    phone: { x: 0.25, y: 1.45, w: 1.98, h: 0.34 },
+    website: { x: 0.25, y: 1.82, w: 1.87, h: 0.2 },
+    subject: { x: 1.6, y: 0.04, w: 6.4, h: 4 },
+    bands: [
+      { x: 0.25, y: 0.25, w: 2.8, h: 1.12 },
+      { x: 2.33, y: 1.45, w: 0.8, h: 0.8 },
+      { x: 0.25, y: 2.37, w: 1.13, h: 0.73 },
+      { x: 0.25, y: 3.6, w: 1.4, h: 0.2 },
+    ],
+    thumbTop: 4.1,
+  })
+  assert.equal(faults.redundantCopy, true)
+  assert.equal(faults.orphaned, true)
+  const holed = judgeCraft({
+    headline: "See the roof before it leaks.",
+    offer: "FREE",
+    qr: { x: 0.25, y: 3.2, w: 0.8, h: 0.8 },
+    phone: { x: 1.13, y: 3.2, w: 1.9, h: 0.34 },
+    website: { x: 1.13, y: 3.56, w: 1.8, h: 0.2 },
+    bands: [
+      { x: 0.25, y: 0.25, w: 2.8, h: 0.9 },
+      { x: 0.25, y: 2.4, w: 1.4, h: 0.7 },
+    ],
+    thumbTop: 4.1,
+  })
+  assert.equal(holed.deadSpace, true)
+  assert.equal(letterFor(Math.min(98, 81)), "B-")
 })
 
 test("a strong reference writeup grades A and a price-rail writeup does not", () => {

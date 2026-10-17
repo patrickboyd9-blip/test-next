@@ -1,6 +1,9 @@
+import type { InchRect } from "@/lib/postcard-layouts/typefit"
+
 import type { GridCard } from "./grid-composer"
-import { trimInches } from "./grid-composer"
+import { rectsIntersect, trimInches } from "./grid-composer"
 import { gradeRank } from "./library"
+import { containsZeroDollar, headlineRepeatsOffer } from "./offer-copy"
 import type { DesignRationale } from "./rationale"
 
 /**
@@ -14,6 +17,14 @@ export const LETTERS = ["A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "F"] a
 export type LetterGrade = (typeof LETTERS)[number]
 
 export const BOARD_FLOOR = "B"
+/** Redundant copy, an orphaned code, or a dead band cannot clear B. */
+export const CRAFT_CEILING = 81
+
+export interface CraftFaults {
+  redundantCopy: boolean
+  orphaned: boolean
+  deadSpace: boolean
+}
 
 export interface CompositionReading {
   panelShare: number
@@ -139,6 +150,95 @@ export function scoreReferenceWriteup(text: string, gradeHint?: string): number 
   return clamp(score)
 }
 
+export function craftFaults(card: GridCard): CraftFaults {
+  const headline = card.front.texts.filter((text) => text.role === "headline").map((text) => text.text).join(" ")
+  const offerLine = card.front.texts.find((text) => text.role === "offer")?.text ?? ""
+  const rest = card.front.texts.find((text) => text.role === "body")?.text ?? ""
+  const offer = [offerLine, rest].filter(Boolean).join(" ")
+  const painted = card.front.texts.map((text) => text.text).join(" ")
+  const qr = card.front.lockup?.qrRect
+  const phone = card.front.lockup?.phone?.rect
+  const website = card.front.lockup?.website?.rect
+  const subject = card.front.photos.find((photo) => photo.treatment === "cutout")?.rect
+  const thumbTop = card.front.photos.find((photo) => photo.treatment === "thumbnail")?.rect.y
+    ?? trimInches(card.front.size).h - 0.25
+  const bands = [
+    ...card.front.texts.map((text) => text.rect),
+    ...(qr ? [qr] : []),
+    ...(phone ? [phone] : []),
+    ...(website ? [website] : []),
+  ]
+  return judgeCraft({
+    headline,
+    offer,
+    painted,
+    qr,
+    phone,
+    website,
+    subject,
+    bands,
+    thumbTop,
+  })
+}
+
+export function judgeCraft(input: {
+  headline: string
+  offer: string
+  painted?: string
+  qr?: InchRect | null
+  phone?: InchRect | null
+  website?: InchRect | null
+  subject?: InchRect | null
+  bands: InchRect[]
+  thumbTop: number
+}): CraftFaults {
+  const painted = input.painted ?? `${input.headline} ${input.offer}`
+  return {
+    redundantCopy: containsZeroDollar(painted) || headlineRepeatsOffer(input.headline, input.offer),
+    orphaned: responseIsOrphaned(input.qr, input.phone, input.website, input.subject),
+    deadSpace: hasDeadBand(input.bands, input.thumbTop),
+  }
+}
+
+function responseIsOrphaned(
+  qr: InchRect | null | undefined,
+  phone: InchRect | null | undefined,
+  website: InchRect | null | undefined,
+  subject: InchRect | null | undefined
+): boolean {
+  if (!qr) return false
+  if (!phone) return true
+  if (subject && rectsIntersect(qr, subject)) return true
+  const withPhone = near(qr, phone, 0.22)
+  const withSite = website ? near(qr, website, 0.22) : true
+  const siteWithPhone = website ? near(website, phone, 0.16) : true
+  return !(withPhone || (withSite && siteWithPhone))
+}
+
+function near(a: InchRect, b: InchRect, gap: number): boolean {
+  const gapX = a.x + a.w <= b.x ? b.x - (a.x + a.w) : b.x + b.w <= a.x ? a.x - (b.x + b.w) : 0
+  const overlapY = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y)
+  const overlapX = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)
+  const gapY = a.y + a.h <= b.y ? b.y - (a.y + a.h) : b.y + b.h <= a.y ? a.y - (b.y + b.h) : 0
+  if (overlapY > 0 && gapX <= gap) return true
+  if (overlapX > 0 && gapY <= gap) return true
+  return gapX <= gap && gapY <= gap
+}
+
+function hasDeadBand(bands: InchRect[], thumbTop: number): boolean {
+  const occupied = bands
+    .filter((band) => band.h > 0 && band.y < thumbTop)
+    .sort((a, b) => a.y - b.y)
+  if (occupied.length < 2) return false
+  let cursor = occupied[0]!.y + occupied[0]!.h
+  let hole = 0
+  for (const band of occupied.slice(1)) {
+    if (band.y > cursor + 0.02) hole = Math.max(hole, band.y - cursor)
+    cursor = Math.max(cursor, band.y + band.h)
+  }
+  return hole > 0.95
+}
+
 export function gradeComposition(input: {
   card: GridCard
   rationale: DesignRationale
@@ -162,6 +262,16 @@ export function gradeComposition(input: {
     if (capped < input.vision.score) {
       explanation = `${explanation} Held at ${letterFor(capped)} because the type still sits in a panel.`
     }
+  }
+  const craft = craftFaults(input.card)
+  if (craft.redundantCopy || craft.orphaned || craft.deadSpace) {
+    score = Math.min(score, CRAFT_CEILING)
+    const reasons = [
+      craft.redundantCopy ? "the offer is repeated in the headline" : "",
+      craft.orphaned ? "the code sits apart from the phone and the URL" : "",
+      craft.deadSpace ? "a band of the card is left empty" : "",
+    ].filter(Boolean)
+    explanation = `${explanation} Held at ${letterFor(score)} because ${reasons.join(", ")}.`
   }
   score = clamp(score)
   const letter = letterFor(score)
@@ -198,5 +308,7 @@ export const VISION_GRADE_ANCHOR = [
   "A looks like this: a light ground, a two-color headline set directly on the canvas, a cut-out subject integrated into the layout, one large floating offer in the brand color, and at most one row of small thumbnails. Boxes are the exception. The eye moves without jumping between frames.",
   "B- or C+ looks like this: a side or bottom panel holds all the type, the offer is close to the headline in size, and the card is a stack of boxes. It is organized and legible, and it still reads as a template.",
   "A panel-style card is not an A. Do not reward it for being tidy.",
+  "Repeating the offer in the headline and the lockup is at most a B-. A free offer is the word FREE, never a $0 figure, and the headline then has to say something else.",
+  "A code that floats away from the phone and the URL, or a band of the card left empty between the type, is at most a B-.",
   "Contrast below 4.5:1 or type that overflows is a hard fail regardless of the composition.",
 ].join(" ")

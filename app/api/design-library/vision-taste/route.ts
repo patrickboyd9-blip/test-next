@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 
+import { criticUsesVision, directorMode } from "@/lib/design-intelligence/pipeline"
 import { cronAuthorized } from "@/lib/design-intelligence/sync-job"
 import { backfillVisionTaste } from "@/lib/design-intelligence/vision-taste"
 
@@ -10,6 +11,13 @@ export const maxDuration = 60
  * Authorization: Bearer CRON_SECRET.
  * Optional JSON body: { "limit": 4 }.
  */
+export async function GET(request: Request) {
+  if (!cronAuthorized(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+  return NextResponse.json(visionStatus())
+}
+
 export async function POST(request: Request) {
   if (!cronAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -22,5 +30,13 @@ export async function POST(request: Request) {
     limit = undefined
   }
   const report = await backfillVisionTaste({ env: process.env, limit })
-  return NextResponse.json(report)
+  return NextResponse.json({ ...report, ...visionStatus() })
+}
+
+function visionStatus() {
+  return {
+    anthropicConfigured: Boolean(process.env.ANTHROPIC_API_KEY?.trim()),
+    director: directorMode(process.env),
+    critic: criticUsesVision(process.env) ? "vision" : "machine",
+  }
 }
