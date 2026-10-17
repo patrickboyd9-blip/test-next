@@ -32,6 +32,8 @@ export function PremiumPostcardFront({
   contact,
   photoSrc,
   alternatePhotoSrc,
+  cutoutSrc,
+  thumbnailSrc,
   businessName,
   paletteId,
   compact,
@@ -42,6 +44,8 @@ export function PremiumPostcardFront({
   contact: StudioContact
   photoSrc: string | null
   alternatePhotoSrc?: string | null
+  cutoutSrc?: string | null
+  thumbnailSrc?: string | null
   businessName?: string
   paletteId?: VerticalPaletteId
   compact?: boolean
@@ -68,7 +72,13 @@ export function PremiumPostcardFront({
           key={slot.id}
           rect={slot.rect}
           size={plan.size}
-          src={photos[index] ?? null}
+          src={
+            slot.treatment === "cutout"
+              ? cutoutSrc ?? null
+              : slot.treatment === "thumbnail"
+                ? thumbnailSrc ?? null
+                : photos[index] ?? null
+          }
           alt={spec.visualDirection?.trim() || "Campaign photograph"}
           paper={plan.palette.paper}
           treatment={slot.treatment}
