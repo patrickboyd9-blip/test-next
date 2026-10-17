@@ -6,7 +6,7 @@ import { test } from "node:test"
 
 import { createFileDocumentStore } from "@/lib/storage/document-store"
 
-import { rankCandidates } from "./candidate-board"
+import { COMPOSITION_FAMILIES, rankCandidates } from "./candidate-board"
 import {
   letterFor,
   scoreDesignPattern,
@@ -167,27 +167,41 @@ test("a thumbs-down on a family pushes that family down for the same owner", asy
   }
 })
 
-test("a current panel-style roofing card lands at B- or C+, and an integrated pattern lands at A", () => {
+test("a separated panel roofing card lands at B- or C+, and an integrated card can clear B", () => {
   const brief = { goal: "Book a free roof inspection", offer: "$0 inspection", businessInfo: { name: "Northline Roofing" } }
   const selection = selectReferences([], brief)
-  const directed = directDesign({ brief, selection, trim: "5x8" })
-  const card = composeGridCard({
-    rationale: directed.rationale,
-    spec: { headline: "Free roof inspection", offer: "$0 inspection", phone: "(619) 555-0148", website: "northline.example/book" },
-    businessName: "Northline Roofing",
+  const spec = { headline: "Free roof inspection", offer: "$0 inspection", phone: "(619) 555-0148", website: "northline.example/book" }
+  const panel = directDesign({ brief, selection, trim: "5x8", slot: 2 })
+  const panelCard = composeGridCard({ rationale: panel.rationale, spec, businessName: "Northline Roofing" })
+  const panelCritique = critiqueCard(panelCard, panel.rationale, "Free roof inspection $0 inspection")
+  const panelGrade = gradeComposition({
+    card: panelCard,
+    rationale: panel.rationale,
+    autoFails: panelCritique.autoFails,
+    worstContrast: panelCritique.autoFails.includes("AF1") ? 3 : 7,
   })
-  const critique = critiqueCard(card, directed.rationale, "Free roof inspection $0 inspection")
-  const grade = gradeComposition({
-    card,
-    rationale: directed.rationale,
-    autoFails: critique.autoFails,
-    worstContrast: critique.autoFails.includes("AF1") ? 3 : 7,
+  const panelReading = readComposition(panelCard, panel.rationale)
+  assert.equal(panel.rationale.grid.intentional_break, "panel")
+  assert.equal(panelReading.typePanel, true)
+  assert.ok(panelGrade.letter === "B-" || panelGrade.letter === "C+", `${panelGrade.letter} ${panelGrade.score} panel ${panelReading.panelShare}`)
+  assert.equal(panelGrade.cleared, false)
+  assert.equal(panelGrade.scoreKind, "machine estimate")
+
+  const open = directDesign({ brief, selection, trim: "5x8", slot: 0 })
+  const openCard = composeGridCard({ rationale: open.rationale, spec, businessName: "Northline Roofing" })
+  const openCritique = critiqueCard(openCard, open.rationale, "Free roof inspection $0 inspection")
+  const openGrade = gradeComposition({
+    card: openCard,
+    rationale: open.rationale,
+    autoFails: openCritique.autoFails,
+    worstContrast: openCritique.autoFails.includes("AF1") ? 3 : 7,
   })
-  const reading = readComposition(card, directed.rationale)
-  assert.equal(reading.typePanel, true)
-  assert.ok(grade.letter === "B-" || grade.letter === "C+", `${grade.letter} ${grade.score} panel ${reading.panelShare}`)
-  assert.equal(grade.cleared, false)
-  assert.equal(grade.scoreKind, "machine estimate")
+  const openReading = readComposition(openCard, open.rationale)
+  assert.equal(open.rationale.grid.intentional_break, "integrated")
+  assert.equal(openReading.typePanel, false)
+  assert.equal(openGrade.cleared, true)
+  assert.ok(openGrade.score > panelGrade.score)
+  assert.equal(openGrade.scoreKind, "machine estimate")
 
   const integrated = scoreDesignPattern({
     typeOnCanvas: true,
@@ -255,8 +269,15 @@ test("the board shows three diverse concepts and cites only what it retrieved", 
     tastes,
   })
   assert.equal(board.considered, 12)
+  assert.equal(COMPOSITION_FAMILIES.length, 12)
+  const familyModes = new Set(COMPOSITION_FAMILIES.map((family) => family.mode))
+  assert.equal(familyModes.has("integrated") && familyModes.has("full-bleed") && familyModes.has("panel"), true)
   assert.equal(board.surfaced.length, 3)
-  assert.equal(new Set(board.surfaced.map((item) => item.familyId)).size, 3)
+  const surfacedModes = board.surfaced.map((item) => item.rationale.grid.intentional_break)
+  assert.equal(new Set(surfacedModes).size, 3)
+  for (const mode of surfacedModes) assert.equal(familyModes.has(mode as "integrated"), true, mode)
+  assert.equal(surfacedModes.includes("integrated"), true)
+  assert.equal(board.surfaced.some((item) => item.card.front.shapes.some((shape) => shape.role === "type-panel")), true)
   const ids = new Set(board.retrieved.map((pick) => pick.id))
   assert.equal(ids.has("PM-047"), true)
   const fewer = await rankCandidates({

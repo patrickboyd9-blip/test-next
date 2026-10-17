@@ -76,7 +76,8 @@ export function readComposition(card: GridCard, rationale: DesignRationale): Com
     offerToHeadline: card.typePt.offer / headline,
     photoShare: card.photoAreaPct / 100,
     calmFieldPct: card.calmFieldPct,
-    thumbnailRow: rationale.grid.name === "bands" && card.panel.h / trim.h <= 0.24,
+    thumbnailRow: card.front.photos.filter((photo) => photo.treatment === "thumbnail").length >= 3
+      || (rationale.grid.name === "bands" && card.panel.h / trim.h <= 0.24),
   }
 }
 
@@ -87,7 +88,7 @@ export function readComposition(card: GridCard, rationale: DesignRationale): Com
  */
 export function scoreComposition(reading: CompositionReading): number {
   let score = 82
-  if (reading.typePanel && reading.panelShare >= 0.32) score -= 6
+  if (reading.typePanel && reading.panelShare >= 0.32) score -= 4
   if (reading.boxed >= 3) score -= 5
   if (reading.boxed >= 5) score -= 4
   if (reading.offerToHeadline >= 1.55) score += 3

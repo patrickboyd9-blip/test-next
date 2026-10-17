@@ -3,7 +3,7 @@ import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import type { CampaignBrief, CreativeDirection, CreativeSpec } from "@/lib/campaign-creator/types"
 import { MEDICARE_AGENT_DISCLAIMER, isMedicareAgentBrief } from "@/lib/campaign-creator/medicare-compliance"
 
-import { directDesign } from "./art-director"
+import { directDesign, usesSeparatedPanel, type CompositionMode } from "./art-director"
 import { critiqueCard } from "./critic"
 import { gradeComposition, type CompositionGrade } from "./composition-grade"
 import { emptyCost, logTokenCost, type TokenCost } from "./cost"
@@ -11,7 +11,7 @@ import { composeGridCard, type GridCard } from "./grid-composer"
 import { loadLibrary, type LibraryRecord } from "./library"
 import { requestModelRationale } from "./model"
 import { criticUsesVision, directorMode, trimFromCanvas } from "./pipeline"
-import type { DesignRationale, GridName, TrimSize } from "./rationale"
+import { validateDesignRationale, type DesignRationale, type GridName, type TrimSize } from "./rationale"
 import { selectReferences, type ReferenceSelection } from "./select"
 import { tasteSignalsForOwner } from "./concept-feedback"
 import {
@@ -28,8 +28,11 @@ import { referencePicksForCritique, requestComparativeCritique } from "./vision-
 
 /**
  * Generates a board of composition families, ranks them, and keeps three
- * that do not repeat a family. The painter is unchanged. Each family is a
- * different Design Rationale the existing composer can place.
+ * that do not repeat a composition mode. Each family is a real mode the
+ * postcard painter understands: integrated, full-bleed, panel, and the
+ * other modes. The mode is written on grid.intentional_break after the
+ * art director returns, so the slot recipe cannot collapse the board
+ * back to one layout.
  */
 
 export const DEFAULT_CANDIDATE_COUNT = 12
@@ -37,30 +40,32 @@ const SURFACE = 3
 
 interface Family {
   id: string
+  mode: CompositionMode
   grid: GridName
   alignment: "left" | "center"
   hero: "offer" | "headline"
   offerRatio: number
+  headlineToBody: number
   eye: DesignRationale["eye_path"]["pattern"]
   feel: string
   placement: string
-  photo: DesignRationale["photo_brief"]["placement"]
   summary: string
 }
 
+/** Twelve layouts. The mode is what the painter reads. The id keeps variants apart. */
 export const COMPOSITION_FAMILIES: readonly Family[] = [
-  { id: "open-canvas-offer", grid: "full-bleed-plus-panel", alignment: "left", hero: "offer", offerRatio: 1.9, eye: "Z", feel: "integrated", placement: "The figure floats on the open field in the brand color.", photo: "full_bleed", summary: "One price floats on the open field." },
-  { id: "open-canvas-headline", grid: "full-bleed-plus-panel", alignment: "left", hero: "headline", offerRatio: 0.5, eye: "F", feel: "integrated", placement: "The headline sits on the open field in the brand color.", photo: "full_bleed", summary: "A short headline sits on the open field." },
-  { id: "thirds-offer", grid: "thirds", alignment: "left", hero: "offer", offerRatio: 1.8, eye: "Z", feel: "panel", placement: "The figure leads a narrow quiet column.", photo: "panel_bleed_two_edges", summary: "The offer leads a narrow column." },
-  { id: "thirds-question", grid: "thirds", alignment: "left", hero: "headline", offerRatio: 0.5, eye: "F", feel: "editorial", placement: "A short question leads. The offer stays second.", photo: "panel_bleed_two_edges", summary: "A question leads the quiet column." },
-  { id: "split-offer", grid: "split-40-60", alignment: "left", hero: "offer", offerRatio: 1.75, eye: "Z", feel: "panel", placement: "The figure owns the type half.", photo: "panel_bleed_two_edges", summary: "The offer owns one half of the card." },
-  { id: "split-story", grid: "split-40-60", alignment: "left", hero: "headline", offerRatio: 0.48, eye: "diagonal", feel: "editorial", placement: "The headline owns the type half.", photo: "panel_bleed_two_edges", summary: "The story owns one half of the card." },
-  { id: "bottom-band-offer", grid: "bands", alignment: "left", hero: "offer", offerRatio: 1.85, eye: "stacked-bands", feel: "integrated", placement: "One band at the foot holds the offer and the response.", photo: "full_bleed", summary: "One band at the foot holds the offer." },
-  { id: "bottom-band-quiet", grid: "bands", alignment: "center", hero: "headline", offerRatio: 0.5, eye: "stacked-bands", feel: "calm", placement: "A quiet band holds a short headline.", photo: "full_bleed", summary: "A quiet band under the photograph." },
-  { id: "centered-numeral", grid: "centered-stack", alignment: "center", hero: "offer", offerRatio: 2, eye: "Z", feel: "integrated", placement: "One numeral sits near the optical center.", photo: "full_bleed", summary: "One numeral sits in the middle of the photograph." },
-  { id: "centered-calm", grid: "centered-stack", alignment: "center", hero: "headline", offerRatio: 0.45, eye: "F", feel: "calm", placement: "A short calm line sits in the middle.", photo: "full_bleed", summary: "A short line sits in the middle." },
-  { id: "diagonal-offer", grid: "thirds", alignment: "left", hero: "offer", offerRatio: 1.7, eye: "diagonal", feel: "urgent", placement: "The eye moves from the work to the figure to the phone.", photo: "panel_bleed_two_edges", summary: "The eye runs from the work to the price." },
-  { id: "stacked-offer", grid: "bands", alignment: "left", hero: "offer", offerRatio: 1.7, eye: "stacked-bands", feel: "urgent", placement: "The offer stacks above a single response row.", photo: "full_bleed", summary: "The offer stacks above one response row." },
+  { id: "integrated-offer", mode: "integrated", grid: "centered-stack", alignment: "left", hero: "offer", offerRatio: 1.9, headlineToBody: 3.2, eye: "Z", feel: "integrated", placement: "The offer floats on the open canvas, larger than the headline.", summary: "Type and a floating offer sit on the open canvas." },
+  { id: "full-bleed-headline", mode: "full-bleed", grid: "full-bleed-plus-panel", alignment: "left", hero: "headline", offerRatio: 0.5, headlineToBody: 2.7, eye: "F", feel: "editorial", placement: "The headline sits on the photograph, with no type panel.", summary: "Type sits on the photograph." },
+  { id: "panel-headline", mode: "panel", grid: "thirds", alignment: "left", hero: "headline", offerRatio: 0.7, headlineToBody: 4, eye: "F", feel: "panel", placement: "One text panel holds the headline beside the photograph.", summary: "One text panel beside the photograph." },
+  { id: "integrated-headline", mode: "integrated", grid: "centered-stack", alignment: "left", hero: "headline", offerRatio: 0.5, headlineToBody: 3.1, eye: "F", feel: "integrated", placement: "A two-color headline sits on the open canvas.", summary: "A two-color headline on the open canvas." },
+  { id: "full-bleed-offer", mode: "full-bleed", grid: "full-bleed-plus-panel", alignment: "left", hero: "offer", offerRatio: 1.8, headlineToBody: 2.8, eye: "Z", feel: "integrated", placement: "The offer sits on the photograph, larger than the headline.", summary: "A large offer sits on the photograph." },
+  { id: "panel-offer", mode: "panel", grid: "thirds", alignment: "left", hero: "offer", offerRatio: 1.8, headlineToBody: 3.4, eye: "Z", feel: "panel", placement: "The offer leads inside one text panel.", summary: "The offer leads inside one panel." },
+  { id: "dark-offer-field", mode: "dark-offer-field", grid: "thirds", alignment: "left", hero: "offer", offerRatio: 1.75, headlineToBody: 3.2, eye: "Z", feel: "urgent", placement: "The offer sits on a dark field beside the photograph.", summary: "A dark field holds the offer." },
+  { id: "overlapping-card", mode: "overlapping-card", grid: "full-bleed-plus-panel", alignment: "left", hero: "headline", offerRatio: 0.55, headlineToBody: 3, eye: "diagonal", feel: "editorial", placement: "A type card overlaps the photograph.", summary: "A type card overlaps the photograph." },
+  { id: "type-led", mode: "type-led", grid: "bands", alignment: "left", hero: "headline", offerRatio: 0.5, headlineToBody: 3.6, eye: "stacked-bands", feel: "editorial", placement: "Type leads, and the photograph is a band above it.", summary: "Type leads under a photo band." },
+  { id: "calm-column", mode: "calm-column", grid: "thirds", alignment: "left", hero: "headline", offerRatio: 0.48, headlineToBody: 3.1, eye: "F", feel: "calm", placement: "A narrow calm column holds a short headline.", summary: "A narrow column holds the headline." },
+  { id: "integrated-calm", mode: "integrated", grid: "centered-stack", alignment: "center", hero: "headline", offerRatio: 0.45, headlineToBody: 2.8, eye: "F", feel: "calm", placement: "A short calm line sits on the open canvas.", summary: "A calm line on the open canvas." },
+  { id: "full-bleed-calm", mode: "full-bleed", grid: "full-bleed-plus-panel", alignment: "center", hero: "headline", offerRatio: 0.42, headlineToBody: 2.7, eye: "F", feel: "calm", placement: "A short line sits on a calm area of the photograph.", summary: "A short line on the photograph." },
 ]
 
 export interface ScoredCandidate {
@@ -233,8 +238,12 @@ function redesignOnce(
   base: DesignRationale,
   retrieved: TastePick[]
 ): ScoredCandidate {
-  const next = COMPOSITION_FAMILIES.find((family) => family.id === "open-canvas-offer" && family.id !== candidate.familyId)
-    ?? COMPOSITION_FAMILIES.find((family) => family.id === "bottom-band-offer")
+  const separated = usesSeparatedPanel(candidate.rationale.grid.intentional_break)
+  const next = (separated
+    ? COMPOSITION_FAMILIES.find((family) => family.mode === "integrated" && family.hero === "offer" && family.id !== candidate.familyId)
+    : undefined)
+    ?? COMPOSITION_FAMILIES.find((family) => family.mode === "full-bleed" && family.id !== candidate.familyId)
+    ?? COMPOSITION_FAMILIES.find((family) => family.id !== candidate.familyId)
     ?? COMPOSITION_FAMILIES[0]!
   const revised = scoreFamily({
     family: next,
@@ -253,15 +262,19 @@ function redesignOnce(
 }
 
 function chooseDiverse(candidates: ScoredCandidate[], directionCount: number): ScoredCandidate[] {
-  const used = new Set<string>()
+  const usedModes = new Set<string>()
+  const usedIds = new Set<string>()
   const chosen: ScoredCandidate[] = []
   for (let index = 0; index < directionCount; index += 1) {
     const options = candidates
       .filter((candidate) => candidate.directionIndex === index)
       .sort((a, b) => Number(b.grade.cleared) - Number(a.grade.cleared) || b.grade.score - a.grade.score)
-    const pick = options.find((candidate) => !used.has(candidate.familyId)) ?? options[0]
+    const pick = options.find((candidate) => !usedModes.has(candidate.rationale.grid.intentional_break) && !usedIds.has(candidate.familyId))
+      ?? options.find((candidate) => !usedIds.has(candidate.familyId))
+      ?? options[0]
     if (!pick) continue
-    used.add(pick.familyId)
+    usedModes.add(pick.rationale.grid.intentional_break)
+    usedIds.add(pick.familyId)
     chosen[index] = pick
   }
   return chosen.filter((candidate): candidate is ScoredCandidate => Boolean(candidate))
@@ -339,44 +352,53 @@ function rationaleForFamily(
   family: Family,
   input: { brief: CampaignBrief; selection: ReferenceSelection; trim: TrimSize; retrieved: TastePick[] }
 ): DesignRationale {
-  const numeral = briefHasNumeralOffer(input.brief) && input.selection.vertical !== "medicare_insurance"
-  const hero = input.selection.vertical === "medicare_insurance" || !numeral ? "headline" : family.hero
+  const medicare = input.selection.vertical === "medicare_insurance"
+  const numeral = briefHasNumeralOffer(input.brief) && !medicare
+  const hero = medicare || !numeral ? "headline" : family.hero
+  const offerHero = hero === "offer"
+  const separated = usesSeparatedPanel(family.mode)
   const proposed: DesignRationale = {
     ...base,
-    grid: { name: family.grid, alignment: family.alignment, intentional_break: family.id },
+    grid: { name: family.grid, alignment: family.alignment, intentional_break: family.mode },
     scale_ratios: {
-      ...base.scale_ratios,
       hero,
-      offer_to_headline_cap: hero === "offer" ? family.offerRatio : 0.55,
-      headline_to_body_cap: Math.max(2.5, base.scale_ratios.headline_to_body_cap),
-      offer_to_body: hero === "offer" ? 5 : Math.max(1.5, base.scale_ratios.offer_to_body),
+      offer_to_headline_cap: offerHero ? family.offerRatio : 0.5,
+      headline_to_body_cap: family.headlineToBody,
+      offer_to_body: offerHero ? 5 : 1.6,
+      front_type_size_count: 3,
     },
     eye_path: { pattern: family.eye, stops: base.eye_path.stops },
     focal_element: {
       ...base.focal_element,
-      kind: hero === "offer" ? "offer_numeral" : base.focal_element.kind === "offer_numeral" ? "photograph_subject" : base.focal_element.kind,
-      description: family.placement.length >= 8 ? family.placement : base.focal_element.description,
-      visual_weight_pct: 42,
-      lead_modality: hero === "offer" ? "offer_field" : "image",
-      lead_modality_area_pct: 70,
+      kind: offerHero
+        ? "offer_numeral"
+        : family.mode === "integrated" || family.mode === "type-led"
+          ? "headline"
+          : base.focal_element.kind === "offer_numeral" ? "photograph_subject" : base.focal_element.kind,
+      description: family.placement,
+      visual_weight_pct: offerHero ? 46 : 40,
+      lead_modality: offerHero ? "offer_field" : family.mode === "full-bleed" ? "image" : separated ? "type" : "image",
+      lead_modality_area_pct: family.mode === "full-bleed" ? 74 : family.mode === "panel" ? 64 : 70,
     },
     offer_treatment: {
       ...base.offer_treatment,
-      kind: hero === "offer" ? "numeral_hero" : input.selection.vertical === "medicare_insurance" ? "concrete_step_no_discount" : "headline_is_the_offer",
+      kind: offerHero ? "numeral_hero" : medicare ? "concrete_step_no_discount" : "headline_is_the_offer",
       placement: family.placement,
     },
-    photo_brief: { ...base.photo_brief, placement: family.photo },
+    photo_brief: {
+      ...base.photo_brief,
+      placement: family.mode === "integrated" || family.mode === "full-bleed" ? "full_bleed" : "panel_bleed_two_edges",
+    },
     principles_invoked: [...base.principles_invoked.slice(0, 4), ...input.retrieved.slice(0, 2).map((pick) => pick.id)].slice(0, 8),
   }
   if (proposed.principles_invoked.length < 3) {
     proposed.principles_invoked = ["P1", "P4", "P7"]
   }
-  return directDesign({
-    brief: input.brief,
-    selection: input.selection,
-    trim: input.trim,
-    proposed,
-  }).rationale
+  const checked = validateDesignRationale(proposed)
+  if (!checked.ok) {
+    throw new Error(`Family ${family.id} rationale failed: ${checked.errors.join(" ")}`)
+  }
+  return checked.rationale
 }
 
 function orderFamilies(feel: string, signals?: TasteSignals): Family[] {
@@ -388,8 +410,9 @@ function orderFamilies(feel: string, signals?: TasteSignals): Family[] {
 function familyRank(family: Family, feel: string, signals?: TasteSignals): number {
   let score = 0
   if (family.feel === feel) score += 3
-  if (signals?.likedFamilies.includes(family.id)) score += 6
-  if (signals?.dislikedFamilies.includes(family.id)) score -= 8
+  const keys = [family.id, family.mode]
+  if (keys.some((key) => signals?.likedFamilies.includes(key))) score += 6
+  if (keys.some((key) => signals?.dislikedFamilies.includes(key))) score -= 8
   return score
 }
 
