@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import type { PostcardIdentity } from "@/lib/campaign-creator/studio-contact"
 import { presentStudioPhoto, type StudioImageState } from "@/lib/campaign-creator/studio-photo"
+import type { ConceptFeedbackView } from "@/lib/campaign-creator/actions"
 import type { CampaignBrief, CreativeDirection } from "@/lib/campaign-creator/types"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
@@ -19,6 +20,8 @@ interface CompareViewProps {
   studioPhotos?: StudioImageState
   onSelect: (directionId: string) => void
   onBack: () => void
+  campaignId?: string
+  feedback?: ConceptFeedbackView[]
 }
 
 export function CompareView({
@@ -30,6 +33,8 @@ export function CompareView({
   studioPhotos,
   onSelect,
   onBack,
+  campaignId,
+  feedback = [],
 }: CompareViewProps) {
   const reducedMotion = useReducedMotion()
 
@@ -75,6 +80,8 @@ export function CompareView({
                 photoNote={photo.note}
                 onSelect={() => onSelect(direction.id)}
                 index={direction.id === recommendedId ? 0 : index}
+                campaignId={campaignId}
+                feedback={feedback.find((item) => item.directionId === direction.id)}
               />
             </motion.div>
           )

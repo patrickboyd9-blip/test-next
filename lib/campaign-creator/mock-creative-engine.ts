@@ -15,7 +15,7 @@ import {
   getMockCreativeDirections,
   getMockRecommendation,
 } from "./mock-creative-data"
-import { applyDesignIntelligence } from "@/lib/design-intelligence/pipeline"
+import { applyStudioBoard } from "@/lib/design-intelligence/candidate-board"
 
 import { applyMockRefinement } from "./mock-refinement-engine"
 
@@ -83,12 +83,12 @@ async function normalizeMockGeneration(
     stripInventedFacts: false,
   })
   const recommendation = getMockRecommendation(result.directions)
-  const designed = await applyDesignIntelligence(input.brief, {
+  const designed = await applyStudioBoard(input.brief, {
     ...result,
     recommendation: {
       ...recommendation,
       rationale: result.recommendation.rationale,
     },
-  }, input.canvas)
+  }, input.canvas, { ownerId: input.ownerId })
   return designed
 }

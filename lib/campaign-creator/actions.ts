@@ -34,6 +34,7 @@ import type {
 } from "@/lib/mail-catalog/types"
 import { getMailPiece } from "@/lib/mail-catalog/catalog"
 import { generateCampaignStrategy } from "@/lib/campaign-strategy/strategy-generator"
+import { listCampaignVotes, saveConceptVote } from "@/lib/design-intelligence/concept-feedback"
 
 const repository = getCampaignRepository()
 
@@ -211,6 +212,7 @@ export async function generateStudioCreative(campaignId: string): Promise<Campai
     const result = await engine.generateDirections({
       brief: latest.brief,
       canvas,
+      ownerId: latest.ownerId,
     })
     return repository.initializeStudioCreative(
       campaignId,
@@ -377,4 +379,44 @@ export async function recoverMissingMailPiece(
   campaignId: string
 ): Promise<Campaign> {
   return forCustomer(await repository.recoverMissingMailPiece(campaignId))
+}
+
+export interface ConceptFeedbackView {
+  directionId: string
+  vote: "up" | "down"
+  reason: string
+}
+
+/** Thumbs for the concepts in one campaign. The owner is taken from the campaign, not from the browser. */
+export async function loadConceptFeedback(campaignId: string): Promise<ConceptFeedbackView[]> {
+  const campaign = await repository.getCampaign(campaignId)
+  if (!campaign) return []
+  const votes = await listCampaignVotes(campaignId)
+  return votes
+    .filter((vote) => vote.ownerId === campaign.ownerId)
+    .map((vote) => ({ directionId: vote.directionId, vote: vote.vote, reason: vote.reason }))
+}
+
+export async function saveConceptFeedback(input: {
+  campaignId: string
+  directionId: string
+  vote: "up" | "down"
+  reason?: string
+}): Promise<ConceptFeedbackView> {
+  if (input.vote !== "up" && input.vote !== "down") {
+    throw new Error("Vote must be up or down.")
+  }
+  const campaign = await repository.getCampaign(input.campaignId)
+  if (!campaign) throw new Error(`Campaign ${input.campaignId} not found`)
+  const direction = campaign.creative.directions.find((item) => item.id === input.directionId)
+  if (!direction) throw new Error("That concept is not on this campaign.")
+  const saved = await saveConceptVote({
+    campaignId: campaign.id,
+    directionId: direction.id,
+    ownerId: campaign.ownerId,
+    vote: input.vote,
+    reason: input.reason,
+    compositionFamily: direction.spec.designRationale?.grid.intentional_break ?? "",
+  })
+  return { directionId: saved.directionId, vote: saved.vote, reason: saved.reason }
 }
