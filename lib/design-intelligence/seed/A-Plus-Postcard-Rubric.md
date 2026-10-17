@@ -207,7 +207,9 @@ Grades are in `analyses/`. Mailbox pieces (PM) are weighted above vendor samples
 - **F: MMR-513, MMR-047, MMR-047-2.** Government-notice look and a fake deadline. Loud hierarchy does not help.
 - **D: PM-011** (seals and a burst), **PM-017** (every device shouting), **PM-023** (catalog, offer deferred), **PM-027** (type and photo axes disagree, as the file reads), **PM-032** (yellow field, a slogan, no next step; may be an address face), **MMR-151** (door-hanger stack).
 
-If Patrick disagrees with PM-047, PM-022, or PM-054 as the A examples, or with PM-011, MMR-513, and MMR-047 as the weak examples, change this table before tuning the weights. The playbook’s ratios stay until response data, not taste, moves them.
+**Owner favorites.** PM-047, PM-054, PM-022, and PM-056. Retrieval keeps these in the set. The critic uses them as calibration anchors. PM-056 is the Wondercide mosquito and tick postcard. Learn its discipline: a three-color palette (navy, lime, white), chunky condensed display type, a clean lifestyle photograph plus one product hero, a 2×2 icon benefit grid on the back, and one color-blocked offer panel with a pill-shaped code. Those are principles. They are not a layout to copy.
+
+If Patrick disagrees with PM-047, PM-022, or PM-054 as the A examples, with PM-056 as a favorite, or with PM-011, MMR-513, and MMR-047 as the weak examples, change this table before tuning the weights. The playbook’s ratios stay until response data, not taste, moves them. The favorite list can also be set with `DESIGN_OWNER_FAVORITES`.
 
 ## 7. What the critic returns
 

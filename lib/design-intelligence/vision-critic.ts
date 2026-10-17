@@ -1,7 +1,8 @@
 import type { CreativeSpec } from "@/lib/campaign-creator/types"
 
 import { estimateUsd, logTokenCost, type TokenCost } from "./cost"
-import { VISION_GRADE_ANCHOR, letterFor, type LetterGrade } from "./composition-grade"
+import { visionGradeAnchor, letterFor, type LetterGrade } from "./composition-grade"
+import { ownerFavoriteIds } from "./owner-favorites"
 import { composeGridCard } from "./grid-composer"
 import { isDesignRationale } from "./rationale"
 import type { TastePick } from "./taste-retrieval"
@@ -58,7 +59,7 @@ export async function requestComparativeCritique(input: {
         "You grade one candidate postcard against an A+ direct-mail rubric.",
         "The first image is the candidate. The later images are A-grade references for comparison only.",
         "Never tell the designer to copy a reference brand, photo, layout, or line.",
-        VISION_GRADE_ANCHOR,
+        visionGradeAnchor(input.env),
         'Return JSON only: {"score": number 0-100, "letter": "A"|"A-"|"B+"|"B"|"B-"|"C+"|"C"|"C-"|"D"|"F", "explanation": "two sentences", "weakness": "the single biggest weakness, one sentence", "redesign": "the one structural change that fixes that weakness"}',
       ].join("\n"),
       messages: [
@@ -179,10 +180,11 @@ export async function reviewRefinementNote(input: {
   }
 }
 
-export function referencePicksForCritique(picks: readonly TastePick[]): TastePick[] {
+export function referencePicksForCritique(picks: readonly TastePick[], favorites: readonly string[] = ownerFavoriteIds()): TastePick[] {
   const graded = picks.filter((pick) => pick.grade === "A" || pick.grade === "A-")
   const pool = graded.length >= 2 ? graded : picks
-  return pool.slice(0, 3)
+  const favorite = new Set(favorites)
+  return [...pool].sort((a, b) => Number(favorite.has(b.id)) - Number(favorite.has(a.id))).slice(0, 3)
 }
 
 function scoreFromLetter(letter: string, fallback: number): number {

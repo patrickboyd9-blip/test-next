@@ -47,8 +47,8 @@ test("the vision director and critic run when the API key is set", () => {
 
 test("the seed holds every written analysis", () => {
   const analyses = loadSeedAnalyses()
-  assert.equal(analyses.length, 91)
-  for (const id of ["PM-047", "PM-054", "PM-022", "MMR-513", "MMR-047", "PM-011"]) {
+  assert.equal(analyses.length, 92)
+  for (const id of ["PM-047", "PM-054", "PM-022", "PM-056", "MMR-513", "MMR-047", "PM-011"]) {
     assert.ok(analyses.some((analysis) => analysis.id === id), id)
   }
 })
@@ -75,7 +75,14 @@ test("anchors are included and anti-examples are only don'ts", () => {
     needsAnalysis: false,
   }))
   const selection = selectReferences(records, { goal: "Book roof inspections", offer: "$0 inspection" })
-  assert.deepEqual(selection.anchors.map((item) => item.id), ["PM-047", "PM-054", "PM-022"])
+  assert.deepEqual(selection.anchors.map((item) => item.id), ["PM-047", "PM-054", "PM-022", "PM-056"])
+  const wondercide = selection.anchors.find((item) => item.id === "PM-056")
+  assert.match(wondercide?.principle ?? "", /three-color|condensed|product hero/i)
+  assert.match(wondercide?.doNotCopy ?? "", /mark/)
+  const onlyTrio = selectReferences(records, { goal: "Book roof inspections", offer: "$0 inspection" }, {
+    DESIGN_OWNER_FAVORITES: "PM-047,PM-054,PM-022",
+  } as NodeJS.ProcessEnv)
+  assert.deepEqual(onlyTrio.anchors.map((item) => item.id), ["PM-047", "PM-054", "PM-022"])
   assert.ok(selection.donts.some((item) => item.id === "MMR-513"))
   assert.ok(selection.donts.some((item) => item.id === "MMR-047"))
   assert.ok(selection.donts.some((item) => item.id === "PM-011"))

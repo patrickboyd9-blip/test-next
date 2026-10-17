@@ -2,19 +2,19 @@ import type { CampaignBrief } from "@/lib/campaign-creator/types"
 
 import { isForbiddenResearchPath } from "./images"
 import {
-  BENCHMARK_ANCHOR_IDS,
   gradeRank,
   isAntiExample,
   type LibraryRecord,
   type MailerAnalysis,
 } from "./library"
+import { ownerFavoriteIds } from "./owner-favorites"
 import type { DesignVertical } from "./rationale"
 import { verticalForBrief } from "./vertical"
 
 /**
  * Picks the mailers an art director may study.
  * A and B grades and Patrick's mailbox pieces outweigh vendor samples.
- * The benchmark trio is always included as quality anchors.
+ * The owner's favorites are always included as quality anchors.
  * Anti-examples are returned only as things not to do.
  */
 
@@ -48,11 +48,14 @@ const IMAGE_LIMIT = 4
 
 export function selectReferences(
   records: readonly LibraryRecord[],
-  brief: CampaignBrief
+  brief: CampaignBrief,
+  env: NodeJS.ProcessEnv = process.env
 ): ReferenceSelection {
   const vertical = verticalForBrief(brief)
+  const favorites = ownerFavoriteIds(env)
+  const favoriteIds = new Set(favorites)
   const byId = new Map(records.map((record) => [record.id, record]))
-  const anchors = BENCHMARK_ANCHOR_IDS.map((id) => byId.get(id))
+  const anchors = favorites.map((id) => byId.get(id))
     .filter((record): record is LibraryRecord => Boolean(record))
     .map((record) => toPick(record, "anchor"))
 
@@ -61,7 +64,7 @@ export function selectReferences(
     .map((record) => toPick(record, "dont"))
 
   const peers = records
-    .filter((record) => !isAntiExample(record) && !BENCHMARK_ANCHOR_IDS.includes(record.id as (typeof BENCHMARK_ANCHOR_IDS)[number]))
+    .filter((record) => !isAntiExample(record) && !favoriteIds.has(record.id))
     .map((record) => ({ record, score: peerScore(record, vertical, brief) }))
     .filter((item) => item.score > 0)
     .sort((a, b) => b.score - a.score || a.record.id.localeCompare(b.record.id))
@@ -136,6 +139,7 @@ const BORROWED: Record<string, string> = {
   "PM-001": "Borrowed one solid panel for a single figure and the phone, and left that mailer's scene behind.",
   "PM-054": "Borrowed a dark field beside the work, and did not use this mailer's right-half split or circular badge.",
   "PM-022": "Borrowed an overlapping card on a full-bleed photograph, and moved the card off this mailer's footprint.",
+  "PM-056": "Borrowed a three-color palette, condensed display type, one product hero, and one offer panel with its code. Left that mailer's layout behind.",
   "PM-052": "Borrowed a full-bleed crop with only a few lines of type, and put the phone in one of those lines.",
   "MMR-397": "Borrowed holding the type to one quiet band under the photograph, with a single next step.",
   "PM-046": "Borrowed one question as the type event and a phone set large in the footer.",
