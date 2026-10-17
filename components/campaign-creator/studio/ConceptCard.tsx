@@ -25,6 +25,7 @@ interface ConceptCardProps {
   identity?: PostcardIdentity
   brief?: CampaignBrief
   generatedAsset?: GeneratedAsset | null
+  alternateGeneratedAsset?: GeneratedAsset | null
   allowLibraryFallback?: boolean
   photoNote?: string | null
   onSelect?: () => void
@@ -40,6 +41,7 @@ export function ConceptCard({
   identity,
   brief,
   generatedAsset,
+  alternateGeneratedAsset,
   allowLibraryFallback = false,
   photoNote,
   onSelect,
@@ -93,6 +95,7 @@ export function ConceptCard({
             identity={identity}
             brief={brief}
             generatedAsset={generatedAsset}
+            alternateGeneratedAsset={alternateGeneratedAsset}
             allowLibraryFallback={allowLibraryFallback}
             enableHoverTilt={variant !== "strip"}
           />

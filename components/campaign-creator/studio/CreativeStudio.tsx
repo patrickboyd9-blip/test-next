@@ -99,6 +99,7 @@ export function CreativeStudio({
     const photo = presentStudioPhoto(studioPhotos, directionId, spec, campaign.brief)
     return {
       generatedAsset: photo.generatedAsset,
+      alternateGeneratedAsset: photo.alternateAsset,
       allowLibraryFallback: photo.allowLibraryFallback,
       photoNote: photo.note,
     }

@@ -21,6 +21,7 @@ interface LeadRevealViewProps {
   onContinue: () => void
   onCompare: () => void
   generatedAsset?: GeneratedAsset | null
+  alternateGeneratedAsset?: GeneratedAsset | null
   allowLibraryFallback?: boolean
   photoNote?: string | null
   identity?: PostcardIdentity
@@ -33,6 +34,7 @@ export function LeadRevealView({
   onContinue,
   onCompare,
   generatedAsset,
+  alternateGeneratedAsset,
   allowLibraryFallback = false,
   photoNote,
   identity,
@@ -72,6 +74,7 @@ export function LeadRevealView({
             side={side}
             size="hero"
             generatedAsset={generatedAsset}
+            alternateGeneratedAsset={alternateGeneratedAsset}
             allowLibraryFallback={allowLibraryFallback}
             identity={identity}
             brief={brief}

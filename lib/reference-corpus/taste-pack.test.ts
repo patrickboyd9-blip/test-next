@@ -29,9 +29,9 @@ const canvas: CreativeCanvas = {
   fullBleedExpected: true,
 }
 
-test("the curated pack is 41 prompt-safe postcard cards", () => {
+test("the curated pack is 56 prompt-safe postcard cards", () => {
   assert.doesNotThrow(() => assertResearchTastePack())
-  assert.equal(RESEARCH_TASTE_PACK.length, 41)
+  assert.equal(RESEARCH_TASTE_PACK.length, 56)
   assert.equal(
     RESEARCH_TASTE_PACK.filter((card) => card.packGroup === "insurance").length,
     21
@@ -45,8 +45,15 @@ test("the curated pack is 41 prompt-safe postcard cards", () => {
   }
   assert.equal(
     RESEARCH_TASTE_PACK.filter((card) => card.packGroup === "home_services").length,
-    10
+    25
   )
+  for (let id = 574; id <= 588; id += 1) {
+    assert.equal(
+      RESEARCH_TASTE_PACK.some((card) => card.mmrId === `MMR-${id}`),
+      true,
+      `MMR-${id}`
+    )
+  }
   const verticals = new Set(
     RESEARCH_TASTE_PACK.filter((card) => card.packGroup === "home_services").map(
       (card) => card.vertical
@@ -70,7 +77,9 @@ test("a roofing brief gets the roofing card and not a restaurant or med-spa card
   const selection = selectReferenceCards(brief)
   const ids = selection.cards.map((card) => card.mmrId)
   assert.equal(selection.match, "vertical")
-  assert.equal(ids.includes("MMR-001"), true)
+  assert.equal(ids.includes("MMR-574"), true)
+  assert.equal(ids.includes("MMR-577"), true)
+  assert.equal(ids.includes("MMR-580"), true)
   assert.equal(ids.includes("MMR-012"), false)
   assert.equal(ids.includes("MMR-021"), false)
   assert.equal(ids.length <= 4, true)
@@ -132,8 +141,10 @@ test("generate and regenerate prompts consume the taste cards without raw resear
   const regenerate = buildRegenerateSystemPrompt(canvas, intelligence)
 
   for (const prompt of [generate, regenerate]) {
-    assert.match(prompt, /\[MMR-001\]/)
-    assert.match(prompt, /indoor consequence/)
+    assert.match(prompt, /\[MMR-574\]/)
+    assert.match(prompt, /\[MMR-577\]/)
+    assert.match(prompt, /\[MMR-580\]/)
+    assert.match(prompt, /exterior roof|finished roof/)
     assert.match(prompt, /Pexels/)
     assert.match(prompt, /Do not spend money, print, or submit/)
     assert.doesNotMatch(prompt, /https?:\/\//i)

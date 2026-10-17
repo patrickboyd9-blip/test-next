@@ -163,6 +163,24 @@ test("a disallowed layout is replaced and the three directions still differ", ()
   assert.equal(applied[0]?.spec.imageryRole === "none", false)
 })
 
+test("roofing directions cite different records for storm, financing, and before/after", () => {
+  const brief: CampaignBrief = { goal: "Book roof inspections", offer: "Free roof inspection" }
+  const applied = applyResearchLayouts(brief, [
+    direction(0, "peer_split"),
+    direction(1, "image_grounded"),
+    direction(2, "type_primary_split"),
+  ])
+  assert.deepEqual(
+    applied.map((item) => item.spec.layoutHints?.templateId),
+    ["storm_alert", "financing_first", "before_after"]
+  )
+  const cited = applied.map((item) => item.research?.sources.map((source) => source.mmrId))
+  assert.deepEqual(cited, [["MMR-574"], ["MMR-577"], ["MMR-580"]])
+  const unique = new Set(cited.flat())
+  assert.equal(unique.size, 3)
+  assert.equal(unique.has("MMR-001"), false)
+})
+
 test("sources and the internal score persist, and older campaigns still load", async () => {
   const sql = new MemorySql()
   const store = createPostgresDocumentStore("campaigns", sql)

@@ -35,6 +35,29 @@ export function copyRestatesLead(lead: string, follow: string): boolean {
   return shorter.every((word, index) => longer[index] === word)
 }
 
+const LEADING_DETERMINER = new Set(["your", "our", "a", "an", "the", "this", "my"])
+
+/**
+ * The headline repeats the offer even when a determiner sits in front.
+ * "Your Free Roof Inspection" restates "Free roof inspection".
+ */
+export function headlineRestatesOffer(offer: string, headline: string): boolean {
+  if (copyRestatesLead(offer, headline)) return true
+  const offerWords = copyWords(offer)
+  const headWords = stripDeterminers(copyWords(headline))
+  if (offerWords.length < 2 || headWords.length < 2) return false
+  if (offerWords.join(" ") === headWords.join(" ")) return true
+  const offerPhrase = offerWords.join(" ")
+  const headPhrase = headWords.join(" ")
+  return headPhrase.includes(offerPhrase) && headWords.length <= offerWords.length + 2
+}
+
+function stripDeterminers(words: string[]): string[] {
+  const next = [...words]
+  while (next.length > 2 && LEADING_DETERMINER.has(next[0] ?? "")) next.shift()
+  return next
+}
+
 function copyWords(value: string): string[] {
   return value
     .toLowerCase()

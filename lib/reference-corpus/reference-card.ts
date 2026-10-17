@@ -83,6 +83,17 @@ export interface ReferenceCard {
    * them, and other briefs can still use them as a quality bar.
    */
   packGroup: ReferenceCardPackGroup
+  /**
+   * Visual pattern this card is a style reference for, such as "storm" or
+   * "before_after". Used to cite the record on the matching composition.
+   * Not printed.
+   */
+  patterns?: readonly string[]
+  /**
+   * When false, the card informs citations and craft only.
+   * It does not vote on which layout families the model may use.
+   */
+  guidesLayout?: boolean
 }
 
 const MMR_ID = /^MMR-\d+$/

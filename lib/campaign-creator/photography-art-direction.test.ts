@@ -85,7 +85,7 @@ test("a weak roofing label becomes three different trade scenes", () => {
   }
   assert.match(subjects[2]!.lighting, /coastal/i)
   assert.doesNotMatch(subjects[2]!.lighting, /Chula Vista/)
-  assert.match(subjects[0]!.craft ?? "", /interior leak|not a crew portrait/i)
+  assert.match(subjects[0]!.craft ?? "", /exterior roof|not empty sky/i)
 })
 
 test("a before/after concept is prompted as one cohesive photograph", () => {

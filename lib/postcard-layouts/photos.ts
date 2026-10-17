@@ -18,16 +18,14 @@ export function customerPhotoUrls(assets: readonly BrandAsset[] | undefined): st
 export function slotPhotoSources(input: {
   slotCount: number
   generatedSrc?: string | null
+  generatedAlternateSrc?: string | null
   assets?: readonly BrandAsset[]
 }): Array<string | null> {
   const uploaded = customerPhotoUrls(input.assets)
+  const generated = [input.generatedSrc ?? null, input.generatedAlternateSrc ?? null]
   const sources: Array<string | null> = []
   for (let index = 0; index < input.slotCount; index += 1) {
-    sources.push(uploaded[index] ?? (index === 0 ? input.generatedSrc ?? null : null))
-  }
-  if (uploaded.length > 0 && input.slotCount > 0) {
-    sources[0] = uploaded[0] ?? null
-    if (input.slotCount > 1) sources[1] = uploaded[1] ?? input.generatedSrc ?? null
+    sources.push(uploaded[index] ?? generated[index] ?? null)
   }
   return sources
 }

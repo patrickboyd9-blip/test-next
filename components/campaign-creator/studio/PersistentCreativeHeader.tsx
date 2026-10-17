@@ -18,6 +18,7 @@ interface PersistentCreativeHeaderProps {
   identity?: PostcardIdentity
   brief?: CampaignBrief
   generatedAsset?: GeneratedAsset | null
+  alternateGeneratedAsset?: GeneratedAsset | null
   allowLibraryFallback?: boolean
   photoNote?: string | null
   onEditCreative: () => void
@@ -31,6 +32,7 @@ export function PersistentCreativeHeader({
   identity,
   brief,
   generatedAsset,
+  alternateGeneratedAsset,
   allowLibraryFallback = false,
   photoNote,
   onEditCreative,
@@ -59,6 +61,7 @@ export function PersistentCreativeHeader({
               identity={identity}
               brief={brief}
               generatedAsset={generatedAsset}
+              alternateGeneratedAsset={alternateGeneratedAsset}
               allowLibraryFallback={allowLibraryFallback}
               enableHoverTilt={false}
               className="!max-w-none !h-full !aspect-auto"

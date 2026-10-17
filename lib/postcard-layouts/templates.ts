@@ -109,14 +109,14 @@ export function frontRegions(template: PostcardTemplateId): DesignRegion[] {
       return [
         { id: "before", kind: "photo", role: "photo", x: 0, y: 0, w: 3.94, h: 2.4, bleed: true },
         { id: "after", kind: "photo", role: "photo-b", x: 4.06, y: 0, w: 3.94, h: 2.4, bleed: true },
-        { id: "before-chip", kind: "shape", role: "chip", x: 0.28, y: 1.96, w: 1.05, h: 0.32 },
-        { id: "before-label", kind: "text", role: "label", x: 0.28, y: 1.96, w: 1.05, h: 0.32, align: "center" },
-        { id: "after-chip", kind: "shape", role: "chip", x: 4.28, y: 1.96, w: 0.95, h: 0.32 },
-        { id: "after-label", kind: "text", role: "label", x: 4.28, y: 1.96, w: 0.95, h: 0.32, align: "center" },
+        { id: "before-chip", kind: "shape", role: "chip", x: 0.28, y: 1.84, w: 1.55, h: 0.44 },
+        { id: "before-label", kind: "text", role: "label", x: 0.28, y: 1.84, w: 1.55, h: 0.44, align: "center" },
+        { id: "after-chip", kind: "shape", role: "chip", x: 4.28, y: 1.84, w: 1.4, h: 0.44 },
+        { id: "after-label", kind: "text", role: "label", x: 4.28, y: 1.84, w: 1.4, h: 0.44, align: "center" },
         { id: "offer-tile", kind: "shape", role: "offer-tile", x: 0.28, y: 2.54, w: 7.44, h: 0.78 },
         { id: "offer", kind: "text", role: "offer", x: 0.42, y: 2.62, w: 7.16, h: 0.62 },
         { id: "headline", kind: "text", role: "headline", x: 0.32, y: 3.4, w: 7.36, h: 0.38 },
-        { id: "trust", kind: "trust", role: "trust", x: 0.28, y: 1.55, w: 3.4, h: 0.28 },
+        { id: "trust", kind: "trust", role: "trust", x: 0.28, y: 0.28, w: 3.5, h: 0.42 },
         { id: "lockup", kind: "lockup", role: "lockup", x: 0.32, y: 3.78, w: 7.36, h: 0.96 },
       ]
     case "trust_proof":

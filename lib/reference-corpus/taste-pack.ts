@@ -1,4 +1,5 @@
 import { INSURANCE_REFERENCE_CARDS } from "./insurance-cards"
+import { ROOFING_REFERENCE_CARDS } from "./roofing-cards"
 import {
   assertReferenceCard,
   type ReferenceCard,
@@ -13,10 +14,11 @@ import {
  * INTERNAL RESEARCH / REFERENCE ONLY — imitate the craft, not the brand.
  *
  * Mix (founder-approved):
- * - 10 home services, covering HVAC, plumbing, electrical, roofing, pest,
- *   and landscaping. Two adjacent exterior/structural postcards are included
- *   because the next records in the named trades published results without
- *   observed composition.
+ * - 25 home services, covering HVAC, plumbing, electrical, roofing, pest,
+ *   and landscaping. Roofing includes MMR-001 plus style-reference notes for
+ *   MMR-574 through MMR-588. Two adjacent exterior/structural postcards are
+ *   included because the next records in the named trades published results
+ *   without observed composition.
  * - 4 local healthcare: dental, med spa, chiropractic, physical therapy.
  * - 3 hospitality: restaurant, pizza, foot-traffic.
  * - 3 craft exemplars: premium versus template, hierarchy, small-card restraint.
@@ -45,6 +47,7 @@ export const RESEARCH_TASTE_PACK: readonly ReferenceCard[] = [
     whyItWorks:
       "The cost of waiting is visible in one glance, and there is a single way to act.",
   },
+  ...ROOFING_REFERENCE_CARDS,
   {
     mmrId: "MMR-002",
     vertical: "hvac",
@@ -450,7 +453,7 @@ export const RESEARCH_TASTE_PACK: readonly ReferenceCard[] = [
 ]
 
 const EXPECTED_GROUP_COUNTS: Record<ReferenceCardPackGroup, number> = {
-  home_services: 10,
+  home_services: 25,
   local_healthcare: 4,
   hospitality: 3,
   craft_exemplar: 3,
@@ -480,8 +483,8 @@ const BANNED_IN_CARD_TEXT = [
 export function assertResearchTastePack(
   pack: readonly ReferenceCard[] = RESEARCH_TASTE_PACK
 ): void {
-  if (pack.length !== 41) {
-    throw new Error(`Taste pack must contain 41 cards (has ${pack.length}).`)
+  if (pack.length !== 56) {
+    throw new Error(`Taste pack must contain 56 cards (has ${pack.length}).`)
   }
   const ids = new Set<string>()
   const counts: Record<ReferenceCardPackGroup, number> = {

@@ -305,6 +305,117 @@ test("trust chips repeat claims and never invent a badge", () => {
   assert.doesNotMatch(spoken, /official|government|final notice|act now|expires/i)
 })
 
+test("print contact stays large enough to read on a 5x8 and a 6x9", () => {
+  for (const size of SIZES) {
+    for (const id of ["storm_alert", "financing_first", "before_after"] as const) {
+      const front = composePostcardFace({
+        templateId: id,
+        size,
+        paletteId: "roofing",
+        spec: {
+          ...SAMPLE.roofing,
+          phone: "222-333-4455",
+          website: "https://www.abcroofing.co",
+          offer: "Free roof inspection",
+          headline: id === "financing_first" ? "Your Free Roof Inspection" : SAMPLE.roofing.headline,
+          subheadline: id === "financing_first" ? "See the roof clearly" : SAMPLE.roofing.subheadline,
+          body: id === "financing_first" ? "" : SAMPLE.roofing.body,
+        },
+        qrPayload: "https://www.abcroofing.co",
+      })
+      assert.equal(front.overflows, false, `${id} ${size}`)
+      assert.deepEqual(front.missingContact, [], `${id} ${size}`)
+      assert.ok((front.lockup?.phone?.fontPt ?? 0) >= 14, `${id} ${size} phone`)
+      assert.ok((front.lockup?.website?.fontPt ?? 0) >= 9, `${id} ${size} website`)
+      assert.ok((front.lockup?.qrInches ?? 0) >= 0.75, `${id} ${size} qr`)
+      assert.ok((front.lockup?.qrLabelPt ?? 0) >= 9, `${id} ${size} scan label`)
+      assert.equal(front.lockup?.qrLabel, "Scan to book")
+      for (const text of front.texts) {
+        if (text.role === "body" || text.role === "contact") {
+          assert.ok(text.fontPt >= 9, `${id} ${text.role}`)
+        }
+      }
+      const offer = front.texts.find((text) => text.role === "offer")
+      assert.ok(offer?.text, `${id} offer`)
+      assert.equal(front.texts.filter((text) => /free roof inspection/i.test(text.text)).length, 1, id)
+    }
+  }
+})
+
+test("a years chip is a tenure claim, not the age of a house", () => {
+  assert.deepEqual(
+    trustChipsForCopy("Homes over 20 years old are where leaks start."),
+    []
+  )
+  assert.equal(
+    trustChipsForCopy("Licensed and insured. 18 years in town.")[0]?.label,
+    "18 years"
+  )
+  const aged = composePostcardFace({
+    templateId: "before_after",
+    size: "6x9",
+    paletteId: "roofing",
+    spec: {
+      ...SAMPLE.roofing,
+      headline: "Water Where It Shouldn't",
+      body: "Homes over 20 years old are where hidden roof damage starts.",
+    },
+    qrPayload: SAMPLE.roofing.qrDestination,
+  })
+  assert.equal(aged.trust.some((chip) => chip.id === "years"), false)
+  const before = aged.texts.find((text) => text.text === "Before")
+  const after = aged.texts.find((text) => text.text === "After")
+  assert.ok(before && before.fontPt >= 11)
+  assert.ok(after && after.fontPt >= 11)
+  const tenured = composePostcardFace({
+    templateId: "before_after",
+    size: "6x9",
+    paletteId: "roofing",
+    spec: { ...SAMPLE.roofing, subheadline: "18 years in town. Licensed and insured." },
+    qrPayload: SAMPLE.roofing.qrDestination,
+  })
+  const years = tenured.trust.find((chip) => chip.id === "years")
+  assert.equal(years?.label, "18 years")
+  assert.ok((years?.fontPt ?? 0) >= 11)
+  assert.ok((years?.rect.h ?? 0) >= 0.36)
+})
+
+test("an offer-led headline does not repeat the offer tile", () => {
+  const front = composePostcardFace({
+    templateId: "financing_first",
+    size: "6x9",
+    paletteId: "roofing",
+    spec: {
+      ...SAMPLE.roofing,
+      offer: "Free roof inspection",
+      headline: "Your Free Roof Inspection",
+      subheadline: "",
+      body: "",
+    },
+    qrPayload: SAMPLE.roofing.qrDestination,
+  })
+  const spoken = front.texts.map((text) => text.text)
+  assert.equal(spoken.filter((line) => /free roof inspection/i.test(line)).length, 1)
+  assert.equal(spoken.includes("Know what the roof needs"), true)
+})
+
+test("the after photograph is not a copy of the before photograph", () => {
+  const slots = slotPhotoSources({
+    slotCount: 2,
+    generatedSrc: "https://cdn.example/damaged.jpg",
+    generatedAlternateSrc: "https://cdn.example/finished.jpg",
+  })
+  assert.deepEqual(slots, [
+    "https://cdn.example/damaged.jpg",
+    "https://cdn.example/finished.jpg",
+  ])
+  const missingAfter = slotPhotoSources({
+    slotCount: 2,
+    generatedSrc: "https://cdn.example/damaged.jpg",
+  })
+  assert.equal(missingAfter[1], null)
+})
+
 test("an uploaded photo fills the slot ahead of the generated one", () => {
   const assets = [
     { id: "a", type: "photo" as const, description: "Front yard", fileUrl: "https://cdn.example/front.jpg" },

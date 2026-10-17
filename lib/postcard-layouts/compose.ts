@@ -1,4 +1,5 @@
 import { qrScanLabel } from "@/components/campaign-creator/studio/design-rules"
+import { headlineRestatesOffer } from "@/components/campaign-creator/studio/studio-copy-hierarchy"
 import type { CreativeSpec } from "@/lib/campaign-creator/types"
 import { addressSideContentRect } from "@/lib/print-spec/address-side-content"
 import {
@@ -39,6 +40,8 @@ export interface LockupPlan {
   qrRect: InchRect
   qrInches: number
   qrLabel: string
+  /** Print size of the scan label, in points. */
+  qrLabelPt: number
   phone?: FittedText
   website?: FittedText
   phoneBox?: { rect: InchRect; fill: string }
@@ -50,6 +53,8 @@ export interface TrustChipPlan {
   rect: InchRect
   fill: string
   color: string
+  /** Print size of the chip label, in points. */
+  fontPt: number
 }
 
 export interface PostcardFacePlan {
@@ -125,7 +130,7 @@ function composeFront(
         id: region.id,
         role: region.role,
         rect: { x: region.x, y: region.y, w: region.w, h: region.h },
-        fill: shapeFill(region.role, palette),
+        fill: shapeFill(region.role, palette, input.templateId),
       })
       continue
     }
@@ -234,10 +239,10 @@ function fitRegion(
   if (!text) return null
   const rect = clampToSafe(region, size)
   const color = textColor(template, role, region.id, palette)
+  const pill = region.id === "before-label" || region.id === "after-label"
   let maxPt = undefined as number | undefined
-  if (role === "headline" && copy.offer && !same(copy.offer, copy.headline)) {
-    maxPt = 24
-  }
+  if (pill) maxPt = 13
+  else if (role === "headline" && copy.offer && !same(copy.offer, copy.headline)) maxPt = 24
   return fitText({
     text,
     rect,
@@ -246,6 +251,7 @@ function fitRegion(
     color,
     align: region.align,
     maxPt,
+    minPt: pill ? 11 : undefined,
   })
 }
 
@@ -282,8 +288,9 @@ function fitLockup(
   size: PostcardSizeId
 ): LockupPlan {
   const rect = clampToSafe(region, size)
-  const labelH = 0.16
-  const qrInches = Math.min(1.02, Math.max(0.78, Math.min(rect.h - labelH, rect.w * 0.42)))
+  const qrLabelPt = 9
+  const labelH = 0.18
+  const qrInches = Math.min(1.05, Math.max(0.78, Math.min(rect.h - labelH, rect.w * 0.42)))
   const qrRect = {
     x: rect.x,
     y: rect.y,
@@ -296,24 +303,26 @@ function fitLockup(
   const phoneFill = onDark ? palette.offerTile : palette.field
   const phoneInk = onDark ? palette.offerInk : palette.fieldInk
   const websiteColor = onDark ? palette.fieldInk : palette.ink
-  const boxH = Math.min(0.42, Math.max(0.32, qrInches * 0.48))
+  const websiteBand = 0.26
+  const boxH = Math.min(0.58, Math.max(0.48, rect.h - websiteBand - 0.05))
   const phoneBoxRect = { x: textX, y: qrRect.y, w: textW, h: boxH }
   const phone = copy.phone
     ? fitText({
         text: copy.phone,
         rect: {
           x: phoneBoxRect.x + 0.08,
-          y: phoneBoxRect.y + 0.05,
+          y: phoneBoxRect.y + 0.04,
           w: Math.max(0.4, phoneBoxRect.w - 0.16),
-          h: Math.max(0.2, phoneBoxRect.h - 0.08),
+          h: Math.max(0.28, phoneBoxRect.h - 0.08),
         },
         role: "contact",
         pairing,
         color: phoneInk,
-        maxPt: 15,
+        minPt: 14,
+        maxPt: 18,
       })
     : undefined
-  const websiteTop = phoneBoxRect.y + phoneBoxRect.h + 0.04
+  const websiteTop = phoneBoxRect.y + phoneBoxRect.h + 0.05
   const website = copy.website
     ? fitText({
         text: copy.website,
@@ -321,12 +330,13 @@ function fitLockup(
           x: textX,
           y: websiteTop,
           w: textW,
-          h: Math.max(0.2, rect.y + rect.h - websiteTop),
+          h: Math.max(0.22, rect.y + rect.h - websiteTop),
         },
         role: "contact",
         pairing,
         color: websiteColor,
-        maxPt: 11,
+        minPt: 11,
+        maxPt: 13,
       })
     : undefined
   const qrLabel = qrScanLabel(input.spec.callToAction, input.qrPayload ?? copy.qr)
@@ -335,6 +345,7 @@ function fitLockup(
     qrRect,
     qrInches,
     qrLabel,
+    qrLabelPt,
     phone,
     website,
     phoneBox: copy.phone ? { rect: phoneBoxRect, fill: phoneFill } : undefined,
@@ -362,9 +373,9 @@ function resolveCopy(input: ComposeInput): CopyBlocks {
   const headline = clean(input.spec.headline)
   const subheadline = clean(input.spec.subheadline)
   const body = clean(input.spec.body)
-  const distinctHeadline = same(offer, headline) ? (same(subheadline, offer) ? "" : subheadline) : headline
+  const distinctHeadline = headlineBesideOffer(offer, headline, subheadline, body)
   const blob = [offer, headline, subheadline, body, input.spec.callToAction].filter(Boolean).join(" ")
-  const years = blob.match(/(\d{1,3})\s*\+?\s*years/i)
+  const years = tenureYears(blob)
   const business = clean(input.businessName ?? "")
   const eyebrow =
     input.templateId === "neighbor_letter"
@@ -399,8 +410,8 @@ function resolveCopy(input: ComposeInput): CopyBlocks {
  */
 export function trustChipsForCopy(blob: string): Array<{ id: string; label: string }> {
   const chips: Array<{ id: string; label: string }> = []
-  const years = blob.match(/\b(\d{1,3})\s*\+?\s*years\b/i)
-  if (years) chips.push({ id: "years", label: `${years[1]} years` })
+  const years = tenureYears(blob)
+  if (years) chips.push({ id: "years", label: `${years} years` })
   if (/\blicen[sc]ed\b/i.test(blob)) chips.push({ id: "licensed", label: "Licensed" })
   if (/\binsured\b/i.test(blob)) chips.push({ id: "insured", label: "Insured" })
   if (/\bwarranty\b/i.test(blob)) chips.push({ id: "warranty", label: "Warranty" })
@@ -422,15 +433,53 @@ function placeTrustChips(
   const color = onDark ? palette.ink : palette.fieldInk
   const placed: TrustChipPlan[] = []
   let x = region.x
-  const height = Math.min(region.h, 0.26)
+  const fontPt = 11
+  const height = Math.min(region.h, 0.42)
   const y = region.y + Math.max(0, (region.h - height) / 2)
   for (const chip of chips) {
-    const w = Math.min(1.7, Math.max(0.78, chip.label.length * 0.072 + 0.28))
+    const w = Math.min(1.9, Math.max(1.05, chip.label.length * 0.09 + 0.42))
     if (x + w > region.x + region.w + 0.02) break
-    placed.push({ id: chip.id, label: chip.label, rect: { x, y, w, h: height }, fill, color })
+    placed.push({ id: chip.id, label: chip.label, rect: { x, y, w, h: height }, fill, color, fontPt })
     x += w + 0.08
   }
   return placed
+}
+
+/**
+ * A years chip is a tenure claim the business made.
+ * The age of a house ("homes over 20 years old") is not a badge.
+ */
+function tenureYears(blob: string): string | null {
+  const pattern = /\b(\d{1,3})\s*\+?\s*years?\b/gi
+  let match: RegExpExecArray | null
+  while ((match = pattern.exec(blob))) {
+    const after = blob.slice(match.index + match[0].length, match.index + match[0].length + 12)
+    if (/^\s+old\b/i.test(after)) continue
+    const before = blob.slice(Math.max(0, match.index - 32), match.index)
+    if (/\b(?:homes?|houses?|roofs?|properties|buildings?)\b[^.]{0,24}\bover\s*$/i.test(before)) continue
+    return match[1] ?? null
+  }
+  return null
+}
+
+function headlineBesideOffer(offer: string, headline: string, subheadline: string, body: string): string {
+  const swapped = same(offer, headline) ? (same(subheadline, offer) ? "" : subheadline) : headline
+  if (!offer || !swapped || !headlineRestatesOffer(offer, swapped)) return swapped
+  return shortBenefit(offer, subheadline) || shortBenefit(offer, body) || benefitForOffer(offer)
+}
+
+function shortBenefit(offer: string, line: string): string {
+  const words = clean(line).split(/\s+/).filter(Boolean)
+  if (words.length < 3 || words.length > 8) return ""
+  if (same(offer, line) || headlineRestatesOffer(offer, line)) return ""
+  return clean(line)
+}
+
+function benefitForOffer(offer: string): string {
+  if (/\broof/i.test(offer)) return "Know what the roof needs"
+  if (/\b(plumb|drain|leak)\b/i.test(offer)) return "See where the water goes"
+  if (/\b(hvac|tune-?up|furnace)\b/i.test(offer)) return "Know the system is ready"
+  return "See what needs attention"
 }
 
 function textForRole(role: TextRole, id: string, copy: CopyBlocks): string {
@@ -501,15 +550,14 @@ function trustOnDark(template: PostcardTemplateId): boolean {
     template === "color_block" ||
     template === "offer_starburst" ||
     template === "storm_alert" ||
-    template === "local_pride" ||
-    template === "before_after"
+    template === "local_pride"
   )
 }
 
-function shapeFill(role: string, palette: VerticalPalette): string {
+function shapeFill(role: string, palette: VerticalPalette, template?: PostcardTemplateId): string {
   if (role === "field" || role === "band" || role === "scrim") return palette.field
   if (role === "offer-tile" || role === "coupon") return palette.offerTile
-  if (role === "chip") return palette.paper
+  if (role === "chip") return template === "before_after" ? palette.field : palette.paper
   if (role === "badge") return palette.accent
   if (role === "rule") return palette.accent
   return palette.paper
@@ -522,6 +570,7 @@ function textColor(
   palette: VerticalPalette
 ): string {
   if (id === "badge-label") return palette.accentInk
+  if ((id === "before-label" || id === "after-label") && template === "before_after") return palette.fieldInk
   if (role === "label") return palette.ink
   if (role === "offer") return palette.offerInk
   if (role === "eyebrow" || role === "proof") return darkType(template) ? palette.fieldInk : palette.ink

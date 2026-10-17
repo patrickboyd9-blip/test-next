@@ -333,6 +333,7 @@ export function CampaignCreatorView({
           identity={identity}
           brief={campaign.brief}
           generatedAsset={approvedPhoto?.generatedAsset}
+          alternateGeneratedAsset={approvedPhoto?.alternateAsset}
           allowLibraryFallback={approvedPhoto?.allowLibraryFallback ?? false}
           photoNote={approvedPhoto?.note}
           onEditCreative={handleEditCreative}

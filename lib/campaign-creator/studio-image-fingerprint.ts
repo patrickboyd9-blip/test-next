@@ -20,9 +20,10 @@ export interface StudioImageRecord {
 
 export function imageBriefContextFor(
   directionId: string,
-  campaign?: CampaignBrief
+  campaign?: CampaignBrief,
+  photoSlot?: ImageBriefContext["photoSlot"]
 ): ImageBriefContext {
-  return { campaign, variationKey: directionId }
+  return { campaign, variationKey: directionId, photoSlot }
 }
 
 export function imageBriefFingerprint(brief: ImageBrief): string {
@@ -51,7 +52,10 @@ export function fingerprintForSpec(
   spec: CreativeSpec,
   context: ImageBriefContext = {}
 ): string | null {
-  const brief = toImageBrief(spec, context)
+  const photoSlot =
+    context.photoSlot ??
+    (spec.layoutHints?.templateId === "before_after" ? "before" : "primary")
+  const brief = toImageBrief(spec, { ...context, photoSlot })
   if (!brief) return null
   return imageBriefFingerprint(brief)
 }
@@ -60,11 +64,12 @@ export function lookupStudioImage(
   records: readonly StudioImageRecord[],
   directionId: string,
   spec: CreativeSpec,
-  campaign?: CampaignBrief
+  campaign?: CampaignBrief,
+  photoSlot?: ImageBriefContext["photoSlot"]
 ): GeneratedAsset | null {
   const fingerprint = fingerprintForSpec(
     spec,
-    imageBriefContextFor(directionId, campaign)
+    imageBriefContextFor(directionId, campaign, photoSlot)
   )
   if (!fingerprint) return null
   const matches = records.filter(

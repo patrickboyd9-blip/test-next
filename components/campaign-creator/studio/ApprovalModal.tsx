@@ -23,6 +23,7 @@ interface ApprovalModalProps {
   directionName: string
   identity?: PostcardIdentity
   generatedAsset?: GeneratedAsset | null
+  alternateGeneratedAsset?: GeneratedAsset | null
   allowLibraryFallback?: boolean
   photoNote?: string | null
   onApprove: () => void
@@ -39,6 +40,7 @@ export function ApprovalModal({
   directionName,
   identity,
   generatedAsset,
+  alternateGeneratedAsset,
   allowLibraryFallback = false,
   photoNote,
   onApprove,
@@ -146,6 +148,7 @@ export function ApprovalModal({
                 identity={identity}
                 brief={brief}
                 generatedAsset={generatedAsset}
+                alternateGeneratedAsset={alternateGeneratedAsset}
                 allowLibraryFallback={allowLibraryFallback}
                 enableHoverTilt={false}
               />

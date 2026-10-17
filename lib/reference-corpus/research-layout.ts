@@ -10,6 +10,7 @@ import {
 } from "@/lib/campaign-creator/types"
 
 import { assignTemplateToSpec, assignTemplates } from "@/lib/postcard-layouts/assign"
+import type { PostcardTemplateId } from "@/lib/postcard-layouts/ids"
 
 import type { ReferenceCard } from "./reference-card"
 import {
@@ -175,7 +176,9 @@ export function layoutPolicyForBrief(
 ): VerticalLayoutPolicy {
   const verticals = referenceVerticalsForBrief(brief)
   const own = pack.filter((card) => verticals.includes(card.vertical))
-  const nonCraft = own.filter((card) => card.packGroup !== "craft_exemplar")
+  const nonCraft = own.filter(
+    (card) => card.packGroup !== "craft_exemplar" && card.guidesLayout !== false
+  )
   const cards = nonCraft.length > 0 ? nonCraft : own
 
   if (verticals.length === 0 || cards.length === 0) {
@@ -309,22 +312,25 @@ export function applyResearchLayouts(
 ): CreativeDirection[] {
   const policy = layoutPolicyForBrief(brief)
   if (policy.mode === "open") {
-    return assignTemplates(
+    return citeByTemplate(
       brief,
-      directions.map((direction) => ({
-        ...direction,
-        research: {
-          sources: policy.sources,
-          layoutSummary: layoutSummaryFor(
-            normalizeLayoutVariant(direction.spec.layoutVariant) ?? "peer_split",
-            "open"
-          ),
-          parameters: parametersForLayout(
-            normalizeLayoutVariant(direction.spec.layoutVariant) ?? "peer_split",
-            policy
-          ),
-        },
-      }))
+      assignTemplates(
+        brief,
+        directions.map((direction) => ({
+          ...direction,
+          research: {
+            sources: policy.sources,
+            layoutSummary: layoutSummaryFor(
+              normalizeLayoutVariant(direction.spec.layoutVariant) ?? "peer_split",
+              "open"
+            ),
+            parameters: parametersForLayout(
+              normalizeLayoutVariant(direction.spec.layoutVariant) ?? "peer_split",
+              policy
+            ),
+          },
+        }))
+      )
     )
   }
 
@@ -341,22 +347,76 @@ export function applyResearchLayouts(
     assigned.set(item.index, choice)
   }
 
-  return assignTemplates(
+  return citeByTemplate(
     brief,
-    directions.map((direction, index) => {
-      const choice = assigned.get(index) ?? { layout: policy.preferred, adjusted: true }
-      const spec = specWithLayout(direction.spec, choice.layout, policy, choice.adjusted)
-      return {
-        ...direction,
-        spec,
-        research: {
-          sources: policy.sources,
-          layoutSummary: layoutSummaryFor(choice.layout, "research"),
-          parameters: parametersForLayout(choice.layout, policy),
-        },
-      }
-    })
+    assignTemplates(
+      brief,
+      directions.map((direction, index) => {
+        const choice = assigned.get(index) ?? { layout: policy.preferred, adjusted: true }
+        const spec = specWithLayout(direction.spec, choice.layout, policy, choice.adjusted)
+        return {
+          ...direction,
+          spec,
+          research: {
+            sources: policy.sources,
+            layoutSummary: layoutSummaryFor(choice.layout, "research"),
+            parameters: parametersForLayout(choice.layout, policy),
+          },
+        }
+      })
+    )
   )
+}
+
+const TEMPLATE_PATTERN: Partial<Record<PostcardTemplateId, string>> = {
+  storm_alert: "storm",
+  financing_first: "financing",
+  before_after: "before_after",
+  local_pride: "local",
+  commercial_restore: "commercial",
+  offer_starburst: "offer",
+  hero_scrim: "offer",
+  service_band: "offer",
+  deadline_coupon: "offer",
+}
+
+/**
+ * When the vertical has pattern notes, each direction cites the unused
+ * record that matches its composition. One shared record is kept only when
+ * the vertical has a single card.
+ */
+function citeByTemplate(brief: CampaignBrief, directions: CreativeDirection[]): CreativeDirection[] {
+  const verticals = referenceVerticalsForBrief(brief)
+  const cards = RESEARCH_TASTE_PACK.filter(
+    (card) =>
+      verticals.includes(card.vertical) &&
+      card.packGroup !== "craft_exemplar" &&
+      (card.patterns?.length ?? 0) > 0
+  )
+  if (cards.length === 0) return directions
+  const used = new Set<string>()
+  return directions.map((direction) => {
+    const template = direction.spec.layoutHints?.templateId
+    const pattern = template ? TEMPLATE_PATTERN[template] : undefined
+    const unused = cards.filter((card) => !used.has(card.mmrId))
+    const matched = pattern ? unused.filter((card) => card.patterns?.includes(pattern)) : []
+    const chosen = matched[0] ?? unused[0]
+    if (!chosen || !direction.research) return direction
+    used.add(chosen.mmrId)
+    return {
+      ...direction,
+      research: {
+        ...direction.research,
+        sources: [
+          {
+            mmrId: chosen.mmrId,
+            title: referenceCardTitle(chosen),
+            whyItWorks: referenceCardWhy(chosen),
+          },
+        ],
+      },
+    }
+  })
 }
 
 /** One spec, used when a refinement picks a layout the research does not support. */

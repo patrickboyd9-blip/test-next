@@ -40,6 +40,8 @@ interface PostcardPreviewProps {
   ariaLabel?: string
   /** Cached or just-resolved photograph. Not a CreativeSpec field. */
   generatedAsset?: GeneratedAsset | null
+  /** Second photograph for a before/after card. */
+  alternateGeneratedAsset?: GeneratedAsset | null
   /**
    * The beta shelf is a labeled stand-in. Leave this false while a
    * campaign photograph should still succeed.
@@ -77,6 +79,7 @@ export function PostcardPreview({
   isShimmering = false,
   ariaLabel,
   generatedAsset,
+  alternateGeneratedAsset,
   identity,
   brief,
   allowLibraryFallback = false,
@@ -99,6 +102,7 @@ export function PostcardPreview({
   const sources = slotPhotoSources({
     slotCount,
     generatedSrc: imagery.src,
+    generatedAlternateSrc: alternateGeneratedAsset?.src ?? null,
     assets: brief?.brandAssets,
   })
   const disclaimer = medicareDisclaimerFor(brief)
