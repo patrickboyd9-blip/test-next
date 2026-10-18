@@ -24,6 +24,7 @@ export interface MailerAnalysis {
   eye_path?: string
   grid?: string
   scale_ratios?: string
+  type_choices?: string
   palette_hex?: string[]
   photo_art_direction?: string
   offer_placement?: string

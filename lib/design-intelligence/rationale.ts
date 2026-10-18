@@ -70,6 +70,11 @@ export interface DesignRationale {
     body: string
     script_role: "none" | "logo_only"
   }
+  /**
+   * Licensed OFL face for this card. trade is Archivo, signal is Barlow
+   * Condensed, letter is Fraunces. Absent means the painter picks from the vertical.
+   */
+  font_pairing?: "trade" | "signal" | "letter"
   photo_brief: {
     mode: "documentary_job" | "result" | "advisor_portrait" | "none"
     subject: string

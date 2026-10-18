@@ -6,7 +6,7 @@
 
 export interface TokenCost {
   cardId: string
-  step: "art-director" | "critic" | "analyze"
+  step: "art-director" | "critic" | "analyze" | "blueprint" | "copy-edit"
   model: string
   inputTokens: number
   outputTokens: number

@@ -5,7 +5,7 @@ import { createAppDocumentStore, type DocumentStore } from "@/lib/storage/docume
 import type { MailOrderRecord } from "@/lib/click2mail/order-record"
 
 import { normalizeCampaignStatus } from "./campaign-status"
-import { getActiveRevision, getActiveSpec, getApprovedSpec } from "./creative-state"
+import { getActiveRevision, getActiveSpec, getApprovedSpec, getNextVersion } from "./creative-state"
 import {
   applyUploadedDesignApproval,
   clearUploadedDesignApproval,
@@ -113,6 +113,7 @@ export interface CampaignRepository {
     activeSpec: CreativeSpec,
     options?: { directionId?: string }
   ): Promise<Campaign>
+  replaceDirectionSpec(id: string, directionId: string, spec: CreativeSpec, note: string): Promise<Campaign>
   approveCreative(id: string): Promise<Campaign>
   unapproveCreative(id: string): Promise<Campaign>
   setDesignSource(id: string, source: DesignSource): Promise<Campaign>
@@ -382,6 +383,34 @@ class StoredCampaignRepository implements CampaignRepository {
     campaign.creative.activeRevisionId =
       revision.version !== null ? revision.id : campaign.creative.activeRevisionId
     campaign.updatedAt = new Date().toISOString()
+    return this.write(campaign)
+  }
+
+  async replaceDirectionSpec(id: string, directionId: string, spec: CreativeSpec, note: string): Promise<Campaign> {
+    const campaign = await this.require(id)
+    const direction = campaign.creative.directions.find((item) => item.id === directionId)
+    if (!direction) throw new Error(`Direction ${directionId} not found`)
+    const next = cloneSpec(spec)
+    direction.spec = next
+    if (next.blueprint) {
+      direction.oneLineDifference = `Blueprint: ${next.blueprint.sourceId}`
+    }
+    const now = new Date().toISOString()
+    const revision: CreativeRevision = {
+      id: randomUUID(),
+      directionId,
+      version: getNextVersion(campaign.creative, directionId),
+      spec: next,
+      customerPrompt: "Use a blueprint",
+      studioResponse: note,
+      type: "refinement",
+      createdAt: now,
+    }
+    campaign.creative.revisions = [...campaign.creative.revisions, revision]
+    campaign.creative.selectedDirectionId = directionId
+    campaign.creative.activeSpec = cloneSpec(next)
+    campaign.creative.activeRevisionId = revision.id
+    campaign.updatedAt = now
     return this.write(campaign)
   }
 
