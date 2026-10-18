@@ -140,6 +140,7 @@ const BORROWED: Record<string, string> = {
   "PM-054": "Borrowed a dark field beside the work, and did not use this mailer's right-half split or circular badge.",
   "PM-022": "Borrowed an overlapping card on a full-bleed photograph, and moved the card off this mailer's footprint.",
   "PM-056": "Borrowed a three-color palette, condensed display type, one product hero, and one offer panel with its code. Left that mailer's layout behind.",
+  "PM-057": "Borrowed one hero product photograph, a short playful headline, and one full-width offer strip with a barcode and an expiry. Left that mailer's layout behind.",
   "PM-052": "Borrowed a full-bleed crop with only a few lines of type, and put the phone in one of those lines.",
   "MMR-397": "Borrowed holding the type to one quiet band under the photograph, with a single next step.",
   "PM-046": "Borrowed one question as the type event and a phone set large in the footer.",

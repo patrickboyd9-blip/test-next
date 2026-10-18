@@ -67,7 +67,7 @@ Optional. Leave them blank unless you need to change a default.
 | `VISION_TASTE_BATCH` | `4` | How many reference photographs one run reads with the vision model for the taste library. The daily job and “sync now” both do this batch. A separate backfill clears the rest. |
 | `VISION_TASTE_PASSES` | `8` | How many batches `scripts/backfill-vision-taste.ts` will run before it stops. |
 | `DESIGN_CANDIDATE_COUNT` | `12` | How many compositions Studio tries before it keeps the best three. Those layouts span the postcard families — integrated, full-bleed, panel, and the other composition modes — varied by whether the offer or the headline leads. |
-| `DESIGN_OWNER_FAVORITES` | `PM-047,PM-054,PM-022,PM-056` | Mailer ids retrieval always weights highly and the critic uses as calibration anchors. PM-056 is the Wondercide postcard. Comma-separated. The lessons are principles, not layouts to copy. |
+| `DESIGN_OWNER_FAVORITES` | `PM-047,PM-054,PM-022,PM-056,PM-057` | Mailer ids retrieval always weights highly and the critic uses as calibration anchors. PM-056 is the Wondercide postcard. PM-057 is the simple food or retail coupon: one hero product photo, a short playful headline, a full-width offer strip, a barcode, and an expiry. Comma-separated. The lessons are principles, not layouts to copy. |
 | `DESIGN_CANDIDATE_BOARD` | on | Set to `off` to skip the twelve-up board and use the earlier one-layout path. |
 | `DESIGN_CANDIDATE_RENDERS` | on, when the vision critic is on | Set to `off` to rank from measurements only and skip the preview renders. |
 | `DESIGN_BOARD_BUDGET_MS` | `75000` | How long the vision ranking may run before it keeps the measurement scores. It will not go past 90 seconds. |
