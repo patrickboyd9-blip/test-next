@@ -7,8 +7,8 @@ import {
 } from "@/lib/print-spec/postcard-5x8-print-spec"
 import { buildPostcard6x9PrintSpec } from "@/lib/print-spec/postcard-6x9-print-spec"
 
-import { measureBackdropContrast } from "./backdrop"
-import { normalizedPanel, textInsideSafe, type GridCard } from "./grid-composer"
+import { measureBackdropContrast, type ContrastPhoto } from "./backdrop"
+import { normalizedPanel, textInsideSafe, textIsClipped, type GridCard } from "./grid-composer"
 import type { DesignRationale, GridName } from "./rationale"
 
 /**
@@ -41,7 +41,12 @@ const VISION_WEIGHTS: Record<string, number> = {
   V1: 10, V2: 12, V3: 6, V4: 8, V5: 6, V6: 8, V7: 6, V8: 6, V9: 8, V10: 10, V11: 8, V12: 6, V13: 6,
 }
 
-export function critiqueCard(card: GridCard, rationale: DesignRationale, copy: string): Critique {
+export function critiqueCard(
+  card: GridCard,
+  rationale: DesignRationale,
+  copy: string,
+  photo?: ContrastPhoto | null
+): Critique {
   const autoFails: string[] = []
   const size = rationale.format.trim
   const headline = combinedText(card.front, "headline")
@@ -49,10 +54,10 @@ export function critiqueCard(card: GridCard, rationale: DesignRationale, copy: s
   const phone = card.front.lockup?.phone
   const words = (headline?.text ?? "").split(/\s+/).filter(Boolean)
 
-  const backdrop = measureBackdropContrast(card)
+  const backdrop = measureBackdropContrast(card, photo)
   const worstContrast = backdrop.worst
-  if (worstContrast < 4.5) autoFails.push("AF1")
-  if (card.front.overflows || words.some((word) => word.includes("-") && word.length > 12)) autoFails.push("AF2")
+  if (worstContrast < 4.5 || backdrop.smallFailing.length > 0) autoFails.push("AF1")
+  if (card.front.overflows || card.back.overflows || clippedCopy(card) || words.some((word) => word.includes("-") && word.length > 12)) autoFails.push("AF2")
   if (words.length > 8) autoFails.push("AF3")
   if (card.photoAreaPct < 40 && rationale.photo_brief.placement !== "none") autoFails.push("AF4")
   const body = rationale.format.trim === "6x9" ? 12 : 11
@@ -123,6 +128,14 @@ export function critiqueCard(card: GridCard, rationale: DesignRationale, copy: s
     edit: passed ? null : editFor(brokenRule, rationale),
     scoreKind: "machine estimate",
   }
+}
+
+function clippedCopy(card: GridCard): boolean {
+  const texts = [...card.front.texts, ...card.back.texts]
+  const lockup = card.front.lockup
+  if (lockup?.phone) texts.push(lockup.phone)
+  if (lockup?.website) texts.push(lockup.website)
+  return texts.some((text) => textIsClipped(text))
 }
 
 export function applyStructuralEdit(rationale: DesignRationale, editRule: string | null): DesignRationale {

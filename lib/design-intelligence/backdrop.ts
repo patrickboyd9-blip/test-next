@@ -18,23 +18,34 @@ const PPI = 72
 export interface BackdropContrast {
   worst: number
   failing: string[]
+  /** Under 14pt. These need 7:1, which is stricter than the 4.5 body floor. */
+  smallFailing: string[]
 }
 
-export function measureBackdropContrast(card: GridCard): BackdropContrast {
-  return measurePlanContrast(card.front)
+export interface ContrastPhoto {
+  rgba: Buffer | Uint8Array
+  width: number
+  height: number
 }
 
-export function measurePlanContrast(plan: PostcardFacePlan): BackdropContrast {
-  const raster = compositePlan(plan)
+export function measureBackdropContrast(card: GridCard, photo?: ContrastPhoto | null): BackdropContrast {
+  return measurePlanContrast(card.front, photo)
+}
+
+export function measurePlanContrast(plan: PostcardFacePlan, photo?: ContrastPhoto | null): BackdropContrast {
+  const raster = compositePlan(plan, photo)
   const samples = textSamples(plan)
   let worst = 21
   const failing: string[] = []
+  const smallFailing: string[] = []
   for (const sample of samples) {
     const ratio = worstContrastInRect(raster, sample.rect, sample.color, plan)
     if (ratio < worst) worst = ratio
+    const small = sample.fontPt < 14
     if (ratio < 4.5) failing.push(sample.role)
+    if (small && ratio < 7) smallFailing.push(sample.role)
   }
-  return { worst: Math.round(worst * 100) / 100, failing }
+  return { worst: Math.round(worst * 100) / 100, failing, smallFailing }
 }
 
 interface Raster {
@@ -43,7 +54,7 @@ interface Raster {
   rgb: Buffer
 }
 
-function compositePlan(plan: PostcardFacePlan): Raster {
+function compositePlan(plan: PostcardFacePlan, cover?: ContrastPhoto | null): Raster {
   const trim = trimInches(plan.size)
   const width = Math.max(1, Math.round(trim.w * PPI))
   const height = Math.max(1, Math.round(trim.h * PPI))
@@ -56,11 +67,14 @@ function compositePlan(plan: PostcardFacePlan): Raster {
   }
   const photo = standInPhoto()
   const cutout = standInCutout()
+  const real = cover ? { width: cover.width, height: cover.height, rgba: Buffer.from(cover.rgba) } : null
   for (const slot of plan.photos) {
-    blitCover(rgb, width, height, slot.rect, slot.treatment === "cutout" ? cutout : photo, trim, slot.treatment === "cutout")
+    const source = slot.treatment === "cutout" ? cutout : real ?? photo
+    blitCover(rgb, width, height, slot.rect, source, trim, slot.treatment === "cutout")
   }
   for (const shape of plan.shapes.filter((item) => studioShapeLayer(item.role) === "mid")) {
     if (shape.role === "scrim") paintScrim(rgb, width, height, shape.rect, hexToRgb(plan.palette.scrim), trim)
+    else if (shape.role === "local-scrim") paintLocalScrim(rgb, width, height, shape.rect, hexToRgb(shape.fill), trim)
     else fillRect(rgb, width, height, shape.rect, hexToRgb(shape.fill), trim)
   }
   for (const shape of plan.shapes.filter((item) => studioShapeLayer(item.role) === "front")) {
@@ -69,13 +83,13 @@ function compositePlan(plan: PostcardFacePlan): Raster {
   return { width, height, rgb }
 }
 
-function textSamples(plan: PostcardFacePlan): Array<{ role: string; rect: FittedText["rect"]; color: string }> {
-  const samples: Array<{ role: string; rect: FittedText["rect"]; color: string }> = plan.texts
+function textSamples(plan: PostcardFacePlan): Array<{ role: string; rect: FittedText["rect"]; color: string; fontPt: number }> {
+  const samples: Array<{ role: string; rect: FittedText["rect"]; color: string; fontPt: number }> = plan.texts
     .filter((text) => text.text.trim().length > 0 && text.lines.length > 0)
-    .map((text) => ({ role: text.role, rect: text.rect, color: text.color }))
+    .map((text) => ({ role: text.role, rect: text.rect, color: text.color, fontPt: text.fontPt }))
   const lockup = plan.lockup
-  if (lockup?.phone?.text) samples.push({ role: "phone", rect: lockup.phone.rect, color: lockup.phone.color })
-  if (lockup?.website?.text) samples.push({ role: "website", rect: lockup.website.rect, color: lockup.website.color })
+  if (lockup?.phone?.text) samples.push({ role: "phone", rect: lockup.phone.rect, color: lockup.phone.color, fontPt: lockup.phone.fontPt })
+  if (lockup?.website?.text) samples.push({ role: "website", rect: lockup.website.rect, color: lockup.website.color, fontPt: lockup.website.fontPt })
   return samples
 }
 
@@ -147,6 +161,33 @@ function blitCover(
     }
   }
   void trim
+}
+
+function paintLocalScrim(
+  rgb: Buffer,
+  width: number,
+  height: number,
+  rect: FittedText["rect"],
+  color: [number, number, number],
+  trim: { w: number; h: number }
+): void {
+  const x0 = clamp(Math.floor(rect.x * PPI), 0, width)
+  const y0 = clamp(Math.floor(rect.y * PPI), 0, height)
+  const x1 = clamp(Math.ceil((rect.x + rect.w) * PPI), x0, width)
+  const y1 = clamp(Math.ceil((rect.y + rect.h) * PPI), y0, height)
+  const span = Math.max(1, x1 - x0)
+  const fromRight = rect.x > trim.w * 0.45
+  for (let y = y0; y < y1; y += 1) {
+    for (let x = x0; x < x1; x += 1) {
+      const t = (x - x0) / span
+      const along = fromRight ? 1 - t : t
+      const alpha = along < 0.72 ? 0.42 : 0.42 * (1 - (along - 0.72) / 0.28)
+      const index = (y * width + x) * 3
+      rgb[index] = blend(rgb[index] ?? 0, color[0], alpha)
+      rgb[index + 1] = blend(rgb[index + 1] ?? 0, color[1], alpha)
+      rgb[index + 2] = blend(rgb[index + 2] ?? 0, color[2], alpha)
+    }
+  }
 }
 
 function paintScrim(

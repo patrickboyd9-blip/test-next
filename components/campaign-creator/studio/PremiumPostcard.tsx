@@ -17,6 +17,7 @@ import type { InchRect } from "@/lib/postcard-layouts/typefit"
 import { lineHeightFor } from "@/lib/postcard-layouts/typefit"
 import { paintQr } from "@/lib/campaign-creator/studio-qr"
 import { studioShapeLayer } from "@/lib/design-intelligence/studio-layer"
+import { planWithRealThumbnails } from "./photo-plan"
 
 const DISPLAY_CSS = {
   trade: 'var(--font-display-family), "Arial Black", "Helvetica Neue", Helvetica, Arial, sans-serif',
@@ -64,19 +65,21 @@ export function PremiumPostcardFront({
     face: "front",
   })
   const photos = [photoSrc, alternatePhotoSrc ?? null]
+  const thumbFill = thumbnailSrc ?? photoSrc ?? alternatePhotoSrc ?? cutoutSrc ?? null
+  const painted = planWithRealThumbnails(plan, thumbFill)
   return (
-    <FaceFrame plan={plan} compact={Boolean(compact)}>
-      <Shapes plan={plan} layer="back" />
-      {plan.photos.map((slot, index) => (
+    <FaceFrame plan={painted} compact={Boolean(compact)}>
+      <Shapes plan={painted} layer="back" />
+      {painted.photos.map((slot, index) => (
         <PhotoSlot
           key={slot.id}
           rect={slot.rect}
-          size={plan.size}
+          size={painted.size}
           src={
             slot.treatment === "cutout"
               ? cutoutSrc ?? null
               : slot.treatment === "thumbnail"
-                ? thumbnailSrc ?? null
+                ? thumbFill
                 : photos[index] ?? null
           }
           alt={spec.visualDirection?.trim() || "Campaign photograph"}
@@ -84,13 +87,13 @@ export function PremiumPostcardFront({
           treatment={slot.treatment}
         />
       ))}
-      <Shapes plan={plan} layer="mid" />
-      <Shapes plan={plan} layer="front" />
-      <TrustChips plan={plan} />
-      {plan.texts.map((text) => (
-        <Fitted key={`${text.role}-${text.rect.y}`} plan={plan} text={text} />
+      <Shapes plan={painted} layer="mid" />
+      <Shapes plan={painted} layer="front" />
+      <TrustChips plan={painted} />
+      {painted.texts.map((text) => (
+        <Fitted key={`${text.role}-${text.rect.y}`} plan={painted} text={text} />
       ))}
-      {plan.lockup ? <Lockup plan={plan} payload={contact.qrPayload} /> : null}
+      {painted.lockup ? <Lockup plan={painted} payload={contact.qrPayload} /> : null}
     </FaceFrame>
   )
 }
@@ -185,6 +188,16 @@ function Shape({ plan, shape }: { plan: PostcardFacePlan; shape: ShapePlan }) {
       />
     )
   }
+  if (shape.role === "local-scrim") {
+    const fromRight = shape.rect.x > trimInches(plan.size).w * 0.45
+    return (
+      <div
+        data-region="local-scrim"
+        className="pointer-events-none absolute"
+        style={{ ...style, background: localScrimGradient(shape.fill, fromRight) }}
+      />
+    )
+  }
   if (shape.role === "starburst") {
     return (
       <svg viewBox="0 0 100 100" className="absolute" style={style} aria-hidden>
@@ -269,7 +282,7 @@ function Fitted({ plan, text }: { plan: PostcardFacePlan; text: PostcardFacePlan
   const family = text.font === "display" ? DISPLAY_CSS[plan.pairing] : TEXT_CSS
   return (
     <p
-      className="absolute m-0 overflow-hidden"
+      className="absolute m-0"
       data-role={text.role}
       style={{
         ...box(text.rect, plan.size),
@@ -280,6 +293,9 @@ function Fitted({ plan, text }: { plan: PostcardFacePlan; text: PostcardFacePlan
         lineHeight: text.role === "offer" ? 0.8 : lineHeightFor(text.font),
         letterSpacing: text.font === "display" ? "-0.03em" : "0",
         textAlign: text.align,
+        textShadow: plan.shapes.some((shape) => shape.role === "local-scrim")
+          ? "0 1px 1px rgba(20, 18, 15, 0.35)"
+          : undefined,
         display: text.role === "offer" || text.role === "label" ? "flex" : "block",
         flexDirection: "column",
         justifyContent: "center",
@@ -313,7 +329,7 @@ function Lockup({ plan, payload }: { plan: PostcardFacePlan; payload: string | n
       ) : null}
       {lockup.phone?.text ? (
         <p
-          className="absolute m-0 flex items-center overflow-hidden font-semibold leading-none"
+          className="absolute m-0 flex items-center font-semibold leading-none"
           data-contact-phone={lockup.phone.text}
           style={{
             ...box(lockup.phone.rect, plan.size),
@@ -327,7 +343,7 @@ function Lockup({ plan, payload }: { plan: PostcardFacePlan; payload: string | n
       ) : null}
       {lockup.website?.text ? (
         <p
-          className="absolute m-0 overflow-hidden font-medium leading-none"
+          className="absolute m-0 font-medium leading-none"
           data-contact-website={displayWebsite(lockup.website.text)}
           style={{
             ...box(lockup.website.rect, plan.size),
@@ -418,6 +434,14 @@ function pointsToCqw(points: number, size: PostcardFacePlan["size"]): string {
 
 function scrimGradient(color: string): string {
   return `linear-gradient(to bottom, ${withAlpha(color, 0)} 0%, ${withAlpha(color, 0.5)} 30%, ${withAlpha(color, 0.9)} 68%, ${withAlpha(color, 0.94)} 100%)`
+}
+
+function localScrimGradient(color: string, fromRight: boolean): string {
+  const solid = withAlpha(color, 0.4)
+  const clear = withAlpha(color, 0)
+  return fromRight
+    ? `linear-gradient(to left, ${solid} 0%, ${solid} 62%, ${clear} 100%)`
+    : `linear-gradient(to right, ${solid} 0%, ${solid} 62%, ${clear} 100%)`
 }
 
 function withAlpha(hex: string, alpha: number): string {

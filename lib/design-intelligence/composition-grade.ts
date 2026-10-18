@@ -4,6 +4,7 @@ import type { GridCard } from "./grid-composer"
 import { rectsIntersect, trimInches } from "./grid-composer"
 import { gradeRank } from "./library"
 import { containsZeroDollar, headlineRepeatsOffer } from "./offer-copy"
+import { calibrationSentence } from "./owner-favorites"
 import type { DesignRationale } from "./rationale"
 
 /**
@@ -303,12 +304,18 @@ function clamp(score: number): number {
   return Math.max(40, Math.min(98, Math.round(score)))
 }
 
-export const VISION_GRADE_ANCHOR = [
-  "Calibration, from looking at mail, not from copying it.",
-  "A looks like this: a light ground, a two-color headline set directly on the canvas, a cut-out subject integrated into the layout, one large floating offer in the brand color, and at most one row of small thumbnails. Boxes are the exception. The eye moves without jumping between frames.",
-  "B- or C+ looks like this: a side or bottom panel holds all the type, the offer is close to the headline in size, and the card is a stack of boxes. It is organized and legible, and it still reads as a template.",
-  "A panel-style card is not an A. Do not reward it for being tidy.",
-  "Repeating the offer in the headline and the lockup is at most a B-. A free offer is the word FREE, never a $0 figure, and the headline then has to say something else.",
-  "A code that floats away from the phone and the URL, or a band of the card left empty between the type, is at most a B-.",
-  "Contrast below 4.5:1 or type that overflows is a hard fail regardless of the composition.",
-].join(" ")
+export function visionGradeAnchor(env: NodeJS.ProcessEnv = process.env): string {
+  return [
+    "Calibration, from looking at mail, not from copying it.",
+    "A looks like this: a light ground, a two-color headline set directly on the canvas, a cut-out subject integrated into the layout, one large floating offer in the brand color, and at most one row of small thumbnails. Boxes are the exception. The eye moves without jumping between frames.",
+    "B- or C+ looks like this: a side or bottom panel holds all the type, the offer is close to the headline in size, and the card is a stack of boxes. It is organized and legible, and it still reads as a template.",
+    "A panel-style card is not an A. Do not reward it for being tidy.",
+    "Repeating the offer in the headline and the lockup is at most a B-. A free offer is the word FREE, never a $0 figure, and the headline then has to say something else.",
+    "A code that floats away from the phone and the URL, or a band of the card left empty between the type, is at most a B-.",
+    calibrationSentence(env),
+    "Type on a photograph sits on a calm patch of sky or wall. It does not sit on a face, a person, or a ladder. Small type under 14pt needs 7:1. A stock portrait, or a cluttered background behind the type, is a weakness.",
+    "Contrast below 4.5:1, or below 7:1 for type under 14pt, or type that overflows, is a hard fail regardless of the composition.",
+  ].join(" ")
+}
+
+export const VISION_GRADE_ANCHOR = visionGradeAnchor()

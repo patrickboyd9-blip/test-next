@@ -8,6 +8,7 @@ import { critiqueCard } from "./critic"
 import { gradeComposition, type CompositionGrade } from "./composition-grade"
 import { emptyCost, logTokenCost, type TokenCost } from "./cost"
 import { composeGridCard, type GridCard } from "./grid-composer"
+import { improveFromWeakness } from "./improve-once"
 import { loadLibrary, type LibraryRecord } from "./library"
 import { requestModelRationale } from "./model"
 import { criticUsesVision, directorMode, trimFromCanvas } from "./pipeline"
@@ -80,6 +81,8 @@ export interface ScoredCandidate {
   spec: CreativeSpec
   costs: TokenCost[]
   redesigned: boolean
+  /** The single biggest weakness the vision critic named, when it ran. */
+  weakness?: string
 }
 
 export interface BoardResult {
@@ -183,7 +186,10 @@ export async function rankCandidates(input: {
     return redesigned.familyId === candidate.familyId ? [candidate] : [candidate, redesigned]
   })
   const visioned = await maybeVision(revised, retrieved, records, input.brief, env)
-  const surfaced = chooseDiverse(visioned, input.directions.length).slice(0, SURFACE)
+  const improved = visioned.map((candidate) =>
+    applyVisionImprovement(candidate, input.brief.businessInfo?.name)
+  )
+  const surfaced = chooseDiverse(improved, input.directions.length).slice(0, SURFACE)
   return { surfaced, retrieved, considered: families.length }
 }
 
@@ -429,7 +435,7 @@ async function maybeVision(
   const images = await loadReferenceImages(refs, records, env)
   if (images.length < 2) return candidates
   const shortlist = [...candidates].sort((a, b) => b.grade.score - a.grade.score).slice(0, 6)
-  const updates = new Map<string, CompositionGrade>()
+  const updates = new Map<string, { grade: CompositionGrade; weakness: string }>()
   await mapPool(shortlist, 3, async (candidate) => {
     if (Date.now() > deadline) return
     const png = await renderPreview(candidate, env)
@@ -443,19 +449,58 @@ async function maybeVision(
     })
     if (!vision) return
     const critique = critiqueCard(candidate.card, candidate.rationale, candidate.spec.headline ?? "")
-    updates.set(candidateKey(candidate), gradeComposition({
-      card: candidate.card,
-      rationale: candidate.rationale,
-      autoFails: critique.autoFails,
-      worstContrast: critique.autoFails.includes("AF1") ? 3 : 7,
-      vision: { score: vision.score, explanation: vision.explanation },
-    }))
+    const weakness = vision.weakness.trim() || vision.redesign.trim()
+    const explanation = weakness ? `${vision.explanation} Biggest weakness: ${weakness}` : vision.explanation
+    updates.set(candidateKey(candidate), {
+      weakness,
+      grade: gradeComposition({
+        card: candidate.card,
+        rationale: candidate.rationale,
+        autoFails: critique.autoFails,
+        worstContrast: critique.autoFails.includes("AF1") ? 3 : 7,
+        vision: { score: vision.score, explanation },
+      }),
+    })
   })
   if (updates.size === 0) return candidates
   return candidates.map((candidate) => {
-    const grade = updates.get(candidateKey(candidate))
-    return grade ? { ...candidate, grade } : candidate
+    const update = updates.get(candidateKey(candidate))
+    return update ? { ...candidate, grade: update.grade, weakness: update.weakness } : candidate
   })
+}
+
+/** One layout change from the weakness the critic just named. A lower grade is discarded. */
+function applyVisionImprovement(candidate: ScoredCandidate, businessName?: string): ScoredCandidate {
+  const weakness = candidate.weakness?.trim()
+  if (!weakness) return candidate
+  const proposal = improveFromWeakness(candidate.rationale, weakness, { allowSeat: false })
+  if (!proposal) return candidate
+  const card = composeGridCard({
+    rationale: proposal.rationale,
+    spec: candidate.spec,
+    businessName,
+  })
+  const critique = critiqueCard(card, proposal.rationale, candidate.spec.headline ?? "")
+  if (critique.autoFails.includes("AF7") || critique.autoFails.includes("AF6") || critique.autoFails.includes("AF1")) {
+    return candidate
+  }
+  const grade = gradeComposition({
+    card,
+    rationale: proposal.rationale,
+    autoFails: critique.autoFails,
+    worstContrast: 7,
+  })
+  if (grade.score < candidate.grade.score) return candidate
+  return {
+    ...candidate,
+    rationale: proposal.rationale,
+    card,
+    grade: {
+      ...grade,
+      explanation: `${grade.explanation} One improvement: ${proposal.explanation}`,
+    },
+    redesigned: true,
+  }
 }
 
 function candidateKey(candidate: ScoredCandidate): string {

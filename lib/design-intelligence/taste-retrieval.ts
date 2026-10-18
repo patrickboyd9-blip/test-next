@@ -1,6 +1,7 @@
 import type { CampaignBrief } from "@/lib/campaign-creator/types"
 
 import { gradeRank } from "./library"
+import { ownerFavoriteIds } from "./owner-favorites"
 import {
   highGrade,
   inferFeel,
@@ -65,12 +66,15 @@ export function retrieveTaste(input: {
   brief: CampaignBrief
   signals?: TasteSignals
   limit?: number
+  /** Defaults to the owner's favorites. Tests can pass a fixed list. */
+  favorites?: readonly string[]
 }): TastePick[] {
   const query = tasteQueryForBrief(input.brief)
   const limit = Math.max(1, Math.min(6, input.limit ?? 4))
+  const favorites = new Set(input.favorites ?? ownerFavoriteIds())
   return input.tastes
     .filter((taste) => highGrade(taste))
-    .map((taste) => ({ taste, score: tasteScore(taste, query, input.signals) }))
+    .map((taste) => ({ taste, score: tasteScore(taste, query, input.signals, favorites) }))
     .filter((item) => item.score > 0)
     .sort((a, b) => b.score - a.score || gradeRank(a.taste.grade) - gradeRank(b.taste.grade) || a.taste.id.localeCompare(b.taste.id))
     .slice(0, limit)
@@ -92,8 +96,9 @@ export function citationsForFamily(picks: readonly TastePick[], feel: string): T
   return chosen
 }
 
-function tasteScore(taste: VisionTaste, query: TasteQuery, signals?: TasteSignals): number {
+function tasteScore(taste: VisionTaste, query: TasteQuery, signals?: TasteSignals, favorites?: ReadonlySet<string>): number {
   let score = 1
+  if (favorites?.has(taste.id)) score += 16
   const rank = gradeRank(taste.grade)
   if (rank === 0) score += 12
   else if (rank === 1) score += 10

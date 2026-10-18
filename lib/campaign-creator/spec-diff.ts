@@ -19,6 +19,7 @@ const SPEC_FIELD_LABELS: Record<string, string> = {
   typeRole: "Type role",
   imagePresence: "Image presence",
   layoutHints: "Layout",
+  designRationale: "Design",
 }
 
 export function buildSpecDiff(before: CreativeSpec, after: CreativeSpec): SpecDiff {
@@ -66,6 +67,7 @@ function serializeSpecField(key: keyof CreativeSpec, value: unknown): string {
   if (value === undefined) return ""
   if (key === "palette" && Array.isArray(value)) return value.join(", ")
   if (key === "layoutHints" && typeof value === "object") return JSON.stringify(value)
+  if (key === "designRationale" && typeof value === "object") return JSON.stringify(value)
   return String(value)
 }
 

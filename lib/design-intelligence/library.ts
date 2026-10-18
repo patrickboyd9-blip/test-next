@@ -294,4 +294,4 @@ export function isAntiExample(record: Pick<LibraryRecord, "id" | "analysis">): b
   return record.id === "MMR-513" || record.id === "MMR-047" || record.id === "MMR-047-2" || record.id === "PM-011"
 }
 
-export const BENCHMARK_ANCHOR_IDS = ["PM-047", "PM-054", "PM-022"] as const
+export { DEFAULT_OWNER_FAVORITE_IDS as BENCHMARK_ANCHOR_IDS } from "./owner-favorites"
