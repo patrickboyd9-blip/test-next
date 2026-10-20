@@ -33,6 +33,8 @@ export interface GridComposeInput {
   spec: Pick<CreativeSpec, "headline" | "subheadline" | "body" | "offer" | "callToAction" | "phone" | "website" | "qrDestination">
   businessName?: string
   disclaimer?: string | null
+  /** Printed on the address side when a regulated vertical requires a label. */
+  complianceMark?: string | null
 }
 
 export interface GridCard {
@@ -180,6 +182,7 @@ export function composeGridCard(input: GridComposeInput): GridCard {
     website,
     proof: input.rationale.trust.back_only[0] ?? "Proof stays on this side",
     disclaimer: input.disclaimer ?? null,
+    complianceMark: input.complianceMark ?? null,
   })
 
   const headlineText = texts.find((text) => text.role === "headline")
@@ -367,6 +370,7 @@ function composeIntegrated(
     website,
     proof: input.rationale.trust.back_only[0] ?? "Proof stays on this side",
     disclaimer: input.disclaimer ?? null,
+    complianceMark: input.complianceMark ?? null,
   })
   const offerText = texts.find((text) => text.role === "offer")
   const headlineText = texts.find((text) => text.role === "headline")
@@ -480,11 +484,13 @@ function composeBack(input: {
   website: string
   proof: string
   disclaimer: string | null
+  complianceMark?: string | null
 }): PostcardFacePlan {
   const content = canvasToTrim(addressSideContentRect(input.geometry), input.geometry.bleedInchesPerSide)
   const texts: FittedText[] = []
   let cursor = content.y
   const lines = [
+    ...(input.complianceMark ? [{ text: input.complianceMark, role: "label" as const, pt: 8 }] : []),
     { text: input.businessName, role: "proof" as const, pt: 12 },
     { text: input.phone, role: "contact" as const, pt: input.trim === "6x9" ? 16 : 14 },
     { text: input.website, role: "label" as const, pt: 11 },

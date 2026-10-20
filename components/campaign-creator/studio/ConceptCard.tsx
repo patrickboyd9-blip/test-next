@@ -15,7 +15,7 @@ import { blueprintMatchLine } from "@/lib/design-intelligence/blueprint-tags"
 
 import { ConceptFeedback } from "./ConceptFeedback"
 import { PostcardPreview, type PostcardPreviewSize } from "./PostcardPreview"
-import { persuasionRecordLine, persuasionUsesLine } from "@/lib/design-intelligence/persuasion"
+import { persuasionAngles, persuasionRecordLine, persuasionUsesLine, persuasionWarnings } from "@/lib/design-intelligence/persuasion"
 
 import { ResearchBasis } from "./ResearchBasis"
 import { StudioPhotoNote } from "./StudioPhotoNote"
@@ -59,6 +59,8 @@ export function ConceptCard({
 }: ConceptCardProps) {
   const reducedMotion = useReducedMotion()
   const isInteractive = Boolean(onSelect)
+  const angles = persuasionAngles(direction.spec.designRationale)
+  const complianceWarnings = persuasionWarnings(direction.spec.designRationale)
 
   const size: PostcardPreviewSize =
     variant === "strip" ? "thumbnail" : variant === "hero" ? "hero" : "thumbnail"
@@ -128,6 +130,19 @@ export function ConceptCard({
             {persuasionRecordLine(direction.spec.designRationale) ? (
               <p className="text-xs text-foreground/80">{persuasionRecordLine(direction.spec.designRationale)}</p>
             ) : null}
+            {angles ? (
+              <div className="flex flex-col gap-0.5">
+                <p className="text-xs font-medium">A/B test options</p>
+                {angles.map((angle) => (
+                  <p key={angle.id} className="text-xs text-foreground/80">
+                    {angle.id} · {angle.label}: {angle.line}
+                  </p>
+                ))}
+              </div>
+            ) : null}
+            {complianceWarnings.map((warning) => (
+              <p key={warning} className="text-xs text-foreground/80">{warning}</p>
+            ))}
           </>
         )}
       </button>

@@ -1,5 +1,6 @@
 "use server"
 
+import { attorneyAdMark } from "@/lib/design-intelligence/attorney-compliance"
 import { isAtOrPastStatus } from "@/lib/campaign-creator/campaign-status"
 import { medicareDisclaimerFor } from "@/lib/campaign-creator/medicare-compliance"
 import { getCampaignRepository } from "@/lib/campaign-creator/repository"
@@ -215,6 +216,15 @@ function printCopy(campaign: Campaign): PostcardPrintCopy {
     qrPayload: contact.qrPayload ?? undefined,
     returnLines: address ? [address] : [],
     disclaimer: medicareDisclaimerFor(campaign.brief) ?? undefined,
+    complianceMark: attorneyAdMark([
+      campaign.brief.goal,
+      campaign.brief.offer,
+      campaign.brief.audience?.description,
+      campaign.brief.businessInfo?.name,
+      spec.headline,
+      spec.body,
+      spec.offer,
+    ].filter(Boolean).join(" ")) ?? undefined,
   }
 }
 

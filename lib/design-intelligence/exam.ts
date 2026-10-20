@@ -213,6 +213,9 @@ function rowFrom(item: ExamBrief, winner: ScoredCandidate, retrieved: string[], 
       winner.rationale.persuasion
         ? `Emotion: ${winner.rationale.persuasion.primaryEmotion.label}. Need: ${winner.rationale.persuasion.coreNeed.label}. Outcome version: ${winner.rationale.persuasion.outcomeGuidance}`
         : "",
+      winner.rationale.persuasion?.angles?.length
+        ? `A/B test options: ${winner.rationale.persuasion.angles.map((angle) => `${angle.id} ${angle.line}`).join(" | ")}`
+        : "",
     ].filter(Boolean).join(" "),
     image,
     tone: winner.blueprint?.tone ?? item.brief.emotionalTone ?? "",

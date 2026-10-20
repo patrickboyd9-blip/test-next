@@ -18,6 +18,7 @@ import type { DesignRationale, TrimSize } from "./rationale"
 import { citationsForDirection, selectReferences, type DirectionCitation } from "./select"
 import { checkSimilarity, type SimilarityResult } from "./similarity"
 import { requestModelRationale, requestVisionCritique, type ModelUsage } from "./model"
+import { attorneyAdMark } from "./attorney-compliance"
 import { applyOutcomeHeadline, clientFactText } from "./persuasion"
 import { renderStudioCardPng } from "./studio-render"
 import { viewSelection, type ImageView } from "./view-images"
@@ -102,13 +103,15 @@ export function repairCard(input: {
   let best: DirectedCard | null = null
   const rounds = Math.max(1, cap)
   for (let round = 1; round <= rounds; round += 1) {
+    const facts = clientFactText(input.brief, spec.offer)
     const card = composeGridCard({
       rationale,
       spec,
       businessName: input.businessName,
       disclaimer: isMedicareAgentBrief(input.brief) ? MEDICARE_AGENT_DISCLAIMER : null,
+      complianceMark: attorneyAdMark(facts),
     })
-    const copy = cardCopy(spec, input.businessName)
+    const copy = cardCopy(spec, input.businessName, attorneyAdMark(facts))
     const critique = critiqueCard(card, rationale, copy, undefined, clientFactText(input.brief, spec.offer))
     const similarity = checkSimilarity(card, copy, input.brief)
     const passed = critiquePasses(critique, similarity)
@@ -363,8 +366,8 @@ function usageCost(cardId: string, step: TokenCost["step"], usage: ModelUsage | 
   }
 }
 
-function cardCopy(spec: CreativeDirection["spec"], businessName?: string): string {
-  return [spec.headline, spec.offer, spec.body, spec.phone, spec.website, businessName].filter(Boolean).join(" ")
+function cardCopy(spec: CreativeDirection["spec"], businessName?: string, complianceMark?: string | null): string {
+  return [spec.headline, spec.offer, spec.body, spec.phone, spec.website, businessName, complianceMark].filter(Boolean).join(" ")
 }
 
 function shortenHeadline(headline: string | undefined): string {

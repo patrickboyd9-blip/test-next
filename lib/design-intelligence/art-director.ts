@@ -10,7 +10,8 @@ import {
   validateDesignRationale,
 } from "./rationale"
 import type { ReferenceSelection } from "./select"
-import { selectPersuasion } from "./persuasion"
+import { isAttorneyMatter } from "./attorney-compliance"
+import { clientFactText, selectPersuasion } from "./persuasion"
 import { briefHasNumeralOffer, verticalForBrief } from "./vertical"
 
 /**
@@ -288,6 +289,14 @@ function enforceHouseRules(rationale: DesignRationale, input: ArtDirectorInput):
   }
   if (next.scale_ratios.headline_to_body_cap < 2.5) next.scale_ratios.headline_to_body_cap = 2.8
   next.persuasion = selectPersuasion({ brief: input.brief, vertical: next.vertical })
+  if (isAttorneyMatter(clientFactText(input.brief))) {
+    next.photo_brief = {
+      ...next.photo_brief,
+      mode: "advisor_portrait",
+      subject: "A calm consultation in an office, one attorney seated, no crash and no injury",
+      lighting: "soft daylight",
+    }
+  }
   if (next.offer_treatment.expiry.trim().length === 0) next.offer_treatment.expiry = "none"
   if (/respond within|hours only|act now|final notice/i.test(next.offer_treatment.expiry)) {
     next.offer_treatment.expiry = "none"

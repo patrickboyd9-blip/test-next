@@ -4,6 +4,7 @@ import { test } from "node:test"
 import { directDesign } from "./art-director"
 import { critiqueCard } from "./critic"
 import { composeGridCard } from "./grid-composer"
+import { composePostcardFace } from "@/lib/postcard-layouts/compose"
 import {
   applyOutcomeHeadline,
   checkPersuasion,
@@ -194,6 +195,10 @@ test("the art director records the Uses line on the rationale", () => {
   assert.equal(directed.rationale.persuasion.primaryEmotion.id.length > 0, true)
   assert.equal(directed.rationale.persuasion.coreNeed.label.length > 0, true)
   assert.equal(directed.rationale.persuasion.outcomeGuidance, "A safe, dry home.")
+  assert.equal(directed.rationale.persuasion.angles.length, 2)
+  assert.equal(directed.rationale.persuasion.angles[0]?.id, "A")
+  assert.equal(directed.rationale.persuasion.angles[1]?.id, "B")
+  assert.deepEqual(directed.rationale.persuasion.complianceWarnings, [])
   const card = composeGridCard({
     rationale: directed.rationale,
     spec: { headline: "A safe, dry home.", offer: "$0 inspection", phone: "(619) 555-0148" },
@@ -201,6 +206,7 @@ test("the art director records the Uses line on the rationale", () => {
   })
   const critique = critiqueCard(card, directed.rationale, "A safe, dry home. FREE inspection", undefined, "Book a free roof inspection $0 inspection")
   assert.equal(critique.autoFails.some((code) => code.startsWith("PS")), false)
+  assert.equal(critique.warnings.length, 0)
 })
 
 test("a we-buy headline and a food headline sell the outcome", () => {
@@ -227,4 +233,84 @@ test("a we-buy headline and a food headline sell the outcome", () => {
   })
   assert.match(food.line, /the feeling of the trade/)
   assert.equal(food.picks.some((pick) => pick.id === "attention_capture"), false)
+})
+
+test("each concept offers an outcome angle and a threat-plus-action angle", () => {
+  const brief = { goal: "Book a free roof inspection", offer: "$0 inspection", audience: { description: "Homeowners" } }
+  const plan = selectPersuasion({ brief, vertical: "roofing" })
+  assert.deepEqual(plan.angles.map((angle) => angle.id), ["A", "B"])
+  assert.equal(plan.angles[0]?.label, "Outcome / benefit")
+  assert.equal(plan.angles[0]?.line, "A safe, dry home.")
+  assert.equal(plan.angles[1]?.label, "Threat plus action")
+  assert.equal(plan.angles[1]?.line, "A small leak becomes damage. Call for the inspection.")
+  const scan = selectPersuasion({
+    brief: { goal: "Show the storm map", offer: "Scan the storm map", audience: { description: "Homeowners" } },
+    vertical: "roofing",
+  })
+  assert.match(scan.angles[1]?.line ?? "", /Scan to see it\.$/)
+})
+
+test("an attorney card requires Advertisement, limits dramatic imagery, and warns about the 30-day wait", () => {
+  const brief = {
+    goal: "Reach people after a car accident",
+    offer: "Free consultation",
+    audience: { description: "People who need a personal injury attorney" },
+    businessInfo: { name: "Northline Law" },
+  }
+  const plan = selectPersuasion({ brief, vertical: "general_local_service" })
+  assert.equal(plan.primaryEmotion.id, "legal_fear")
+  assert.equal(plan.outcomeGuidance, "A clear next step.")
+  assert.equal(plan.angles[0]?.line, "A clear next step.")
+  assert.match(plan.angles[1]?.line ?? "", /Waiting can cost the claim\. Call for the free step\./)
+  assert.deepEqual(plan.complianceWarnings, ["Florida Bar 4-7.18: wait 30 days after an accident before mailing."])
+
+  const directed = directDesign({ brief, selection: selectReferences([], brief), trim: "5x8" })
+  assert.equal(directed.rationale.vertical, "general_local_service")
+  assert.equal(directed.rationale.photo_brief.mode, "advisor_portrait")
+  assert.match(directed.rationale.photo_brief.subject, /calm consultation/)
+  assert.match(directed.rationale.photo_brief.subject, /no crash and no injury/)
+
+  const spec = { headline: "A clear next step.", offer: "Free consultation", phone: "(619) 555-0148" }
+  const stamped = composeGridCard({
+    rationale: directed.rationale,
+    spec,
+    businessName: "Northline Law",
+    complianceMark: "Advertisement",
+  })
+  assert.match(stamped.back.texts.map((text) => text.text).join(" "), /\bAdvertisement\b/)
+  const preview = composePostcardFace({
+    templateId: "hero_scrim",
+    face: "back",
+    spec,
+    businessName: "Northline Law",
+    complianceMark: "Advertisement",
+  })
+  assert.equal(preview.overflows, false)
+  assert.match(preview.texts.map((text) => text.text).join(" "), /\bAdvertisement\b/)
+  const plain = composeGridCard({ rationale: directed.rationale, spec, businessName: "Northline Law" })
+  assert.equal(/\bAdvertisement\b/.test(plain.back.texts.map((text) => text.text).join(" ")), false)
+
+  const client = "Reach people after a car accident. Free consultation. personal injury attorney"
+  const missing = critiqueCard(stamped, directed.rationale, "A clear next step. Free consultation", undefined, client)
+  assert.equal(missing.autoFails.includes("PS13"), true)
+  assert.equal(missing.autoFails.includes("PS14"), false)
+  assert.deepEqual(missing.warnings, ["Florida Bar 4-7.18: wait 30 days after an accident before mailing."])
+
+  const dramatic = {
+    ...directed.rationale,
+    photo_brief: { ...directed.rationale.photo_brief, subject: "A bloody crash scene with ambulance lights" },
+  }
+  const graphic = critiqueCard(stamped, dramatic, "Advertisement. A clear next step.", undefined, client)
+  assert.equal(graphic.autoFails.includes("PS13"), false)
+  assert.equal(graphic.autoFails.includes("PS14"), true)
+
+  const labeled = critiqueCard(stamped, directed.rationale, "Advertisement. A clear next step.", undefined, client)
+  assert.equal(labeled.autoFails.includes("PS13"), false)
+  assert.equal(labeled.autoFails.includes("PS14"), false)
+  assert.match(labeled.warnings.join(" "), /30 days/)
+
+  const roof = critiqueCard(stamped, directed.rationale, "A safe, dry home. Free inspection", undefined, "Book a free roof inspection")
+  assert.equal(roof.autoFails.includes("PS13"), false)
+  assert.equal(roof.autoFails.includes("PS14"), false)
+  assert.deepEqual(roof.warnings, [])
 })

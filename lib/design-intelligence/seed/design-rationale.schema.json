@@ -254,7 +254,7 @@
     "persuasion": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["picks", "line", "primaryEmotion", "coreNeed", "awareness", "outcomeGuidance"],
+      "required": ["picks", "line", "primaryEmotion", "coreNeed", "awareness", "outcomeGuidance", "angles", "complianceWarnings"],
       "properties": {
         "picks": {
           "type": "array",
@@ -299,7 +299,30 @@
             "label": { "type": "string" }
           }
         },
-        "outcomeGuidance": { "type": "string" }
+        "outcomeGuidance": { "type": "string" },
+        "angles": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "prefixItems": [
+            { "properties": { "id": { "const": "A" } } },
+            { "properties": { "id": { "const": "B" } } }
+          ],
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "label", "line"],
+            "properties": {
+              "id": { "enum": ["A", "B"] },
+              "label": { "type": "string", "minLength": 1 },
+              "line": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "complianceWarnings": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
       }
     }
   },

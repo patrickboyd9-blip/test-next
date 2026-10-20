@@ -64,6 +64,7 @@ export async function renderTemplatedPostcardPdf(input: {
     businessName: input.copy.businessName,
     qrPayload: input.copy.qrPayload,
     disclaimer: Boolean(input.copy.disclaimer),
+    complianceMark: input.copy.complianceMark,
     spec: input.copy,
   }
   const front = composePostcardFace({ ...planInput, face: "front" })

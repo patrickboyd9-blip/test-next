@@ -28,6 +28,7 @@ import {
   type TastePick,
   type TasteSignals,
 } from "./taste-retrieval"
+import { ATTORNEY_AD_LABEL, attorneyAdMark } from "./attorney-compliance"
 import { applyOutcomeHeadline, clientFactText, selectPersuasion } from "./persuasion"
 import { briefHasNumeralOffer } from "./vertical"
 import { loadTasteCorpus, visionTasteStore, type VisionTaste } from "./vision-taste"
@@ -294,13 +295,16 @@ async function scoreFamily(input: {
         : undefined,
     }),
   }
+  const facts = clientFactText(input.brief, spec.offer)
+  const complianceMark = attorneyAdMark(facts)
   const card = composeGridCard({
     rationale,
     spec,
     businessName: input.brief.businessInfo?.name,
     disclaimer: isMedicareAgentBrief(input.brief) ? MEDICARE_AGENT_DISCLAIMER : null,
+    complianceMark,
   })
-  const copy = [spec.headline, spec.offer, spec.body, spec.phone, input.brief.businessInfo?.name]
+  const copy = [spec.headline, spec.offer, spec.body, spec.phone, input.brief.businessInfo?.name, complianceMark]
     .filter(Boolean)
     .join(" ")
   const critique = critiqueCard(card, rationale, copy, undefined, clientFactText(input.brief, spec.offer))
@@ -577,6 +581,7 @@ function applyVisionImprovement(candidate: ScoredCandidate, businessName?: strin
     rationale: proposal.rationale,
     spec: candidate.spec,
     businessName,
+    complianceMark: (proposal.rationale.persuasion?.complianceWarnings.length ?? 0) > 0 ? ATTORNEY_AD_LABEL : null,
   })
   const critique = critiqueCard(card, proposal.rationale, candidate.spec.headline ?? "")
   if (critique.autoFails.includes("AF7") || critique.autoFails.includes("AF6") || critique.autoFails.includes("AF1")) {

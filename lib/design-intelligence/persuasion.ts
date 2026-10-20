@@ -7,8 +7,10 @@
 
 import type { CampaignBrief } from "@/lib/campaign-creator/types"
 
+import { attorneyWarnings, isAttorneyMatter } from "./attorney-compliance"
 import {
   coreNeed,
+  emotionsFor,
   headlineFor,
   resolveAwareness,
   resolveEmotion,
@@ -36,6 +38,9 @@ export interface PersuasionPlan {
   coreNeed: { id: string; label: string }
   awareness: { id: string; label: string }
   outcomeGuidance: string
+  /** Two headlines to test. Markets do not agree on which one wins. */
+  angles: Array<{ id: "A" | "B"; label: string; line: string }>
+  complianceWarnings: string[]
 }
 
 export interface PersuasionContext {
@@ -74,6 +79,7 @@ const OUTCOME: Record<string, string> = {
   pest: "A house that feels settled.",
   landscaping: "A yard you enjoy.",
   solar: "Power that stays quiet.",
+  legal: "A clear next step.",
   general: "The result you wanted.",
 }
 
@@ -123,11 +129,30 @@ export function selectPersuasion(input: PersuasionContext): PersuasionPlan {
     coreNeed: { id: need.id, label: need.label },
     awareness: { id: awareness.id, label: awareness.label },
     outcomeGuidance: outcomeGuidance(kind),
+    angles: abAngles(kind, input.brief.offer ?? ""),
+    complianceWarnings: attorneyWarnings(facts),
   }
 }
 
 export function outcomeGuidance(kind: string): string {
   return OUTCOME[kind] ?? OUTCOME.general!
+}
+
+function abAngles(kind: string, offer: string): PersuasionPlan["angles"] {
+  const fear = emotionsFor(kind).find((emotion) => emotion.fear)
+  const threat = (fear?.problem ?? "A small problem gets larger.").replace(/\.+$/, "")
+  return [
+    { id: "A", label: "Outcome / benefit", line: outcomeGuidance(kind) },
+    { id: "B", label: "Threat plus action", line: `${threat}. ${actionFor(offer)}` },
+  ]
+}
+
+function actionFor(offer: string): string {
+  if (/\binspection\b|\bcheck\b/i.test(offer)) return "Call for the inspection."
+  if (/\bscan\b|\bmap\b/i.test(offer)) return "Scan to see it."
+  if (/\bfree\b|\$\s*0/i.test(offer)) return "Call for the free step."
+  const short = offer.replace(/\s+/g, " ").trim().split(" ").filter(Boolean).slice(0, 4).join(" ")
+  return short ? `Call about ${short}.` : "Call or scan."
 }
 
 export function usesLine(ids: readonly string[]): string {
@@ -154,6 +179,19 @@ export function persuasionRecordLine(rationale: unknown): string | null {
         ? "so this leads with the company"
         : "so this leads with the problem"
   return `Emotion: ${persuasion.primaryEmotion.label} (${source}). Need: ${persuasion.coreNeed.label}. Audience: ${persuasion.awareness.label}, ${lead}. Outcome version: ${persuasion.outcomeGuidance}`
+}
+
+export function persuasionAngles(rationale: unknown): Array<{ id: "A" | "B"; label: string; line: string }> | null {
+  if (!rationale || typeof rationale !== "object") return null
+  const angles = (rationale as { persuasion?: PersuasionPlan }).persuasion?.angles
+  if (!angles || angles.length < 2) return null
+  return angles
+}
+
+export function persuasionWarnings(rationale: unknown): string[] {
+  if (!rationale || typeof rationale !== "object") return []
+  const warnings = (rationale as { persuasion?: PersuasionPlan }).persuasion?.complianceWarnings
+  return Array.isArray(warnings) ? warnings.filter((warning) => typeof warning === "string" && warning.trim()) : []
 }
 
 export function applyOutcomeHeadline(input: {
@@ -250,6 +288,7 @@ export function clientFactText(brief: CampaignBrief, extra?: string): string {
 
 export function persuasionVertical(brief: CampaignBrief, vertical?: DesignVertical): string {
   const text = clientFactText(brief)
+  if (isAttorneyMatter(text)) return "legal"
   if (vertical === "medicare_insurance" || /\bmedicare\b|\bmedicaid\b|\bsupplement\b/i.test(text)) return "medicare"
   if (/\bwe buy\b|\brather sell\b|\bsell (?:the|your) house\b/i.test(text)) return "we_buy"
   if (/\brestaurant\b|\bsupper\b|\bmenu\b|\bdining\b|\bfood\b/i.test(text)) return "food"

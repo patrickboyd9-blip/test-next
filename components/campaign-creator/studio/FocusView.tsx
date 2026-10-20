@@ -10,7 +10,7 @@ import type { PostcardIdentity } from "@/lib/campaign-creator/studio-contact"
 import { presentStudioPhoto, type StudioImageState } from "@/lib/campaign-creator/studio-photo"
 import type { ConceptFeedbackView } from "@/lib/campaign-creator/actions"
 import type { Campaign, CampaignBrief, CreativeDirection, CreativeSpec } from "@/lib/campaign-creator/types"
-import { persuasionRecordLine, persuasionUsesLine } from "@/lib/design-intelligence/persuasion"
+import { persuasionAngles, persuasionRecordLine, persuasionUsesLine, persuasionWarnings } from "@/lib/design-intelligence/persuasion"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
 import { blueprintMatchLine } from "@/lib/design-intelligence/blueprint-tags"
@@ -77,6 +77,8 @@ export function FocusView({
   const caption = buildFocusCaption(direction)
   const uses = persuasionUsesLine(spec.designRationale)
   const persuasionNote = persuasionRecordLine(spec.designRationale)
+  const angles = persuasionAngles(spec.designRationale)
+  const complianceWarnings = persuasionWarnings(spec.designRationale)
 
   return (
     <div className="flex flex-col gap-8">
@@ -117,6 +119,19 @@ export function FocusView({
         <p className="text-sm text-muted-foreground">{direction.rationale}</p>
         {uses ? <p className="text-sm text-foreground/80">{uses}</p> : null}
         {persuasionNote ? <p className="text-sm text-foreground/80">{persuasionNote}</p> : null}
+        {angles ? (
+          <div className="flex flex-col gap-1">
+            <p className="text-sm font-medium">A/B test options</p>
+            {angles.map((angle) => (
+              <p key={angle.id} className="text-sm text-foreground/80">
+                {angle.id} · {angle.label}: {angle.line}
+              </p>
+            ))}
+          </div>
+        ) : null}
+        {complianceWarnings.map((warning) => (
+          <p key={warning} className="text-sm text-foreground/80">{warning}</p>
+        ))}
         <ResearchBasis research={direction.research} />
         {spec.blueprint ? (
           <p className="text-xs font-medium">Blueprint: {blueprintMatchLine(spec.blueprint)}</p>

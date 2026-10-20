@@ -315,7 +315,7 @@ export function visionGradeAnchor(env: NodeJS.ProcessEnv = process.env): string 
     calibrationSentence(env),
     "Type on a photograph sits on a calm patch of sky or wall. It does not sit on a face, a person, or a ladder. Small type under 14pt needs 7:1. A stock portrait, or a cluttered background behind the type, is a weakness.",
     "Contrast below 4.5:1, or below 7:1 for type under 14pt, or type that overflows, is a hard fail regardless of the composition.",
-    "Persuasion: one emotion, one core need, and a sell-the-outcome version. Cold lists lead with the problem. Past customers lead with the offer. A threat needs a call, a scan, or a free inspection. A count, a deadline, a testimonial, or a personal fact has to come from the client. No fake check and no government costume. Medicare never says free for a $0 premium.",
+    "Persuasion: one emotion, one core need, and a sell-the-outcome version. Cold lists lead with the problem. Past customers lead with the offer. A threat needs a call, a scan, or a free inspection. A count, a deadline, a testimonial, or a personal fact has to come from the client. No fake check and no government costume. Medicare never says free for a $0 premium. An attorney card says Advertisement. Dramatic injury imagery is a hard fail. Florida Bar 4-7.18 is a warning: wait 30 days after an accident before mailing.",
   ].join(" ")
 }
 

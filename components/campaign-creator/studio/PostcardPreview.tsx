@@ -22,6 +22,7 @@ import { useReducedMotion } from "@/hooks/use-reduced-motion"
 import { ShimmerOverlay, SpecDiffHighlight } from "./SpecDiffHighlight"
 import { PostcardBackFace, PostcardFrontFace } from "./PostcardComposition"
 import { PremiumBackMessage } from "./PremiumPostcard"
+import { attorneyAdMark } from "@/lib/design-intelligence/attorney-compliance"
 import { isPostcardTemplate, isVerticalPalette } from "@/lib/postcard-layouts/ids"
 import { slotPhotoSources } from "@/lib/postcard-layouts/photos"
 import { TEMPLATE_META } from "@/lib/postcard-layouts/templates"
@@ -106,6 +107,18 @@ export function PostcardPreview({
     assets: brief?.brandAssets,
   })
   const disclaimer = medicareDisclaimerFor(brief)
+  const complianceMark = attorneyAdMark(
+    [
+      brief?.goal,
+      brief?.offer,
+      brief?.audience?.description,
+      brief?.businessInfo?.name,
+      brief?.otherRequirements,
+      spec.headline,
+      spec.body,
+      spec.offer,
+    ].filter(Boolean).join(" ")
+  )
 
   const content = isAddressSide ? (
     <PostcardBackFace
@@ -123,6 +136,7 @@ export function PostcardPreview({
           businessName={contact.businessName}
           paletteId={isVerticalPalette(spec.layoutHints?.verticalPalette) ? spec.layoutHints.verticalPalette : undefined}
           disclaimer={Boolean(disclaimer)}
+          complianceMark={complianceMark}
         />
       ) : null}
     </PostcardBackFace>

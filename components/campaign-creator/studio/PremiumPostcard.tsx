@@ -104,12 +104,14 @@ export function PremiumBackMessage({
   businessName,
   paletteId,
   disclaimer,
+  complianceMark,
 }: {
   templateId: PostcardTemplateId
   spec: CreativeSpec
   businessName?: string
   paletteId?: VerticalPaletteId
   disclaimer?: boolean
+  complianceMark?: string | null
 }) {
   const plan = composePostcardFace({
     templateId,
@@ -118,6 +120,7 @@ export function PremiumBackMessage({
     paletteId: paletteId ?? (isVerticalPalette(spec.layoutHints?.verticalPalette) ? spec.layoutHints.verticalPalette : "general"),
     face: "back",
     disclaimer,
+    complianceMark,
   })
   return (
     <div data-template-back={plan.templateId} data-overflow={plan.overflows ? "yes" : "no"} className="absolute inset-0">

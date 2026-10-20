@@ -9,6 +9,7 @@ import { buildPostcard6x9PrintSpec } from "@/lib/print-spec/postcard-6x9-print-s
 
 import { measureBackdropContrast, type ContrastPhoto } from "./backdrop"
 import { normalizedPanel, textInsideSafe, textIsClipped, type GridCard } from "./grid-composer"
+import { attorneyCompliance } from "./attorney-compliance"
 import { checkPersuasion } from "./persuasion"
 import type { DesignRationale, GridName } from "./rationale"
 
@@ -36,6 +37,8 @@ export interface Critique {
   brokenRule: string | null
   /** "vision" only after the vision critic has scored this card. */
   scoreKind: "machine estimate" | "vision"
+  /** Shown to the client. These do not change the letter. */
+  warnings: string[]
 }
 
 const VISION_WEIGHTS: Record<string, number> = {
@@ -94,6 +97,14 @@ export function critiqueCard(
     const code = PERSUASION_CODES[finding.id]
     if (code) autoFails.push(code)
   }
+  const attorney = attorneyCompliance({
+    copy,
+    clientText,
+    photoText: [rationale.photo_brief.subject, rationale.photo_brief.lighting].join(" "),
+  })
+  for (const fail of attorney.hardFails) {
+    autoFails.push(fail.id === "attorney_label" ? "PS13" : "PS14")
+  }
   if (rationale.vertical === "medicare_insurance" && /\$\s?\d/.test(copy) && rationale.offer_treatment.kind !== "numeral_hero") {
     // A stated price the brief owns is allowed. The costume is the failure, not a number the customer wrote.
   }
@@ -143,6 +154,7 @@ export function critiqueCard(
     brokenRule: passed ? null : brokenRule,
     edit: passed ? null : editFor(brokenRule, rationale),
     scoreKind: "machine estimate",
+    warnings: attorney.warnings,
   }
 }
 
@@ -213,6 +225,8 @@ function editFor(rule: string | null, rationale: DesignRationale): string {
   if (rule === "PS9") return "Remove the testimonial the client did not supply."
   if (rule === "PS10") return "Remove the steering or discriminatory line."
   if (rule === "PS11") return "Remove the fake check."
+  if (rule === "PS13") return "Add the word Advertisement."
+  if (rule === "PS14") return "Replace the dramatic injury image with a calm consultation."
   return "Give the card one panel, one offer, and one response."
 }
 

@@ -116,6 +116,10 @@ export interface DesignRationale {
     coreNeed: { id: string; label: string }
     awareness: { id: string; label: string }
     outcomeGuidance: string
+    /** Two copy angles for the same concept, labeled as an A/B test. */
+    angles: Array<{ id: "A" | "B"; label: string; line: string }>
+    /** Shown to the client. These do not change the letter. */
+    complianceWarnings: string[]
   }
   /**
    * Where type sits on a full-bleed photograph.
@@ -326,8 +330,24 @@ export function validateDesignRationale(
       typeof guidance === "string" &&
       guidance.trim().length > 0
     )
-    if (!picksOk || typeof line !== "string" || !line.startsWith("Uses:") || !recordOk) {
-      errors.push("persuasion needs two or three principles, a Uses line, one emotion, one need, and an outcome version.")
+    const angles = Array.isArray(persuasion?.angles) ? persuasion.angles : null
+    const anglesOk = Boolean(
+      angles &&
+      angles.length === 2 &&
+      angles.every((angle, index) => {
+        if (!angle || typeof angle !== "object") return false
+        const row = angle as { id?: unknown; label?: unknown; line?: unknown }
+        return row.id === (index === 0 ? "A" : "B") &&
+          typeof row.label === "string" &&
+          row.label.trim().length > 0 &&
+          typeof row.line === "string" &&
+          row.line.trim().length > 0
+      })
+    )
+    const warnings = persuasion?.complianceWarnings
+    const warningsOk = Array.isArray(warnings) && warnings.every((warning) => typeof warning === "string")
+    if (!picksOk || typeof line !== "string" || !line.startsWith("Uses:") || !recordOk || !anglesOk || !warningsOk) {
+      errors.push("persuasion needs two or three principles, a Uses line, one emotion, one need, an outcome version, and two A/B angles.")
     }
   }
 
