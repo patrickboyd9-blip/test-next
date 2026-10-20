@@ -205,10 +205,14 @@ function editFor(rule: string | null, rationale: DesignRationale): string {
   if (rule === "AF7" || rule === "V12") return "Group the phone, the website, and a labeled code in one lockup."
   if (rule === "similarity") return "Move the panel so the card does not repeat a reference mailer's arrangement."
   if (rule === "V13" || rule === "V8") return "Drop the official-notice cues and keep one calm accent."
-  if (rule === "PS1" || rule === "PS5") return "Rewrite the headline so it sells the outcome, with no fear tactic."
+  if (rule === "PS1") return "Make the benefit clear in the headline, and keep an outcome version in the rationale."
+  if (rule === "PS5") return "Pair the threat with one easy action: a call, a scan, or the free inspection."
   if (rule === "PS3" || rule === "PS7") return "Remove the fake deadline or the fake limit."
-  if (rule === "PS4" || rule === "PS6") return "Remove any number the client did not supply."
-  if (rule === "PS8" || rule === "PS9") return "Drop the word free, and drop any hint of health, income, or distress."
+  if (rule === "PS4" || rule === "PS6" || rule === "PS12") return "Remove any fact the client did not supply."
+  if (rule === "PS8") return "Medicare cannot say free for a $0 premium."
+  if (rule === "PS9") return "Remove the testimonial the client did not supply."
+  if (rule === "PS10") return "Remove the steering or discriminatory line."
+  if (rule === "PS11") return "Remove the fake check."
   return "Give the card one panel, one offer, and one response."
 }
 
@@ -217,11 +221,14 @@ const PERSUASION_CODES: Record<string, string> = {
   standout: "PS2",
   urgency: "PS3",
   invented: "PS4",
-  fear: "PS5",
+  efficacy: "PS5",
   placeholder: "PS6",
   scarcity: "PS7",
   medicare_free: "PS8",
-  implied: "PS9",
+  testimonial: "PS9",
+  fair_housing: "PS10",
+  fake_check: "PS11",
+  false_personal: "PS12",
 }
 
 function hierarchyScore(

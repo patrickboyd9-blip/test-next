@@ -15,7 +15,7 @@ import { blueprintMatchLine } from "@/lib/design-intelligence/blueprint-tags"
 
 import { ConceptFeedback } from "./ConceptFeedback"
 import { PostcardPreview, type PostcardPreviewSize } from "./PostcardPreview"
-import { persuasionUsesLine } from "@/lib/design-intelligence/persuasion"
+import { persuasionRecordLine, persuasionUsesLine } from "@/lib/design-intelligence/persuasion"
 
 import { ResearchBasis } from "./ResearchBasis"
 import { StudioPhotoNote } from "./StudioPhotoNote"
@@ -124,6 +124,9 @@ export function ConceptCard({
             </p>
             {persuasionUsesLine(direction.spec.designRationale) ? (
               <p className="text-xs text-foreground/80">{persuasionUsesLine(direction.spec.designRationale)}</p>
+            ) : null}
+            {persuasionRecordLine(direction.spec.designRationale) ? (
+              <p className="text-xs text-foreground/80">{persuasionRecordLine(direction.spec.designRationale)}</p>
             ) : null}
           </>
         )}

@@ -112,6 +112,10 @@ export interface DesignRationale {
   persuasion?: {
     picks: Array<{ id: string; why: string }>
     line: string
+    primaryEmotion: { id: string; label: string; source: "client" | "recommended" }
+    coreNeed: { id: string; label: string }
+    awareness: { id: string; label: string }
+    outcomeGuidance: string
   }
   /**
    * Where type sits on a full-bleed photograph.
@@ -303,8 +307,27 @@ export function validateDesignRationale(
         return typeof row.id === "string" && row.id.trim().length > 0 && typeof row.why === "string" && row.why.trim().length > 0
       })
     )
-    if (!picksOk || typeof line !== "string" || !line.startsWith("Uses:")) {
-      errors.push("persuasion needs two or three principles and a Uses line.")
+    const emotion = record(persuasion?.primaryEmotion)
+    const need = record(persuasion?.coreNeed)
+    const awareness = record(persuasion?.awareness)
+    const guidance = persuasion?.outcomeGuidance
+    const recordOk = Boolean(
+      emotion &&
+      typeof emotion.id === "string" &&
+      emotion.id.trim() &&
+      typeof emotion.label === "string" &&
+      (emotion.source === "client" || emotion.source === "recommended") &&
+      need &&
+      typeof need.id === "string" &&
+      typeof need.label === "string" &&
+      awareness &&
+      typeof awareness.id === "string" &&
+      typeof awareness.label === "string" &&
+      typeof guidance === "string" &&
+      guidance.trim().length > 0
+    )
+    if (!picksOk || typeof line !== "string" || !line.startsWith("Uses:") || !recordOk) {
+      errors.push("persuasion needs two or three principles, a Uses line, one emotion, one need, and an outcome version.")
     }
   }
 

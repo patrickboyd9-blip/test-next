@@ -1,11 +1,19 @@
 /**
  * How a campaign uses the persuasion principles.
- * The art director picks two or three. The copywriter sells the outcome.
- * The critic rejects invented facts, fake urgency, and fear.
+ * The art director picks two or three, one emotion, and one core need.
+ * The copywriter keeps a sell-the-outcome version whatever the emotion.
+ * The critic rejects false claims and a threat that has no easy action.
  */
 
 import type { CampaignBrief } from "@/lib/campaign-creator/types"
 
+import {
+  coreNeed,
+  headlineFor,
+  resolveAwareness,
+  resolveEmotion,
+  type CampaignEmotion,
+} from "./persuasion-emotions"
 import { headlineRepeatsOffer } from "./offer-copy"
 import {
   persuasionPrinciple,
@@ -24,6 +32,10 @@ export interface PersuasionPick {
 export interface PersuasionPlan {
   picks: PersuasionPick[]
   line: string
+  primaryEmotion: { id: string; label: string; source: "client" | "recommended" }
+  coreNeed: { id: string; label: string }
+  awareness: { id: string; label: string }
+  outcomeGuidance: string
 }
 
 export interface PersuasionContext {
@@ -41,9 +53,12 @@ const CLAIM = /\b(\d[\d,]*)\s*(%|percent|neighbors|homes|customers|families|revi
 const SOFT_CLAIM = /\b(?:over|more than|nearly|almost)\s+(\d[\d,]*)\b/gi
 const URGENCY_WORDS = /\b(?:act now|limited time|today only|expires soon|hurry|while supplies last|last chance|don'?t wait|hours only|final hours)\b/i
 const SCARCITY_WORDS = /\b(?:only\s+\d+\s+(?:left|spots?|slots?|seats?)|while supplies last|limited quantities|today only)\b/i
-const FEAR_WORDS = /\b(?:terrifying|nightmare|disaster|collapse|frighten|ruined|danger)\b|\blose your home\b|\bbefore it(?:'s| is) too late\b|\bdon'?t wait\b|\bact now\b|\bfinal notice\b/i
+const THREAT = /\b(?:leak(?:s|ing)?|water damage|storm damage|wind damage|foreclos\w*|coverage gap|collapse|disaster|nightmare|ruin(?:ed)?|too late|infestation|breakdown|flood(?:ing)?|mold)\b/i
+const EASY_ACTION = /\b(?:call|scan|text|book|visit|tap)\b|\bfree (?:inspection|quote|estimate|review|check)\b|\$\s*0\b|\binspection\b|\(\d{3}\)|\b\d{3}[-.\s]\d{3}[-.\s]\d{4}\b/i
+const FAKE_CHECK = /\b(?:pay to the order of|this is a check|treasury check|government check|stimulus check|non-negotiable instrument)\b/i
+const FAIR_HOUSING = /\b(?:whites only|blacks only|no children|no kids|adults only|christian neighborhood|exclusive neighborhood|changing neighborhood|the right kind of people|no section 8)\b/i
+const UNSUPPLIED_PERSON = /\bwe know you(?:'re| are)\b|\byour (?:illness|diagnosis|foreclosure|income)\b|\bbehind on (?:payments|rent)\b/i
 const PLACEHOLDER = /\b(?:lorem ipsum|lorem|tbd|xxx+|\[(?:address|name|phone|date|number)\]|123 main(?: street)?)\b/i
-const SENSITIVE = /\b(?:we know you(?:'re| are) (?:sick|behind|struggling)|your (?:illness|income|diagnosis|foreclosure)|behind on (?:payments|rent)|low income)\b/i
 const GOVERNMENT = /\bofficial notice\b|\bfinal notice\b|\bofficial business\b|\bgreat seal\b|\beagle\b/i
 
 const OUTCOME: Record<string, string> = {
@@ -82,7 +97,6 @@ export function selectPersuasion(input: PersuasionContext): PersuasionPlan {
     genuineScarcity: /\bonly\s+\d+\s+(?:left|spots?|slots?|seats?|openings?)\b/i.test(facts),
     reserved: /\breserved for\b/i.test(facts) || /\b\d{1,6}\s+[A-Za-z]+\s+(?:st|street|ave|avenue|rd|road|dr|drive|ln|lane|blvd)\b/i.test(facts),
     geography: /\b(?:neighborhood|neighbours|neighbors|zip code|local|city|street)\b/i.test(facts),
-    sensitive: /\b(?:foreclos|bankrupt|behind on|low income|diagnos|cancer|illness)\b/i.test(facts),
     question: /\?/.test(facts) || input.blueprint?.copyPattern === "question_headline",
     smallStep: /\b(?:scan|storm map|quiz|checklist)\b/i.test(facts),
     tiers: /\b(?:tiers?|plans|options)\b/i.test(facts),
@@ -98,8 +112,22 @@ export function selectPersuasion(input: PersuasionContext): PersuasionPlan {
     .sort((a, b) => b.score - a.score || a.principle.id.localeCompare(b.principle.id))
 
   const chosen = [must("sell_the_outcome"), ...ranked.slice(0, 2).map((item) => item.principle)]
-  const picks = chosen.map((principle) => ({ id: principle.id, why: whyFor(principle.id, flags) }))
-  return { picks, line: usesLine(picks.map((pick) => pick.id)) }
+  const resolved = resolveEmotion(kind, facts, input.brief.primaryEmotion)
+  const awareness = resolveAwareness(input.brief.audienceAwareness)
+  const need = coreNeed(resolved.emotion.need)
+  const picks = chosen.map((principle) => ({ id: principle.id, why: whyFor(principle.id, { ...flags, emotion: resolved.emotion }) }))
+  return {
+    picks,
+    line: usesLine(picks.map((pick) => pick.id)),
+    primaryEmotion: { id: resolved.emotion.id, label: resolved.emotion.label, source: resolved.source },
+    coreNeed: { id: need.id, label: need.label },
+    awareness: { id: awareness.id, label: awareness.label },
+    outcomeGuidance: outcomeGuidance(kind),
+  }
+}
+
+export function outcomeGuidance(kind: string): string {
+  return OUTCOME[kind] ?? OUTCOME.general!
 }
 
 export function usesLine(ids: readonly string[]): string {
@@ -113,6 +141,21 @@ export function persuasionUsesLine(rationale: unknown): string | null {
   return typeof line === "string" && line.startsWith("Uses:") ? line : null
 }
 
+export function persuasionRecordLine(rationale: unknown): string | null {
+  if (!rationale || typeof rationale !== "object") return null
+  const persuasion = (rationale as { persuasion?: PersuasionPlan }).persuasion
+  if (!persuasion?.primaryEmotion || !persuasion.coreNeed || !persuasion.awareness || !persuasion.outcomeGuidance) return null
+  const source = persuasion.primaryEmotion.source === "client" ? "chosen" : "recommended"
+  const lead = persuasion.awareness.id === "past_customer"
+    ? "so this leads with the offer"
+    : persuasion.awareness.id === "solution_aware"
+      ? "so this leads with the kind of fix"
+      : persuasion.awareness.id === "product_aware"
+        ? "so this leads with the company"
+        : "so this leads with the problem"
+  return `Emotion: ${persuasion.primaryEmotion.label} (${source}). Need: ${persuasion.coreNeed.label}. Audience: ${persuasion.awareness.label}, ${lead}. Outcome version: ${persuasion.outcomeGuidance}`
+}
+
 export function applyOutcomeHeadline(input: {
   headline: string
   offer: string
@@ -122,11 +165,16 @@ export function applyOutcomeHeadline(input: {
   const headline = input.headline.replace(/\s+/g, " ").trim()
   const kind = persuasionVertical(input.brief, input.vertical)
   if (headline && !headlineIsFeature(headline, input.offer, kind)) return headline
-  return OUTCOME[kind] ?? OUTCOME.general!
+  const resolved = resolveEmotion(kind, clientFactText(input.brief), input.brief.primaryEmotion)
+  return headlineFor({
+    emotion: resolved.emotion,
+    awareness: input.brief.audienceAwareness,
+    offer: input.offer,
+  })
 }
 
 export interface PersuasionFinding {
-  id: "benefit" | "standout" | "urgency" | "invented" | "fear" | "placeholder" | "scarcity" | "medicare_free" | "implied" | "government"
+  id: "benefit" | "standout" | "urgency" | "invented" | "efficacy" | "placeholder" | "scarcity" | "medicare_free" | "testimonial" | "false_personal" | "fair_housing" | "fake_check" | "government"
   ok: boolean
   detail: string
 }
@@ -156,11 +204,7 @@ export function checkPersuasion(input: {
     },
     urgencyFinding(copy, client),
     inventedFinding(copy, client),
-    {
-      id: "fear",
-      ok: !FEAR_WORDS.test(copy),
-      detail: FEAR_WORDS.test(copy) ? "The card uses a fear tactic." : "No fear tactic.",
-    },
+    efficacyFinding(copy),
     {
       id: "placeholder",
       ok: !PLACEHOLDER.test(copy),
@@ -174,10 +218,13 @@ export function checkPersuasion(input: {
         ? "Medicare must not say free for a $0 premium."
         : "Medicare does not say free.",
     },
+    testimonialFinding(copy, client),
+    falsePersonalFinding(copy, client),
+    fairHousingFinding(copy, input.vertical),
     {
-      id: "implied",
-      ok: !SENSITIVE.test(copy),
-      detail: SENSITIVE.test(copy) ? "The card implies private knowledge of distress, health, or income." : "No private-status implication.",
+      id: "fake_check",
+      ok: !FAKE_CHECK.test(copy),
+      detail: FAKE_CHECK.test(copy) ? "The card looks like a check." : "No fake check.",
     },
     {
       id: "government",
@@ -241,7 +288,7 @@ function allowed(id: string, flags: Flags): boolean {
   if (id === "authority") return flags.trueCredential
   if (id === "urgency") return flags.realDate
   if (id === "endowment") return flags.reserved
-  if (id === "personalization") return flags.geography && !flags.sensitive
+  if (id === "personalization") return flags.geography
   if (id === "reciprocity") return flags.freeGive && !flags.medicare
   if (flags.medicare && (id === "scarcity" || id === "reciprocity")) return false
   return true
@@ -269,31 +316,67 @@ function scorePrinciple(principle: PersuasionPrinciple, flags: Flags): number {
   return score
 }
 
-function whyFor(id: string, flags: Flags): string {
+function whyFor(id: string, flags: Flags & { emotion: CampaignEmotion }): string {
   if (id === "sell_the_outcome") return `The headline sells the result for ${flags.kind.replaceAll("_", " ")}, not the service feature.`
   if (id === "isolation_effect") return "One offer is the only element that should look different."
   if (id === "reciprocity") return "The brief gives something before it asks, so the card can lead with that gift."
   if (id === "urgency") return "The brief names a real date, so the deadline can be that date."
-  if (id === "emotion_by_vertical") return emotionWhy(flags.kind)
+  if (id === "emotion_by_vertical") return `The card uses one emotion, ${flags.emotion.label}, and one need, ${coreNeed(flags.emotion.need).label}.`
   if (id === "attention_capture") return "One photograph and one headline are enough to stop the reader."
   if (id === "commitment") return "A small yes-question fits this brief better than a demand."
   if (id === "specificity") return "The price or claim is one the client already stated."
   if (id === "contrast") return "The action needs to be the high-contrast element, in large type."
   if (id === "social_proof") return "The brief includes a real count, so that count may be used."
   if (id === "authority") return "The brief states a credential, so one credential line is enough."
-  if (id === "personalization") return "The mail can name the neighborhood. It cannot imply health, income, or distress."
+  if (id === "personalization") return "The mail can name the neighborhood the client named."
   if (id === "loss_framing") return "The reader can lose something they already have, so loss framing can be tested against a gain."
   if (id === "foot_in_the_door") return "The first ask is a small step, not the whole job."
   const principle = persuasionPrinciple(id)
   return principle ? principle.postcard : "This principle fits the brief."
 }
 
-function emotionWhy(kind: string): string {
-  if (kind === "roofing") return "Roofing should feel like protection of the home, without a scare."
-  if (kind === "we_buy") return "A house sale should feel like relief, speed, and certainty."
-  if (kind === "medicare") return "Medicare should feel like security and clarity, not fear."
-  if (kind === "food" || kind === "retail") return "Food should feel like appetite and the pride of a smart buy."
-  return "The feeling should match the trade."
+function efficacyFinding(copy: string): PersuasionFinding {
+  const threat = THREAT.test(copy)
+  const action = EASY_ACTION.test(copy)
+  const ok = !threat || action
+  return {
+    id: "efficacy",
+    ok,
+    detail: ok ? "A threat is paired with an easy action, or there is no threat." : "The threat has no call, scan, or free inspection.",
+  }
+}
+
+function testimonialFinding(copy: string, client: string): PersuasionFinding {
+  const quotes = [...copy.matchAll(/[“"]([^”"]{8,})[”"]/g)].map((match) => match[1] ?? "")
+  const missing = quotes.filter((quote) => !client.toLowerCase().includes(quote.toLowerCase()))
+  const marked = /\b(?:testimonial|customer said|homeowner said|five stars)\b/i.test(copy)
+  const supplied = /\b(?:testimonial|said|review)\b/i.test(client)
+  const ok = missing.length === 0 && (!marked || supplied)
+  return {
+    id: "testimonial",
+    ok,
+    detail: ok ? "No unsupplied testimonial." : "The card quotes someone the client did not supply.",
+  }
+}
+
+function falsePersonalFinding(copy: string, client: string): PersuasionFinding {
+  const match = copy.match(UNSUPPLIED_PERSON)
+  const ok = !match || client.toLowerCase().includes(match[0].toLowerCase())
+  return {
+    id: "false_personal",
+    ok,
+    detail: ok ? "No unsupplied fact about this person." : "The card states a personal fact the client did not supply.",
+  }
+}
+
+function fairHousingFinding(copy: string, vertical: string): PersuasionFinding {
+  const housing = vertical === "real_estate" || vertical === "we_buy"
+  const ok = !housing || !FAIR_HOUSING.test(copy)
+  return {
+    id: "fair_housing",
+    ok,
+    detail: ok ? "No steering or discriminatory line." : "The housing line steers or discriminates.",
+  }
 }
 
 function urgencyFinding(copy: string, client: string): PersuasionFinding {
@@ -373,7 +456,6 @@ interface Flags {
   genuineScarcity: boolean
   reserved: boolean
   geography: boolean
-  sensitive: boolean
   question: boolean
   smallStep: boolean
   tiers: boolean

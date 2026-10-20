@@ -45,7 +45,8 @@ export interface PersuasionPrinciple {
   verticals: readonly PersuasionVertical[]
   tones: readonly PersuasionTone[]
   evidence: EvidenceStrength
-  ethics: string
+  /** Legal limit only. Fear, joy, urgency, and relief are all allowed. */
+  compliance: string
 }
 
 const ALL_VERTICALS = PERSUASION_VERTICALS
@@ -61,7 +62,7 @@ export const PERSUASION_PRINCIPLES: readonly PersuasionPrinciple[] = [
     verticals: ALL_VERTICALS,
     tones: LOCAL_TONES,
     evidence: "strong",
-    ethics: "Do not buy attention with a fake official notice or a wall of badges.",
+    compliance: "Do not buy attention with a fake official notice or a wall of badges.",
   },
   {
     id: "reciprocity",
@@ -72,7 +73,7 @@ export const PERSUASION_PRINCIPLES: readonly PersuasionPrinciple[] = [
     verticals: ["roofing", "plumbing", "hvac", "we_buy", "real_estate", "food", "retail", "dental", "pest", "solar", "landscaping", "general"],
     tones: ["friendly", "professional", "calm", "empathetic", "playful", "appetite"],
     evidence: "mixed",
-    ethics: "Medicare does not call a $0 premium free. The gift has to be something the business will actually give.",
+    compliance: "Medicare does not call a $0 premium free. The gift has to be something the business will actually give.",
   },
   {
     id: "social_proof",
@@ -83,7 +84,7 @@ export const PERSUASION_PRINCIPLES: readonly PersuasionPrinciple[] = [
     verticals: ALL_VERTICALS,
     tones: ["friendly", "professional", "calm", "empathetic"],
     evidence: "mixed",
-    ethics: "Never invent a count, a star rating, or a neighborhood statistic.",
+    compliance: "Never invent a count, a star rating, or a neighborhood statistic.",
   },
   {
     id: "authority",
@@ -94,7 +95,7 @@ export const PERSUASION_PRINCIPLES: readonly PersuasionPrinciple[] = [
     verticals: ["roofing", "plumbing", "hvac", "medicare", "dental", "pest", "solar", "general"],
     tones: ["professional", "calm", "empathetic"],
     evidence: "mixed",
-    ethics: "Do not invent a license, a certification, or a years-in-business figure.",
+    compliance: "Do not invent a license, a certification, or a years-in-business figure.",
   },
   {
     id: "scarcity",
@@ -105,7 +106,7 @@ export const PERSUASION_PRINCIPLES: readonly PersuasionPrinciple[] = [
     verticals: ["food", "retail", "dental", "hvac"],
     tones: ["urgent", "playful"],
     evidence: "weak-mixed",
-    ethics: "No fake limits, no 'only a few left,' and no countdown the business did not set.",
+    compliance: "No fake limits, no 'only a few left,' and no countdown the business did not set.",
   },
   {
     id: "loss_framing",
@@ -116,7 +117,7 @@ export const PERSUASION_PRINCIPLES: readonly PersuasionPrinciple[] = [
     verticals: ["medicare", "roofing", "real_estate"],
     tones: ["urgent", "calm", "professional"],
     evidence: "mixed",
-    ethics: "Do not tell someone they can lose a free visit, a gift, or a discount they never had.",
+    compliance: "Do not tell someone they can lose a free visit, a gift, or a discount they never had.",
   },
   {
     id: "commitment",
@@ -127,7 +128,7 @@ export const PERSUASION_PRINCIPLES: readonly PersuasionPrinciple[] = [
     verticals: ["roofing", "plumbing", "hvac", "dental", "pest", "solar", "landscaping"],
     tones: ["friendly", "professional", "calm"],
     evidence: "mixed",
-    ethics: "The question has to be something the reader can know. Do not imply you already know their health, income, or distress.",
+    compliance: "Do not state a health, income, or distress fact the client did not supply.",
   },
   {
     id: "liking",
@@ -138,7 +139,7 @@ export const PERSUASION_PRINCIPLES: readonly PersuasionPrinciple[] = [
     verticals: ALL_VERTICALS,
     tones: ["friendly", "empathetic", "calm", "playful"],
     evidence: "mixed",
-    ethics: "Do not use a stock family or claim family-owned unless the brief says so.",
+    compliance: "Do not use a stock family or claim family-owned unless the brief says so.",
   },
   {
     id: "curiosity_gap",
@@ -149,7 +150,7 @@ export const PERSUASION_PRINCIPLES: readonly PersuasionPrinciple[] = [
     verticals: ALL_VERTICALS,
     tones: ["playful", "friendly", "professional", "appetite"],
     evidence: "mixed",
-    ethics: "Do not hide the price, the sender, or a required Medicare disclaimer.",
+    compliance: "Do not hide the price, the sender, or a required Medicare disclaimer.",
   },
   {
     id: "urgency",
@@ -160,7 +161,7 @@ export const PERSUASION_PRINCIPLES: readonly PersuasionPrinciple[] = [
     verticals: ALL_VERTICALS,
     tones: ["urgent", "professional"],
     evidence: "mixed-test",
-    ethics: "No 'act now,' no invented expiry, and no deadline the business will not honor.",
+    compliance: "No invented expiry, and no deadline the business will not honor.",
   },
   {
     id: "endowed_progress",
@@ -171,7 +172,7 @@ export const PERSUASION_PRINCIPLES: readonly PersuasionPrinciple[] = [
     verticals: ["medicare", "roofing", "solar", "real_estate", "we_buy", "general"],
     tones: ["calm", "professional", "empathetic"],
     evidence: "mixed",
-    ethics: "Do not pretend a form was filed or a credit was applied if it was not.",
+    compliance: "Do not pretend a form was filed or a credit was applied if it was not.",
   },
   {
     id: "choice_architecture",
@@ -182,7 +183,7 @@ export const PERSUASION_PRINCIPLES: readonly PersuasionPrinciple[] = [
     verticals: ["hvac", "medicare", "solar", "dental", "pest", "retail"],
     tones: ["calm", "professional"],
     evidence: "mixed",
-    ethics: "Do not hide a required plan difference, and do not invent a third tier.",
+    compliance: "Do not hide a required plan difference, and do not invent a third tier.",
   },
   {
     id: "contrast",
@@ -193,7 +194,7 @@ export const PERSUASION_PRINCIPLES: readonly PersuasionPrinciple[] = [
     verticals: ["medicare", "roofing", "plumbing", "hvac", "dental", "general"],
     tones: ["calm", "professional", "urgent"],
     evidence: "hypothesis",
-    ethics: "Contrast is not a flashing badge or a government-notice palette.",
+    compliance: "Contrast is not a flashing badge or a government-notice palette.",
   },
   {
     id: "isolation_effect",
@@ -204,7 +205,7 @@ export const PERSUASION_PRINCIPLES: readonly PersuasionPrinciple[] = [
     verticals: ALL_VERTICALS,
     tones: LOCAL_TONES,
     evidence: "strong",
-    ethics: "Never mimic FINAL NOTICE or government styling to make that element stand out.",
+    compliance: "Never mimic FINAL NOTICE or government styling to make that element stand out.",
   },
   {
     id: "specificity",
@@ -215,7 +216,7 @@ export const PERSUASION_PRINCIPLES: readonly PersuasionPrinciple[] = [
     verticals: ["retail", "food", "plumbing", "hvac", "dental", "pest", "landscaping"],
     tones: ["professional", "playful", "appetite", "friendly"],
     evidence: "mixed",
-    ethics: "Do not invent a precise number to sound credible.",
+    compliance: "Do not invent a precise number to sound credible.",
   },
   {
     id: "foot_in_the_door",
@@ -226,7 +227,7 @@ export const PERSUASION_PRINCIPLES: readonly PersuasionPrinciple[] = [
     verticals: ["roofing", "solar", "real_estate", "we_buy", "pest", "general"],
     tones: ["friendly", "professional", "calm"],
     evidence: "mixed",
-    ethics: "The scan has to lead somewhere real. Do not disguise a hard sell as a map.",
+    compliance: "The scan has to lead somewhere real. Do not disguise a hard sell as a map.",
   },
   {
     id: "endowment",
@@ -237,18 +238,18 @@ export const PERSUASION_PRINCIPLES: readonly PersuasionPrinciple[] = [
     verticals: ["we_buy", "retail", "solar", "roofing"],
     tones: ["empathetic", "professional", "calm"],
     evidence: "mixed",
-    ethics: "Do not imply a personal credit, a hardship, or knowledge of this household's finances.",
+    compliance: "Say a credit is reserved only when the client said that reservation is real.",
   },
   {
     id: "personalization",
     name: "Personalization",
     label: "their neighborhood",
-    rule: "Personalize by geography. Never imply knowledge of distress, health, or income.",
-    postcard: "A neighborhood, city, or street the mail drop actually covers. Nothing about this person's private life.",
+    rule: "Personalize by geography when the mail drop is a real place.",
+    postcard: "A neighborhood, city, or street the mailing list actually covers.",
     verticals: ALL_VERTICALS,
     tones: ["friendly", "empathetic", "calm", "professional"],
     evidence: "mixed",
-    ethics: "Geography only. No health, income, foreclosure, or other private-status implication.",
+    compliance: "Do not state a health, income, or legal fact about this household unless the client supplied it.",
   },
   {
     id: "sequence_consistency",
@@ -259,29 +260,29 @@ export const PERSUASION_PRINCIPLES: readonly PersuasionPrinciple[] = [
     verticals: ALL_VERTICALS,
     tones: LOCAL_TONES,
     evidence: "mixed",
-    ethics: "Consistency is not a reason to repeat a false claim.",
+    compliance: "Consistency is not a reason to repeat a false claim.",
   },
   {
     id: "emotion_by_vertical",
     name: "Emotion by vertical",
     label: "the feeling of the trade",
-    rule: "Match the feeling to the trade, without scare tactics.",
-    postcard: "Roofing protects the home. We-buy offers relief, speed, and certainty. Medicare offers security and clarity. Food offers appetite and the pride of a smart buy.",
-    verticals: ["roofing", "we_buy", "medicare", "food", "retail"],
+    rule: "Use the one emotion the client chose. When they leave it open, use the recommendation.",
+    postcard: "One emotion per card. Roofing can be fear of damage, love of family, or trust. We-buy can be relief, optimism, or fear of foreclosure costs. Medicare can be trust, calm, or fear of a coverage gap. A coupon can be joy or anticipation.",
+    verticals: ALL_VERTICALS,
     tones: LOCAL_TONES,
     evidence: "mixed",
-    ethics: "Roofing does not scare. We-buy stays empathetic. Medicare uses no fear. Food does not shame.",
+    compliance: "The emotion cannot invent a fact, a deadline, or a testimonial.",
   },
   {
     id: "sell_the_outcome",
     name: "Sell the outcome",
     label: "sell the outcome",
-    rule: "Sell the outcome, not the feature.",
-    postcard: "Roofing is a safe dry home and peace of mind. We-buy is a fresh start. Medicare is confidence. Food is the moment and the memory.",
+    rule: "Every mailer keeps a sell-the-outcome version, whatever the emotion.",
+    postcard: "Roofing is a safe dry home. We-buy is a fresh start. Medicare is confidence. Food is the moment. That line stays available even when the headline uses another emotion.",
     verticals: ALL_VERTICALS,
     tones: LOCAL_TONES,
     evidence: "mixed",
-    ethics: "The outcome has to be one the business can actually deliver. Do not promise a result the offer does not support.",
+    compliance: "The outcome has to be one the business can actually deliver. Do not promise a result the offer does not support.",
   },
 ]
 

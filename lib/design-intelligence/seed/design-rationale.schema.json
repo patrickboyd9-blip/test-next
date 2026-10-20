@@ -254,7 +254,7 @@
     "persuasion": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["picks", "line"],
+      "required": ["picks", "line", "primaryEmotion", "coreNeed", "awareness", "outcomeGuidance"],
       "properties": {
         "picks": {
           "type": "array",
@@ -270,7 +270,36 @@
             }
           }
         },
-        "line": { "type": "string" }
+        "line": { "type": "string" },
+        "primaryEmotion": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "label", "source"],
+          "properties": {
+            "id": { "type": "string" },
+            "label": { "type": "string" },
+            "source": { "enum": ["client", "recommended"] }
+          }
+        },
+        "coreNeed": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "label"],
+          "properties": {
+            "id": { "type": "string" },
+            "label": { "type": "string" }
+          }
+        },
+        "awareness": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "label"],
+          "properties": {
+            "id": { "type": "string" },
+            "label": { "type": "string" }
+          }
+        },
+        "outcomeGuidance": { "type": "string" }
       }
     }
   },

@@ -17,6 +17,12 @@ import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import type { CampaignBrief, CampaignStatus } from "@/lib/campaign-creator/types"
 import type { MailPieceFormatRecommendationView } from "@/lib/campaign-creator/actions"
+import {
+  AUDIENCE_AWARENESS,
+  emotionsFor,
+  resolveEmotion,
+} from "@/lib/design-intelligence/persuasion-emotions"
+import { clientFactText, persuasionVertical } from "@/lib/design-intelligence/persuasion"
 
 interface BriefSummaryCardProps {
   brief: CampaignBrief
@@ -89,6 +95,108 @@ export function Field({ label, value, onCommit, readOnly, multiline, placeholder
           onBlur={commit}
         />
       )}
+    </div>
+  )
+}
+
+function EmotionPicker({
+  brief,
+  readOnly,
+  onFieldChange,
+}: {
+  brief: CampaignBrief
+  readOnly: boolean
+  onFieldChange: (patch: Partial<CampaignBrief>) => void
+}) {
+  const kind = persuasionVertical(brief)
+  const options = emotionsFor(kind)
+  const recommended = resolveEmotion(kind, clientFactText(brief)).emotion
+  const selected = options.some((emotion) => emotion.id === brief.primaryEmotion) ? brief.primaryEmotion ?? "" : ""
+  const current = options.find((emotion) => emotion.id === selected)
+
+  if (readOnly) {
+    return (
+      <div className="flex flex-col gap-0.5">
+        <span className="text-xs text-muted-foreground">Primary emotion</span>
+        <span className="text-sm">{current?.label ?? `${recommended.label} (recommended)`}</span>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="text-xs text-muted-foreground" htmlFor="primary-emotion">
+        Primary emotion
+      </label>
+      <select
+        id="primary-emotion"
+        className="h-9 rounded-md border bg-transparent px-3 text-sm"
+        value={selected}
+        onChange={(event) => onFieldChange({ primaryEmotion: event.target.value || undefined })}
+      >
+        <option value="">Use the recommendation</option>
+        {options.map((emotion) => (
+          <option key={emotion.id} value={emotion.id}>
+            {emotion.label}
+          </option>
+        ))}
+      </select>
+      <p className="text-xs text-muted-foreground">Recommended: {recommended.label}</p>
+    </div>
+  )
+}
+
+function AwarenessPicker({
+  brief,
+  readOnly,
+  onFieldChange,
+}: {
+  brief: CampaignBrief
+  readOnly: boolean
+  onFieldChange: (patch: Partial<CampaignBrief>) => void
+}) {
+  const selected = brief.audienceAwareness ?? "cold"
+  const current = AUDIENCE_AWARENESS.find((item) => item.id === selected) ?? AUDIENCE_AWARENESS[0]!
+
+  if (readOnly) {
+    return (
+      <div className="flex flex-col gap-0.5">
+        <span className="text-xs text-muted-foreground">Audience awareness</span>
+        <span className="text-sm">{current.label}</span>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="text-xs text-muted-foreground" htmlFor="audience-awareness">
+        Audience awareness
+      </label>
+      <select
+        id="audience-awareness"
+        className="h-9 rounded-md border bg-transparent px-3 text-sm"
+        value={selected}
+        onChange={(event) =>
+          onFieldChange({
+            audienceAwareness: event.target.value as CampaignBrief["audienceAwareness"],
+          })
+        }
+      >
+        {AUDIENCE_AWARENESS.map((item) => (
+          <option key={item.id} value={item.id}>
+            {item.label}
+          </option>
+        ))}
+      </select>
+      <p className="text-xs text-muted-foreground">
+        {current.lead === "offer"
+          ? "Past customers lead with the offer."
+          : current.lead === "solution"
+            ? "Solution-aware readers lead with the kind of fix."
+            : current.lead === "product"
+              ? "Product-aware readers lead with this company."
+              : "Cold lists lead with the problem."}
+      </p>
     </div>
   )
 }
@@ -187,6 +295,8 @@ export function BriefSummaryCard({
             placeholder="How should this feel to the recipient?"
             onCommit={(value) => onFieldChange({ emotionalTone: value })}
           />
+          <EmotionPicker brief={brief} readOnly={readOnly} onFieldChange={onFieldChange} />
+          <AwarenessPicker brief={brief} readOnly={readOnly} onFieldChange={onFieldChange} />
           <Field
             key={`offer:${brief.offer ?? ""}`}
             label="Offer"

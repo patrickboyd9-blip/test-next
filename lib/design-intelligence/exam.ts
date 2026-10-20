@@ -210,6 +210,9 @@ function rowFrom(item: ExamBrief, winner: ScoredCandidate, retrieved: string[], 
         ? `Blueprint: ${winner.blueprint.sourceId} · ${winner.blueprint.tone}. Similarity ${winner.blueprint.similarity.toFixed(2)}.`
         : "",
       winner.rationale.persuasion?.line ?? "",
+      winner.rationale.persuasion
+        ? `Emotion: ${winner.rationale.persuasion.primaryEmotion.label}. Need: ${winner.rationale.persuasion.coreNeed.label}. Outcome version: ${winner.rationale.persuasion.outcomeGuidance}`
+        : "",
     ].filter(Boolean).join(" "),
     image,
     tone: winner.blueprint?.tone ?? item.brief.emotionalTone ?? "",
