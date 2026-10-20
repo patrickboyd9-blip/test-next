@@ -10,6 +10,7 @@ import type { PostcardIdentity } from "@/lib/campaign-creator/studio-contact"
 import { presentStudioPhoto, type StudioImageState } from "@/lib/campaign-creator/studio-photo"
 import type { ConceptFeedbackView } from "@/lib/campaign-creator/actions"
 import type { Campaign, CampaignBrief, CreativeDirection, CreativeSpec } from "@/lib/campaign-creator/types"
+import { persuasionUsesLine } from "@/lib/design-intelligence/persuasion"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
 import { blueprintMatchLine } from "@/lib/design-intelligence/blueprint-tags"
@@ -74,6 +75,7 @@ export function FocusView({
   const reducedMotion = useReducedMotion()
   const [side, setSide] = useState<"front" | "back">("front")
   const caption = buildFocusCaption(direction)
+  const uses = persuasionUsesLine(spec.designRationale)
 
   return (
     <div className="flex flex-col gap-8">
@@ -112,6 +114,7 @@ export function FocusView({
 
       <div className="flex max-w-lg flex-col gap-3">
         <p className="text-sm text-muted-foreground">{direction.rationale}</p>
+        {uses ? <p className="text-sm text-foreground/80">{uses}</p> : null}
         <ResearchBasis research={direction.research} />
         {spec.blueprint ? (
           <p className="text-xs font-medium">Blueprint: {blueprintMatchLine(spec.blueprint)}</p>

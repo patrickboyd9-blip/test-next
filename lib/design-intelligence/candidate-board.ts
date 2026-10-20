@@ -28,6 +28,7 @@ import {
   type TastePick,
   type TasteSignals,
 } from "./taste-retrieval"
+import { applyOutcomeHeadline, clientFactText, selectPersuasion } from "./persuasion"
 import { briefHasNumeralOffer } from "./vertical"
 import { loadTasteCorpus, visionTasteStore, type VisionTaste } from "./vision-taste"
 import { referencePicksForCritique, requestComparativeCritique } from "./vision-critic"
@@ -270,6 +271,29 @@ async function scoreFamily(input: {
       }
     }
   }
+  spec = {
+    ...spec,
+    headline: applyOutcomeHeadline({
+      headline: spec.headline ?? "",
+      offer: spec.offer ?? input.brief.offer ?? "",
+      brief: input.brief,
+      vertical: rationale.vertical,
+    }),
+  }
+  rationale = {
+    ...rationale,
+    persuasion: selectPersuasion({
+      brief: input.brief,
+      vertical: rationale.vertical,
+      blueprint: input.blueprint
+        ? {
+            tone: input.blueprint.tones[0]?.tag,
+            offerType: spec.blueprint?.offerType ?? input.blueprint.offerTypes[0]?.tag,
+            copyPattern: spec.blueprint?.copyPattern ?? input.blueprint.copyPatterns[0]?.tag,
+          }
+        : undefined,
+    }),
+  }
   const card = composeGridCard({
     rationale,
     spec,
@@ -279,7 +303,7 @@ async function scoreFamily(input: {
   const copy = [spec.headline, spec.offer, spec.body, spec.phone, input.brief.businessInfo?.name]
     .filter(Boolean)
     .join(" ")
-  const critique = critiqueCard(card, rationale, copy)
+  const critique = critiqueCard(card, rationale, copy, undefined, clientFactText(input.brief, spec.offer))
   const sampled = gradeComposition({
     card,
     rationale,
@@ -386,7 +410,7 @@ function applyBoard(result: GenerateDirectionsResult, board: BoardResult): Gener
       },
       research: {
         sources,
-        layoutSummary: winner.summary,
+        layoutSummary: [winner.summary, winner.rationale.persuasion?.line].filter(Boolean).join(" "),
         parameters: direction.research?.parameters ?? {
           headlineScale: winner.rationale.scale_ratios.headline_to_body_cap,
           headlinePosition: "on_color_field",

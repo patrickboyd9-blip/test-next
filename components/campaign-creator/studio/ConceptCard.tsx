@@ -15,6 +15,8 @@ import { blueprintMatchLine } from "@/lib/design-intelligence/blueprint-tags"
 
 import { ConceptFeedback } from "./ConceptFeedback"
 import { PostcardPreview, type PostcardPreviewSize } from "./PostcardPreview"
+import { persuasionUsesLine } from "@/lib/design-intelligence/persuasion"
+
 import { ResearchBasis } from "./ResearchBasis"
 import { StudioPhotoNote } from "./StudioPhotoNote"
 
@@ -120,6 +122,9 @@ export function ConceptCard({
             <p className="line-clamp-2 text-xs text-muted-foreground">
               {direction.oneLineDifference ?? direction.rationale}
             </p>
+            {persuasionUsesLine(direction.spec.designRationale) ? (
+              <p className="text-xs text-foreground/80">{persuasionUsesLine(direction.spec.designRationale)}</p>
+            ) : null}
           </>
         )}
       </button>

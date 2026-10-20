@@ -137,7 +137,8 @@ function directorSystem(): string {
   return [
     "You are the art director for a local-service postcard. Return one Design Rationale as JSON.",
     "Use transferable principles only. Never reproduce a reference layout, artwork, logo, phone number, or wording.",
-    "Medicare and insurance stay compliance-calm: no eagle, no official notice, no fake deadline.",
+    "Medicare and insurance stay compliance-calm: no eagle, no official notice, no fake deadline, and never the word free for a $0 premium.",
+    "The headline sells the outcome, not the feature. Record two or three persuasion principles that fit the vertical, the tone, and the offer. Do not invent a count, a deadline, or a scarcity claim.",
     "The front has a phone, a website, and a QR labeled Scan to book.",
     rules.slice(0, 4000),
   ].join("\n\n")

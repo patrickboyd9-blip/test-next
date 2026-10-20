@@ -10,6 +10,7 @@ import {
   validateDesignRationale,
 } from "./rationale"
 import type { ReferenceSelection } from "./select"
+import { selectPersuasion } from "./persuasion"
 import { briefHasNumeralOffer, verticalForBrief } from "./vertical"
 
 /**
@@ -286,6 +287,7 @@ function enforceHouseRules(rationale: DesignRationale, input: ArtDirectorInput):
     next.scale_ratios.offer_to_headline_cap = 1.7
   }
   if (next.scale_ratios.headline_to_body_cap < 2.5) next.scale_ratios.headline_to_body_cap = 2.8
+  next.persuasion = selectPersuasion({ brief: input.brief, vertical: next.vertical })
   if (next.offer_treatment.expiry.trim().length === 0) next.offer_treatment.expiry = "none"
   if (/respond within|hours only|act now|final notice/i.test(next.offer_treatment.expiry)) {
     next.offer_treatment.expiry = "none"

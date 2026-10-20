@@ -982,12 +982,16 @@ function scaffoldFor(vertical: DesignVertical): PostcardTemplateId {
 }
 
 function spokenCopy(input: GridComposeInput): { headline: string; numeral: string; rest: string } {
-  return resolveFrontCopy({
+  const spoken = resolveFrontCopy({
     headline: clean(input.spec.headline) || "One clear next step",
     offer: clean(input.spec.offer) || clean(input.spec.callToAction) || "Call today",
     moment: input.rationale.audience_moment,
     vertical: input.rationale.vertical,
   })
+  if (input.rationale.vertical === "medicare_insurance" && spoken.numeral === "FREE") {
+    return { headline: spoken.headline, numeral: spoken.rest || "A local review", rest: "" }
+  }
+  return spoken
 }
 
 function trustLine(input: GridComposeInput): string {

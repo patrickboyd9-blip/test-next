@@ -204,9 +204,13 @@ function rowFrom(item: ExamBrief, winner: ScoredCandidate, retrieved: string[], 
     family: winner.familyId,
     cleared: winner.grade.cleared,
     retrieved,
-    explanation: winner.blueprint
-      ? `${winner.grade.explanation} Blueprint: ${winner.blueprint.sourceId} · ${winner.blueprint.tone}. Similarity ${winner.blueprint.similarity.toFixed(2)}.`
-      : winner.grade.explanation,
+    explanation: [
+      winner.grade.explanation,
+      winner.blueprint
+        ? `Blueprint: ${winner.blueprint.sourceId} · ${winner.blueprint.tone}. Similarity ${winner.blueprint.similarity.toFixed(2)}.`
+        : "",
+      winner.rationale.persuasion?.line ?? "",
+    ].filter(Boolean).join(" "),
     image,
     tone: winner.blueprint?.tone ?? item.brief.emotionalTone ?? "",
     blueprint: winner.blueprint?.sourceId ?? null,

@@ -106,6 +106,14 @@ export interface DesignRationale {
   }
   principles_invoked: string[]
   /**
+   * Two or three persuasion principles for this campaign, in plain language.
+   * Absent on older rationales written before the psychology layer.
+   */
+  persuasion?: {
+    picks: Array<{ id: string; why: string }>
+    line: string
+  }
+  /**
    * Where type sits on a full-bleed photograph.
    * Measured from the real photo. Absent until a photograph has been read.
    */
@@ -280,6 +288,24 @@ export function validateDesignRationale(
 
   if (!Array.isArray(raw.principles_invoked) || raw.principles_invoked.length < 3 || raw.principles_invoked.some((item) => typeof item !== "string")) {
     errors.push("principles_invoked needs at least three ids.")
+  }
+  if (raw.persuasion !== undefined) {
+    const persuasion = record(raw.persuasion)
+    const picks = Array.isArray(persuasion?.picks) ? persuasion.picks : null
+    const line = persuasion?.line
+    const picksOk = Boolean(
+      picks &&
+      picks.length >= 2 &&
+      picks.length <= 3 &&
+      picks.every((pick) => {
+        if (!pick || typeof pick !== "object") return false
+        const row = pick as { id?: unknown; why?: unknown }
+        return typeof row.id === "string" && row.id.trim().length > 0 && typeof row.why === "string" && row.why.trim().length > 0
+      })
+    )
+    if (!picksOk || typeof line !== "string" || !line.startsWith("Uses:")) {
+      errors.push("persuasion needs two or three principles and a Uses line.")
+    }
   }
 
   if (errors.length > 0) return { ok: false, errors }

@@ -9,6 +9,7 @@ import { buildPostcard6x9PrintSpec } from "@/lib/print-spec/postcard-6x9-print-s
 
 import { measureBackdropContrast, type ContrastPhoto } from "./backdrop"
 import { normalizedPanel, textInsideSafe, textIsClipped, type GridCard } from "./grid-composer"
+import { checkPersuasion } from "./persuasion"
 import type { DesignRationale, GridName } from "./rationale"
 
 /**
@@ -45,7 +46,8 @@ export function critiqueCard(
   card: GridCard,
   rationale: DesignRationale,
   copy: string,
-  photo?: ContrastPhoto | null
+  photo?: ContrastPhoto | null,
+  clientText = ""
 ): Critique {
   const autoFails: string[] = []
   const size = rationale.format.trim
@@ -77,6 +79,20 @@ export function critiqueCard(
   if (backViolatesKeepOut(card)) autoFails.push("AF10")
   if (GOVERNMENT.test(copy) || (rationale.vertical === "medicare_insurance" && rationale.palette.emotion !== "compliance_calm")) {
     autoFails.push("AF8")
+  }
+  const standouts = card.front.shapes.filter((shape) =>
+    shape.role === "offer-tile" || shape.role === "coupon" || shape.role === "badge" || shape.role === "starburst"
+  ).length
+  for (const finding of checkPersuasion({
+    headline: headline?.text ?? "",
+    copy,
+    clientText,
+    vertical: rationale.vertical,
+    standoutCount: standouts,
+  })) {
+    if (finding.ok || finding.id === "government") continue
+    const code = PERSUASION_CODES[finding.id]
+    if (code) autoFails.push(code)
   }
   if (rationale.vertical === "medicare_insurance" && /\$\s?\d/.test(copy) && rationale.offer_treatment.kind !== "numeral_hero") {
     // A stated price the brief owns is allowed. The costume is the failure, not a number the customer wrote.
@@ -189,7 +205,23 @@ function editFor(rule: string | null, rationale: DesignRationale): string {
   if (rule === "AF7" || rule === "V12") return "Group the phone, the website, and a labeled code in one lockup."
   if (rule === "similarity") return "Move the panel so the card does not repeat a reference mailer's arrangement."
   if (rule === "V13" || rule === "V8") return "Drop the official-notice cues and keep one calm accent."
+  if (rule === "PS1" || rule === "PS5") return "Rewrite the headline so it sells the outcome, with no fear tactic."
+  if (rule === "PS3" || rule === "PS7") return "Remove the fake deadline or the fake limit."
+  if (rule === "PS4" || rule === "PS6") return "Remove any number the client did not supply."
+  if (rule === "PS8" || rule === "PS9") return "Drop the word free, and drop any hint of health, income, or distress."
   return "Give the card one panel, one offer, and one response."
+}
+
+const PERSUASION_CODES: Record<string, string> = {
+  benefit: "PS1",
+  standout: "PS2",
+  urgency: "PS3",
+  invented: "PS4",
+  fear: "PS5",
+  placeholder: "PS6",
+  scarcity: "PS7",
+  medicare_free: "PS8",
+  implied: "PS9",
 }
 
 function hierarchyScore(

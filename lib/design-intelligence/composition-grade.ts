@@ -315,6 +315,7 @@ export function visionGradeAnchor(env: NodeJS.ProcessEnv = process.env): string 
     calibrationSentence(env),
     "Type on a photograph sits on a calm patch of sky or wall. It does not sit on a face, a person, or a ladder. Small type under 14pt needs 7:1. A stock portrait, or a cluttered background behind the type, is a weakness.",
     "Contrast below 4.5:1, or below 7:1 for type under 14pt, or type that overflows, is a hard fail regardless of the composition.",
+    "Persuasion: the benefit has to be clear at a glance, exactly one element stands out, urgency has to be a real date, and a count or a claim has to come from the client. No fear tactics, no fake scarcity, no placeholder numbers. Medicare never says free for a $0 premium and never looks like the government.",
   ].join(" ")
 }
 

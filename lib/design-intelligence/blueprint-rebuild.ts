@@ -9,6 +9,7 @@ import {
 } from "./blueprint"
 import { editFilledCopy, type CopyEditor } from "./blueprint-copy-edit"
 import { freshCopy, offerTypeFromText, patternsToTry, templateFor } from "./blueprint-tags"
+import { applyOutcomeHeadline, selectPersuasion } from "./persuasion"
 import { guardRebuild } from "./blueprint-guard"
 import { validateDesignRationale, type DesignRationale, type GridName } from "./rationale"
 
@@ -60,6 +61,12 @@ export async function rebuildFromBlueprint(input: {
     edit: input.edit,
   })
   const copyPattern = written.pattern
+  const headline = applyOutcomeHeadline({
+    headline: written.headline,
+    offer,
+    brief: input.brief,
+    vertical: input.rationale.vertical,
+  })
   const guarded = guardRebuild({
     sourceId: input.blueprint.sourceId,
     boxes: input.blueprint.boxes,
@@ -69,7 +76,7 @@ export async function rebuildFromBlueprint(input: {
     accent: mapped.accent,
     spec: {
       ...input.spec,
-      headline: written.headline,
+      headline,
       subheadline: written.subheadline,
     },
   })
@@ -117,6 +124,11 @@ export async function rebuildFromBlueprint(input: {
       placement: input.blueprint.front,
     },
     principles_invoked: ["P1", "P4", "P7", input.blueprint.sourceId].slice(0, 8),
+    persuasion: selectPersuasion({
+      brief: input.brief,
+      vertical: input.rationale.vertical,
+      blueprint: { tone, offerType, copyPattern },
+    }),
   }
   const checked = validateDesignRationale(proposed)
   if (!checked.ok) return null
