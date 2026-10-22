@@ -26,6 +26,8 @@ import type { PrintMailMode } from "@/lib/click2mail/mode"
 import { parseRecipientCsv, normalizeRecipient } from "@/lib/click2mail/recipients"
 import type { Campaign } from "@/lib/campaign-creator/types"
 
+import { EddmPrintMailStage } from "./EddmPrintMailStage"
+
 interface PrintMailTestStageProps {
   campaign: Campaign
   mode: PrintMailMode
@@ -43,6 +45,13 @@ const EMPTY_SELF = {
 }
 
 export function PrintMailTestStage({ campaign, mode, onCampaign }: PrintMailTestStageProps) {
+  if (campaign.brief.audience?.delivery === "eddm") {
+    return <EddmPrintMailStage campaign={campaign} mode={mode} onCampaign={onCampaign} />
+  }
+  return <AddressedPrintMailStage campaign={campaign} mode={mode} onCampaign={onCampaign} />
+}
+
+function AddressedPrintMailStage({ campaign, mode, onCampaign }: PrintMailTestStageProps) {
   const [source, setSource] = useState<"self" | "csv">("self")
   const [selfAddress, setSelfAddress] = useState(EMPTY_SELF)
   const [csvText, setCsvText] = useState("")

@@ -22,6 +22,10 @@ interface MailerInput {
   imagery: ImageryKey
   leadJob: LeadJob
   imageryRole: ImageryRole
+  size?: MailTemplate["size"]
+  backLayout?: CreativeSpec["backLayout"]
+  templateId?: NonNullable<CreativeSpec["layoutHints"]>["templateId"]
+  verticalPalette?: NonNullable<CreativeSpec["layoutHints"]>["verticalPalette"]
 }
 
 function mailer(input: MailerInput): MailTemplate {
@@ -41,7 +45,11 @@ function mailer(input: MailerInput): MailTemplate {
     imagery: input.imagery,
     leadJob: input.leadJob,
     imageryRole: input.imageryRole,
-    backLayout: "standard_address",
+    backLayout: input.backLayout ?? "standard_address",
+    layoutHints:
+      input.templateId || input.verticalPalette
+        ? { templateId: input.templateId, verticalPalette: input.verticalPalette }
+        : undefined,
   }
   return {
     id: input.id,
@@ -49,7 +57,7 @@ function mailer(input: MailerInput): MailTemplate {
     name: input.name,
     summary: input.summary,
     sampleBusinessName: input.business,
-    size: "5x8",
+    size: input.size ?? "5x8",
     spec,
   }
 }
@@ -562,5 +570,55 @@ export const MAIL_TEMPLATES: readonly MailTemplate[] = [
     imagery: "none",
     leadJob: "offer",
     imageryRole: "none",
+  }),
+  mailer({
+    id: "restaurant-every-door",
+    industry: "restaurant",
+    name: "Neighborhood coupon",
+    summary: "A coupon for every home on the routes you choose. No names.",
+    business: "Corner Oven",
+    headline: "A Treat For Neighbors",
+    subheadline: "Bring this card to the counter.",
+    body: "Every home on this route can use the coupon. Ask for the side when you order.",
+    callToAction: "Bring this card in",
+    offer: "Free side with any meal",
+    phone: "(512) 555-0144",
+    website: "https://corneroven.example/coupon",
+    layout: "banded_split",
+    tone: "Warm",
+    palette: ["#7a2e1b", "#f3d2a4", "#fff8f0"],
+    visual: "A neighborhood pizza on a wooden counter, evening window light, no logos and no text.",
+    imagery: "stock_restaurant",
+    leadJob: "offer",
+    imageryRole: "neighborhood",
+    size: "6.5x9",
+    backLayout: "eddm_postal_customer",
+    templateId: "deadline_coupon",
+    verticalPalette: "general",
+  }),
+  mailer({
+    id: "roofing-every-door",
+    industry: "roofing",
+    name: "Neighborhood inspection",
+    summary: "A roof check offered to every home on the route, not to a named list.",
+    business: "Harbor Roofing",
+    headline: "Free Roof Check Nearby",
+    subheadline: "We look at the shingles on this block.",
+    body: "Homeowners on this route can book a look before the next storm. No name on the card.",
+    callToAction: "Book a roof check",
+    offer: "Free roof inspection",
+    phone: "(619) 555-0148",
+    website: "https://harborroofing.com/inspect",
+    layout: "image_grounded",
+    tone: "Clear",
+    palette: ["#1e3a5f", "#8aa4b5", "#f6f1e7"],
+    visual: "Rooflines along a quiet residential street after rain, no logos and no text.",
+    imagery: "stock_generic_local",
+    leadJob: "offer",
+    imageryRole: "neighborhood",
+    size: "6.25x11",
+    backLayout: "eddm_postal_customer",
+    templateId: "storm_alert",
+    verticalPalette: "roofing",
   }),
 ]

@@ -2,6 +2,8 @@ import { randomUUID } from "crypto"
 
 import { isAtOrPastStatus } from "@/lib/campaign-creator/campaign-status"
 import { assignDefaultMailPieceSpec } from "@/lib/campaign-creator/mail-piece"
+import type { MailPieceCatalogId } from "@/lib/mail-catalog/types"
+import { isEddmSize } from "@/lib/eddm/geometry"
 import { cloneSpec } from "@/lib/campaign-creator/spec-diff"
 import type {
   Campaign,
@@ -13,10 +15,16 @@ import type { MailTemplate } from "./types"
 import { TEMPLATE_INDUSTRY_LABELS } from "./types"
 
 /**
- * Loads a catalog mailer into the existing Studio path.
- * Writes the 5×8 mail piece the printer already uses. Does not edit that
- * geometry, and does not touch the 6×9 print spec.
+ * Loads a catalog mailer into Studio.
+ * A 5×8 template keeps the addressed postcard. An Every Door template
+ * selects the 6.5×9 or 6.25×11 catalog piece.
  */
+function catalogIdForTemplate(template: MailTemplate): MailPieceCatalogId {
+  if (template.size === "6.5x9") return "postcard_6_5x9"
+  if (template.size === "6.25x11") return "postcard_6_25x11"
+  return "postcard_5x8"
+}
+
 export function applyTemplateStart(
   campaign: Campaign,
   template: MailTemplate,
@@ -77,7 +85,25 @@ export function applyTemplateStart(
       website: spec.website,
     },
   }
-  assignDefaultMailPieceSpec(campaign, now)
+  assignDefaultMailPieceSpec(campaign, now, catalogIdForTemplate(template))
+  if (isEddmSize(template.size)) {
+    campaign.brief = {
+      ...campaign.brief,
+      audience: {
+        description: "Every door in this area",
+        delivery: "eddm",
+        eddm: {
+          query: "",
+          zip: "",
+          coverage: "residential",
+          size: template.size,
+          filters: {},
+          selectedRouteIds: [],
+          routes: [],
+        },
+      },
+    }
+  }
   campaign.creative = {
     directions: [direction],
     recommendation: {

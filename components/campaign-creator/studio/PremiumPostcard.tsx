@@ -10,7 +10,7 @@ import {
   type PostcardFacePlan,
   type ShapePlan,
 } from "@/lib/postcard-layouts/compose"
-import type { PostcardTemplateId, VerticalPaletteId } from "@/lib/postcard-layouts/ids"
+import type { LayoutSizeId, PostcardTemplateId, VerticalPaletteId } from "@/lib/postcard-layouts/ids"
 import { isVerticalPalette } from "@/lib/postcard-layouts/ids"
 import { trimInches } from "@/lib/postcard-layouts/templates"
 import type { InchRect } from "@/lib/postcard-layouts/typefit"
@@ -26,6 +26,8 @@ const DISPLAY_CSS = {
 } as const
 
 const TEXT_CSS = 'var(--font-studio-family), "Helvetica Neue", Helvetica, Arial, sans-serif'
+
+type FacePlan = PostcardFacePlan<LayoutSizeId>
 
 export function PremiumPostcardFront({
   templateId,
@@ -50,7 +52,7 @@ export function PremiumPostcardFront({
   businessName?: string
   paletteId?: VerticalPaletteId
   compact?: boolean
-  plan?: PostcardFacePlan
+  plan?: FacePlan
 }) {
   const plan = prepared ?? composePostcardFace({
     templateId,
@@ -137,7 +139,7 @@ function FaceFrame({
   compact,
   children,
 }: {
-  plan: PostcardFacePlan
+  plan: FacePlan
   compact: boolean
   children: ReactNode
 }) {
@@ -165,7 +167,7 @@ function FaceFrame({
   )
 }
 
-function Shapes({ plan, layer }: { plan: PostcardFacePlan; layer: "back" | "mid" | "front" }) {
+function Shapes({ plan, layer }: { plan: FacePlan; layer: "back" | "mid" | "front" }) {
   const shapes = plan.shapes.filter((shape) => shapeLayer(shape.role) === layer)
   return (
     <>
@@ -180,7 +182,7 @@ function shapeLayer(role: string): "back" | "mid" | "front" {
   return studioShapeLayer(role)
 }
 
-function Shape({ plan, shape }: { plan: PostcardFacePlan; shape: ShapePlan }) {
+function Shape({ plan, shape }: { plan: FacePlan; shape: ShapePlan }) {
   const style = box(shape.rect, plan.size)
   if (shape.role === "scrim") {
     return (
@@ -251,7 +253,7 @@ function PhotoSlot({
   treatment,
 }: {
   rect: InchRect
-  size: PostcardFacePlan["size"]
+  size: LayoutSizeId
   src: string | null
   alt: string
   paper: string
@@ -280,7 +282,7 @@ function PhotoSlot({
   )
 }
 
-function Fitted({ plan, text }: { plan: PostcardFacePlan; text: PostcardFacePlan["texts"][number] }) {
+function Fitted({ plan, text }: { plan: FacePlan; text: FacePlan["texts"][number] }) {
   if (text.lines.length === 0) return null
   const family = text.font === "display" ? DISPLAY_CSS[plan.pairing] : TEXT_CSS
   return (
@@ -313,7 +315,7 @@ function Fitted({ plan, text }: { plan: PostcardFacePlan; text: PostcardFacePlan
   )
 }
 
-function Lockup({ plan, payload }: { plan: PostcardFacePlan; payload: string | null }) {
+function Lockup({ plan, payload }: { plan: FacePlan; payload: string | null }) {
   const lockup = plan.lockup
   if (!lockup) return null
   return (
@@ -362,7 +364,7 @@ function Lockup({ plan, payload }: { plan: PostcardFacePlan; payload: string | n
   )
 }
 
-function TrustChips({ plan }: { plan: PostcardFacePlan }) {
+function TrustChips({ plan }: { plan: FacePlan }) {
   if (plan.trust.length === 0) return null
   return (
     <>
@@ -395,7 +397,7 @@ function QrMark({
   payload: string
   label: string
   labelPt: number
-  size: PostcardFacePlan["size"]
+  size: LayoutSizeId
 }) {
   const painted = useMemo(() => paintQr(payload), [payload])
   if (!painted) return null
@@ -419,7 +421,7 @@ function QrMark({
   )
 }
 
-function box(rect: InchRect, size: PostcardFacePlan["size"]): CSSProperties {
+function box(rect: InchRect, size: LayoutSizeId): CSSProperties {
   const trim = trimInches(size)
   return {
     position: "absolute",
@@ -430,7 +432,7 @@ function box(rect: InchRect, size: PostcardFacePlan["size"]): CSSProperties {
   }
 }
 
-function pointsToCqw(points: number, size: PostcardFacePlan["size"]): string {
+function pointsToCqw(points: number, size: LayoutSizeId): string {
   const trim = trimInches(size)
   return `${((points / 72) * (100 / trim.w)).toFixed(3)}cqw`
 }

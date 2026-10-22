@@ -13,6 +13,8 @@ import type {
   Click2MailClient,
   CreditPurchaseResult,
   DocumentCreated,
+  EddmMailerInfo,
+  EddmPostOfficeSubmission,
   JobDraft,
   JobSnapshot,
   ProofSnapshot,
@@ -348,6 +350,63 @@ export function createClick2MailClient(options: {
       return toJob(result, response, secrets, lifecycle ?? "")
     },
 
+    async getEddm(jobId) {
+      return readJob(await send({ method: "GET", path: `/jobs/${encodeURIComponent(jobId)}/eddm` }), secrets, jobId)
+    },
+
+    async setEddmInfo(jobId, info) {
+      return readJob(
+        await send({
+          method: "POST",
+          path: `/jobs/${encodeURIComponent(jobId)}/eddmInfo`,
+          form: eddmInfoForm(info),
+        }),
+        secrets,
+        jobId
+      )
+    },
+
+    async setEddmRoute(jobId, route) {
+      return readJob(
+        await send({
+          method: "POST",
+          path: `/jobs/${encodeURIComponent(jobId)}/eddmRoute`,
+          form: {
+            poName: route.poName,
+            route: route.route,
+            postalCode: route.postalCode,
+            totalPieces: String(route.totalPieces),
+          },
+        }),
+        secrets,
+        jobId
+      )
+    },
+
+    async setEddmPostOffice(jobId, office) {
+      return readJob(
+        await send({
+          method: "POST",
+          path: `/jobs/${encodeURIComponent(jobId)}/eddmPo`,
+          form: eddmPoForm(office),
+        }),
+        secrets,
+        jobId
+      )
+    },
+
+    async updateEddmJob(jobId, input) {
+      return readJob(
+        await send({
+          method: "POST",
+          path: `/jobs/${encodeURIComponent(jobId)}/update`,
+          form: { crid: input.crid, quantity: String(input.quantity) },
+        }),
+        secrets,
+        jobId
+      )
+    },
+
     async getTracking(jobId, trackingType = "IMB") {
       const response = await send({
         method: "GET",
@@ -459,6 +518,41 @@ function purchaseForm(input: PurchaseCreditInput): Record<string, string> {
   }
 }
 
+function readJob(
+  response: Click2MailHttpResponse,
+  secrets: readonly string[],
+  fallbackId: string
+): JobSnapshot {
+  const result = readResult(parseBody(response, secrets))
+  if (response.status < 200 || response.status >= 300 || (result.status !== null && result.status !== 0)) {
+    throw fail(response, result, secrets)
+  }
+  return toJob({ ...result, id: result.id ?? fallbackId }, response, secrets, result.jobStatus || "")
+}
+
+function eddmInfoForm(info: EddmMailerInfo): Record<string, string> {
+  const form: Record<string, string> = {
+    name: info.name,
+    address: info.address,
+    city: info.city,
+    state: info.state,
+    zip: info.zip,
+  }
+  if (info.organization?.trim()) form.organization = info.organization.trim()
+  if (info.phone?.trim()) form.phone = info.phone.trim()
+  return form
+}
+
+function eddmPoForm(office: EddmPostOfficeSubmission): Record<string, string> {
+  const form: Record<string, string> = {
+    name: office.name,
+    address: office.address,
+    totalPieces: String(office.totalPieces),
+  }
+  if (office.hours?.trim()) form.hours = office.hours.trim()
+  return form
+}
+
 function assertPurchase(input: PurchaseCreditInput): void {
   const amount = Number(input.billingAmount)
   if (!Number.isFinite(amount) || amount < 10) {
@@ -478,9 +572,9 @@ function jobForm(input: JobDraft): Record<string, string> {
     printOption: product.printOption,
     mailClass: product.mailClass,
     documentId: input.documentId,
-    addressId: input.addressId,
     appSignature: "Modern Mail",
   }
+  if (input.addressId) form.addressId = input.addressId
   // Quantity is only for products that do not use an address list.
   // Sending it on a postcard job can price the piece as something other than a postcard.
   if (input.quantity !== undefined && !input.addressId) form.quantity = String(input.quantity)

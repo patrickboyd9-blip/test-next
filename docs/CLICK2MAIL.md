@@ -153,3 +153,5 @@ A job left without `--submit` sits in editing. Editing has not been paid.
 - It does not turn the file into CMYK
 - It does not mail from production unless the environment and the flag are both set
 - Staging will not return Intelligent Mail tracking
+
+Every Door Direct Mail is a separate path. The screen can choose routes and estimate postage. The Click2Mail EDDM calls stay off until `C2M_EDDM_SUBMIT=true` on staging. See `docs/EDDM.md`.

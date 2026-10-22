@@ -95,6 +95,7 @@ export function CampaignCreatorView({
   const [recoveryFromFailedConfirm, setRecoveryFromFailedConfirm] = useState(false)
   const [formatRecommendation, setFormatRecommendation] =
     useState<MailPieceFormatRecommendationView | null>(null)
+  const [stageError, setStageError] = useState<string | null>(null)
 
   async function handleSend() {
     const text = composerValue.trim()
@@ -135,6 +136,7 @@ export function CampaignCreatorView({
     }
 
     setIsConfirmingAudience(true)
+    setStageError(null)
     try {
       const updated = await confirmCampaignAudience(campaign.id)
       setCampaign(updated)
@@ -146,7 +148,7 @@ export function CampaignCreatorView({
         setRecoveryFromFailedConfirm(true)
         return
       }
-      throw error
+      setStageError(error instanceof Error ? error.message : "The audience could not be confirmed.")
     } finally {
       setIsConfirmingAudience(false)
     }
@@ -158,6 +160,7 @@ export function CampaignCreatorView({
     }
 
     setIsConfirmingQuantity(true)
+    setStageError(null)
     try {
       const updated = await confirmCampaignQuantity(campaign.id)
       setCampaign(updated)
@@ -169,7 +172,7 @@ export function CampaignCreatorView({
         setRecoveryFromFailedConfirm(true)
         return
       }
-      throw error
+      setStageError(error instanceof Error ? error.message : "The quantity could not be confirmed.")
     } finally {
       setIsConfirmingQuantity(false)
     }
@@ -403,15 +406,31 @@ export function CampaignCreatorView({
       )}
 
       {showAudience && (
-        <AudienceStage
-          audience={campaign.brief.audience}
-          status={campaign.status}
-          fromConversation={campaign.entry !== "upload" && campaign.entry !== "template"}
-          onFieldChange={handleFieldChange}
-          onConfirm={handleConfirmAudience}
-          isConfirming={isConfirmingAudience}
-          hideConfirm={showMailPieceRecovery}
-        />
+        <>
+          <AudienceStage
+            audience={campaign.brief.audience}
+            briefText={[
+              campaign.brief.goal,
+              campaign.brief.offer,
+              campaign.brief.audience?.description,
+              campaign.brief.audience?.eddm?.neighborhood,
+              campaign.brief.otherRequirements,
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            status={campaign.status}
+            fromConversation={campaign.entry !== "upload" && campaign.entry !== "template"}
+            onFieldChange={handleFieldChange}
+            onConfirm={handleConfirmAudience}
+            isConfirming={isConfirmingAudience}
+            hideConfirm={showMailPieceRecovery}
+          />
+          {stageError && (
+            <p className="mt-3 text-sm text-destructive" role="alert">
+              {stageError}
+            </p>
+          )}
+        </>
       )}
 
       {showQuantityTracking && (

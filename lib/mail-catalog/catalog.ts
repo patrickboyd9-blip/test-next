@@ -1,4 +1,6 @@
 import { POSTCARD_5X8_V1 } from "./pieces/postcard-5x8"
+import { POSTCARD_6_25X11_V1 } from "./pieces/postcard-6-25x11"
+import { POSTCARD_6_5X9_V1 } from "./pieces/postcard-6-5x9"
 import type {
   MailPieceCatalogEntry,
   MailPieceCatalogId,
@@ -16,6 +18,12 @@ export const MAIL_PIECE_CATALOG: {
 } = {
   postcard_5x8: {
     1: POSTCARD_5X8_V1,
+  },
+  postcard_6_5x9: {
+    1: POSTCARD_6_5X9_V1,
+  },
+  postcard_6_25x11: {
+    1: POSTCARD_6_25X11_V1,
   },
 }
 

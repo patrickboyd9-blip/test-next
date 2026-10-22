@@ -16,7 +16,9 @@ import { getMailTemplate } from "@/lib/mail-templates/query"
 import {
   applyCreativeApproval,
   applyCreativeUnapproval,
+  applyEddmCatalog,
   applyStrategyConfirmation,
+  assertEddmAudience,
 } from "./mail-piece"
 import { applyAiGenerationStart, applyAiStart } from "./start-path"
 import { cloneSpec } from "./spec-diff"
@@ -44,6 +46,11 @@ function requireCurrentMailPiece(campaign: Campaign): void {
 /** Write precondition for confirmAudience. Does not create or repair a MailPiece. */
 export function applyAudienceConfirmation(campaign: Campaign, now: string): void {
   requireCurrentMailPiece(campaign)
+  assertEddmAudience(campaign)
+  const eddm = campaign.brief.audience?.eddm
+  if (campaign.brief.audience?.delivery === "eddm" && eddm) {
+    applyEddmCatalog(campaign, eddm.size, now)
+  }
   campaign.status = "audience_confirmed"
   campaign.updatedAt = now
 }
@@ -51,6 +58,7 @@ export function applyAudienceConfirmation(campaign: Campaign, now: string): void
 /** Write precondition for confirmQuantity. Does not create or repair a MailPiece. */
 export function applyQuantityConfirmation(campaign: Campaign, now: string): void {
   requireCurrentMailPiece(campaign)
+  assertEddmAudience(campaign)
   campaign.status = "quantity_confirmed"
   campaign.updatedAt = now
 }

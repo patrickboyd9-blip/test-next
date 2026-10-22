@@ -39,6 +39,8 @@ interface PostcardPreviewProps {
   highlightRegions?: string[]
   isShimmering?: boolean
   ariaLabel?: string
+  /** Overrides the 5×8 studio frame when a gallery card is an EDDM flat. */
+  viewingAspectClass?: string
   /** Cached or just-resolved photograph. Not a CreativeSpec field. */
   generatedAsset?: GeneratedAsset | null
   /** Second photograph for a before/after card. */
@@ -79,6 +81,7 @@ export function PostcardPreview({
   highlightRegions = [],
   isShimmering = false,
   ariaLabel,
+  viewingAspectClass,
   generatedAsset,
   alternateGeneratedAsset,
   identity,
@@ -181,7 +184,7 @@ export function PostcardPreview({
       <motion.div
         className={cn(
           "@container relative overflow-hidden rounded-lg shadow-lg sm:shadow-lg",
-          STUDIO_VIEWING_ASPECT_CLASS,
+          viewingAspectClass ?? STUDIO_VIEWING_ASPECT_CLASS,
           SIZE_CLASSES[size],
           size === "thumbnail" && "shadow-md",
           className

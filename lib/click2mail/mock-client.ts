@@ -64,6 +64,26 @@ export function createMockClick2MailClient(options?: {
       calls.push(`getTracking:${jobId}`)
       return { id: jobId, status: 0, description: "Success", pieces: [] }
     },
+    async getEddm(jobId) {
+      calls.push(`getEddm:${jobId}`)
+      return { id: jobId, status: 0, description: "Success", jobStatus: "EDITING" }
+    },
+    async setEddmInfo(jobId) {
+      calls.push(`setEddmInfo:${jobId}`)
+      return { id: jobId, status: 0, description: "Success", jobStatus: "EDITING" }
+    },
+    async setEddmRoute(jobId, route) {
+      calls.push(`setEddmRoute:${jobId}:${route.route}`)
+      return { id: jobId, status: 0, description: "Success", jobStatus: "EDITING" }
+    },
+    async setEddmPostOffice(jobId, office) {
+      calls.push(`setEddmPostOffice:${jobId}:${office.name}`)
+      return { id: jobId, status: 0, description: "Success", jobStatus: "EDITING" }
+    },
+    async updateEddmJob(jobId, input) {
+      calls.push(`updateEddmJob:${jobId}:${input.crid}:${input.quantity}`)
+      return { id: jobId, status: 0, description: "Success", jobStatus: "EDITING" }
+    },
   }
 
   return client

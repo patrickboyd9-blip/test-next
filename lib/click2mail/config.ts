@@ -113,11 +113,19 @@ export function assertClick2MailCallable(config: Click2MailConfig): void {
 
 export function describePrintMailMode(env: NodeJS.ProcessEnv = process.env): PrintMailMode {
   const config = loadClick2MailConfig(env)
+  const accountConfigured = Boolean(env.C2M_EDDM_CRID?.trim())
+  const submitRequested = env.C2M_EDDM_SUBMIT?.trim() === "true"
   return {
     environment: config.environment,
     productionEnabled: config.environment === "prod" && config.allowProduction,
     credentialsConfigured: Boolean(config.username && config.password),
     postage: loadPostcardPostage(env),
+    eddmSubmitEnabled:
+      config.environment === "stage" &&
+      submitRequested &&
+      Boolean(config.username && config.password) &&
+      accountConfigured,
+    eddmAccountConfigured: accountConfigured,
   }
 }
 

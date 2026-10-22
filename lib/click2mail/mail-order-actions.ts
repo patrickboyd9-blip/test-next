@@ -12,8 +12,11 @@ import { renderPostcardPrintPdf } from "@/lib/print-spec/render-campaign-postcar
 import { renderTemplatedPostcardPdf } from "@/lib/print-spec/render-template-postcard-pdf"
 import { isPostcardTemplate, isVerticalPalette } from "@/lib/postcard-layouts/ids"
 
-import { assertClick2MailCallable, loadClick2MailConfig } from "./config"
+import { assertClick2MailCallable, describePrintMailMode, loadClick2MailConfig } from "./config"
 import { createClick2MailClient } from "./client"
+import { placeEddmOrder } from "./eddm-order"
+import { isEddmSize } from "@/lib/eddm/geometry"
+import { eddmAudienceIssue } from "@/lib/eddm/validate"
 import { loadFinalPostcardPhoto } from "./load-print-photo"
 import { placeClick2MailOrder, refreshClick2MailOrder } from "./order"
 import type { MailOrderRecord } from "./order-record"
@@ -58,6 +61,85 @@ export async function submitPrintMailTest(
   }
 
   return runOrder(campaign, parsed.recipients, undefined)
+}
+
+export async function submitEddmPrintTest(campaignId: string): Promise<PrintMailActionResult> {
+  const campaign = await repository.getCampaign(campaignId)
+  if (!campaign) return missing(campaignId)
+  const blocked = guard(campaign)
+  if (blocked) return { campaign, issues: [blocked] }
+
+  const audience = campaign.brief.audience
+  const eddm = audience?.eddm
+  if (audience?.delivery !== "eddm" || !eddm || !isEddmSize(eddm.size)) {
+    return { campaign, issues: ["Choose Every door in an area and a 6.5×9 or 6.25×11 card first."] }
+  }
+  const text = [campaign.brief.goal, campaign.brief.offer, audience.description, eddm.neighborhood]
+    .filter(Boolean)
+    .join(" ")
+  const issue = eddmAudienceIssue({ text, audience: eddm })
+  if (issue) return { campaign, issues: [issue] }
+
+  const mode = describePrintMailMode()
+  if (mode.environment !== "stage") {
+    return { campaign, issues: ["Every Door orders stay on Click2Mail staging. Production EDDM is not turned on."] }
+  }
+  if (!mode.eddmSubmitEnabled) {
+    return {
+      campaign,
+      issues: [
+        mode.eddmAccountConfigured
+          ? "Staging EDDM submit is off until Click2Mail confirms the product names. Set C2M_EDDM_SUBMIT=true on staging after that."
+          : "Add the USPS account id in C2M_EDDM_CRID. Staging submit stays off until Click2Mail confirms which id to send.",
+      ],
+    }
+  }
+
+  const business = campaign.brief.businessInfo
+  const mailer = {
+    name: business?.name?.trim() || "",
+    organization: business?.name?.trim() || undefined,
+    address: business?.street?.trim() || business?.address?.trim() || "",
+    city: business?.city?.trim() || "",
+    state: business?.state?.trim() || "",
+    zip: business?.postalCode?.trim() || "",
+    phone: business?.phone?.trim() || campaign.brief.phone,
+  }
+  if (!mailer.name || !mailer.address || !mailer.city || !mailer.state || !mailer.zip) {
+    return { campaign, issues: ["Add the business name and return address before sending an Every Door order."] }
+  }
+
+  const { config, client } = clientFromEnv()
+  let artwork: MailOrderRecord["artwork"] = "type-plate"
+  let pdf: Uint8Array<ArrayBufferLike>
+  try {
+    const built = await renderEddmPdf(campaign, eddm.size)
+    pdf = built.bytes
+    artwork = built.artwork
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "The print file could not be built."
+    return { campaign, issues: [message] }
+  }
+
+  const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+Z$/, "Z")
+  const order = await placeEddmOrder({
+    client,
+    config,
+    pdf,
+    size: eddm.size,
+    coverage: eddm.coverage,
+    routes: eddm.routes,
+    mailer,
+    uspsAccountId: process.env.C2M_EDDM_CRID?.trim() ?? "",
+    submitEnabled: true,
+    documentName: `mm-eddm-${campaign.id.slice(0, 8)}-${stamp}`,
+    artwork,
+    submit: true,
+    proof: true,
+    existing: campaign.mailOrder?.eddm ? campaign.mailOrder : undefined,
+  })
+  const saved = await repository.saveMailOrder(campaign.id, order)
+  return { campaign: saved, issues: order.error ? [order.error] : [] }
 }
 
 export async function continuePrintMailTest(campaignId: string): Promise<PrintMailActionResult> {
@@ -198,6 +280,22 @@ function oneRecipient(input: {
     recipients: parsed.recipient ? [parsed.recipient] : [],
     errors: parsed.errors,
   }
+}
+
+async function renderEddmPdf(campaign: Campaign, size: "6.5x9" | "6.25x11") {
+  const uploaded = await loadApprovedUploadPdf(campaign)
+  if (uploaded) return { bytes: uploaded, artwork: "uploaded-design" as const }
+  const photo = await loadFinalPostcardPhoto(campaign)
+  const templateId = campaign.mailPiece?.spec.layoutHints?.templateId
+  const paletteId = campaign.mailPiece?.spec.layoutHints?.verticalPalette
+  const rendered = await renderTemplatedPostcardPdf({
+    copy: printCopy(campaign),
+    templateId: isPostcardTemplate(templateId) ? templateId : "neighbor_letter",
+    paletteId: isVerticalPalette(paletteId) ? paletteId : undefined,
+    size,
+    image: photo ?? undefined,
+  })
+  return { bytes: rendered.bytes, artwork: rendered.artwork }
 }
 
 function printCopy(campaign: Campaign): PostcardPrintCopy {

@@ -1,5 +1,6 @@
 import type { CreativeCanvas } from "../creative-canvas"
 import type { CreativeIntelligenceContext } from "../creative-intelligence"
+import { eddmCopyRules } from "@/lib/eddm/copy"
 import type {
   CampaignBrief,
   CreativeDirection,
@@ -73,6 +74,8 @@ ${JSON.stringify(recent, null, 2)}
 
 Customer request:
 ${input.prompt}
+
+${input.brief.audience?.delivery === "eddm" ? eddmCopyRules(input.brief.audience.eddm?.neighborhood) : ""}
 
 Return your answer only through the structured tool.`
 }

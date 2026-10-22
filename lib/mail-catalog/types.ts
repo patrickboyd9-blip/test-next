@@ -12,7 +12,7 @@
  * version (e.g. postcard_5x8 v2), never editing an existing version.
  */
 
-export type MailPieceCatalogId = "postcard_5x8"
+export type MailPieceCatalogId = "postcard_5x8" | "postcard_6_5x9" | "postcard_6_25x11"
 
 /** Published immutable versions. Grows as new versions are added; never reused. */
 export type MailPieceCatalogVersion = 1
