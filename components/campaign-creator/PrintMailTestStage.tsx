@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 
 import { Badge } from "@/components/ui/badge"
@@ -14,22 +15,29 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { recordComplianceAcceptance, startMailCheckout } from "@/lib/checkout/actions"
+import { COMPLIANCE_CHECKOUT_HOOK } from "@/lib/checkout/compliance-gate"
+import type { CheckoutAvailability } from "@/lib/checkout/stripe-config"
 import {
   continuePrintMailTest,
   refreshPrintMailStatus,
-  submitPrintMailTest,
 } from "@/lib/click2mail/mail-order-actions"
-import { postageEstimate } from "@/lib/click2mail/cost"
 import { mailingCutoffWarning } from "@/lib/click2mail/cutoff"
 import { isTerminalJobStatus, jobStatusLabel } from "@/lib/click2mail/job-status"
 import type { PrintMailMode } from "@/lib/click2mail/mode"
 import { parseRecipientCsv, normalizeRecipient } from "@/lib/click2mail/recipients"
+import { priceForCount } from "@/lib/pricing/quote"
+import type { CustomerRate } from "@/lib/pricing/types"
 import type { Campaign } from "@/lib/campaign-creator/types"
 
 interface PrintMailTestStageProps {
   campaign: Campaign
   mode: PrintMailMode
   onCampaign: (campaign: Campaign) => void
+  rate: CustomerRate
+  showPricingBanner: boolean
+  checkout: CheckoutAvailability
+  checkoutNotice?: string | null
 }
 
 const EMPTY_SELF = {
@@ -42,7 +50,15 @@ const EMPTY_SELF = {
   zip: "",
 }
 
-export function PrintMailTestStage({ campaign, mode, onCampaign }: PrintMailTestStageProps) {
+export function PrintMailTestStage({
+  campaign,
+  mode,
+  onCampaign,
+  rate,
+  showPricingBanner,
+  checkout,
+  checkoutNotice,
+}: PrintMailTestStageProps) {
   const [source, setSource] = useState<"self" | "csv">("self")
   const [selfAddress, setSelfAddress] = useState(EMPTY_SELF)
   const [csvText, setCsvText] = useState("")
@@ -58,11 +74,22 @@ export function PrintMailTestStage({ campaign, mode, onCampaign }: PrintMailTest
 
   const order = campaign.mailOrder
   const pieceCount = recipients.length
+  const pricedCount = order && !order.submitted && order.jobId ? order.pieceCount : pieceCount
+  const price = priceForCount(rate, pricedCount)
   const productionLocked = mode.environment === "prod" && !mode.productionEnabled
-  const canSend = mode.credentialsConfigured && !productionLocked && pieceCount > 0 && !busy
+  const termsAccepted = Boolean(campaign.complianceAcceptance?.acceptedAt)
+  const alreadyPaid = campaign.payment?.status === "paid" && campaign.payment.orderId === order?.id
+  const canPay =
+    checkout.enabled &&
+    termsAccepted &&
+    mode.credentialsConfigured &&
+    !productionLocked &&
+    pricedCount > 0 &&
+    price.totalCents >= 50 &&
+    !alreadyPaid &&
+    !busy
   const testMode = !mode.productionEnabled
   const cutoffWarning = order?.submitted ? null : mailingCutoffWarning(now)
-  const postage = postageEstimate(pieceCount, mode.postage)
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 60_000)
@@ -87,16 +114,29 @@ export function PrintMailTestStage({ campaign, mode, onCampaign }: PrintMailTest
     }
   }, [campaign.id, mode.credentialsConfigured, order?.jobId, order?.jobStatus, onCampaign])
 
-  async function handleSubmit() {
+  async function handleAcceptTerms() {
+    setBusy(true)
+    setIssues([])
+    try {
+      const result = await recordComplianceAcceptance(campaign.id)
+      onCampaign(result.campaign)
+      setIssues(result.issues)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function handlePay() {
     setBusy(true)
     setIssues([])
     try {
       const result =
         source === "csv"
-          ? await submitPrintMailTest(campaign.id, { kind: "csv", csvText })
-          : await submitPrintMailTest(campaign.id, { kind: "self", ...selfAddress })
+          ? await startMailCheckout(campaign.id, { kind: "csv", csvText })
+          : await startMailCheckout(campaign.id, { kind: "self", ...selfAddress })
       onCampaign(result.campaign)
       setIssues(result.issues)
+      if (result.checkoutUrl) window.location.assign(result.checkoutUrl)
     } finally {
       setBusy(false)
     }
@@ -125,33 +165,53 @@ export function PrintMailTestStage({ campaign, mode, onCampaign }: PrintMailTest
         </div>
         <CardDescription>
           {testMode
-            ? "This sends the approved postcard to Click2Mail staging. It does not mail real customers, and production stays off."
-            : "Production is on. This can print real pieces and spend real credit."}
+            ? "Review the price, accept the mailing terms, then pay. The piece is sent to the printer only after the card payment succeeds."
+            : "Production is on. Payment still has to succeed before anything is mailed."}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
+        {showPricingBanner && (
+          <div className="rounded-lg border-2 border-foreground bg-muted px-4 py-3" role="status">
+            <p className="font-medium">Pricing not final</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              These amounts are placeholders. They can change before anyone is charged on the live site.
+            </p>
+          </div>
+        )}
+
         {productionLocked && (
           <p className="text-sm text-muted-foreground">
             This server is pointed at production, and live mailing is locked. Nothing is sent until
-            C2M_ALLOW_PRODUCTION is turned on.
+            that lock is turned off.
           </p>
         )}
         {!mode.credentialsConfigured && (
           <p className="text-sm text-muted-foreground">
-            Staging credentials are not on this server yet. Add C2M_USERNAME and C2M_PASSWORD, then
-            try again.
+            The printer is not connected on this server yet. You can review the price. Nothing is sent.
+          </p>
+        )}
+        {!checkout.enabled && checkout.message && (
+          <p className="text-sm text-muted-foreground">{checkout.message}</p>
+        )}
+        {checkoutNotice && (
+          <p className="text-sm" role="status">
+            {checkoutNotice}
           </p>
         )}
 
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <p className="text-sm text-muted-foreground">Piece count</p>
-            <p className="text-lg font-medium">{pieceCount}</p>
+            <p className="text-sm text-muted-foreground">Price per card</p>
+            <p className="text-lg font-medium">{price.perCardLabel}</p>
           </div>
           <div>
-            <p className="text-sm text-muted-foreground">Estimated postage</p>
-            <p className="text-lg font-medium">{postage.amountLabel}</p>
-            <p className="text-sm text-muted-foreground">{postage.detail}</p>
+            <p className="text-sm text-muted-foreground">
+              {pricedCount === 1 ? "Total for 1 card" : `Total for ${pricedCount} cards`}
+            </p>
+            <p className="text-lg font-medium">{price.totalLabel}</p>
+            {pricedCount === 0 && (
+              <p className="text-sm text-muted-foreground">Add addresses to see the total.</p>
+            )}
           </div>
         </div>
 
@@ -217,6 +277,8 @@ export function PrintMailTestStage({ campaign, mode, onCampaign }: PrintMailTest
 
         {order && <OrderStatus order={order} />}
 
+        <ComplianceCheckoutHook accepted={termsAccepted} busy={busy} onAccept={() => void handleAcceptTerms()} />
+
         {issues.length > 0 && (
           <ul className="text-sm text-destructive">
             {issues.map((issue) => (
@@ -228,14 +290,59 @@ export function PrintMailTestStage({ campaign, mode, onCampaign }: PrintMailTest
       <CardFooter className="justify-end gap-2">
         {order && !order.jobId && (order.documentId || order.addressListId) && (
           <Button type="button" variant="outline" onClick={() => void handleContinue()} disabled={busy || productionLocked}>
-            {busy ? "Checking…" : testMode ? "Continue staging test" : "Continue mailing"}
+            {busy ? "Checking…" : "Check the addresses again"}
           </Button>
         )}
-        <Button type="button" onClick={() => void handleSubmit()} disabled={!canSend}>
-          {busy ? "Sending…" : testMode ? "Send staging test" : "Send production mailing"}
-        </Button>
+        {alreadyPaid ? (
+          <Button type="button" variant="outline" render={<Link href="/app/orders" />}>
+            View order
+          </Button>
+        ) : (
+          <Button type="button" onClick={() => void handlePay()} disabled={!canPay}>
+            {busy ? "Opening checkout…" : "Pay and send"}
+          </Button>
+        )}
       </CardFooter>
     </Card>
+  )
+}
+
+/**
+ * HOOK: compliance clickwrap.
+ * The clickwrap change replaces the body of this section. It must stay above
+ * payment, keep data-compliance-hook="before-payment", and call
+ * recordComplianceAcceptance (or write campaign.complianceAcceptance) before
+ * Pay and send can succeed. See lib/checkout/compliance-gate.ts.
+ */
+export function ComplianceCheckoutHook({
+  accepted,
+  busy,
+  onAccept,
+}: {
+  accepted: boolean
+  busy: boolean
+  onAccept: () => void
+}) {
+  return (
+    <section
+      data-compliance-hook={COMPLIANCE_CHECKOUT_HOOK}
+      aria-label="Mailing terms"
+      className="rounded-lg border p-3"
+    >
+      <p className="text-sm font-medium">Mailing terms</p>
+      {accepted ? (
+        <p className="mt-1 text-sm text-muted-foreground">Mailing terms accepted.</p>
+      ) : (
+        <>
+          <p className="mt-1 text-sm text-muted-foreground">
+            The agreement to mail this piece sits here, before payment. Payment stays closed until it is accepted.
+          </p>
+          <Button type="button" className="mt-3" variant="outline" onClick={onAccept} disabled={busy}>
+            Accept mailing terms
+          </Button>
+        </>
+      )}
+    </section>
   )
 }
 
@@ -265,18 +372,18 @@ function OrderStatus({ order }: { order: NonNullable<Campaign["mailOrder"]> }) {
       <p className="font-medium">{jobStatusLabel(order.jobStatus)}</p>
       <p className="mt-1 text-muted-foreground">
         {order.submitted
-          ? "Submitted with user credit."
-          : "Not submitted yet. A staging job in editing has not been paid."}
+          ? "Sent to the printer after payment."
+          : "Not sent yet. Payment has to succeed before this is submitted."}
       </p>
       <dl className="mt-3 grid gap-1 text-muted-foreground sm:grid-cols-2">
         <Detail label="Pieces" value={String(order.pieceCount)} />
-        <Detail label="Postage estimate" value={order.estimatedCostLabel} />
-        <Detail label="Artwork" value={order.artwork === "final-photo" ? "Final photograph" : "Words on a solid ground"} />
+        <Detail label="Total" value={order.estimatedCostLabel} />
+        <Detail label="Artwork" value={order.artwork === "final-photo" ? "Final photograph" : order.artwork === "uploaded-design" ? "Uploaded design" : "Words on a solid ground"} />
         <Detail label="Document" value={order.documentId} />
         <Detail label="Address list" value={order.addressListId} />
         <Detail label="List status" value={order.addressListStatus !== undefined ? String(order.addressListStatus) : undefined} />
         <Detail label="Job" value={order.jobId} />
-        <Detail label="Click2Mail status" value={vendorJobLine(order)} />
+        <Detail label="Printer status" value={vendorJobLine(order)} />
         <Detail label="Proof" value={order.proofId} />
         <Detail label="Tracking pieces" value={order.trackingPieceCount !== undefined ? String(order.trackingPieceCount) : undefined} />
         <Detail label="Updated" value={formatWhen(order.updatedAt)} />

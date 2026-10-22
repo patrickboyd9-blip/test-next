@@ -1,4 +1,6 @@
 import type { MailOrderRecord } from "@/lib/click2mail/order-record"
+import type { ComplianceAcceptance } from "@/lib/checkout/compliance-gate"
+import type { PaymentRecord } from "@/lib/payments/types"
 import type {
   MailPieceCatalogId,
   MailPieceCatalogVersion,
@@ -522,6 +524,13 @@ export interface Campaign {
    */
   mailOrder?: MailOrderRecord
   mailOrderHistory?: MailOrderRecord[]
+  /**
+   * Written by the compliance clickwrap before payment.
+   * Checkout will not start while this is absent.
+   */
+  complianceAcceptance?: ComplianceAcceptance
+  /** Latest card payment for this campaign. Linked to mailOrder by orderId. */
+  payment?: PaymentRecord
   /** Internal signal only — never surfaced to the customer as a score. */
   readyForBriefReview: boolean
   createdAt: string

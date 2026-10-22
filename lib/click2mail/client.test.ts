@@ -241,3 +241,17 @@ test("address list status 9 is an error and status 5 is ready", async () => {
 function addressXml(status: number): string {
   return `<?xml version="1.0"?><addressList><id>472743</id><status>${status}</status><description>Ready</description></addressList>`
 }
+
+test("cancel submitted job posts to the job cancel path", async () => {
+  let path = ""
+  const transport: Click2MailTransport = {
+    async send(request) {
+      path = request.path
+      return xml(200, fixture("job-created.xml"))
+    },
+  }
+  const client = createClick2MailClient({ config: stageConfig(), transport })
+  const job = await client.cancelSubmittedJob("13331417")
+  assert.equal(path, "/jobs/13331417/cancel")
+  assert.equal(job.id, "13331417")
+})

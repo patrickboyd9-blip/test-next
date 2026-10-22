@@ -3,6 +3,8 @@ import { randomUUID } from "crypto"
 import { createAppDocumentStore, type DocumentStore } from "@/lib/storage/document-store"
 
 import type { MailOrderRecord } from "@/lib/click2mail/order-record"
+import type { ComplianceAcceptance } from "@/lib/checkout/compliance-gate"
+import type { PaymentRecord } from "@/lib/payments/types"
 
 import { normalizeCampaignStatus } from "./campaign-status"
 import { getActiveRevision, getActiveSpec, getApprovedSpec, getNextVersion } from "./creative-state"
@@ -124,6 +126,8 @@ export interface CampaignRepository {
   saveUploadedDesignReview(id: string, review: UploadedDesignReview): Promise<Campaign>
   approveUploadedDesign(id: string, printFileKey: string): Promise<Campaign>
   saveMailOrder(id: string, order: MailOrderRecord): Promise<Campaign>
+  savePayment(id: string, payment: PaymentRecord): Promise<Campaign>
+  saveComplianceAcceptance(id: string, acceptance: ComplianceAcceptance): Promise<Campaign>
 }
 
 function backfillDirectionRevisions(
@@ -498,6 +502,20 @@ class StoredCampaignRepository implements CampaignRepository {
     }
     campaign.mailOrder = order
     campaign.updatedAt = order.updatedAt
+    return this.write(campaign)
+  }
+
+  async savePayment(id: string, payment: PaymentRecord): Promise<Campaign> {
+    const campaign = await this.require(id)
+    campaign.payment = payment
+    campaign.updatedAt = payment.updatedAt
+    return this.write(campaign)
+  }
+
+  async saveComplianceAcceptance(id: string, acceptance: ComplianceAcceptance): Promise<Campaign> {
+    const campaign = await this.require(id)
+    campaign.complianceAcceptance = acceptance
+    campaign.updatedAt = acceptance.acceptedAt
     return this.write(campaign)
   }
 }

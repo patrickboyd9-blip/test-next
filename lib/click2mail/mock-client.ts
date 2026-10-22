@@ -51,6 +51,10 @@ export function createMockClick2MailClient(options?: {
       calls.push(`submitJob:${jobId}`)
       return { id: jobId, status: 0, description: "Success", jobStatus: "ORDER_SUBMITTED" }
     },
+    async cancelSubmittedJob(jobId) {
+      calls.push(`cancelSubmittedJob:${jobId}`)
+      return { id: jobId, status: 0, description: "Cancelled", jobStatus: "EDITING" }
+    },
     async getJob(jobId) {
       calls.push(`getJob:${jobId}`)
       return {

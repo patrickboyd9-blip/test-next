@@ -23,7 +23,11 @@ import {
   unapproveCreative,
   type MailPieceFormatRecommendationView,
 } from "@/lib/campaign-creator/actions"
+import type { CheckoutAvailability } from "@/lib/checkout/stripe-config"
 import type { PrintMailMode } from "@/lib/click2mail/mode"
+import { DEFAULT_PRICING_CONFIG, REVIEW_MAIL_CLASS, REVIEW_PRODUCT_ID } from "@/lib/pricing/defaults"
+import { customerRate } from "@/lib/pricing/quote"
+import type { CustomerRate } from "@/lib/pricing/types"
 import type { Campaign, CampaignBrief, CampaignStatus, ConversationMessage } from "@/lib/campaign-creator/types"
 import { getMailPiece } from "@/lib/mail-catalog/catalog"
 
@@ -50,6 +54,8 @@ import { CreativeStudio } from "./studio/CreativeStudio"
 import { PersistentCreativeHeader } from "./studio/PersistentCreativeHeader"
 import { useStudioDirectionImages } from "./studio/use-studio-direction-images"
 
+const defaultCustomerRate = customerRate(DEFAULT_PRICING_CONFIG, REVIEW_PRODUCT_ID, REVIEW_MAIL_CLASS)!
+
 function resolveStudioCanvas(campaign: Campaign) {
   const mailPieceSpec = campaign.mailPieceSpec
   if (!mailPieceSpec) return null
@@ -67,12 +73,23 @@ interface CampaignCreatorViewProps {
   initialCampaign: Campaign
   printMailMode: PrintMailMode
   designReviewAvailable?: boolean
+  pricingRate?: CustomerRate
+  showPricingBanner?: boolean
+  checkout?: CheckoutAvailability
+  checkoutNotice?: string | null
 }
 
 export function CampaignCreatorView({
   initialCampaign,
   printMailMode,
   designReviewAvailable = false,
+  pricingRate,
+  showPricingBanner = false,
+  checkout = {
+    enabled: false,
+    message: "Card payment is not set up yet. You can still review the price. Nothing is sent until it is.",
+  },
+  checkoutNotice = null,
 }: CampaignCreatorViewProps) {
   const [campaign, setCampaignState] = useState<Campaign>(() => campaignForCustomer(initialCampaign))
   const setCampaign = (value: SetStateAction<Campaign>) => {
@@ -353,6 +370,10 @@ export function CampaignCreatorView({
             campaign={campaign}
             mode={printMailMode}
             onCampaign={setCampaign}
+            rate={pricingRate ?? defaultCustomerRate}
+            showPricingBanner={showPricingBanner}
+            checkout={checkout}
+            checkoutNotice={checkoutNotice}
           />
         </div>
       )}

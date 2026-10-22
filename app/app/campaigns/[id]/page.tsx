@@ -4,9 +4,14 @@ import { CampaignCreatorView } from "@/components/campaign-creator/CampaignCreat
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { isDesignReviewAvailable } from "@/lib/bring-your-own-design/design-review"
 import { getCampaign } from "@/lib/campaign-creator/actions"
-import { POSTCARD_5X8_POSTAGE } from "@/lib/click2mail/cost"
+import { markCheckoutCancelled } from "@/lib/checkout/actions"
+import { checkoutAvailability } from "@/lib/checkout/stripe-config"
 import { describePrintMailMode } from "@/lib/click2mail/config"
+import { POSTCARD_5X8_POSTAGE } from "@/lib/click2mail/cost"
 import type { PrintMailMode } from "@/lib/click2mail/mode"
+import { REVIEW_MAIL_CLASS, REVIEW_PRODUCT_ID } from "@/lib/pricing/defaults"
+import { customerRate, showPricingNotFinalBanner } from "@/lib/pricing/quote"
+import { getPricingConfig } from "@/lib/pricing/store"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -34,15 +39,22 @@ function printMailMode(): PrintMailMode {
 
 export default async function CampaignPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ checkout?: string }>
 }) {
   const { id } = await params
+  const query = await searchParams
+  if (query.checkout === "cancelled") await markCheckoutCancelled(id)
   const campaign = await getCampaign(id)
 
   if (!campaign) {
     notFound()
   }
+
+  const pricing = await getPricingConfig()
+  const rate = customerRate(pricing, REVIEW_PRODUCT_ID, REVIEW_MAIL_CLASS)
 
   return (
     <div className="flex min-h-svh flex-col">
@@ -56,6 +68,12 @@ export default async function CampaignPage({
         initialCampaign={campaign}
         printMailMode={printMailMode()}
         designReviewAvailable={isDesignReviewAvailable()}
+        pricingRate={rate ?? undefined}
+        showPricingBanner={showPricingNotFinalBanner(pricing)}
+        checkout={checkoutAvailability()}
+        checkoutNotice={
+          query.checkout === "cancelled" ? "Payment was cancelled. Nothing was sent." : null
+        }
       />
     </div>
   )

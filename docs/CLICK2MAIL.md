@@ -13,11 +13,19 @@ That screen asks for recipients in one of two ways:
 - Upload a CSV with the columns `first,last,address1,address2,city,state,zip`
 - Or send one test piece to an address you type in
 
-It shows how many pieces that is, and an **estimated First Class postage** for a standard 5×8 address. That figure is postage only. Production is additional, and a nonstandard address costs more. Click2Mail charges the staging account when the job is submitted.
+It shows one **price per card** and a **total** for the addresses on the screen. That total is printing, postage, and margin together. The screen does not split those costs. While the prices are still placeholders, a preview or local site shows **Pricing not final**.
+
+The mailing terms sit above the pay button. Payment stays closed until those terms are accepted. The real clickwrap replaces that block. It has to stay above payment.
+
+**Pay and send** opens Stripe Checkout in test mode. The piece is sent to Click2Mail only after Stripe says the card payment succeeded. If the Stripe test keys are missing, the price still shows, the pay button stays off, and nothing is sent.
 
 If you send close to **8:00 PM ET**, or after it, the screen says so. Click2Mail runs API jobs through a batch queue. A job that arrives near the cutoff can miss that day’s mailing and go out the next business day.
 
-Sending the test builds a two-page PDF of the approved postcard, uploads it, creates the address list, creates the job, asks for a proof, and submits it with **User Credit**. The campaign keeps the document id, address-list id, job id, status, and times. The status line updates by asking Click2Mail again. Click2Mail does not call us when something changes.
+Orders live at **Orders** in the sidebar. A paid mailing moves through Paid, Submitted, Printing, and Mailed. Before the 8:00 PM ET cutoff, **Cancel order** stops the Click2Mail job and refunds the card. After the cutoff, or once it is at the printer, cancel is no longer offered.
+
+Prices are edited at **Pricing**, which asks for the owner key (`PRICING_OWNER_KEY`).
+
+Sending a paid order builds a two-page PDF of the approved postcard, uploads it, creates the address list, creates the job, asks for a proof, and after payment submits it with **Invoice** so the job can still be cancelled before the cutoff. The campaign keeps the document id, address-list id, job id, status, and the payment. The status line updates by asking Click2Mail again. Click2Mail does not call us when something changes. Stripe does call us when the card payment succeeds, fails, or is abandoned.
 
 Staging usually has no mail tracking. That is expected.
 

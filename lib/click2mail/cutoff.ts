@@ -28,10 +28,44 @@ export function mailingCutoffWarning(now: Date): string | null {
   return null
 }
 
-function easternParts(now: Date): { weekday: string; hour: number; minute: number } {
+/**
+ * The last moment a submitted job can still be cancelled: the next
+ * business-day 8:00 PM ET cutoff strictly after it was submitted.
+ * A Tuesday afternoon job can be cancelled until Tuesday at 8:00 PM ET.
+ * A job submitted after that, or on a weekend, can be cancelled until the
+ * next business day's 8:00 PM ET cutoff.
+ */
+export function cancellationDeadline(submittedAt: Date): Date {
+  const start = easternParts(submittedAt)
+  for (let offset = 0; offset < 14; offset += 1) {
+    const day = addCalendarDays(start.year, start.month, start.day, offset)
+    const noon = zonedToUtc(day.year, day.month, day.day, 12, 0)
+    const weekday = easternParts(noon).weekday
+    if (weekday === "Sat" || weekday === "Sun") continue
+    const cutoff = zonedToUtc(day.year, day.month, day.day, SAME_DAY_CUTOFF_HOUR, SAME_DAY_CUTOFF_MINUTE)
+    if (cutoff.getTime() > submittedAt.getTime()) return cutoff
+  }
+  return zonedToUtc(start.year, start.month, start.day + 14, SAME_DAY_CUTOFF_HOUR, SAME_DAY_CUTOFF_MINUTE)
+}
+
+export function isBeforeCancellationDeadline(submittedAt: Date, now: Date): boolean {
+  return now.getTime() < cancellationDeadline(submittedAt).getTime()
+}
+
+function easternParts(now: Date): {
+  weekday: string
+  year: number
+  month: number
+  day: number
+  hour: number
+  minute: number
+} {
   const formatted = new Intl.DateTimeFormat("en-US", {
     timeZone: SAME_DAY_CUTOFF_TIME_ZONE,
     weekday: "short",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
     hourCycle: "h23",
@@ -40,7 +74,30 @@ function easternParts(now: Date): { weekday: string; hour: number; minute: numbe
     formatted.find((part) => part.type === type)?.value ?? ""
   return {
     weekday: read("weekday"),
+    year: Number(read("year")),
+    month: Number(read("month")),
+    day: Number(read("day")),
     hour: Number(read("hour")),
     minute: Number(read("minute")),
   }
+}
+
+function addCalendarDays(year: number, month: number, day: number, days: number) {
+  const utc = new Date(Date.UTC(year, month - 1, day))
+  utc.setUTCDate(utc.getUTCDate() + days)
+  return { year: utc.getUTCFullYear(), month: utc.getUTCMonth() + 1, day: utc.getUTCDate() }
+}
+
+/** UTC instant whose clock in America/New_York matches the given calendar time. */
+function zonedToUtc(year: number, month: number, day: number, hour: number, minute: number): Date {
+  let utc = Date.UTC(year, month - 1, day, hour, minute)
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const parts = easternParts(new Date(utc))
+    const got = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute)
+    const want = Date.UTC(year, month - 1, day, hour, minute)
+    const diff = got - want
+    if (diff === 0) return new Date(utc)
+    utc -= diff
+  }
+  return new Date(utc)
 }
