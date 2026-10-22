@@ -203,7 +203,7 @@ export function composeGridCard(input: GridComposeInput): GridCard {
 
 /**
  * Light open canvas. Headline in two brand colors, the contact line under it,
- * a cut-out subject on the right, a floating offer, and one row of thumbnails.
+ * one cut-out subject, and a floating offer. One photograph stays one hero.
  */
 function composeIntegrated(
   input: GridComposeInput,
@@ -325,11 +325,9 @@ function composeIntegrated(
   }
   const clusterTop = phoneText.rect.y
   const clusterBottom = Math.max(qrRect.y + qrRect.h, websiteText.rect.y + websiteText.rect.h)
-  const photos = thumbnailRow(geometry, trim)
-  photos.unshift({ id: "subject", role: "photo", rect: geometry.photo, bleed: false, treatment: "cutout" })
+  const photos: PhotoSlotPlan[] = [{ id: "subject", role: "photo", rect: geometry.photo, bleed: false, treatment: "cutout" }]
   const shapes: ShapePlan[] = [
     { id: "paper", role: "paper", rect: { x: 0, y: 0, w: trim.w, h: trim.h }, fill: paper },
-    ...thumbnailFrames(geometry, trim, ink),
   ]
   const photoArea = (geometry.photo.w * geometry.photo.h) / (trim.w * trim.h)
   const front: PostcardFacePlan = {
@@ -418,52 +416,24 @@ function integratedGeometry(trim: { w: number; h: number }): {
   thumbTop: number
   thumbH: number
 } {
-  const thumbH = round2(Math.min(0.7, trim.h * 0.13))
-  const thumbTop = round2(trim.h - SAFE_IN - thumbH)
+  const thumbH = 0
+  const thumbTop = trim.h
   return {
     photo: {
       x: round2(Math.min(trim.w * 0.29, 2.32)),
       y: 0.04,
       w: round2(trim.w - Math.min(trim.w * 0.29, 2.32)),
-      h: round2(Math.max(1.8, thumbTop - 0.1)),
+      h: round2(Math.max(1.8, trim.h - 0.08)),
     },
     column: {
       x: SAFE_IN,
       y: SAFE_IN,
       w: round2(trim.w * 0.56),
-      h: round2(thumbTop - SAFE_IN - 0.1),
+      h: round2(trim.h - SAFE_IN * 2),
     },
     thumbTop,
     thumbH,
   }
-}
-
-function thumbnailRow(geometry: { thumbTop: number; thumbH: number }, trim: { w: number; h: number }): PhotoSlotPlan[] {
-  const count = 4
-  const gap = 0.08
-  const left = SAFE_IN
-  const right = trim.w - SAFE_IN
-  const width = round2((right - left - gap * (count - 1)) / count)
-  return Array.from({ length: count }, (_, index) => ({
-    id: `thumb-${index + 1}`,
-    role: "photo",
-    rect: { x: round2(left + index * (width + gap)), y: geometry.thumbTop, w: width, h: geometry.thumbH },
-    bleed: false,
-    treatment: "thumbnail" as const,
-  }))
-}
-
-function thumbnailFrames(
-  geometry: { thumbTop: number; thumbH: number },
-  trim: { w: number; h: number },
-  ink: string
-): ShapePlan[] {
-  return thumbnailRow(geometry, trim).map((slot, index) => ({
-    id: `thumb-frame-${index + 1}`,
-    role: "thumbnail",
-    rect: { x: slot.rect.x - 0.02, y: slot.rect.y - 0.02, w: slot.rect.w + 0.04, h: slot.rect.h + 0.04 },
-    fill: ink,
-  }))
 }
 
 function splitHeadline(headline: string): [string, string] {

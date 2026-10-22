@@ -13,8 +13,6 @@ import type { Campaign, CampaignBrief, CreativeDirection, CreativeSpec } from "@
 import { persuasionAngles, persuasionRecordLine, persuasionUsesLine, persuasionWarnings } from "@/lib/design-intelligence/persuasion"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
-import { blueprintMatchLine } from "@/lib/design-intelligence/blueprint-tags"
-
 import { BlueprintBrowser } from "./BlueprintBrowser"
 import { ConceptCard } from "./ConceptCard"
 import { ConceptFeedback } from "./ConceptFeedback"
@@ -124,7 +122,7 @@ export function FocusView({
             <p className="text-sm font-medium">A/B test options</p>
             {angles.map((angle) => (
               <p key={angle.id} className="text-sm text-foreground/80">
-                {angle.id} · {angle.label}: {angle.line}
+                {angle.onCard ? "On the card · " : ""}{angle.id} · {angle.label}: {angle.line}
               </p>
             ))}
           </div>
@@ -133,9 +131,6 @@ export function FocusView({
           <p key={warning} className="text-sm text-foreground/80">{warning}</p>
         ))}
         <ResearchBasis research={direction.research} />
-        {spec.blueprint ? (
-          <p className="text-xs font-medium">Blueprint: {blueprintMatchLine(spec.blueprint)}</p>
-        ) : null}
         {campaignId ? (
           <ConceptFeedback campaignId={campaignId} directionId={direction.id} initial={feedback} />
         ) : null}

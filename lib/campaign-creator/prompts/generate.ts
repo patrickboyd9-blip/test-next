@@ -37,10 +37,10 @@ Generation constraints:
 - Each spec must include leadJob and imageryRole from the closed lists, matching the concept
 - typeRole and imagePresence are optional. Emit them only after the concept is established, and only when the concept needs subject or accent
 - After conceiving visualDirection, emit imagePresence: accent when that conception names a small witness to a type-led piece. Do not emit accent when the image occupies the family's normal supporting or image field. Do not infer accent from imageryRole. Do not emit accent merely to make directions visually different
-- All 3 must have genuinely different messaging angles (not paraphrases)
+- All 3 must have genuinely different messaging angles (not paraphrases). Use three different psychologies: one sells the result, one pairs a threat with one easy action, and one uses local trust in the business the client named. Do not quote another brand's slogan or any campaign result figure
 - Direction name: ${DIRECTION_NAME_CONSTRAINT} Count the words before you return the tool
 - tags: exactly 3 strategic tags per direction
-- rationale: 2 sentences max, tied to the goal, audience, and Primary Success Metric. Explain why the concept is strategically different. Do not claim conversion, bookings, lift, ROI, or that a direction will outperform
+- rationale: 2 sentences max, tied to the goal, audience, and Primary Success Metric. Explain why the concept is strategically different. Do not claim conversion, bookings, lift, ROI, or that a direction will outperform. Never invent an age, an income, years in the home, or a neighborhood count. Only cite facts that are in the brief
 - designedToDrive: customer-language Primary Success Metric from the brief
 - oneLineDifference: required for the two non-lead directions (≤ 80 characters); omit or leave empty on the lead
 - Recommend the direction that best serves the Primary Success Metric, and say why in the rationale without performance claims

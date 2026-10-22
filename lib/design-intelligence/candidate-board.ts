@@ -5,7 +5,7 @@ import { MEDICARE_AGENT_DISCLAIMER, isMedicareAgentBrief } from "@/lib/campaign-
 
 import { directDesign, usesSeparatedPanel, type CompositionMode } from "./art-director"
 import { normalizeToneTag, normalizeVerticalTag, selectBlueprints, type MailerBlueprint } from "./blueprint"
-import { blueprintMatchLine, copyPatternFromText, offerTypeFromText, patternFitsOffer } from "./blueprint-tags"
+import { copyPatternFromText, offerTypeFromText, patternFitsOffer } from "./blueprint-tags"
 import { ownerFavoriteIds } from "./owner-favorites"
 import { loadBlueprintCorpus } from "./blueprint-store"
 import { rebuildFromBlueprint } from "./blueprint-rebuild"
@@ -29,7 +29,8 @@ import {
   type TasteSignals,
 } from "./taste-retrieval"
 import { ATTORNEY_AD_LABEL, attorneyAdMark } from "./attorney-compliance"
-import { applyOutcomeHeadline, clientFactText, selectPersuasion } from "./persuasion"
+import { scrubUnstatedAudience, scrubUnstatedName, statedNameFallback } from "./audience-facts"
+import { applyOutcomeHeadline, clientFactText, roleForDirection, selectPersuasion } from "./persuasion"
 import { briefHasNumeralOffer } from "./vertical"
 import { loadTasteCorpus, visionTasteStore, type VisionTaste } from "./vision-taste"
 import { referencePicksForCritique, requestComparativeCritique } from "./vision-critic"
@@ -129,7 +130,7 @@ export async function applyStudioBoard(
     records: options?.records,
     tastes: options?.tastes,
   })
-  return applyBoard(result, board)
+  return applyBoard(result, board, brief)
 }
 
 export async function rankCandidates(input: {
@@ -249,7 +250,11 @@ async function scoreFamily(input: {
   blueprint?: MailerBlueprint
   env?: NodeJS.ProcessEnv
 }): Promise<ScoredCandidate> {
-  let rationale = rationaleForFamily(input.base, input.family, input)
+  const family = input.family.mode === "type-led"
+    ? COMPOSITION_FAMILIES.find((item) => item.id === "integrated-headline") ?? input.family
+    : input.family
+  const role = roleForDirection(input.directionIndex, input.brief.primaryEmotion)
+  let rationale = rationaleForFamily(input.base, family, input)
   let spec = input.spec
   let blueprintMeta: ScoredCandidate["blueprint"]
   if (input.blueprint) {
@@ -279,6 +284,7 @@ async function scoreFamily(input: {
       offer: spec.offer ?? input.brief.offer ?? "",
       brief: input.brief,
       vertical: rationale.vertical,
+      role,
     }),
   }
   rationale = {
@@ -286,6 +292,7 @@ async function scoreFamily(input: {
     persuasion: selectPersuasion({
       brief: input.brief,
       vertical: rationale.vertical,
+      role,
       blueprint: input.blueprint
         ? {
             tone: input.blueprint.tones[0]?.tag,
@@ -294,6 +301,14 @@ async function scoreFamily(input: {
           }
         : undefined,
     }),
+  }
+  const templateBand = rationale.grid.intentional_break !== "integrated"
+  if (templateBand) {
+    rationale = {
+      ...rationale,
+      grid: { name: "centered-stack", alignment: "left", intentional_break: "integrated" },
+      photo_brief: { ...rationale.photo_brief, placement: "full_bleed" },
+    }
   }
   const facts = clientFactText(input.brief, spec.offer)
   const complianceMark = attorneyAdMark(facts)
@@ -315,10 +330,10 @@ async function scoreFamily(input: {
     worstContrast: critique.autoFails.includes("AF1") ? 3 : 7,
   })
   return {
-    familyId: input.family.id,
+    familyId: family.id,
     grid: rationale.grid.name,
-    feel: input.family.feel,
-    summary: blueprintMeta ? `Blueprint: ${blueprintMatchLine(blueprintMeta)}` : input.family.summary,
+    feel: family.feel,
+    summary: templateBand ? "Type and a cut-out subject sit on the open canvas." : family.summary,
     directionIndex: input.directionIndex,
     rationale,
     card,
@@ -367,6 +382,7 @@ function chooseDiverse(candidates: ScoredCandidate[], directionCount: number): S
   for (let index = 0; index < directionCount; index += 1) {
     const options = candidates
       .filter((candidate) => candidate.directionIndex === index)
+      .filter((candidate) => candidate.rationale.grid.intentional_break !== "type-led")
       .sort((a, b) => Number(b.grade.cleared) - Number(a.grade.cleared) || b.grade.score - a.grade.score)
     const pick = options.find((candidate) => !usedModes.has(candidate.rationale.grid.intentional_break) && !usedIds.has(candidate.familyId))
       ?? options.find((candidate) => !usedIds.has(candidate.familyId))
@@ -379,7 +395,8 @@ function chooseDiverse(candidates: ScoredCandidate[], directionCount: number): S
   return chosen.filter((candidate): candidate is ScoredCandidate => Boolean(candidate))
 }
 
-function applyBoard(result: GenerateDirectionsResult, board: BoardResult): GenerateDirectionsResult {
+function applyBoard(result: GenerateDirectionsResult, board: BoardResult, brief: CampaignBrief): GenerateDirectionsResult {
+  const facts = clientFactText(brief)
   const best = [...board.surfaced].sort((a, b) => b.grade.score - a.grade.score)[0]
   const directions = result.directions.map((direction, index) => {
     const winner = board.surfaced.find((candidate) => candidate.directionIndex === index)
@@ -390,10 +407,15 @@ function applyBoard(result: GenerateDirectionsResult, board: BoardResult): Gener
       title: pick.principle.split(".")[0] || pick.principle,
       whyItWorks: pick.principle,
     }))
+    const onCard = winner.rationale.persuasion?.angles.find((angle) => angle.onCard)?.line
+    const lesson = winner.rationale.persuasion?.lesson
+    const researchId = winner.blueprint ? `Research id ${winner.blueprint.sourceId}.` : ""
     return {
       ...direction,
+      name: scrubUnstatedName(direction.name, facts, statedNameFallback(brief.offer, brief.goal)),
+      rationale: scrubUnstatedAudience(direction.rationale, facts) || `Offers ${brief.offer?.trim() || brief.goal?.trim() || "the stated offer"}.`,
       recommended: best ? winner === best : false,
-      oneLineDifference: winner.summary,
+      oneLineDifference: onCard || winner.summary,
       spec: {
         ...direction.spec,
         ...winner.spec,
@@ -414,7 +436,7 @@ function applyBoard(result: GenerateDirectionsResult, board: BoardResult): Gener
       },
       research: {
         sources,
-        layoutSummary: [winner.summary, winner.rationale.persuasion?.line].filter(Boolean).join(" "),
+        layoutSummary: [winner.summary, winner.rationale.persuasion?.line, lesson, researchId].filter(Boolean).join(" "),
         parameters: direction.research?.parameters ?? {
           headlineScale: winner.rationale.scale_ratios.headline_to_body_cap,
           headlinePosition: "on_color_field",
@@ -517,6 +539,7 @@ function orderFamilies(feel: string, signals?: TasteSignals): Family[] {
 
 function familyRank(family: Family, feel: string, signals?: TasteSignals): number {
   let score = 0
+  if (family.mode === "type-led") score -= 12
   if (family.feel === feel) score += 3
   const keys = [family.id, family.mode]
   if (keys.some((key) => signals?.likedFamilies.includes(key))) score += 6

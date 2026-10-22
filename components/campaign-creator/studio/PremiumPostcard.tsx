@@ -65,7 +65,7 @@ export function PremiumPostcardFront({
     face: "front",
   })
   const photos = [photoSrc, alternatePhotoSrc ?? null]
-  const thumbFill = thumbnailSrc ?? photoSrc ?? alternatePhotoSrc ?? cutoutSrc ?? null
+  const thumbFill = thumbnailSrc && thumbnailSrc !== photoSrc && thumbnailSrc !== cutoutSrc ? thumbnailSrc : null
   const painted = planWithRealThumbnails(plan, thumbFill)
   return (
     <FaceFrame plan={painted} compact={Boolean(compact)}>

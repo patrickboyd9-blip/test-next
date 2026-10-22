@@ -300,6 +300,8 @@
           }
         },
         "outcomeGuidance": { "type": "string" },
+        "role": { "enum": ["outcome", "threat", "trust"] },
+        "lesson": { "type": "string" },
         "angles": {
           "type": "array",
           "minItems": 2,
@@ -315,7 +317,8 @@
             "properties": {
               "id": { "enum": ["A", "B"] },
               "label": { "type": "string", "minLength": 1 },
-              "line": { "type": "string", "minLength": 1 }
+              "line": { "type": "string", "minLength": 1 },
+              "onCard": { "type": "boolean" }
             }
           }
         },

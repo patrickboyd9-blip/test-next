@@ -5,9 +5,13 @@ import { directDesign } from "./art-director"
 import { critiqueCard } from "./critic"
 import { composeGridCard } from "./grid-composer"
 import { composePostcardFace } from "@/lib/postcard-layouts/compose"
+import { scrubUnstatedAudience, scrubUnstatedName } from "./audience-facts"
+import { lessonFor } from "./ad-psych/lessons-data"
 import {
   applyOutcomeHeadline,
   checkPersuasion,
+  onCardLine,
+  roleForDirection,
   selectPersuasion,
 } from "./persuasion"
 import { PERSUASION_PRINCIPLES } from "./persuasion-principles"
@@ -44,13 +48,13 @@ test("a free roof inspection uses the outcome, the gift, and one standout offer"
   assert.equal(plan.coreNeed.label.length > 0, true)
   assert.equal(plan.awareness.id, "cold")
   assert.equal(plan.outcomeGuidance, "A safe, dry home.")
-  assert.equal(applyOutcomeHeadline({ headline: "Free roof inspection", offer: "$0 inspection", brief, vertical: "roofing" }), "Know your roofer.")
+  assert.equal(applyOutcomeHeadline({ headline: "Free roof inspection", offer: "$0 inspection", brief, vertical: "roofing" }), "A dry, safe home starts here.")
   assert.equal(applyOutcomeHeadline({
     headline: "Free roof inspection",
     offer: "$0 inspection",
     brief: { ...brief, primaryEmotion: "roofing_fear" },
     vertical: "roofing",
-  }), "A small leak becomes damage.")
+  }), "Call before a small leak spreads.")
   assert.equal(applyOutcomeHeadline({
     headline: "Free roof inspection",
     offer: "$0 inspection",
@@ -248,6 +252,50 @@ test("each concept offers an outcome angle and a threat-plus-action angle", () =
     vertical: "roofing",
   })
   assert.match(scan.angles[1]?.line ?? "", /Scan to see it\.$/)
+})
+
+test("three directions use three psychologies and the chosen line is the headline", () => {
+  const brief = { goal: "Book a free roof inspection", offer: "$0 inspection", audience: { description: "Homeowners" }, businessInfo: { name: "ABC Roofers" } }
+  const plans = [0, 1, 2].map((index) => selectPersuasion({
+    brief,
+    vertical: "roofing",
+    role: roleForDirection(index, brief.primaryEmotion),
+  }))
+  assert.deepEqual(plans.map((plan) => plan.role), ["outcome", "threat", "trust"])
+  assert.deepEqual(plans.map((plan) => plan.primaryEmotion.label), ["Love and protection of family", "Fear of leaks and damage", "Trust"])
+  const headlines = plans.map((plan) => onCardLine("roofing", plan.role))
+  assert.equal(new Set(headlines).size, 3)
+  assert.equal(headlines[0], "A dry, safe home starts here.")
+  assert.equal(headlines[1], "Call before a small leak spreads.")
+  assert.equal(headlines[2], "A local crew checks this roof.")
+  for (const plan of plans) {
+    const painted = plan.angles.find((angle) => angle.onCard)
+    assert.equal(painted?.id, "A")
+    assert.equal(painted?.line, onCardLine("roofing", plan.role))
+    assert.equal(plan.angles[0]?.line === plan.angles[1]?.line, false)
+    assert.equal(/\b(?:impressions?|lift|roi|unverified)\b/i.test(plan.lesson), false)
+    assert.equal(plan.lesson, lessonFor("roofing", plan.role))
+  }
+  assert.match(plans[0]?.lesson ?? "", /finished house/i)
+  assert.match(plans[1]?.lesson ?? "", /easy/i)
+  const feared = [0, 1, 2].map((index) => roleForDirection(index, "roofing_fear"))
+  assert.deepEqual(feared, ["threat", "outcome", "trust"])
+  const copied = checkPersuasion({
+    headline: "Don't leave storm damage unchecked.",
+    copy: "889K impressions",
+    clientText: "Book a roof inspection",
+    vertical: "roofing",
+    standoutCount: 1,
+  })
+  assert.equal(copied.find((item) => item.id === "copied_line")?.ok, false)
+  assert.equal(copied.find((item) => item.id === "agency_result")?.ok, false)
+})
+
+test("a rationale cannot invent an age the client did not enter", () => {
+  const facts = "Book a free roof inspection for homeowners"
+  assert.equal(scrubUnstatedAudience("Homes over 30 years old need a look. The inspection is free.", facts), "The inspection is free.")
+  assert.equal(scrubUnstatedName("Age-Triggered Inspection", facts, "Free roof inspection"), "Free roof inspection")
+  assert.equal(scrubUnstatedAudience("Homeowners asked for a roof inspection.", facts), "Homeowners asked for a roof inspection.")
 })
 
 test("an attorney card requires Advertisement, limits dramatic imagery, and warns about the 30-day wait", () => {

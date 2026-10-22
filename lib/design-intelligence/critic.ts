@@ -243,6 +243,8 @@ const PERSUASION_CODES: Record<string, string> = {
   fair_housing: "PS10",
   fake_check: "PS11",
   false_personal: "PS12",
+  copied_line: "PS15",
+  agency_result: "PS16",
 }
 
 function hierarchyScore(

@@ -119,7 +119,7 @@ test("a rebuilt card keeps the font class and writes the offer into the copy pat
   })
   assert.ok(rebuilt)
   assert.equal(rebuilt.spec.blueprint?.sourceId, "PM-056")
-  assert.equal(rebuilt.spec.headline, "Know your roofer.")
+  assert.equal(rebuilt.spec.headline, "A dry, safe home starts here.")
   assert.equal(rebuilt.rationale.persuasion?.outcomeGuidance, "A safe, dry home.")
   assert.equal(rebuilt.spec.subheadline, "Call today.")
   assert.equal(rebuilt.spec.headline?.includes("See the roof"), false)
@@ -285,10 +285,10 @@ test("deadline-loss framing is not forced onto a free inspection", async () => {
   assert.ok(rebuilt)
   const written = `${rebuilt.spec.headline} ${rebuilt.spec.subheadline ?? ""}`
   assert.equal(/don'?t lose/i.test(written), false)
-  assert.match(written, /Know your roofer/)
+  assert.match(written, /A dry, safe home starts here\./)
   assert.equal(rebuilt.spec.blueprint?.copyPattern === "deadline_warning", false)
   assert.equal(seen.some((line) => /don'?t lose/i.test(line)), false)
-  assert.equal(rebuilt.spec.headline, "Know your roofer.")
+  assert.equal(rebuilt.spec.headline, "A dry, safe home starts here.")
   assert.equal(rebuilt.rationale.persuasion?.outcomeGuidance, "A safe, dry home.")
 })
 

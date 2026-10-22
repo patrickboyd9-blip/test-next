@@ -7,6 +7,7 @@
 
 import type { CampaignBrief } from "@/lib/campaign-creator/types"
 
+import { headlineCopiesCampaign, lessonFor, textHasAgencyResult, type DirectionRole } from "./ad-psych/lessons-data"
 import { attorneyWarnings, isAttorneyMatter } from "./attorney-compliance"
 import {
   coreNeed,
@@ -38,20 +39,28 @@ export interface PersuasionPlan {
   coreNeed: { id: string; label: string }
   awareness: { id: string; label: string }
   outcomeGuidance: string
+  /** Which psychology this direction is testing. */
+  role: DirectionRole
+  /** A client-safe lesson from the research. Never a slogan or a result figure. */
+  lesson: string
   /** Two headlines to test. Markets do not agree on which one wins. */
-  angles: Array<{ id: "A" | "B"; label: string; line: string }>
+  angles: Array<{ id: "A" | "B"; label: string; line: string; onCard?: boolean }>
   complianceWarnings: string[]
 }
 
 export interface PersuasionContext {
   brief: CampaignBrief
   vertical?: DesignVertical
+  /** Set on the candidate board so the three directions do not share one psychology. */
+  role?: DirectionRole
   blueprint?: {
     tone?: string
     offerType?: string
     copyPattern?: string
   }
 }
+
+export type { DirectionRole }
 
 const DATE = /\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\.?\s+\d{1,2}(?:,\s*\d{4})?\b|\b\d{1,2}\/\d{1,2}(?:\/\d{2,4})?\b/i
 const CLAIM = /\b(\d[\d,]*)\s*(%|percent|neighbors|homes|customers|families|reviews|years|households|stars)\b/gi
@@ -118,7 +127,10 @@ export function selectPersuasion(input: PersuasionContext): PersuasionPlan {
     .sort((a, b) => b.score - a.score || a.principle.id.localeCompare(b.principle.id))
 
   const chosen = [must("sell_the_outcome"), ...ranked.slice(0, 2).map((item) => item.principle)]
-  const resolved = resolveEmotion(kind, facts, input.brief.primaryEmotion)
+  const resolved = input.role
+    ? emotionForRole(kind, input.role, input.brief.primaryEmotion)
+    : resolveEmotion(kind, facts, input.brief.primaryEmotion)
+  const role = input.role ?? roleFromEmotion(resolved.emotion)
   const awareness = resolveAwareness(input.brief.audienceAwareness)
   const need = coreNeed(resolved.emotion.need)
   const picks = chosen.map((principle) => ({ id: principle.id, why: whyFor(principle.id, { ...flags, emotion: resolved.emotion }) }))
@@ -129,13 +141,162 @@ export function selectPersuasion(input: PersuasionContext): PersuasionPlan {
     coreNeed: { id: need.id, label: need.label },
     awareness: { id: awareness.id, label: awareness.label },
     outcomeGuidance: outcomeGuidance(kind),
-    angles: abAngles(kind, input.brief.offer ?? ""),
+    role,
+    lesson: lessonFor(kind, role),
+    angles: input.role
+      ? roleAngles(kind, input.role, input.brief.businessInfo?.name)
+      : abAngles(kind, input.brief.offer ?? ""),
     complianceWarnings: attorneyWarnings(facts),
   }
 }
 
+/** Fear chosen by the client leads. The other two directions still use a different psychology. */
+export function roleForDirection(index: number, clientEmotion?: string | null): DirectionRole {
+  const fear = Boolean(clientEmotion && /fear/i.test(clientEmotion))
+  const order: DirectionRole[] = fear ? ["threat", "outcome", "trust"] : ["outcome", "threat", "trust"]
+  return order[((index % 3) + 3) % 3]!
+}
+
 export function outcomeGuidance(kind: string): string {
   return OUTCOME[kind] ?? OUTCOME.general!
+}
+
+const ROLE_COPY: Record<string, Record<DirectionRole, readonly [string, string]>> = {
+  roofing: {
+    outcome: ["A dry, safe home starts here", "The house stays dry after this"],
+    threat: ["Call before a small leak spreads", "Book a look before damage spreads"],
+    trust: ["A local crew checks this roof", "A named crew checks this roof"],
+  },
+  plumbing: {
+    outcome: ["Water you can trust again", "The drain runs clear again"],
+    threat: ["Call before a slow leak spreads", "Book a look before water spreads"],
+    trust: ["A local plumber takes this call", "This plumber takes the call"],
+  },
+  hvac: {
+    outcome: ["A house that feels right", "The rooms feel right again"],
+    threat: ["Call before the next breakdown", "Book a check before it breaks"],
+    trust: ["A local tech checks the system", "This tech checks the system"],
+  },
+  medicare: {
+    outcome: ["A plan you can check", "The choice can feel clear"],
+    threat: ["Call about a coverage gap", "Call about another coverage gap"],
+    trust: ["A local agent explains the plan", "This agent explains the plan"],
+  },
+  we_buy: {
+    outcome: ["The sale can be simple", "A fresh start can be simple"],
+    threat: ["Call before foreclosure costs grow", "Ask before those costs grow"],
+    trust: ["A local buyer makes this offer", "This buyer makes the offer"],
+  },
+  real_estate: {
+    outcome: ["The right house, shown clearly", "See the life in the house"],
+    threat: ["Call before the right house goes", "Ask before that house is gone"],
+    trust: ["A local showing, in daylight", "See this house in daylight"],
+  },
+  food: {
+    outcome: ["A weeknight can feel special", "Tuesday can feel like an outing"],
+    threat: ["Call before the weeknight is gone", "Save the table before Tuesday goes"],
+    trust: ["This kitchen saves you a table", "A local table is waiting"],
+  },
+  retail: {
+    outcome: ["The good buy, kept close", "The visit is the good part"],
+    threat: ["Call before this offer ends", "Come in before the offer ends"],
+    trust: ["A local shop holds this buy", "This shop holds the buy"],
+  },
+  dental: {
+    outcome: ["A smile you can trust", "The visit can feel simple"],
+    threat: ["Call before a small issue grows", "Book a visit before it grows"],
+    trust: ["A local dentist answers this", "This dentist takes the question"],
+  },
+  pest: {
+    outcome: ["A house that feels settled", "The kitchen can feel settled"],
+    threat: ["Call before the infestation spreads", "Book a visit before it spreads"],
+    trust: ["A local tech treats this house", "This tech treats the house"],
+  },
+  landscaping: {
+    outcome: ["A yard you can enjoy", "The yard can look cared for"],
+    threat: ["Call before the season is lost", "Book a cleanup before it shows"],
+    trust: ["A local crew tends this yard", "This crew tends the yard"],
+  },
+  solar: {
+    outcome: ["Quiet power is possible here", "The bill can be explained"],
+    threat: ["Call about the climbing bill", "Ask before the bill climbs"],
+    trust: ["A local review explains the bill", "This review explains the bill"],
+  },
+  legal: {
+    outcome: ["A clear next step", "The next call can be simple"],
+    threat: ["Call before waiting costs the claim", "Ask before the wait costs you"],
+    trust: ["A calm talk about the claim", "A local talk about the claim"],
+  },
+  general: {
+    outcome: ["The result you wanted", "This can be handled"],
+    threat: ["Call before a small problem grows", "Book a look before it grows"],
+    trust: ["A local crew takes the next step", "This crew takes the next step"],
+  },
+}
+
+function roleFromEmotion(emotion: { id: string; fear: boolean }): DirectionRole {
+  if (emotion.fear) return "threat"
+  if (/trust/i.test(emotion.id)) return "trust"
+  return "outcome"
+}
+
+function emotionForRole(kind: string, role: DirectionRole, chosenId?: string | null) {
+  const options = emotionsFor(kind)
+  const chosen = chosenId ? options.find((emotion) => emotion.id === chosenId) : undefined
+  if (role === "threat") {
+    const fear = options.find((emotion) => emotion.fear)
+    const client = chosen?.fear ? chosen : undefined
+    const fallback = options.find((emotion) => !emotion.recommend) ?? options[options.length - 1] ?? options[0]!
+    return { emotion: client ?? fear ?? fallback, source: client ? "client" as const : "recommended" as const }
+  }
+  if (role === "trust") {
+    const trust = options.find((emotion) => /trust/i.test(emotion.id)) ?? options.find((emotion) => !emotion.fear) ?? options[0]!
+    const client = chosen && /trust/i.test(chosen.id) ? chosen : undefined
+    return { emotion: client ?? trust, source: client ? "client" as const : "recommended" as const }
+  }
+  const outcome = options.find((emotion) => !emotion.fear && !/trust/i.test(emotion.id)) ?? options.find((emotion) => !emotion.fear) ?? options[0]!
+  const client = chosen && !chosen.fear && !/trust/i.test(chosen.id) ? chosen : undefined
+  return { emotion: client ?? outcome, source: client ? "client" as const : "recommended" as const }
+}
+
+function rolePair(kind: string, role: DirectionRole): readonly [string, string] {
+  return (ROLE_COPY[kind] ?? ROLE_COPY.general)![role]
+}
+
+export function onCardLine(kind: string, role: DirectionRole): string {
+  return finishLine(rolePair(kind, role)[0])
+}
+
+function finishLine(line: string): string {
+  const trimmed = line.replace(/\s+/g, " ").trim()
+  return /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`
+}
+
+function roleAngles(kind: string, role: DirectionRole, businessName?: string): PersuasionPlan["angles"] {
+  const [primary, alternate] = rolePair(kind, role)
+  const labels: Record<DirectionRole, readonly [string, string]> = {
+    outcome: ["Outcome on the card", "Another outcome"],
+    threat: ["Threat plus action", "Another threat plus action"],
+    trust: ["Local trust", "Named crew"],
+  }
+  const second = role === "trust" ? namedTrustLine(kind, businessName, alternate) : alternate
+  return [
+    { id: "A", label: labels[role][0], line: finishLine(primary), onCard: true },
+    { id: "B", label: labels[role][1], line: finishLine(second), onCard: false },
+  ]
+}
+
+function namedTrustLine(kind: string, businessName: string | undefined, generic: string): string {
+  const name = businessName?.replace(/\s+/g, " ").trim()
+  if (!name) return generic
+  const line = kind === "medicare"
+    ? `${name} explains the plan`
+    : kind === "legal"
+      ? `${name} takes the call`
+      : kind === "food"
+        ? `${name} holds a table`
+        : `${name} checks this`
+  return line.split(/\s+/).length <= 8 ? line : generic
 }
 
 function abAngles(kind: string, offer: string): PersuasionPlan["angles"] {
@@ -181,7 +342,7 @@ export function persuasionRecordLine(rationale: unknown): string | null {
   return `Emotion: ${persuasion.primaryEmotion.label} (${source}). Need: ${persuasion.coreNeed.label}. Audience: ${persuasion.awareness.label}, ${lead}. Outcome version: ${persuasion.outcomeGuidance}`
 }
 
-export function persuasionAngles(rationale: unknown): Array<{ id: "A" | "B"; label: string; line: string }> | null {
+export function persuasionAngles(rationale: unknown): Array<{ id: "A" | "B"; label: string; line: string; onCard?: boolean }> | null {
   if (!rationale || typeof rationale !== "object") return null
   const angles = (rationale as { persuasion?: PersuasionPlan }).persuasion?.angles
   if (!angles || angles.length < 2) return null
@@ -194,25 +355,29 @@ export function persuasionWarnings(rationale: unknown): string[] {
   return Array.isArray(warnings) ? warnings.filter((warning) => typeof warning === "string" && warning.trim()) : []
 }
 
+const WEAK_HEADLINE = /^(?:know your|know who)\b/i
+
 export function applyOutcomeHeadline(input: {
   headline: string
   offer: string
   brief: CampaignBrief
   vertical?: DesignVertical
+  role?: DirectionRole
 }): string {
   const headline = input.headline.replace(/\s+/g, " ").trim()
   const kind = persuasionVertical(input.brief, input.vertical)
-  if (headline && !headlineIsFeature(headline, input.offer, kind)) return headline
+  if (input.role) return onCardLine(kind, input.role)
+  if (input.brief.audienceAwareness === "past_customer" && headlineIsFeature(headline, input.offer, kind)) {
+    const resolved = resolveEmotion(kind, clientFactText(input.brief), input.brief.primaryEmotion)
+    return headlineFor({ emotion: resolved.emotion, awareness: input.brief.audienceAwareness, offer: input.offer })
+  }
+  if (headline && !headlineIsFeature(headline, input.offer, kind) && !WEAK_HEADLINE.test(headline)) return headline
   const resolved = resolveEmotion(kind, clientFactText(input.brief), input.brief.primaryEmotion)
-  return headlineFor({
-    emotion: resolved.emotion,
-    awareness: input.brief.audienceAwareness,
-    offer: input.offer,
-  })
+  return onCardLine(kind, resolved.emotion.fear ? "threat" : "outcome")
 }
 
 export interface PersuasionFinding {
-  id: "benefit" | "standout" | "urgency" | "invented" | "efficacy" | "placeholder" | "scarcity" | "medicare_free" | "testimonial" | "false_personal" | "fair_housing" | "fake_check" | "government"
+  id: "benefit" | "standout" | "urgency" | "invented" | "efficacy" | "placeholder" | "scarcity" | "medicare_free" | "testimonial" | "false_personal" | "fair_housing" | "fake_check" | "government" | "copied_line" | "agency_result"
   ok: boolean
   detail: string
 }
@@ -268,6 +433,16 @@ export function checkPersuasion(input: {
       id: "government",
       ok: !GOVERNMENT.test(copy),
       detail: GOVERNMENT.test(copy) ? "The card mimics a government notice." : "No government costume.",
+    },
+    {
+      id: "copied_line",
+      ok: !headlineCopiesCampaign(headline),
+      detail: headlineCopiesCampaign(headline) ? "The headline copies a campaign line from the research." : "The headline is not a research slogan.",
+    },
+    {
+      id: "agency_result",
+      ok: !textHasAgencyResult(copy),
+      detail: textHasAgencyResult(copy) ? "An agency result figure is on the card." : "No agency result figure.",
     },
   ]
   return findings

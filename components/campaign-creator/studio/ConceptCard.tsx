@@ -11,8 +11,6 @@ import type { CampaignBrief, CreativeDirection } from "@/lib/campaign-creator/ty
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
 import type { ConceptFeedbackView } from "@/lib/campaign-creator/actions"
-import { blueprintMatchLine } from "@/lib/design-intelligence/blueprint-tags"
-
 import { ConceptFeedback } from "./ConceptFeedback"
 import { PostcardPreview, type PostcardPreviewSize } from "./PostcardPreview"
 import { persuasionAngles, persuasionRecordLine, persuasionUsesLine, persuasionWarnings } from "@/lib/design-intelligence/persuasion"
@@ -116,11 +114,6 @@ export function ConceptCard({
           <>
             <StudioPhotoNote note={photoNote} />
             <p className="text-sm font-semibold">{direction.name}</p>
-            {direction.spec.blueprint ? (
-              <p className="text-xs font-medium">
-                Blueprint: {blueprintMatchLine(direction.spec.blueprint)}
-              </p>
-            ) : null}
             <p className="line-clamp-2 text-xs text-muted-foreground">
               {direction.oneLineDifference ?? direction.rationale}
             </p>
@@ -135,7 +128,7 @@ export function ConceptCard({
                 <p className="text-xs font-medium">A/B test options</p>
                 {angles.map((angle) => (
                   <p key={angle.id} className="text-xs text-foreground/80">
-                    {angle.id} · {angle.label}: {angle.line}
+                    {angle.onCard ? "On the card · " : ""}{angle.id} · {angle.label}: {angle.line}
                   </p>
                 ))}
               </div>
