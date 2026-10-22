@@ -28,6 +28,8 @@ function printMailMode(): PrintMailMode {
       productionEnabled: false,
       credentialsConfigured: false,
       postage: POSTCARD_5X8_POSTAGE,
+      eddmSubmitEnabled: false,
+      eddmAccountConfigured: false,
     }
   }
 }

@@ -24,7 +24,7 @@ import {
   type PostcardFacePlan,
   type ShapePlan,
 } from "@/lib/postcard-layouts/compose"
-import type { FontPairingId, PostcardSizeId, PostcardTemplateId, VerticalPaletteId } from "@/lib/postcard-layouts/ids"
+import type { FontPairingId, LayoutSizeId, PostcardTemplateId, VerticalPaletteId } from "@/lib/postcard-layouts/ids"
 import { trimInches } from "@/lib/postcard-layouts/templates"
 import type { FittedText, InchRect } from "@/lib/postcard-layouts/typefit"
 import {
@@ -37,6 +37,9 @@ import {
   type RenderedPostcardPdf,
 } from "@/lib/print-spec/render-campaign-postcard-pdf"
 import { canvasRectToPdf, type PostcardGeometry } from "@/lib/print-spec/postcard-5x8-print-spec"
+import { eddmMessageCanvasRect } from "@/lib/print-spec/postcard-eddm-print-spec"
+import { isEddmSize } from "@/lib/eddm/geometry"
+import { toNeighborhoodCopy } from "@/lib/eddm/copy"
 import { assertPrintImageDpi } from "@/lib/print-spec/render-campaign-postcard-pdf"
 
 const FONT_DIR = path.join(process.cwd(), "lib/print-spec/fonts")
@@ -51,21 +54,22 @@ export async function renderTemplatedPostcardPdf(input: {
   copy: PostcardPrintCopy
   templateId: PostcardTemplateId
   paletteId?: VerticalPaletteId
-  size?: PostcardSizeId
+  size?: LayoutSizeId
   image?: PostcardPrintImage
   alternateImage?: PostcardPrintImage
 }): Promise<RenderedPostcardPdf> {
   const size = input.size ?? "5x8"
   const spec = geometryFor(size)
+  const copy = isEddmSize(size) ? neighborhoodPrintCopy(input.copy) : input.copy
   const planInput = {
     templateId: input.templateId,
     size,
     paletteId: input.paletteId ?? "general",
-    businessName: input.copy.businessName,
-    qrPayload: input.copy.qrPayload,
-    disclaimer: Boolean(input.copy.disclaimer),
-    complianceMark: input.copy.complianceMark,
-    spec: input.copy,
+    businessName: copy.businessName,
+    qrPayload: copy.qrPayload,
+    disclaimer: Boolean(copy.disclaimer),
+    complianceMark: copy.complianceMark,
+    spec: copy,
   }
   const front = composePostcardFace({ ...planInput, face: "front" })
   const back = composePostcardFace({ ...planInput, face: "back" })
@@ -91,14 +95,14 @@ export async function renderTemplatedPostcardPdf(input: {
   markBoxes(frontPage, spec)
   markBoxes(backPage, spec)
 
-  drawFront(frontPage, spec, front, images, input.copy.qrPayload, display, strong, text)
-  drawBack(backPage, spec, input.copy, back, display, strong, text)
+  drawFront(frontPage, spec, front, images, copy.qrPayload, display, strong, text)
+  drawBack(backPage, spec, copy, back, display, strong, text)
 
   const bytes = await doc.save({ useObjectStreams: false })
   assertTemplatedPage(bytes, spec)
   return {
     bytes,
-    backContent: addressSideContentRect(spec),
+    backContent: isEddmSize(size) ? eddmMessageCanvasRect(spec) : addressSideContentRect(spec),
     imageDpi: images.dpi,
     artwork: input.image ? "final-photo" : "type-plate",
   }
@@ -107,7 +111,7 @@ export async function renderTemplatedPostcardPdf(input: {
 function drawFront(
   page: PDFPage,
   spec: PostcardGeometry,
-  plan: PostcardFacePlan,
+  plan: PostcardFacePlan<LayoutSizeId>,
   images: EmbeddedImages,
   qrPayload: string | undefined,
   display: PDFFont,
@@ -140,7 +144,7 @@ function drawBack(
   page: PDFPage,
   spec: PostcardGeometry,
   copy: PostcardPrintCopy,
-  plan: PostcardFacePlan,
+  plan: PostcardFacePlan<LayoutSizeId>,
   display: PDFFont,
   strong: PDFFont,
   text: PDFFont
@@ -152,6 +156,11 @@ function drawBack(
     height: spec.pdfPagePoints.heightPoints,
     color: rgb(1, 1, 1),
   })
+  if (isEddmSize(plan.size)) {
+    for (const shape of plan.shapes) drawShape(page, spec, plan, shape)
+    for (const line of plan.texts) drawFitted(page, spec, line, display, text)
+    return
+  }
   const content = addressSideContentRect(spec)
   const address = addressBackPlan(copy)
   const box = canvasRectToPdf(content, spec.artworkCanvasInches.heightInches)
@@ -217,7 +226,7 @@ function drawBack(
 function drawPhoto(
   page: PDFPage,
   spec: PostcardGeometry,
-  plan: PostcardFacePlan,
+  plan: PostcardFacePlan<LayoutSizeId>,
   slot: PhotoSlotPlan,
   image: PDFImage | null,
   wash: string
@@ -241,7 +250,7 @@ function drawPhoto(
   page.pushOperators(popGraphicsState())
 }
 
-function drawShape(page: PDFPage, spec: PostcardGeometry, plan: PostcardFacePlan, shape: ShapePlan) {
+function drawShape(page: PDFPage, spec: PostcardGeometry, plan: PostcardFacePlan<LayoutSizeId>, shape: ShapePlan) {
   const expanded =
     shape.role === "field" ||
     shape.role === "paper" ||
@@ -273,6 +282,18 @@ function drawShape(page: PDFPage, spec: PostcardGeometry, plan: PostcardFacePlan
   }
   if (shape.role === "chip") {
     page.drawSvgPath(pillPath(pdf.xPoints, pdf.yPoints, pdf.widthPoints, pdf.heightPoints), {
+      color: paint(shape.fill),
+    })
+    return
+  }
+  if (shape.role === "panel") {
+    page.drawRectangle({
+      x: pdf.xPoints,
+      y: pdf.yPoints,
+      width: pdf.widthPoints,
+      height: pdf.heightPoints,
+      borderColor: paint(plan.palette.ink),
+      borderWidth: 0.75,
       color: paint(shape.fill),
     })
     return
@@ -325,7 +346,7 @@ function drawFitted(page: PDFPage, spec: PostcardGeometry, line: FittedText, dis
 function drawFrontLockup(
   page: PDFPage,
   spec: PostcardGeometry,
-  plan: PostcardFacePlan,
+  plan: PostcardFacePlan<LayoutSizeId>,
   payload: string | undefined,
   display: PDFFont,
   strong: PDFFont,
@@ -368,7 +389,7 @@ function drawFrontLockup(
   })
 }
 
-function drawTrust(page: PDFPage, spec: PostcardGeometry, plan: PostcardFacePlan, font: PDFFont) {
+function drawTrust(page: PDFPage, spec: PostcardGeometry, plan: PostcardFacePlan<LayoutSizeId>, font: PDFFont) {
   for (const chip of plan.trust) {
     const pdf = canvasRectToPdf(canvasRect(chip.rect), spec.artworkCanvasInches.heightInches)
     page.drawSvgPath(pillPath(pdf.xPoints, pdf.yPoints, pdf.widthPoints, pdf.heightPoints), {
@@ -483,7 +504,17 @@ async function embedImages(
   return { primary: await embed(primary), alternate: await embed(alternate), dpi }
 }
 
-function expandBleed(rect: InchRect, size: PostcardSizeId, bleed: number): InchRect {
+function neighborhoodPrintCopy(copy: PostcardPrintCopy): PostcardPrintCopy {
+  return {
+    ...copy,
+    headline: copy.headline ? toNeighborhoodCopy(copy.headline) : copy.headline,
+    body: copy.body ? toNeighborhoodCopy(copy.body) : copy.body,
+    offer: copy.offer ? toNeighborhoodCopy(copy.offer) : copy.offer,
+    callToAction: copy.callToAction ? toNeighborhoodCopy(copy.callToAction) : copy.callToAction,
+  }
+}
+
+function expandBleed(rect: InchRect, size: LayoutSizeId, bleed: number): InchRect {
   const trim = trimInches(size)
   let { x, y, w, h } = rect
   if (x <= 0.02) {

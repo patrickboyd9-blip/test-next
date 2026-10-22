@@ -4,6 +4,7 @@ import type {
   MailPieceCatalogVersion,
 } from "@/lib/mail-catalog/types"
 import type { DesignRationale } from "@/lib/design-intelligence/rationale"
+import type { EddmAudience } from "@/lib/eddm/routes"
 import type { PostcardTemplateId, VerticalPaletteId } from "@/lib/postcard-layouts/ids"
 
 export type CampaignStatus =
@@ -44,9 +45,14 @@ export interface PrimarySuccessMetric {
   description?: string
 }
 
+export type AudienceDelivery = "named_list" | "eddm"
+
 export interface AudienceDefinition {
   description: string
   quantity?: number
+  /** Omitted on older campaigns. Those stay a named mailing list. */
+  delivery?: AudienceDelivery
+  eddm?: EddmAudience
 }
 
 export interface BusinessInfo {
@@ -170,7 +176,7 @@ export const GENERATED_SPEC_TOOL_REQUIRED = [
   "imageryRole",
 ] as const
 
-export type BackLayout = "standard_address"
+export type BackLayout = "standard_address" | "eddm_postal_customer"
 
 export type HeadlinePosition = "beside_photo" | "over_quiet_area" | "on_color_field" | "in_band"
 export type ResearchPhotoCrop = "tight" | "open" | "space_for_type"

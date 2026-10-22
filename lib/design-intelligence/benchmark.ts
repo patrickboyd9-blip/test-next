@@ -3,7 +3,7 @@ import path from "node:path"
 
 import type { CampaignBrief, CreativeSpec } from "@/lib/campaign-creator/types"
 import { assignTemplateToSpec, verticalPaletteForBrief } from "@/lib/postcard-layouts/assign"
-import { composePostcardFace } from "@/lib/postcard-layouts/compose"
+import { composePostcardFace, type PostcardFacePlan } from "@/lib/postcard-layouts/compose"
 
 import { critiqueCard } from "./critic"
 import { loadLibrary, loadSeedAnalyses } from "./library"
@@ -193,7 +193,7 @@ async function writePair(
   outDir: string,
   item: BenchmarkBrief,
   directed: DirectedCard,
-  beforePlan: ReturnType<typeof composePostcardFace>
+  beforePlan: PostcardFacePlan
 ): Promise<void> {
   await mkdir(outDir, { recursive: true })
   const payload = item.brief.qrDestination ?? item.brief.website ?? "https://example.com/book"

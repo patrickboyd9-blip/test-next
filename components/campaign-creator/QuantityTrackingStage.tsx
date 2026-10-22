@@ -13,6 +13,8 @@ import {
 import { Separator } from "@/components/ui/separator"
 import type { CampaignBrief, CampaignStatus } from "@/lib/campaign-creator/types"
 import { isAtOrPastStatus } from "@/lib/campaign-creator/campaign-status"
+import { eddmPostageEstimate } from "@/lib/eddm/postage"
+import { summarizeSelection } from "@/lib/eddm/routes"
 
 import { Field } from "./BriefSummaryCard"
 
@@ -35,6 +37,11 @@ export function QuantityTrackingStage({
 }: QuantityTrackingStageProps) {
   const readOnly = status !== "audience_confirmed"
   const isConfirmed = isAtOrPastStatus(status, "quantity_confirmed")
+  const everyDoor = brief.audience?.delivery === "eddm" && brief.audience.eddm
+  const eddmSummary = everyDoor
+    ? summarizeSelection(everyDoor.routes, everyDoor.coverage)
+    : null
+  const eddmPostage = eddmSummary ? eddmPostageEstimate(eddmSummary.pieces) : null
 
   return (
     <Card>
@@ -50,22 +57,42 @@ export function QuantityTrackingStage({
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
-        <Field
-          key={`quantity:${brief.audience?.quantity ?? ""}`}
-          label="Quantity"
-          value={brief.audience?.quantity ? String(brief.audience.quantity) : ""}
-          readOnly={readOnly}
-          type="number"
-          placeholder="How many pieces?"
-          onCommit={(value) =>
-            onFieldChange({
-              audience: {
-                description: brief.audience?.description ?? "",
-                quantity: value ? Number(value) : undefined,
-              },
-            })
-          }
-        />
+        {eddmSummary && eddmPostage ? (
+          <div className="flex flex-col gap-2">
+            <div>
+              <p className="text-sm text-muted-foreground">Pieces</p>
+              <p className="text-lg font-medium">{eddmSummary.pieces.toLocaleString("en-US")}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">{eddmPostage.label}</p>
+              <p className="text-lg font-medium">{eddmPostage.amountLabel}</p>
+              <p className="text-sm text-muted-foreground">{eddmPostage.detail}</p>
+            </div>
+            {eddmSummary.messages.map((message) => (
+              <p key={message} className="text-sm text-destructive" role="status">
+                {message}
+              </p>
+            ))}
+          </div>
+        ) : (
+          <Field
+            key={`quantity:${brief.audience?.quantity ?? ""}`}
+            label="Quantity"
+            value={brief.audience?.quantity ? String(brief.audience.quantity) : ""}
+            readOnly={readOnly}
+            type="number"
+            placeholder="How many pieces?"
+            onCommit={(value) =>
+              onFieldChange({
+                audience: {
+                  ...brief.audience,
+                  description: brief.audience?.description ?? "",
+                  quantity: value ? Number(value) : undefined,
+                },
+              })
+            }
+          />
+        )}
 
         <Separator />
 
@@ -94,7 +121,7 @@ export function QuantityTrackingStage({
       </CardContent>
       {!readOnly && !hideConfirm && (
         <CardFooter className="justify-end">
-          <Button onClick={onConfirm} disabled={isConfirming}>
+          <Button onClick={onConfirm} disabled={isConfirming || Boolean(eddmSummary && eddmSummary.messages.length > 0)}>
             {isConfirming ? "Confirming…" : "Confirm quantity & tracking"}
           </Button>
         </CardFooter>

@@ -10,11 +10,15 @@ import { TEMPLATE_INDUSTRIES } from "./types"
 
 test("the catalog has three mailers for each industry, stored as records", () => {
   const all = listMailTemplates()
-  assert.equal(all.length, TEMPLATE_INDUSTRIES.length * 3)
+  const addressed = all.filter((template) => template.size === "5x8")
+  const eddm = all.filter((template) => template.size !== "5x8")
+  assert.equal(addressed.length, TEMPLATE_INDUSTRIES.length * 3)
   assert.equal(new Set(all.map((template) => template.id)).size, all.length)
+  assert.ok(eddm.some((template) => template.size === "6.5x9"))
+  assert.ok(eddm.some((template) => template.size === "6.25x11"))
 
   for (const industry of TEMPLATE_INDUSTRIES) {
-    const group = listMailTemplates(industry)
+    const group = listMailTemplates(industry).filter((template) => template.size === "5x8")
     assert.equal(group.length, 3)
     for (const template of group) {
       assert.equal(template.industry, industry)
@@ -25,6 +29,13 @@ test("the catalog has three mailers for each industry, stored as records", () =>
       const words = headlineWordCount(template.spec.headline)
       assert.ok(words >= 3 && words <= 6, `${template.id} headline has ${words} words`)
     }
+  }
+  for (const template of eddm) {
+    assert.equal(template.spec.backLayout, "eddm_postal_customer")
+    assert.equal(template.spec.layoutHints?.templateId !== undefined, true)
+    const words = headlineWordCount(template.spec.headline)
+    assert.ok(words >= 3 && words <= 6, `${template.id} headline has ${words} words`)
+    assert.doesNotMatch(`${template.spec.headline} ${template.spec.body}`, /\bDear\b|\{\{/)
   }
 
   assert.equal(getMailTemplate("missing"), null)

@@ -5,6 +5,8 @@
  * any reference mailer, specimen, or third-party template.
  */
 
+import type { EddmSize } from "@/lib/eddm/geometry"
+
 export const POSTCARD_TEMPLATE_IDS = [
   "hero_scrim",
   "offer_starburst",
@@ -26,6 +28,9 @@ export type PostcardTemplateId = (typeof POSTCARD_TEMPLATE_IDS)[number]
 
 export const POSTCARD_SIZES = ["5x8", "6x9"] as const
 export type PostcardSizeId = (typeof POSTCARD_SIZES)[number]
+
+/** Addressed cards plus Every Door flats. Studio grids stay on PostcardSizeId. */
+export type LayoutSizeId = PostcardSizeId | EddmSize
 
 export const FONT_PAIRINGS = ["trade", "signal", "letter"] as const
 export type FontPairingId = (typeof FONT_PAIRINGS)[number]

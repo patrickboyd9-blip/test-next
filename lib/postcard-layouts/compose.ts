@@ -8,8 +8,17 @@ import {
   type PostcardGeometry,
 } from "@/lib/print-spec/postcard-5x8-print-spec"
 import { buildPostcard6x9PrintSpec } from "@/lib/print-spec/postcard-6x9-print-spec"
+import { buildEddmPrintSpec } from "@/lib/print-spec/postcard-eddm-print-spec"
+import {
+  EDDM_INDICIA_LINES,
+  EDDM_POSTAL_CUSTOMER,
+  eddmMessageRect,
+  eddmTrim,
+  isEddmSize,
+} from "@/lib/eddm/geometry"
+import { toNeighborhoodCopy } from "@/lib/eddm/copy"
 
-import type { PostcardSizeId, PostcardTemplateId, VerticalPaletteId } from "./ids"
+import type { LayoutSizeId, PostcardSizeId, PostcardTemplateId, VerticalPaletteId } from "./ids"
 import { paletteById, type VerticalPalette } from "./palette"
 import {
   clampToSafe,
@@ -59,9 +68,9 @@ export interface TrustChipPlan {
   fontPt: number
 }
 
-export interface PostcardFacePlan {
+export interface PostcardFacePlan<S extends LayoutSizeId = PostcardSizeId> {
   templateId: PostcardTemplateId
-  size: PostcardSizeId
+  size: S
   face: "front" | "back"
   pairing: (typeof TEMPLATE_META)[PostcardTemplateId]["pairing"]
   palette: VerticalPalette
@@ -77,7 +86,7 @@ export interface PostcardFacePlan {
 
 export interface ComposeInput {
   templateId: PostcardTemplateId
-  size?: PostcardSizeId
+  size?: LayoutSizeId
   face?: "front" | "back"
   spec: Pick<
     CreativeSpec,
@@ -92,21 +101,26 @@ export interface ComposeInput {
   complianceMark?: string | null
 }
 
-export function composePostcardFace(input: ComposeInput): PostcardFacePlan {
+export function composePostcardFace(input: ComposeInput & { size?: PostcardSizeId }): PostcardFacePlan
+export function composePostcardFace(input: ComposeInput): PostcardFacePlan<LayoutSizeId>
+export function composePostcardFace(input: ComposeInput): PostcardFacePlan<LayoutSizeId> {
   const size = input.size ?? "5x8"
   const face = input.face ?? "front"
   const meta = TEMPLATE_META[input.templateId]
   const palette = paletteById(input.paletteId ?? "general")
-  if (face === "back") return composeBack(input, size, meta.pairing, palette)
+  if (face === "back") {
+    if (isEddmSize(size)) return composeEddmBack(input, size, meta.pairing, palette)
+    return composeBack(input, size, meta.pairing, palette)
+  }
   return composeFront(input, size, meta.pairing, palette)
 }
 
 function composeFront(
   input: ComposeInput,
-  size: PostcardSizeId,
+  size: LayoutSizeId,
   pairing: PostcardFacePlan["pairing"],
   palette: VerticalPalette
-): PostcardFacePlan {
+): PostcardFacePlan<LayoutSizeId> {
   const regions = frontRegions(input.templateId).map((region) => ({
     ...region,
     ...scaleRect(region, size),
@@ -170,6 +184,125 @@ function composeFront(
     lockup,
     overflows,
     missingContact,
+  }
+}
+
+function composeEddmBack(
+  input: ComposeInput,
+  size: LayoutSizeId,
+  pairing: PostcardFacePlan["pairing"],
+  palette: VerticalPalette
+): PostcardFacePlan<LayoutSizeId> {
+  if (!isEddmSize(size)) {
+    throw new Error("EDDM back requires a 6.5×9 or 6.25×11 card.")
+  }
+  const trim = eddmTrim(size)
+  const keepOuts = trimKeepOuts(size)
+  const indicia = keepOuts.find((item) => item.id === "eddm_indicia")
+  const address = keepOuts.find((item) => item.id === "postal_customer")
+  const message = eddmMessageRect(trim)
+  const copy = resolveCopy({
+    ...input,
+    spec: {
+      ...input.spec,
+      headline: toNeighborhoodCopy(input.spec.headline ?? ""),
+      subheadline: toNeighborhoodCopy(input.spec.subheadline ?? ""),
+      body: toNeighborhoodCopy(input.spec.body ?? ""),
+      offer: toNeighborhoodCopy(input.spec.offer ?? ""),
+      callToAction: toNeighborhoodCopy(input.spec.callToAction ?? ""),
+    },
+  })
+  const texts: FittedText[] = []
+  const shapes: ShapePlan[] = []
+  if (indicia) {
+    shapes.push({
+      id: "eddm-indicia",
+      role: "panel",
+      rect: { x: indicia.x, y: indicia.y, w: indicia.w, h: indicia.h },
+      fill: "#f4f1ea",
+    })
+    const lineH = (indicia.h - 0.28) / EDDM_INDICIA_LINES.length
+    EDDM_INDICIA_LINES.forEach((line, index) => {
+      const fitted = fitText({
+        text: line,
+        rect: {
+          x: indicia.x + 0.12,
+          y: indicia.y + 0.12 + index * lineH,
+          w: indicia.w - 0.24,
+          h: lineH,
+        },
+        role: "label",
+        pairing,
+        color: palette.ink,
+        align: "center",
+        minPt: 8,
+        maxPt: 11,
+      })
+      if (fitted.lines.length > 0) texts.push(fitted)
+    })
+  }
+  if (address) {
+    const fitted = fitText({
+      text: EDDM_POSTAL_CUSTOMER,
+      rect: { x: address.x, y: address.y, w: address.w, h: address.h },
+      role: "label",
+      pairing,
+      color: palette.ink,
+      align: "left",
+      minPt: 8,
+      maxPt: 12,
+    })
+    if (fitted.lines.length > 0) texts.push(fitted)
+  }
+  const returnName = clean(input.businessName)
+  if (returnName && address) {
+    const fitted = fitText({
+      text: returnName,
+      rect: { x: 0.25, y: 0.28, w: Math.max(1.2, address.x - 0.4), h: 0.7 },
+      role: "label",
+      pairing,
+      color: palette.ink,
+      minPt: 8,
+      maxPt: 11,
+    })
+    if (fitted.lines.length > 0) texts.push(fitted)
+  }
+  const roles = backRoles(input.templateId)
+  const gap = 0.08
+  let cursor = message.yInches
+  let height = message.heightInches
+  if (input.disclaimer) {
+    height = Math.max(0.8, height - 0.4)
+  }
+  const each = roles.length > 0 ? (height - gap * Math.max(roles.length - 1, 0)) / roles.length : height
+  for (const role of roles) {
+    const text = backCopy(copy, role)
+    const rect = { x: message.xInches, y: cursor, w: message.widthInches, h: Math.max(0.35, each) }
+    cursor += each + gap
+    if (!text) continue
+    const fitted = fitText({
+      text,
+      rect,
+      role,
+      pairing,
+      color: role === "offer" ? palette.accent : palette.ink,
+      maxPt: role === "offer" ? 22 : role === "headline" ? 18 : 13,
+    })
+    if (fitted.lines.length > 0) texts.push(fitted)
+  }
+  return {
+    templateId: input.templateId,
+    size,
+    face: "back",
+    pairing,
+    palette,
+    photos: [],
+    shapes,
+    texts,
+    trust: [],
+    lockup: null,
+    overflows: texts.some((text) => text.overflows),
+    missingContact: [],
   }
 }
 
@@ -253,7 +386,7 @@ function fitRegion(
   copy: CopyBlocks,
   pairing: PostcardFacePlan["pairing"],
   palette: VerticalPalette,
-  size: PostcardSizeId
+  size: LayoutSizeId
 ): FittedText | null {
   const role = region.role as TextRole
   const text = textForRole(role, region.id, copy)
@@ -306,7 +439,7 @@ function fitLockup(
   copy: CopyBlocks,
   pairing: PostcardFacePlan["pairing"],
   palette: VerticalPalette,
-  size: PostcardSizeId
+  size: LayoutSizeId
 ): LockupPlan {
   const rect = clampToSafe(region, size)
   const qrLabelPt = 9
@@ -613,7 +746,17 @@ function contrastSafe(preferred: string, background: string, fallback: string): 
   return preferred === fallback ? preferred : preferred || fallback
 }
 
-export function backMessageRect(size: PostcardSizeId, disclaimer: boolean): InchRect {
+export function backMessageRect(size: LayoutSizeId, disclaimer: boolean): InchRect {
+  if (isEddmSize(size)) {
+    const message = eddmMessageRect(eddmTrim(size))
+    const bottom = disclaimer ? 0.4 : 0
+    return {
+      x: message.xInches,
+      y: message.yInches,
+      w: message.widthInches,
+      h: Math.max(0.8, message.heightInches - bottom),
+    }
+  }
   const spec = geometryFor(size)
   const content = addressSideContentRect(spec)
   const bleed = spec.bleedInchesPerSide
@@ -633,11 +776,13 @@ export function backMessageRect(size: PostcardSizeId, disclaimer: boolean): Inch
   }
 }
 
-export function geometryFor(size: PostcardSizeId): PostcardGeometry {
-  return size === "6x9" ? buildPostcard6x9PrintSpec() : buildPostcard5x8PrintSpec()
+export function geometryFor(size: LayoutSizeId): PostcardGeometry {
+  if (size === "6x9") return buildPostcard6x9PrintSpec()
+  if (isEddmSize(size)) return buildEddmPrintSpec(size)
+  return buildPostcard5x8PrintSpec()
 }
 
-export function trimKeepOuts(size: PostcardSizeId): Array<InchRect & { id: string }> {
+export function trimKeepOuts(size: LayoutSizeId): Array<InchRect & { id: string }> {
   const spec = geometryFor(size)
   const bleed = spec.bleedInchesPerSide
   return spec.keepOuts.map((keepOut) => ({
@@ -649,7 +794,11 @@ export function trimKeepOuts(size: PostcardSizeId): Array<InchRect & { id: strin
   }))
 }
 
-export function contentTrimRect(size: PostcardSizeId): InchRect {
+export function contentTrimRect(size: LayoutSizeId): InchRect {
+  if (isEddmSize(size)) {
+    const message = eddmMessageRect(eddmTrim(size))
+    return { x: message.xInches, y: message.yInches, w: message.widthInches, h: message.heightInches }
+  }
   const spec = geometryFor(size)
   const content = addressSideContentRect(spec)
   const bleed = spec.bleedInchesPerSide
@@ -682,7 +831,7 @@ function displayHost(value: string | undefined): string {
   return clean(value).replace(/^https?:\/\//i, "").replace(/\/$/, "")
 }
 
-export function safeTrimRect(size: PostcardSizeId): InchRect {
+export function safeTrimRect(size: LayoutSizeId): InchRect {
   const trim = trimInches(size)
   return { x: 0.25, y: 0.25, w: trim.w - 0.5, h: trim.h - 0.5 }
 }

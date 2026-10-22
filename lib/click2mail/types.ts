@@ -51,10 +51,35 @@ export interface ReturnAddress {
 
 export interface JobDraft {
   documentId: string
-  addressId: string
+  /** Omitted for Every Door jobs, which use quantity instead of an address list. */
+  addressId?: string
   product: Click2MailProductOptions
   returnAddress?: ReturnAddress
   quantity?: number
+}
+
+export interface EddmMailerInfo {
+  name: string
+  organization?: string
+  address: string
+  city: string
+  state: string
+  zip: string
+  phone?: string
+}
+
+export interface EddmRouteSubmission {
+  poName: string
+  route: string
+  postalCode: string
+  totalPieces: number
+}
+
+export interface EddmPostOfficeSubmission {
+  name: string
+  address: string
+  hours?: string
+  totalPieces: number
 }
 
 export interface JobSnapshot {
@@ -110,4 +135,14 @@ export interface Click2MailClient {
   submitJob(jobId: string, billingType: string): Promise<JobSnapshot>
   getJob(jobId: string): Promise<JobSnapshot>
   getTracking(jobId: string, trackingType?: string): Promise<TrackingSnapshot>
+  /**
+   * EDDM calls. Field names follow the public REST reference.
+   * They have not been confirmed on staging, so the product keeps them
+   * behind C2M_EDDM_SUBMIT.
+   */
+  getEddm(jobId: string): Promise<JobSnapshot>
+  setEddmInfo(jobId: string, info: EddmMailerInfo): Promise<JobSnapshot>
+  setEddmRoute(jobId: string, route: EddmRouteSubmission): Promise<JobSnapshot>
+  setEddmPostOffice(jobId: string, office: EddmPostOfficeSubmission): Promise<JobSnapshot>
+  updateEddmJob(jobId: string, input: { crid: string; quantity: number }): Promise<JobSnapshot>
 }

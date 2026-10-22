@@ -8,4 +8,11 @@ export interface PrintMailMode {
   credentialsConfigured: boolean
   /** First Class postcard postage used for the estimate on this server. */
   postage: PostcardPostageRates
+  /**
+   * True only on staging, with C2M_EDDM_SUBMIT=true, credentials, and a USPS
+   * account id. Production never turns this on.
+   */
+  eddmSubmitEnabled: boolean
+  /** True when C2M_EDDM_CRID is set. The id itself stays on the server. */
+  eddmAccountConfigured: boolean
 }

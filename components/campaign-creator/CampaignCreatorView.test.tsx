@@ -22,6 +22,8 @@ const printMailMode: PrintMailMode = {
   productionEnabled: false,
   credentialsConfigured: false,
   postage: { standardFirstClassDollars: 0.56, nonstandardFirstClassDollars: 0.73 },
+  eddmSubmitEnabled: false,
+  eddmAccountConfigured: false,
 }
 
 test("AI strategy confirmation opens direction generation and skips the design chooser", async () => {

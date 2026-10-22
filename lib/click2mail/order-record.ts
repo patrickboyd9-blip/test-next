@@ -1,3 +1,5 @@
+import type { EddmSize } from "@/lib/eddm/geometry"
+
 /** Vendor ids and timestamps stored on the campaign document. No credentials. */
 export interface MailOrderProduct {
   documentClass: string
@@ -35,4 +37,11 @@ export interface MailOrderRecord {
   updatedAt: string
   submittedAt?: string
   lastPolledAt?: string
+  /** Present on an Every Door order. Addressed postcard orders omit it. */
+  eddm?: {
+    size: EddmSize
+    routeCount: number
+    postOfficeCount: number
+    prepared: boolean
+  }
 }

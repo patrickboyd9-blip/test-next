@@ -29,11 +29,10 @@ export const TEMPLATE_INDUSTRY_LABELS: Record<TemplateIndustry, string> = {
 }
 
 /**
- * Studio templates are composed for the locked 5×8 postcard.
- * Bleed, trim, and the address-side keep-out stay on POSTCARD_5X8_V1.
- * The 6×9 print spec is a separate geometry and is not rewritten here.
+ * Addressed templates stay on the locked 5×8 postcard.
+ * EDDM templates use a 6.5×9 or 6.25×11 flat.
  */
-export type TemplateSize = "5x8"
+export type TemplateSize = "5x8" | "6.5x9" | "6.25x11"
 
 /** A mailer a customer can start from. One record, not a screen. */
 export interface MailTemplate {

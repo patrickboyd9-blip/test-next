@@ -12,6 +12,7 @@ import {
   TEMPLATE_INDUSTRY_LABELS,
   type MailTemplate,
   type TemplateIndustry,
+  type TemplateSize,
 } from "@/lib/mail-templates/types"
 import { cn } from "@/lib/utils"
 
@@ -106,11 +107,12 @@ export function TemplateGallery({ onBack, onSelect }: TemplateGalleryProps) {
                     qrDestination: template.spec.qrDestination,
                   }}
                   ariaLabel={`${template.name} postcard`}
+                  viewingAspectClass={aspectClass(template.size)}
                 />
               </div>
               <span className="flex flex-col gap-1">
                 <span className="text-xs text-muted-foreground">
-                  {TEMPLATE_INDUSTRY_LABELS[template.industry]} · 5×8
+                  {TEMPLATE_INDUSTRY_LABELS[template.industry]} · {sizeLabel(template.size)}
                 </span>
                 <span className="text-sm font-medium tracking-tight">{template.name}</span>
                 <span className="text-sm leading-6 text-muted-foreground">{template.summary}</span>
@@ -130,6 +132,18 @@ export function TemplateGallery({ onBack, onSelect }: TemplateGalleryProps) {
       )}
     </div>
   )
+}
+
+function sizeLabel(size: TemplateSize): string {
+  if (size === "6.5x9") return "6.5×9 Every Door"
+  if (size === "6.25x11") return "6.25×11 Every Door"
+  return "5×8"
+}
+
+function aspectClass(size: TemplateSize): string | undefined {
+  if (size === "6.5x9") return "aspect-[9/6.5]"
+  if (size === "6.25x11") return "aspect-[11/6.25]"
+  return undefined
 }
 
 function FilterChip({

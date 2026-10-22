@@ -1,4 +1,4 @@
-import type { FontPairingId, PostcardSizeId, PostcardTemplateId } from "./ids"
+import type { FontPairingId, LayoutSizeId, PostcardTemplateId } from "./ids"
 import type { InchRect } from "./typefit"
 
 export interface DesignRegion {
@@ -59,11 +59,14 @@ export function templatesForPalette(palette: string): readonly PostcardTemplateI
   return TEMPLATES_FOR[palette] ?? TEMPLATES_FOR.general
 }
 
-export function trimInches(size: PostcardSizeId): { w: number; h: number } {
-  return size === "6x9" ? { w: 9, h: 6 } : { w: 8, h: 5 }
+export function trimInches(size: LayoutSizeId): { w: number; h: number } {
+  if (size === "6x9") return { w: 9, h: 6 }
+  if (size === "6.5x9") return { w: 9, h: 6.5 }
+  if (size === "6.25x11") return { w: 11, h: 6.25 }
+  return { w: 8, h: 5 }
 }
 
-export function scaleRect(rect: InchRect, size: PostcardSizeId): InchRect {
+export function scaleRect(rect: InchRect, size: LayoutSizeId): InchRect {
   const trim = trimInches(size)
   return {
     x: rect.x * (trim.w / 8),
@@ -246,7 +249,7 @@ export function rectsOverlap(a: InchRect, b: InchRect, gap = 0.01): boolean {
   return a.x + a.w > b.x + gap && b.x + b.w > a.x + gap && a.y + a.h > b.y + gap && b.y + b.h > a.y + gap
 }
 
-export function clampToSafe(rect: InchRect, size: PostcardSizeId): InchRect {
+export function clampToSafe(rect: InchRect, size: LayoutSizeId): InchRect {
   const trim = trimInches(size)
   const inset = 0.25
   const x = Math.max(rect.x, inset)
