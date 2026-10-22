@@ -17,14 +17,23 @@ import {
   confirmCampaignAudience,
   confirmCampaignQuantity,
   getMailPieceFormatRecommendation,
+  openEveryDoorRoutes,
   recoverMissingMailPiece,
+  saveUploadedAudienceList,
   sendCampaignMessage,
+  updateAudienceSpec,
   updateCampaignBrief,
   unapproveCreative,
   type MailPieceFormatRecommendationView,
 } from "@/lib/campaign-creator/actions"
 import type { PrintMailMode } from "@/lib/click2mail/mode"
-import type { Campaign, CampaignBrief, CampaignStatus, ConversationMessage } from "@/lib/campaign-creator/types"
+import type {
+  AudienceDefinition,
+  Campaign,
+  CampaignBrief,
+  CampaignStatus,
+  ConversationMessage,
+} from "@/lib/campaign-creator/types"
 import { getMailPiece } from "@/lib/mail-catalog/catalog"
 
 import { Button } from "@/components/ui/button"
@@ -95,6 +104,8 @@ export function CampaignCreatorView({
   const [recoveryFromFailedConfirm, setRecoveryFromFailedConfirm] = useState(false)
   const [formatRecommendation, setFormatRecommendation] =
     useState<MailPieceFormatRecommendationView | null>(null)
+  const [routesBusy, setRoutesBusy] = useState(false)
+  const [listUploadError, setListUploadError] = useState<string[]>([])
 
   async function handleSend() {
     const text = composerValue.trim()
@@ -110,6 +121,27 @@ export function CampaignCreatorView({
       setPendingMessage(null)
       setIsSending(false)
     }
+  }
+
+  async function handleAudienceChange(draft: AudienceDefinition) {
+    const updated = await updateAudienceSpec(campaign.id, draft)
+    setCampaign(updated)
+  }
+
+  async function handleOpenRoutes() {
+    setRoutesBusy(true)
+    try {
+      const result = await openEveryDoorRoutes(campaign.id)
+      setCampaign(result.campaign)
+    } finally {
+      setRoutesBusy(false)
+    }
+  }
+
+  async function handleUploadList(csvText: string) {
+    const result = await saveUploadedAudienceList(campaign.id, csvText)
+    setCampaign(result.campaign)
+    setListUploadError(result.errors)
   }
 
   async function handleFieldChange(patch: Partial<CampaignBrief>) {
@@ -294,7 +326,14 @@ export function CampaignCreatorView({
           }}
         />
       ) : (
-        <ConversationThread messages={displayMessages} isThinking={isSending} />
+        <ConversationThread
+          messages={displayMessages}
+          isThinking={isSending}
+          brief={campaign.brief}
+          onAudienceChange={(draft) => void handleAudienceChange(draft)}
+          onOpenRoutes={() => void handleOpenRoutes()}
+          routesBusy={routesBusy}
+        />
       )}
 
       {showComposer && (
@@ -404,10 +443,14 @@ export function CampaignCreatorView({
 
       {showAudience && (
         <AudienceStage
-          audience={campaign.brief.audience}
+          brief={campaign.brief}
           status={campaign.status}
           fromConversation={campaign.entry !== "upload" && campaign.entry !== "template"}
-          onFieldChange={handleFieldChange}
+          onAudienceChange={(draft) => void handleAudienceChange(draft)}
+          onOpenRoutes={() => void handleOpenRoutes()}
+          routesBusy={routesBusy}
+          onUploadList={(csvText) => void handleUploadList(csvText)}
+          uploadErrors={listUploadError}
           onConfirm={handleConfirmAudience}
           isConfirming={isConfirmingAudience}
           hideConfirm={showMailPieceRecovery}

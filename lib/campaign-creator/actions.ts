@@ -24,10 +24,13 @@ import {
   briefPatchFromPersonalization,
   personalizationFromPrompt,
 } from "./prompt-personalization"
+import { acceptAudienceEdit, audienceFromMessage, pieceCountStatedIn } from "@/lib/audience/interpret"
+import { everyDoorRouteHandoff } from "@/lib/audience/providers"
+import { parseRecipientCsv } from "@/lib/click2mail/recipients"
 import { campaignForCustomer } from "./customer-campaign"
 import { getCampaignRepository } from "./repository"
 import { buildSpecDiff, cloneSpec } from "./spec-diff"
-import type { Campaign, CampaignBrief, CreativeRevision, MailPieceSpec } from "./types"
+import type { AudienceDefinition, Campaign, CampaignBrief, CreativeRevision, MailPieceSpec } from "./types"
 import type {
   MailPieceCatalogId,
   MailPieceCatalogVersion,
@@ -121,24 +124,68 @@ export async function sendCampaignMessage(
   const campaign = await repository.getCampaign(campaignId)
   if (!campaign) throw new Error(`Campaign ${campaignId} not found`)
 
+  const turn = audienceFromMessage(campaign.brief, trimmed)
+  const briefForEngine = turn?.showCard
+    ? { ...campaign.brief, audience: turn.audience }
+    : campaign.brief
+
   try {
     const engine = await getConversationEngine()
     const result = await engine.nextTurn({
-      brief: campaign.brief,
+      brief: briefForEngine,
       transcript: campaign.transcript,
       message: trimmed,
     })
 
-    await repository.updateBrief(campaignId, result.brief)
+    const briefPatch: Partial<CampaignBrief> = { ...result.brief }
+    if (turn?.showCard) {
+      briefPatch.audience = turn.audience
+    } else if (briefPatch.audience) {
+      const stated = pieceCountStatedIn(trimmed)
+      const merged: AudienceDefinition = {
+        ...campaign.brief.audience,
+        ...briefPatch.audience,
+        description: briefPatch.audience.description ?? campaign.brief.audience?.description ?? "",
+      }
+      if (stated === undefined) {
+        merged.quantity = campaign.brief.audience?.quantity
+        merged.quantityKind = campaign.brief.audience?.quantityKind
+      } else {
+        merged.quantity = stated
+        merged.quantityKind = "requested"
+      }
+      briefPatch.audience = acceptAudienceEdit(campaign.brief, merged)
+    }
+
+    await repository.updateBrief(campaignId, briefPatch)
     await repository.setReadyForBriefReview(campaignId, result.readyForBriefReview)
 
     return forCustomer(await repository.appendMessage(campaignId, {
       id: randomUUID(),
       role: "assistant",
-      content: result.reply,
+      content: turn && turn.blocked.length > 0 ? turn.assistantNote : result.reply,
       createdAt: new Date().toISOString(),
+      audienceCard: turn?.showCard ? turn.audience : undefined,
     }))
   } catch (error) {
+    if (turn?.showCard) {
+      await repository.updateBrief(campaignId, { audience: turn.audience })
+      const disconnected = error instanceof ConversationEngineNotConfiguredError
+      if (!disconnected) {
+        console.error("Campaign Creator conversation engine failed:", error)
+      }
+      const content = disconnected
+        ? `${turn.assistantNote} I saved the audience. The rest of the design conversation isn't connected yet, so you can keep editing the card.`
+        : `${turn.assistantNote} I saved the audience. Please try the rest of that message again.`
+      return forCustomer(await repository.appendMessage(campaignId, {
+        id: randomUUID(),
+        role: "assistant",
+        content,
+        createdAt: new Date().toISOString(),
+        audienceCard: turn.audience,
+      }))
+    }
+
     if (error instanceof ConversationEngineNotConfiguredError) {
       return forCustomer(await repository.appendMessage(campaignId, {
         id: randomUUID(),
@@ -167,7 +214,88 @@ export async function updateCampaignBrief(
   campaignId: string,
   patch: Partial<CampaignBrief>
 ): Promise<Campaign> {
-  return forCustomer(await repository.updateBrief(campaignId, patch))
+  if (!patch.audience) return forCustomer(await repository.updateBrief(campaignId, patch))
+  const current = await repository.getCampaign(campaignId)
+  if (!current) throw new Error(`Campaign ${campaignId} not found`)
+  const audience = acceptAudienceEdit(current.brief, {
+    ...current.brief.audience,
+    ...patch.audience,
+    description: patch.audience.description ?? current.brief.audience?.description ?? "",
+  })
+  return forCustomer(await repository.updateBrief(campaignId, { ...patch, audience }))
+}
+
+/** Saves an edited audience card. The provider is resolved again. No data API is called. */
+export async function updateAudienceSpec(
+  campaignId: string,
+  draft: AudienceDefinition
+): Promise<Campaign> {
+  const current = await repository.getCampaign(campaignId)
+  if (!current) throw new Error(`Campaign ${campaignId} not found`)
+  const audience = acceptAudienceEdit(current.brief, draft)
+  return forCustomer(await repository.updateBrief(campaignId, { audience }))
+}
+
+/**
+ * Counts names in a list the customer already has.
+ * Does not submit mail and does not call a data vendor.
+ */
+export async function saveUploadedAudienceList(
+  campaignId: string,
+  csvText: string
+): Promise<{ campaign: Campaign; errors: string[] }> {
+  const current = await repository.getCampaign(campaignId)
+  if (!current) throw new Error(`Campaign ${campaignId} not found`)
+  const parsed = parseRecipientCsv(csvText)
+  if (parsed.errors.length > 0 || parsed.recipients.length === 0) {
+    return {
+      campaign: forCustomer(current),
+      errors: parsed.errors.length > 0 ? parsed.errors : ["No names were found in that file."],
+    }
+  }
+  const listType = current.brief.audience?.listType === "prospect" ? "prospect" : "house"
+  const audience = acceptAudienceEdit(current.brief, {
+    ...current.brief.audience,
+    description: current.brief.audience?.description || "Your list",
+    listType,
+    quantity: parsed.recipients.length,
+    quantityKind: "from_upload",
+    provider: {
+      id: "upload",
+      status: "needs_upload",
+      message: "",
+      count: "unavailable",
+    },
+  })
+  return {
+    campaign: forCustomer(await repository.updateBrief(campaignId, { audience })),
+    errors: [],
+  }
+}
+
+/**
+ * Marks this audience for the Every Door route map.
+ * The map itself is a separate step. This does not build routes or invent a count.
+ */
+export async function openEveryDoorRoutes(
+  campaignId: string
+): Promise<{ campaign: Campaign; message: string }> {
+  const current = await repository.getCampaign(campaignId)
+  if (!current) throw new Error(`Campaign ${campaignId} not found`)
+  const audience = acceptAudienceEdit(current.brief, {
+    ...current.brief.audience,
+    description: current.brief.audience?.description ?? "",
+    listType: "every_door",
+  })
+  const handoff = everyDoorRouteHandoff(audience)
+  if (handoff.hook !== "eddm.routeMap") {
+    throw new Error("Every Door route hook is missing.")
+  }
+  const updated = await repository.updateBrief(campaignId, { audience })
+  return {
+    campaign: forCustomer(updated),
+    message: audience.provider?.message ?? "This audience is saved for the route map.",
+  }
 }
 
 export async function confirmCampaignStrategy(campaignId: string): Promise<Campaign> {

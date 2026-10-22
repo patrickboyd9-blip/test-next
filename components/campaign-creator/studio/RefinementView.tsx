@@ -13,6 +13,7 @@ import type { PostcardIdentity } from "@/lib/campaign-creator/studio-contact"
 import type { Campaign, CreativeDirection, CreativeSpec } from "@/lib/campaign-creator/types"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
+import { ResponseEstimate } from "../ResponseEstimate"
 import { PostcardPreview, PostcardSideToggle } from "./PostcardPreview"
 import { StudioPhotoNote } from "./StudioPhotoNote"
 import { RevisionHistoryPanel } from "./RevisionHistoryPanel"
@@ -202,6 +203,8 @@ export function RefinementView({
           <span className="rounded bg-muted px-2 py-0.5 text-xs font-medium">v{version} current</span>
         </div>
       </div>
+
+      <ResponseEstimate brief={campaign.brief} />
 
       {campaign.entry === "template" && (
         <p className="text-sm leading-6 text-muted-foreground">

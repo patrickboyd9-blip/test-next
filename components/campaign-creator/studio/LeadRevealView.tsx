@@ -13,6 +13,7 @@ import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
 import { ConceptFeedback } from "./ConceptFeedback"
 import { PostcardPreview, PostcardSideToggle } from "./PostcardPreview"
+import { ResponseEstimate } from "../ResponseEstimate"
 import { ResearchBasis } from "./ResearchBasis"
 import { StrategyTags } from "./StrategyTags"
 import { StudioPhotoNote } from "./StudioPhotoNote"
@@ -105,6 +106,7 @@ export function LeadRevealView({
           <span className="font-medium">{direction.designedToDrive}</span>
         </p>
         <StrategyTags tags={direction.tags} />
+        {brief ? <ResponseEstimate brief={brief} /> : null}
       </motion.div>
 
       <motion.div

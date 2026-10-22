@@ -13,6 +13,7 @@ import {
 import { Separator } from "@/components/ui/separator"
 import type { CampaignBrief, CampaignStatus } from "@/lib/campaign-creator/types"
 import { isAtOrPastStatus } from "@/lib/campaign-creator/campaign-status"
+import { withRequestedQuantity } from "@/lib/audience/interpret"
 
 import { Field } from "./BriefSummaryCard"
 
@@ -58,12 +59,7 @@ export function QuantityTrackingStage({
           type="number"
           placeholder="How many pieces?"
           onCommit={(value) =>
-            onFieldChange({
-              audience: {
-                description: brief.audience?.description ?? "",
-                quantity: value ? Number(value) : undefined,
-              },
-            })
+            onFieldChange({ audience: withRequestedQuantity(brief.audience, value) })
           }
         />
 

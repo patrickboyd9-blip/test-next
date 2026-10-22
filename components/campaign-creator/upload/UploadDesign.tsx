@@ -11,6 +11,7 @@ import {
   requestUploadedDesignReview,
 } from "@/lib/bring-your-own-design/actions"
 import { DESIGN_REVIEW_QUESTION } from "@/lib/bring-your-own-design/design-review"
+import { ResponseEstimate } from "@/components/campaign-creator/ResponseEstimate"
 import type { Campaign, DesignFaceName, UploadedDesignIssue } from "@/lib/campaign-creator/types"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -294,6 +295,7 @@ export function UploadDesign({
 
       {!readOnly && canApprove && (
         <div className="flex flex-col gap-3">
+          <ResponseEstimate brief={campaign.brief} />
           {warnings.length > 0 && (
             <p className="text-sm text-muted-foreground">
               There is a warning above. Approve only if the proof looks right.
