@@ -25,12 +25,27 @@ import { isTerminalJobStatus, jobStatusLabel } from "@/lib/click2mail/job-status
 import type { PrintMailMode } from "@/lib/click2mail/mode"
 import { parseRecipientCsv, normalizeRecipient } from "@/lib/click2mail/recipients"
 import type { Campaign } from "@/lib/campaign-creator/types"
+import type { StudioImageState } from "@/lib/campaign-creator/studio-photo"
+import { previewCampaignSend, previewContinueSend } from "@/lib/compliance/actions"
+import {
+  approveAndSendLabel,
+  COMPLIANCE_TEXT,
+  EMPTY_CERTIFICATION_BOXES,
+  freshCertificationIssue,
+  type CertificationBoxes,
+} from "@/lib/compliance/legal-text"
+
+import { ApprovedProof } from "@/components/compliance/ApprovedProof"
+import { ComplianceChecks } from "@/components/compliance/ComplianceChecks"
 
 interface PrintMailTestStageProps {
   campaign: Campaign
   mode: PrintMailMode
   onCampaign: (campaign: Campaign) => void
+  studioPhotos?: StudioImageState
 }
+
+const EMPTY_PHOTOS: StudioImageState = { records: [], misses: [], phase: "ready" }
 
 const EMPTY_SELF = {
   first: "",
@@ -42,13 +57,26 @@ const EMPTY_SELF = {
   zip: "",
 }
 
-export function PrintMailTestStage({ campaign, mode, onCampaign }: PrintMailTestStageProps) {
+export function PrintMailTestStage({
+  campaign,
+  mode,
+  onCampaign,
+  studioPhotos = EMPTY_PHOTOS,
+}: PrintMailTestStageProps) {
   const [source, setSource] = useState<"self" | "csv">("self")
   const [selfAddress, setSelfAddress] = useState(EMPTY_SELF)
   const [csvText, setCsvText] = useState("")
   const [issues, setIssues] = useState<string[]>([])
   const [busy, setBusy] = useState(false)
   const [now, setNow] = useState(() => new Date())
+  const [industryId, setIndustryId] = useState("")
+  const [boxes, setBoxes] = useState<CertificationBoxes>(EMPTY_CERTIFICATION_BOXES)
+  const [coverage, setCoverage] = useState<{ covered: boolean; message: string | null }>({
+    covered: false,
+    message: null,
+  })
+  const [continueReady, setContinueReady] = useState(false)
+  const [continueMessage, setContinueMessage] = useState<string | null>(null)
 
   const recipients = useMemo(() => {
     if (source === "csv") return parseRecipientCsv(csvText).recipients
@@ -59,15 +87,85 @@ export function PrintMailTestStage({ campaign, mode, onCampaign }: PrintMailTest
   const order = campaign.mailOrder
   const pieceCount = recipients.length
   const productionLocked = mode.environment === "prod" && !mode.productionEnabled
-  const canSend = mode.credentialsConfigured && !productionLocked && pieceCount > 0 && !busy
+  const certificationIssue = freshCertificationIssue(industryId, boxes)
+  const freshOk = certificationIssue === null
+  const blocked = certificationIssue?.code === "blocked"
+  const covered = coverage.covered && !blocked
+  const canSend =
+    mode.credentialsConfigured &&
+    !productionLocked &&
+    pieceCount > 0 &&
+    !busy &&
+    (freshOk || covered)
   const testMode = !mode.productionEnabled
   const cutoffWarning = order?.submitted ? null : mailingCutoffWarning(now)
   const postage = postageEstimate(pieceCount, mode.postage)
+  const designKey = [
+    campaign.mailPiece?.id ?? "",
+    campaign.mailPiece?.version ?? "",
+    campaign.uploadedDesign?.front?.key ?? "",
+    campaign.uploadedDesign?.back?.key ?? "",
+    campaign.uploadedDesign?.checkedAt ?? "",
+    campaign.uploadedDesign?.printFileKey ?? "",
+  ].join("::")
+  const listKey = recipients
+    .map((recipient) =>
+      [recipient.first, recipient.last, recipient.address1, recipient.address2, recipient.city, recipient.state, recipient.zip].join("|")
+    )
+    .join("\n")
+  const [seenDesignKey, setSeenDesignKey] = useState(designKey)
+  const [seenListKey, setSeenListKey] = useState(listKey)
+  if (seenDesignKey !== designKey) {
+    setSeenDesignKey(designKey)
+    setSeenListKey(listKey)
+    setIndustryId("")
+    setBoxes(EMPTY_CERTIFICATION_BOXES)
+    setCoverage({ covered: false, message: null })
+  } else if (seenListKey !== listKey) {
+    const hadList = seenListKey.length > 0
+    setSeenListKey(listKey)
+    const touched =
+      boxes.reviewedProof ||
+      boxes.responsibility ||
+      boxes.listRights ||
+      boxes.industryAcknowledgment ||
+      coverage.covered
+    if (hadList && touched) {
+      setBoxes(EMPTY_CERTIFICATION_BOXES)
+      setCoverage({ covered: false, message: null })
+    }
+  }
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 60_000)
     return () => window.clearInterval(timer)
   }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    const timer = window.setTimeout(() => {
+      void previewCampaignSend(campaign.id, industryId, recipients).then((result) => {
+        if (!cancelled) setCoverage(result)
+      })
+    }, 200)
+    return () => {
+      cancelled = true
+      window.clearTimeout(timer)
+    }
+  }, [campaign.id, industryId, recipients])
+
+  useEffect(() => {
+    if (!order || order.jobId) return
+    let cancelled = false
+    void previewContinueSend(campaign.id).then((result) => {
+      if (cancelled) return
+      setContinueReady(result.ok)
+      setContinueMessage(result.ok ? null : result.message)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [campaign.id, campaign.mailPiece?.id, campaign.mailPiece?.version, order])
 
   useEffect(() => {
     if (!mode.credentialsConfigured || !order?.jobId || isTerminalJobStatus(order.jobStatus)) return
@@ -91,10 +189,15 @@ export function PrintMailTestStage({ campaign, mode, onCampaign }: PrintMailTest
     setBusy(true)
     setIssues([])
     try {
+      const certification = {
+        textVersionId: COMPLIANCE_TEXT.versionId,
+        industryId,
+        boxes,
+      }
       const result =
         source === "csv"
-          ? await submitPrintMailTest(campaign.id, { kind: "csv", csvText })
-          : await submitPrintMailTest(campaign.id, { kind: "self", ...selfAddress })
+          ? await submitPrintMailTest(campaign.id, { kind: "csv", csvText }, certification)
+          : await submitPrintMailTest(campaign.id, { kind: "self", ...selfAddress }, certification)
       onCampaign(result.campaign)
       setIssues(result.issues)
     } finally {
@@ -224,16 +327,34 @@ export function PrintMailTestStage({ campaign, mode, onCampaign }: PrintMailTest
             ))}
           </ul>
         )}
+
+        <ComplianceChecks
+          industryId={industryId}
+          onIndustryId={setIndustryId}
+          boxes={boxes}
+          onBoxes={setBoxes}
+          covered={covered}
+          notice={coverage.message}
+          proof={<ApprovedProof campaign={campaign} studioPhotos={studioPhotos} />}
+          submitLabel={busy ? "Sending…" : approveAndSendLabel(pieceCount, postage.amountLabel)}
+          submitDisabled={!canSend}
+          onSubmit={() => void handleSubmit()}
+        />
       </CardContent>
       <CardFooter className="justify-end gap-2">
         {order && !order.jobId && (order.documentId || order.addressListId) && (
-          <Button type="button" variant="outline" onClick={() => void handleContinue()} disabled={busy || productionLocked}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => void handleContinue()}
+            disabled={busy || productionLocked || !continueReady}
+          >
             {busy ? "Checking…" : testMode ? "Continue staging test" : "Continue mailing"}
           </Button>
         )}
-        <Button type="button" onClick={() => void handleSubmit()} disabled={!canSend}>
-          {busy ? "Sending…" : testMode ? "Send staging test" : "Send production mailing"}
-        </Button>
+        {continueMessage && (
+          <p className="mr-auto text-sm text-muted-foreground">{continueMessage}</p>
+        )}
       </CardFooter>
     </Card>
   )

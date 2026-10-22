@@ -1,5 +1,22 @@
 "use server"
 
+import { randomUUID } from "crypto"
+
+import { sha256Hex } from "@/lib/compliance/hash"
+import { textVersionIds } from "@/lib/compliance/legal-text"
+import { storeApprovedProofPdf } from "@/lib/compliance/proof-file"
+import { readRequestMeta } from "@/lib/compliance/request-meta"
+import {
+  gateCampaignContinue,
+  gateCampaignSubmit,
+  writeFreshCertification,
+  writeJobLink,
+} from "@/lib/compliance/record"
+import {
+  STALE_PROOF_FILE_MESSAGE,
+  type CampaignCertificationInput,
+  type SendDecision,
+} from "@/lib/compliance/send-gate"
 import { attorneyAdMark } from "@/lib/design-intelligence/attorney-compliance"
 import { isAtOrPastStatus } from "@/lib/campaign-creator/campaign-status"
 import { medicareDisclaimerFor } from "@/lib/campaign-creator/medicare-compliance"
@@ -41,7 +58,8 @@ export async function submitPrintMailTest(
         city: string
         state: string
         zip: string
-      }
+      },
+  certification: CampaignCertificationInput | null
 ): Promise<PrintMailActionResult> {
   const campaign = await repository.getCampaign(campaignId)
   if (!campaign) return missing(campaignId)
@@ -57,7 +75,14 @@ export async function submitPrintMailTest(
     return { campaign, issues: parsed.errors.length > 0 ? parsed.errors : ["Add at least one address."] }
   }
 
-  return runOrder(campaign, parsed.recipients, undefined)
+  const decision = await gateCampaignSubmit({
+    campaign,
+    recipients: parsed.recipients,
+    certification,
+  })
+  if (!decision.ok) return { campaign, issues: [decision.message] }
+
+  return runOrder(campaign, parsed.recipients, undefined, decision)
 }
 
 export async function continuePrintMailTest(campaignId: string): Promise<PrintMailActionResult> {
@@ -68,7 +93,9 @@ export async function continuePrintMailTest(campaignId: string): Promise<PrintMa
   if (!campaign.mailOrder?.addressListId && !campaign.mailOrder?.documentId) {
     return { campaign, issues: ["There is no staging order to continue."] }
   }
-  return runOrder(campaign, [], campaign.mailOrder)
+  const decision = await gateCampaignContinue(campaign)
+  if (!decision.ok) return { campaign, issues: [decision.message] }
+  return runOrder(campaign, [], campaign.mailOrder, decision)
 }
 
 export async function refreshPrintMailStatus(campaignId: string): Promise<PrintMailActionResult> {
@@ -127,7 +154,8 @@ function clientFromEnv() {
 async function runOrder(
   campaign: Campaign,
   recipients: readonly Recipient[],
-  existing: MailOrderRecord | undefined
+  existing: MailOrderRecord | undefined,
+  decision: Extract<SendDecision, { ok: true }>
 ): Promise<PrintMailActionResult> {
   const { config, client } = clientFromEnv()
   let artwork: MailOrderRecord["artwork"] = existing?.artwork ?? "type-plate"
@@ -164,6 +192,9 @@ async function runOrder(
     }
   }
 
+  const proof = await keepApprovedProof(campaign.id, pdf, decision)
+  if (!proof.ok) return { campaign, issues: [proof.message] }
+
   const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+Z$/, "Z")
   const order = await placeClick2MailOrder({
     client,
@@ -181,7 +212,75 @@ async function runOrder(
     pollTimeoutMs: 20_000,
   })
   const saved = await repository.saveMailOrder(campaign.id, order)
-  return { campaign: saved, issues: order.error ? [order.error] : [] }
+  const issues = order.error ? [order.error] : []
+  if (order.jobId) {
+    try {
+      await writeJobLink({
+        campaignId: campaign.id,
+        certificationId: proof.certificationId,
+        click2mailJobId: order.jobId,
+        facts: await readRequestMeta(),
+        proofPdfSha256: proof.sha256,
+        proofPdfLocation: proof.location,
+        textVersionIds: decision.mode === "fresh" ? decision.textVersionIds : textVersionIds(),
+        textSha256: decision.mode === "fresh" ? decision.textSha256 : decision.prior.textSha256,
+        industry: decision.mode === "fresh" ? decision.industryId : decision.prior.industryId,
+        warningsShown: decision.warnings,
+        designFingerprint:
+          decision.mode === "fresh" ? decision.designFingerprint : decision.prior.designFingerprint,
+        listFingerprint:
+          decision.mode === "fresh" ? decision.listFingerprint : decision.prior.listFingerprint,
+      })
+    } catch (error) {
+      issues.push(
+        error instanceof Error ? error.message : "The acceptance record could not store the job id."
+      )
+    }
+  }
+  return { campaign: saved, issues }
+}
+
+async function keepApprovedProof(
+  campaignId: string,
+  pdf: Uint8Array<ArrayBufferLike>,
+  decision: Extract<SendDecision, { ok: true }>
+): Promise<
+  | { ok: true; certificationId: string; sha256: string | null; location: string | null }
+  | { ok: false; message: string }
+> {
+  if (decision.mode === "prior") {
+    if (pdf.byteLength > 0 && decision.prior.proofPdfSha256) {
+      if (sha256Hex(pdf) !== decision.prior.proofPdfSha256) {
+        return { ok: false, message: STALE_PROOF_FILE_MESSAGE }
+      }
+    }
+    return {
+      ok: true,
+      certificationId: decision.prior.id,
+      sha256: decision.prior.proofPdfSha256,
+      location: decision.prior.proofPdfLocation,
+    }
+  }
+
+  if (pdf.byteLength === 0) {
+    return { ok: false, message: "The proof file could not be saved, so this was not sent." }
+  }
+  const eventId = randomUUID()
+  const stored = await storeApprovedProofPdf({ campaignId, eventId, bytes: pdf })
+  const certificationId = await writeFreshCertification({
+    campaignId,
+    decision,
+    facts: await readRequestMeta(),
+    proofPdfSha256: stored.sha256,
+    proofPdfLocation: stored.location,
+    eventId,
+  })
+  return {
+    ok: true,
+    certificationId,
+    sha256: stored.sha256,
+    location: stored.location,
+  }
 }
 
 function oneRecipient(input: {

@@ -353,6 +353,7 @@ export function CampaignCreatorView({
             campaign={campaign}
             mode={printMailMode}
             onCampaign={setCampaign}
+            studioPhotos={studioPhotos}
           />
         </div>
       )}
