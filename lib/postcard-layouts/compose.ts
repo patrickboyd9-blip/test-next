@@ -28,6 +28,8 @@ export interface PhotoSlotPlan {
   bleed: boolean
   /** cover fills a frame. cutout sits on the canvas. thumbnail is one cell in the bottom row. */
   treatment?: "cover" | "cutout" | "thumbnail"
+  /** Point in the source (0–1) that the cover crop keeps in frame. */
+  focal?: { x: number; y: number }
 }
 
 export interface ShapePlan {

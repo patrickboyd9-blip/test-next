@@ -24,8 +24,10 @@ import {
   type PostcardFacePlan,
   type ShapePlan,
 } from "@/lib/postcard-layouts/compose"
-import type { FontPairingId, PostcardSizeId, PostcardTemplateId, VerticalPaletteId } from "@/lib/postcard-layouts/ids"
+import { isPostcardTemplate, type FontPairingId, type PostcardSizeId, type PostcardTemplateId, type VerticalPaletteId } from "@/lib/postcard-layouts/ids"
 import { trimInches } from "@/lib/postcard-layouts/templates"
+import type { GridCard } from "@/lib/design-intelligence/grid-composer"
+import { isDesignRationale } from "@/lib/design-intelligence/rationale"
 import type { FittedText, InchRect } from "@/lib/postcard-layouts/typefit"
 import {
   addressBackDisclaimerPlacement,
@@ -102,6 +104,78 @@ export async function renderTemplatedPostcardPdf(input: {
     imageDpi: images.dpi,
     artwork: input.image ? "final-photo" : "type-plate",
   }
+}
+
+export type PrintDesignSource =
+  | { source: "studio"; card: GridCard }
+  | { source: "template" }
+  | { source: "plate" }
+
+/** Studio rationale wins. Otherwise a legacy template, otherwise a type plate. */
+export function selectPrintDesign(input: {
+  rationale: unknown
+  studio: GridCard | null
+  templateId?: string | null
+}): PrintDesignSource {
+  if (isDesignRationale(input.rationale) && input.studio) return { source: "studio", card: input.studio }
+  if (isPostcardTemplate(input.templateId ?? undefined)) return { source: "template" }
+  return { source: "plate" }
+}
+
+/**
+ * Paints the Studio design object. The caller passes the same card the
+ * preview composed. This function does not build a second layout.
+ */
+export async function renderStudioDesignPdf(input: {
+  card: GridCard
+  copy: PostcardPrintCopy
+  image?: PostcardPrintImage
+  alternateImage?: PostcardPrintImage
+}): Promise<RenderedPostcardPdf & { design: GridCard }> {
+  const spec = geometryFor(input.card.front.size)
+  const doc = await PDFDocument.create()
+  doc.registerFontkit(fontkit)
+  const display = await doc.embedFont(readFileSync(path.join(FONT_DIR, DISPLAY_FILE[input.card.front.pairing])), { subset: true })
+  const text = await doc.embedFont(readFileSync(path.join(FONT_DIR, "SourceSans3-Regular.ttf")), { subset: true })
+  const strong = await doc.embedFont(readFileSync(path.join(FONT_DIR, "SourceSans3-Semibold.ttf")), { subset: true })
+  const images = await embedImages(doc, input.image, input.alternateImage, spec)
+  const pageSize: [number, number] = [spec.pdfPagePoints.widthPoints, spec.pdfPagePoints.heightPoints]
+  const frontPage = doc.addPage(pageSize)
+  const backPage = doc.addPage(pageSize)
+  markBoxes(frontPage, spec)
+  markBoxes(backPage, spec)
+  drawFront(frontPage, spec, input.card.front, images, input.copy.qrPayload, display, strong, text)
+  drawPlanBack(backPage, spec, input.card.back, display, strong, text)
+  const bytes = await doc.save({ useObjectStreams: false })
+  await assertTemplatedPage(bytes, spec)
+  return {
+    bytes,
+    backContent: addressSideContentRect(spec),
+    imageDpi: images.dpi,
+    artwork: input.image ? "final-photo" : "type-plate",
+    design: input.card,
+  }
+}
+
+function drawPlanBack(
+  page: PDFPage,
+  spec: PostcardGeometry,
+  plan: PostcardFacePlan,
+  display: PDFFont,
+  strong: PDFFont,
+  text: PDFFont
+) {
+  const paper = plan.shapes.find((shape) => shape.role === "paper")?.fill ?? "#FFFFFF"
+  page.drawRectangle({
+    x: 0,
+    y: 0,
+    width: spec.pdfPagePoints.widthPoints,
+    height: spec.pdfPagePoints.heightPoints,
+    color: paint(paper),
+  })
+  for (const shape of plan.shapes) drawShape(page, spec, plan, shape)
+  for (const line of plan.texts) drawFitted(page, spec, line, display, text)
+  if (plan.lockup) drawFrontLockup(page, spec, plan, undefined, display, strong, text)
 }
 
 function drawFront(
@@ -229,15 +303,17 @@ function drawPhoto(
     return
   }
   page.pushOperators(pushGraphicsState(), rectangle(pdf.xPoints, pdf.yPoints, pdf.widthPoints, pdf.heightPoints), clip(), endPath())
+  const focal = slot.focal ?? { x: 0.5, y: 0.5 }
   const scale = Math.max(pdf.widthPoints / image.width, pdf.heightPoints / image.height)
   const width = image.width * scale
   const height = image.height * scale
-  page.drawImage(image, {
-    x: pdf.xPoints + (pdf.widthPoints - width) / 2,
-    y: pdf.yPoints + (pdf.heightPoints - height) / 2,
-    width,
-    height,
-  })
+  let x = pdf.xPoints + focal.x * pdf.widthPoints - focal.x * width
+  let y = pdf.yPoints + (1 - focal.y) * pdf.heightPoints - (1 - focal.y) * height
+  if (x > pdf.xPoints) x = pdf.xPoints
+  if (y > pdf.yPoints) y = pdf.yPoints
+  if (x + width < pdf.xPoints + pdf.widthPoints) x = pdf.xPoints + pdf.widthPoints - width
+  if (y + height < pdf.yPoints + pdf.heightPoints) y = pdf.yPoints + pdf.heightPoints - height
+  page.drawImage(image, { x, y, width, height })
   page.pushOperators(popGraphicsState())
 }
 

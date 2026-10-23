@@ -14,6 +14,7 @@ import type { ConceptFeedbackView } from "@/lib/campaign-creator/actions"
 import { ConceptFeedback } from "./ConceptFeedback"
 import { PostcardPreview, type PostcardPreviewSize } from "./PostcardPreview"
 import { persuasionAngles, persuasionRecordLine, persuasionUsesLine, persuasionWarnings } from "@/lib/design-intelligence/persuasion"
+import { designDebugEnabled, publicDirectionLine } from "@/lib/campaign-creator/customer-direction-line"
 
 import { ResearchBasis } from "./ResearchBasis"
 import { StudioPhotoNote } from "./StudioPhotoNote"
@@ -57,8 +58,10 @@ export function ConceptCard({
 }: ConceptCardProps) {
   const reducedMotion = useReducedMotion()
   const isInteractive = Boolean(onSelect)
-  const angles = persuasionAngles(direction.spec.designRationale)
+  const debug = designDebugEnabled()
+  const angles = debug ? persuasionAngles(direction.spec.designRationale) : null
   const complianceWarnings = persuasionWarnings(direction.spec.designRationale)
+  const why = publicDirectionLine(direction.oneLineDifference) ?? publicDirectionLine(direction.rationale)
 
   const size: PostcardPreviewSize =
     variant === "strip" ? "thumbnail" : variant === "hero" ? "hero" : "thumbnail"
@@ -114,13 +117,13 @@ export function ConceptCard({
           <>
             <StudioPhotoNote note={photoNote} />
             <p className="text-sm font-semibold">{direction.name}</p>
-            <p className="line-clamp-2 text-xs text-muted-foreground">
-              {direction.oneLineDifference ?? direction.rationale}
-            </p>
-            {persuasionUsesLine(direction.spec.designRationale) ? (
+            {why ? (
+              <p className="line-clamp-3 text-xs text-muted-foreground">{why}</p>
+            ) : null}
+            {debug && persuasionUsesLine(direction.spec.designRationale) ? (
               <p className="text-xs text-foreground/80">{persuasionUsesLine(direction.spec.designRationale)}</p>
             ) : null}
-            {persuasionRecordLine(direction.spec.designRationale) ? (
+            {debug && persuasionRecordLine(direction.spec.designRationale) ? (
               <p className="text-xs text-foreground/80">{persuasionRecordLine(direction.spec.designRationale)}</p>
             ) : null}
             {angles ? (
@@ -139,7 +142,7 @@ export function ConceptCard({
           </>
         )}
       </button>
-      {variant !== "strip" ? <ResearchBasis research={direction.research} /> : null}
+      {variant !== "strip" && debug ? <ResearchBasis research={direction.research} /> : null}
       {variant !== "strip" && campaignId ? (
         <ConceptFeedback campaignId={campaignId} directionId={direction.id} initial={feedback} />
       ) : null}

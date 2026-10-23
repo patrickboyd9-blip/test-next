@@ -132,7 +132,7 @@ function directorSystem(): string {
   try {
     rules = readSeedText("SUMMARY.md")
   } catch {
-    rules = "One focal element. Offer larger than the headline when the offer is the hero. Three type sizes. One response. No government costume."
+    rules = "One focal element. The headline carries the strategy. The offer is a smaller line unless the design says the offer leads. Three type sizes. One response. No government costume."
   }
   return [
     "You are the art director for a local-service postcard. Return one Design Rationale as JSON.",

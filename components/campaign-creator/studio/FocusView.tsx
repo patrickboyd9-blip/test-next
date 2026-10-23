@@ -11,6 +11,7 @@ import { presentStudioPhoto, type StudioImageState } from "@/lib/campaign-creato
 import type { ConceptFeedbackView } from "@/lib/campaign-creator/actions"
 import type { Campaign, CampaignBrief, CreativeDirection, CreativeSpec } from "@/lib/campaign-creator/types"
 import { persuasionAngles, persuasionRecordLine, persuasionUsesLine, persuasionWarnings } from "@/lib/design-intelligence/persuasion"
+import { designDebugEnabled, publicDirectionLine } from "@/lib/campaign-creator/customer-direction-line"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
 import { BlueprintBrowser } from "./BlueprintBrowser"
@@ -43,11 +44,7 @@ interface FocusViewProps {
 }
 
 function buildFocusCaption(direction: CreativeDirection): string {
-  if (direction.recommended) {
-    return `This direction leads with trust before the offer — a strong choice for homeowners who need confidence before booking.`
-  }
-  const tone = direction.spec.tone?.split(",")[0]?.toLowerCase() ?? "distinct"
-  return `${direction.name} takes a ${tone} approach — ${direction.oneLineDifference ?? direction.rationale}`
+  return publicDirectionLine(direction.oneLineDifference) ?? publicDirectionLine(direction.rationale) ?? direction.name
 }
 
 export function FocusView({
@@ -73,9 +70,10 @@ export function FocusView({
   const reducedMotion = useReducedMotion()
   const [side, setSide] = useState<"front" | "back">("front")
   const caption = buildFocusCaption(direction)
-  const uses = persuasionUsesLine(spec.designRationale)
-  const persuasionNote = persuasionRecordLine(spec.designRationale)
-  const angles = persuasionAngles(spec.designRationale)
+  const debug = designDebugEnabled()
+  const uses = debug ? persuasionUsesLine(spec.designRationale) : null
+  const persuasionNote = debug ? persuasionRecordLine(spec.designRationale) : null
+  const angles = debug ? persuasionAngles(spec.designRationale) : null
   const complianceWarnings = persuasionWarnings(spec.designRationale)
 
   return (
@@ -114,7 +112,7 @@ export function FocusView({
       </AnimatePresence>
 
       <div className="flex max-w-lg flex-col gap-3">
-        <p className="text-sm text-muted-foreground">{direction.rationale}</p>
+        <p className="text-sm text-muted-foreground">{caption}</p>
         {uses ? <p className="text-sm text-foreground/80">{uses}</p> : null}
         {persuasionNote ? <p className="text-sm text-foreground/80">{persuasionNote}</p> : null}
         {angles ? (
@@ -130,7 +128,7 @@ export function FocusView({
         {complianceWarnings.map((warning) => (
           <p key={warning} className="text-sm text-foreground/80">{warning}</p>
         ))}
-        <ResearchBasis research={direction.research} />
+        {debug ? <ResearchBasis research={direction.research} /> : null}
         {campaignId ? (
           <ConceptFeedback campaignId={campaignId} directionId={direction.id} initial={feedback} />
         ) : null}
@@ -140,15 +138,6 @@ export function FocusView({
         </p>
         <StrategyTags tags={direction.tags} />
       </div>
-
-      <motion.p
-        key={direction.id}
-        initial={reducedMotion ? false : { opacity: 0, y: 4 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-lg text-sm text-muted-foreground"
-      >
-        {caption}
-      </motion.p>
 
       <div className="flex max-w-lg flex-col gap-3 sm:flex-row sm:items-center">
         <Button onClick={onStartRefining}>Start refining →</Button>

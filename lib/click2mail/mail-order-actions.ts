@@ -9,7 +9,9 @@ import type { Campaign, CreativeSpec } from "@/lib/campaign-creator/types"
 import type { PostcardPrintCopy } from "@/lib/print-spec/render-campaign-postcard-pdf"
 import { loadApprovedUploadPdf } from "@/lib/bring-your-own-design/print-source"
 import { renderPostcardPrintPdf } from "@/lib/print-spec/render-campaign-postcard-pdf"
-import { renderTemplatedPostcardPdf } from "@/lib/print-spec/render-template-postcard-pdf"
+import { renderStudioDesignPdf, renderTemplatedPostcardPdf, selectPrintDesign } from "@/lib/print-spec/render-template-postcard-pdf"
+import { composeGridCard } from "@/lib/design-intelligence/grid-composer"
+import { isDesignRationale } from "@/lib/design-intelligence/rationale"
 import { isPostcardTemplate, isVerticalPalette } from "@/lib/postcard-layouts/ids"
 
 import { assertClick2MailCallable, loadClick2MailConfig } from "./config"
@@ -143,15 +145,33 @@ async function runOrder(
         const photo = await loadFinalPostcardPhoto(campaign)
         const templateId = campaign.mailPiece?.spec.layoutHints?.templateId
         const paletteId = campaign.mailPiece?.spec.layoutHints?.verticalPalette
-        const rendered = isPostcardTemplate(templateId)
+        const copy = printCopy(campaign)
+        const rationale = campaign.mailPiece?.spec.designRationale
+        const studio = isDesignRationale(rationale)
+          ? composeGridCard({
+              rationale,
+              spec: campaign.mailPiece?.spec ?? {},
+              businessName: copy.businessName,
+              disclaimer: copy.disclaimer,
+              complianceMark: copy.complianceMark,
+            })
+          : null
+        const design = selectPrintDesign({ rationale, studio, templateId })
+        const rendered = design.source === "studio"
+          ? await renderStudioDesignPdf({
+              card: design.card,
+              copy,
+              image: photo ?? undefined,
+            })
+          : isPostcardTemplate(templateId)
           ? await renderTemplatedPostcardPdf({
-              copy: printCopy(campaign),
+              copy,
               templateId,
               paletteId: isVerticalPalette(paletteId) ? paletteId : undefined,
               image: photo ?? undefined,
             })
           : await renderPostcardPrintPdf({
-              copy: printCopy(campaign),
+              copy,
               image: photo ?? undefined,
               plateColor: plateFromSpec(campaign.mailPiece?.spec),
             })
@@ -170,7 +190,7 @@ async function runOrder(
     config,
     pdf,
     recipients,
-    postcardSize: "5x8",
+    postcardSize: campaign.mailPiece?.spec.designRationale?.format?.trim === "6x9" ? "6x9" : "5x8",
     documentName: `mm-${campaign.id.slice(0, 8)}-${stamp}`,
     addressListName: `mm-${campaign.id.slice(0, 8)}-${stamp}`,
     returnAddress: returnAddressFor(campaign),

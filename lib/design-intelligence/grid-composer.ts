@@ -15,6 +15,14 @@ import type { CompositionMode } from "./art-director"
 import { resolveFrontCopy } from "./offer-copy"
 import { contrastRatio, inkForBackground, isLight, relativeLuminance } from "./contrast"
 import type { DesignRationale, DesignVertical, TrimSize, TypeSeat } from "./rationale"
+import {
+  briefShowsPerson,
+  emptyShare,
+  headIsClipped,
+  minHeightForHead,
+  personFocal,
+  sceneFocal,
+} from "./subject-crop"
 
 /**
  * Places the front (and the address-side proof) on a real grid from a
@@ -70,7 +78,7 @@ export function composeGridCard(input: GridComposeInput): GridCard {
   const responseContent = responseBand ? clampRect(inset(responseBand, 0.06), trim) : content
   const responseInk = responseBand ? inkForBackground(responseFill) : ink
   const spoken = spokenCopy(input)
-  const offerIsHero = leadsWithOffer(input.rationale.scale_ratios.hero, spoken.numeral)
+  const offerIsHero = leadsWithOffer(input.rationale.scale_ratios.hero)
   const headline = spoken.headline
   const offerParts = offerIsHero
     ? { numeral: spoken.numeral, rest: spoken.rest }
@@ -97,12 +105,12 @@ export function composeGridCard(input: GridComposeInput): GridCard {
   const protectOffer = Boolean(input.rationale.refine?.minOfferPt)
   const blocks: StackBlock[] = []
   if (offerIsHero) {
-    blocks.push({ text: offerParts.numeral, role: "offer", pt: sizes.offer, floor: offerFloor, color: offerColor, protect: protectOffer })
+    blocks.push({ text: offerParts.numeral, role: "offer", pt: sizes.offer, floor: offerFloor, color: offerColor, protect: protectOffer, ratioLock: true })
     if (offerParts.rest) blocks.push({ text: offerParts.rest, role: "body", pt: sizes.support, floor: smallFloor, color: ink })
     blocks.push({ text: headline, role: "headline", pt: sizes.headline, floor: headlineFloor, color: ink })
   } else {
     blocks.push({ text: headline, role: "headline", pt: sizes.headline, floor: headlineFloor, color: ink })
-    blocks.push({ text: offerParts.numeral, role: "offer", pt: sizes.offer, floor: offerFloor, color: offerColor, protect: protectOffer })
+    blocks.push({ text: offerParts.numeral, role: "offer", pt: sizes.offer, floor: offerFloor, color: offerColor, protect: protectOffer, ratioLock: false })
   }
   if (trust) blocks.push({ text: trust, role: "proof", pt: Math.min(sizes.support, 13), floor: smallFloor, color: ink })
   const stacked = placeStack({
@@ -186,7 +194,7 @@ export function composeGridCard(input: GridComposeInput): GridCard {
   })
 
   const headlineText = texts.find((text) => text.role === "headline")
-  return {
+  return finishCard({
     front,
     back,
     typePt: {
@@ -198,7 +206,7 @@ export function composeGridCard(input: GridComposeInput): GridCard {
     photoAreaPct: Math.round(photoArea * 100),
     calmFieldPct: calm,
     panel: regions.panel,
-  }
+  }, input)
 }
 
 /**
@@ -218,7 +226,7 @@ function composeIntegrated(
   const headlineInk = ink
   const geometry = integratedGeometry(trim)
   const spoken = spokenCopy(input)
-  const offerIsHero = leadsWithOffer(input.rationale.scale_ratios.hero, spoken.numeral)
+  const offerIsHero = leadsWithOffer(input.rationale.scale_ratios.hero)
   const headline = spoken.headline
   const [firstLine, secondLine] = splitHeadline(headline)
   const offerParts = offerIsHero
@@ -229,7 +237,7 @@ function composeIntegrated(
   const name = clean(input.businessName) || "Local crew"
   const column = geometry.column
   const sizes = typeSizes(input.rationale, column.h * 0.72, offerIsHero ? "offer" : "headline")
-  const offerColor = offerIsHero && contrastRatio(accent, paper) >= 4.5 ? accent : accentOnPaper
+  const offerColor = offerIsHero && contrastRatio(accent, paper) >= 4.5 ? accent : ink
   const blocks: StackBlock[] = [
     { text: firstLine, role: "headline", pt: sizes.headline, floor: (input.rationale.format.trim === "6x9" ? 12 : 11) * 2.5, color: headlineInk },
   ]
@@ -372,7 +380,7 @@ function composeIntegrated(
   })
   const offerText = texts.find((text) => text.role === "offer")
   const headlineText = texts.find((text) => text.role === "headline")
-  return {
+  return finishCard({
     front,
     back,
     typePt: {
@@ -384,7 +392,7 @@ function composeIntegrated(
     photoAreaPct: Math.round(photoArea * 100),
     calmFieldPct: 55,
     panel: column,
-  }
+  }, input)
 }
 
 /** The box the critic samples is the ink, so a cut-out can sit in the empty margin. */
@@ -519,6 +527,65 @@ export function trimInches(size: TrimSize): { w: number; h: number } {
 export function safeRect(size: TrimSize): InchRect {
   const trim = trimInches(size)
   return { x: SAFE_IN, y: SAFE_IN, w: trim.w - SAFE_IN * 2, h: trim.h - SAFE_IN * 2 }
+}
+
+/**
+ * A thumbnail frame that starts 0.23 in from the trim hangs outside the
+ * 0.25 in safe margin. Seat the frame on the safe edge instead.
+ */
+export function seatThumbnailFrame(rect: InchRect, size: TrimSize): InchRect {
+  const safe = safeRect(size)
+  const x = Math.max(safe.x, rect.x)
+  const y = Math.max(safe.y, rect.y)
+  const right = Math.min(safe.x + safe.w, rect.x + rect.w)
+  const bottom = Math.min(safe.y + safe.h, rect.y + rect.h)
+  return {
+    x: round2(x),
+    y: round2(y),
+    w: round2(Math.max(0.2, right - x)),
+    h: round2(Math.max(0.2, bottom - y)),
+  }
+}
+
+function seatThumbnailFrames(plan: PostcardFacePlan): PostcardFacePlan {
+  return {
+    ...plan,
+    photos: plan.photos.map((slot) =>
+      slot.treatment === "thumbnail" ? { ...slot, rect: seatThumbnailFrame(slot.rect, plan.size) } : slot
+    ),
+    shapes: plan.shapes.map((shape) =>
+      shape.role === "thumbnail" ? { ...shape, rect: seatThumbnailFrame(shape.rect, plan.size) } : shape
+    ),
+  }
+}
+
+function finishCard(card: GridCard, input: GridComposeInput): GridCard {
+  const person = briefShowsPerson(input.rationale.photo_brief)
+  const focal = person ? personFocal() : sceneFocal()
+  const trim = trimInches(card.front.size)
+  let photos = seatThumbnailFrames(card.front).photos.map((slot) => ({ ...slot, focal: slot.focal ?? focal }))
+  if (person) {
+    photos = photos.map((slot) => {
+      if (!headIsClipped(slot)) return slot
+      const minH = Math.min(trim.h, minHeightForHead(slot.rect.w))
+      const h = round2(Math.max(slot.rect.h, minH))
+      const y = round2(Math.max(0, Math.min(slot.rect.y, trim.h - h)))
+      return { ...slot, focal: personFocal(), rect: { ...slot.rect, y, h } }
+    })
+  }
+  let front: PostcardFacePlan = { ...card.front, photos }
+  if (emptyShare(front, trim) > 0.35) {
+    front = {
+      ...front,
+      photos: front.photos.map((slot) => {
+        const shortBand = slot.rect.y < 0.08 && slot.rect.h < trim.h * 0.55 && slot.rect.w > trim.w * 0.8
+        if (!shortBand) return slot
+        const h = round2(Math.max(slot.rect.h, trim.h * 0.72, person ? minHeightForHead(slot.rect.w) : slot.rect.h))
+        return { ...slot, rect: { ...slot.rect, y: 0, h: Math.min(trim.h, h) } }
+      }),
+    }
+  }
+  return { ...card, front }
 }
 
 export function textInsideSafe(rect: InchRect, size: TrimSize): boolean {
@@ -725,9 +792,9 @@ function placeResponse(input: {
   }
 }
 
-/** A free offer is the word FREE, and that word is the hero even when the family asked for a headline. */
-function leadsWithOffer(hero: "offer" | "headline", numeral: string): boolean {
-  return hero === "offer" || numeral === "FREE"
+/** The offer leads only when the design says it does. FREE is otherwise a smaller line. */
+function leadsWithOffer(hero: "offer" | "headline"): boolean {
+  return hero === "offer"
 }
 
 function typeSizes(
@@ -771,6 +838,8 @@ interface StackBlock {
   width?: number
   /** Keep this line large, and shrink the lines under it first. */
   protect?: boolean
+  /** Hold the offer at 1.55× the headline. Headline-led cards leave this off. */
+  ratioLock?: boolean
 }
 
 /**
@@ -860,10 +929,10 @@ function shrinkStop(block: StackBlock, belowFloor: boolean): number {
   return Math.max(legibility, block.floor)
 }
 
-/** FREE stays at least 1.55× the headline while either line can still shrink. */
+/** An offer-led card keeps FREE at least 1.55× the headline while either line can still shrink. */
 function wouldBreakOfferRatio(blocks: StackBlock[], index: number): boolean {
   const block = blocks[index]
-  if (!block || block.role !== "offer") return false
+  if (!block || block.role !== "offer" || !block.ratioLock) return false
   const headline = blocks.find((item) => item.role === "headline")
   if (!headline) return false
   if (headline.pt - shrinkStop(headline, true) <= 0.01) return false
@@ -964,19 +1033,27 @@ function spokenCopy(input: GridComposeInput): { headline: string; numeral: strin
     moment: input.rationale.audience_moment,
     vertical: input.rationale.vertical,
   })
+  const requested = clean(input.spec.headline)
+  const roleLine = Boolean(input.rationale.persuasion?.role)
+    && requested
+    && !/\bfree\b/i.test(requested)
+    && !/\$\s*0(?:\.00)?\b/.test(requested)
   if (input.rationale.vertical === "medicare_insurance" && spoken.numeral === "FREE") {
-    return { headline: spoken.headline, numeral: spoken.rest || "A local review", rest: "" }
+    return { headline: roleLine ? requested : spoken.headline, numeral: spoken.rest || "A local review", rest: "" }
   }
+  if (roleLine) return { headline: requested, numeral: spoken.numeral, rest: spoken.rest }
   return spoken
 }
 
 function trustLine(input: GridComposeInput): string {
+  const name = clean(input.businessName)
   if (input.rationale.vertical === "medicare_insurance") {
-    return clean(input.businessName) || "A local licensed advisor"
+    return name || "A local licensed advisor"
   }
+  if (name) return name
   const line = input.rationale.trust.front_line
   if (/license/i.test(line)) return "Licensed and local"
-  return clean(input.businessName) || "Local crew"
+  return "Local crew"
 }
 
 function displayHost(value: string): string {

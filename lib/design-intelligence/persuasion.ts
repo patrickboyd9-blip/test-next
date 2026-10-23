@@ -366,6 +366,12 @@ export function applyOutcomeHeadline(input: {
 }): string {
   const headline = input.headline.replace(/\s+/g, " ").trim()
   const kind = persuasionVertical(input.brief, input.vertical)
+  if (input.role === "trust") {
+    const named = namedTrustLine(kind, input.brief.businessInfo?.name, rolePair(kind, input.role)[0])
+    if (input.brief.businessInfo?.name && named.split(/\s+/).length <= 8 && !/^a\b/i.test(named)) {
+      return finishLine(named)
+    }
+  }
   if (input.role) return onCardLine(kind, input.role)
   if (input.brief.audienceAwareness === "past_customer" && headlineIsFeature(headline, input.offer, kind)) {
     const resolved = resolveEmotion(kind, clientFactText(input.brief), input.brief.primaryEmotion)

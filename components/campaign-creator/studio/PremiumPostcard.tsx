@@ -85,6 +85,7 @@ export function PremiumPostcardFront({
           alt={spec.visualDirection?.trim() || "Campaign photograph"}
           paper={plan.palette.paper}
           treatment={slot.treatment}
+          focal={slot.focal}
         />
       ))}
       <Shapes plan={painted} layer="mid" />
@@ -249,6 +250,7 @@ function PhotoSlot({
   alt,
   paper,
   treatment,
+  focal,
 }: {
   rect: InchRect
   size: PostcardFacePlan["size"]
@@ -256,6 +258,7 @@ function PhotoSlot({
   alt: string
   paper: string
   treatment?: "cover" | "cutout" | "thumbnail"
+  focal?: { x: number; y: number }
 }) {
   const cutout = treatment === "cutout"
   if (cutout && !src) return null
@@ -271,6 +274,7 @@ function PhotoSlot({
           src={src}
           alt={alt}
           className={cutout ? "h-full w-full object-contain object-left" : "h-full w-full object-cover"}
+          style={cutout ? undefined : { objectPosition: `${((focal?.x ?? 0.5) * 100).toFixed(1)}% ${((focal?.y ?? 0.42) * 100).toFixed(1)}%` }}
           draggable={false}
         />
       ) : (

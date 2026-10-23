@@ -227,7 +227,12 @@ test("three directions do not share a grid and proportions", () => {
     const headline = card.front.texts.find((text) => text.role === "headline")
     assert.equal(offer?.text, "FREE")
     assert.equal(card.front.texts.some((text) => /\$\s*0\b/.test(text.text)), false)
-    assert.ok(offer && headline && offer.fontPt >= headline.fontPt * 1.55)
+    assert.ok(offer && headline)
+    if (rationales[cards.indexOf(card)]?.scale_ratios.hero === "offer") {
+      assert.ok(offer.fontPt >= headline.fontPt * 1.55)
+    } else {
+      assert.ok(headline.fontPt > offer.fontPt)
+    }
   }
 })
 

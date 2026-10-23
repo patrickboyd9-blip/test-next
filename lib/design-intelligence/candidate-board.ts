@@ -30,7 +30,8 @@ import {
 } from "./taste-retrieval"
 import { ATTORNEY_AD_LABEL, attorneyAdMark } from "./attorney-compliance"
 import { scrubUnstatedAudience, scrubUnstatedName, statedNameFallback } from "./audience-facts"
-import { applyOutcomeHeadline, clientFactText, roleForDirection, selectPersuasion } from "./persuasion"
+import { applyOutcomeHeadline, clientFactText, roleForDirection, selectPersuasion, type DirectionRole } from "./persuasion"
+import type { ImageryRole, LeadJob } from "@/lib/campaign-creator/types"
 import { briefHasNumeralOffer } from "./vertical"
 import { loadTasteCorpus, visionTasteStore, type VisionTaste } from "./vision-taste"
 import { referencePicksForCritique, requestComparativeCritique } from "./vision-critic"
@@ -302,13 +303,42 @@ async function scoreFamily(input: {
         : undefined,
     }),
   }
-  const templateBand = rationale.grid.intentional_break !== "integrated"
-  if (templateBand) {
-    rationale = {
-      ...rationale,
-      grid: { name: "centered-stack", alignment: "left", intentional_break: "integrated" },
-      photo_brief: { ...rationale.photo_brief, placement: "full_bleed" },
-    }
+  const presentation = rolePresentation(role)
+  rationale = {
+    ...rationale,
+    grid: { name: presentation.grid, alignment: "left", intentional_break: presentation.mode },
+    scale_ratios: {
+      ...rationale.scale_ratios,
+      hero: "headline",
+      offer_to_headline_cap: 0.48,
+      offer_to_body: 1.6,
+    },
+    offer_treatment: {
+      ...rationale.offer_treatment,
+      kind: rationale.vertical === "medicare_insurance" ? "concrete_step_no_discount" : "headline_is_the_offer",
+      placement: presentation.placement,
+    },
+    focal_element: {
+      ...rationale.focal_element,
+      kind: "headline",
+      description: presentation.placement,
+      lead_modality: presentation.mode === "full-bleed" ? "image" : "type",
+    },
+    photo_brief: {
+      ...rationale.photo_brief,
+      mode: presentation.photoMode,
+      subject: presentation.subject,
+      crop: presentation.crop,
+      placement: presentation.mode === "panel" ? "panel_bleed_two_edges" : "full_bleed",
+    },
+  }
+  spec = {
+    ...spec,
+    visualDirection: presentation.visualDirection,
+    imageryRole: presentation.imageryRole,
+    leadJob: presentation.leadJob,
+    layoutVariant: "image_grounded",
+    imagePresence: "field",
   }
   const facts = clientFactText(input.brief, spec.offer)
   const complianceMark = attorneyAdMark(facts)
@@ -333,7 +363,7 @@ async function scoreFamily(input: {
     familyId: family.id,
     grid: rationale.grid.name,
     feel: family.feel,
-    summary: templateBand ? "Type and a cut-out subject sit on the open canvas." : family.summary,
+    summary: presentation.summary,
     directionIndex: input.directionIndex,
     rationale,
     card,
@@ -407,15 +437,15 @@ function applyBoard(result: GenerateDirectionsResult, board: BoardResult, brief:
       title: pick.principle.split(".")[0] || pick.principle,
       whyItWorks: pick.principle,
     }))
-    const onCard = winner.rationale.persuasion?.angles.find((angle) => angle.onCard)?.line
     const lesson = winner.rationale.persuasion?.lesson
     const researchId = winner.blueprint ? `Research id ${winner.blueprint.sourceId}.` : ""
+    const role = winner.rationale.persuasion?.role
     return {
       ...direction,
-      name: scrubUnstatedName(direction.name, facts, statedNameFallback(brief.offer, brief.goal)),
+      name: role ? strategyName(role) : scrubUnstatedName(direction.name, facts, statedNameFallback(brief.offer, brief.goal)),
       rationale: scrubUnstatedAudience(direction.rationale, facts) || `Offers ${brief.offer?.trim() || brief.goal?.trim() || "the stated offer"}.`,
       recommended: best ? winner === best : false,
-      oneLineDifference: onCard || winner.summary,
+      oneLineDifference: role ? customerWhyLine(role) : winner.summary,
       spec: {
         ...direction.spec,
         ...winner.spec,
@@ -529,6 +559,72 @@ function rationaleForFamily(
     throw new Error(`Family ${family.id} rationale failed: ${checked.errors.join(" ")}`)
   }
   return checked.rationale
+}
+
+function rolePresentation(role: DirectionRole): {
+  mode: CompositionMode
+  grid: GridName
+  summary: string
+  placement: string
+  subject: string
+  crop: string
+  photoMode: DesignRationale["photo_brief"]["mode"]
+  visualDirection: string
+  imageryRole: ImageryRole
+  leadJob: LeadJob
+} {
+  if (role === "threat") {
+    return {
+      mode: "full-bleed",
+      grid: "full-bleed-plus-panel",
+      summary: "The headline sits on the photograph. The offer is a small line.",
+      placement: "Headline on a calm area of the photograph. Offer is a small line.",
+      subject: "The problem itself, shown honestly and quietly, with no wreckage and no invented damage",
+      crop: "Close on the problem, with a calm area left for the headline",
+      photoMode: "documentary_job",
+      visualDirection: "The problem itself, quiet and honest. No wreckage, no countdown, and no made-up damage.",
+      imageryRole: "consequence",
+      leadJob: "problem",
+    }
+  }
+  if (role === "trust") {
+    return {
+      mode: "panel",
+      grid: "thirds",
+      summary: "A full-height portrait beside the headline.",
+      placement: "A full-height portrait. The headline is the proof. The offer is a small line.",
+      subject: "One local person from this business, face fully in frame with room above the head, calm daylight",
+      crop: "Head and shoulders, the face complete, space above the head",
+      photoMode: "advisor_portrait",
+      visualDirection: "One local person, face fully in frame, room above the head, calm daylight. Not the same scene as the other cards.",
+      imageryRole: "crew",
+      leadJob: "trust",
+    }
+  }
+  return {
+    mode: "integrated",
+    grid: "centered-stack",
+    summary: "The headline is the result, on an open canvas.",
+    placement: "The result headline sits on the open canvas. The offer is a small line.",
+    subject: "The finished result of the job, in daylight, no person in the frame",
+    crop: "The finished work, open sky, no person",
+    photoMode: "result",
+    visualDirection: "The finished result of the job, daylight, no person in the frame. Not a portrait and not the problem.",
+    imageryRole: "neighborhood",
+    leadJob: "offer",
+  }
+}
+
+export function strategyName(role: DirectionRole): string {
+  if (role === "threat") return "Before it spreads"
+  if (role === "trust") return "Local proof"
+  return "The outcome"
+}
+
+export function customerWhyLine(role: DirectionRole): string {
+  if (role === "threat") return "One honest risk, then one easy step. No deadline and no made-up number."
+  if (role === "trust") return "A local face and the business name carry the proof."
+  return "The headline is the result the homeowner wants. The offer stays small."
 }
 
 function orderFamilies(feel: string, signals?: TasteSignals): Family[] {

@@ -38,6 +38,7 @@ import {
   typeOnlyRealization,
 } from "./studio-composition-derivation"
 import { composeGridCard } from "@/lib/design-intelligence/grid-composer"
+import type { PostcardFacePlan } from "@/lib/postcard-layouts/compose"
 import { skyRail } from "@/lib/design-intelligence/refine-note"
 import { isDesignRationale, type TypeSeat } from "@/lib/design-intelligence/rationale"
 import { useTypeSeat } from "./use-type-seat"
@@ -75,6 +76,7 @@ export function PostcardFrontFace({
   contact,
   photoAlt,
   photoSeat,
+  preparedFront,
 }: {
   spec: CreativeSpec
   layout: LayoutVariant
@@ -90,26 +92,32 @@ export function PostcardFrontFace({
   photoAlt: string
   /** Measured on the generated photograph. The rationale seat wins when a refine set one. */
   photoSeat?: TypeSeat | null
+  /** The same front plan the print file paints. */
+  preparedFront?: PostcardFacePlan
 }) {
   const measuredSeat = useTypeSeat(photoSrc)
   const templateId = spec.layoutHints?.templateId
-  if (isDesignRationale(spec.designRationale)) {
+  if (preparedFront || isDesignRationale(spec.designRationale)) {
     const measured = photoSeat ?? measuredSeat ?? null
-    const seat = spec.designRationale.refine?.skySide
-      ? skyRail(measured ?? spec.designRationale.type_seat)
-      : spec.designRationale.type_seat ?? measured ?? undefined
-    const card = composeGridCard({
-      rationale: seat ? { ...spec.designRationale, type_seat: seat } : spec.designRationale,
-      spec: {
-        ...spec,
-        phone: contact.phone ?? spec.phone,
-        website: contact.website ?? spec.website,
-      },
-      businessName: contact.businessName,
-    })
+    const stored = isDesignRationale(spec.designRationale) ? spec.designRationale : null
+    const seat = stored?.refine?.skySide
+      ? skyRail(measured ?? stored.type_seat)
+      : stored?.type_seat ?? measured ?? undefined
+    const cardFront = preparedFront ?? (stored
+      ? composeGridCard({
+          rationale: seat ? { ...stored, type_seat: seat } : stored,
+          spec: {
+            ...spec,
+            phone: contact.phone ?? spec.phone,
+            website: contact.website ?? spec.website,
+          },
+          businessName: contact.businessName,
+        }).front
+      : null)
+    if (!cardFront) return null
     return (
       <PremiumPostcardFront
-        templateId={card.front.templateId}
+        templateId={cardFront.templateId}
         spec={spec}
         contact={contact}
         photoSrc={photoSrc}
@@ -118,7 +126,7 @@ export function PostcardFrontFace({
         thumbnailSrc={thumbnailSrc}
         businessName={contact.businessName}
         compact={compact}
-        plan={card.front}
+        plan={cardFront}
       />
     )
   }
