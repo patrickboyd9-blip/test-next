@@ -229,8 +229,8 @@ MAILED  (handed to USPS)
 
 | Zone | Spec |
 |---|---|
-| **Bleed** | Extend background colors/images **1/8″ (0.125″) beyond the trim edge** on all sides. |
-| **Safe area / live area** | Keep all critical content (text, logos, CTAs) **at least 1/8″ to 1/4″ inside the trim edge**. |
+| **Bleed** | Extend background colors/images **0.25″ beyond the trim edge** on all sides. The verified 5×8 template is an 8.5 × 5.5 in page around an 8 × 5 in trim. The older blog note of 1/8″ (0.125″) is not the bleed this product uses. |
+| **Safe area / live area** | Keep all critical content (text, logos, QR, phone, URL, license line) **0.25″ inside the trim edge**. |
 | **No-bleed alternative** (5×8-specific, from the product/template page) | If not bleeding to the edge, leave a **1/8″ border** around text/images instead. |
 | **Resolution** | Minimum **300 DPI** at final print size. |
 | **Color mode** | **CMYK** required; RGB "will shift... sometimes significantly" if submitted. |
@@ -249,7 +249,7 @@ MAILED  (handed to USPS)
 
 **[DOC]** IMb-specific geometry (from a separate search-result synthesis of Click2Mail's own guidance, consistent with the table above): the Intelligent Mail barcode is roughly **3″ × 5/8″**, and *can* live inside the address block itself if the address area has **at least 3.5″ of horizontal space**; otherwise Click2Mail places it across the bottom, toward the right, and reserves a **3/4″ × 4-7/8″ zone in the lower-right corner** for it.
 
-**[INDUSTRY]** 1/8″ bleed and a similarly-sized safe margin are standard across the commercial print industry generally (this specific pairing is not unique to Click2Mail) — cited here for context, not as a Click2Mail-specific claim.
+**[DOC]** The 5×8 and 6×9 files Modern Mail builds use **0.25″ bleed** and a **0.25″ safe margin**. A 1/8″ bleed figure from Click2Mail's general blog is stale for these templates.
 
 **[UNKNOWN]** Whether these numbers are literally identical for the 5×8 format specifically, or whether larger "oversized" formats like 5×8 use a different (e.g., proportionally larger) bleed/safe-area convention the way some print vendors scale margins with sheet size. Needs direct confirmation against the actual 5×8 template/spec sheet, not the general blog post.
 

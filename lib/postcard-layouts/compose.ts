@@ -28,6 +28,8 @@ export interface PhotoSlotPlan {
   bleed: boolean
   /** cover fills a frame. cutout sits on the canvas. thumbnail is one cell in the bottom row. */
   treatment?: "cover" | "cutout" | "thumbnail"
+  /** Point in the source (0–1) that the cover crop keeps in frame. */
+  focal?: { x: number; y: number }
 }
 
 export interface ShapePlan {
@@ -88,6 +90,8 @@ export interface ComposeInput {
   paletteId?: VerticalPaletteId
   /** When set, the back message stays above the disclaimer band. */
   disclaimer?: boolean
+  /** A required legal label, such as Advertisement on an attorney card. */
+  complianceMark?: string | null
 }
 
 export function composePostcardFace(input: ComposeInput): PostcardFacePlan {
@@ -184,7 +188,24 @@ function composeBack(
   const shapes: ShapePlan[] = []
   const gap = 0.06
   let cursor = box.y
-  const each = roles.length > 0 ? (box.h - gap * (roles.length - 1)) / roles.length : box.h
+  let height = box.h
+  const mark = input.complianceMark?.trim()
+  if (mark) {
+    const labelH = 0.28
+    const fitted = fitText({
+      text: mark,
+      rect: clampToSafe({ x: box.x, y: cursor, w: box.w, h: labelH }, size),
+      role: "label",
+      pairing,
+      color: palette.ink,
+      minPt: 8,
+      maxPt: 9,
+    })
+    if (fitted.lines.length > 0) texts.push(fitted)
+    cursor += labelH + gap
+    height = Math.max(0.4, box.h - labelH - gap)
+  }
+  const each = roles.length > 0 ? (height - gap * Math.max(roles.length - 1, 0)) / roles.length : height
 
   if (input.templateId === "deadline_coupon") {
     shapes.push({

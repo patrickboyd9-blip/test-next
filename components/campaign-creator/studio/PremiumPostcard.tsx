@@ -65,7 +65,7 @@ export function PremiumPostcardFront({
     face: "front",
   })
   const photos = [photoSrc, alternatePhotoSrc ?? null]
-  const thumbFill = thumbnailSrc ?? photoSrc ?? alternatePhotoSrc ?? cutoutSrc ?? null
+  const thumbFill = thumbnailSrc && thumbnailSrc !== photoSrc && thumbnailSrc !== cutoutSrc ? thumbnailSrc : null
   const painted = planWithRealThumbnails(plan, thumbFill)
   return (
     <FaceFrame plan={painted} compact={Boolean(compact)}>
@@ -85,6 +85,7 @@ export function PremiumPostcardFront({
           alt={spec.visualDirection?.trim() || "Campaign photograph"}
           paper={plan.palette.paper}
           treatment={slot.treatment}
+          focal={slot.focal}
         />
       ))}
       <Shapes plan={painted} layer="mid" />
@@ -104,12 +105,14 @@ export function PremiumBackMessage({
   businessName,
   paletteId,
   disclaimer,
+  complianceMark,
 }: {
   templateId: PostcardTemplateId
   spec: CreativeSpec
   businessName?: string
   paletteId?: VerticalPaletteId
   disclaimer?: boolean
+  complianceMark?: string | null
 }) {
   const plan = composePostcardFace({
     templateId,
@@ -118,6 +121,7 @@ export function PremiumBackMessage({
     paletteId: paletteId ?? (isVerticalPalette(spec.layoutHints?.verticalPalette) ? spec.layoutHints.verticalPalette : "general"),
     face: "back",
     disclaimer,
+    complianceMark,
   })
   return (
     <div data-template-back={plan.templateId} data-overflow={plan.overflows ? "yes" : "no"} className="absolute inset-0">
@@ -246,6 +250,7 @@ function PhotoSlot({
   alt,
   paper,
   treatment,
+  focal,
 }: {
   rect: InchRect
   size: PostcardFacePlan["size"]
@@ -253,6 +258,7 @@ function PhotoSlot({
   alt: string
   paper: string
   treatment?: "cover" | "cutout" | "thumbnail"
+  focal?: { x: number; y: number }
 }) {
   const cutout = treatment === "cutout"
   if (cutout && !src) return null
@@ -268,6 +274,7 @@ function PhotoSlot({
           src={src}
           alt={alt}
           className={cutout ? "h-full w-full object-contain object-left" : "h-full w-full object-cover"}
+          style={cutout ? undefined : { objectPosition: `${((focal?.x ?? 0.5) * 100).toFixed(1)}% ${((focal?.y ?? 0.42) * 100).toFixed(1)}%` }}
           draggable={false}
         />
       ) : (

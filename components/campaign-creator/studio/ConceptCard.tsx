@@ -11,10 +11,11 @@ import type { CampaignBrief, CreativeDirection } from "@/lib/campaign-creator/ty
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
 import type { ConceptFeedbackView } from "@/lib/campaign-creator/actions"
-import { blueprintMatchLine } from "@/lib/design-intelligence/blueprint-tags"
-
 import { ConceptFeedback } from "./ConceptFeedback"
 import { PostcardPreview, type PostcardPreviewSize } from "./PostcardPreview"
+import { persuasionAngles, persuasionRecordLine, persuasionUsesLine, persuasionWarnings } from "@/lib/design-intelligence/persuasion"
+import { designDebugEnabled, publicDirectionLine } from "@/lib/campaign-creator/customer-direction-line"
+
 import { ResearchBasis } from "./ResearchBasis"
 import { StudioPhotoNote } from "./StudioPhotoNote"
 
@@ -57,6 +58,10 @@ export function ConceptCard({
 }: ConceptCardProps) {
   const reducedMotion = useReducedMotion()
   const isInteractive = Boolean(onSelect)
+  const debug = designDebugEnabled()
+  const angles = debug ? persuasionAngles(direction.spec.designRationale) : null
+  const complianceWarnings = persuasionWarnings(direction.spec.designRationale)
+  const why = publicDirectionLine(direction.oneLineDifference) ?? publicDirectionLine(direction.rationale)
 
   const size: PostcardPreviewSize =
     variant === "strip" ? "thumbnail" : variant === "hero" ? "hero" : "thumbnail"
@@ -112,18 +117,32 @@ export function ConceptCard({
           <>
             <StudioPhotoNote note={photoNote} />
             <p className="text-sm font-semibold">{direction.name}</p>
-            {direction.spec.blueprint ? (
-              <p className="text-xs font-medium">
-                Blueprint: {blueprintMatchLine(direction.spec.blueprint)}
-              </p>
+            {why ? (
+              <p className="line-clamp-3 text-xs text-muted-foreground">{why}</p>
             ) : null}
-            <p className="line-clamp-2 text-xs text-muted-foreground">
-              {direction.oneLineDifference ?? direction.rationale}
-            </p>
+            {debug && persuasionUsesLine(direction.spec.designRationale) ? (
+              <p className="text-xs text-foreground/80">{persuasionUsesLine(direction.spec.designRationale)}</p>
+            ) : null}
+            {debug && persuasionRecordLine(direction.spec.designRationale) ? (
+              <p className="text-xs text-foreground/80">{persuasionRecordLine(direction.spec.designRationale)}</p>
+            ) : null}
+            {angles ? (
+              <div className="flex flex-col gap-0.5">
+                <p className="text-xs font-medium">A/B test options</p>
+                {angles.map((angle) => (
+                  <p key={angle.id} className="text-xs text-foreground/80">
+                    {angle.onCard ? "On the card · " : ""}{angle.id} · {angle.label}: {angle.line}
+                  </p>
+                ))}
+              </div>
+            ) : null}
+            {complianceWarnings.map((warning) => (
+              <p key={warning} className="text-xs text-foreground/80">{warning}</p>
+            ))}
           </>
         )}
       </button>
-      {variant !== "strip" ? <ResearchBasis research={direction.research} /> : null}
+      {variant !== "strip" && debug ? <ResearchBasis research={direction.research} /> : null}
       {variant !== "strip" && campaignId ? (
         <ConceptFeedback campaignId={campaignId} directionId={direction.id} initial={feedback} />
       ) : null}

@@ -84,6 +84,15 @@ export interface CampaignBrief {
   businessInfo?: BusinessInfo
   brandAssets?: BrandAsset[]
   emotionalTone?: string
+  /**
+   * One primary emotion for this campaign. Empty means the art director recommends one.
+   * Ids live in lib/design-intelligence/persuasion-emotions.ts.
+   */
+  primaryEmotion?: string
+  /**
+   * Schwartz awareness. Omitted means a cold list, which leads with the problem.
+   */
+  audienceAwareness?: "cold" | "problem_aware" | "solution_aware" | "product_aware" | "past_customer"
   offer?: string
   qrDestination?: string
   phone?: string

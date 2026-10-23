@@ -21,7 +21,10 @@ import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
 import { ShimmerOverlay, SpecDiffHighlight } from "./SpecDiffHighlight"
 import { PostcardBackFace, PostcardFrontFace } from "./PostcardComposition"
-import { PremiumBackMessage } from "./PremiumPostcard"
+import { PremiumBackMessage, PremiumPostcardFront } from "./PremiumPostcard"
+import { composeGridCard } from "@/lib/design-intelligence/grid-composer"
+import { isDesignRationale } from "@/lib/design-intelligence/rationale"
+import { attorneyAdMark } from "@/lib/design-intelligence/attorney-compliance"
 import { isPostcardTemplate, isVerticalPalette } from "@/lib/postcard-layouts/ids"
 import { slotPhotoSources } from "@/lib/postcard-layouts/photos"
 import { TEMPLATE_META } from "@/lib/postcard-layouts/templates"
@@ -106,26 +109,64 @@ export function PostcardPreview({
     assets: brief?.brandAssets,
   })
   const disclaimer = medicareDisclaimerFor(brief)
+  const complianceMark = attorneyAdMark(
+    [
+      brief?.goal,
+      brief?.offer,
+      brief?.audience?.description,
+      brief?.businessInfo?.name,
+      brief?.otherRequirements,
+      spec.headline,
+      spec.body,
+      spec.offer,
+    ].filter(Boolean).join(" ")
+  )
+
+  const studioCard = isDesignRationale(spec.designRationale)
+    ? composeGridCard({
+        rationale: spec.designRationale,
+        spec: {
+          ...spec,
+          phone: contact.phone ?? spec.phone,
+          website: contact.website ?? spec.website,
+        },
+        businessName: contact.businessName,
+        disclaimer,
+        complianceMark,
+      })
+    : null
 
   const content = isAddressSide ? (
-    <PostcardBackFace
-      primary={primary}
-      secondary={secondary}
-      accent={accent}
-      reservedRoles={canvas.reservedRegionRoles}
-      compact={compact}
-      disclaimer={disclaimer}
-    >
-      {template ? (
-        <PremiumBackMessage
-          templateId={template}
-          spec={spec}
-          businessName={contact.businessName}
-          paletteId={isVerticalPalette(spec.layoutHints?.verticalPalette) ? spec.layoutHints.verticalPalette : undefined}
-          disclaimer={Boolean(disclaimer)}
-        />
-      ) : null}
-    </PostcardBackFace>
+    studioCard ? (
+      <PremiumPostcardFront
+        plan={studioCard.back}
+        templateId={studioCard.back.templateId}
+        spec={spec}
+        contact={contact}
+        photoSrc={null}
+        compact={compact}
+      />
+    ) : (
+      <PostcardBackFace
+        primary={primary}
+        secondary={secondary}
+        accent={accent}
+        reservedRoles={canvas.reservedRegionRoles}
+        compact={compact}
+        disclaimer={disclaimer}
+      >
+        {template ? (
+          <PremiumBackMessage
+            templateId={template}
+            spec={spec}
+            businessName={contact.businessName}
+            paletteId={isVerticalPalette(spec.layoutHints?.verticalPalette) ? spec.layoutHints.verticalPalette : undefined}
+            disclaimer={Boolean(disclaimer)}
+            complianceMark={complianceMark}
+          />
+        ) : null}
+      </PostcardBackFace>
+    )
   ) : (
     <PostcardFrontFace
       spec={spec}
@@ -139,6 +180,7 @@ export function PostcardPreview({
       contact={contact}
       photoAlt={spec.visualDirection?.trim() || "Campaign photography"}
       photoSeat={generatedAsset?.typeSeat}
+      preparedFront={studioCard?.front}
     />
   )
 

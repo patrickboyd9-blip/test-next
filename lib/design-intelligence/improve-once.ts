@@ -121,11 +121,6 @@ export function biggestWeakness(
   const craft = craftFaults(card)
   if (craft.redundantCopy) return "The offer is repeated."
   if (craft.orphaned) return "The code sits apart from the phone."
-  const offer = card.front.texts.find((text) => text.role === "offer")?.fontPt ?? 0
-  const headline = card.front.texts.filter((text) => text.role === "headline").reduce((max, text) => Math.max(max, text.fontPt), 0)
-  if (headline > 0 && offer / headline < 1.55 && card.front.texts.some((text) => text.role === "offer" && text.text === "FREE")) {
-    return "FREE is smaller than the headline."
-  }
   return ""
 }
 

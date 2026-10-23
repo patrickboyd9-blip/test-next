@@ -38,14 +38,14 @@ export function printPixels(size: TrimSize, ppi = PRINT_PPI): { width: number; h
 export async function renderStudioCardPng(
   plan: PostcardFacePlan,
   qrPayload: string,
-  options?: { ppi?: number; photoJpeg?: Buffer }
+  options?: { ppi?: number; photoJpeg?: Buffer; cutoutPng?: Buffer }
 ): Promise<Buffer> {
   const size = printPixels(plan.size, options?.ppi)
   const directory = await mkdtemp(path.join(os.tmpdir(), "studio-card-"))
   const htmlPath = path.join(directory, "card.html")
   const pngPath = path.join(directory, "card.png")
   try {
-    await writeFile(htmlPath, cardHtml(plan, qrPayload, options?.ppi, options?.photoJpeg), "utf8")
+    await writeFile(htmlPath, cardHtml(plan, qrPayload, options?.ppi, options?.photoJpeg, options?.cutoutPng), "utf8")
     await runChrome(htmlPath, pngPath, size.width, size.height)
     const png = await readFile(pngPath)
     const actual = pngSize(png)
@@ -58,11 +58,11 @@ export async function renderStudioCardPng(
   }
 }
 
-function cardHtml(plan: PostcardFacePlan, qrPayload: string, ppi?: number, photoJpeg?: Buffer): string {
+function cardHtml(plan: PostcardFacePlan, qrPayload: string, ppi?: number, photoJpeg?: Buffer, cutoutPng?: Buffer): string {
   const trim = trimInches(plan.size)
   const size = printPixels(plan.size, ppi)
   const photo = (photoJpeg ?? standInPhotoJpeg()).toString("base64")
-  const cutout = standInCutoutPng().toString("base64")
+  const cutout = (cutoutPng ?? standInCutoutPng()).toString("base64")
   const displayFamily = plan.pairing === "letter" ? "Fraunces" : plan.pairing === "signal" ? "Barlow Condensed" : "Archivo"
   const parts: string[] = []
   for (const shape of plan.shapes.filter((item) => studioShapeLayer(item.role) === "back")) {
@@ -75,7 +75,7 @@ function cardHtml(plan: PostcardFacePlan, qrPayload: string, ppi?: number, photo
       )
     } else {
       parts.push(
-        `<img alt="Stand-in photo" src="data:image/jpeg;base64,${photo}" style="${box(slot.rect, trim)}object-fit:cover;" />`
+        `<img alt="Stand-in photo" src="data:image/jpeg;base64,${photo}" style="${box(slot.rect, trim)}object-fit:cover;object-position:${((slot.focal?.x ?? 0.5) * 100).toFixed(1)}% ${((slot.focal?.y ?? 0.42) * 100).toFixed(1)}%;" />`
       )
     }
   }

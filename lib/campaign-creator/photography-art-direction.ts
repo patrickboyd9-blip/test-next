@@ -60,7 +60,7 @@ const LIGHT: Record<PhotoRole, string> = {
 
 const EMOTION: Record<LeadJob, string> = {
   offer: "Calm confidence. The picture makes the offer feel concrete.",
-  problem: "The cost of waiting, without fear-mongering.",
+  problem: "The cost of waiting, in the emotion the campaign chose.",
   trust: "Competence and care. Not a smile at the camera.",
   urgency: "A moment that should not wait, still short of spectacle.",
 }

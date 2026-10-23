@@ -11,7 +11,6 @@ export function ResearchBasis({ research }: { research?: DirectionResearch }) {
 
   return (
     <details
-      open
       className="text-[11px] leading-snug text-muted-foreground"
       data-research-basis=""
       onClick={(event) => event.stopPropagation()}
