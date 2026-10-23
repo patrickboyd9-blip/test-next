@@ -270,7 +270,18 @@ class StoredCampaignRepository implements CampaignRepository {
 
   async updateBrief(id: string, patch: Partial<CampaignBrief>): Promise<Campaign> {
     const campaign = await this.require(id)
-    campaign.brief = { ...campaign.brief, ...patch }
+    const audience = patch.audience
+        ? {
+          ...campaign.brief.audience,
+          ...patch.audience,
+          description: patch.audience.description ?? campaign.brief.audience?.description ?? "",
+        }
+      : campaign.brief.audience
+    campaign.brief = {
+      ...campaign.brief,
+      ...patch,
+      ...(patch.audience ? { audience } : {}),
+    }
     campaign.updatedAt = new Date().toISOString()
     return this.write(campaign)
   }

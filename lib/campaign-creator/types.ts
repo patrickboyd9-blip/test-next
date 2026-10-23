@@ -23,6 +23,11 @@ export interface ConversationMessage {
   role: ConversationRole
   content: string
   createdAt: string
+  /**
+   * Snapshot of the audience understood on this turn.
+   * The latest card in the thread edits the live brief; older cards stay as history.
+   */
+  audienceCard?: AudienceDefinition
 }
 
 export type PrimarySuccessMetricType =
@@ -44,9 +49,59 @@ export interface PrimarySuccessMetric {
   description?: string
 }
 
+export type AudienceListType = "house" | "prospect" | "every_door"
+
+export type AudienceProviderId = "upload" | "every_door" | "melissa"
+
+/** How a piece count was obtained. Never a purchased or invented universe size. */
+export type AudienceQuantityKind = "requested" | "from_upload" | "unavailable"
+
+export type AudienceProviderStatus =
+  | "needs_upload"
+  | "file_counted"
+  | "route_to_eddm"
+  | "coming_soon"
+
+export interface AudienceGeography {
+  kind: "zip" | "radius" | "city"
+  label: string
+  postalCode?: string
+  radiusMiles?: number
+  place?: string
+}
+
+export interface AudienceFilter {
+  id: string
+  field: "homeowner" | "home_age_years" | "household_income" | "year_built" | "custom"
+  label: string
+  operator?: "is" | "gte" | "lte"
+  value?: number | string
+}
+
+/**
+ * What a list provider returned. `count` is unavailable unless it came from
+ * the customer's own file. Providers must not invent a household count.
+ */
+export interface AudienceProviderState {
+  id: AudienceProviderId
+  status: AudienceProviderStatus
+  message: string
+  count: "unavailable" | { kind: "from_upload"; value: number }
+  /** Set when Every Door should hand this audience to the route map. */
+  hook?: "eddm.routeMap"
+}
+
 export interface AudienceDefinition {
   description: string
   quantity?: number
+  /** Absent on campaigns saved before list planning. Treat a bare quantity as a request. */
+  quantityKind?: AudienceQuantityKind
+  geography?: AudienceGeography
+  filters?: AudienceFilter[]
+  listType?: AudienceListType
+  provider?: AudienceProviderState
+  /** Set when a housing audience dropped a protected-class target. */
+  fairHousingNote?: string
 }
 
 export interface BusinessInfo {

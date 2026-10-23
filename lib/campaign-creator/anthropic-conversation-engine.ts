@@ -93,7 +93,11 @@ const updateBriefTool: Anthropic.Tool = {
             type: "object",
             properties: {
               description: { type: "string" },
-              quantity: { type: "number" },
+              quantity: {
+                type: "number",
+                description:
+                  "Only when the customer stated how many pieces to mail. Never a household count you calculated.",
+              },
             },
           },
           businessInfo: {
@@ -160,6 +164,13 @@ details — do not fabricate them. Only include something in the brief if the cu
 actually said it, or it is an unmistakable, safe inference from what they said. When in \
 doubt, ask instead of assuming.
 
+When the customer describes who should receive the mail, a structured audience card is \
+saved from their words. Do not invent a household count, a route count, or a response \
+rate, and do not promise results. If the brief already has an audience description, \
+geography, or filters, do not ask again who they want to reach. For housing-related \
+mail, never agree to target race, religion, national origin, familial status, \
+disability, or sex. Income, the age of a home, homeowner status, and location are fine.
+
 Set readyForBriefReview to true only once you have enough for a strong first \
 recommendation — not a perfect or exhaustive brief. It is fine for optional details to \
 stay unknown. Keep it false while a genuinely necessary piece of information (like the \
@@ -208,6 +219,8 @@ function mergeBriefPatch(
 
   if (incoming.audience) {
     patch.audience = {
+      ...current.audience,
+      ...incoming.audience,
       description: incoming.audience.description ?? current.audience?.description ?? "",
       quantity: incoming.audience.quantity ?? current.audience?.quantity,
     }

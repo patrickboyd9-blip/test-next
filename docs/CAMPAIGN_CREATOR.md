@@ -93,6 +93,20 @@ Examples:
 
 Modern Mail should understand the audience concept before translating it into an actual mailing audience.
 
+When the customer describes an audience in the same campaign chat, Modern Mail turns that description into a card they can edit: where, filters, list type, and quantity. That card is what the Audience step starts from.
+
+The list is one of three:
+
+- A house list is people who already know the business. The customer uploads the names. The count is the number of names in the file.
+- A prospect list is saved for a data partner. No list is purchased in the product yet, and the count stays unavailable.
+- Every Door is saved for the route map. That map is a separate step. Modern Mail does not invent a household count for it.
+
+For housing-related mail, Modern Mail does not target race, religion, national origin, familial status, disability, or sex. Income, the age of a home, homeowner status, and location can stay.
+
+A number the customer asked to mail is labeled as a request. It is not a counted list. Modern Mail does not invent a count.
+
+Before an order, Modern Mail shows a response range on the strategy review, the concept screens, and the Audience step. The range is an estimate from a conservative planning table. It is not a guarantee, and the screen says that results vary.
+
 ### 4. Brand and Company Information
 
 Modern Mail should collect any relevant business information needed for the campaign.
@@ -256,9 +270,9 @@ Customer:
 
 Modern Mail:
 
-> "Got it. Who would you like to target? For example, homeowners in specific ZIP codes, a certain income range, or another type of household."
+> "Got it. I already have homeowners in Irvine, about 1,000 pieces, on the audience card. You can edit that. What should the postcard feel like?"
 
-The exact questions should depend on what the customer has already told Modern Mail.
+The exact questions should depend on what the customer has already told Modern Mail. If the audience was already described, Modern Mail does not ask for it again.
 
 ### Progressive Intelligence
 

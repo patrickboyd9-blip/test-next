@@ -20,6 +20,7 @@ import { ConceptFeedback } from "./ConceptFeedback"
 import { PostcardPreview, PostcardSideToggle } from "./PostcardPreview"
 import { ResearchBasis } from "./ResearchBasis"
 import { StrategyTags } from "./StrategyTags"
+import { ResponseEstimate } from "../ResponseEstimate"
 import { StudioPhotoNote } from "./StudioPhotoNote"
 
 interface FocusViewProps {
@@ -137,6 +138,7 @@ export function FocusView({
           <span className="font-medium">{direction.designedToDrive}</span>
         </p>
         <StrategyTags tags={direction.tags} />
+        {brief ? <ResponseEstimate brief={brief} /> : null}
       </div>
 
       <div className="flex max-w-lg flex-col gap-3 sm:flex-row sm:items-center">

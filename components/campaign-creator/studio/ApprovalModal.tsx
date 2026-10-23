@@ -12,6 +12,7 @@ import type { CampaignBrief, CreativeSpec } from "@/lib/campaign-creator/types"
 import { trackingDestination } from "@/lib/campaign-creator/creative-state"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
+import { ResponseEstimate } from "../ResponseEstimate"
 import { PostcardPreview } from "./PostcardPreview"
 import { StudioPhotoNote } from "./StudioPhotoNote"
 
@@ -183,6 +184,9 @@ export function ApprovalModal({
               </span>
             </p>
             <p className="mt-1 text-center text-xs text-muted-foreground">{directionName}</p>
+            <div className="mt-4">
+              <ResponseEstimate brief={brief} />
+            </div>
 
             <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
               <Button

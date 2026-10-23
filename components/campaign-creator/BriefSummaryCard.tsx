@@ -23,6 +23,9 @@ import {
   resolveEmotion,
 } from "@/lib/design-intelligence/persuasion-emotions"
 import { clientFactText, persuasionVertical } from "@/lib/design-intelligence/persuasion"
+import { withRequestedQuantity } from "@/lib/audience/interpret"
+
+import { ResponseEstimate } from "./ResponseEstimate"
 
 interface BriefSummaryCardProps {
   brief: CampaignBrief
@@ -324,21 +327,17 @@ export function BriefSummaryCard({
             }
           />
           <Field
-            key={`audienceQuantity:${brief.audience?.quantity ?? ""}`}
+            key={`audienceQuantity:${brief.audience?.quantity ?? ""}:${brief.audience?.quantityKind ?? ""}`}
             label="Quantity"
             value={brief.audience?.quantity ? String(brief.audience.quantity) : ""}
             readOnly={readOnly}
             type="number"
             placeholder="How many pieces?"
             onCommit={(value) =>
-              onFieldChange({
-                audience: {
-                  description: brief.audience?.description ?? "",
-                  quantity: value ? Number(value) : undefined,
-                },
-              })
+              onFieldChange({ audience: withRequestedQuantity(brief.audience, value) })
             }
           />
+          <ResponseEstimate brief={brief} />
         </div>
 
         <Separator />

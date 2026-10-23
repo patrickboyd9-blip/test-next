@@ -9,6 +9,7 @@ import type { ConceptFeedbackView } from "@/lib/campaign-creator/actions"
 import type { CampaignBrief, CreativeDirection } from "@/lib/campaign-creator/types"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
+import { ResponseEstimate } from "../ResponseEstimate"
 import { ConceptCard } from "./ConceptCard"
 
 interface CompareViewProps {
@@ -56,6 +57,7 @@ export function CompareView({
       </button>
 
       <h2 className="text-lg font-semibold">Three directions for your campaign</h2>
+      {brief ? <ResponseEstimate brief={brief} /> : null}
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {directions.map((direction, index) => {
