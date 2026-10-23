@@ -4,10 +4,12 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
   BarChart3,
+  CircleDollarSign,
   LayoutDashboard,
   LayoutTemplate,
   Megaphone,
   PenLine,
+  Receipt,
   Settings,
   Sparkles,
   Users,
@@ -43,6 +45,8 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Design requests", href: "/app/design-requests", icon: PenLine },
   { label: "AI Creator", href: "/app/ai-creator", icon: Sparkles, soon: true },
   { label: "Insights", href: "/app/insights", icon: BarChart3, soon: true },
+  { label: "Orders", href: "/app/orders", icon: Receipt },
+  { label: "Pricing", href: "/app/pricing", icon: CircleDollarSign },
   { label: "Settings", href: "/app/settings", icon: Settings, soon: true },
 ]
 
@@ -67,7 +71,7 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {NAV_ITEMS.map((item) => {
-                const isActive = pathname === item.href
+                const isActive = item.href === "/app" ? pathname === "/app" : pathname === item.href || pathname.startsWith(`${item.href}/`)
                 const Icon = item.icon
 
                 if (item.soon) {

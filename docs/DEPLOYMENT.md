@@ -38,6 +38,23 @@ The Blob store must stay **Private**. That is the setting Vercel picks when you 
 
 Without the two API keys, campaign pages still open. The writing and the photographs fall back to the built-in practice behavior instead of calling Anthropic or OpenAI.
 
+## Pricing and card payment
+
+Customers see one price per card and a total. Those numbers come from **Pricing** in the sidebar (`/app/pricing`). The page is locked until you set an owner key. Card payment uses Stripe **test mode** only. A live key leaves checkout off, and the rest of the app still opens.
+
+Add these in **Settings → Environment Variables** for **Production and Preview**, then redeploy:
+
+| Variable | What to put |
+| --- | --- |
+| `STRIPE_SECRET_KEY` | Stripe **test** secret key. It starts with `sk_test_`. In Stripe: Developers → API keys, with **Test mode** turned on. Do not paste a key that starts with `sk_live_`. |
+| `STRIPE_WEBHOOK_SECRET` | Signing secret for the webhook. It starts with `whsec_`. In Stripe: Developers → Webhooks → Add endpoint. The URL is `https://test-next-modern-mail2.vercel.app/api/stripe/webhook` for production, and the preview address plus `/api/stripe/webhook` for a preview. Subscribe to `checkout.session.completed`, `checkout.session.expired`, `checkout.session.async_payment_failed`, and `payment_intent.payment_failed`. |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe **test** publishable key. It starts with `pk_test_`. Same API keys page as the secret key. |
+| `PRICING_OWNER_KEY` | A password you choose. It unlocks `/app/pricing`. It is not a Stripe key. |
+
+The mailing is sent to Click2Mail only after the webhook says the test payment succeeded. If any of the three Stripe values is missing, the price still shows and the pay button explains that card payment is not set up. Nothing is sent.
+
+To try the webhook on a laptop, the Stripe CLI can forward events to `http://localhost:3000/api/stripe/webhook`. Use the signing secret that command prints as `STRIPE_WEBHOOK_SECRET`.
+
 ## Reference library
 
 Studio already knows the written grades for the mailbox and vendor pieces. Those notes ship with the app. The photographs of those pieces do not. They stay out of git.

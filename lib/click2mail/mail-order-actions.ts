@@ -43,7 +43,8 @@ export async function submitPrintMailTest(
         city: string
         state: string
         zip: string
-      }
+      },
+  customerTotalLabel?: string
 ): Promise<PrintMailActionResult> {
   const campaign = await repository.getCampaign(campaignId)
   if (!campaign) return missing(campaignId)
@@ -59,7 +60,31 @@ export async function submitPrintMailTest(
     return { campaign, issues: parsed.errors.length > 0 ? parsed.errors : ["Add at least one address."] }
   }
 
-  return runOrder(campaign, parsed.recipients, undefined)
+  return runOrder(campaign, parsed.recipients, reusableOrder(campaign), {
+    submit: false,
+    customerTotalLabel,
+  })
+}
+
+/**
+ * Submit a job only after the card payment is recorded as paid.
+ * Invoice billing is required so Click2Mail can still cancel the job before
+ * the cutoff. The customer has already paid Modern Mail.
+ */
+export async function submitPaidMailOrder(campaignId: string): Promise<PrintMailActionResult> {
+  const campaign = await repository.getCampaign(campaignId)
+  if (!campaign) return missing(campaignId)
+  if (campaign.payment?.status !== "paid") {
+    return { campaign, issues: ["This mailing has not been paid, so it was not sent."] }
+  }
+  const order = campaign.mailOrder
+  if (!order?.jobId) return { campaign, issues: ["There is no mailing ready to send."] }
+  if (order.submitted) return { campaign, issues: [] }
+  return runOrder(campaign, [], order, {
+    submit: true,
+    customerTotalLabel: campaign.payment.totalLabel,
+    billingType: "Invoice",
+  })
 }
 
 export async function continuePrintMailTest(campaignId: string): Promise<PrintMailActionResult> {
@@ -68,9 +93,9 @@ export async function continuePrintMailTest(campaignId: string): Promise<PrintMa
   const blocked = guard(campaign)
   if (blocked) return { campaign, issues: [blocked] }
   if (!campaign.mailOrder?.addressListId && !campaign.mailOrder?.documentId) {
-    return { campaign, issues: ["There is no staging order to continue."] }
+    return { campaign, issues: ["There is no order to continue."] }
   }
-  return runOrder(campaign, [], campaign.mailOrder)
+  return runOrder(campaign, [], campaign.mailOrder, { submit: false })
 }
 
 export async function refreshPrintMailStatus(campaignId: string): Promise<PrintMailActionResult> {
@@ -108,6 +133,13 @@ function missing(campaignId: string): PrintMailActionResult {
   throw new Error(`Campaign ${campaignId} not found`)
 }
 
+function reusableOrder(campaign: Campaign): MailOrderRecord | undefined {
+  const order = campaign.mailOrder
+  if (!order || order.submitted) return undefined
+  if (campaign.payment?.status === "paid" && campaign.payment.orderId === order.id) return undefined
+  return order
+}
+
 function guard(campaign: Campaign): string | null {
   if (!isAtOrPastStatus(campaign.status, "creative_approved") || !campaign.mailPiece) {
     return "Approve the postcard before sending a print test."
@@ -129,7 +161,8 @@ function clientFromEnv() {
 async function runOrder(
   campaign: Campaign,
   recipients: readonly Recipient[],
-  existing: MailOrderRecord | undefined
+  existing: MailOrderRecord | undefined,
+  options: { submit: boolean; customerTotalLabel?: string; billingType?: string }
 ): Promise<PrintMailActionResult> {
   const { config, client } = clientFromEnv()
   let artwork: MailOrderRecord["artwork"] = existing?.artwork ?? "type-plate"
@@ -195,7 +228,9 @@ async function runOrder(
     addressListName: `mm-${campaign.id.slice(0, 8)}-${stamp}`,
     returnAddress: returnAddressFor(campaign),
     artwork,
-    submit: true,
+    submit: options.submit,
+    customerTotalLabel: options.customerTotalLabel,
+    productOverrides: options.billingType ? { billingType: options.billingType } : undefined,
     proof: true,
     existing,
     pollTimeoutMs: 20_000,

@@ -22,6 +22,8 @@ export interface PlaceOrderInput {
   postcardSize?: PostcardSize
   productOverrides?: Partial<Click2MailConfig["product"]>
   artwork: MailOrderRecord["artwork"]
+  /** Customer-facing total. When set, this replaces the postage-only label. */
+  customerTotalLabel?: string
   submit: boolean
   proof: boolean
   existing?: MailOrderRecord
@@ -42,17 +44,20 @@ export async function placeClick2MailOrder(input: PlaceOrderInput): Promise<Mail
   const postage = loadPostcardPostage()
   const existing = input.existing
   const order: MailOrderRecord = existing
-    ? { ...existing, error: undefined, updatedAt: now() }
+    ? {
+        ...existing,
+        error: undefined,
+        updatedAt: now(),
+        estimatedCostLabel: input.customerTotalLabel ?? existing.estimatedCostLabel,
+      }
     : {
         id: randomUUID(),
         mode: input.config.environment === "prod" ? "production" : "test",
         environment: input.config.environment,
         pieceCount: input.recipients.length,
-        estimatedCostLabel: postageEstimateLabel(
-          input.recipients.length,
-          postage,
-          input.postcardSize ?? "5x8"
-        ),
+        estimatedCostLabel:
+          input.customerTotalLabel ??
+          postageEstimateLabel(input.recipients.length, postage, input.postcardSize ?? "5x8"),
         artwork: input.artwork,
         submitted: false,
         product: {

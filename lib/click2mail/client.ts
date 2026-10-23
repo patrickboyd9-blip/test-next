@@ -333,6 +333,18 @@ export function createClick2MailClient(options: {
       return toJob(result, response, secrets, "ORDER_SUBMITTED")
     },
 
+    async cancelSubmittedJob(jobId) {
+      const response = await send({
+        method: "POST",
+        path: `/jobs/${encodeURIComponent(jobId)}/cancel`,
+      })
+      const result = readResult(parseBody(response, secrets))
+      if (response.status < 200 || response.status >= 300 || result.status !== 0) {
+        throw fail(response, result, secrets)
+      }
+      return toJob(result, response, secrets, "EDITING")
+    },
+
     async getJob(jobId) {
       const response = await send({ method: "GET", path: `/jobs/${encodeURIComponent(jobId)}` })
       const result = readResult(parseBody(response, secrets))

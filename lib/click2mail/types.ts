@@ -108,6 +108,11 @@ export interface Click2MailClient {
   createProof(jobId: string): Promise<ProofSnapshot>
   getProof(jobId: string, proofId: string, sessionId: string): Promise<ProofSnapshot>
   submitJob(jobId: string, billingType: string): Promise<JobSnapshot>
+  /**
+   * Cancel a submitted job. Click2Mail only accepts this before processing
+   * starts, and only when the job was submitted with Invoice billing.
+   */
+  cancelSubmittedJob(jobId: string): Promise<JobSnapshot>
   getJob(jobId: string): Promise<JobSnapshot>
   getTracking(jobId: string, trackingType?: string): Promise<TrackingSnapshot>
 }
