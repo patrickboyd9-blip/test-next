@@ -1,3 +1,5 @@
+import { eddmPaymentCleared } from "@/lib/fulfillment/payment-clearance"
+
 import { loadPostcardPostage } from "./cost"
 import { Click2MailError } from "./errors"
 import type { PrintMailMode } from "./mode"
@@ -74,11 +76,22 @@ export function loadClick2MailConfig(env: NodeJS.ProcessEnv = process.env): Clic
     environment === "prod" ? PROD_BASE_URL : STAGE_BASE_URL
   ).replace(/\/$/, "")
 
+  const username =
+    environment === "stage"
+      ? textOr(env.C2M_STAGE_USERNAME, env.C2M_USERNAME?.trim() ?? "")
+      : env.C2M_USERNAME?.trim() ?? ""
+  const password =
+    environment === "stage"
+      ? env.C2M_STAGE_PASSWORD !== undefined && env.C2M_STAGE_PASSWORD !== ""
+        ? env.C2M_STAGE_PASSWORD
+        : (env.C2M_PASSWORD ?? "")
+      : (env.C2M_PASSWORD ?? "")
+
   return {
     environment,
     baseUrl,
-    username: env.C2M_USERNAME?.trim() ?? "",
-    password: env.C2M_PASSWORD ?? "",
+    username,
+    password,
     allowProduction: env.C2M_ALLOW_PRODUCTION?.trim() === "true",
     addressListReadyMinStatus: readInt(env.C2M_ADDRESS_LIST_READY_MIN, 3),
     addressListErrorStatus: readInt(env.C2M_ADDRESS_LIST_ERROR_STATUS, 9),
@@ -100,9 +113,11 @@ export function loadClick2MailConfig(env: NodeJS.ProcessEnv = process.env): Clic
 
 export function assertClick2MailCallable(config: Click2MailConfig): void {
   if (!config.username || !config.password) {
-    throw new Click2MailError(
-      "Click2Mail credentials are missing. Set C2M_USERNAME and C2M_PASSWORD on the server."
-    )
+    const names =
+      config.environment === "stage"
+        ? "Set C2M_STAGE_USERNAME and C2M_STAGE_PASSWORD, or C2M_USERNAME and C2M_PASSWORD, on the server."
+        : "Set C2M_USERNAME and C2M_PASSWORD on the server."
+    throw new Click2MailError(`Click2Mail credentials are missing. ${names}`)
   }
   if (config.environment === "prod" && !config.allowProduction) {
     throw new Click2MailError(
@@ -113,19 +128,16 @@ export function assertClick2MailCallable(config: Click2MailConfig): void {
 
 export function describePrintMailMode(env: NodeJS.ProcessEnv = process.env): PrintMailMode {
   const config = loadClick2MailConfig(env)
-  const accountConfigured = Boolean(env.C2M_EDDM_CRID?.trim())
+  const credentialsConfigured = Boolean(config.username && config.password)
   const submitRequested = env.C2M_EDDM_SUBMIT?.trim() === "true"
   return {
     environment: config.environment,
     productionEnabled: config.environment === "prod" && config.allowProduction,
-    credentialsConfigured: Boolean(config.username && config.password),
+    credentialsConfigured,
     postage: loadPostcardPostage(env),
-    eddmSubmitEnabled:
-      config.environment === "stage" &&
-      submitRequested &&
-      Boolean(config.username && config.password) &&
-      accountConfigured,
-    eddmAccountConfigured: accountConfigured,
+    eddmSubmitEnabled: config.environment === "stage" && submitRequested && credentialsConfigured,
+    eddmAccountConfigured: credentialsConfigured,
+    eddmPaymentCleared: eddmPaymentCleared({ environment: config.environment, env }),
   }
 }
 

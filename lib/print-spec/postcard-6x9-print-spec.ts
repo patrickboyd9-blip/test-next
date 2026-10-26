@@ -1,3 +1,4 @@
+import { CLICK2MAIL_POSTCARD_6X9_RESERVED } from "./click2mail-reserved-zones"
 import {
   buildPostcardGeometry,
   type PostcardGeometry,
@@ -9,19 +10,19 @@ import {
  * Trim is 9 × 6 in. The page is 9.5 × 6.5 in because bleed is 0.25 in on
  * every side. The safe inset is 0.25 in inside the trim.
  *
- * The address keep-out is the measured figure from the bring-your-own-design
- * research: 3.656 in wide by 2.948 in tall from the bottom-right of the trim,
- * plus a strip 6 in wide by 0.625 in tall. That measurement is still to be
- * confirmed with Click2Mail, so it is not a published catalog version.
+ * The address keep-out numbers live in click2mail-reserved-zones.ts.
+ * David at Click2Mail has not confirmed the 6×9 boxes. Change them there.
  * Templates and preflight both read this function.
  */
 export function buildPostcard6x9PrintSpec(): PostcardGeometry {
   const trimWidth = 9
   const trimHeight = 6
-  const panelWidth = 3.656
-  const panelHeight = 2.948
-  const stripWidth = 6
-  const stripHeight = 0.625
+  const panel = CLICK2MAIL_POSTCARD_6X9_RESERVED.mailingPanel
+  const strip = CLICK2MAIL_POSTCARD_6X9_RESERVED.barcodeStrip
+  const panelWidth = panel.widthInches
+  const panelHeight = panel.heightInches
+  const stripWidth = strip.widthInches
+  const stripHeight = strip.heightInches
 
   return buildPostcardGeometry({
     artworkCanvasInches: { widthInches: 9.5, heightInches: 6.5 },

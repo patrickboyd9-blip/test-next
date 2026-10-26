@@ -9,10 +9,16 @@ export interface PrintMailMode {
   /** First Class postcard postage used for the estimate on this server. */
   postage: PostcardPostageRates
   /**
-   * True only on staging, with C2M_EDDM_SUBMIT=true, credentials, and a USPS
-   * account id. Production never turns this on.
+   * True only on staging, with C2M_EDDM_SUBMIT=true and credentials.
+   * Production never turns this on. Full-service Every Door does not need
+   * the customer's USPS account id.
    */
   eddmSubmitEnabled: boolean
-  /** True when C2M_EDDM_CRID is set. The id itself stays on the server. */
+  /** True when staging or production credentials are set. The values stay on the server. */
   eddmAccountConfigured: boolean
+  /**
+   * True when this order is allowed to leave for Click2Mail.
+   * The page also turns this on when the campaign itself is marked paid.
+   */
+  eddmPaymentCleared: boolean
 }

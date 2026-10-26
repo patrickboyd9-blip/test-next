@@ -12,12 +12,7 @@ import { composePostcardFace } from "@/lib/postcard-layouts/compose"
 import { rectsOverlap } from "@/lib/postcard-layouts/templates"
 
 import { hasRecipientPersonalization, toNeighborhoodCopy } from "./copy"
-import {
-  EDDM_CLEARANCE_INCHES,
-  EDDM_INDICIA_FROM_RIGHT_INCHES,
-  EDDM_INDICIA_FROM_TOP_INCHES,
-  qualifiesAsEddmFlat,
-} from "./geometry"
+import { eddmKeepOuts, eddmMessageRect, eddmTrim, qualifiesAsEddmFlat } from "./geometry"
 import { EDDM_MAX_PIECES_PER_ZIP_PER_DAY, EDDM_MIN_PIECES, eddmLimitMessages } from "./limits"
 import { eddmPostageEstimate } from "./postage"
 import { routeMatchesFilter, snapshotRoute, summarizeSelection, type EddmRoute } from "./routes"
@@ -81,33 +76,41 @@ test("6.5×9 and 6.25×11 are EDDM flats and 5×8 is not", () => {
   assert.equal(jumbo.physical.artworkCanvasInches.heightInches, 6.75)
 })
 
-test("the indicia zone is above and to the right of Postal Customer", () => {
-  for (const id of ["postcard_6_5x9", "postcard_6_25x11"] as const) {
-    const entry = getMailPiece(id, 1)
-    const trim = entry.physical.finishedTrimInches.widthInches
-    const indicia = entry.creativeCanvas.reservedKeepOut.rectangles.find((rect) => rect.id === "eddm_indicia")
-    const address = entry.creativeCanvas.reservedKeepOut.rectangles.find((rect) => rect.id === "postal_customer")
-    assert.ok(indicia)
-    assert.ok(address)
-    assert.equal(indicia.widthInches, EDDM_INDICIA_FROM_RIGHT_INCHES)
-    assert.equal(indicia.heightInches, EDDM_INDICIA_FROM_TOP_INCHES)
-    assert.equal(indicia.xInches + indicia.widthInches, trim)
-    assert.equal(indicia.yInches, 0)
-    assert.ok(indicia.widthInches > 0.5)
-    assert.ok(indicia.heightInches > 0.5)
-    assert.equal(address.xInches + address.widthInches + EDDM_CLEARANCE_INCHES, indicia.xInches)
-    assert.ok(address.yInches > indicia.yInches)
+test("the reserved address block matches the Click2Mail template and the offer stays out of it", () => {
+  // Measured Oct 26, 2026 from the Click2Mail Word templates.
+  // 6.5×9 page is 9.5 × 7 in. Trim is 9 × 6.5. Block is x=5, y=4.5, 4 × 2.
+  // 6.25×11 page is 11.5 × 6.75 in. Trim is 11 × 6.25. Block is x=7, y=4.25, 4 × 2.
+  for (const size of ["6.5x9", "6.25x11"] as const) {
+    const trim = eddmTrim(size)
+    const [block] = eddmKeepOuts(trim)
+    assert.ok(block)
+    assert.equal(block.id, "eddm_address_block")
+    assert.equal(block.widthInches, 4)
+    assert.equal(block.heightInches, 2)
+    assert.equal(block.xInches, trim.widthInches - 4)
+    assert.equal(block.yInches, trim.heightInches - 2)
+    assert.equal(block.xInches + block.widthInches, trim.widthInches)
+    assert.equal(block.yInches + block.heightInches, trim.heightInches)
+    assert.notEqual(block.widthInches, 1.625)
+    assert.notEqual(block.yInches, 0)
+    const message = eddmMessageRect(trim)
     assert.equal(
       rectsOverlap(
-        { x: address.xInches, y: address.yInches, w: address.widthInches, h: address.heightInches },
-        { x: indicia.xInches, y: indicia.yInches, w: indicia.widthInches, h: indicia.heightInches }
+        { x: message.xInches, y: message.yInches, w: message.widthInches, h: message.heightInches },
+        { x: block.xInches, y: block.yInches, w: block.widthInches, h: block.heightInches }
       ),
       false
     )
+    const entry = getMailPiece(size === "6.5x9" ? "postcard_6_5x9" : "postcard_6_25x11", 1)
+    const catalog = entry.creativeCanvas.reservedKeepOut.rectangles[0]
+    assert.equal(catalog?.widthInches, 4)
+    assert.equal(catalog?.heightInches, 2)
+    assert.equal(catalog?.xInches, block.xInches)
+    assert.equal(catalog?.yInches, block.yInches)
   }
 })
 
-test("the EDDM back says Postal Customer and leaves the indicia zone clear of the offer", () => {
+test("the print plan leaves the address block blank and keeps the offer out of it", () => {
   const back = composePostcardFace({
     templateId: "deadline_coupon",
     size: "6.5x9",
@@ -123,18 +126,22 @@ test("the EDDM back says Postal Customer and leaves the indicia zone clear of th
       qrDestination: "https://corneroven.example/coupon",
     },
   })
-  const postal = back.texts.find((text) => text.text === "POSTAL CUSTOMER")
-  const indicia = back.texts.find((text) => text.text === "ECRWSS")
+  const block = eddmKeepOuts(eddmTrim("6.5x9"))[0]
+  assert.ok(block)
+  const reserved = { x: block.xInches, y: block.yInches, w: block.widthInches, h: block.heightInches }
   const offer = back.texts.find((text) => text.role === "offer")
-  assert.ok(postal)
-  assert.ok(indicia)
   assert.ok(offer)
   assert.equal(back.overflows, false)
   assert.equal(hasRecipientPersonalization(offer.text), false)
   assert.match(offer.text, /Free side/)
-  assert.equal(rectsOverlap(postal.rect, indicia.rect), false)
-  assert.equal(rectsOverlap(offer.rect, indicia.rect), false)
-  assert.equal(rectsOverlap(offer.rect, postal.rect), false)
+  assert.equal(
+    back.texts.some((text) => /POSTAL CUSTOMER|ECRWSS|EDDM RETAIL/i.test(text.text)),
+    false
+  )
+  assert.equal(back.shapes.some((shape) => rectsOverlap(shape.rect, reserved)), false)
+  for (const text of back.texts) {
+    assert.equal(rectsOverlap(text.rect, reserved), false, text.role)
+  }
 })
 
 test("a 6.5×9 print file is two pages at the bleed size", async () => {
@@ -199,6 +206,18 @@ test("filters use age, income, and household size, and a blank figure stays", ()
   assert.equal(summary.pieces, 480)
   const withBusiness = summarizeSelection(routes.map(snapshotRoute), "residential_and_business")
   assert.equal(withBusiness.pieces, 521)
+  assert.equal(summary.postOffices[0]?.name, "JAMES A FARLEY")
+  assert.equal(summary.postOffices[0]?.city, "NEW YORK")
+  assert.equal(summary.postOffices[0]?.state, "NY")
+  assert.equal(summary.postOffices[0]?.routeType, "City")
+  assert.equal(summary.messages.some((message) => /post office/i.test(message)), false)
+
+  const unnamed = summarizeSelection(
+    [{ ...snapshotRoute(routes[0] as EddmRoute), postOfficeName: "" }],
+    "residential"
+  )
+  assert.equal(unnamed.postOffices.length, 0)
+  assert.match(unnamed.messages.join(" "), /can't tell which post office delivers route C001/)
 })
 
 test("web mercator route lines become longitude and latitude", () => {

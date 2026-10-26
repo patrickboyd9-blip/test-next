@@ -39,6 +39,10 @@ export function createMockClick2MailClient(options?: {
       state.lastJob = input
       return { id: "job-1", status: 0, description: "Created", jobStatus: "EDITING" }
     },
+    async createJobFromTemplate(input) {
+      calls.push(`createJobFromTemplate:${input.templateName}:${input.quantity}`)
+      return { id: "job-1", status: 0, description: "Created", jobStatus: "EDITING" }
+    },
     async createProof(jobId) {
       calls.push(`createProof:${jobId}`)
       return { id: "proof-1", sessionId: "session-1", status: 0, description: "Success" }
@@ -47,8 +51,8 @@ export function createMockClick2MailClient(options?: {
       calls.push(`getProof:${jobId}:${proofId}:${sessionId}`)
       return { id: proofId, sessionId, status: 0, description: "Proof file" }
     },
-    async submitJob(jobId) {
-      calls.push(`submitJob:${jobId}`)
+    async submitJob(jobId, billingType) {
+      calls.push(`submitJob:${jobId}:${billingType}`)
       return { id: jobId, status: 0, description: "Success", jobStatus: "ORDER_SUBMITTED" }
     },
     async getJob(jobId) {

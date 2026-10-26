@@ -62,6 +62,8 @@ export interface EddmMailerInfo {
   name: string
   organization?: string
   address: string
+  address2?: string
+  address3?: string
   city: string
   state: string
   zip: string
@@ -77,9 +79,16 @@ export interface EddmRouteSubmission {
 
 export interface EddmPostOfficeSubmission {
   name: string
+  /** City, state, and ZIP when the feed has no street. */
   address: string
+  city: string
+  state: string
+  zip: string
   hours?: string
+  phone?: string
   totalPieces: number
+  deliveryType: string
+  routeType: string
 }
 
 export interface JobSnapshot {
@@ -130,15 +139,23 @@ export interface Click2MailClient {
   }): Promise<AddressListSnapshot>
   getAddressList(id: string): Promise<AddressListSnapshot>
   createJob(input: JobDraft): Promise<JobSnapshot>
+  /**
+   * A job template is created in the Click2Mail staging site, then started
+   * by name. The document and quantity are attached on the following update.
+   */
+  createJobFromTemplate(input: {
+    templateName: string
+    documentId: string
+    quantity: number
+  }): Promise<JobSnapshot>
   createProof(jobId: string): Promise<ProofSnapshot>
   getProof(jobId: string, proofId: string, sessionId: string): Promise<ProofSnapshot>
   submitJob(jobId: string, billingType: string): Promise<JobSnapshot>
   getJob(jobId: string): Promise<JobSnapshot>
   getTracking(jobId: string, trackingType?: string): Promise<TrackingSnapshot>
   /**
-   * EDDM calls. Field names follow the public REST reference.
-   * They have not been confirmed on staging, so the product keeps them
-   * behind C2M_EDDM_SUBMIT.
+   * Every Door calls. Field names follow Click2Mail's EDDM Postman
+   * collection and the REST reference. Full service does not send a CRID.
    */
   getEddm(jobId: string): Promise<JobSnapshot>
   setEddmInfo(jobId: string, info: EddmMailerInfo): Promise<JobSnapshot>

@@ -15,7 +15,10 @@ import {
 import { submitEddmPrintTest, refreshPrintMailStatus } from "@/lib/click2mail/mail-order-actions"
 import { isTerminalJobStatus, jobStatusLabel } from "@/lib/click2mail/job-status"
 import type { PrintMailMode } from "@/lib/click2mail/mode"
-import { eddmDisplayName } from "@/lib/eddm/geometry"
+import { eddmPaymentBlockedMessage } from "@/lib/fulfillment/payment-clearance"
+import { eddmDisplayName, isEddmSize } from "@/lib/eddm/geometry"
+
+import { EddmAddressBlockPreview } from "./EddmAddressBlockPreview"
 import { eddmPostageEstimate } from "@/lib/eddm/postage"
 import { summarizeSelection } from "@/lib/eddm/routes"
 import type { Campaign } from "@/lib/campaign-creator/types"
@@ -34,7 +37,12 @@ export function EddmPrintMailStage({ campaign, mode, onCampaign }: EddmPrintMail
   const summary = eddm ? summarizeSelection(eddm.routes, eddm.coverage) : null
   const postage = eddmPostageEstimate(summary?.pieces ?? 0)
   const blocked = summary ? summary.messages.length > 0 : true
-  const canSend = mode.eddmSubmitEnabled && !blocked && !busy && mode.environment === "stage"
+  const canSend =
+    mode.eddmSubmitEnabled &&
+    mode.eddmPaymentCleared &&
+    !blocked &&
+    !busy &&
+    mode.environment === "stage"
 
   useEffect(() => {
     if (!mode.credentialsConfigured || !order?.jobId || isTerminalJobStatus(order.jobStatus)) return
@@ -75,7 +83,7 @@ export function EddmPrintMailStage({ campaign, mode, onCampaign }: EddmPrintMail
           <Badge variant="outline">Every Door</Badge>
         </div>
         <CardDescription>
-          This prepares an Every Door order on Click2Mail staging. It does not mail real customers, and it does not show a checkout price.
+          Click2Mail prints and mails this with their Every Door permit. You pay first. Then the order goes to Click2Mail staging. This screen does not show a checkout price.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
@@ -87,20 +95,29 @@ export function EddmPrintMailStage({ campaign, mode, onCampaign }: EddmPrintMail
         </div>
         <p className="text-sm text-muted-foreground">{postage.detail}</p>
         <p className="text-sm text-muted-foreground">
-          Residential {summary?.residential.toLocaleString("en-US") ?? "0"} · Business {summary?.business.toLocaleString("en-US") ?? "0"}. The address line is Postal Customer.
+          Residential {summary?.residential.toLocaleString("en-US") ?? "0"} · Business {summary?.business.toLocaleString("en-US") ?? "0"}.
         </p>
+        {eddm && isEddmSize(eddm.size) ? <EddmAddressBlockPreview size={eddm.size} /> : null}
         {summary?.messages.map((message) => (
           <p key={message} className="rounded-lg border p-3 text-sm" role="status">
             {message}
           </p>
         ))}
-        {!mode.eddmSubmitEnabled && (
+        {!mode.eddmPaymentCleared && (
           <p className="rounded-lg border bg-muted/40 p-3 text-sm" role="status">
-            {mode.environment !== "stage"
-              ? "Every Door orders stay on Click2Mail staging. Production is not turned on."
-              : mode.eddmAccountConfigured
-                ? "Staging submit is off until Click2Mail confirms the product names for these sizes. Set C2M_EDDM_SUBMIT=true on staging after that."
-                : "Add the USPS account id in C2M_EDDM_CRID. The live order also stays off until Click2Mail confirms which id belongs in the crid field."}
+            {eddmPaymentBlockedMessage()}
+          </p>
+        )}
+        {mode.environment !== "stage" && (
+          <p className="rounded-lg border bg-muted/40 p-3 text-sm" role="status">
+            Every Door orders stay on Click2Mail staging. Production is not turned on.
+          </p>
+        )}
+        {mode.environment === "stage" && !mode.eddmSubmitEnabled && (
+          <p className="rounded-lg border bg-muted/40 p-3 text-sm" role="status">
+            {mode.credentialsConfigured
+              ? "Staging send is off until C2M_EDDM_SUBMIT=true. A job template created in the Click2Mail staging site is the preferred way to name the product."
+              : "Click2Mail staging sign-in is not set. Add C2M_STAGE_USERNAME and C2M_STAGE_PASSWORD on the server."}
           </p>
         )}
         {order?.jobId && (

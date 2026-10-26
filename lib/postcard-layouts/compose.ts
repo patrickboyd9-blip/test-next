@@ -9,13 +9,7 @@ import {
 } from "@/lib/print-spec/postcard-5x8-print-spec"
 import { buildPostcard6x9PrintSpec } from "@/lib/print-spec/postcard-6x9-print-spec"
 import { buildEddmPrintSpec } from "@/lib/print-spec/postcard-eddm-print-spec"
-import {
-  EDDM_INDICIA_LINES,
-  EDDM_POSTAL_CUSTOMER,
-  eddmMessageRect,
-  eddmTrim,
-  isEddmSize,
-} from "@/lib/eddm/geometry"
+import { eddmMessageRect, eddmTrim, isEddmSize } from "@/lib/eddm/geometry"
 import { toNeighborhoodCopy } from "@/lib/eddm/copy"
 
 import type { LayoutSizeId, PostcardSizeId, PostcardTemplateId, VerticalPaletteId } from "./ids"
@@ -197,9 +191,6 @@ function composeEddmBack(
     throw new Error("EDDM back requires a 6.5×9 or 6.25×11 card.")
   }
   const trim = eddmTrim(size)
-  const keepOuts = trimKeepOuts(size)
-  const indicia = keepOuts.find((item) => item.id === "eddm_indicia")
-  const address = keepOuts.find((item) => item.id === "postal_customer")
   const message = eddmMessageRect(trim)
   const copy = resolveCopy({
     ...input,
@@ -212,61 +203,10 @@ function composeEddmBack(
       callToAction: toNeighborhoodCopy(input.spec.callToAction ?? ""),
     },
   })
+  // Click2Mail prints Postal Customer and the indicia in the bottom-right
+  // reserved box. This plan leaves that rectangle empty.
   const texts: FittedText[] = []
   const shapes: ShapePlan[] = []
-  if (indicia) {
-    shapes.push({
-      id: "eddm-indicia",
-      role: "panel",
-      rect: { x: indicia.x, y: indicia.y, w: indicia.w, h: indicia.h },
-      fill: "#f4f1ea",
-    })
-    const lineH = (indicia.h - 0.28) / EDDM_INDICIA_LINES.length
-    EDDM_INDICIA_LINES.forEach((line, index) => {
-      const fitted = fitText({
-        text: line,
-        rect: {
-          x: indicia.x + 0.12,
-          y: indicia.y + 0.12 + index * lineH,
-          w: indicia.w - 0.24,
-          h: lineH,
-        },
-        role: "label",
-        pairing,
-        color: palette.ink,
-        align: "center",
-        minPt: 8,
-        maxPt: 11,
-      })
-      if (fitted.lines.length > 0) texts.push(fitted)
-    })
-  }
-  if (address) {
-    const fitted = fitText({
-      text: EDDM_POSTAL_CUSTOMER,
-      rect: { x: address.x, y: address.y, w: address.w, h: address.h },
-      role: "label",
-      pairing,
-      color: palette.ink,
-      align: "left",
-      minPt: 8,
-      maxPt: 12,
-    })
-    if (fitted.lines.length > 0) texts.push(fitted)
-  }
-  const returnName = clean(input.businessName)
-  if (returnName && address) {
-    const fitted = fitText({
-      text: returnName,
-      rect: { x: 0.25, y: 0.28, w: Math.max(1.2, address.x - 0.4), h: 0.7 },
-      role: "label",
-      pairing,
-      color: palette.ink,
-      minPt: 8,
-      maxPt: 11,
-    })
-    if (fitted.lines.length > 0) texts.push(fitted)
-  }
   const roles = backRoles(input.templateId)
   const gap = 0.08
   let cursor = message.yInches

@@ -297,6 +297,32 @@ export function createClick2MailClient(options: {
       return toJob(result, response, secrets, "EDITING")
     },
 
+    async createJobFromTemplate(input) {
+      const created = await send({
+        method: "POST",
+        path: "/jobs/jobTemplate",
+        form: { templateName: input.templateName },
+      })
+      const createdResult = readResult(parseBody(created, secrets))
+      if (created.status < 200 || created.status >= 300 || createdResult.status !== 0) {
+        throw fail(created, createdResult, secrets)
+      }
+      const job = toJob(createdResult, created, secrets, "EDITING")
+      const updated = await send({
+        method: "POST",
+        path: `/jobs/${encodeURIComponent(job.id)}/update`,
+        form: {
+          documentId: input.documentId,
+          quantity: String(input.quantity),
+        },
+      })
+      const updatedResult = readResult(parseBody(updated, secrets))
+      if (updated.status < 200 || updated.status >= 300 || (updatedResult.status !== null && updatedResult.status !== 0)) {
+        throw fail(updated, updatedResult, secrets)
+      }
+      return toJob({ ...updatedResult, id: updatedResult.id ?? job.id }, updated, secrets, job.jobStatus || "EDITING")
+    },
+
     async createProof(jobId) {
       const response = await send({
         method: "POST",
@@ -532,23 +558,31 @@ function readJob(
 
 function eddmInfoForm(info: EddmMailerInfo): Record<string, string> {
   const form: Record<string, string> = {
-    name: info.name,
-    address: info.address,
-    city: info.city,
-    state: info.state,
-    zip: info.zip,
+    mailerName: info.name,
+    mailerAddress1: info.address,
+    mailerCity: info.city,
+    mailerState: info.state,
+    mailerPostalcode: info.zip,
   }
-  if (info.organization?.trim()) form.organization = info.organization.trim()
-  if (info.phone?.trim()) form.phone = info.phone.trim()
+  if (info.organization?.trim()) form.mailerOrganization = info.organization.trim()
+  if (info.address2?.trim()) form.mailerAddress2 = info.address2.trim()
+  if (info.address3?.trim()) form.mailerAddress3 = info.address3.trim()
+  if (info.phone?.trim()) form.mailerPhone = info.phone.trim()
   return form
 }
 
 function eddmPoForm(office: EddmPostOfficeSubmission): Record<string, string> {
   const form: Record<string, string> = {
-    name: office.name,
-    address: office.address,
+    poName: office.name,
+    deliveryType: office.deliveryType,
     totalPieces: String(office.totalPieces),
+    poAddress: office.address,
+    poCity: office.city,
+    poState: office.state,
+    poPostalCode: office.zip,
+    routeType: office.routeType,
   }
+  if (office.phone?.trim()) form.phone = office.phone.trim()
   if (office.hours?.trim()) form.hours = office.hours.trim()
   return form
 }

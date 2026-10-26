@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { eddmBlockedReason } from "@/lib/eddm/copy"
-import { eddmDisplayName, type EddmSize } from "@/lib/eddm/geometry"
+import { eddmDisplayName, isEddmSize } from "@/lib/eddm/geometry"
 import {
   routeMatchesFilter,
   routePieces,
@@ -18,6 +18,7 @@ import {
 } from "@/lib/eddm/routes"
 import type { AudienceDefinition } from "@/lib/campaign-creator/types"
 
+import { EddmAddressBlockPreview } from "./EddmAddressBlockPreview"
 import { EddmRouteMap } from "./EddmRouteMap"
 
 interface EddmAudiencePanelProps {
@@ -283,20 +284,7 @@ export function EddmAudiencePanel({ audience, briefText, readOnly, onChange }: E
         <p className="text-sm text-muted-foreground sm:col-span-4">{summary.postage.detail}</p>
       </div>
 
-      <div className="rounded-lg border bg-white p-3 text-sm">
-        <div className="flex items-start justify-between gap-3">
-          <span className="text-muted-foreground">Return address</span>
-          <span className="font-medium tracking-wide">POSTAL CUSTOMER</span>
-          <span className="border px-2 py-1 text-center text-xs leading-tight tracking-wide">
-            ECRWSS
-            <br />
-            EDDM RETAIL
-          </span>
-        </div>
-        <p className="mt-3 text-muted-foreground">
-          The address side says Postal Customer. The indicia sits above and to the right. The offer speaks to the neighborhood, with no first name. Card size {eddmDisplayName(eddm.size as EddmSize)}.
-        </p>
-      </div>
+      {isEddmSize(eddm.size) ? <EddmAddressBlockPreview size={eddm.size} /> : null}
 
       {summary.messages.map((message) => (
         <p key={message} className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm" role="status">

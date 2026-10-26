@@ -55,10 +55,14 @@ Set these on the server, or in your shell before the smoke test. Never commit th
 | Name | Purpose |
 |---|---|
 | `C2M_ENV` | `stage` (default) or `prod` |
-| `C2M_USERNAME` | Click2Mail account username |
-| `C2M_PASSWORD` | Click2Mail account password |
-| `C2M_ALLOW_PRODUCTION` | Must be the word `true` before any production call |
-| `C2M_BASE_URL` | Optional. Overrides the host |
+| `C2M_STAGE_USERNAME` | Staging username. Used first when `C2M_ENV` is stage. |
+| `C2M_STAGE_PASSWORD` | Staging password. Used first when `C2M_ENV` is stage. |
+| `C2M_USERNAME` | Account username. Staging uses this only when the stage username is empty. Production uses this name. |
+| `C2M_PASSWORD` | Account password. Same fallback rule as the username. |
+| `C2M_ALLOW_PRODUCTION` | Must be the word `true` before any production call. Every Door stays on staging even then. |
+| `C2M_BASE_URL` | Optional. Overrides the host. |
+
+Every Door ordering is described in `docs/EDDM.md`. It uses the same staging sign-in. It does not send a customer USPS account id.
 
 The app signs in with HTTP Basic auth. Passwords are not written to logs.
 

@@ -19,7 +19,7 @@ Every substantive claim below is tagged with one of five classifications, matchi
 | **[ASSUMPTION]** | Inferred from patterns in the documentation but not explicitly stated for our exact case (e.g., extrapolated from a sibling product's example) |
 | **[UNKNOWN]** | Not found anywhere in public documentation; needs direct clarification from Click2Mail |
 
-**Important gap up front:** You asked me to incorporate "the information I previously shared from my email conversations with the Click2Mail team." I searched this Gmail account exhaustively (`click2mail`, `c2m`, `"click 2 mail"`, `postcard API`, `mail vendor`, and a broad `in:anywhere click2mail` sweep) and found **zero matching threads**. Nothing from Click2Mail staff exists in this mailbox. Every **[STAFF]**-eligible claim in this report is therefore absent — everything here comes from public documentation only. If those email conversations exist elsewhere (a different inbox, a shared doc, a Slack thread), please paste or forward the actual content and I will fold it in and re-tag the relevant sections as **[STAFF]**. Until then, treat every open question below as genuinely open.
+**Important gap up front:** You asked me to incorporate "the information I previously shared from my email conversations with the Click2Mail team." I searched this Gmail account exhaustively (`click2mail`, `c2m`, `"click 2 mail"`, `postcard API`, `mail vendor`, and a broad `in:anywhere click2mail` sweep) and found **zero matching threads**. Nothing from Click2Mail staff exists in this mailbox. Every **[STAFF]**-eligible claim in the original report is therefore absent — the body below comes from public documentation only. Staff answers received Oct 26, 2026, and the template measurements from that day, are in the addendum at the end. They supersede the open questions they name.
 
 ---
 
@@ -450,3 +450,26 @@ All paths below are staging (`stage-rest.click2mail.com`); production is assumed
 ---
 
 *This document reflects publicly available documentation as read during this research session. Several sections explicitly depend on the vendor confirming or correcting specific points (§15). No architectural or implementation decision should be made from this document alone where a claim is tagged [ASSUMPTION] or [UNKNOWN] without first resolving it.*
+
+---
+
+## Addendum — Oct 26, 2026 staff answers and template measurements
+
+**[STAFF]** Click2Mail confirmed that Every Door can be submitted on the REST API. They strongly recommend a job template (created in the staging site, started with `POST /jobs/jobTemplate`). Product-option strings that are typed by hand are a common source of `invalid product options`. The FAQ is https://click2mail.kayako.com/article/764-invalid-product-options-rest-api-error. The extra Every Door calls are in https://github.com/click2mail/Postman-Click2Mail-EDDM.
+
+**[STAFF]** Routes come from the USPS Every Door route tool. They are sent with `POST /jobs/{id}/eddmRoute`. Staging host: `https://stage-rest.click2mail.com/molpro`. The production host stays a config value.
+
+**[STAFF]** Click2Mail prints the Every Door address block and indicia. Use their full-service product, in their words: "PM EDDM (Full Service): includes the Click2Mail permit". Do not build a customer-permit flow. The API still needs the delivering post office for each route.
+
+**[MEASURED]** The Every Door Word templates were downloaded Oct 26, 2026 from https://templates.click2mail.com/every-door-direct-mail/6.5x9 and https://templates.click2mail.com/every-door-direct-mail/6.25x11. Page size is the trim plus 0.25 in of bleed: 9.5×7 in for 6.5×9, and 11.5×6.75 in for 6.25×11. On both backs the white address block is 4.00 in wide by 2.00 in tall, flush to the bottom-right of the trim. That replaces the earlier USPS-derived guess (stamp zone 1.625 in from the right and 1.375 in from the top; Postal Customer block 3.4×0.8 in at 0.45 in down). The numbers live in `lib/print-spec/click2mail-reserved-zones.ts`. A test checks the reserved zones against these dimensions.
+
+**[STAFF, still open]** David is still confirming the 5×8 and 6×9 reserved boxes. Those current numbers are in the same config file and are marked unconfirmed.
+
+### Where the published docs disagree
+
+- The Postman sample mail class is "Postage Paid in Advance". Staff said to use full service, so the order sends "PM EDDM (Full Service): includes the Click2Mail permit" unless `C2M_EDDM_MAIL_CLASS` overrides it.
+- The Postman `eddmPo` sample swaps city, state, and ZIP (`poState` is a city name, `poPostalCode` is a state name, `poCity` is a ZIP). The OpenAPI descriptions put city, state, and ZIP in `poCity`, `poState`, and `poPostalCode`. The order follows the descriptions.
+- The Postman route example is `20852-C083`. The written reference says "route number". The order sends ZIP plus route id, matching the example.
+- The Postman collection does not send `crid`. Full service includes the Click2Mail permit, so the order does not send a customer CRID.
+- OpenAPI marks `phone` and `poAddress` required, and the `poAddress` description says "Post Office Phone number", while the Postman sample sends a street. The USPS route feed has a facility name and a city/state, and no street, phone, or hours. The order sends the city, state, and ZIP it actually has, and omits phone and hours.
+- The FAQ says job templates are the reliable path. Direct product options are what we send only when `C2M_EDDM_JOB_TEMPLATE` is empty.

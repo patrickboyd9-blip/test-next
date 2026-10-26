@@ -1,34 +1,57 @@
 import { randomUUID } from "crypto"
 
+import { eddmPaymentBlockedMessage } from "@/lib/fulfillment/payment-clearance"
 import { eddmPostageEstimate } from "@/lib/eddm/postage"
 import { isEddmSize, type EddmSize } from "@/lib/eddm/geometry"
-import { summarizeSelection, type EddmCoverage, type EddmRouteSnapshot } from "@/lib/eddm/routes"
+import {
+  eddmRouteCode,
+  summarizeSelection,
+  type EddmCoverage,
+  type EddmRouteSnapshot,
+} from "@/lib/eddm/routes"
 
 import type { Click2MailConfig, Click2MailProductOptions } from "./config"
-import { postcardJobProduct } from "./products"
 import type { MailOrderRecord } from "./order-record"
 import type { Click2MailClient, EddmMailerInfo } from "./types"
 
 /**
- * Product names are not in Click2Mail's public EDDM reference.
- * Override them when Click2Mail confirms the strings. Until then the
- * staging submit flag stays off.
+ * Staff answer, Oct 26, 2026: full-service Every Door includes the
+ * Click2Mail permit. Their Postman sample uses a different mail class.
+ * Override with C2M_EDDM_MAIL_CLASS if staging rejects this string.
  */
+export const EDDM_FULL_SERVICE_MAIL_CLASS = "PM EDDM (Full Service): includes the Click2Mail permit"
+export const EDDM_LAYOUT = "We Prep and Mail"
+
 export function eddmDocumentClass(size: EddmSize, env: NodeJS.ProcessEnv = process.env): string {
-  const configured =
-    size === "6.5x9" ? env.C2M_EDDM_CLASS_6_5X9 : env.C2M_EDDM_CLASS_6_25X11
+  const configured = size === "6.5x9" ? env.C2M_EDDM_CLASS_6_5X9 : env.C2M_EDDM_CLASS_6_25X11
   const trimmed = configured?.trim()
   if (trimmed) return trimmed
-  return size === "6.5x9" ? "Postcard 6.5 x 9" : "Postcard 6.25 x 11"
+  return size === "6.5x9" ? "EDDM Mailer 6.5 x 9" : "EDDM Mailer 6.25 x 11"
 }
 
 export function eddmJobProduct(size: EddmSize, env: NodeJS.ProcessEnv = process.env): Click2MailProductOptions {
-  const base = postcardJobProduct("5x8")
   return {
-    ...base,
+    documentFormat: "PDF",
     documentClass: eddmDocumentClass(size, env),
-    mailClass: env.C2M_EDDM_MAIL_CLASS?.trim() || "Standard Mail",
+    layout: env.C2M_EDDM_LAYOUT?.trim() || EDDM_LAYOUT,
+    productionTime: env.C2M_EDDM_PRODUCTION_TIME?.trim() || "Next Day",
+    envelope: " ",
+    color: env.C2M_EDDM_COLOR?.trim() || "Full Color",
+    paperType: env.C2M_EDDM_PAPER_TYPE?.trim() || "White Matte",
+    printOption: env.C2M_EDDM_PRINT_OPTION?.trim() || "Printing both sides",
+    mailClass: env.C2M_EDDM_MAIL_CLASS?.trim() || EDDM_FULL_SERVICE_MAIL_CLASS,
+    addressMappingId: "",
+    billingType: env.C2M_EDDM_BILLING_TYPE?.trim() || "Invoice",
   }
+}
+
+export function eddmJobTemplateName(env: NodeJS.ProcessEnv = process.env): string {
+  return env.C2M_EDDM_JOB_TEMPLATE?.trim() ?? ""
+}
+
+function eddmDeliveryType(coverage: EddmCoverage, env: NodeJS.ProcessEnv): string {
+  if (coverage === "residential") return env.C2M_EDDM_DELIVERY_RESIDENTIAL?.trim() || "Residential"
+  return env.C2M_EDDM_DELIVERY_ALL?.trim() || "All"
 }
 
 export interface PlaceEddmOrderInput {
@@ -39,22 +62,28 @@ export interface PlaceEddmOrderInput {
   coverage: EddmCoverage
   routes: readonly EddmRouteSnapshot[]
   mailer: EddmMailerInfo
-  uspsAccountId: string
   /** Must be the staging flag. Production is refused even when this is true. */
   submitEnabled: boolean
+  /** Customer payment recorded, or the staging operator flag. Unpaid orders make no calls. */
+  paymentCleared: boolean
   documentName: string
   artwork: MailOrderRecord["artwork"]
   submit: boolean
   proof: boolean
+  /** When set, the job starts from a Click2Mail job template instead of raw product options. */
+  jobTemplateName?: string
   existing?: MailOrderRecord
   now?: () => string
+  env?: NodeJS.ProcessEnv
 }
 
 export async function placeEddmOrder(input: PlaceEddmOrderInput): Promise<MailOrderRecord> {
   const now = input.now ?? (() => new Date().toISOString())
+  const env = input.env ?? process.env
   const summary = summarizeSelection(input.routes, input.coverage)
   const postage = eddmPostageEstimate(summary.pieces)
-  const product = eddmJobProduct(input.size)
+  const product = eddmJobProduct(input.size, env)
+  const templateName = input.jobTemplateName ?? eddmJobTemplateName(env)
   const existing = input.existing
   const order: MailOrderRecord = existing
     ? { ...existing, error: undefined, updatedAt: now() }
@@ -108,11 +137,17 @@ export async function placeEddmOrder(input: PlaceEddmOrderInput): Promise<MailOr
     }
 
     if (!order.jobId) {
-      const job = await input.client.createJob({
-        documentId: order.documentId,
-        product,
-        quantity: summary.pieces,
-      })
+      const job = templateName
+        ? await input.client.createJobFromTemplate({
+            templateName,
+            documentId: order.documentId,
+            quantity: summary.pieces,
+          })
+        : await input.client.createJob({
+            documentId: order.documentId,
+            product,
+            quantity: summary.pieces,
+          })
       order.jobId = job.id
       order.jobStatus = job.jobStatus || "EDITING"
       order.resultCode = job.status ?? undefined
@@ -123,25 +158,28 @@ export async function placeEddmOrder(input: PlaceEddmOrderInput): Promise<MailOr
     if (!order.eddm?.prepared) {
       await input.client.setEddmInfo(order.jobId, input.mailer)
       for (const route of input.routes) {
+        const pieces = input.coverage === "residential" ? route.residential : route.residential + route.business
         await input.client.setEddmRoute(order.jobId, {
-          poName: route.postOfficeName || `Post office ${route.zip}`,
-          route: route.route,
+          poName: route.postOfficeName,
+          route: eddmRouteCode(route),
           postalCode: route.zip,
-          totalPieces: input.coverage === "residential" ? route.residential : route.residential + route.business,
+          totalPieces: pieces,
         })
       }
+      const deliveryType = eddmDeliveryType(input.coverage, env)
       for (const office of summary.postOffices) {
         await input.client.setEddmPostOffice(order.jobId, {
           name: office.name,
           address: office.address,
+          city: office.city,
+          state: office.state,
+          zip: office.zip,
           hours: office.hours,
           totalPieces: office.totalPieces,
+          deliveryType,
+          routeType: office.routeType,
         })
       }
-      await input.client.updateEddmJob(order.jobId, {
-        crid: input.uspsAccountId,
-        quantity: summary.pieces,
-      })
       order.eddm = {
         size: input.size,
         routeCount: input.routes.length,
@@ -181,10 +219,10 @@ function eddmOrderBlock(input: PlaceEddmOrderInput, limitMessages: readonly stri
     return "Every Door orders stay on Click2Mail staging. Production EDDM is not turned on."
   }
   if (!input.submitEnabled) {
-    return "Staging EDDM submit is off until Click2Mail confirms the product names and the USPS account id field. Set C2M_EDDM_SUBMIT=true on staging after that."
+    return "Staging Every Door submit is off. Set C2M_EDDM_SUBMIT=true on Click2Mail staging after the job template is ready."
   }
-  if (!input.uspsAccountId.trim()) {
-    return "Add the USPS account id in C2M_EDDM_CRID before a staging Every Door order can be sent."
+  if (!input.paymentCleared) {
+    return eddmPaymentBlockedMessage()
   }
   if (!isEddmSize(input.size)) {
     return "Choose a 6.5×9 or 6.25×11 card."

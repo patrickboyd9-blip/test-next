@@ -12,6 +12,8 @@ import { renderPostcardPrintPdf } from "@/lib/print-spec/render-campaign-postcar
 import { renderTemplatedPostcardPdf } from "@/lib/print-spec/render-template-postcard-pdf"
 import { isPostcardTemplate, isVerticalPalette } from "@/lib/postcard-layouts/ids"
 
+import { eddmPaymentBlockedMessage, eddmPaymentCleared } from "@/lib/fulfillment/payment-clearance"
+
 import { assertClick2MailCallable, describePrintMailMode, loadClick2MailConfig } from "./config"
 import { createClick2MailClient } from "./client"
 import { placeEddmOrder } from "./eddm-order"
@@ -84,13 +86,21 @@ export async function submitEddmPrintTest(campaignId: string): Promise<PrintMail
   if (mode.environment !== "stage") {
     return { campaign, issues: ["Every Door orders stay on Click2Mail staging. Production EDDM is not turned on."] }
   }
+  const paid = eddmPaymentCleared({
+    payment: campaign.payment,
+    environment: mode.environment,
+    env: process.env,
+  })
+  if (!paid) {
+    return { campaign, issues: [eddmPaymentBlockedMessage()] }
+  }
   if (!mode.eddmSubmitEnabled) {
     return {
       campaign,
       issues: [
-        mode.eddmAccountConfigured
-          ? "Staging EDDM submit is off until Click2Mail confirms the product names. Set C2M_EDDM_SUBMIT=true on staging after that."
-          : "Add the USPS account id in C2M_EDDM_CRID. Staging submit stays off until Click2Mail confirms which id to send.",
+        mode.credentialsConfigured
+          ? "Staging Every Door submit is off. Set C2M_EDDM_SUBMIT=true on Click2Mail staging after the job template is ready."
+          : "Click2Mail staging sign-in is not set. Add C2M_STAGE_USERNAME and C2M_STAGE_PASSWORD on the server.",
       ],
     }
   }
@@ -130,8 +140,8 @@ export async function submitEddmPrintTest(campaignId: string): Promise<PrintMail
     coverage: eddm.coverage,
     routes: eddm.routes,
     mailer,
-    uspsAccountId: process.env.C2M_EDDM_CRID?.trim() ?? "",
     submitEnabled: true,
+    paymentCleared: true,
     documentName: `mm-eddm-${campaign.id.slice(0, 8)}-${stamp}`,
     artwork,
     submit: true,

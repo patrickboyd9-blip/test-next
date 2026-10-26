@@ -1,3 +1,4 @@
+import type { PaymentClearance } from "@/lib/fulfillment/payment-clearance"
 import type { MailOrderRecord } from "@/lib/click2mail/order-record"
 import type {
   MailPieceCatalogId,
@@ -528,6 +529,12 @@ export interface Campaign {
    */
   mailOrder?: MailOrderRecord
   mailOrderHistory?: MailOrderRecord[]
+  /**
+   * Customer payment for this mailing. Absent means unpaid.
+   * Click2Mail is not called until status is paid. Checkout on another
+   * branch is what writes this.
+   */
+  payment?: PaymentClearance
   /** Internal signal only — never surfaced to the customer as a score. */
   readyForBriefReview: boolean
   createdAt: string

@@ -57,11 +57,15 @@ export interface EddmAudience {
 
 export interface EddmPostOffice {
   name: string
-  /** Street address is not in the free route feed. This is the city and ZIP. */
+  /** The USPS feed has no street. This is the city, state, and ZIP we do have. */
   address: string
+  city: string
+  state: string
   /** Hours are not in the free route feed. */
   hours: string
   zip: string
+  /** City, Rural, or Highway, from the route prefix. */
+  routeType: string
   totalPieces: number
 }
 
@@ -97,6 +101,54 @@ export function routePieces(route: Pick<EddmRouteSnapshot, "residential" | "busi
   return Math.max(0, route.residential) + Math.max(0, route.business)
 }
 
+/** "NEW YORK, NY" becomes city NEW YORK and state NY. */
+export function parseCityState(cityState: string): { city: string; state: string } {
+  const trimmed = cityState.trim()
+  const match = trimmed.match(/^(.*),\s*([A-Za-z]{2})$/)
+  if (!match) return { city: trimmed, state: "" }
+  return { city: (match[1] ?? "").trim(), state: (match[2] ?? "").toUpperCase() }
+}
+
+/** C071 is a city route. R is rural. H is highway. */
+export function eddmRouteType(route: string): string {
+  const prefix = route.trim().charAt(0).toUpperCase()
+  if (prefix === "R") return "Rural"
+  if (prefix === "H") return "Highway"
+  return "City"
+}
+
+/**
+ * Click2Mail's EDDM sample sends the route as ZIP plus the route id,
+ * for example 20852-C083. Their written reference says "route number".
+ * We send the sample's form.
+ */
+export function eddmRouteCode(route: Pick<EddmRouteSnapshot, "zip" | "route">): string {
+  return `${route.zip}-${route.route}`
+}
+
+/** Plain-English block when a selected route has no delivering post office. */
+export function deliveringPostOfficeIssues(routes: readonly EddmRouteSnapshot[]): string[] {
+  const missingName = routes.filter((route) => !route.postOfficeName.trim())
+  if (missingName.length > 0) {
+    const listed = missingName
+      .slice(0, 3)
+      .map((route) => `route ${route.route} in ZIP ${route.zip}`)
+      .join(", ")
+    const extra = missingName.length > 3 ? `, and ${missingName.length - 3} more` : ""
+    return [
+      `We can't tell which post office delivers ${listed}${extra}. Every Door needs that post office before checkout. Pick routes that show a post office, or load the routes again.`,
+    ]
+  }
+  const missingState = routes.filter((route) => !parseCityState(route.cityState).state)
+  if (missingState.length > 0) {
+    const route = missingState[0]
+    return [
+      `We know ${route?.postOfficeName} delivers route ${route?.route} in ZIP ${route?.zip}, but the USPS feed did not include that post office's city and state. Checkout stays closed until it does.`,
+    ]
+  }
+  return []
+}
+
 /**
  * A missing demographic stays selectable. The feed often leaves income or
  * household size blank, and hiding those routes would empty the map.
@@ -123,28 +175,39 @@ export function summarizeSelection(
     business += Math.max(0, route.business)
     pieces += count
     perZip.set(route.zip, (perZip.get(route.zip) ?? 0) + count)
-    const key = `${route.zip}:${route.postOfficeName}`
+    if (!route.postOfficeName.trim()) continue
+    const place = parseCityState(route.cityState)
+    if (!place.state) continue
+    const routeType = eddmRouteType(route.route)
+    const key = `${route.zip}:${route.postOfficeName}:${routeType}`
     const existing = offices.get(key)
     if (existing) {
       existing.totalPieces += count
     } else {
       offices.set(key, {
-        name: route.postOfficeName || `Post office ${route.zip}`,
-        address: [route.cityState, route.zip].filter(Boolean).join(" "),
+        name: route.postOfficeName.trim(),
+        address: `${place.city}, ${place.state} ${route.zip}`,
+        city: place.city,
+        state: place.state,
         hours: "",
         zip: route.zip,
+        routeType,
         totalPieces: count,
       })
     }
   }
   const zipTotals = [...perZip.entries()].map(([zip, zipPieces]) => ({ zip, pieces: zipPieces }))
+  const messages =
+    routes.length === 0
+      ? ["Select at least one carrier route."]
+      : [...deliveringPostOfficeIssues(routes), ...eddmLimitMessages({ pieces, perZip: zipTotals })]
   return {
     residential,
     business,
     pieces,
     routeCount: routes.length,
     perZip: zipTotals,
-    messages: routes.length === 0 ? ["Select at least one carrier route."] : eddmLimitMessages({ pieces, perZip: zipTotals }),
+    messages,
     postage: eddmPostageEstimate(pieces),
     postOffices: [...offices.values()],
   }

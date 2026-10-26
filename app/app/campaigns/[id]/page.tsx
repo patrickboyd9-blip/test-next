@@ -7,6 +7,7 @@ import { getCampaign } from "@/lib/campaign-creator/actions"
 import { POSTCARD_5X8_POSTAGE } from "@/lib/click2mail/cost"
 import { describePrintMailMode } from "@/lib/click2mail/config"
 import type { PrintMailMode } from "@/lib/click2mail/mode"
+import type { Campaign } from "@/lib/campaign-creator/types"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -19,9 +20,13 @@ export const dynamic = "force-dynamic"
  */
 export const maxDuration = 60
 
-function printMailMode(): PrintMailMode {
+function printMailMode(campaign: Campaign): PrintMailMode {
   try {
-    return describePrintMailMode()
+    const mode = describePrintMailMode()
+    return {
+      ...mode,
+      eddmPaymentCleared: mode.eddmPaymentCleared || campaign.payment?.status === "paid",
+    }
   } catch {
     return {
       environment: "stage",
@@ -30,6 +35,7 @@ function printMailMode(): PrintMailMode {
       postage: POSTCARD_5X8_POSTAGE,
       eddmSubmitEnabled: false,
       eddmAccountConfigured: false,
+      eddmPaymentCleared: campaign.payment?.status === "paid",
     }
   }
 }
@@ -56,7 +62,7 @@ export default async function CampaignPage({
       </header>
       <CampaignCreatorView
         initialCampaign={campaign}
-        printMailMode={printMailMode()}
+        printMailMode={printMailMode(campaign)}
         designReviewAvailable={isDesignReviewAvailable()}
       />
     </div>
