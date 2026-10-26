@@ -467,9 +467,11 @@ All paths below are staging (`stage-rest.click2mail.com`); production is assumed
 
 ### Where the published docs disagree
 
-- The Postman sample mail class is "Postage Paid in Advance". Staff said to use full service, so the order sends "PM EDDM (Full Service): includes the Click2Mail permit" unless `C2M_EDDM_MAIL_CLASS` overrides it.
+- Staff described the product as "PM EDDM (Full Service): includes the Click2Mail permit". Staging job 1304272 rejected that string, "PM EDDM (Full Service)", and "EDDM Full Service" with "status 9: Invalid product options. Sku not found." The job was created only with the Postman mail class "Postage Paid in Advance". That is the default until Click2Mail confirms which string includes their permit. Override with `C2M_EDDM_MAIL_CLASS`.
 - The Postman `eddmPo` sample swaps city, state, and ZIP (`poState` is a city name, `poPostalCode` is a state name, `poCity` is a ZIP). The OpenAPI descriptions put city, state, and ZIP in `poCity`, `poState`, and `poPostalCode`. The order follows the descriptions.
 - The Postman route example is `20852-C083`. The written reference says "route number". The order sends ZIP plus route id, matching the example.
 - The Postman collection does not send `crid`. Full service includes the Click2Mail permit, so the order does not send a customer CRID.
-- OpenAPI marks `phone` and `poAddress` required, and the `poAddress` description says "Post Office Phone number", while the Postman sample sends a street. The USPS route feed has a facility name and a city/state, and no street, phone, or hours. The order sends the city, state, and ZIP it actually has, and omits phone and hours.
+- OpenAPI marks `phone` and `poAddress` required, and the `poAddress` description says "Post Office Phone number", while the Postman sample sends a street. Staging confirmed both are required: without them `eddmPo` returns "Please provide mailing address and phone number information." With a street and a phone it returned 201. The route feed has neither, so they are filled from the USPS post office locator, with a small saved table when that locator is down.
+- Sending `eddmRoute` before `eddmPo` returns "Job is not a EDDM job". The working order is eddmInfo, then eddmPo, then eddmRoute. `10001-C071` was accepted.
+- `Invoice` returned "User does not have access to this payment method" on the staging account. Card billing from the server fails because Accept.js data is never present. Submit uses User Credit, after `GET /credit`. A credit purchase can report Success while the balance stays unchanged.
 - The FAQ says job templates are the reliable path. Direct product options are what we send only when `C2M_EDDM_JOB_TEMPLATE` is empty.

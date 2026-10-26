@@ -26,6 +26,10 @@ export interface EddmRoute {
   medianIncome: number | null
   householdSize: number | null
   postOfficeName: string
+  /** Street from the USPS facility locator. Empty until that lookup succeeds. */
+  postOfficeStreet: string
+  /** Phone from the USPS facility locator. Empty until that lookup succeeds. */
+  postOfficePhone: string
   lines: Array<Array<[number, number]>>
 }
 
@@ -42,6 +46,10 @@ export interface EddmRouteSnapshot {
   medianIncome: number | null
   householdSize: number | null
   postOfficeName: string
+  /** Street from the USPS facility locator. Empty when the lookup did not find one. */
+  postOfficeStreet?: string
+  /** Phone from the USPS facility locator. Empty when the lookup did not find one. */
+  postOfficePhone?: string
 }
 
 export interface EddmAudience {
@@ -57,10 +65,12 @@ export interface EddmAudience {
 
 export interface EddmPostOffice {
   name: string
-  /** The USPS feed has no street. This is the city, state, and ZIP we do have. */
+  /** Street address of the delivering post office. Click2Mail requires this. */
   address: string
   city: string
   state: string
+  /** Phone of the delivering post office. Click2Mail requires this. */
+  phone: string
   /** Hours are not in the free route feed. */
   hours: string
   zip: string
@@ -93,6 +103,8 @@ export function snapshotRoute(route: EddmRoute): EddmRouteSnapshot {
     medianIncome: route.medianIncome,
     householdSize: route.householdSize,
     postOfficeName: route.postOfficeName,
+    postOfficeStreet: route.postOfficeStreet,
+    postOfficePhone: route.postOfficePhone,
   }
 }
 
@@ -146,6 +158,20 @@ export function deliveringPostOfficeIssues(routes: readonly EddmRouteSnapshot[])
       `We know ${route?.postOfficeName} delivers route ${route?.route} in ZIP ${route?.zip}, but the USPS feed did not include that post office's city and state. Checkout stays closed until it does.`,
     ]
   }
+  const incomplete = routes.find((route) => !route.postOfficeStreet?.trim() || !route.postOfficePhone?.trim())
+  if (incomplete) {
+    const missingStreet = !incomplete.postOfficeStreet?.trim()
+    const missingPhone = !incomplete.postOfficePhone?.trim()
+    const what =
+      missingStreet && missingPhone
+        ? "a street address or a phone number"
+        : missingStreet
+          ? "a street address"
+          : "a phone number"
+    return [
+      `We don't have ${what} for ${incomplete.postOfficeName}, the post office that delivers route ${incomplete.route} in ZIP ${incomplete.zip}. Every Door needs both before checkout.`,
+    ]
+  }
   return []
 }
 
@@ -175,7 +201,9 @@ export function summarizeSelection(
     business += Math.max(0, route.business)
     pieces += count
     perZip.set(route.zip, (perZip.get(route.zip) ?? 0) + count)
-    if (!route.postOfficeName.trim()) continue
+    const street = route.postOfficeStreet?.trim() ?? ""
+    const phone = route.postOfficePhone?.trim() ?? ""
+    if (!route.postOfficeName.trim() || !street || !phone) continue
     const place = parseCityState(route.cityState)
     if (!place.state) continue
     const routeType = eddmRouteType(route.route)
@@ -186,9 +214,10 @@ export function summarizeSelection(
     } else {
       offices.set(key, {
         name: route.postOfficeName.trim(),
-        address: `${place.city}, ${place.state} ${route.zip}`,
+        address: street,
         city: place.city,
         state: place.state,
+        phone,
         hours: "",
         zip: route.zip,
         routeType,

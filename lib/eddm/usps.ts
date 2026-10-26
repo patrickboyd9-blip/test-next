@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises"
 import path from "node:path"
 
+import { applyPostOfficeContacts, lookupPostOfficeContacts } from "./post-office-locator"
 import type { EddmRoute } from "./routes"
 
 const USPS_EXECUTE =
@@ -55,7 +56,7 @@ export async function loadEddmRoutes(input: {
   const cached = await readCache(cacheDir, zip)
   try {
     const body = await fetchUsps(zip, fetchImpl)
-    const routes = parseUspsRoutes(body)
+    const routes = await attachPostOffices(parseUspsRoutes(body), zip, fetchImpl)
     await writeCache(cacheDir, { zip, fetchedAt: new Date(now).toISOString(), body })
     if (routes.length === 0) {
       return {
@@ -79,7 +80,7 @@ export async function loadEddmRoutes(input: {
     }
   } catch (error) {
     if (cached) {
-      const routes = parseUspsRoutes(cached.body)
+      const routes = await attachPostOffices(parseUspsRoutes(cached.body), zip, fetchImpl)
       const saved = cached.fetchedAt
       const stale = now - Date.parse(saved) > CACHE_TTL_MS
       return {
@@ -216,6 +217,8 @@ function featureToRoute(feature: unknown): EddmRoute | null {
     medianIncome: optionalNumber(attributes, ["MED_INCOME", "MEDIAN_INCOME"]),
     householdSize: optionalNumber(attributes, ["AVG_HH_SIZ", "AVG_HH_SIZE", "AVG_HH_SZ"]),
     postOfficeName: text(attributes, ["FACILITY_NAME", "FAC_NAME", "PO_NAME"]) || "",
+    postOfficeStreet: text(attributes, ["FACILITY_ADDRESS", "FAC_ADDR", "ADDRESS", "STREET"]) || "",
+    postOfficePhone: text(attributes, ["PHONE", "FACILITY_PHONE", "PO_PHONE"]) || "",
     lines: readLines((feature as { geometry?: unknown }).geometry),
   }
 }
@@ -271,6 +274,16 @@ function optionalNumber(attributes: Record<string, unknown>, keys: readonly stri
     if (typeof value === "string" && value.trim() && Number.isFinite(Number(value))) return Number(value)
   }
   return null
+}
+
+async function attachPostOffices(
+  routes: EddmRoute[],
+  zip: string,
+  fetchImpl: typeof fetch
+): Promise<EddmRoute[]> {
+  if (routes.length === 0) return routes
+  const contacts = await lookupPostOfficeContacts({ zip, fetchImpl })
+  return applyPostOfficeContacts(routes, contacts)
 }
 
 function defaultCacheDir(): string {

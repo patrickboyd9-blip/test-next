@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto"
 
 import { eddmPaymentBlockedMessage } from "@/lib/fulfillment/payment-clearance"
-import { eddmPostageEstimate } from "@/lib/eddm/postage"
+import { EDDM_RETAIL_POSTAGE_DOLLARS, eddmPostageEstimate } from "@/lib/eddm/postage"
 import { isEddmSize, type EddmSize } from "@/lib/eddm/geometry"
 import {
   eddmRouteCode,
@@ -15,11 +15,15 @@ import type { MailOrderRecord } from "./order-record"
 import type { Click2MailClient, EddmMailerInfo } from "./types"
 
 /**
- * Staff answer, Oct 26, 2026: full-service Every Door includes the
- * Click2Mail permit. Their Postman sample uses a different mail class.
- * Override with C2M_EDDM_MAIL_CLASS if staging rejects this string.
+ * Staging job 1304272 accepted this mail class.
+ * "PM EDDM (Full Service): includes the Click2Mail permit",
+ * "PM EDDM (Full Service)", and "EDDM Full Service" all returned
+ * "status 9: Invalid product options. Sku not found."
+ * Click2Mail still has to confirm which string is full service with their permit.
+ * Override with C2M_EDDM_MAIL_CLASS when they do.
  */
-export const EDDM_FULL_SERVICE_MAIL_CLASS = "PM EDDM (Full Service): includes the Click2Mail permit"
+export const EDDM_MAIL_CLASS = "Postage Paid in Advance"
+export const EDDM_BILLING_TYPE = "User Credit"
 export const EDDM_LAYOUT = "We Prep and Mail"
 
 export function eddmDocumentClass(size: EddmSize, env: NodeJS.ProcessEnv = process.env): string {
@@ -39,10 +43,23 @@ export function eddmJobProduct(size: EddmSize, env: NodeJS.ProcessEnv = process.
     color: env.C2M_EDDM_COLOR?.trim() || "Full Color",
     paperType: env.C2M_EDDM_PAPER_TYPE?.trim() || "White Matte",
     printOption: env.C2M_EDDM_PRINT_OPTION?.trim() || "Printing both sides",
-    mailClass: env.C2M_EDDM_MAIL_CLASS?.trim() || EDDM_FULL_SERVICE_MAIL_CLASS,
+    mailClass: env.C2M_EDDM_MAIL_CLASS?.trim() || EDDM_MAIL_CLASS,
     addressMappingId: "",
-    billingType: env.C2M_EDDM_BILLING_TYPE?.trim() || "Invoice",
+    billingType: eddmBillingType(env),
   }
+}
+
+/** User Credit draws the staging balance. Invoice can be set later. Card billing is refused. */
+export function eddmBillingType(env: NodeJS.ProcessEnv = process.env): string {
+  return env.C2M_EDDM_BILLING_TYPE?.trim() || EDDM_BILLING_TYPE
+}
+
+export function isServerCardBilling(value: string): boolean {
+  return /credit card|apple pay|google pay|accept\.js|\bcard\b/i.test(value)
+}
+
+export function eddmCreditShortMessage(balance: number, needed: number): string {
+  return `Click2Mail User Credit is ${formatDollars(balance)}. This order needs at least ${formatDollars(needed)} in postage before it can be sent. A credit purchase can say Success without changing the balance. Add credit on the Click2Mail staging account, then try again.`
 }
 
 export function eddmJobTemplateName(env: NodeJS.ProcessEnv = process.env): string {
@@ -157,15 +174,6 @@ export async function placeEddmOrder(input: PlaceEddmOrderInput): Promise<MailOr
 
     if (!order.eddm?.prepared) {
       await input.client.setEddmInfo(order.jobId, input.mailer)
-      for (const route of input.routes) {
-        const pieces = input.coverage === "residential" ? route.residential : route.residential + route.business
-        await input.client.setEddmRoute(order.jobId, {
-          poName: route.postOfficeName,
-          route: eddmRouteCode(route),
-          postalCode: route.zip,
-          totalPieces: pieces,
-        })
-      }
       const deliveryType = eddmDeliveryType(input.coverage, env)
       for (const office of summary.postOffices) {
         await input.client.setEddmPostOffice(order.jobId, {
@@ -174,10 +182,21 @@ export async function placeEddmOrder(input: PlaceEddmOrderInput): Promise<MailOr
           city: office.city,
           state: office.state,
           zip: office.zip,
+          phone: office.phone,
           hours: office.hours,
           totalPieces: office.totalPieces,
           deliveryType,
           routeType: office.routeType,
+        })
+      }
+      // Routes are rejected ("not a EDDM job") until a post office is on the job.
+      for (const route of input.routes) {
+        const pieces = input.coverage === "residential" ? route.residential : route.residential + route.business
+        await input.client.setEddmRoute(order.jobId, {
+          poName: route.postOfficeName,
+          route: eddmRouteCode(route),
+          postalCode: route.zip,
+          totalPieces: pieces,
         })
       }
       order.eddm = {
@@ -197,6 +216,15 @@ export async function placeEddmOrder(input: PlaceEddmOrderInput): Promise<MailOr
     }
 
     if (input.submit && !order.submitted) {
+      if (product.billingType === EDDM_BILLING_TYPE) {
+        const needed = Math.round(summary.pieces * EDDM_RETAIL_POSTAGE_DOLLARS * 100) / 100
+        const credit = await input.client.getCredit()
+        if (credit.balance + 0.001 < needed) {
+          order.error = eddmCreditShortMessage(credit.balance, needed)
+          order.updatedAt = now()
+          return order
+        }
+      }
       const submitted = await input.client.submitJob(order.jobId, product.billingType)
       order.submitted = true
       order.submittedAt = now()
@@ -224,8 +252,15 @@ function eddmOrderBlock(input: PlaceEddmOrderInput, limitMessages: readonly stri
   if (!input.paymentCleared) {
     return eddmPaymentBlockedMessage()
   }
+  if (isServerCardBilling(eddmBillingType(input.env ?? process.env))) {
+    return "Card payment is not sent from this server. Every Door uses User Credit on the Click2Mail account."
+  }
   if (!isEddmSize(input.size)) {
     return "Choose a 6.5×9 or 6.25×11 card."
   }
   return limitMessages[0] ?? null
+}
+
+function formatDollars(amount: number): string {
+  return `$${amount.toFixed(2)}`
 }

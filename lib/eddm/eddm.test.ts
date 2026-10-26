@@ -206,11 +206,23 @@ test("filters use age, income, and household size, and a blank figure stays", ()
   assert.equal(summary.pieces, 480)
   const withBusiness = summarizeSelection(routes.map(snapshotRoute), "residential_and_business")
   assert.equal(withBusiness.pieces, 521)
-  assert.equal(summary.postOffices[0]?.name, "JAMES A FARLEY")
-  assert.equal(summary.postOffices[0]?.city, "NEW YORK")
-  assert.equal(summary.postOffices[0]?.state, "NY")
-  assert.equal(summary.postOffices[0]?.routeType, "City")
-  assert.equal(summary.messages.some((message) => /post office/i.test(message)), false)
+  assert.match(summary.messages.join(" "), /street address or a phone number/)
+  assert.equal(summary.postOffices.length, 0)
+  const ready = summarizeSelection(
+    routes.map((route) => ({
+      ...snapshotRoute(route),
+      postOfficeStreet: "421 8TH AVE",
+      postOfficePhone: "212-330-3296",
+    })),
+    "residential"
+  )
+  assert.equal(ready.postOffices[0]?.name, "JAMES A FARLEY")
+  assert.equal(ready.postOffices[0]?.address, "421 8TH AVE")
+  assert.equal(ready.postOffices[0]?.phone, "212-330-3296")
+  assert.equal(ready.postOffices[0]?.city, "NEW YORK")
+  assert.equal(ready.postOffices[0]?.state, "NY")
+  assert.equal(ready.postOffices[0]?.routeType, "City")
+  assert.equal(ready.messages.some((message) => /street address|phone number/i.test(message)), false)
 
   const unnamed = summarizeSelection(
     [{ ...snapshotRoute(routes[0] as EddmRoute), postOfficeName: "" }],
