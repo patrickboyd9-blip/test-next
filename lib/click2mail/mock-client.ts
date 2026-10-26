@@ -17,6 +17,10 @@ export function createMockClick2MailClient(options?: {
       calls.push("getCredit")
       return { balance: 25, status: 0, description: "Success" }
     },
+    async getJobCost(jobId) {
+      calls.push(`getJobCost:${jobId}`)
+      return { total: 25, status: 0, description: "Success" }
+    },
     async purchaseCredit() {
       calls.push("purchaseCredit")
       return { status: 0, description: "Success" }

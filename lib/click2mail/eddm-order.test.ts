@@ -193,7 +193,12 @@ test("a paid staging order sends the accepted mail class, post office, then rout
       requests.push(request)
       if (request.path === "/credit") {
         return xmlResponse(
-          `<?xml version="1.0"?><credit><balance>500.00</balance><status>0</status><description>Success</description></credit>`
+          `<?xml version="1.0"?><credit><balance>400.00</balance><status>0</status><description>Success</description></credit>`
+        )
+      }
+      if (request.path.endsWith("/cost")) {
+        return xmlResponse(
+          `<?xml version="1.0"?><job><cost>337.92</cost><tax>0.16</tax><status>0</status><description>Success</description></job>`
         )
       }
       const id = request.path.includes("/documents") ? "doc-9" : "job-9"
@@ -240,6 +245,7 @@ test("a paid staging order sends the accepted mail class, post office, then rout
     "/jobs/job-9/eddmInfo",
     "/jobs/job-9/eddmPo",
     "/jobs/job-9/eddmRoute",
+    "/jobs/job-9/cost",
     "/credit",
     "/jobs/job-9/submit",
   ])
@@ -274,8 +280,9 @@ test("a paid staging order sends the accepted mail class, post office, then rout
   assert.equal(route?.postalCode, "10001")
   assert.equal(route?.poName, "JAMES A FARLEY")
   assert.equal(route?.totalPieces, "400")
-  assert.equal(requests[6]?.form?.billingType, "User Credit")
-  assert.equal(requests[6]?.form?.crid, undefined)
+  assert.equal(requests[5]?.query?.paymentType, "User Credit")
+  assert.equal(requests[7]?.form?.billingType, "User Credit")
+  assert.equal(requests[7]?.form?.crid, undefined)
 })
 
 test("a short User Credit balance stops the order before submit", async () => {
@@ -283,9 +290,14 @@ test("a short User Credit balance stops the order before submit", async () => {
   const transport: Click2MailTransport = {
     async send(request) {
       requests.push(request)
+      if (request.path.endsWith("/cost")) {
+        return xmlResponse(
+          `<?xml version="1.0"?><job><cost>337.92</cost><tax>0.16</tax><status>0</status><description>Success</description></job>`
+        )
+      }
       if (request.path === "/credit") {
         return xmlResponse(
-          `<?xml version="1.0"?><credit><balance>0.00</balance><status>0</status><description>Success</description></credit>`
+          `<?xml version="1.0"?><credit><balance>200.00</balance><status>0</status><description>Success</description></credit>`
         )
       }
       const id = request.path.includes("/documents") ? "doc-1" : "job-1"
@@ -314,7 +326,55 @@ test("a short User Credit balance stops the order before submit", async () => {
   })
   assert.equal(order.submitted, false)
   assert.equal(order.eddm?.prepared, true)
-  assert.equal(order.error, eddmCreditShortMessage(0, 104))
+  // $200 would cover the $104 postage estimate. The job total is $337.92 plus $0.16 tax.
+  assert.equal(order.error, eddmCreditShortMessage(200, 338.08))
+  assert.equal(requests.at(-1)?.path, "/credit")
+  assert.equal(requests.some((request) => request.path.endsWith("/cost")), true)
+  assert.equal(requests.some((request) => request.path.endsWith("/submit")), false)
+})
+
+test("a failed job cost call falls back to the postage estimate", async () => {
+  const requests: Click2MailHttpRequest[] = []
+  const transport: Click2MailTransport = {
+    async send(request) {
+      requests.push(request)
+      if (request.path.endsWith("/cost")) {
+        return xmlResponse(
+          `<?xml version="1.0"?><job><status>9</status><description>Cost unavailable</description></job>`
+        )
+      }
+      if (request.path === "/credit") {
+        return xmlResponse(
+          `<?xml version="1.0"?><credit><balance>0.00</balance><status>0</status><description>Success</description></credit>`
+        )
+      }
+      const id = request.path.includes("/documents") ? "doc-2" : "job-2"
+      return xmlResponse(
+        `<?xml version="1.0"?><job><id>${id}</id><status>0</status><description>Success</description></job>`
+      )
+    },
+  }
+  const config = loadClick2MailConfig(stageEnv)
+  const client = createClick2MailClient({ config, transport })
+  const order = await placeEddmOrder({
+    client,
+    config,
+    pdf: new Uint8Array([1]),
+    size: "6.5x9",
+    coverage: "residential",
+    routes,
+    mailer,
+    submitEnabled: true,
+    paymentCleared: true,
+    documentName: "eddm-card",
+    artwork: "type-plate",
+    submit: true,
+    proof: false,
+    now: () => "2026-10-22T00:00:00.000Z",
+  })
+  assert.equal(order.submitted, false)
+  assert.equal(order.error, eddmCreditShortMessage(0, 104, "estimate"))
+  assert.match(order.error ?? "", /postage estimate/)
   assert.equal(requests.at(-1)?.path, "/credit")
   assert.equal(requests.some((request) => request.path.endsWith("/submit")), false)
 })

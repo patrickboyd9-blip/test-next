@@ -58,8 +58,16 @@ export function isServerCardBilling(value: string): boolean {
   return /credit card|apple pay|google pay|accept\.js|\bcard\b/i.test(value)
 }
 
-export function eddmCreditShortMessage(balance: number, needed: number): string {
-  return `Click2Mail User Credit is ${formatDollars(balance)}. This order needs at least ${formatDollars(needed)} in postage before it can be sent. A credit purchase can say Success without changing the balance. Add credit on the Click2Mail staging account, then try again.`
+export function eddmCreditShortMessage(
+  balance: number,
+  needed: number,
+  basis: "job" | "estimate" = "job"
+): string {
+  const need =
+    basis === "estimate"
+      ? `Click2Mail did not return a job cost, so this check uses the postage estimate of ${formatDollars(needed)}.`
+      : `This order needs at least ${formatDollars(needed)}, including tax, before it can be sent.`
+  return `Click2Mail User Credit is ${formatDollars(balance)}. ${need} A credit purchase can say Success without changing the balance. Add credit on the Click2Mail staging account, then try again.`
 }
 
 export function eddmJobTemplateName(env: NodeJS.ProcessEnv = process.env): string {
@@ -217,10 +225,21 @@ export async function placeEddmOrder(input: PlaceEddmOrderInput): Promise<MailOr
 
     if (input.submit && !order.submitted) {
       if (product.billingType === EDDM_BILLING_TYPE) {
-        const needed = Math.round(summary.pieces * EDDM_RETAIL_POSTAGE_DOLLARS * 100) / 100
+        const postage = Math.round(summary.pieces * EDDM_RETAIL_POSTAGE_DOLLARS * 100) / 100
+        let needed = postage
+        let basis: "job" | "estimate" = "estimate"
+        try {
+          const cost = await input.client.getJobCost(order.jobId, product.billingType)
+          needed = cost.total
+          basis = "job"
+        } catch {
+          // Job 1304272 cost $337.92 plus $0.16 tax. Postage is only the fallback.
+          needed = postage
+          basis = "estimate"
+        }
         const credit = await input.client.getCredit()
         if (credit.balance + 0.001 < needed) {
-          order.error = eddmCreditShortMessage(credit.balance, needed)
+          order.error = eddmCreditShortMessage(credit.balance, needed, basis)
           order.updatedAt = now()
           return order
         }

@@ -37,13 +37,13 @@ A paid staging order, with `C2M_EDDM_SUBMIT=true`, does this:
 3. `POST /jobs/{id}/eddmInfo` with `mailerName`, `mailerAddress1`, `mailerCity`, `mailerState`, `mailerPostalcode`, and `mailerPhone`.
 4. `POST /jobs/{id}/eddmPo` once per delivering post office. This has to come before the routes. Click2Mail returns "Job is not a EDDM job" if a route is sent first. The call needs the facility name, street, city, state, ZIP, phone, piece count, `deliveryType`, and `routeType`.
 5. `POST /jobs/{id}/eddmRoute` once per route. The route value is the ZIP plus the route id, such as `10001-C071`. That form worked on job 1304272.
-6. `GET /credit`, then `POST /jobs/{id}/submit` with billing type `User Credit`.
+6. `GET /jobs/{id}/cost` for User Credit, then `GET /credit`, then `POST /jobs/{id}/submit` with billing type `User Credit`. The balance is compared with that job total, including tax. Job 1304272 was $337.92 plus $0.16 tax for 400 pieces. If the cost call fails, the check uses the $0.26 postage estimate instead.
 
 Sign-in uses `C2M_STAGE_USERNAME` and `C2M_STAGE_PASSWORD`. If those are empty, staging falls back to `C2M_USERNAME` and `C2M_PASSWORD`.
 
 The route feed names the delivering post office (`FACILITY_NAME`) and the city and state (`CITY_STATE`). It does not include a street or a phone. Those come from the USPS post office locator (`tools.usps.com` POLocator), matched on the facility name. A successful lookup is saved for seven days. If the locator is down, a small saved table covers offices we have already read (James A. Farley in 10001 is the first). If a selected route still has no street or no phone, checkout stops with a plain-English message and Click2Mail is not called.
 
-`Invoice` returned "User does not have access to this payment method" on this staging account. Card payment through the API fails because the server never has Accept.js data, so card billing is refused. User Credit is the path for now. Before submit, the balance is read again with `GET /credit`. A credit purchase can say Success without changing the balance. If the balance is below the postage estimate, submit stops and the screen says to add credit. `C2M_EDDM_BILLING_TYPE` can switch to Invoice later, when the account has that method. It cannot switch to a card.
+`Invoice` returned "User does not have access to this payment method" on this staging account. Card payment through the API fails because the server never has Accept.js data, so card billing is refused. User Credit is the path for now. Before submit, the order reads `GET /jobs/{id}/cost` and then `GET /credit`. Submit stops when the balance is below that total, including tax. A credit purchase can say Success without changing the balance. If Click2Mail does not return a cost, the check uses the postage estimate. `C2M_EDDM_BILLING_TYPE` can switch to Invoice later, when the account has that method. It cannot switch to a card.
 
 Product strings. Job 1304272 was created with the 6.5×9 document class and Postage Paid in Advance. The other strings are still the defaults below:
 

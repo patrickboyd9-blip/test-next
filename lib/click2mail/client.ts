@@ -13,6 +13,7 @@ import type {
   Click2MailClient,
   CreditPurchaseResult,
   DocumentCreated,
+  JobCostSnapshot,
   EddmMailerInfo,
   EddmPostOfficeSubmission,
   JobDraft,
@@ -23,6 +24,7 @@ import type {
   TrackingSnapshot,
 } from "./types"
 import {
+  childText,
   childrenNamed,
   findChild,
   firstText,
@@ -165,6 +167,58 @@ function fail(
   })
 }
 
+/**
+ * Job 1304272 quoted cost 337.92 and tax 0.16. The Java client only maps `cost`,
+ * so tax is added here. A totalCost that already includes tax is used as-is.
+ */
+export function jobCostTotal(root: XmlElement): number | null {
+  const tax = firstMoney(root, ["tax", "taxAmount", "salesTax"]) ?? 0
+  const explicit = firstMoney(root, ["totalCost", "grandTotal"])
+  const flat = firstMoney(root, ["cost"])
+  if (explicit !== null) {
+    const preTax = flat ?? explicit
+    if (tax > 0 && explicit + 0.001 < preTax + tax) return roundCents(explicit + tax)
+    return roundCents(explicit)
+  }
+  if (flat !== null) return roundCents(flat + tax)
+
+  let sum = 0
+  let found = false
+  for (const name of ["productionCost", "standardCost", "nonstandardCost", "nonStandardCost", "internationalCost", "postageCost"]) {
+    const node = findChild(root, name)
+    if (!node) continue
+    const subtotal = money(childText(node, "subtotal") ?? node.text)
+    if (subtotal === null) continue
+    sum += subtotal
+    found = true
+  }
+  if (tax > 0) {
+    sum += tax
+    found = true
+  }
+  return found ? roundCents(sum) : null
+}
+
+function firstMoney(element: XmlElement, names: readonly string[]): number | null {
+  for (const name of names) {
+    const value = money(childText(element, name))
+    if (value !== null) return value
+  }
+  return null
+}
+
+function money(value: string | undefined): number | null {
+  if (!value) return null
+  const cleaned = value.replace(/[$,]/g, "").trim()
+  if (!/^-?\d+(\.\d+)?$/.test(cleaned)) return null
+  const amount = Number(cleaned)
+  return Number.isFinite(amount) ? amount : null
+}
+
+function roundCents(amount: number): number {
+  return Math.round(amount * 100) / 100
+}
+
 function snippet(body: string): string {
   const compact = body.replace(/\s+/g, " ").trim()
   if (!compact || compact.startsWith("<!DOCTYPE") || compact.startsWith("<html")) {
@@ -223,6 +277,23 @@ export function createClick2MailClient(options: {
         throw fail(response, { ...result, description: "Credit balance was not a number." }, secrets)
       }
       return { balance, status: result.status, description: result.description }
+    },
+
+    async getJobCost(jobId, paymentType) {
+      const response = await send({
+        method: "GET",
+        path: `/jobs/${encodeURIComponent(jobId)}/cost`,
+        query: { paymentType },
+      })
+      const root = parseBody(response, secrets)
+      const result = readResult(root)
+      if (response.status < 200 || response.status >= 300) throw fail(response, result, secrets)
+      if (result.status !== null && result.status !== 0) throw fail(response, result, secrets)
+      const total = jobCostTotal(root)
+      if (total === null) {
+        throw fail(response, { ...result, description: result.description || "Job cost was missing." }, secrets)
+      }
+      return { total, status: result.status, description: result.description } satisfies JobCostSnapshot
     },
 
     async purchaseCredit(input) {

@@ -21,6 +21,13 @@ export interface CreditSnapshot {
   description: string
 }
 
+/** Total from GET /jobs/{id}/cost, including tax. */
+export interface JobCostSnapshot {
+  total: number
+  status: number | null
+  description: string
+}
+
 export interface CreditPurchaseResult {
   status: number | null
   description: string
@@ -124,6 +131,8 @@ export interface TrackingSnapshot {
 
 export interface Click2MailClient {
   getCredit(): Promise<CreditSnapshot>
+  /** Quoted job total for the payment type we will submit with. Includes tax. */
+  getJobCost(jobId: string, paymentType: string): Promise<JobCostSnapshot>
   purchaseCredit(input: PurchaseCreditInput): Promise<CreditPurchaseResult>
   createDocument(input: {
     documentName: string
