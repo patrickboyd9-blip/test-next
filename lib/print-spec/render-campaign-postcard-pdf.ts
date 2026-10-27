@@ -41,6 +41,10 @@ export interface PostcardPrintCopy {
   disclaimer?: string
   /** Printed on the address side when a regulated vertical requires it. */
   complianceMark?: string
+  /** Supporting line. Roofing pro templates can use it as the headline when the headline repeats the offer. */
+  subheadline?: string
+  /** License text the business supplied. */
+  license?: string
 }
 
 export interface AddressBackPlan {

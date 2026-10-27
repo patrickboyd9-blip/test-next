@@ -14,7 +14,9 @@ import { persuasionAngles, persuasionRecordLine, persuasionUsesLine, persuasionW
 import { designDebugEnabled, publicDirectionLine } from "@/lib/campaign-creator/customer-direction-line"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
+import { verticalForBrief } from "@/lib/design-intelligence/vertical"
 import { BlueprintBrowser } from "./BlueprintBrowser"
+import { ProTemplatePicker } from "./ProTemplatePicker"
 import { ConceptCard } from "./ConceptCard"
 import { ConceptFeedback } from "./ConceptFeedback"
 import { PostcardPreview, PostcardSideToggle } from "./PostcardPreview"
@@ -145,6 +147,13 @@ export function FocusView({
           Approve as-is
         </Button>
       </div>
+      {campaignId && brief && verticalForBrief(brief) === "roofing" && onBlueprintApplied ? (
+        <ProTemplatePicker
+          campaignId={campaignId}
+          current={spec.layoutHints?.templateId}
+          onApplied={onBlueprintApplied}
+        />
+      ) : null}
       {campaignId && onBlueprintApplied ? (
         <BlueprintBrowser campaignId={campaignId} onApplied={onBlueprintApplied} />
       ) : null}

@@ -11,6 +11,8 @@ import { buildPostcard6x9PrintSpec } from "@/lib/print-spec/postcard-6x9-print-s
 
 import type { PostcardSizeId, PostcardTemplateId, VerticalPaletteId } from "./ids"
 import { paletteById, type VerticalPalette } from "./palette"
+import { isRoofingProTemplate } from "@/lib/roofing-pro/ids"
+import { composeRoofingProFace } from "@/lib/roofing-pro/compose"
 import {
   clampToSafe,
   frontRegions,
@@ -92,9 +94,26 @@ export interface ComposeInput {
   disclaimer?: boolean
   /** A required legal label, such as Advertisement on an attorney card. */
   complianceMark?: string | null
+  /** License text the business already supplied. Never invented here. */
+  license?: string | null
+  /** Disclaimer words, when the flag above is also set. */
+  disclaimerText?: string | null
 }
 
 export function composePostcardFace(input: ComposeInput): PostcardFacePlan {
+  if (isRoofingProTemplate(input.templateId)) {
+    return composeRoofingProFace({
+      templateId: input.templateId,
+      size: input.size,
+      face: input.face,
+      spec: input.spec,
+      businessName: input.businessName,
+      qrPayload: input.qrPayload,
+      license: input.license,
+      disclaimerText: input.disclaimerText,
+      complianceMark: input.complianceMark,
+    })
+  }
   const size = input.size ?? "5x8"
   const face = input.face ?? "front"
   const meta = TEMPLATE_META[input.templateId]

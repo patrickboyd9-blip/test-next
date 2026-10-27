@@ -17,6 +17,7 @@ import type { InchRect } from "@/lib/postcard-layouts/typefit"
 import { lineHeightFor } from "@/lib/postcard-layouts/typefit"
 import { paintQr } from "@/lib/campaign-creator/studio-qr"
 import { studioShapeLayer } from "@/lib/design-intelligence/studio-layer"
+import { steepScrimCss } from "@/lib/roofing-pro/scrim"
 import { planWithRealThumbnails } from "./photo-plan"
 
 const DISPLAY_CSS = {
@@ -92,7 +93,7 @@ export function PremiumPostcardFront({
       <Shapes plan={painted} layer="front" />
       <TrustChips plan={painted} />
       {painted.texts.map((text) => (
-        <Fitted key={`${text.role}-${text.rect.y}`} plan={painted} text={text} />
+        <Fitted key={`${text.role}-${text.rect.x}-${text.rect.y}-${text.text}`} plan={painted} text={text} />
       ))}
       {painted.lockup ? <Lockup plan={painted} payload={contact.qrPayload} /> : null}
     </FaceFrame>
@@ -127,7 +128,7 @@ export function PremiumBackMessage({
     <div data-template-back={plan.templateId} data-overflow={plan.overflows ? "yes" : "no"} className="absolute inset-0">
       <Shapes plan={plan} layer="front" />
       {plan.texts.map((text) => (
-        <Fitted key={`${text.role}-${text.rect.y}`} plan={plan} text={text} />
+        <Fitted key={`${text.role}-${text.rect.x}-${text.rect.y}-${text.text}`} plan={plan} text={text} />
       ))}
     </div>
   )
@@ -183,12 +184,12 @@ function shapeLayer(role: string): "back" | "mid" | "front" {
 
 function Shape({ plan, shape }: { plan: PostcardFacePlan; shape: ShapePlan }) {
   const style = box(shape.rect, plan.size)
-  if (shape.role === "scrim") {
+  if (shape.role === "scrim" || shape.role === "solid-scrim") {
     return (
       <div
-        data-region="scrim"
+        data-region={shape.role}
         className="pointer-events-none absolute"
-        style={{ ...style, background: scrimGradient(plan.palette.scrim) }}
+        style={{ ...style, background: shape.role === "solid-scrim" ? steepScrimCss(plan.palette.scrim) : scrimGradient(plan.palette.scrim) }}
       />
     )
   }

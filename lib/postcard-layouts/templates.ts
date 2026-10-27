@@ -1,4 +1,5 @@
 import type { FontPairingId, PostcardSizeId, PostcardTemplateId } from "./ids"
+import { ROOFING_PRO_META, ROOFING_PRO_TEMPLATE_IDS } from "@/lib/roofing-pro/ids"
 import type { InchRect } from "./typefit"
 
 export interface DesignRegion {
@@ -39,6 +40,16 @@ export const TEMPLATE_META: Record<PostcardTemplateId, TemplateMeta> = {
   financing_first: { id: "financing_first", pairing: "signal", photoSlots: 1, label: "Payment offer beside a photograph" },
   local_pride: { id: "local_pride", pairing: "trade", photoSlots: 1, label: "Job photograph with a local headline" },
   commercial_restore: { id: "commercial_restore", pairing: "signal", photoSlots: 1, label: "Quiet commercial restoration" },
+  roof_full_bleed: { id: "roof_full_bleed", pairing: "trade", photoSlots: 1, label: ROOFING_PRO_META.roof_full_bleed.name },
+  roof_split: { id: "roof_split", pairing: "trade", photoSlots: 1, label: ROOFING_PRO_META.roof_split.name },
+  roof_coupon: { id: "roof_coupon", pairing: "signal", photoSlots: 1, label: ROOFING_PRO_META.roof_coupon.name },
+  roof_before_after: { id: "roof_before_after", pairing: "trade", photoSlots: 2, label: ROOFING_PRO_META.roof_before_after.name },
+  roof_trust: { id: "roof_trust", pairing: "letter", photoSlots: 1, label: ROOFING_PRO_META.roof_trust.name },
+  roof_storm: { id: "roof_storm", pairing: "trade", photoSlots: 1, label: ROOFING_PRO_META.roof_storm.name },
+  roof_neighborhood: { id: "roof_neighborhood", pairing: "trade", photoSlots: 1, label: ROOFING_PRO_META.roof_neighborhood.name },
+  roof_seasonal: { id: "roof_seasonal", pairing: "signal", photoSlots: 1, label: ROOFING_PRO_META.roof_seasonal.name },
+  roof_minimal: { id: "roof_minimal", pairing: "trade", photoSlots: 1, label: ROOFING_PRO_META.roof_minimal.name },
+  roof_premium: { id: "roof_premium", pairing: "letter", photoSlots: 1, label: ROOFING_PRO_META.roof_premium.name },
 }
 
 /**
@@ -47,7 +58,7 @@ export const TEMPLATE_META: Record<PostcardTemplateId, TemplateMeta> = {
  * forward. Medicare never enters this list.
  */
 const TEMPLATES_FOR: Record<string, readonly PostcardTemplateId[]> = {
-  roofing: ["storm_alert", "financing_first", "before_after", "local_pride", "commercial_restore"],
+  roofing: ROOFING_PRO_TEMPLATE_IDS,
   plumbing: ["offer_starburst", "deadline_coupon", "hero_scrim", "neighbor_letter"],
   hvac: ["service_band", "deadline_coupon", "hero_scrim", "color_block"],
   medicare: ["medicare_calm", "portrait_aside", "neighbor_letter"],

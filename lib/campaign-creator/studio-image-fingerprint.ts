@@ -54,7 +54,7 @@ export function fingerprintForSpec(
 ): string | null {
   const photoSlot =
     context.photoSlot ??
-    (spec.layoutHints?.templateId === "before_after" ? "before" : "primary")
+    (spec.layoutHints?.templateId === "before_after" || spec.layoutHints?.templateId === "roof_before_after" ? "before" : "primary")
   const brief = toImageBrief(spec, { ...context, photoSlot })
   if (!brief) return null
   return imageBriefFingerprint(brief)

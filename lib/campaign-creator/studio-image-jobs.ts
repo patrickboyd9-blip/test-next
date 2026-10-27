@@ -6,6 +6,7 @@ import { rasterFromDataUrl, readingFromDataUrl } from "@/lib/design-intelligence
 import { isDesignRationale } from "@/lib/design-intelligence/rationale"
 
 import { getActiveSpec, getApprovedSpec } from "./creative-state"
+import { isBeforeAfterTemplate } from "./roof-photo-slots"
 import { toImageBrief, type ImageBrief } from "./image-brief"
 import type {
   GeneratedAsset,
@@ -182,7 +183,7 @@ async function readStudioImageSlots(input: {
     const context = imageBriefContextFor(
       item.directionId,
       input.campaignBrief,
-      item.photoSlot ?? (item.spec.layoutHints?.templateId === "before_after" ? "before" : "primary")
+      item.photoSlot ?? (isBeforeAfterTemplate(item.spec.layoutHints?.templateId) ? "before" : "primary")
     )
     const brief = toImageBrief(item.spec, context)
     if (!brief) continue
@@ -258,7 +259,7 @@ function workItems(
 }
 
 function expandPhotoSlots(item: WorkItem): WorkItem[] {
-  if (item.spec.layoutHints?.templateId !== "before_after") return [item]
+  if (!isBeforeAfterTemplate(item.spec.layoutHints?.templateId)) return [item]
   return [
     { ...item, photoSlot: "before" },
     { ...item, photoSlot: "after" },

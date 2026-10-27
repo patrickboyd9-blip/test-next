@@ -44,7 +44,7 @@ export function presentStudioPhoto(
     campaign
   )
   const alternateAsset =
-    spec.layoutHints?.templateId === "before_after"
+    (spec.layoutHints?.templateId === "before_after" || spec.layoutHints?.templateId === "roof_before_after")
       ? lookupStudioImage(state.records, directionId, spec, campaign, "after")
       : null
   if (generatedAsset) {

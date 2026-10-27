@@ -8,6 +8,8 @@ export interface PostcardIdentity {
   phone?: string
   website?: string
   qrDestination?: string
+  /** License line already on the brief. Not invented by Studio. */
+  license?: string
 }
 
 export interface StudioContact {
@@ -21,13 +23,14 @@ export function postcardIdentityFromBrief(brief: {
   phone?: string
   website?: string
   qrDestination?: string
-  businessInfo?: { name?: string; phone?: string; website?: string }
+  businessInfo?: { name?: string; phone?: string; website?: string; license?: string }
 }): PostcardIdentity {
   return {
     businessName: brief.businessInfo?.name,
     phone: brief.phone ?? brief.businessInfo?.phone,
     website: brief.website ?? brief.businessInfo?.website,
     qrDestination: brief.qrDestination,
+    license: brief.businessInfo?.license,
   }
 }
 

@@ -113,7 +113,13 @@ export interface CampaignRepository {
     activeSpec: CreativeSpec,
     options?: { directionId?: string }
   ): Promise<Campaign>
-  replaceDirectionSpec(id: string, directionId: string, spec: CreativeSpec, note: string): Promise<Campaign>
+  replaceDirectionSpec(
+    id: string,
+    directionId: string,
+    spec: CreativeSpec,
+    note: string,
+    customerPrompt?: string
+  ): Promise<Campaign>
   approveCreative(id: string): Promise<Campaign>
   unapproveCreative(id: string): Promise<Campaign>
   setDesignSource(id: string, source: DesignSource): Promise<Campaign>
@@ -386,7 +392,13 @@ class StoredCampaignRepository implements CampaignRepository {
     return this.write(campaign)
   }
 
-  async replaceDirectionSpec(id: string, directionId: string, spec: CreativeSpec, note: string): Promise<Campaign> {
+  async replaceDirectionSpec(
+    id: string,
+    directionId: string,
+    spec: CreativeSpec,
+    note: string,
+    customerPrompt = "Use a blueprint"
+  ): Promise<Campaign> {
     const campaign = await this.require(id)
     const direction = campaign.creative.directions.find((item) => item.id === directionId)
     if (!direction) throw new Error(`Direction ${directionId} not found`)
@@ -398,7 +410,7 @@ class StoredCampaignRepository implements CampaignRepository {
       directionId,
       version: getNextVersion(campaign.creative, directionId),
       spec: next,
-      customerPrompt: "Use a blueprint",
+      customerPrompt,
       studioResponse: note,
       type: "refinement",
       createdAt: now,

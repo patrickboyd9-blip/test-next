@@ -518,6 +518,30 @@ export async function browseBlueprints(input: {
   return cards
 }
 
+/** Switches the selected roofing direction onto a fixed pro template. The words stay. */
+export async function chooseRoofingProTemplate(campaignId: string, templateId: string): Promise<Campaign> {
+  const { isRoofingProTemplate } = await import("@/lib/roofing-pro/ids")
+  if (!isRoofingProTemplate(templateId)) throw new Error("That layout is not a roofing pro template.")
+  const campaign = await repository.getCampaign(campaignId)
+  if (!campaign) throw new Error(`Campaign ${campaignId} not found`)
+  const directionId = campaign.creative.selectedDirectionId
+  if (!directionId) throw new Error("No direction selected")
+  const direction = campaign.creative.directions.find((item) => item.id === directionId)
+  if (!direction) throw new Error("Selected direction not found")
+  const current = campaign.creative.activeSpec ?? direction.spec
+  const spec = {
+    ...current,
+    layoutHints: {
+      ...current.layoutHints,
+      templateId,
+      verticalPalette: "roofing" as const,
+    },
+  }
+  return forCustomer(
+    await repository.replaceDirectionSpec(campaignId, directionId, spec, "Switched to a pro template.", "Use a pro template")
+  )
+}
+
 /** Rebuilds the selected concept from one blueprint, with this campaign's words and colors. */
 export async function applyCampaignBlueprint(campaignId: string, blueprintId: string): Promise<Campaign> {
   const campaign = await repository.getCampaign(campaignId)

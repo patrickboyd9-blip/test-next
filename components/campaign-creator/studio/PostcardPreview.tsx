@@ -24,6 +24,8 @@ import { PostcardBackFace, PostcardFrontFace } from "./PostcardComposition"
 import { PremiumBackMessage, PremiumPostcardFront } from "./PremiumPostcard"
 import { composeGridCard } from "@/lib/design-intelligence/grid-composer"
 import { isDesignRationale } from "@/lib/design-intelligence/rationale"
+import { composeRoofingProCard } from "@/lib/roofing-pro/compose"
+import { isRoofingProTemplate } from "@/lib/roofing-pro/ids"
 import { attorneyAdMark } from "@/lib/design-intelligence/attorney-compliance"
 import { isPostcardTemplate, isVerticalPalette } from "@/lib/postcard-layouts/ids"
 import { slotPhotoSources } from "@/lib/postcard-layouts/photos"
@@ -68,6 +70,7 @@ const SIZE_CLASSES: Record<PostcardPreviewSize, string> = {
  * Do not derive this from canvas.trimSizeInches.
  */
 const STUDIO_VIEWING_ASPECT_CLASS = "aspect-[8/5]"
+const STUDIO_6X9_ASPECT_CLASS = "aspect-[3/2]"
 
 const DEFAULT_PALETTE = ["#1e3a5f", "#4a90a4", "#f5f5f0"] as const
 
@@ -122,19 +125,33 @@ export function PostcardPreview({
     ].filter(Boolean).join(" ")
   )
 
-  const studioCard = isDesignRationale(spec.designRationale)
+  const trimSize = canvas.trimSizeInches.longInches >= 9 ? "6x9" : "5x8"
+  const sharedSpec = {
+    ...spec,
+    phone: contact.phone ?? spec.phone,
+    website: contact.website ?? spec.website,
+  }
+  const proCard = isRoofingProTemplate(template)
+    ? composeRoofingProCard({
+        templateId: template,
+        size: trimSize,
+        spec: sharedSpec,
+        businessName: contact.businessName,
+        qrPayload: contact.qrPayload,
+        license: identity?.license,
+        disclaimerText: disclaimer,
+        complianceMark,
+      })
+    : null
+  const studioCard = proCard ?? (isDesignRationale(spec.designRationale)
     ? composeGridCard({
         rationale: spec.designRationale,
-        spec: {
-          ...spec,
-          phone: contact.phone ?? spec.phone,
-          website: contact.website ?? spec.website,
-        },
+        spec: sharedSpec,
         businessName: contact.businessName,
         disclaimer,
         complianceMark,
       })
-    : null
+    : null)
 
   const content = isAddressSide ? (
     studioCard ? (
@@ -209,7 +226,7 @@ export function PostcardPreview({
       <motion.div
         className={cn(
           "@container relative overflow-hidden rounded-lg shadow-lg sm:shadow-lg",
-          STUDIO_VIEWING_ASPECT_CLASS,
+          trimSize === "6x9" ? STUDIO_6X9_ASPECT_CLASS : STUDIO_VIEWING_ASPECT_CLASS,
           SIZE_CLASSES[size],
           size === "thumbnail" && "shadow-md",
           className

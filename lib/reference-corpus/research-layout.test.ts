@@ -163,7 +163,7 @@ test("a disallowed layout is replaced and the three directions still differ", ()
   assert.equal(applied[0]?.spec.imageryRole === "none", false)
 })
 
-test("roofing directions cite different records for storm, financing, and before/after", () => {
+test("roofing directions cite different records for the three default pro layouts", () => {
   const brief: CampaignBrief = { goal: "Book roof inspections", offer: "Free roof inspection" }
   const applied = applyResearchLayouts(brief, [
     direction(0, "peer_split"),
@@ -172,10 +172,10 @@ test("roofing directions cite different records for storm, financing, and before
   ])
   assert.deepEqual(
     applied.map((item) => item.spec.layoutHints?.templateId),
-    ["storm_alert", "financing_first", "before_after"]
+    ["roof_full_bleed", "roof_split", "roof_before_after"]
   )
   const cited = applied.map((item) => item.research?.sources.map((source) => source.mmrId))
-  assert.deepEqual(cited, [["MMR-574"], ["MMR-577"], ["MMR-580"]])
+  assert.deepEqual(cited, [["MMR-587"], ["MMR-583"], ["MMR-580"]])
   const unique = new Set(cited.flat())
   assert.equal(unique.size, 3)
   assert.equal(unique.has("MMR-001"), false)
