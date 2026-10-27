@@ -342,7 +342,9 @@ function namedTrustLine(kind: string, businessName: string | undefined, generic:
       ? `${name} takes the call`
       : kind === "food"
         ? `${name} holds a table`
-        : `${name} checks this`
+        : kind === "roofing"
+          ? `${name} checks this roof`
+          : generic
   return line.split(/\s+/).length <= 8 ? line : generic
 }
 

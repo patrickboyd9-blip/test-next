@@ -8,8 +8,8 @@ import type { LibraryRecord } from "@/lib/design-intelligence/library"
 import { verticalForBrief } from "@/lib/design-intelligence/vertical"
 
 import { industryCounts } from "./coverage"
-import { GOLD_INDUSTRIES, industryForBrief, normalizeIndustry, type GoldIndustry } from "./industry"
-import { indexSourceFiles, type SourceFile } from "./parse"
+import { GOLD_INDUSTRIES, industryForBrief, normalizeIndustry, resolveIndustry, type GoldIndustry } from "./industry"
+import { dedupeResearchEntries, indexSourceFiles, type SourceFile } from "./parse"
 import { queryFromBrief, retrieveResearch } from "./retrieve"
 
 const SAMPLE_BRIEFS: Record<GoldIndustry, CampaignBrief> = {
@@ -272,6 +272,118 @@ test("pest control and restaurants are not dropped, and insurance is not all Med
   const hvacPick = selectReferences([heating], { offer: "Free inspection for broken AC units" }, env)
   assert.ok(hvacPick.peers.some((pick) => pick.id === "PM-015"))
   assert.equal(verticalForBrief({ goal: "Review homeowners insurance", offer: "A home insurance quote" }), "general_local_service")
+})
+
+test("a photo-folder copy keeps the provenance industry, headline, and offer", () => {
+  const note = indexSourceFiles([
+    {
+      path: "assets/physical/PM-015/provenance.json",
+      ref: "c3po",
+      json: {
+        id: "PM-015",
+        notes: "Anderson Plumbing, Heating and Air.\nPrinted headline: One service call\nPrinted offer: $99 service",
+      },
+    },
+    {
+      path: "assets/physical/PM-039/notes.md",
+      ref: "c3po",
+      text: "PM-039\nHeating and air.\nPrinted headline: Cool air by evening\nPrinted offer: $410 off a new system\n",
+    },
+    {
+      path: "assets/physical/PM-047/notes.md",
+      ref: "c3po",
+      text: "PM-047\nA window and door mailer.\nPrinted headline: The new opening\nPrinted offer: Free window estimate\n",
+    },
+    {
+      path: "assets/physical/PM-057/notes.md",
+      ref: "c3po",
+      text: "PM-057\nDairy Queen coupon.\nPrinted headline: Tuesday night\nPrinted offer: A free cone\n",
+    },
+  ])
+  const folder = indexSourceFiles([
+    {
+      path: "assets/physical/PM-015/",
+      ref: "c3po",
+      json: { id: "PM-015", images: ["assets/physical/PM-015/front.jpg"] },
+    },
+  ])
+  const byId = new Map(note.entries.map((entry) => [entry.id, entry]))
+  assert.equal(byId.get("PM-039")?.industry, "hvac")
+  assert.match(byId.get("PM-039")?.headlines.join(" ") ?? "", /Cool air/)
+  assert.match(byId.get("PM-039")?.offers.join(" ") ?? "", /\$410/)
+  assert.equal(resolveIndustry({ notes: "window and door mailer" }), "windows-gutters-siding")
+  assert.equal(byId.get("PM-047")?.industry, "windows-gutters-siding")
+  assert.equal(resolveIndustry({ notes: "Dairy Queen coupon" }), "restaurants-food")
+  assert.equal(byId.get("PM-057")?.industry, "restaurants-food")
+  assert.match(byId.get("PM-057")?.offers.join(" ") ?? "", /cone/i)
+
+  for (const order of [
+    [folder.entries[0]!, note.entries.find((entry) => entry.id === "PM-015")!],
+    [note.entries.find((entry) => entry.id === "PM-015")!, folder.entries[0]!],
+  ]) {
+    const merged = dedupeResearchEntries(order)
+    assert.equal(merged.length, 1)
+    assert.equal(merged[0]?.industry, "hvac")
+    assert.match(merged[0]?.headlines.join(" ") ?? "", /service call/i)
+    assert.match(merged[0]?.offers.join(" ") ?? "", /\$99/)
+    assert.ok(merged[0]?.imageRefs.some((ref) => ref.endsWith("front.jpg")))
+  }
+})
+
+test("life insurance and tutoring briefs reach their own industries", () => {
+  assert.equal(
+    industryForBrief({ goal: "Life insurance for homeowners", offer: "A family policy" }),
+    "life-insurance"
+  )
+  assert.equal(industryForBrief({ goal: "Book tutoring", offer: "Homework help after school" }), "tutoring-childcare")
+  assert.equal(industryForBrief({ goal: "Review homeowners insurance", offer: "A home insurance quote" }), "home-insurance")
+  assert.equal(industryForBrief({ goal: "Ask the bank for a home loan", offer: "A written quote" }), "mortgage-financial")
+})
+
+test("a record outside the 28 industries stays none and is not a same-industry example", () => {
+  const filler = "conference brochure ".repeat(20)
+  const notes = `${filler} hotel gift shop and a bank financial webinar job listing. Not affiliated with Medicare.`
+  assert.equal(resolveIndustry({ notes }), "none")
+  assert.equal(normalizeIndustry("b2b travel"), "none")
+
+  const indexed = indexSourceFiles([
+    {
+      path: "examples/MMR-900.md",
+      ref: "mando",
+      text: `# MMR-900\n\n## OBSERVED\n- Headline: "A long trip"\n\n## INFERRED\nOne brochure.\n\n## INTERPRETATION\n${notes}\n`,
+    },
+  ])
+  const outsider = indexed.entries.find((entry) => entry.id === "MMR-900")
+  assert.equal(outsider?.industry, "none")
+  const hits = retrieveResearch(indexed.entries, queryFromBrief({ offer: "Free inspection for broken AC units" }), 6)
+  assert.equal(hits.hits.some((hit) => hit.entry.id === "MMR-900" && hit.band === "same"), false)
+  assert.equal(hits.hits.some((hit) => hit.entry.id === "MMR-900"), false)
+
+  const heating: LibraryRecord = {
+    id: "PM-015",
+    source: "seed",
+    vertical: "hvac",
+    grade: "B",
+    needsAnalysis: false,
+    images: [],
+    analysis: { id: "PM-015", vertical: "hvac", grade: "B", summary: "Heating and air service call." },
+  }
+  const travel: LibraryRecord = {
+    id: "MMR-900",
+    source: "seed",
+    vertical: "b2b",
+    grade: "A-",
+    needsAnalysis: false,
+    images: [],
+    analysis: { id: "MMR-900", vertical: "b2b", grade: "A-", summary: notes },
+  }
+  const picked = selectReferences(
+    [travel, heating],
+    { offer: "Free inspection for broken AC units", businessInfo: { name: "Coastal Comfort Heating & Air" } },
+    { DESIGN_OWNER_FAVORITES: "PM-999" } as NodeJS.ProcessEnv
+  )
+  assert.equal(picked.peers.some((peer) => peer.id === "MMR-900"), false)
+  assert.ok(picked.peers.some((peer) => peer.id === "PM-015"))
 })
 
 test("customer lines hide blueprint ids and internal notes", () => {

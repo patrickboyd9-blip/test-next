@@ -19,6 +19,7 @@ import {
 
 export { addressSideContentRect, rectsOverlap }
 import { encodeSolidPng, effectiveDpi, readRasterSize } from "./raster"
+import { upscaleToPrintCanvas } from "./upscale-print-image"
 
 export const MIN_EFFECTIVE_DPI = 300
 
@@ -261,7 +262,9 @@ export async function renderPostcardPrintPdf(input: {
   const backContent = addressSideContentRect(spec)
   const plateColor = input.plateColor ?? [30, 58, 95]
   const artwork = input.image ? "final-photo" : "type-plate"
-  const image = input.image ?? solidPlate(spec, plateColor)
+  const image = input.image
+    ? upscaleToPrintCanvas(input.image, spec.artworkCanvasInches, MIN_EFFECTIVE_DPI)
+    : solidPlate(spec, plateColor)
   const imageDpi = assertPrintImageDpi(
     { width: image.width, height: image.height },
     spec.artworkCanvasInches

@@ -1,3 +1,5 @@
+import { normalizeIndustry } from "@/lib/research-library/industry"
+
 import { isHomeServicesBrief } from "./creative-intelligence"
 import {
   isFinalExpenseBrief,
@@ -112,7 +114,7 @@ const HVAC: SceneBank = {
   ],
   crew: [
     "Hands and gauges at an outdoor condenser. Coils, copper, working daylight. No logo and no face as the subject.",
-    "A technician on a ladder at a soffit vent, seen from the yard, tools in a bag. Sky left quiet. Not a handshake.",
+    "A technician kneeling beside an outdoor condenser with the service panel open, coils and copper visible, working daylight.",
     "A filter being slid from a return grille, only hands and the grille, interior daylight. Not a stock smile.",
   ],
   neighborhood: [
@@ -433,13 +435,18 @@ export function buildPhotographyArtDirection(input: {
   const bank = BANKS[bankKey(trade)] ?? LOCAL_SERVICE
   const conceived = input.visualDirection.trim()
   const weak = isWeakVisualDirection(conceived)
-  const insuranceTrade = trade === "auto_insurance" || trade === "home_insurance" || trade === "life_insurance"
   const genericJob = /finished result of the job|the problem itself|from this business|one local person/i.test(conceived)
   const portrait = trade.startsWith("medicare") ? uploadedAgentPortrait(input.campaign) : undefined
+  const replace =
+    weak ||
+    badSubject(conceived, trade) ||
+    offIndustry(conceived, trade) ||
+    genericJob ||
+    (trade === "hvac" && !hvacDepiction(conceived))
   const subject =
     portrait && input.imageryRole === "crew"
       ? `The uploaded agent photograph: ${portrait}. A friendly headshot, eyes to the camera, natural color, capable and local. Not a stock model and not a government portrait.`
-      : weak || badSubject(conceived, trade) || (insuranceTrade && genericJob)
+      : replace
         ? pick(bank[input.imageryRole], `${input.variationKey ?? "direction"}:${input.leadJob}`)
         : conceived
 
@@ -464,6 +471,9 @@ export function buildPhotographyArtDirection(input: {
   if (trade === "auto_insurance" || trade === "home_insurance" || trade === "life_insurance") {
     art.negativeSpace = "Leave a calm third of the frame as open sky, driveway, or a plain wall. No ladders, tools, work crews, roofs being repaired, or people climbing."
     art.refuse = `${art.refuse} No ladders, handymen, roofers, hard hats, crashes, collisions, or Medicare cards.`
+  }
+  if (trade === "hvac") {
+    art.refuse = `${art.refuse} No gutters, window trim, siding, termite treatment, or someone painting a window. The photograph is heating and air equipment.`
   }
   return art
 }
@@ -504,6 +514,31 @@ function refuseFor(trade: string): string {
     return "No text, logos, QR codes, or watermarks. No casket, coffin, funeral, cemetery, or grief scene. No Capitol, eagle, seal, flag, or official-notice styling."
   }
   return REFUSE
+}
+
+const TRADE_GOLD: Record<string, string> = {
+  hvac: "hvac",
+  plumbing: "plumbing",
+  roofing: "roofing",
+  pest: "pest-control",
+  landscaping: "landscaping",
+  restaurant: "restaurants-food",
+  pizza_qsr: "restaurants-food",
+  dental: "dental",
+  auto_insurance: "auto-insurance",
+  home_insurance: "home-insurance",
+  life_insurance: "life-insurance",
+}
+
+function offIndustry(value: string, trade: string): boolean {
+  const expected = TRADE_GOLD[trade]
+  if (!expected) return false
+  const found = normalizeIndustry(value)
+  return found !== "none" && found !== expected
+}
+
+function hvacDepiction(value: string): boolean {
+  return /\b(hvac|condensers?|furnaces?|thermostats?|air condition|ducts?|vents?|filters?|coils?|\bac\b)\b/i.test(value)
 }
 
 function badSubject(value: string, trade: string): boolean {

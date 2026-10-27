@@ -79,6 +79,10 @@ function scoreEntry(entry: ResearchEntry, query: RetrievalQuery): { score: numbe
   if (queryIndustry !== "medicare" && medicareSpecific(entry)) {
     return { score: 0, band: "broader" }
   }
+  // A record outside the 28 industries is craft context, not a same-industry example.
+  if (queryIndustry !== "none" && entryIndustry === "none") {
+    return { score: 0, band: "broader" }
+  }
   let score = 2
   let band: RetrievalHit["band"] = "broader"
   const neighbor = neighborRank(queryIndustry, entryIndustry)

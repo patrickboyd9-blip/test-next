@@ -13,7 +13,7 @@ import { isForbiddenResearchPath } from "@/lib/design-intelligence/images"
 import type { CampaignBrief } from "@/lib/campaign-creator/types"
 
 import { coverageStats } from "./coverage"
-import { indexSourceFiles, type SourceFile } from "./parse"
+import { dedupeResearchEntries, indexSourceFiles, type SourceFile } from "./parse"
 import { queryFromBrief, retrieveResearch } from "./retrieve"
 import type { PendingFile, ResearchIndex, RetrievalHit } from "./types"
 
@@ -259,12 +259,7 @@ function isPrivate(filePath: string): boolean {
 }
 
 function dedupe(entries: ResearchIndex["entries"]): ResearchIndex["entries"] {
-  const byId = new Map<string, ResearchIndex["entries"][number]>()
-  for (const entry of entries) {
-    const current = byId.get(entry.id)
-    if (!current || (entry.gold && !current.gold) || (entry.evidence === "visual" && current.evidence !== "visual")) byId.set(entry.id, entry)
-  }
-  return [...byId.values()]
+  return dedupeResearchEntries(entries)
 }
 
 function parseStoredIndex(raw: unknown): ResearchIndex | null {

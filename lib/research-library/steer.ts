@@ -13,6 +13,7 @@ import type { PostcardTemplateId } from "@/lib/postcard-layouts/ids"
 import { verticalPaletteForBrief } from "@/lib/postcard-layouts/assign"
 import { templatesForPalette } from "@/lib/postcard-layouts/templates"
 
+import { industryForBrief, normalizeIndustry } from "./industry"
 import { copiesLibrary } from "./guard"
 import { layoutTuneFromHits, photoNoteFromHits } from "./evidence"
 import { entryHasContent } from "./retrieve"
@@ -102,6 +103,10 @@ export function photoFits(note: string | undefined, brief: CampaignBrief): boole
   const facts = clientFactText(brief)
   if (!/\bmedicare\b/i.test(facts) && MEDICARE_COPY.test(text)) return false
   if (isNonMedicareInsurance(facts) && TRADE_PHOTO.test(text)) return false
+  const briefIndustry = industryForBrief(brief)
+  const noteIndustry = normalizeIndustry(text)
+  if (briefIndustry !== "none" && noteIndustry !== "none" && noteIndustry !== briefIndustry) return false
+  if (briefIndustry === "hvac" && /\b(gutters?|siding|window trim|termites?|painting)\b/i.test(text)) return false
   return true
 }
 

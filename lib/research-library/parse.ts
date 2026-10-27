@@ -348,28 +348,35 @@ function attachImageCatalog(entries: ResearchEntry[], catalog: unknown, catalogP
 }
 
 function mergeEntries(entries: ResearchEntry[]): ResearchEntry[] {
+  return dedupeResearchEntries(entries).sort((a, b) => a.id.localeCompare(b.id))
+}
+
+/**
+ * One id can arrive twice: a provenance note in one batch and a photo-folder
+ * stub in another. Keep the photographs and the note's industry, headline, and offer.
+ */
+export function dedupeResearchEntries(entries: readonly ResearchEntry[]): ResearchEntry[] {
   const byId = new Map<string, ResearchEntry>()
   for (const entry of entries) {
     const current = byId.get(entry.id)
-    if (!current) {
-      byId.set(entry.id, entry)
-      continue
-    }
-    byId.set(entry.id, richer(current, entry))
+    byId.set(entry.id, current ? richer(current, entry) : entry)
   }
-  return [...byId.values()].sort((a, b) => a.id.localeCompare(b.id))
+  return [...byId.values()]
 }
 
 function richer(left: ResearchEntry, right: ResearchEntry): ResearchEntry {
   const preferred = scoreEntry(right) > scoreEntry(left) ? right : left
   const other = preferred === left ? right : left
+  const headlines = preferred.headlines.length > 0 ? preferred.headlines : other.headlines
+  const offers = preferred.offers.length > 0 ? preferred.offers : other.offers
+  const industry = knownIndustry(preferred.industry) ? preferred.industry : knownIndustry(other.industry) ? other.industry : preferred.industry
   return {
     ...preferred,
-    industry: knownIndustry(preferred.industry) ? preferred.industry : knownIndustry(other.industry) ? other.industry : preferred.industry,
+    industry,
     imageRefs: unique([...preferred.imageRefs, ...other.imageRefs]),
     colors: preferred.colors.length > 0 ? preferred.colors : other.colors,
-    headlines: preferred.headlines.length > 0 ? preferred.headlines : other.headlines,
-    offers: preferred.offers.length > 0 ? preferred.offers : other.offers,
+    headlines,
+    offers,
     photoStyle: preferred.photoStyle || other.photoStyle,
     responseEvidence: preferred.responseEvidence || other.responseEvidence,
     whyItWorks: preferred.whyItWorks || other.whyItWorks,
@@ -377,11 +384,26 @@ function richer(left: ResearchEntry, right: ResearchEntry): ResearchEntry {
     favoriteOf: preferred.favoriteOf || other.favoriteOf,
     evidence: preferred.imageRefs.length + other.imageRefs.length > 0 ? "visual" : preferred.evidence,
     gold: preferred.gold || other.gold,
+    searchText: mergedSearch(preferred, other, headlines, offers, industry),
     layout: {
       ...other.layout,
       ...stripEmpty(preferred.layout),
     },
   }
+}
+
+function mergedSearch(
+  preferred: ResearchEntry,
+  other: ResearchEntry,
+  headlines: string[],
+  offers: string[],
+  industry: string
+): string {
+  const useful = (value: string | undefined) => Boolean(value && value.trim() && value.trim() !== NONE_INDUSTRY)
+  if (useful(preferred.searchText) && preferred.headlines.length > 0) return preferred.searchText
+  const fromOther = useful(other.searchText) ? other.searchText : ""
+  const rebuilt = [industry, ...headlines, ...offers, fromOther].filter((value) => useful(value)).join(" ")
+  return rebuilt || preferred.searchText
 }
 
 function scoreEntry(entry: ResearchEntry): number {
@@ -472,7 +494,7 @@ function readFields(text: string): FieldBag {
     const key = match[1]!.toLowerCase().replace(/\s+/g, " ").trim()
     const value = match[2]!.trim()
     if (/^industr|^vertical|^trade/.test(key)) bag.industry = value
-    else if (key === "offer" || key === "offer type") bag.offer = value
+    else if (key === "offer" || key === "offer type" || key === "printed offer") bag.offer = value
     else if (key === "emotion" || key === "tone") bag.emotion = value
     else if (key === "format" || key === "piece") bag.format = value
     else if (key === "size" || key === "trim") bag.size = value
@@ -638,7 +660,7 @@ function provenanceFromJson(value: unknown, file: SourceFile): { entries: Resear
 }
 
 function labeledLine(text: string, key: string): string | undefined {
-  const match = new RegExp(`^\\s*(?:${key})\\s*[:—–-]\\s*(.+)$`, "im").exec(text)
+  const match = new RegExp(`^\\s*(?:printed\\s+)?(?:${key})\\s*[:—–-]\\s*(.+)$`, "im").exec(text)
   const value = match?.[1]?.replace(/^["']|["']$/g, "").trim()
   return value || undefined
 }

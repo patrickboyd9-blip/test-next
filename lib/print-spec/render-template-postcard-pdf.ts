@@ -37,12 +37,14 @@ import {
   addressBackPlan,
   addressBackQrPlacement,
   addressSideContentRect,
+  assertPrintImageDpi,
+  MIN_EFFECTIVE_DPI,
   type PostcardPrintCopy,
   type PostcardPrintImage,
   type RenderedPostcardPdf,
 } from "@/lib/print-spec/render-campaign-postcard-pdf"
 import { canvasRectToPdf, type PostcardGeometry } from "@/lib/print-spec/postcard-5x8-print-spec"
-import { assertPrintImageDpi } from "@/lib/print-spec/render-campaign-postcard-pdf"
+import { upscaleToPrintCanvas } from "@/lib/print-spec/upscale-print-image"
 
 const FONT_DIR = path.join(process.cwd(), "lib/print-spec/fonts")
 
@@ -641,10 +643,16 @@ async function embedImages(
     const kind = image.bytes[0] === 0xff && image.bytes[1] === 0xd8 ? "jpeg" : "png"
     return kind === "jpeg" ? doc.embedJpg(image.bytes) : doc.embedPng(image.bytes)
   }
-  const dpi = primary
-    ? assertPrintImageDpi({ width: primary.width, height: primary.height }, spec.artworkCanvasInches)
+  const fittedPrimary = primary
+    ? upscaleToPrintCanvas(primary, spec.artworkCanvasInches, MIN_EFFECTIVE_DPI)
+    : undefined
+  const fittedAlternate = alternate
+    ? upscaleToPrintCanvas(alternate, spec.artworkCanvasInches, MIN_EFFECTIVE_DPI)
+    : undefined
+  const dpi = fittedPrimary
+    ? assertPrintImageDpi({ width: fittedPrimary.width, height: fittedPrimary.height }, spec.artworkCanvasInches)
     : { x: 300, y: 300 }
-  return { primary: await embed(primary), alternate: await embed(alternate), dpi }
+  return { primary: await embed(fittedPrimary), alternate: await embed(fittedAlternate), dpi }
 }
 
 function expandBleed(rect: InchRect, size: PostcardSizeId, bleed: number): InchRect {

@@ -158,11 +158,12 @@ function classify(value: string, mode: ClassifyMode): string {
     const slug = exactSlug(text)
     if (slug) return slug
   }
-  if (/\bmedicare\b|\bmedicaid\b|\bmedigap\b/.test(text)) return "medicare"
+  if (medicareSignal(text, mode)) return "medicare"
   if (/\bauto insurance\b|\bcar insurance\b|\bvehicle insurance\b/.test(text)) return "auto-insurance"
+  // Life is named on purpose. "Life insurance for homeowners" is not a home policy.
+  if (/\blife insurance\b|\bfinal expense\b|\bburial insurance\b/.test(text)) return "life-insurance"
   if (/\bhomeowners?\b|\bhome owner\b/.test(text) && /\binsurance\b/.test(text)) return "home-insurance"
   if (/\bhome insurance\b/.test(text)) return "home-insurance"
-  if (/\blife insurance\b|\bfinal expense\b|\bburial insurance\b/.test(text)) return "life-insurance"
   if (hvacSignal(text, mode)) return "hvac"
   if (windowSignal(text, mode)) return "windows-gutters-siding"
   if (plumbingSignal(text)) return "plumbing"
@@ -173,7 +174,7 @@ function classify(value: string, mode: ClassifyMode): string {
   if (/\bdental\b|\bdentist\b|\bdentures?\b/.test(text)) return "dental"
   if (/\bmed spa\b|\bmedspa\b|\bchiro\b|\bbotox\b|\baesthetic\b/.test(text)) return "med-spa-chiro"
   if (vetSignal(text, mode)) return "vet-pet"
-  if (/\brestaurant\b|\bdining\b|\bpizza\b|\bqsr\b|\bgrocery\b|\bmenu\b/.test(text)) return "restaurants-food"
+  if (restaurantSignal(text)) return "restaurants-food"
   if (/\bgym\b|\bfitness\b|\byoga\b/.test(text)) return "gyms-fitness"
   if (cleaningSignal(text, mode)) return "cleaning-pressure-washing"
   if (/\bjunk\b|\bhaul away\b|\bhauling\b/.test(text)) return "junk-removal"
@@ -181,13 +182,50 @@ function classify(value: string, mode: ClassifyMode): string {
   if (/\bhome security\b|\balarm\b|\bsecurity system\b/.test(text)) return "home-security"
   if (/\bremodel|\brenovat|\bkitchen remodel\b|\bbathroom remodel\b/.test(text)) return "home-remodeling"
   if (/\bwe buy\b|\bcash offer\b|\bhome buying\b|\bbuy your house\b|\bsell your house\b/.test(text)) return "home-buying"
-  if (/\breal estate\b|\brealtor\b|\blisting\b|\bopen house\b/.test(text)) return "real-estate-agents"
-  if (/\bmortgage\b|\bcredit union\b|\brefinance\b|\bdebt\b|\bbank\b|\bfinancial\b|\bloan\b/.test(text)) return "mortgage-financial"
+  if (realEstateSignal(text, mode)) return "real-estate-agents"
+  if (mortgageSignal(text, mode)) return "mortgage-financial"
   if (/\bchurch\b|\bcongregation\b|\bnonprofit\b|\bcommunity center\b/.test(text)) return "churches-community"
-  if (/\btutor\b|\bchildcare\b|\bchild care\b|\bdaycare\b|\bday care\b|\bpreschool\b/.test(text)) return "tutoring-childcare"
+  if (/\btutors?\b|\btutoring\b|\bchildcare\b|\bchild care\b|\bdaycare\b|\bday care\b|\bpreschool\b|\bafter school\b|\bhomework\b|\blearning center\b/.test(text)) return "tutoring-childcare"
   if (autoSignal(text)) return "auto"
-  if (/\bgrand opening\b|\bretail\b|\bstore\b|\bshop\b/.test(text)) return "retail-grand-openings"
+  if (retailSignal(text, mode)) return "retail-grand-openings"
   return NONE_INDUSTRY
+}
+
+/**
+ * A long note that only mentions Medicare in a disclaimer is not a Medicare mailer.
+ * Short labels and real plan language still are.
+ */
+function medicareSignal(text: string, mode: ClassifyMode): boolean {
+  const cleaned = text
+    .replace(/\bnot affiliated with (?:medicare|medicaid|cms)\b/g, " ")
+    .replace(/\bnot (?:a )?medicare\b/g, " ")
+  if (!/\bmedicare\b|\bmedicaid\b|\bmedigap\b/.test(cleaned)) return false
+  if (mode === "label" || cleaned.split(" ").length <= 32) return true
+  return /\bmedicare\b/.test(cleaned) && /\b(?:advantage|supplement|plan|enrollment|medigap|senior|aep)\b/.test(cleaned)
+}
+
+function restaurantSignal(text: string): boolean {
+  if (/\brestaurant\b|\bdining\b|\bpizza\b|\bqsr\b|\bgrocery\b|\bmenu\b/.test(text)) return true
+  return /\bdairy queen\b|\bmcdonald|\bburger king\b|\btaco bell\b|\bwendy\b|\bdomino|\bpizza hut\b|\bchipotle\b|\bstarbucks\b|\bdunkin\b|\bkfc\b/.test(text)
+}
+
+function realEstateSignal(text: string, mode: ClassifyMode): boolean {
+  if (/\breal estate\b|\brealtor\b|\bopen house\b/.test(text)) return true
+  if (/\b(?:home|house)\s+listing\b/.test(text)) return true
+  return mode === "label" && /\blisting\b/.test(text)
+}
+
+function mortgageSignal(text: string, mode: ClassifyMode): boolean {
+  if (/\bmortgage\b|\bcredit union\b|\brefinance\b/.test(text)) return true
+  if (/\b(?:home|house)\s+loans?\b/.test(text)) return true
+  return mode === "label" && /\bdebt\b|\bbank\b|\bfinancial\b|\bloan\b/.test(text)
+}
+
+function retailSignal(text: string, mode: ClassifyMode): boolean {
+  if (/\bgrand opening\b|\bretail\b/.test(text)) return true
+  if (!/\bstore\b|\bshop\b/.test(text)) return false
+  if (mode === "label") return true
+  return text.split(" ").length <= 24
 }
 
 function hvacSignal(text: string, mode: ClassifyMode): boolean {
@@ -203,8 +241,9 @@ function hvacSignal(text: string, mode: ClassifyMode): boolean {
 function windowSignal(text: string, mode: ClassifyMode): boolean {
   if (/\bgutters?\b|\bsiding\b/.test(text)) return true
   if (/\bwindow replacement\b|\bvinyl windows?\b|\breplacement windows?\b/.test(text)) return true
+  if (/\bwindows?\s+and\s+doors?\b|\bdoors?\s+and\s+windows?\b/.test(text)) return true
   if (mode === "label" && /\bwindows?\b/.test(text)) return true
-  if (mode === "notes" && /\bwindows\b/.test(text)) return true
+  if (mode === "notes" && /\b(?:new|replacement|vinyl)\s+windows\b/.test(text)) return true
   return false
 }
 

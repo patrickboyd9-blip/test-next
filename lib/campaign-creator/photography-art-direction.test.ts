@@ -358,6 +358,48 @@ test("an auto insurance photo brief shows the car, not a handyman on a ladder", 
   assert.match(brief.artDirection.subject, /car|driveway/i)
 })
 
+test("an HVAC photograph depicts heating and air, not a borrowed gutter or window", () => {
+  const campaign: CampaignBrief = {
+    goal: "Cool the house",
+    offer: "Free inspection for broken AC units",
+    businessInfo: { name: "Coastal Comfort Heating & Air" },
+  }
+  const roles = ["consequence", "crew", "neighborhood"] as const
+  for (const imageryRole of roles) {
+    const art = buildPhotographyArtDirection({
+      imageryRole,
+      leadJob: imageryRole === "crew" ? "trust" : imageryRole === "consequence" ? "problem" : "offer",
+      occupancy: "field",
+      visualDirection: imageryRole === "crew"
+        ? "A man painting window trim"
+        : "A man on a ladder at a gutter",
+      campaign,
+      variationKey: `hvac-${imageryRole}`,
+      layoutVariant: "image_grounded",
+    })
+    assert.equal(art.trade, "hvac")
+    assert.match(art.subject, /condenser|furnace|thermostat|vent|filter|coil|duct/i)
+    assert.doesNotMatch(art.subject, /gutter|window trim|termite|siding/i)
+  }
+  const brief = toImageBrief(
+    spec({
+      visualDirection: "Hands and gauges at an outdoor condenser.",
+      imageryRole: "crew",
+      leadJob: "trust",
+      headline: "Call before the AC quits",
+      offer: "Free inspection for broken AC units",
+    }),
+    {
+      campaign,
+      variationKey: "hvac-note",
+      researchPhotoNote: "A man on a ladder at a gutter, borrowed from a windows layout.",
+    }
+  )
+  assert.ok(brief)
+  assert.match(brief.artDirection.subject, /condenser|furnace|thermostat|coil/i)
+  assert.doesNotMatch(brief.artDirection.subject, /gutter|window trim/i)
+})
+
 test("final expense refuses a casket", () => {
   const art = buildPhotographyArtDirection({
     imageryRole: "consequence",

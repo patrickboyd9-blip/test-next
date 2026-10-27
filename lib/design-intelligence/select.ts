@@ -8,7 +8,7 @@ import {
   type MailerAnalysis,
 } from "./library"
 import { ownerFavoriteIds } from "./owner-favorites"
-import { industriesAdjacent, industryForBrief, normalizeIndustry } from "@/lib/research-library/industry"
+import { industriesAdjacent, industryForBrief, normalizeIndustry, resolveIndustry } from "@/lib/research-library/industry"
 import type { DesignVertical } from "./rationale"
 import { verticalForBrief } from "./vertical"
 
@@ -189,11 +189,11 @@ function peerScore(record: LibraryRecord, _vertical: DesignVertical, brief: Camp
   const analysis = record.analysis
   const briefIndustry = industryForBrief(brief)
   const recordIndustry = recordIndustryFor(record.vertical ?? analysis?.vertical, `${analysis?.summary ?? ""} ${analysis?.offer_placement ?? ""} ${analysis?.focal_point ?? ""}`)
+  if (recordIndustry === "none") return 0
   let score = 0
   if (briefIndustry !== "none" && recordIndustry === briefIndustry) score += 8
-  else if (briefIndustry !== "none" && recordIndustry !== "none" && industriesAdjacent(briefIndustry, recordIndustry)) score += 3
-  else if (briefIndustry === "none" && recordIndustry !== "none") score += 2
-  else if (recordIndustry === "none") score += 1
+  else if (briefIndustry !== "none" && industriesAdjacent(briefIndustry, recordIndustry)) score += 3
+  else if (briefIndustry === "none") score += 2
   else return 0
 
   const rank = gradeRank(record.grade ?? analysis?.grade)
@@ -254,6 +254,5 @@ function recordIndustryFor(vertical: string | undefined, notes: string): string 
     if (fromNotes === "hvac" || fromNotes === "windows-gutters-siding") return fromNotes
   }
   if (fromLabel !== "none") return fromLabel
-  const fromNotes = normalizeIndustry(notes)
-  return fromNotes
+  return resolveIndustry({ notes })
 }
