@@ -517,13 +517,32 @@ export function applyOutcomeHeadline(input: {
       businessName: input.brief.businessInfo?.name,
     })[0]!
   }
-  if (headline && !isStockHeadline(headline) && !headlineIsFeature(headline, input.offer, kind) && !WEAK_HEADLINE.test(headline)) return headline
-  if (input.role === "trust" && kind !== "roofing") {
-    const named = namedTrustLine(kind, input.brief.businessInfo?.name, rolePair(kind, input.role)[0])
-    if (input.brief.businessInfo?.name && named.split(/\s+/).length <= 8 && !/^a\b/i.test(named)) {
-      return finishLine(named)
-    }
-  }
+  const roleLine = input.role
+    ? headlineForRole({
+        kind,
+        role: input.role,
+        offer: input.offer,
+        goal: input.brief.goal,
+        city: input.brief.businessInfo?.city,
+        businessName: input.brief.businessInfo?.name,
+      })
+    : ""
+  const outcomeLineForKind = onCardLine(kind, "outcome")
+  const nameNearby = input.brief.businessInfo?.name
+    ? sameHeadline(headline.replace(/[.!?]+$/, ""), `${input.brief.businessInfo.name} nearby`)
+    : false
+  const repeatsAnotherRole = Boolean(
+    input.role && input.role !== "outcome" && sameHeadline(headline, outcomeLineForKind)
+  )
+  if (
+    headline &&
+    !nameNearby &&
+    !repeatsAnotherRole &&
+    !isStockHeadline(headline) &&
+    !headlineIsFeature(headline, input.offer, kind) &&
+    !WEAK_HEADLINE.test(headline)
+  ) return headline
+  if (roleLine) return roleLine
   if (input.brief.audienceAwareness === "past_customer" && headlineIsFeature(headline, input.offer, kind)) {
     const resolved = resolveEmotion(kind, clientFactText(input.brief), input.brief.primaryEmotion)
     return headlineFor({ emotion: resolved.emotion, awareness: input.brief.audienceAwareness, offer: input.offer })

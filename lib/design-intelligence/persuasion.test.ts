@@ -377,3 +377,22 @@ test("an attorney card requires Advertisement, limits dramatic imagery, and warn
   assert.equal(roof.autoFails.includes("PS14"), false)
   assert.deepEqual(roof.warnings, [])
 })
+
+test("three HVAC directions get three headlines, and a nearby label does not stay", () => {
+  const brief = {
+    goal: "Book HVAC service before the heat",
+    offer: "Free inspection for broken AC units",
+    businessInfo: { name: "Northwind Heating & Air" },
+  }
+  const lines = (["outcome", "threat", "trust"] as const).map((role) => applyOutcomeHeadline({
+    headline: role === "threat" ? "Northwind Heating & Air nearby" : "The house cools down again.",
+    offer: brief.offer,
+    brief,
+    vertical: "hvac",
+    role,
+  }))
+  assert.equal(new Set(lines).size, 3)
+  assert.match(lines[0]!, /cools down/i)
+  assert.match(lines[1]!, /AC quits/i)
+  assert.match(lines[2]!, /Northwind Heating & Air checks this/i)
+})

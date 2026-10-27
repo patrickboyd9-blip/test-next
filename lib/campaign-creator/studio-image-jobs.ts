@@ -147,8 +147,8 @@ export async function syncStudioDirectionImages(options: {
   const first = await read()
   if (first.due.length === 0) return first.load
 
-  const work = () =>
-    Promise.all(first.due.map((slot) => executeStudioImageJob({
+  const work = async () => {
+    await Promise.all(first.due.map((slot) => executeStudioImageJob({
       campaignId: options.campaignId,
       campaignBrief: options.campaignBrief,
       store,
@@ -157,6 +157,7 @@ export async function syncStudioDirectionImages(options: {
       now,
       photoCheck: options.photoCheck,
     })))
+  }
 
   if (options.runInline) {
     await work()

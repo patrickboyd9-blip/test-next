@@ -15,7 +15,7 @@ Do these in order. Connecting storage does not update the site that is already r
 5. Back on the **Storage** tab, create or connect **Blob** the same way, and connect that store to this project (Production, and Preview if you use it).
 6. Open **Settings**, then **Environment Variables**. Add:
    - `ANTHROPIC_API_KEY` — writes the campaign conversation and the postcard concepts, and runs the art director and the critic. Add it for **Production and Preview**. A preview without this key lays cards out from the written rules, so it cannot be the vision test.
-   - `OPENAI_API_KEY` — makes the photographs inside Studio.
+   - `OPENAI_API_KEY` — makes the photographs inside Studio. The name is exactly `OPENAI_API_KEY`. Add it for **Production and Preview**. A missing key leaves the stand-in drawing and writes that name in the server log. A key that is set, when a picture still fails, logs the direction, the size, the attempt, and the error.
    Add both for Production and Preview.
 7. Open **Deployments**, open the latest production deployment, and choose **Redeploy**. Environment variables are picked up on a new deployment. A refresh of the old deployment is not enough.
 
@@ -118,7 +118,7 @@ Conversation, concept writing, and photograph generation are allowed **60 second
 
 Vercel’s current Hobby plan **with Fluid Compute** allows up to 300 seconds, and that is often the default. This app stays at 60 so a deploy cannot fail on the stricter Hobby cap. If Settings → Functions shows that Fluid Compute is on and a longer limit is allowed, the 60 second cap in the campaign page can be raised later.
 
-One concept-writing click is usually inside 60 seconds. Photographs do not wait inside that click. Studio starts one photograph in the background and keeps that same visit alive until the picture is saved or the 60 second cap runs out. The page checks back every few seconds. A fast preview is made for each direction. The direction you choose is made again, larger, for print. If a photograph is cut off, Studio tries that one once more. A photograph that already finished is kept and is not made again.
+One concept-writing click is usually inside 60 seconds. Photographs do not wait inside that click. Studio starts every preview that is ready, together, in the background, and keeps that same visit alive until those pictures are saved or the 60 second cap runs out. Each preview is 1024 by 1024 at low quality, with a 25 second limit and one retry. The page checks back every few seconds, and a finished photograph shows up on its own card. The direction you choose is made again, larger, for print. A photograph that already finished is kept and is not made again. If three previews still die at the 60 second cap, the next lever is Fluid Compute or a higher maxDuration. The layouts themselves do not wait on the photographs.
 
 ## What you do not configure
 

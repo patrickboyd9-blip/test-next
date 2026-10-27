@@ -320,6 +320,15 @@ async function scoreFamily(input: {
       role,
     }),
   }
+  // "Then [the whole offer]" is the offer said twice, and it reads as a broken sentence.
+  const restated = spec.subheadline?.replace(/^then\s+/i, "").replace(/[.!?]+$/, "").trim()
+  if (
+    verbatimOffer &&
+    restated &&
+    restated.toLowerCase() === verbatimOffer.replace(/[.!?]+$/, "").trim().toLowerCase()
+  ) {
+    spec = { ...spec, subheadline: "Call today." }
+  }
   // A blueprint rewrite that only fell back to a stock option never replaces
   // this direction's own distinct headline.
   if (persuasionVertical(input.brief, rationale.vertical) === "roofing" && input.spec.headline) {
@@ -702,7 +711,7 @@ export function strategyName(role: DirectionRole): string {
 
 export function customerWhyLine(role: DirectionRole): string {
   if (role === "threat") return "One honest risk, then one easy step. No deadline and no made-up number."
-  if (role === "trust") return "A local face and the business name carry the proof."
+  if (role === "trust") return "The business name carries the proof."
   return "The headline is the result the homeowner wants. A free, dollar, or percent offer is the largest type."
 }
 

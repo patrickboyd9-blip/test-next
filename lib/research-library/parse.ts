@@ -592,11 +592,6 @@ function isIgnorableDoc(filePath: string): boolean {
   return /^(readme|license|contributing|changelog)(\.|$)/.test(name)
 }
 
-function industryFromPath(filePath: string): string | undefined {
-  const industry = resolveIndustry({ path: filePath })
-  return knownIndustry(industry) ? industry : undefined
-}
-
 function knownIndustry(value: string | undefined): boolean {
   return Boolean(value && value !== NONE_INDUSTRY && value !== "unknown")
 }
