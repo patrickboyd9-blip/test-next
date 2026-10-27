@@ -6,7 +6,7 @@ import { eddmPaymentBlockedMessage } from "@/lib/fulfillment/payment-clearance"
 
 import { createClick2MailClient, type Click2MailHttpRequest, type Click2MailTransport } from "./client"
 import { describePrintMailMode, loadClick2MailConfig } from "./config"
-import { EDDM_MAIL_CLASS, eddmCreditShortMessage, placeEddmOrder } from "./eddm-order"
+import { eddmCreditShortMessage, placeEddmOrder } from "./eddm-order"
 import { createMockClick2MailClient } from "./mock-client"
 
 const routes: EddmRouteSnapshot[] = [
@@ -36,6 +36,41 @@ const mailer = {
   zip: "10001",
   phone: "(619) 555-0148",
 }
+
+const CRID = "123456789"
+const LOOKED_UP_MAIL_CLASS = "PM EDDM (Full Service): includes the Click2Mail permit"
+const OPTIONS_XML = `<?xml version="1.0"?><productOptions>
+  <productOption>
+    <documentClass>EDDM Mailer 6.5 x 9</documentClass>
+    <layout>We Prep and Mail</layout>
+    <productionTime>Next Day</productionTime>
+    <envelope> </envelope>
+    <color>Full Color</color>
+    <paperType>White Matte</paperType>
+    <printOption>Printing both sides</printOption>
+    <mailClass>${LOOKED_UP_MAIL_CLASS}</mailClass>
+  </productOption>
+  <productOption>
+    <documentClass>EDDM Mailer 6.5 x 9</documentClass>
+    <layout>We Prep and Mail</layout>
+    <productionTime>Next Day</productionTime>
+    <envelope> </envelope>
+    <color>Full Color</color>
+    <paperType>White Matte</paperType>
+    <printOption>Printing both sides</printOption>
+    <mailClass>Postage Paid in Advance</mailClass>
+  </productOption>
+  <productOption>
+    <documentClass>EDDM Mailer 6.25 x 11</documentClass>
+    <layout>We Prep and Mail</layout>
+    <productionTime>Next Day</productionTime>
+    <envelope> </envelope>
+    <color>Full Color</color>
+    <paperType>White Matte</paperType>
+    <printOption>Printing both sides</printOption>
+    <mailClass>${LOOKED_UP_MAIL_CLASS}</mailClass>
+  </productOption>
+</productOptions>`
 
 const stageEnv = {
   C2M_ENV: "stage",
@@ -100,6 +135,7 @@ test("a route with no delivering post office blocks checkout before any call", a
     coverage: "residential",
     routes: [{ ...routes[0], postOfficeName: "" }],
     mailer,
+    crid: CRID,
     submitEnabled: true,
     paymentCleared: true,
     documentName: "eddm",
@@ -127,6 +163,7 @@ test("production refuses an EDDM order even when the flag is on", async () => {
     coverage: "residential",
     routes,
     mailer,
+    crid: CRID,
     submitEnabled: true,
     paymentCleared: true,
     documentName: "eddm",
@@ -149,6 +186,7 @@ test("a route with no street or phone blocks checkout before any call", async ()
     coverage: "residential",
     routes: [{ ...routes[0], postOfficeStreet: "", postOfficePhone: "" }],
     mailer,
+    crid: CRID,
     submitEnabled: true,
     paymentCleared: true,
     documentName: "eddm",
@@ -162,6 +200,61 @@ test("a route with no street or phone blocks checkout before any call", async ()
   assert.match(order.error ?? "", /JAMES A FARLEY/)
 })
 
+test("a Full Service order without a CRID makes no Click2Mail calls", async () => {
+  const client = createMockClick2MailClient()
+  const order = await placeEddmOrder({
+    client,
+    config: loadClick2MailConfig(stageEnv),
+    pdf: new Uint8Array([1]),
+    size: "6.5x9",
+    coverage: "residential",
+    routes,
+    mailer,
+    crid: " ",
+    submitEnabled: true,
+    paymentCleared: true,
+    documentName: "eddm",
+    artwork: "type-plate",
+    submit: true,
+    proof: false,
+    now: () => "2026-10-22T00:00:00.000Z",
+  })
+  assert.equal(client.calls.length, 0)
+  assert.match(order.error ?? "", /CRID/)
+})
+
+test("a mail class that is not in the product list is not sent", async () => {
+  const requests: Click2MailHttpRequest[] = []
+  const transport: Click2MailTransport = {
+    async send(request) {
+      requests.push(request)
+      return xmlResponse(OPTIONS_XML)
+    },
+  }
+  const client = createClick2MailClient({ config: loadClick2MailConfig(stageEnv), transport })
+  const order = await placeEddmOrder({
+    client,
+    config: loadClick2MailConfig(stageEnv),
+    pdf: new Uint8Array([1]),
+    size: "6.5x9",
+    coverage: "residential",
+    routes,
+    mailer,
+    crid: CRID,
+    submitEnabled: true,
+    paymentCleared: true,
+    documentName: "eddm",
+    artwork: "type-plate",
+    submit: true,
+    proof: false,
+    env: { ...stageEnv, C2M_EDDM_MAIL_CLASS: "PM EDDM (Full Service)" } as NodeJS.ProcessEnv,
+    now: () => "2026-10-22T00:00:00.000Z",
+  })
+  assert.deepEqual(requests.map((request) => request.path), ["/productOptions/advanced"])
+  assert.match(order.error ?? "", /not a mail class/)
+  assert.equal(order.submitted, false)
+})
+
 test("card billing is refused before any Click2Mail call", async () => {
   const client = createMockClick2MailClient()
   const order = await placeEddmOrder({
@@ -172,6 +265,7 @@ test("card billing is refused before any Click2Mail call", async () => {
     coverage: "residential",
     routes,
     mailer,
+    crid: CRID,
     submitEnabled: true,
     paymentCleared: true,
     documentName: "eddm",
@@ -191,6 +285,7 @@ test("a paid staging order sends the accepted mail class, post office, then rout
   const transport: Click2MailTransport = {
     async send(request) {
       requests.push(request)
+      if (request.path.endsWith("/productOptions/advanced")) return xmlResponse(OPTIONS_XML)
       if (request.path === "/credit") {
         return xmlResponse(
           `<?xml version="1.0"?><credit><balance>400.00</balance><status>0</status><description>Success</description></credit>`
@@ -226,6 +321,7 @@ test("a paid staging order sends the accepted mail class, post office, then rout
     coverage: "residential",
     routes,
     mailer,
+    crid: CRID,
     submitEnabled: true,
     paymentCleared: true,
     documentName: "eddm-card",
@@ -238,10 +334,11 @@ test("a paid staging order sends the accepted mail class, post office, then rout
   assert.equal(order.jobId, "job-9")
   assert.equal(order.submitted, true)
   const paths = requests.map((request) => request.path)
-  assert.equal(EDDM_MAIL_CLASS, "Postage Paid in Advance")
   assert.deepEqual(paths, [
+    "/productOptions/advanced",
     "/documents",
     "/jobs",
+    "/jobs/job-9/update",
     "/jobs/job-9/eddmInfo",
     "/jobs/job-9/eddmPo",
     "/jobs/job-9/eddmRoute",
@@ -249,15 +346,16 @@ test("a paid staging order sends the accepted mail class, post office, then rout
     "/credit",
     "/jobs/job-9/submit",
   ])
-  assert.equal(paths.some((path) => path.endsWith("/update")), false)
-  const job = requests[1]?.form
+  const job = requests[2]?.form
   assert.equal(job?.documentClass, "EDDM Mailer 6.5 x 9")
   assert.equal(job?.layout, "We Prep and Mail")
-  assert.equal(job?.mailClass, "Postage Paid in Advance")
+  assert.equal(job?.mailClass, LOOKED_UP_MAIL_CLASS)
+  assert.notEqual(job?.mailClass, "Postage Paid in Advance")
   assert.equal(job?.paperType, "White Matte")
   assert.equal(job?.quantity, "400")
   assert.equal(job?.addressId, undefined)
-  const info = requests[2]?.form
+  assert.equal(requests[3]?.form?.crid, CRID)
+  const info = requests[4]?.form
   assert.equal(info?.mailerName, "Harbor Roofing")
   assert.equal(info?.mailerAddress1, "1 Main St")
   assert.equal(info?.mailerCity, "New York")
@@ -266,7 +364,7 @@ test("a paid staging order sends the accepted mail class, post office, then rout
   assert.equal(info?.mailerPhone, "(619) 555-0148")
   assert.equal(info?.name, undefined)
   assert.equal(info?.crid, undefined)
-  const office = requests[3]?.form
+  const office = requests[5]?.form
   assert.equal(office?.poName, "JAMES A FARLEY")
   assert.equal(office?.poCity, "NEW YORK")
   assert.equal(office?.poState, "NY")
@@ -275,14 +373,15 @@ test("a paid staging order sends the accepted mail class, post office, then rout
   assert.equal(office?.phone, "212-330-3296")
   assert.equal(office?.deliveryType, "Residential")
   assert.equal(office?.routeType, "City")
-  const route = requests[4]?.form
+  const route = requests[6]?.form
   assert.equal(route?.route, "10001-C071")
   assert.equal(route?.postalCode, "10001")
   assert.equal(route?.poName, "JAMES A FARLEY")
   assert.equal(route?.totalPieces, "400")
-  assert.equal(requests[5]?.query?.paymentType, "User Credit")
-  assert.equal(requests[7]?.form?.billingType, "User Credit")
-  assert.equal(requests[7]?.form?.crid, undefined)
+  assert.equal(requests[7]?.query?.paymentType, "User Credit")
+  assert.equal(requests[7]?.query?.details, "true")
+  assert.equal(requests[9]?.form?.billingType, "User Credit")
+  assert.equal(requests[9]?.form?.crid, undefined)
 })
 
 test("a short User Credit balance stops the order before submit", async () => {
@@ -290,6 +389,7 @@ test("a short User Credit balance stops the order before submit", async () => {
   const transport: Click2MailTransport = {
     async send(request) {
       requests.push(request)
+      if (request.path.endsWith("/productOptions/advanced")) return xmlResponse(OPTIONS_XML)
       if (request.path.endsWith("/cost")) {
         return xmlResponse(
           `<?xml version="1.0"?><job><cost>337.92</cost><tax>0.16</tax><status>0</status><description>Success</description></job>`
@@ -316,6 +416,7 @@ test("a short User Credit balance stops the order before submit", async () => {
     coverage: "residential",
     routes,
     mailer,
+    crid: CRID,
     submitEnabled: true,
     paymentCleared: true,
     documentName: "eddm-card",
@@ -338,6 +439,7 @@ test("a failed job cost call falls back to the postage estimate", async () => {
   const transport: Click2MailTransport = {
     async send(request) {
       requests.push(request)
+      if (request.path.endsWith("/productOptions/advanced")) return xmlResponse(OPTIONS_XML)
       if (request.path.endsWith("/cost")) {
         return xmlResponse(
           `<?xml version="1.0"?><job><status>9</status><description>Cost unavailable</description></job>`
@@ -364,6 +466,7 @@ test("a failed job cost call falls back to the postage estimate", async () => {
     coverage: "residential",
     routes,
     mailer,
+    crid: CRID,
     submitEnabled: true,
     paymentCleared: true,
     documentName: "eddm-card",
@@ -384,6 +487,7 @@ test("a job template starts the Every Door job when one is named", async () => {
   const transport: Click2MailTransport = {
     async send(request) {
       requests.push(request)
+      if (request.path.endsWith("/productOptions/advanced")) return xmlResponse(OPTIONS_XML)
       const id = request.path.includes("/documents") ? "doc-3" : "job-3"
       const xml = `<?xml version="1.0"?><job><id>${id}</id><status>0</status><description>Success</description></job>`
       return {
@@ -404,6 +508,7 @@ test("a job template starts the Every Door job when one is named", async () => {
     coverage: "residential",
     routes,
     mailer,
+    crid: CRID,
     submitEnabled: true,
     paymentCleared: true,
     documentName: "eddm-card",
@@ -415,13 +520,14 @@ test("a job template starts the Every Door job when one is named", async () => {
   })
   assert.equal(order.error, undefined)
   assert.equal(order.submitted, false)
-  assert.equal(requests[1]?.path, "/jobs/jobTemplate")
-  assert.equal(requests[1]?.form?.templateName, "Modern Mail EDDM 6.25 x 11")
-  assert.equal(requests[2]?.path, "/jobs/job-3/update")
-  assert.equal(requests[2]?.form?.documentId, "doc-3")
-  assert.equal(requests[2]?.form?.quantity, "400")
-  assert.equal(requests[2]?.form?.crid, undefined)
-  assert.equal(requests[0]?.fields?.documentClass, "EDDM Mailer 6.25 x 11")
+  assert.equal(requests[2]?.path, "/jobs/jobTemplate")
+  assert.equal(requests[2]?.form?.templateName, "Modern Mail EDDM 6.25 x 11")
+  assert.equal(requests[3]?.path, "/jobs/job-3/update")
+  assert.equal(requests[3]?.form?.documentId, "doc-3")
+  assert.equal(requests[3]?.form?.quantity, "400")
+  assert.equal(requests[3]?.form?.crid, CRID)
+  assert.equal(requests[1]?.fields?.documentClass, "EDDM Mailer 6.25 x 11")
+  assert.equal(requests.some((request) => request.path === "/jobs"), false)
 })
 
 function xmlResponse(xml: string) {
@@ -433,7 +539,7 @@ function xmlResponse(xml: string) {
   }
 }
 
-test("staging submit does not require a CRID, and production never enables it", () => {
+test("staging flags do not turn on production, and the customer CRID is separate", () => {
   const stage = describePrintMailMode({
     C2M_ENV: "stage",
     C2M_STAGE_USERNAME: "u",

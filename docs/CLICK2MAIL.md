@@ -158,4 +158,8 @@ A job left without `--submit` sits in editing. Editing has not been paid.
 - It does not mail from production unless the environment and the flag are both set
 - Staging will not return Intelligent Mail tracking
 
-Every Door Direct Mail is a separate path. The screen can choose routes and estimate postage. The Click2Mail EDDM calls stay off until `C2M_EDDM_SUBMIT=true` on staging. See `docs/EDDM.md`.
+Every Door Direct Mail is a separate path. The customer enters a USPS CRID once. The Click2Mail calls stay off until `C2M_EDDM_SUBMIT=true` on staging. A job template is the preferred way to name the product. See `docs/EDDM.md`. One staging order, paid with User Credit:
+
+```bash
+npm run c2m:eddm -- --crid 123456789 --pieces 400
+```

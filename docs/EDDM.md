@@ -22,40 +22,52 @@ If the USPS feed is down, the last saved routes for that ZIP are shown, with a n
 
 ## Click2Mail
 
-Click2Mail answered on Oct 26, 2026 that Every Door should use their full-service permit, in their words **PM EDDM (Full Service): includes the Click2Mail permit**. We do not build a bring-your-own-permit flow, and we do not send the customer's USPS account id.
+Click2Mail answered on Oct 26, 2026 that Every Door should use their full-service permit. On Oct 27, Mahesh said job 1304272 returned "Sku not found" because the mail class was typed by hand. The job is created from a **job template** saved in the Click2Mail staging site (`C2M_EDDM_JOB_TEMPLATE`, or `C2M_EDDM_JOB_TEMPLATE_6_5X9` / `C2M_EDDM_JOB_TEMPLATE_6_25X11`). The API can start that template. It cannot create one. There is no endpoint for that.
 
-Staging job **1304272** did not accept that phrase. `PM EDDM (Full Service)` and `EDDM Full Service` also returned "status 9: Invalid product options. Sku not found." The only mail class that created a job was **Postage Paid in Advance**. That is the default. `C2M_EDDM_MAIL_CLASS` still overrides it. Click2Mail has to confirm which string is full service with their permit.
+If no template name is set, the order calls `GET /productOptions/advanced` and sends only a document class and mail class from that response. A Full Service string is used when the list contains one. `Postage Paid in Advance` is used when that is the only mail class the list returns. `C2M_EDDM_MAIL_CLASS` is ignored unless it matches one of those returned strings exactly.
+
+Howard at Click2Mail said a USPS CRID is required for the postal paperwork. Without it the job is held. The customer enters it once on Print & mail. It is saved on the business and remembered on this machine for the next campaign. The free signup is the [Business Customer Gateway](https://gateway.usps.com/).
 
 The customer pays Modern Mail first. Nothing is sent to Click2Mail until that payment is recorded (`campaign.payment.status` is `paid`). Checkout itself is a separate branch. On staging only, `C2M_EDDM_ASSUME_PAID=true` lets an operator run one job before that checkout exists. Production ignores the flag.
 
-Click2Mail recommends a job template made in the staging site. Set its name in `C2M_EDDM_JOB_TEMPLATE`. If that is empty, the order sends the product strings below. The host is staging (`https://stage-rest.click2mail.com/molpro`) unless `C2M_BASE_URL` overrides it. Production Every Door is refused even when production mail is otherwise allowed.
+The host is staging (`https://stage-rest.click2mail.com/molpro`) unless `C2M_BASE_URL` overrides it. Production Every Door is refused even when production mail is otherwise allowed.
 
-A paid staging order, with `C2M_EDDM_SUBMIT=true`, does this:
+A paid staging order, with `C2M_EDDM_SUBMIT=true` and a CRID, does this:
 
-1. `POST /documents` with the print PDF. The address block on that PDF is blank.
-2. `POST /jobs/jobTemplate` when a template name is set, then `POST /jobs/{id}/update` with the document id and the piece count. Otherwise `POST /jobs` with the product strings, a quantity, and no address list.
-3. `POST /jobs/{id}/eddmInfo` with `mailerName`, `mailerAddress1`, `mailerCity`, `mailerState`, `mailerPostalcode`, and `mailerPhone`.
-4. `POST /jobs/{id}/eddmPo` once per delivering post office. This has to come before the routes. Click2Mail returns "Job is not a EDDM job" if a route is sent first. The call needs the facility name, street, city, state, ZIP, phone, piece count, `deliveryType`, and `routeType`.
-5. `POST /jobs/{id}/eddmRoute` once per route. The route value is the ZIP plus the route id, such as `10001-C071`. That form worked on job 1304272.
-6. `GET /jobs/{id}/cost` for User Credit, then `GET /credit`, then `POST /jobs/{id}/submit` with billing type `User Credit`. The balance is compared with that job total, including tax. Job 1304272 was $337.92 plus $0.16 tax for 400 pieces. If the cost call fails, the check uses the $0.26 postage estimate instead.
+1. `GET /productOptions/advanced`, so the document class is an exact value from Click2Mail.
+2. `POST /documents` with the print PDF. The address block on that PDF is blank.
+3. `POST /jobs/jobTemplate` when a template name is set, then `POST /jobs/{id}/update` with the document id, the piece count, and the CRID. Otherwise `POST /jobs` with the looked-up product strings, then `POST /jobs/{id}/update` with the CRID. No address list.
+4. `POST /jobs/{id}/eddmInfo` with the mailer name and return address.
+5. `POST /jobs/{id}/eddmPo` once per delivering post office. This has to come before the routes. The call needs the facility name, street, city, state, ZIP, phone, piece count, `deliveryType`, and `routeType`. Click2Mail does not look these up. We do.
+6. `POST /jobs/{id}/eddmRoute` once per route. The route value is the ZIP plus the route id, such as `10001-C071`.
+7. `GET /jobs/{id}/cost?details=true` for User Credit, then `GET /credit`, then `POST /jobs/{id}/submit` with billing type `User Credit`. The balance is compared with that job total, including tax. If the cost call fails, the check uses the $0.26 postage estimate instead.
 
-Sign-in uses `C2M_STAGE_USERNAME` and `C2M_STAGE_PASSWORD`. If those are empty, staging falls back to `C2M_USERNAME` and `C2M_PASSWORD`.
+The delivering post office comes from the USPS route feed (`FACILITY_NAME`) and the USPS post office locator at `tools.usps.com` (`POLocator/findLocations`), matched on the facility name. A successful lookup is saved for seven days. If the locator is down, a small saved table covers offices we have already read (James A. Farley, 421 8th Ave, New York, NY 10001, 212-330-3296). USPS Web Tools were retired, and the newer Locations API needs a key we do not have. The public locator is the workable free source. If a selected route still has no street or no phone, checkout stops with a plain-English message and Click2Mail is not called.
 
-The route feed names the delivering post office (`FACILITY_NAME`) and the city and state (`CITY_STATE`). It does not include a street or a phone. Those come from the USPS post office locator (`tools.usps.com` POLocator), matched on the facility name. A successful lookup is saved for seven days. If the locator is down, a small saved table covers offices we have already read (James A. Farley in 10001 is the first). If a selected route still has no street or no phone, checkout stops with a plain-English message and Click2Mail is not called.
+`Invoice` is not enabled on this staging account. Card payment through the API is refused. User Credit is the only payment. The staging balance on Oct 27 was $347.40. A credit purchase can say Success without changing the balance. `C2M_EDDM_BILLING_TYPE` cannot switch this order to a card. The staging script forces User Credit.
 
-`Invoice` returned "User does not have access to this payment method" on this staging account. Card payment through the API fails because the server never has Accept.js data, so card billing is refused. User Credit is the path for now. Before submit, the order reads `GET /jobs/{id}/cost` and then `GET /credit`. Submit stops when the balance is below that total, including tax. A credit purchase can say Success without changing the balance. If Click2Mail does not return a cost, the check uses the postage estimate. `C2M_EDDM_BILLING_TYPE` can switch to Invoice later, when the account has that method. It cannot switch to a card.
+Run one live staging order from your machine. This environment does not have the staging password, and it does not call Click2Mail.
 
-Product strings. Job 1304272 was created with the 6.5×9 document class and Postage Paid in Advance. The other strings are still the defaults below:
+```bash
+C2M_ENV=stage C2M_STAGE_USERNAME=... C2M_STAGE_PASSWORD=... \
+C2M_EDDM_CRID=123456789 \
+C2M_EDDM_JOB_TEMPLATE="Your template name" \
+npm run c2m:eddm -- --pieces 400 --zip 10001 --route C071
+```
 
-| Variable | Default |
+It prints the job id, status, and cost. It does not print the username or password. Leave the template unset only if you want the script to read product options instead. 400 pieces is the default so the order can fit a few hundred dollars of staging credit. The route may have more homes.
+
+Product strings are not defaults we type. They come from the template or the product-options list. Optional overrides, and only when they match that list exactly:
+
+| Variable | Role |
 |---|---|
-| `C2M_EDDM_CLASS_6_5X9` | `EDDM Mailer 6.5 x 9` |
-| `C2M_EDDM_CLASS_6_25X11` | `EDDM Mailer 6.25 x 11` |
-| `C2M_EDDM_MAIL_CLASS` | `Postage Paid in Advance` |
-| `C2M_EDDM_LAYOUT` | `We Prep and Mail` |
-| `C2M_EDDM_PAPER_TYPE` | `White Matte` |
-| `C2M_EDDM_BILLING_TYPE` | `User Credit` |
-| `C2M_EDDM_JOB_TEMPLATE` | empty. Set this to the template name from the staging site. |
+| `C2M_EDDM_JOB_TEMPLATE` | Template name from the staging site. Preferred. |
+| `C2M_EDDM_JOB_TEMPLATE_6_5X9` | Template for the 6.5×9 card, if it differs. |
+| `C2M_EDDM_JOB_TEMPLATE_6_25X11` | Template for the 6.25×11 card, if it differs. |
+| `C2M_EDDM_CLASS_6_5X9` | Document class override. Must match the product list. |
+| `C2M_EDDM_CLASS_6_25X11` | Document class override. Must match the product list. |
+| `C2M_EDDM_MAIL_CLASS` | Mail class override. Must match the product list. Ignored when a template is set. |
+| `C2M_EDDM_BILLING_TYPE` | The app can be set to Invoice later. The staging script always uses User Credit. |
 
 ### The address block
 
@@ -71,6 +83,6 @@ David at Click2Mail is still confirming the 5×8 and 6×9 reserved boxes. Those 
 ## What is still unverified
 
 - Whether commercial use of `https://gis.usps.com/arcgis/rest/services/EDDM/selectZIP/GPServer/routes/execute` is allowed. The feed is public and undocumented. It returned routes for ZIP 10001 during development.
-- Which mail-class string is full service with the Click2Mail permit. Job 1304272 accepted only `Postage Paid in Advance`.
+- Which mail-class string is full service with the Click2Mail permit. Mahesh said the Oct 26 "Sku not found" errors came from typing the value. The order now uses a job template, or the exact text from `GET /productOptions/advanced`.
 - Whether `deliveryType` for homes plus businesses should be `All` or another word. Residential alone sends `Residential`.
 - The all-in price. The screen shows a postage estimate only.

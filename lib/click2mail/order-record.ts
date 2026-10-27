@@ -43,5 +43,9 @@ export interface MailOrderRecord {
     routeCount: number
     postOfficeCount: number
     prepared: boolean
+    /** Customer's USPS CRID was sent on the job update. */
+    cridSent?: boolean
+    /** Click2Mail GET /jobs/{id}/cost total, including tax. */
+    vendorCost?: number
   }
 }

@@ -12,44 +12,18 @@ import {
 
 import type { Click2MailConfig, Click2MailProductOptions } from "./config"
 import type { MailOrderRecord } from "./order-record"
+import { selectEddmProduct, type ProductOptionRow } from "./product-options"
 import type { Click2MailClient, EddmMailerInfo } from "./types"
+import { eddmCridInvalidMessage, eddmCridMissingMessage, normalizeUspsCrid } from "@/lib/eddm/usps-crid"
 
 /**
- * Staging job 1304272 accepted this mail class.
- * "PM EDDM (Full Service): includes the Click2Mail permit",
- * "PM EDDM (Full Service)", and "EDDM Full Service" all returned
- * "status 9: Invalid product options. Sku not found."
- * Click2Mail still has to confirm which string is full service with their permit.
- * Override with C2M_EDDM_MAIL_CLASS when they do.
+ * Billing is User Credit. Invoice is off on this staging account.
+ * Product strings are not typed here. A job template supplies them, or
+ * GET /productOptions/advanced does. Job 1304272 failed with "Sku not found"
+ * when the mail class was typed by hand.
  */
-export const EDDM_MAIL_CLASS = "Postage Paid in Advance"
 export const EDDM_BILLING_TYPE = "User Credit"
-export const EDDM_LAYOUT = "We Prep and Mail"
 
-export function eddmDocumentClass(size: EddmSize, env: NodeJS.ProcessEnv = process.env): string {
-  const configured = size === "6.5x9" ? env.C2M_EDDM_CLASS_6_5X9 : env.C2M_EDDM_CLASS_6_25X11
-  const trimmed = configured?.trim()
-  if (trimmed) return trimmed
-  return size === "6.5x9" ? "EDDM Mailer 6.5 x 9" : "EDDM Mailer 6.25 x 11"
-}
-
-export function eddmJobProduct(size: EddmSize, env: NodeJS.ProcessEnv = process.env): Click2MailProductOptions {
-  return {
-    documentFormat: "PDF",
-    documentClass: eddmDocumentClass(size, env),
-    layout: env.C2M_EDDM_LAYOUT?.trim() || EDDM_LAYOUT,
-    productionTime: env.C2M_EDDM_PRODUCTION_TIME?.trim() || "Next Day",
-    envelope: " ",
-    color: env.C2M_EDDM_COLOR?.trim() || "Full Color",
-    paperType: env.C2M_EDDM_PAPER_TYPE?.trim() || "White Matte",
-    printOption: env.C2M_EDDM_PRINT_OPTION?.trim() || "Printing both sides",
-    mailClass: env.C2M_EDDM_MAIL_CLASS?.trim() || EDDM_MAIL_CLASS,
-    addressMappingId: "",
-    billingType: eddmBillingType(env),
-  }
-}
-
-/** User Credit draws the staging balance. Invoice can be set later. Card billing is refused. */
 export function eddmBillingType(env: NodeJS.ProcessEnv = process.env): string {
   return env.C2M_EDDM_BILLING_TYPE?.trim() || EDDM_BILLING_TYPE
 }
@@ -70,8 +44,9 @@ export function eddmCreditShortMessage(
   return `Click2Mail User Credit is ${formatDollars(balance)}. ${need} A credit purchase can say Success without changing the balance. Add credit on the Click2Mail staging account, then try again.`
 }
 
-export function eddmJobTemplateName(env: NodeJS.ProcessEnv = process.env): string {
-  return env.C2M_EDDM_JOB_TEMPLATE?.trim() ?? ""
+export function eddmJobTemplateName(size: EddmSize, env: NodeJS.ProcessEnv = process.env): string {
+  const specific = size === "6.5x9" ? env.C2M_EDDM_JOB_TEMPLATE_6_5X9 : env.C2M_EDDM_JOB_TEMPLATE_6_25X11
+  return specific?.trim() || env.C2M_EDDM_JOB_TEMPLATE?.trim() || ""
 }
 
 function eddmDeliveryType(coverage: EddmCoverage, env: NodeJS.ProcessEnv): string {
@@ -95,7 +70,9 @@ export interface PlaceEddmOrderInput {
   artwork: MailOrderRecord["artwork"]
   submit: boolean
   proof: boolean
-  /** When set, the job starts from a Click2Mail job template instead of raw product options. */
+  /** The customer's USPS CRID. Full Service Every Door is held without it. */
+  crid?: string
+  /** When set, the job starts from a Click2Mail job template instead of product options. */
   jobTemplateName?: string
   existing?: MailOrderRecord
   now?: () => string
@@ -107,8 +84,8 @@ export async function placeEddmOrder(input: PlaceEddmOrderInput): Promise<MailOr
   const env = input.env ?? process.env
   const summary = summarizeSelection(input.routes, input.coverage)
   const postage = eddmPostageEstimate(summary.pieces)
-  const product = eddmJobProduct(input.size, env)
-  const templateName = input.jobTemplateName ?? eddmJobTemplateName(env)
+  const billingType = eddmBillingType(env)
+  const templateName = input.jobTemplateName ?? eddmJobTemplateName(input.size, env)
   const existing = input.existing
   const order: MailOrderRecord = existing
     ? { ...existing, error: undefined, updatedAt: now() }
@@ -121,13 +98,13 @@ export async function placeEddmOrder(input: PlaceEddmOrderInput): Promise<MailOr
         artwork: input.artwork,
         submitted: false,
         product: {
-          documentClass: product.documentClass,
-          layout: product.layout,
-          paperType: product.paperType,
-          printOption: product.printOption,
-          mailClass: product.mailClass,
-          productionTime: product.productionTime,
-          color: product.color,
+          documentClass: templateName ? templateName : "Click2Mail product options",
+          layout: templateName ? "Job template" : "",
+          paperType: "",
+          printOption: "",
+          mailClass: templateName ? "Job template" : "",
+          productionTime: "",
+          color: "",
         },
         eddm: {
           size: input.size,
@@ -147,6 +124,24 @@ export async function placeEddmOrder(input: PlaceEddmOrderInput): Promise<MailOr
   }
 
   try {
+    const rows = await input.client.getAdvancedProductOptions()
+    const chosen = selectEddmProduct(rows, input.size, {
+      documentClass: configuredDocumentClass(input.size, env),
+      mailClass: templateName ? undefined : env.C2M_EDDM_MAIL_CLASS,
+    })
+    const product = productFromRow(chosen, billingType)
+    order.product = templateName
+      ? { ...order.product, documentClass: chosen.documentClass, mailClass: "Job template" }
+      : {
+          documentClass: product.documentClass,
+          layout: product.layout,
+          paperType: product.paperType,
+          printOption: product.printOption,
+          mailClass: product.mailClass,
+          productionTime: product.productionTime,
+          color: product.color,
+        }
+
     if (!order.documentId) {
       const document = await input.client.createDocument({
         documentName: input.documentName,
@@ -161,12 +156,14 @@ export async function placeEddmOrder(input: PlaceEddmOrderInput): Promise<MailOr
       order.updatedAt = now()
     }
 
+    const crid = normalizeUspsCrid(input.crid) ?? ""
     if (!order.jobId) {
       const job = templateName
         ? await input.client.createJobFromTemplate({
             templateName,
             documentId: order.documentId,
             quantity: summary.pieces,
+            crid,
           })
         : await input.client.createJob({
             documentId: order.documentId,
@@ -177,6 +174,14 @@ export async function placeEddmOrder(input: PlaceEddmOrderInput): Promise<MailOr
       order.jobStatus = job.jobStatus || "EDITING"
       order.resultCode = job.status ?? undefined
       order.resultDescription = job.description
+      if (!templateName) {
+        await input.client.updateEddmJob(order.jobId, { crid, quantity: summary.pieces })
+      }
+      order.eddm = { ...(order.eddm ?? blankEddm(input, summary)), cridSent: true }
+      order.updatedAt = now()
+    } else if (!order.eddm?.cridSent) {
+      await input.client.updateEddmJob(order.jobId, { crid, quantity: summary.pieces })
+      order.eddm = { ...(order.eddm ?? blankEddm(input, summary)), cridSent: true }
       order.updatedAt = now()
     }
 
@@ -212,6 +217,8 @@ export async function placeEddmOrder(input: PlaceEddmOrderInput): Promise<MailOr
         routeCount: input.routes.length,
         postOfficeCount: summary.postOffices.length,
         prepared: true,
+        cridSent: order.eddm?.cridSent,
+        vendorCost: order.eddm?.vendorCost,
       }
       order.updatedAt = now()
     }
@@ -224,17 +231,18 @@ export async function placeEddmOrder(input: PlaceEddmOrderInput): Promise<MailOr
     }
 
     if (input.submit && !order.submitted) {
-      if (product.billingType === EDDM_BILLING_TYPE) {
-        const postage = Math.round(summary.pieces * EDDM_RETAIL_POSTAGE_DOLLARS * 100) / 100
-        let needed = postage
+      if (billingType === EDDM_BILLING_TYPE) {
+        const postageOnly = Math.round(summary.pieces * EDDM_RETAIL_POSTAGE_DOLLARS * 100) / 100
+        let needed = postageOnly
         let basis: "job" | "estimate" = "estimate"
         try {
-          const cost = await input.client.getJobCost(order.jobId, product.billingType)
+          const cost = await input.client.getJobCost(order.jobId, billingType)
           needed = cost.total
           basis = "job"
+          if (order.eddm) order.eddm = { ...order.eddm, vendorCost: cost.total }
         } catch {
           // Job 1304272 cost $337.92 plus $0.16 tax. Postage is only the fallback.
-          needed = postage
+          needed = postageOnly
           basis = "estimate"
         }
         const credit = await input.client.getCredit()
@@ -244,7 +252,7 @@ export async function placeEddmOrder(input: PlaceEddmOrderInput): Promise<MailOr
           return order
         }
       }
-      const submitted = await input.client.submitJob(order.jobId, product.billingType)
+      const submitted = await input.client.submitJob(order.jobId, billingType)
       order.submitted = true
       order.submittedAt = now()
       order.jobStatus = submitted.jobStatus || order.jobStatus
@@ -277,7 +285,43 @@ function eddmOrderBlock(input: PlaceEddmOrderInput, limitMessages: readonly stri
   if (!isEddmSize(input.size)) {
     return "Choose a 6.5×9 or 6.25×11 card."
   }
+  if (!input.crid?.trim()) return eddmCridMissingMessage()
+  if (!normalizeUspsCrid(input.crid)) return eddmCridInvalidMessage()
   return limitMessages[0] ?? null
+}
+
+function configuredDocumentClass(size: EddmSize, env: NodeJS.ProcessEnv): string | undefined {
+  const configured = size === "6.5x9" ? env.C2M_EDDM_CLASS_6_5X9 : env.C2M_EDDM_CLASS_6_25X11
+  const trimmed = configured?.trim()
+  return trimmed || undefined
+}
+
+function productFromRow(row: ProductOptionRow, billingType: string): Click2MailProductOptions {
+  return {
+    documentFormat: "PDF",
+    documentClass: row.documentClass,
+    layout: row.layout,
+    productionTime: row.productionTime,
+    envelope: row.envelope || " ",
+    color: row.color,
+    paperType: row.paperType,
+    printOption: row.printOption,
+    mailClass: row.mailClass,
+    addressMappingId: "",
+    billingType,
+  }
+}
+
+function blankEddm(
+  input: PlaceEddmOrderInput,
+  summary: { routeCount: number; postOffices: readonly unknown[] }
+): NonNullable<MailOrderRecord["eddm"]> {
+  return {
+    size: input.size,
+    routeCount: summary.routeCount,
+    postOfficeCount: summary.postOffices.length,
+    prepared: false,
+  }
 }
 
 function formatDollars(amount: number): string {

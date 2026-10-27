@@ -1,4 +1,5 @@
 import type { Click2MailProductOptions } from "./config"
+import type { ProductOptionRow } from "./product-options"
 import type { Recipient } from "./recipients"
 
 export interface PurchaseCreditInput {
@@ -152,10 +153,14 @@ export interface Click2MailClient {
    * A job template is created in the Click2Mail staging site, then started
    * by name. The document and quantity are attached on the following update.
    */
+  /** Valid combinations from GET /productOptions/advanced. Do not invent these strings. */
+  getAdvancedProductOptions(): Promise<ProductOptionRow[]>
   createJobFromTemplate(input: {
     templateName: string
     documentId: string
     quantity: number
+    /** Required on a Full Service Every Door job. Click2Mail holds the job without it. */
+    crid?: string
   }): Promise<JobSnapshot>
   createProof(jobId: string): Promise<ProofSnapshot>
   getProof(jobId: string, proofId: string, sessionId: string): Promise<ProofSnapshot>
@@ -164,7 +169,8 @@ export interface Click2MailClient {
   getTracking(jobId: string, trackingType?: string): Promise<TrackingSnapshot>
   /**
    * Every Door calls. Field names follow Click2Mail's EDDM Postman
-   * collection and the REST reference. Full service does not send a CRID.
+   * collection and the REST reference. The customer's USPS CRID is sent
+   * on the job update, which marks crid required for EDDM.
    */
   getEddm(jobId: string): Promise<JobSnapshot>
   setEddmInfo(jobId: string, info: EddmMailerInfo): Promise<JobSnapshot>

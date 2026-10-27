@@ -67,6 +67,11 @@ export interface BusinessInfo {
   state?: string
   postalCode?: string
   socialHandle?: string
+  /**
+   * USPS Customer Registration ID for this business. Full Service Every Door
+   * needs it. Saved here so the customer enters it once.
+   */
+  uspsCrid?: string
 }
 
 /**

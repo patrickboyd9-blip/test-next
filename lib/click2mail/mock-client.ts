@@ -21,6 +21,21 @@ export function createMockClick2MailClient(options?: {
       calls.push(`getJobCost:${jobId}`)
       return { total: 25, status: 0, description: "Success" }
     },
+    async getAdvancedProductOptions() {
+      calls.push("getAdvancedProductOptions")
+      return [
+        {
+          documentClass: "EDDM Mailer 6.5 x 9",
+          layout: "We Prep and Mail",
+          productionTime: "Next Day",
+          envelope: " ",
+          color: "Full Color",
+          paperType: "White Matte",
+          printOption: "Printing both sides",
+          mailClass: "Postage Paid in Advance",
+        },
+      ]
+    },
     async purchaseCredit() {
       calls.push("purchaseCredit")
       return { status: 0, description: "Success" }

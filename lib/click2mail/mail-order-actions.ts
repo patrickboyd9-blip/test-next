@@ -19,6 +19,8 @@ import { createClick2MailClient } from "./client"
 import { placeEddmOrder } from "./eddm-order"
 import { isEddmSize } from "@/lib/eddm/geometry"
 import { eddmAudienceIssue } from "@/lib/eddm/validate"
+import { eddmCridInvalidMessage, normalizeUspsCrid } from "@/lib/eddm/usps-crid"
+import { readRememberedUspsCrid, writeRememberedUspsCrid } from "@/lib/eddm/usps-crid-store"
 import { loadFinalPostcardPhoto } from "./load-print-photo"
 import { placeClick2MailOrder, refreshClick2MailOrder } from "./order"
 import type { MailOrderRecord } from "./order-record"
@@ -118,6 +120,16 @@ export async function submitEddmPrintTest(campaignId: string): Promise<PrintMail
   if (!mailer.name || !mailer.address || !mailer.city || !mailer.state || !mailer.zip) {
     return { campaign, issues: ["Add the business name and return address before sending an Every Door order."] }
   }
+  if (!normalizeUspsCrid(business?.uspsCrid)) {
+    return {
+      campaign,
+      issues: [
+        business?.uspsCrid?.trim()
+          ? eddmCridInvalidMessage()
+          : "Full Service Every Door needs your Postal Service business ID (CRID). Without it, Click2Mail holds the job. Enter it on this screen. You only do this once.",
+      ],
+    }
+  }
 
   const { config, client } = clientFromEnv()
   let artwork: MailOrderRecord["artwork"] = "type-plate"
@@ -140,6 +152,7 @@ export async function submitEddmPrintTest(campaignId: string): Promise<PrintMail
     coverage: eddm.coverage,
     routes: eddm.routes,
     mailer,
+    crid: business?.uspsCrid,
     submitEnabled: true,
     paymentCleared: true,
     documentName: `mm-eddm-${campaign.id.slice(0, 8)}-${stamp}`,
@@ -150,6 +163,22 @@ export async function submitEddmPrintTest(campaignId: string): Promise<PrintMail
   })
   const saved = await repository.saveMailOrder(campaign.id, order)
   return { campaign: saved, issues: order.error ? [order.error] : [] }
+}
+
+export async function saveUspsCrid(campaignId: string, raw: string): Promise<PrintMailActionResult> {
+  const campaign = await repository.getCampaign(campaignId)
+  if (!campaign) return missing(campaignId)
+  const crid = normalizeUspsCrid(raw)
+  if (!crid) return { campaign, issues: [eddmCridInvalidMessage()] }
+  await writeRememberedUspsCrid(crid)
+  const saved = await repository.updateBrief(campaignId, {
+    businessInfo: { ...campaign.brief.businessInfo, uspsCrid: crid },
+  })
+  return { campaign: saved, issues: [] }
+}
+
+export async function rememberedUspsCrid(): Promise<string> {
+  return (await readRememberedUspsCrid()) ?? ""
 }
 
 export async function continuePrintMailTest(campaignId: string): Promise<PrintMailActionResult> {

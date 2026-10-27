@@ -7,6 +7,7 @@ import {
 } from "./config"
 import { Click2MailError, redactSecrets } from "./errors"
 import { interpretVendorJob } from "./job-status"
+import { parseProductOptions } from "./product-options"
 import { buildAddressListXml } from "./recipients"
 import type {
   AddressListSnapshot,
@@ -283,7 +284,7 @@ export function createClick2MailClient(options: {
       const response = await send({
         method: "GET",
         path: `/jobs/${encodeURIComponent(jobId)}/cost`,
-        query: { paymentType },
+        query: { paymentType, details: "true" },
       })
       const root = parseBody(response, secrets)
       const result = readResult(root)
@@ -294,6 +295,19 @@ export function createClick2MailClient(options: {
         throw fail(response, { ...result, description: result.description || "Job cost was missing." }, secrets)
       }
       return { total, status: result.status, description: result.description } satisfies JobCostSnapshot
+    },
+
+    async getAdvancedProductOptions() {
+      const response = await send({ method: "GET", path: "/productOptions/advanced" })
+      const root = parseBody(response, secrets)
+      const result = readResult(root)
+      if (response.status < 200 || response.status >= 300) throw fail(response, result, secrets)
+      if (result.status !== null && result.status !== 0) throw fail(response, result, secrets)
+      const rows = parseProductOptions(root)
+      if (rows.length === 0) {
+        throw fail(response, { ...result, description: result.description || "Product options were missing." }, secrets)
+      }
+      return rows
     },
 
     async purchaseCredit(input) {
@@ -385,6 +399,7 @@ export function createClick2MailClient(options: {
         form: {
           documentId: input.documentId,
           quantity: String(input.quantity),
+          ...(input.crid ? { crid: input.crid } : {}),
         },
       })
       const updatedResult = readResult(parseBody(updated, secrets))

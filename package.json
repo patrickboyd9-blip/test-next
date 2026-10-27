@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "c2m:smoke": "tsx scripts/c2m-smoke.ts"
+    "c2m:smoke": "tsx scripts/c2m-smoke.ts",
+    "c2m:eddm": "tsx scripts/c2m-eddm-stage.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.116.0",
