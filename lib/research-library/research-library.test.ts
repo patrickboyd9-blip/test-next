@@ -5,6 +5,8 @@ import path from "node:path"
 import test from "node:test"
 
 import type { CampaignBrief, CreativeDirection } from "@/lib/campaign-creator/types"
+import { heroLockup } from "@/lib/design-intelligence/offer-copy"
+import { rankCandidates } from "@/lib/design-intelligence/candidate-board"
 import { createFileDocumentStore } from "@/lib/storage/document-store"
 
 import { coverageBalances, formatCoverageReport } from "./coverage"
@@ -20,6 +22,8 @@ import { fixtureResearchIndex, fixtureSourceFiles } from "./fixtures"
 import { clearResearchIndexMemory, refreshResearchIndex } from "./index"
 import { indexSourceFiles } from "./parse"
 import { queryFromBrief, retrieveResearch } from "./retrieve"
+import { steerSpecFromResearch } from "./steer"
+import type { ResearchEntry } from "./types"
 import type { GithubReader } from "@/lib/design-intelligence/sync"
 
 const roofingBrief: CampaignBrief = {
@@ -199,11 +203,242 @@ test("a defensive gold file and a private path survive a partial sync", async ()
   await rm(directory, { recursive: true })
 })
 
+test("different retrieved evidence changes the headline, the offer framing, and the layout", async () => {
+  const index = fixtureResearchIndex()
+  const roofHits = retrieveResearch(index.entries, queryFromBrief(roofingBrief), 4).hits
+  const hvacHits = retrieveResearch(index.entries, queryFromBrief(hvacBrief), 4).hits
+  const autoHits = retrieveResearch(index.entries, queryFromBrief(autoBrief), 4).hits
+  const roof = steerSpecFromResearch({
+    headline: "Free roof inspection",
+    offer: "Free roof inspection",
+    brief: roofingBrief,
+    hits: roofHits,
+    role: "outcome",
+  })
+  const hvac = steerSpecFromResearch({
+    headline: "Free tune-up",
+    offer: "$89 tune-up",
+    brief: hvacBrief,
+    hits: hvacHits,
+    role: "outcome",
+  })
+  const auto = steerSpecFromResearch({
+    headline: "Know your rate",
+    offer: "A written quote",
+    brief: autoBrief,
+    hits: autoHits,
+    role: "outcome",
+  })
+  assert.notEqual(roof.headline, hvac.headline)
+  assert.notEqual(roof.headline, auto.headline)
+  assert.notEqual(hvac.headline, auto.headline)
+  assert.equal(roof.templateId, "roof_coupon")
+  assert.notEqual(roof.templateId, auto.templateId)
+  assert.equal(auto.templateId, "neighbor_letter")
+  assert.equal(roof.offerProminent, true)
+  assert.equal(hvac.templateId, "hero_scrim")
+  assert.equal(hvac.offerProminent, false)
+  assert.equal(auto.offerProminent, false)
+  assert.equal(roof.offer, "Free roof inspection")
+  assert.equal(hvac.offer, "$89 tune-up")
+  assert.equal(auto.offer, "A written quote")
+  assert.equal(roof.trace.headlineId, "GOLD-roofing-001")
+  assert.equal(roof.trace.layoutId, "GOLD-roofing-001")
+  assert.equal(auto.trace.headlineId, "GOLD-auto-insurance-001")
+  assert.doesNotMatch(`${roof.headline} ${hvac.headline} ${auto.headline}`, /medicare|coverage gap/i)
+  assert.doesNotMatch(auto.photoDirection ?? "", /ladder|handyman|medicare/i)
+
+  const kept = steerSpecFromResearch({
+    headline: "See the roof before it leaks",
+    offer: "Free roof inspection",
+    brief: roofingBrief,
+    hits: roofHits,
+    role: "outcome",
+  })
+  assert.equal(kept.headline, "See the roof before it leaks")
+  assert.equal(kept.trace.headlineId, undefined)
+  assert.equal(kept.trace.layoutId, "GOLD-roofing-001")
+
+  const rulesEnv = {
+    DESIGN_DIRECTOR: "rules",
+    DESIGN_CRITIC: "machine",
+    DESIGN_CANDIDATE_RENDERS: "off",
+    DESIGN_CANDIDATE_COUNT: "3",
+  } as unknown as NodeJS.ProcessEnv
+  const directions = [0, 1, 2].map((index) => ({
+    id: `d-${index}`,
+    name: `Direction ${index}`,
+    rationale: "One next step.",
+    designedToDrive: "calls",
+    tags: [],
+    spec: {
+      headline: index === 0 ? "Free roof inspection" : index === 1 ? "Wind on the ridge?" : "One roof. One visit.",
+      offer: "Free roof inspection",
+      palette: ["#111111", "#222222", "#333333"] as [string, string, string],
+    },
+    recommended: index === 0,
+    createdAt: "2026-10-27T00:00:00.000Z",
+  }))
+  const withLibrary = await rankCandidates({
+    brief: roofingBrief,
+    directions,
+    trim: "5x8",
+    env: rulesEnv,
+    records: [],
+    tastes: [],
+    blueprints: [],
+    researchHits: roofHits,
+  })
+  const withoutLibrary = await rankCandidates({
+    brief: roofingBrief,
+    directions,
+    trim: "5x8",
+    env: rulesEnv,
+    records: [],
+    tastes: [],
+    blueprints: [],
+    researchHits: [],
+  })
+  const leadOn = withLibrary.surfaced.find((item) => item.directionIndex === 0)
+  const leadOff = withoutLibrary.surfaced.find((item) => item.directionIndex === 0)
+  assert.ok(leadOn && leadOff)
+  assert.notEqual(leadOn.spec.headline, leadOff.spec.headline)
+  assert.notEqual(leadOn.rationale.grid.intentional_break, leadOff.rationale.grid.intentional_break)
+  assert.equal(leadOn.rationale.scale_ratios.hero, "offer")
+  assert.equal(leadOff.rationale.scale_ratios.hero, "headline")
+  assert.equal(leadOn.spec.layoutHints?.templateId, "roof_coupon")
+  assert.equal(leadOn.evidenceTrace?.layoutId, "GOLD-roofing-001")
+  assert.equal(leadOff.evidenceTrace, undefined)
+  assert.match(leadOn.spec.headline ?? "", /See the roof/)
+  assert.doesNotMatch(leadOn.spec.offer ?? "", /A written\.$/)
+})
+
+test("an empty image record ranks below a content-rich mailer", () => {
+  const rich = entry({
+    id: "HVAC-RICH",
+    industry: "hvac",
+    headlines: ["A quieter summer"],
+    offers: ["$89 tune-up"],
+    photoStyle: "outdoor condenser, daylight",
+    evidence: "text",
+  })
+  const empty = entry({
+    id: "HVAC-EMPTY",
+    industry: "hvac",
+    headlines: [],
+    offers: [],
+    evidence: "visual",
+    gold: true,
+    imageRefs: ["images/gold/hvac/front.jpg"],
+  })
+  const retrieved = retrieveResearch([empty, rich], {
+    industry: "hvac",
+    offerType: "maintenance",
+    audience: "homeowners",
+    direction: "tune-up",
+    emotion: "relief",
+  }, 4)
+  assert.equal(retrieved.hits[0]?.entry.id, "HVAC-RICH")
+  assert.ok((retrieved.hits.findIndex((hit) => hit.entry.id === "HVAC-EMPTY")) > 0)
+})
+
+test("auto insurance prefers home and life insurance and never Medicare copy", () => {
+  const home = entry({
+    id: "HOME-INS",
+    industry: "home_insurance",
+    headlines: ["A policy you can read"],
+    offers: ["A written quote"],
+    photoStyle: "a house and a parked car",
+  })
+  const life = entry({
+    id: "LIFE-INS",
+    industry: "life_insurance",
+    headlines: ["A family kept well"],
+    offers: ["A written quote"],
+    photoStyle: "a family on a porch",
+  })
+  const local = entry({
+    id: "LOCAL",
+    industry: "home_services",
+    headlines: ["A local next step"],
+    offers: ["A written quote"],
+  })
+  const medicare = entry({
+    id: "MED",
+    industry: "medicare",
+    headlines: ["Check your Medicare plan"],
+    offers: ["Annual enrollment review"],
+    whyItWorks: "Medicare annual enrollment",
+    photoStyle: "a Medicare card on a table",
+  })
+  const retrieved = retrieveResearch([medicare, local, life, home], queryFromBrief(autoBrief), 4)
+  assert.equal(retrieved.hits[0]?.entry.id, "HOME-INS")
+  assert.equal(retrieved.hits[1]?.entry.id, "LIFE-INS")
+  assert.equal(retrieved.hits.some((hit) => hit.entry.industry === "medicare" || /medicare/i.test(hit.entry.headlines.join(" "))), false)
+  const steered = steerSpecFromResearch({
+    headline: "Know your rate",
+    offer: "A written quote",
+    brief: autoBrief,
+    hits: retrieved.hits,
+    role: "outcome",
+  })
+  assert.doesNotMatch(`${steered.headline} ${steered.photoDirection ?? ""}`, /medicare|coverage gap|ladder|handyman/i)
+  assert.equal(steered.offer, "A written quote")
+})
+
+test("an offer stays whole, and an unknown response note is not a prompt line", () => {
+  const lockup = heroLockup("A written quote")
+  assert.equal(lockup.numeral, "A written quote")
+  assert.equal(lockup.rest, "")
+  assert.notEqual(`${lockup.numeral} ${lockup.rest}`.trim(), "A written.")
+  const indexed = indexSourceFiles([{
+    path: "mailers/MMR-unknown.md",
+    ref: "mando",
+    text: "# MMR-unknown\n\n## OBSERVED\n- Industry: roofing\n- Headline: \"See the roof\"\n\n## INFERRED\nOne roof.\n\n## INTERPRETATION\nWhy it works: one photograph.\nResponse: UNKNOWN\n",
+  }])
+  const parsed = indexed.entries.find((item) => item.id === "MMR-unknown")
+  assert.equal(parsed?.responseEvidence, undefined)
+  const copy = formatCopyEvidence([{
+    entry: entry({
+      id: "MMR-unknown",
+      industry: "roofing",
+      headlines: ["See the roof"],
+      responseEvidence: "UNKNOWN",
+    }),
+    score: 10,
+    band: "same",
+  }])
+  assert.match(copy, /See the roof/)
+  assert.doesNotMatch(copy, /internal response note/i)
+  assert.doesNotMatch(copy, /UNKNOWN/)
+})
+
 test("indexing does not require a network call", () => {
   const { entries } = indexSourceFiles(fixtureSourceFiles())
   assert.ok(entries.find((entry) => entry.id === "GOLD-hvac-001")?.layout.photoShare === 0.55)
   assert.equal(entries.find((entry) => entry.id === "GOLD-hvac-001")?.favoriteOf, "PM-022")
 })
+
+function entry(partial: Partial<ResearchEntry> & { id: string; industry: string }): ResearchEntry {
+  return {
+    origin: "mmr",
+    sourcePath: "test",
+    ref: "mando",
+    offerType: "other",
+    emotion: "unspecified",
+    format: "postcard",
+    layout: {},
+    colors: [],
+    headlines: [],
+    offers: [],
+    structures: [],
+    imageRefs: [],
+    evidence: "text",
+    gold: false,
+    searchText: partial.industry,
+    ...partial,
+  }
+}
 
 function direction(): CreativeDirection {
   return {

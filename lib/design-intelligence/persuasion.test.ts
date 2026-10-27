@@ -62,6 +62,20 @@ test("a free roof inspection uses the outcome, the gift, and one standout offer"
     vertical: "roofing",
   }), "$0 inspection")
   assert.equal(applyOutcomeHeadline({ headline: "See the roof before it leaks", offer: "$0 inspection", brief, vertical: "roofing" }), "See the roof before it leaks")
+  assert.equal(applyOutcomeHeadline({
+    headline: "See the roof before it leaks",
+    offer: "$0 inspection",
+    brief,
+    vertical: "roofing",
+    role: "outcome",
+  }), "See the roof before it leaks")
+  assert.equal(applyOutcomeHeadline({
+    headline: "Free roof inspection",
+    offer: "$0 inspection",
+    brief,
+    vertical: "roofing",
+    role: "outcome",
+  }), "A dry, safe home starts here.")
 })
 
 test("a real date is the deadline, and a fake one is rejected", () => {

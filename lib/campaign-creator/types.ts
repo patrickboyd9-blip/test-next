@@ -316,6 +316,16 @@ export interface DirectionResearch {
   influencedBy?: string[]
   /** Photograph description borrowed from the library. Not printed on the card. */
   photoDirection?: string
+  /**
+   * Which retrieved record drove the headline, the offer framing, the layout, and the photograph.
+   * Hidden in the customer UI unless design debug is on.
+   */
+  evidenceTrace?: {
+    headlineId?: string
+    offerId?: string
+    layoutId?: string
+    photoId?: string
+  }
 }
 
 /** A distinct creative direction presented to the customer for selection. */

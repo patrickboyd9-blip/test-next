@@ -1,4 +1,5 @@
 import { cutoutSubjectLine, cutoutSubjectRequested } from "@/lib/design-intelligence/cutout"
+import { photoFits } from "@/lib/research-library/steer"
 
 import { buildCampaignLookBlock } from "./campaign-look"
 import { roofSlotForTemplate, ROOF_SLOT_BRIEFS, ROOF_SLOT_NEGATIVE_SPACE } from "./roof-photo-slots"
@@ -163,10 +164,11 @@ export function toImageBrief(
     }
   }
 
-  if (context.researchPhotoNote?.trim()) {
+  const researchNote = context.researchPhotoNote?.trim()
+  if (researchNote && (!context.campaign || photoFits(researchNote, context.campaign))) {
     brief.artDirection = {
       ...brief.artDirection,
-      subject: `${brief.artDirection.subject} Photograph direction from researched mailers, as a description only: ${context.researchPhotoNote.trim()}`,
+      subject: `${brief.artDirection.subject} Photograph direction from researched mailers, as a description only: ${researchNote}`,
     }
   }
 

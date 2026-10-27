@@ -549,7 +549,7 @@ function resolveCopy(input: RoofingProInput, offerLed: boolean): Copy {
   if (!offerLed && nextHeadline && same(nextHeadline, offer)) nextOffer = ""
   const expiry = statedExpiryLine([offer, sub, body].filter(Boolean).join(" "))
   return {
-    offer: limitChars(nextOffer, offerLed ? ROOFING_COPY_LIMITS.offerLed : ROOFING_COPY_LIMITS.offer),
+    offer: nextOffer.replace(/\s+/g, " ").trim(),
     headline: limitChars(nextHeadline, ROOFING_COPY_LIMITS.headline),
     body: same(body, nextHeadline) || same(body, nextOffer) ? "" : limitChars(body, ROOFING_COPY_LIMITS.body),
     business: limitChars(clean(input.businessName), ROOFING_COPY_LIMITS.business),
@@ -579,7 +579,8 @@ function fitBounded(input: {
   minPt?: number
   maxPt?: number
 }): FittedText {
-  let text = limitChars(input.text, input.maxChars)
+  const offer = input.role === "offer"
+  let text = offer ? input.text.replace(/\s+/g, " ").trim() : limitChars(input.text, input.maxChars)
   let minPt = input.minPt
   const empty = fitText({
     text: "",
@@ -605,7 +606,7 @@ function fitBounded(input: {
     })
     if (!fitted.overflows && fitted.lines.length > 0) return fitted
     const words = text.split(" ")
-    if (words.length > 1) {
+    if (!offer && words.length > 1) {
       words.pop()
       text = words.join(" ")
       continue

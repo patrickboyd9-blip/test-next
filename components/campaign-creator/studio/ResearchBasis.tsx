@@ -2,6 +2,16 @@
 
 import type { DirectionResearch } from "@/lib/campaign-creator/types"
 
+function traceLine(trace: DirectionResearch["evidenceTrace"]): string {
+  if (!trace) return ""
+  return [
+    trace.headlineId ? `Headline from ${trace.headlineId}` : "",
+    trace.offerId ? `Offer from ${trace.offerId}` : "",
+    trace.layoutId ? `Layout from ${trace.layoutId}` : "",
+    trace.photoId ? `Photo from ${trace.photoId}` : "",
+  ].filter(Boolean).join(" · ")
+}
+
 /**
  * Customer-facing citation for a direction.
  * Scores and repair notes stay off this component.
@@ -30,6 +40,7 @@ export function ResearchBasis({ research }: { research?: DirectionResearch }) {
       {research.influencedBy && research.influencedBy.length > 0 ? (
         <p className="mt-1.5">Influenced by {research.influencedBy.join(", ")}</p>
       ) : null}
+      {traceLine(research.evidenceTrace) ? <p className="mt-1.5">{traceLine(research.evidenceTrace)}</p> : null}
       {research.layoutSummary ? <p className="mt-1.5">{research.layoutSummary}</p> : null}
     </details>
   )

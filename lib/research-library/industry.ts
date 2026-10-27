@@ -35,11 +35,25 @@ const ALIASES: readonly [RegExp, string][] = [
 
 const GROUPS: readonly (readonly string[])[] = [
   ["roofing", "hvac", "plumbing", "electrical", "solar", "pest_control", "landscaping", "junk_removal", "foundation", "painting", "flooring", "windows", "cleaning", "moving", "home_services"],
-  ["auto_insurance", "home_insurance", "life_insurance", "medicare", "final_expense", "insurance"],
+  ["home_insurance", "life_insurance", "insurance"],
   ["auto_insurance", "auto_repair"],
   ["medicare", "dental", "medical", "final_expense"],
   ["real_estate", "roofing", "home_insurance"],
 ]
+
+/** Closest neighbor first. Medicare is not a neighbor of auto, home, or life insurance. */
+const NEIGHBOR_ORDER: Record<string, readonly string[]> = {
+  auto_insurance: ["home_insurance", "life_insurance", "home_services", "insurance"],
+  home_insurance: ["auto_insurance", "life_insurance", "home_services", "insurance"],
+  life_insurance: ["home_insurance", "auto_insurance", "home_services", "insurance"],
+}
+
+export function neighborRank(queryIndustry: string, entryIndustry: string): number {
+  const order = NEIGHBOR_ORDER[queryIndustry]
+  if (!order) return 0
+  const index = order.indexOf(entryIndustry)
+  return index >= 0 ? index + 1 : 0
+}
 
 export function normalizeIndustry(value: string | undefined | null): string {
   const text = (value ?? "").toLowerCase().replace(/&/g, " and ").replace(/[^a-z0-9]+/g, " ").trim()
@@ -52,7 +66,15 @@ export function normalizeIndustry(value: string | undefined | null): string {
 
 export function industriesAdjacent(left: string, right: string): boolean {
   if (!left || !right || left === right || left === "unknown" || right === "unknown") return false
+  if (medicareBlocked(left, right)) return false
+  if (neighborRank(left, right) > 0 || neighborRank(right, left) > 0) return true
   return GROUPS.some((group) => group.includes(left) && group.includes(right))
+}
+
+function medicareBlocked(left: string, right: string): boolean {
+  const pair = new Set([left, right])
+  if (!pair.has("medicare")) return false
+  return pair.has("auto_insurance") || pair.has("home_insurance") || pair.has("life_insurance")
 }
 
 export function researchOfferType(text: string): string {

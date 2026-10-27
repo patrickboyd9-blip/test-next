@@ -1,19 +1,19 @@
-import type { CampaignBrief } from "../lib/campaign-creator/types"
-import { formatArtDirectorEvidence, formatCopyEvidence, layoutTuneFromHits, photoNoteFromHits, stampLibraryResearch } from "../lib/research-library/evidence"
+import type { CampaignBrief, CreativeDirection } from "../lib/campaign-creator/types"
+import { rankCandidates } from "../lib/design-intelligence/candidate-board"
 import { fixtureResearchIndex } from "../lib/research-library/fixtures"
 import { clearResearchIndexMemory, loadResearchIndex } from "../lib/research-library"
 import { queryFromBrief, retrieveResearch } from "../lib/research-library/retrieve"
+import type { RetrievalHit } from "../lib/research-library/types"
 
 /**
- * Shows which research ids three sample businesses retrieve, and what that
- * changes in the prompt, the layout, and the photograph description.
+ * Shows what the real candidate board does for three businesses with the
+ * research library on and off. The layout is the one the board paints.
  * Does not call an image API and does not print tokens.
  */
 
-const businesses: { name: string; brief: CampaignBrief; beforeTemplate: string }[] = [
+const businesses: { name: string; brief: CampaignBrief }[] = [
   {
     name: "Summit Roof Co (roofing)",
-    beforeTemplate: "roof_split",
     brief: {
       goal: "Book roof inspections",
       offer: "Free roof inspection",
@@ -24,7 +24,6 @@ const businesses: { name: string; brief: CampaignBrief; beforeTemplate: string }
   },
   {
     name: "Northwind Comfort (HVAC)",
-    beforeTemplate: "service_band",
     brief: {
       goal: "Book an HVAC tune-up",
       offer: "$89 tune-up",
@@ -34,7 +33,6 @@ const businesses: { name: string; brief: CampaignBrief; beforeTemplate: string }
   },
   {
     name: "Harbor Auto Cover (auto insurance)",
-    beforeTemplate: "medicare_calm",
     brief: {
       goal: "Ask for an auto insurance quote",
       offer: "A written quote",
@@ -44,6 +42,13 @@ const businesses: { name: string; brief: CampaignBrief; beforeTemplate: string }
     },
   },
 ]
+
+const rulesEnv = {
+  DESIGN_DIRECTOR: "rules",
+  DESIGN_CRITIC: "machine",
+  DESIGN_CANDIDATE_RENDERS: "off",
+  DESIGN_CANDIDATE_COUNT: "3",
+} as unknown as NodeJS.ProcessEnv
 
 async function main(): Promise<void> {
   clearResearchIndexMemory()
@@ -56,39 +61,69 @@ async function main(): Promise<void> {
 
   for (const business of businesses) {
     const retrieved = retrieveResearch(index.entries, queryFromBrief(business.brief), 5)
-    const tune = layoutTuneFromHits(retrieved.hits)
-    const stamped = stampLibraryResearch({
-      directions: [{
-        id: "proof",
-        name: "Lead",
-        rationale: "The offer is the reason to respond.",
-        designedToDrive: business.brief.goal ?? "A response",
-        tags: ["local"],
-        recommended: true,
-        createdAt: "2026-10-27T00:00:00.000Z",
-        spec: {
-          headline: "A short headline",
-          offer: business.brief.offer,
-          palette: ["#111111", "#222222", "#333333"],
-          layoutVariant: "peer_split",
-          layoutHints: { templateId: business.beforeTemplate as "roof_split" },
-        },
-      }],
-    }, retrieved.hits, business.brief)
-    const after = stamped.directions[0]
+    const off = await leadFor(business.brief, [])
+    const on = await leadFor(business.brief, retrieved.hits)
     console.log(`\n${business.name}`)
     console.log(`Retrieved: ${retrieved.hits.map((hit) => `${hit.entry.id} (${hit.band}, ${hit.entry.evidence}${hit.entry.gold ? ", gold" : ""})`).join("; ") || "none"}`)
     console.log(`Fallback: ${retrieved.fallback}`)
-    console.log(`Copy evidence includes: ${firstLine(formatCopyEvidence(retrieved.hits))}`)
-    console.log(`Layout: template ${business.beforeTemplate} -> ${after?.spec.layoutHints?.templateId ?? business.beforeTemplate}; photo share ${tune?.photoShare ?? "unchanged"}; offer prominent ${tune?.offerProminent ?? false}`)
-    console.log(`Photo brief adds: ${photoNoteFromHits(retrieved.hits) ?? "no photograph description on the retrieved records"}`)
-    console.log(`Art direction note: ${firstLine(formatArtDirectorEvidence(retrieved.hits))}`)
+    console.log(`Headline: ${off.headline} -> ${on.headline}`)
+    console.log(`Offer: ${off.offer} -> ${on.offer}`)
+    console.log(`Layout: ${off.layout} -> ${on.layout}`)
+    console.log(`Evidence: ${on.trace || "none"}`)
   }
 }
 
-function firstLine(value: string): string {
-  const line = value.split("\n").map((item) => item.trim()).filter((item) => item.startsWith("- "))[0]
-  return line ?? "(no retrieved line)"
+async function leadFor(brief: CampaignBrief, hits: RetrievalHit[]) {
+  const directions = directionsFor(brief)
+  const board = await rankCandidates({
+    brief,
+    directions,
+    trim: "5x8",
+    env: rulesEnv,
+    records: [],
+    tastes: [],
+    blueprints: [],
+    researchHits: hits,
+  })
+  const lead = board.surfaced.find((candidate) => candidate.directionIndex === 0) ?? board.surfaced[0]
+  const offerText = lead?.card.front.texts
+    .filter((text) => text.role === "offer" || text.role === "body")
+    .map((text) => text.text)
+    .join(" ")
+  const trace = lead?.evidenceTrace
+  const traceLine = trace
+    ? [
+        trace.headlineId ? `headline ${trace.headlineId}` : "",
+        trace.offerId ? `offer ${trace.offerId}` : "",
+        trace.layoutId ? `layout ${trace.layoutId}` : "",
+        trace.photoId ? `photo ${trace.photoId}` : "",
+      ].filter(Boolean).join(", ")
+    : ""
+  return {
+    headline: lead?.spec.headline ?? "",
+    offer: offerText || lead?.spec.offer || "",
+    layout: `${lead?.rationale.grid.intentional_break ?? "unset"} / ${lead?.spec.layoutHints?.templateId ?? "no template"} / hero ${lead?.rationale.scale_ratios.hero ?? "unset"}`,
+    trace: traceLine,
+  }
+}
+
+function directionsFor(brief: CampaignBrief): CreativeDirection[] {
+  const headlines = ["Free inspection", "Wind on the ridge?", "One local visit."]
+  return headlines.map((headline, index) => ({
+    id: `d-${index}`,
+    name: `Direction ${index}`,
+    rationale: "One next step.",
+    designedToDrive: brief.goal ?? "A response",
+    tags: ["local"],
+    recommended: index === 0,
+    createdAt: "2026-10-27T00:00:00.000Z",
+    spec: {
+      headline,
+      offer: brief.offer,
+      palette: ["#111111", "#222222", "#333333"],
+      layoutVariant: "image_grounded",
+    },
+  }))
 }
 
 main().catch((error: unknown) => {

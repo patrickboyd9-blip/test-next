@@ -38,7 +38,8 @@ import { loadTasteCorpus, visionTasteStore, type VisionTaste } from "./vision-ta
 import { referencePicksForCritique, requestComparativeCritique } from "./vision-critic"
 import { formatArtDirectorEvidence, goldExpectationFromHits, layoutTuneFromHits } from "@/lib/research-library/evidence"
 import { researchHitsForBrief } from "@/lib/research-library"
-import type { GoldExpectation } from "@/lib/research-library/types"
+import { applySteeredCopy, applySteeredRationale, steerSpecFromResearch, type EvidenceTrace } from "@/lib/research-library/steer"
+import type { GoldExpectation, RetrievalHit } from "@/lib/research-library/types"
 
 /**
  * Generates a board of composition families, ranks them, and keeps three
@@ -98,6 +99,8 @@ export interface ScoredCandidate {
   weakness?: string
   /** Set when this candidate was rebuilt from a mailer blueprint. */
   blueprint?: { sourceId: string; tone: string; similarity: number; offerType?: string; copyPattern?: string }
+  /** Which retrieved record drove the lead headline, offer, layout, and photograph. */
+  evidenceTrace?: EvidenceTrace
 }
 
 export interface BoardResult {
@@ -148,6 +151,8 @@ export async function rankCandidates(input: {
   tastes?: VisionTaste[]
   signals?: TasteSignals
   blueprints?: MailerBlueprint[]
+  /** Pass [] to score the board with the library off. Omit to load the index. */
+  researchHits?: RetrievalHit[]
 }): Promise<BoardResult> {
   const env = input.env ?? process.env
   const records = input.records ?? await safeLibrary()
@@ -155,7 +160,7 @@ export async function rankCandidates(input: {
   const tastes = input.tastes ?? await safeTastes()
   const signals = input.signals ?? await safeSignals(input.ownerId)
   const retrieved = retrieveTaste({ tastes, brief: input.brief, signals, limit: 4 })
-  const libraryHits = await researchHitsForBrief(input.brief)
+  const libraryHits = input.researchHits ?? await researchHitsForBrief(input.brief)
   const libraryTune = layoutTuneFromHits(libraryHits)
   const gold = goldExpectationFromHits(libraryHits)
   const guidance = [guidanceFromRetrieval(retrieved, signals), formatArtDirectorEvidence(libraryHits)].filter((line) => line.trim()).join("\n")
@@ -220,6 +225,7 @@ export async function rankCandidates(input: {
       blueprint,
       env,
       gold,
+      researchHits: libraryHits,
     })
   }))
   const revised: ScoredCandidate[] = []
@@ -228,7 +234,7 @@ export async function rankCandidates(input: {
       revised.push(candidate)
       continue
     }
-    const redesigned = await redesignOnce(candidate, input, selection, base, retrieved, gold)
+    const redesigned = await redesignOnce(candidate, input, selection, base, retrieved, gold, libraryHits)
     revised.push(candidate)
     if (redesigned.familyId !== candidate.familyId) revised.push(redesigned)
   }
@@ -259,6 +265,7 @@ async function scoreFamily(input: {
   blueprint?: MailerBlueprint
   env?: NodeJS.ProcessEnv
   gold?: GoldExpectation | null
+  researchHits?: RetrievalHit[]
 }): Promise<ScoredCandidate> {
   const family = input.family.mode === "type-led"
     ? COMPOSITION_FAMILIES.find((item) => item.id === "integrated-headline") ?? input.family
@@ -349,6 +356,20 @@ async function scoreFamily(input: {
     layoutVariant: "image_grounded",
     imagePresence: "field",
   }
+  let evidenceTrace: EvidenceTrace | undefined
+  if ((input.researchHits?.length ?? 0) > 0 && input.directionIndex === 0) {
+    const steered = steerSpecFromResearch({
+      headline: spec.headline ?? "",
+      offer: spec.offer ?? input.brief.offer ?? "",
+      brief: input.brief,
+      hits: input.researchHits ?? [],
+      vertical: rationale.vertical,
+      role,
+    })
+    spec = applySteeredCopy(spec, steered)
+    rationale = applySteeredRationale(rationale, steered, input.brief)
+    evidenceTrace = steered.trace
+  }
   const facts = clientFactText(input.brief, spec.offer)
   const complianceMark = attorneyAdMark(facts)
   const card = composeGridCard({
@@ -381,6 +402,7 @@ async function scoreFamily(input: {
     costs: input.costs,
     redesigned: Boolean(input.redesigned),
     blueprint: blueprintMeta,
+    evidenceTrace,
   }
 }
 
@@ -390,7 +412,8 @@ async function redesignOnce(
   selection: ReferenceSelection,
   base: DesignRationale,
   retrieved: TastePick[],
-  gold?: GoldExpectation | null
+  gold?: GoldExpectation | null,
+  researchHits?: RetrievalHit[]
 ): Promise<ScoredCandidate> {
   const separated = usesSeparatedPanel(candidate.rationale.grid.intentional_break)
   const next = (separated
@@ -411,6 +434,7 @@ async function redesignOnce(
     retrieved,
     redesigned: true,
     gold,
+    researchHits,
   })
   if (revised.grade.score >= candidate.grade.score) return revised
   return { ...candidate, redesigned: true }
@@ -434,6 +458,11 @@ function chooseDiverse(candidates: ScoredCandidate[], directionCount: number): S
     chosen[index] = pick
   }
   return chosen.filter((candidate): candidate is ScoredCandidate => Boolean(candidate))
+}
+
+function traceIds(trace: EvidenceTrace | undefined): string[] {
+  if (!trace) return []
+  return [trace.headlineId, trace.offerId, trace.layoutId, trace.photoId].filter((id): id is string => Boolean(id))
 }
 
 function applyBoard(result: GenerateDirectionsResult, board: BoardResult, brief: CampaignBrief): GenerateDirectionsResult {
@@ -486,6 +515,9 @@ function applyBoard(result: GenerateDirectionsResult, board: BoardResult, brief:
           offerBadge: "none",
           colorBlock: "field",
         },
+        influencedBy: traceIds(winner.evidenceTrace).length > 0 ? traceIds(winner.evidenceTrace) : direction.research?.influencedBy,
+        photoDirection: winner.evidenceTrace?.photoId ? winner.spec.visualDirection : direction.research?.photoDirection,
+        evidenceTrace: winner.evidenceTrace,
         quality: {
           score: Math.round((winner.grade.score / 10) * 10) / 10,
           rubricPassed: winner.grade.cleared ? 10 : 6,

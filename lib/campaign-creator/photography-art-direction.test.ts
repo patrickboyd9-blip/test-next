@@ -317,6 +317,44 @@ test("an uploaded agent photo becomes the crew portrait", () => {
   assert.match(prompt, /looking at the camera/i)
 })
 
+test("an auto insurance photo brief shows the car, not a handyman on a ladder", () => {
+  const campaign: CampaignBrief = {
+    goal: "Ask for an auto insurance quote",
+    offer: "A written quote",
+    audience: { description: "Drivers who own one family car" },
+    businessInfo: { name: "Harbor Auto Cover" },
+  }
+  const art = buildPhotographyArtDirection({
+    imageryRole: "neighborhood",
+    leadJob: "offer",
+    occupancy: "field",
+    visualDirection: "The finished result of the job, daylight, no person in the frame. Not a portrait and not the problem.",
+    campaign,
+    variationKey: "auto-lead",
+    layoutVariant: "image_grounded",
+  })
+  assert.match(art.subject, /car|driveway/i)
+  assert.doesNotMatch(art.subject, /ladder|handyman|roofer|shingle/i)
+  assert.match(art.negativeSpace, /No ladders/i)
+  const brief = toImageBrief(
+    spec({
+      visualDirection: art.subject,
+      imageryRole: "neighborhood",
+      leadJob: "offer",
+      headline: "What the car costs to cover",
+      offer: "A written quote",
+    }),
+    {
+      campaign,
+      variationKey: "auto-lead",
+      researchPhotoNote: "A handyman on a ladder at a worn roof, and a Medicare card on the table.",
+    }
+  )
+  assert.ok(brief)
+  assert.doesNotMatch(brief.artDirection.subject, /handyman|ladder|on the table/i)
+  assert.match(brief.artDirection.subject, /car|driveway/i)
+})
+
 test("final expense refuses a casket", () => {
   const art = buildPhotographyArtDirection({
     imageryRole: "consequence",

@@ -24,6 +24,7 @@ import { renderStudioCardPng } from "./studio-render"
 import { viewSelection, type ImageView } from "./view-images"
 import { formatArtDirectorEvidence, goldExpectationFromHits, layoutTuneFromHits } from "@/lib/research-library/evidence"
 import { researchHitsForBrief } from "@/lib/research-library"
+import { applySteeredCopy, applySteeredRationale, steerSpecFromResearch, type EvidenceTrace } from "@/lib/research-library/steer"
 
 export interface DirectedCard {
   rationale: DesignRationale
@@ -35,6 +36,9 @@ export interface DirectedCard {
   costs: TokenCost[]
   shown: boolean
   viewed: ImageView[]
+  evidenceTrace?: EvidenceTrace
+  /** Headline, offer, and layout after research steering. */
+  resolvedSpec: CreativeDirection["spec"]
 }
 
 export async function directOneCard(input: {
@@ -86,6 +90,7 @@ export async function directOneCard(input: {
     env,
     cardId,
     gold: goldExpectationFromHits(hits),
+    hits,
   })
   return noteViews(repaired, viewed)
 }
@@ -99,18 +104,34 @@ export function repairCard(input: {
   env?: NodeJS.ProcessEnv
   cardId?: string
   gold?: import("@/lib/research-library/types").GoldExpectation | null
+  hits?: import("@/lib/research-library/types").RetrievalHit[]
 }): DirectedCard {
   const env = input.env ?? process.env
   const cap = criticCap(env)
   let rationale = input.rationale
-  let spec = {
-    ...input.spec,
-    headline: applyOutcomeHeadline({
+  let evidenceTrace: EvidenceTrace | undefined
+  let spec = { ...input.spec }
+  if (input.hits && input.hits.length > 0) {
+    const steered = steerSpecFromResearch({
       headline: input.spec.headline ?? "",
       offer: input.spec.offer ?? input.brief.offer ?? "",
       brief: input.brief,
+      hits: input.hits,
       vertical: input.rationale.vertical,
-    }),
+    })
+    spec = applySteeredCopy(spec, steered)
+    rationale = applySteeredRationale(rationale, steered, input.brief)
+    evidenceTrace = steered.trace
+  } else {
+    spec = {
+      ...spec,
+      headline: applyOutcomeHeadline({
+        headline: input.spec.headline ?? "",
+        offer: input.spec.offer ?? input.brief.offer ?? "",
+        brief: input.brief,
+        vertical: input.rationale.vertical,
+      }),
+    }
   }
   const edits: string[] = []
   let best: DirectedCard | null = null
@@ -138,6 +159,8 @@ export function repairCard(input: {
       costs: input.costs ?? [],
       shown: passed,
       viewed: [],
+      evidenceTrace,
+      resolvedSpec: spec,
     }
     if (preferAttempt(attempt, best)) best = attempt
     if (passed || round === rounds) break
@@ -233,9 +256,10 @@ export async function applyDesignIntelligence(
       env,
       cardId: direction.id,
       gold: goldExpectationFromHits(hits),
+      hits: index === leadIndex ? hits : [],
     })
     if (index === leadIndex && criticUsesVision(env)) {
-      directed = await applyVisionRound(directed, brief, direction.spec, env)
+      directed = await applyVisionRound(directed, brief, direction.spec, env, hits)
     } else {
       logTokenCost(emptyCost(direction.id, "critic"))
     }
@@ -293,6 +317,11 @@ function attachDirection(
     ...direction,
     spec: {
       ...direction.spec,
+      headline: directed.resolvedSpec.headline ?? direction.spec.headline,
+      offer: directed.resolvedSpec.offer ?? direction.spec.offer,
+      visualDirection: directed.resolvedSpec.visualDirection ?? direction.spec.visualDirection,
+      leadJob: directed.resolvedSpec.leadJob ?? direction.spec.leadJob,
+      layoutHints: directed.resolvedSpec.layoutHints ?? direction.spec.layoutHints,
       designRationale: directed.rationale,
       palette: [
         directed.rationale.palette.neutral_hex[0] ?? "#F4F1EA",
@@ -312,8 +341,16 @@ function attachDirection(
         colorBlock: "field",
       },
       quality,
+      influencedBy: traceIds(directed.evidenceTrace),
+      evidenceTrace: directed.evidenceTrace,
     },
   }
+}
+
+function traceIds(trace: EvidenceTrace | undefined): string[] | undefined {
+  if (!trace) return undefined
+  const ids = [trace.headlineId, trace.offerId, trace.layoutId, trace.photoId].filter((id): id is string => Boolean(id))
+  return ids.length > 0 ? ids : undefined
 }
 
 export function qualityFrom(directed: DirectedCard): ResearchQuality {
@@ -416,7 +453,8 @@ async function applyVisionRound(
   directed: DirectedCard,
   brief: CampaignBrief,
   spec: CreativeDirection["spec"],
-  env: NodeJS.ProcessEnv
+  env: NodeJS.ProcessEnv,
+  hits?: import("@/lib/research-library/types").RetrievalHit[]
 ): Promise<DirectedCard> {
   let png: Buffer
   try {
@@ -449,6 +487,7 @@ async function applyVisionRound(
     costs: [...directed.costs, cost],
     env,
     cardId: directed.costs[0]?.cardId,
+    hits,
   })
   return {
     ...shifted,

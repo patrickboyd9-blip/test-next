@@ -89,6 +89,7 @@ const OUTCOME: Record<string, string> = {
   landscaping: "A yard you enjoy.",
   solar: "Power that stays quiet.",
   legal: "A clear next step.",
+  insurance: "A quote you can read.",
   general: "The result you wanted.",
 }
 
@@ -226,6 +227,11 @@ const ROLE_COPY: Record<string, Record<DirectionRole, readonly [string, string]>
     outcome: ["A clear next step", "The next call can be simple"],
     threat: ["Call before waiting costs the claim", "Ask before the wait costs you"],
     trust: ["A calm talk about the claim", "A local talk about the claim"],
+  },
+  insurance: {
+    outcome: ["A quote you can read", "The cost can be clear"],
+    threat: ["Call before the renewal surprises you", "Ask before the bill changes"],
+    trust: ["A local agent explains the quote", "This agent explains the quote"],
   },
   general: {
     outcome: ["The result you wanted", "This can be handled"],
@@ -366,6 +372,7 @@ export function applyOutcomeHeadline(input: {
 }): string {
   const headline = input.headline.replace(/\s+/g, " ").trim()
   const kind = persuasionVertical(input.brief, input.vertical)
+  if (headline && !headlineIsFeature(headline, input.offer, kind) && !WEAK_HEADLINE.test(headline)) return headline
   if (input.role === "trust") {
     const named = namedTrustLine(kind, input.brief.businessInfo?.name, rolePair(kind, input.role)[0])
     if (input.brief.businessInfo?.name && named.split(/\s+/).length <= 8 && !/^a\b/i.test(named)) {
@@ -377,7 +384,6 @@ export function applyOutcomeHeadline(input: {
     const resolved = resolveEmotion(kind, clientFactText(input.brief), input.brief.primaryEmotion)
     return headlineFor({ emotion: resolved.emotion, awareness: input.brief.audienceAwareness, offer: input.offer })
   }
-  if (headline && !headlineIsFeature(headline, input.offer, kind) && !WEAK_HEADLINE.test(headline)) return headline
   const resolved = resolveEmotion(kind, clientFactText(input.brief), input.brief.primaryEmotion)
   return onCardLine(kind, resolved.emotion.fear ? "threat" : "outcome")
 }
@@ -467,9 +473,16 @@ export function clientFactText(brief: CampaignBrief, extra?: string): string {
   ].filter((value): value is string => Boolean(value?.trim())).join(" ")
 }
 
+/** Auto, home, and life insurance are not Medicare, even when the design vertical is shared. */
+export function isNonMedicareInsurance(text: string): boolean {
+  if (/\bmedicare\b|\bmedicaid\b|\bmedigap\b/i.test(text)) return false
+  return /\b(?:auto|car|vehicle|homeowners|home|life)\s+insurance\b/i.test(text)
+}
+
 export function persuasionVertical(brief: CampaignBrief, vertical?: DesignVertical): string {
   const text = clientFactText(brief)
   if (isAttorneyMatter(text)) return "legal"
+  if (isNonMedicareInsurance(text)) return "insurance"
   if (vertical === "medicare_insurance" || /\bmedicare\b|\bmedicaid\b|\bsupplement\b/i.test(text)) return "medicare"
   if (/\bwe buy\b|\brather sell\b|\bsell (?:the|your) house\b/i.test(text)) return "we_buy"
   if (/\brestaurant\b|\bsupper\b|\bmenu\b|\bdining\b|\bfood\b/i.test(text)) return "food"
@@ -489,6 +502,7 @@ function headlineIsFeature(headline: string, offer: string, kind: string): boole
   if (outcomeAlready(headline, kind)) return false
   if (headlineRepeatsOffer(headline, offer)) return true
   if (/^(?:a\s+)?free\b/i.test(headline)) return true
+  if (kind === "insurance" && /\b(?:quote|estimate)\b/i.test(headline) && !/\b(?:inspection|tune-?up|treatment|cleanup|check)\b/i.test(headline)) return false
   if (/\b(?:inspection|tune-?up|treatment|cleanup|check|quote|estimate)\b/i.test(headline)) return true
   if (kind === "we_buy" && /\bsell (?:the|your) house\b/i.test(headline)) return true
   if (kind === "dental" && /\bvisit\b/i.test(headline)) return true

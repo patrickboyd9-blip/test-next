@@ -1,4 +1,5 @@
 import type { CampaignBrief, CreativeDirection, DirectionResearch, ResearchLayoutParameters } from "@/lib/campaign-creator/types"
+import { clientFactText, isNonMedicareInsurance } from "@/lib/design-intelligence/persuasion"
 import type { PostcardTemplateId } from "@/lib/postcard-layouts/ids"
 import { verticalPaletteForBrief } from "@/lib/postcard-layouts/assign"
 import { templatesForPalette } from "@/lib/postcard-layouts/templates"
@@ -97,7 +98,7 @@ export function stampLibraryResearch<T extends { directions: CreativeDirection[]
   if (hits.length === 0 || result.directions.length === 0) return result
   const tune = layoutTuneFromHits(hits)
   const gold = goldExpectationFromHits(hits)
-  const photo = photoNoteFromHits(hits)
+  const photo = photoNoteForBrief(photoNoteFromHits(hits), brief)
   const sources = hits.slice(0, 6).map((hit) => ({
     mmrId: hit.entry.id,
     title: sourceTitle(hit.entry),
@@ -128,7 +129,8 @@ export function stampLibraryResearch<T extends { directions: CreativeDirection[]
             }
           : research?.quality,
         influencedBy,
-        photoDirection: photo,
+        photoDirection: photo ?? research?.photoDirection,
+        evidenceTrace: research?.evidenceTrace,
       },
     }
     return next
@@ -198,8 +200,25 @@ function evidenceLine(hit: RetrievalHit): string {
   if (entry.photoStyle) bits.push(`photo: ${clip(entry.photoStyle, 140)}`)
   if (entry.whyItWorks) bits.push(`why it works: ${clip(entry.whyItWorks, 160)}`)
   if (entry.favoriteOf && entry.favoriteSimilarity) bits.push(`similarity ${entry.favoriteSimilarity}/5 to ${entry.favoriteOf}`)
-  if (entry.responseEvidence) bits.push(`internal response note, do not print: ${clip(entry.responseEvidence, 160)}`)
+  if (usableResponse(entry.responseEvidence)) bits.push(`internal response note, do not print: ${clip(entry.responseEvidence ?? "", 160)}`)
   return `- ${bits.join("; ")}`
+}
+
+function photoNoteForBrief(note: string | undefined, brief?: CampaignBrief): string | undefined {
+  const text = note?.replace(/\s+/g, " ").trim()
+  if (!text) return undefined
+  if (!brief) return text
+  const facts = clientFactText(brief)
+  if (!/\bmedicare\b|\bmedicaid\b|\bmedigap\b/i.test(facts) && /\bmedicare\b|\bmedicaid\b|\bmedigap\b|\bcoverage gap\b/i.test(text)) return undefined
+  if (isNonMedicareInsurance(facts) && /\bladders?\b|\bhandymen\b|\bhandyman\b|\broofers?\b|\bshingles?\b|\bhard hats?\b/i.test(text)) return undefined
+  return text
+}
+
+function usableResponse(value: string | undefined): boolean {
+  const trimmed = value?.replace(/\s+/g, " ").trim() ?? ""
+  if (!trimmed) return false
+  if (/^(?:unknown|n\/a|na|none|not available|not stated|unspecified)\b/i.test(trimmed)) return false
+  return true
 }
 
 function offerIsProminent(entry: ResearchEntry): boolean {
@@ -213,9 +232,11 @@ function templateBias(entry: ResearchEntry): string | undefined {
   const prominent = offerIsProminent(entry)
   if (entry.industry === "roofing" || entry.industry === "hvac" || entry.industry === "plumbing") {
     if (prominent && share >= 0.45) return entry.industry === "roofing" ? "roof_coupon" : "service_band"
-    if (share >= 0.6) return entry.industry === "roofing" ? "roof_full_bleed" : "hero_scrim"
+    if (share >= 0.55) return entry.industry === "roofing" ? "roof_full_bleed" : "hero_scrim"
   }
-  if (entry.industry === "auto_insurance" || entry.industry === "medicare" || entry.industry === "insurance") return "medicare_calm"
+  if (entry.industry === "auto_insurance" || entry.industry === "home_insurance" || entry.industry === "life_insurance") return "neighbor_letter"
+  if (entry.industry === "medicare") return "medicare_calm"
+  if (entry.industry === "insurance") return "neighbor_letter"
   if (share >= 0.6) return "hero_scrim"
   if (prominent) return "service_band"
   return undefined

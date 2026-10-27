@@ -1,7 +1,7 @@
 import type { CampaignBrief } from "@/lib/campaign-creator/types"
 import { verticalForBrief } from "@/lib/design-intelligence/vertical"
 
-import { industriesAdjacent, normalizeIndustry, researchEmotion, researchOfferType } from "./industry"
+import { industriesAdjacent, neighborRank, normalizeIndustry, researchEmotion, researchOfferType } from "./industry"
 import type { ResearchEntry, RetrievalHit, RetrievalQuery, RetrievalResult } from "./types"
 
 const DEFAULT_LIMIT = 6
@@ -28,6 +28,10 @@ export function queryFromBrief(brief: CampaignBrief, direction?: { name?: string
   }
 }
 
+export function entryHasContent(entry: ResearchEntry): boolean {
+  return Boolean(entry.headlines.some((line) => line.trim()) || entry.offers.some((line) => line.trim()) || entry.photoStyle?.trim())
+}
+
 export function retrieveResearch(entries: readonly ResearchEntry[], query: RetrievalQuery, limit = DEFAULT_LIMIT): RetrievalResult {
   const cap = Math.max(1, Math.min(8, limit))
   const ranked = entries
@@ -35,17 +39,27 @@ export function retrieveResearch(entries: readonly ResearchEntry[], query: Retri
     .filter((hit) => hit.score > 0)
     .sort((a, b) => b.score - a.score || a.entry.id.localeCompare(b.entry.id))
   const same = ranked.filter((hit) => hit.band === "same")
+  const adjacent = ranked.filter((hit) => hit.band === "adjacent")
+  const richSame = same.filter((hit) => entryHasContent(hit.entry))
+  const richAdjacent = adjacent.filter((hit) => entryHasContent(hit.entry))
   let fallback: RetrievalResult["fallback"] = "none"
   let pool = ranked
-  if (same.length >= cap) {
+  if (richSame.length >= cap) {
+    pool = richSame
+  } else if (richSame.length > 0) {
+    fallback = "filled"
+    pool = [...richSame, ...richAdjacent, ...same.filter((hit) => !entryHasContent(hit.entry))]
+  } else if (richAdjacent.length > 0) {
+    fallback = "adjacent"
+    pool = [...richAdjacent, ...adjacent.filter((hit) => !entryHasContent(hit.entry))]
+  } else if (same.length >= cap) {
     pool = same
   } else if (same.length > 0) {
     fallback = "filled"
-    pool = [...same, ...ranked.filter((hit) => hit.band === "adjacent")]
-  } else if (ranked.some((hit) => hit.band === "adjacent")) {
+    pool = [...same, ...adjacent]
+  } else if (adjacent.length > 0) {
     fallback = "adjacent"
-    pool = ranked.filter((hit) => hit.band === "adjacent")
-    if (pool.length < cap) pool = ranked
+    pool = adjacent.length >= cap ? adjacent : ranked
   } else {
     fallback = "broader"
   }
@@ -61,28 +75,50 @@ export function retrieveResearch(entries: readonly ResearchEntry[], query: Retri
 }
 
 function scoreEntry(entry: ResearchEntry, query: RetrievalQuery): { score: number; band: RetrievalHit["band"] } {
+  if (query.industry !== "medicare" && query.industry !== "final_expense" && medicareSpecific(entry)) {
+    return { score: 0, band: "broader" }
+  }
   let score = 2
   let band: RetrievalHit["band"] = "broader"
+  const neighbor = neighborRank(query.industry, entry.industry)
   if (entry.industry === query.industry) {
     score += 50
     band = "same"
+  } else if (neighbor > 0) {
+    score += neighbor === 1 ? 28 : neighbor === 2 ? 22 : 16
+    band = "adjacent"
   } else if (industriesAdjacent(entry.industry, query.industry)) {
-    score += 22
+    score += 18
     band = "adjacent"
   } else if (entry.industry === "home_services" || entry.industry === "insurance" || query.industry === "home_services") {
     score += 6
   } else {
     score -= 4
   }
+  if (!entryHasContent(entry)) score -= 80
   if (entry.gold) score += 28
   if (entry.evidence === "visual") score += 22
   else score += 3
   if (entry.favoriteSimilarity) score += entry.favoriteSimilarity * 4
-  if (entry.responseEvidence) score += 8
+  if (usableResponseNote(entry.responseEvidence)) score += 8
   if (entry.offerType !== "other" && entry.offerType === query.offerType) score += 10
   if (entry.emotion !== "unspecified" && entry.emotion === query.emotion) score += 6
   score += audienceOverlap(entry, query)
   return { score, band }
+}
+
+function usableResponseNote(value: string | undefined): boolean {
+  const trimmed = value?.replace(/\s+/g, " ").trim() ?? ""
+  if (!trimmed) return false
+  if (/^(?:unknown|n\/a|na|none|not available|not stated|unspecified)\b/i.test(trimmed)) return false
+  if (/\bno measured\b|\bnot measured\b|\bno response (rate|data|noted)\b|\bno data\b|\bnone recorded\b|\bno rate\b/i.test(trimmed)) return false
+  return true
+}
+
+function medicareSpecific(entry: ResearchEntry): boolean {
+  if (entry.industry === "medicare") return true
+  const blob = [entry.headlines.join(" "), entry.offers.join(" "), entry.whyItWorks ?? "", entry.photoStyle ?? "", entry.searchText].join(" ")
+  return /\bmedicare\b|\bmedicaid\b|\bmedigap\b|\bcoverage gap\b|\baep\b|\bannual enrollment\b/i.test(blob)
 }
 
 function audienceOverlap(entry: ResearchEntry, query: RetrievalQuery): number {

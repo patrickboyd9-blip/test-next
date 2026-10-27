@@ -670,6 +670,7 @@ function responseField(record: Record<string, unknown>): string | undefined {
 function meaningfulResponse(value: string | undefined): string | undefined {
   const trimmed = value?.replace(/\s+/g, " ").trim()
   if (!trimmed) return undefined
+  if (/^(?:unknown|n\/a|na|none|not available|not stated|unspecified)\b/i.test(trimmed)) return undefined
   if (/\bno measured\b|\bnot measured\b|\bno response (rate|data|noted)\b|\bno data\b|\bnone recorded\b|\bno rate\b/i.test(trimmed)) return undefined
   return trimmed
 }

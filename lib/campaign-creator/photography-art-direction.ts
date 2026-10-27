@@ -253,6 +253,42 @@ const FINAL_EXPENSE: SceneBank = {
   ],
 }
 
+const AUTO_INSURANCE: SceneBank = {
+  consequence: [
+    "A parked family car in a residential driveway, daylight, intact, no collision. No person on a ladder and no work crew.",
+    "A quiet house front and one car in the drive, ordinary daylight, no damage and no tools.",
+    "The side of a family car and an empty driveway, calm sky, no crash and no one climbing.",
+  ],
+  crew: [
+    "The same parked family car, quiet daylight, no driver posed at the camera, no tools and no ladder.",
+    "A local advisor only when that photograph was uploaded. Otherwise the parked car and the house, no hard hat and no roof work.",
+    "Hands are out of frame. The subject is the car in the driveway, daylight, no collision.",
+  ],
+  neighborhood: [
+    "A quiet residential street with ordinary cars in driveways, daylight, no crash and no work crew.",
+    "Houses and parked cars along a sidewalk, one time of day, no readable signs and no ladders.",
+    "A shaded driveway and a family car, the house intact, no repair and no Medicare card.",
+  ],
+}
+
+const LIFE_INSURANCE: SceneBank = {
+  consequence: [
+    "A living family at a kitchen table in daylight, well and connected, contemporary color. Not grief and not a work site.",
+    "Two generations on a front porch, alive and at ease. Not a ladder, not a cemetery, and not a hospital.",
+    "A family walking a quiet block, capable and ordinary. Not a crash and not a construction crew.",
+  ],
+  crew: [
+    "A living family photographed together, faces natural, contemporary color. Not a casket and not a hard hat.",
+    "Hands of two generations around a table, only the people and the table, daylight.",
+    "A parent and an adult child in a bright kitchen, well and ordinary. Not a job site.",
+  ],
+  neighborhood: [
+    "An ordinary home with a family on the walk, living and well, daylight, no readable signs.",
+    "A residential street and a family out together, contemporary color. Not a capitol and not a ladder.",
+    "A front yard in open light, people alive and capable. Not a roof repair.",
+  ],
+}
+
 const LOCAL_SERVICE: SceneBank = {
   consequence: [
     "The visible cost of waiting, in an ordinary home, shown as a category situation: one small problem in a calm room. Not gore and not a ruined kitchen used as stock proof.",
@@ -285,6 +321,9 @@ const BANKS: Record<string, SceneBank> = {
   pizza_qsr: RESTAURANT,
   dental: DENTAL,
   med_spa: DENTAL,
+  auto_insurance: AUTO_INSURANCE,
+  home_insurance: AUTO_INSURANCE,
+  life_insurance: LIFE_INSURANCE,
   "local-service": LOCAL_SERVICE,
 }
 
@@ -381,11 +420,13 @@ export function buildPhotographyArtDirection(input: {
   const bank = BANKS[bankKey(trade)] ?? LOCAL_SERVICE
   const conceived = input.visualDirection.trim()
   const weak = isWeakVisualDirection(conceived)
+  const insuranceTrade = trade === "auto_insurance" || trade === "home_insurance" || trade === "life_insurance"
+  const genericJob = /finished result of the job|the problem itself|from this business|one local person/i.test(conceived)
   const portrait = trade.startsWith("medicare") ? uploadedAgentPortrait(input.campaign) : undefined
   const subject =
     portrait && input.imageryRole === "crew"
       ? `The uploaded agent photograph: ${portrait}. A friendly headshot, eyes to the camera, natural color, capable and local. Not a stock model and not a government portrait.`
-      : weak || badSubject(conceived, trade)
+      : weak || badSubject(conceived, trade) || (insuranceTrade && genericJob)
         ? pick(bank[input.imageryRole], `${input.variationKey ?? "direction"}:${input.leadJob}`)
         : conceived
 
@@ -402,6 +443,10 @@ export function buildPhotographyArtDirection(input: {
 
   const craft = craftNote(input.campaign, trade)
   if (craft) art.craft = craft
+  if (trade === "auto_insurance" || trade === "home_insurance" || trade === "life_insurance") {
+    art.negativeSpace = "Leave a calm third of the frame as open sky, driveway, or a plain wall. No ladders, tools, work crews, roofs being repaired, or people climbing."
+    art.refuse = `${art.refuse} No ladders, handymen, roofers, hard hats, crashes, collisions, or Medicare cards.`
+  }
   return art
 }
 
@@ -431,6 +476,9 @@ function refuseFor(trade: string): string {
 }
 
 function badSubject(value: string, trade: string): boolean {
+  if (trade === "auto_insurance" || trade === "home_insurance" || trade === "life_insurance") {
+    return /\b(ladders?|handymen|handyman|roofers?|shingles?|hard hats?|condensers?|technicians?|construction|job sites?|medicare|crashes?|collisions?|caskets?|funerals?)\b/i.test(value)
+  }
   if (!trade.startsWith("medicare") && trade !== "final_expense" && trade !== "life_insurance") {
     return false
   }

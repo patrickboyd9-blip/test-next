@@ -74,10 +74,6 @@ export function heroLockup(offer: string): { numeral: string; rest: string } {
   }
   const priced = cleaned.match(/^(\$?\d[\d,]*(?:\.\d+)?%?)\b\s*(.*)$/)
   if (priced) return { numeral: priced[1] ?? cleaned, rest: (priced[2] ?? "").trim() }
-  const parts = cleaned.split(/\s+/).filter(Boolean)
-  if (parts.length > 1 && (parts[0] ?? "").length <= 12) {
-    return { numeral: parts[0] ?? cleaned, rest: parts.slice(1).join(" ") }
-  }
   return { numeral: cleaned, rest: "" }
 }
 
