@@ -15,6 +15,7 @@ import {
   type PDFPage,
 } from "pdf-lib"
 
+import { addressSideQrPayload } from "@/lib/campaign-creator/address-side"
 import { buildQrMatrix, QR_QUIET_MODULES } from "@/lib/campaign-creator/studio-qr"
 import {
   canvasRect,
@@ -58,6 +59,7 @@ export async function renderTemplatedPostcardPdf(input: {
   size?: PostcardSizeId
   image?: PostcardPrintImage
   alternateImage?: PostcardPrintImage
+  backImage?: PostcardPrintImage
 }): Promise<RenderedPostcardPdf> {
   const size = input.size ?? "5x8"
   const spec = geometryFor(size)
@@ -90,6 +92,7 @@ export async function renderTemplatedPostcardPdf(input: {
   const text = await doc.embedFont(readFileSync(path.join(FONT_DIR, "SourceSans3-Regular.ttf")), { subset: true })
   const strong = await doc.embedFont(readFileSync(path.join(FONT_DIR, "SourceSans3-Semibold.ttf")), { subset: true })
   const images = await embedImages(doc, input.image, input.alternateImage, spec)
+  const backPhoto = await embedLoose(doc, input.backImage)
 
   const pageSize: [number, number] = [spec.pdfPagePoints.widthPoints, spec.pdfPagePoints.heightPoints]
   const frontPage = doc.addPage(pageSize)
@@ -98,8 +101,11 @@ export async function renderTemplatedPostcardPdf(input: {
   markBoxes(backPage, spec)
 
   drawFront(frontPage, spec, front, images, input.copy.qrPayload, display, strong, text)
-  if (isRoofingProTemplate(input.templateId)) drawPlanBack(backPage, spec, back, display, strong, text)
-  else drawBack(backPage, spec, input.copy, back, display, strong, text)
+  if (isRoofingProTemplate(input.templateId) || input.copy.addressSide) {
+    drawPlanBack(backPage, spec, back, display, strong, text, backPhoto, addressSideQrPayload(input.copy, input.copy.qrPayload))
+  } else {
+    drawBack(backPage, spec, input.copy, back, display, strong, text)
+  }
 
   const bytes = await doc.save({ useObjectStreams: false })
   assertTemplatedPage(bytes, spec)
@@ -147,6 +153,7 @@ export async function renderStudioDesignPdf(input: {
   copy: PostcardPrintCopy
   image?: PostcardPrintImage
   alternateImage?: PostcardPrintImage
+  backImage?: PostcardPrintImage
 }): Promise<RenderedPostcardPdf & { design: GridCard }> {
   const spec = geometryFor(input.card.front.size)
   const doc = await PDFDocument.create()
@@ -155,13 +162,23 @@ export async function renderStudioDesignPdf(input: {
   const text = await doc.embedFont(readFileSync(path.join(FONT_DIR, "SourceSans3-Regular.ttf")), { subset: true })
   const strong = await doc.embedFont(readFileSync(path.join(FONT_DIR, "SourceSans3-Semibold.ttf")), { subset: true })
   const images = await embedImages(doc, input.image, input.alternateImage, spec)
+  const backPhoto = await embedLoose(doc, input.backImage)
   const pageSize: [number, number] = [spec.pdfPagePoints.widthPoints, spec.pdfPagePoints.heightPoints]
   const frontPage = doc.addPage(pageSize)
   const backPage = doc.addPage(pageSize)
   markBoxes(frontPage, spec)
   markBoxes(backPage, spec)
   drawFront(frontPage, spec, input.card.front, images, input.copy.qrPayload, display, strong, text)
-  drawPlanBack(backPage, spec, input.card.back, display, strong, text)
+  drawPlanBack(
+    backPage,
+    spec,
+    input.card.back,
+    display,
+    strong,
+    text,
+    backPhoto,
+    addressSideQrPayload(input.copy, input.copy.qrPayload)
+  )
   const bytes = await doc.save({ useObjectStreams: false })
   await assertTemplatedPage(bytes, spec)
   return {
@@ -179,7 +196,9 @@ function drawPlanBack(
   plan: PostcardFacePlan,
   display: PDFFont,
   strong: PDFFont,
-  text: PDFFont
+  text: PDFFont,
+  backPhoto: PDFImage | null = null,
+  qrPayload?: string
 ) {
   const paper = plan.shapes.find((shape) => shape.role === "paper")?.fill ?? "#FFFFFF"
   page.drawRectangle({
@@ -190,8 +209,11 @@ function drawPlanBack(
     color: paint(paper),
   })
   for (const shape of plan.shapes) drawShape(page, spec, plan, shape)
+  for (const slot of plan.photos) {
+    drawPhoto(page, spec, plan, slot, backPhoto, plan.palette.field)
+  }
   for (const line of plan.texts) drawFitted(page, spec, line, display, text)
-  if (plan.lockup) drawFrontLockup(page, spec, plan, undefined, display, strong, text)
+  if (plan.lockup) drawFrontLockup(page, spec, plan, qrPayload, display, strong, text)
 }
 
 function drawFront(
@@ -596,6 +618,16 @@ interface EmbeddedImages {
   primary: PDFImage | null
   alternate: PDFImage | null
   dpi: { x: number; y: number }
+}
+
+async function embedLoose(doc: PDFDocument, image: PostcardPrintImage | undefined): Promise<PDFImage | null> {
+  if (!image) return null
+  try {
+    const kind = image.bytes[0] === 0xff && image.bytes[1] === 0xd8 ? "jpeg" : "png"
+    return kind === "jpeg" ? doc.embedJpg(image.bytes) : doc.embedPng(image.bytes)
+  } catch {
+    return null
+  }
 }
 
 async function embedImages(

@@ -298,6 +298,7 @@ export function CreativeStudio({
         onApprove={() => openApproval("refine")}
         onApplyRefinement={handleApplyRefinement}
         onRestoreRevision={handleRestoreRevision}
+        onCampaignUpdate={onCampaignUpdate}
       />
     )
   } else {
@@ -318,6 +319,7 @@ export function CreativeStudio({
         onStartRefining={() => setSubPhase("refine")}
         onApproveAsIs={() => openApproval("focus")}
         onBlueprintApplied={onCampaignUpdate}
+        onCampaignUpdate={onCampaignUpdate}
         campaignId={hasPersistedDirections ? campaign.id : undefined}
         feedback={feedback.find((item) => item.directionId === selectedDirection.id)}
       />

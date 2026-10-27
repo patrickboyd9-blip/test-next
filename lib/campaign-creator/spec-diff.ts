@@ -20,6 +20,7 @@ const SPEC_FIELD_LABELS: Record<string, string> = {
   imagePresence: "Image presence",
   layoutHints: "Layout",
   designRationale: "Design",
+  addressSide: "Back of the card",
 }
 
 export function buildSpecDiff(before: CreativeSpec, after: CreativeSpec): SpecDiff {
@@ -68,6 +69,7 @@ function serializeSpecField(key: keyof CreativeSpec, value: unknown): string {
   if (key === "palette" && Array.isArray(value)) return value.join(", ")
   if (key === "layoutHints" && typeof value === "object") return JSON.stringify(value)
   if (key === "designRationale" && typeof value === "object") return JSON.stringify(value)
+  if (key === "addressSide" && typeof value === "object") return JSON.stringify(value)
   return String(value)
 }
 

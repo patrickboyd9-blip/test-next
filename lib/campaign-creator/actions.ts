@@ -27,7 +27,7 @@ import {
 import { campaignForCustomer } from "./customer-campaign"
 import { getCampaignRepository } from "./repository"
 import { buildSpecDiff, cloneSpec } from "./spec-diff"
-import type { Campaign, CampaignBrief, CreativeRevision, MailPieceSpec } from "./types"
+import type { AddressSideEdit, Campaign, CampaignBrief, CreativeRevision, MailPieceSpec } from "./types"
 import type {
   MailPieceCatalogId,
   MailPieceCatalogVersion,
@@ -401,6 +401,14 @@ export async function restoreRevision(
   return forCustomer(
     await repository.appendRevision(campaignId, revision, restoredSpec, { directionId })
   )
+}
+
+export async function updateAddressSide(campaignId: string, edit: AddressSideEdit): Promise<Campaign> {
+  const campaign = await repository.getCampaign(campaignId)
+  if (!campaign) throw new Error(`Campaign ${campaignId} not found`)
+  const directionId = campaign.creative.selectedDirectionId
+  if (!directionId) throw new Error("No direction selected")
+  return forCustomer(await repository.saveAddressSide(campaignId, directionId, edit))
 }
 
 export async function approveCreative(campaignId: string): Promise<Campaign> {

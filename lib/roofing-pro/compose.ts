@@ -1,3 +1,4 @@
+import { composeAddressSideFace } from "@/lib/campaign-creator/address-side-layout"
 import { qrScanLabel } from "@/components/campaign-creator/studio/design-rules"
 import type { CreativeSpec } from "@/lib/campaign-creator/types"
 import type { LockupPlan, PhotoSlotPlan, PostcardFacePlan, ShapePlan, TrustChipPlan } from "@/lib/postcard-layouts/compose"
@@ -30,13 +31,15 @@ export interface RoofingProInput {
   face?: "front" | "back"
   spec: Pick<
     CreativeSpec,
-    "headline" | "subheadline" | "body" | "offer" | "callToAction" | "phone" | "website" | "qrDestination"
+    "headline" | "subheadline" | "body" | "offer" | "callToAction" | "phone" | "website" | "qrDestination" | "addressSide"
   >
   businessName?: string
   qrPayload?: string | null
   license?: string | null
   disclaimerText?: string | null
   complianceMark?: string | null
+  /** Return lines for the message column. The mailing panel stays blank. */
+  returnAddress?: string | null
 }
 
 const DARK_TYPE = new Set<RoofingProTemplateId>(["roof_full_bleed", "roof_storm", "roof_seasonal"])
@@ -165,6 +168,23 @@ function composeBack(
   pairing: PostcardFacePlan["pairing"],
   palette: VerticalPalette
 ): PostcardFacePlan {
+  if (input.spec.addressSide) {
+    return composeAddressSideFace({
+      size,
+      pairing,
+      palette,
+      spec: input.spec,
+      businessName: input.businessName,
+      phone: input.spec.phone,
+      website: input.spec.website,
+      license: input.license ?? undefined,
+      returnAddress: input.returnAddress ?? undefined,
+      qrDestination: input.qrPayload ?? input.spec.qrDestination,
+      disclaimer: input.disclaimerText,
+      complianceMark: input.complianceMark,
+      templateId: input.templateId,
+    })
+  }
   const box = contentBox(size)
   const trim = trimInches(size)
   const copy = resolveCopy(input, ROOFING_PRO_META[input.templateId].offerLed)

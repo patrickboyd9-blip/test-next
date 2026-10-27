@@ -9,12 +9,14 @@ import type { GeneratedAsset } from "@/lib/campaign-creator/image-generation"
 import type { PostcardIdentity } from "@/lib/campaign-creator/studio-contact"
 import { presentStudioPhoto, type StudioImageState } from "@/lib/campaign-creator/studio-photo"
 import type { ConceptFeedbackView } from "@/lib/campaign-creator/actions"
-import type { Campaign, CampaignBrief, CreativeDirection, CreativeSpec } from "@/lib/campaign-creator/types"
+import { fallbackBackProof } from "@/lib/campaign-creator/address-side"
+import type { AddressSideEdit, Campaign, CampaignBrief, CreativeDirection, CreativeSpec } from "@/lib/campaign-creator/types"
 import { persuasionAngles, persuasionRecordLine, persuasionUsesLine, persuasionWarnings } from "@/lib/design-intelligence/persuasion"
 import { designDebugEnabled, publicDirectionLine } from "@/lib/campaign-creator/customer-direction-line"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
 import { verticalForBrief } from "@/lib/design-intelligence/vertical"
+import { AddressSideEditor } from "./AddressSideEditor"
 import { BlueprintBrowser } from "./BlueprintBrowser"
 import { ProTemplatePicker } from "./ProTemplatePicker"
 import { ConceptCard } from "./ConceptCard"
@@ -43,6 +45,7 @@ interface FocusViewProps {
   campaignId?: string
   feedback?: ConceptFeedbackView
   onBlueprintApplied?: (campaign: Campaign) => void
+  onCampaignUpdate?: (campaign: Campaign) => void
 }
 
 function buildFocusCaption(direction: CreativeDirection): string {
@@ -68,9 +71,17 @@ export function FocusView({
   campaignId,
   feedback,
   onBlueprintApplied,
+  onCampaignUpdate,
 }: FocusViewProps) {
   const reducedMotion = useReducedMotion()
   const [side, setSide] = useState<"front" | "back">("front")
+  const [backEdit, setBackEdit] = useState<AddressSideEdit | undefined>(spec.addressSide)
+  const [backDirection, setBackDirection] = useState(direction.id)
+  if (backDirection !== direction.id) {
+    setBackDirection(direction.id)
+    setBackEdit(spec.addressSide)
+  }
+  const previewSpec = backEdit ? { ...spec, addressSide: backEdit } : spec
   const caption = buildFocusCaption(direction)
   const debug = designDebugEnabled()
   const uses = debug ? persuasionUsesLine(spec.designRationale) : null
@@ -98,7 +109,7 @@ export function FocusView({
         >
           <PostcardPreview
             canvas={canvas}
-            spec={spec}
+            spec={previewSpec}
             side={side}
             size="hero"
             identity={identity}
@@ -110,6 +121,25 @@ export function FocusView({
           />
           <StudioPhotoNote note={photoNote} />
           <PostcardSideToggle side={side} onSideChange={setSide} />
+          {side === "back" ? (
+            <AddressSideEditor
+              key={direction.id}
+              spec={previewSpec}
+              campaignId={campaignId}
+              fallbacks={{
+                businessName: identity?.businessName,
+                offer: spec.offer,
+                proof: fallbackBackProof(spec.designRationale?.trust.back_only[0], spec.offer ?? ""),
+                license: identity?.license,
+                phone: identity?.phone ?? spec.phone,
+                website: identity?.website ?? spec.website,
+                returnAddress: brief?.businessInfo?.address,
+                qrDestination: identity?.qrDestination ?? spec.qrDestination,
+              }}
+              onPreview={setBackEdit}
+              onSaved={onCampaignUpdate}
+            />
+          ) : null}
         </motion.div>
       </AnimatePresence>
 

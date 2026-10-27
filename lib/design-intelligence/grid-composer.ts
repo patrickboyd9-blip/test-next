@@ -1,4 +1,5 @@
-import type { CreativeSpec } from "@/lib/campaign-creator/types"
+import { composeAddressSideFace } from "@/lib/campaign-creator/address-side-layout"
+import type { AddressSideEdit, CreativeSpec } from "@/lib/campaign-creator/types"
 import type { PostcardFacePlan, PhotoSlotPlan, ShapePlan } from "@/lib/postcard-layouts/compose"
 import type { FontPairingId, PostcardTemplateId, VerticalPaletteId } from "@/lib/postcard-layouts/ids"
 import type { VerticalPalette } from "@/lib/postcard-layouts/palette"
@@ -38,11 +39,15 @@ const QR_IN = 0.8
 
 export interface GridComposeInput {
   rationale: DesignRationale
-  spec: Pick<CreativeSpec, "headline" | "subheadline" | "body" | "offer" | "callToAction" | "phone" | "website" | "qrDestination">
+  spec: Pick<CreativeSpec, "headline" | "subheadline" | "body" | "offer" | "callToAction" | "phone" | "website" | "qrDestination" | "addressSide">
   businessName?: string
   disclaimer?: string | null
   /** Printed on the address side when a regulated vertical requires a label. */
   complianceMark?: string | null
+  /** License the business already supplied. Printed only when that section is on. */
+  license?: string | null
+  /** Return lines for the message column. The mailing panel stays blank. */
+  returnAddress?: string | null
 }
 
 export interface GridCard {
@@ -193,19 +198,7 @@ export function composeGridCard(input: GridComposeInput): GridCard {
     ].filter((item) => item.length > 0),
   }
 
-  const back = composeBack({
-    trim: input.rationale.format.trim,
-    geometry: input.rationale.format.trim === "6x9" ? buildPostcard6x9PrintSpec() : buildPostcard5x8PrintSpec(),
-    palette,
-    pairing,
-    ink,
-    businessName: clean(input.businessName),
-    phone,
-    website,
-    proof: backProof(input.rationale.trust.back_only[0], clean(input.spec.offer)),
-    disclaimer: input.disclaimer ?? null,
-    complianceMark: input.complianceMark ?? null,
-  })
+  const back = paintBack(input, palette, pairing, ink, clean(input.businessName), phone, website)
 
   const headlineText = texts.find((text) => text.role === "headline")
   return finishCard({
@@ -421,19 +414,7 @@ function composeIntegrated(
     overflows: faceOverflows(texts, [phoneText, websiteText]),
     missingContact: [phoneText.text ? "" : "phone", websiteText.text ? "" : "website"].filter((item) => item.length > 0),
   }
-  const back = composeBack({
-    trim: input.rationale.format.trim,
-    geometry: input.rationale.format.trim === "6x9" ? buildPostcard6x9PrintSpec() : buildPostcard5x8PrintSpec(),
-    palette,
-    pairing,
-    ink,
-    businessName: name,
-    phone,
-    website,
-    proof: backProof(input.rationale.trust.back_only[0], clean(input.spec.offer)),
-    disclaimer: input.disclaimer ?? null,
-    complianceMark: input.complianceMark ?? null,
-  })
+  const back = paintBack(input, palette, pairing, ink, name, phone, website)
   const offerText = texts.find((text) => text.role === "offer")
   const headlineText = texts.find((text) => text.role === "headline")
   return finishCard({
@@ -679,19 +660,7 @@ function composeOfferStrip(
     overflows: faceOverflows(texts, [phoneText, websiteText]),
     missingContact: [phoneText.text ? "" : "phone", websiteText.text ? "" : "website"].filter((item) => item.length > 0),
   }
-  const back = composeBack({
-    trim: input.rationale.format.trim,
-    geometry: input.rationale.format.trim === "6x9" ? buildPostcard6x9PrintSpec() : buildPostcard5x8PrintSpec(),
-    palette,
-    pairing,
-    ink,
-    businessName: name || "Local crew",
-    phone,
-    website,
-    proof: backProof(input.rationale.trust.back_only[0], clean(input.spec.offer)),
-    disclaimer: input.disclaimer ?? null,
-    complianceMark: input.complianceMark ?? null,
-  })
+  const back = paintBack(input, palette, pairing, ink, name || "Local crew", phone, website)
   return finishCard({
     front,
     back,
@@ -707,6 +676,35 @@ function composeOfferStrip(
   }, input)
 }
 
+function paintBack(
+  input: GridComposeInput,
+  palette: VerticalPalette,
+  pairing: FontPairingId,
+  ink: string,
+  businessName: string,
+  phone: string,
+  website: string
+): PostcardFacePlan {
+  return composeBack({
+    trim: input.rationale.format.trim,
+    geometry: input.rationale.format.trim === "6x9" ? buildPostcard6x9PrintSpec() : buildPostcard5x8PrintSpec(),
+    palette,
+    pairing,
+    ink,
+    businessName,
+    phone,
+    website,
+    proof: backProof(input.rationale.trust.back_only[0], clean(input.spec.offer)),
+    disclaimer: input.disclaimer ?? null,
+    complianceMark: input.complianceMark ?? null,
+    addressSide: input.spec.addressSide,
+    offer: clean(input.spec.offer),
+    license: input.license ?? undefined,
+    returnAddress: input.returnAddress ?? undefined,
+    qrDestination: clean(input.spec.qrDestination),
+  })
+}
+
 function composeBack(input: {
   trim: TrimSize
   geometry: PostcardGeometry
@@ -719,7 +717,36 @@ function composeBack(input: {
   proof: string
   disclaimer: string | null
   complianceMark?: string | null
+  addressSide?: AddressSideEdit
+  offer?: string
+  license?: string
+  returnAddress?: string
+  qrDestination?: string
 }): PostcardFacePlan {
+  if (input.addressSide) {
+    return composeAddressSideFace({
+      size: input.trim,
+      pairing: input.pairing,
+      palette: input.palette,
+      ink: input.ink,
+      spec: {
+        addressSide: input.addressSide,
+        offer: input.offer,
+        phone: input.phone,
+        website: input.website,
+        qrDestination: input.qrDestination,
+      },
+      businessName: input.businessName,
+      phone: input.phone,
+      website: input.website,
+      proof: input.proof,
+      license: input.license,
+      returnAddress: input.returnAddress,
+      qrDestination: input.qrDestination,
+      disclaimer: input.disclaimer,
+      complianceMark: input.complianceMark,
+    })
+  }
   const content = canvasToTrim(addressSideContentRect(input.geometry), input.geometry.bleedInchesPerSide)
   const texts: FittedText[] = []
   let cursor = content.y
