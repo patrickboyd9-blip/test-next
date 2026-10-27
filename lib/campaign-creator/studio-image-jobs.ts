@@ -84,6 +84,7 @@ interface WorkItem {
   spec: CreativeSpec
   tier: StudioImageTier
   photoSlot?: "primary" | "before" | "after"
+  researchPhotoNote?: string
 }
 
 interface PreparedSlot {
@@ -183,7 +184,8 @@ async function readStudioImageSlots(input: {
     const context = imageBriefContextFor(
       item.directionId,
       input.campaignBrief,
-      item.photoSlot ?? (isBeforeAfterTemplate(item.spec.layoutHints?.templateId) ? "before" : "primary")
+      item.photoSlot ?? (isBeforeAfterTemplate(item.spec.layoutHints?.templateId) ? "before" : "primary"),
+      item.researchPhotoNote
     )
     const brief = toImageBrief(item.spec, context)
     if (!brief) continue
@@ -249,13 +251,15 @@ function workItems(
       directionId: entry.directionId,
       spec: entry.spec,
       tier: "preview",
+      researchPhotoNote: entry.researchPhotoNote,
     })
   )
   const selected = creative.selectedDirectionId
   if (!selected) return previews
   const spec = getApprovedSpec(creative) ?? getActiveSpec(creative, selected)
   if (!spec) return previews
-  return [...previews, ...expandPhotoSlots({ directionId: selected, spec, tier: "final" })]
+  const note = creative.directions.find((direction) => direction.id === selected)?.research?.photoDirection
+  return [...previews, ...expandPhotoSlots({ directionId: selected, spec, tier: "final", researchPhotoNote: note })]
 }
 
 function expandPhotoSlots(item: WorkItem): WorkItem[] {

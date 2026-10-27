@@ -27,6 +27,9 @@ export function ResearchBasis({ research }: { research?: DirectionResearch }) {
           </li>
         ))}
       </ul>
+      {research.influencedBy && research.influencedBy.length > 0 ? (
+        <p className="mt-1.5">Influenced by {research.influencedBy.join(", ")}</p>
+      ) : null}
       {research.layoutSummary ? <p className="mt-1.5">{research.layoutSummary}</p> : null}
     </details>
   )

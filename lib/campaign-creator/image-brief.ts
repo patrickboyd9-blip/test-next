@@ -56,6 +56,8 @@ export interface ImageBriefContext {
   variationKey?: string
   /** Before/after compositions ask for a second, different photograph. */
   photoSlot?: "primary" | "before" | "after"
+  /** Text description from retrieved mailers. Not an image. */
+  researchPhotoNote?: string
 }
 
 export interface ImageBrief {
@@ -158,6 +160,13 @@ export function toImageBrief(
     if (roofSlot === "after") brief.imageryRole = "neighborhood"
     if (roofSlot === "before") {
       brief.doNotInvent = brief.doNotInvent.filter((item) => item !== "invented property damage")
+    }
+  }
+
+  if (context.researchPhotoNote?.trim()) {
+    brief.artDirection = {
+      ...brief.artDirection,
+      subject: `${brief.artDirection.subject} Photograph direction from researched mailers, as a description only: ${context.researchPhotoNote.trim()}`,
     }
   }
 

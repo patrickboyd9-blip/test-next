@@ -6,7 +6,8 @@ import { findIndustryPlaybook } from "./playbooks"
 import { generateRecommendations } from "./recommendation-engine"
 
 export function buildCampaignPrompt(
-  brief: CampaignBrief
+  brief: CampaignBrief,
+  libraryEvidence?: string
 ): string {
   const searchableText = JSON.stringify(brief)
 
@@ -51,6 +52,7 @@ ${playbook}`
     : ""
 }
 
+${libraryEvidence?.trim() ? `Research library evidence:\n${libraryEvidence.trim()}\n` : ""}
 Current Campaign Brief:
 
 ${JSON.stringify(brief, null, 2)}

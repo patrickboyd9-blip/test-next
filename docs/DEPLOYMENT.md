@@ -42,6 +42,10 @@ Without the two API keys, campaign pages still open. The writing and the photogr
 
 Studio already knows the written grades for the mailbox and vendor pieces. Those notes ship with the app. The photographs of those pieces do not. They stay out of git.
 
+The daily pull also indexes the written library: every MMR markdown record, the gold recipes under `gold/`, and the rest of the C-3PO branch. Anything inside a `private/` folder is skipped and never stored. Copy, layout, photograph direction, and the critic read that index. The index is cached in the database (or `.data` on a laptop). It does not copy the research into this public repository.
+
+**Production needs `RESEARCH_GITHUB_TOKEN` set in Vercel** for this grounding to work on the live site. Without that token the app still runs, and it still uses the written seed that ships in the code, but it cannot see the full private library. Preview needs the same token if you want preview generations grounded the same way.
+
 To let the live site keep learning from new mail, add these in **Settings → Environment Variables** for **Production and Preview**:
 
 | Variable | Required | What to put |
@@ -63,6 +67,7 @@ Optional. Leave them blank unless you need to change a default.
 | `DESIGN_CRITIC` | the vision model when `ANTHROPIC_API_KEY` is set, otherwise a machine estimate | Set to `machine` to score from measurements only. A machine score is labeled "machine estimate" until the vision critic runs. The vision critic scores the print-resolution card. If that render cannot be produced, the score stays a machine estimate. |
 | `DESIGN_CRITIC_ROUNDS` | `3` | How many layout repairs to try. The app will not go past 3. |
 | `DESIGN_SYNC_BATCH` | `40` | How many new mailers one daily run downloads. |
+| `RESEARCH_INDEX_BATCH` | `80` | How many written records one daily run reads into the research index. The job repeats the batch a few times so a full library catches up. `npx tsx scripts/research-coverage.ts` reads the rest on a laptop. |
 | `DESIGN_ANALYZE_CAP` | `8` | How many ungraded mailers one run sends to the vision model for a short written grade. |
 | `VISION_TASTE_BATCH` | `4` | How many reference photographs one run reads with the vision model for the taste library. The daily job and “sync now” both do this batch. A separate backfill clears the rest. |
 | `VISION_TASTE_PASSES` | `8` | How many batches `scripts/backfill-vision-taste.ts` will run before it stops. |

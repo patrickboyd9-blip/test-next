@@ -22,6 +22,8 @@ import { attorneyAdMark } from "./attorney-compliance"
 import { applyOutcomeHeadline, clientFactText } from "./persuasion"
 import { renderStudioCardPng } from "./studio-render"
 import { viewSelection, type ImageView } from "./view-images"
+import { formatArtDirectorEvidence, goldExpectationFromHits, layoutTuneFromHits } from "@/lib/research-library/evidence"
+import { researchHitsForBrief } from "@/lib/research-library"
 
 export interface DirectedCard {
   rationale: DesignRationale
@@ -43,18 +45,27 @@ export async function directOneCard(input: {
   records?: LibraryRecord[]
   env?: NodeJS.ProcessEnv
   cardId?: string
+  researchHits?: import("@/lib/research-library/types").RetrievalHit[]
 }): Promise<DirectedCard> {
   const env = input.env ?? process.env
   const records = input.records ?? (await loadLibrary())
   const selection = selectReferences(records, input.brief)
   const trim = input.trim ?? "5x8"
   const cardId = input.cardId ?? "card"
-  const cited = citationsForDirection(records, input.brief, directionRecipe({ brief: input.brief, selection, trim }, 0).mode)
+  const hits = input.researchHits ?? []
+  const tune = layoutTuneFromHits(hits)
+  const cited = citationsForDirection(records, input.brief, directionRecipe({ brief: input.brief, selection, trim, layoutTune: tune ?? undefined }, 0).mode)
   const costs: TokenCost[] = []
   let proposed: unknown
   let modelNote: TokenCost | null = null
   if (directorMode(env) === "model") {
-    const model = await requestModelRationale({ brief: input.brief, selection: { ...selection, imageIds: cited.map((item) => item.mmrId) }, trim, env })
+    const model = await requestModelRationale({
+      brief: input.brief,
+      selection: { ...selection, imageIds: cited.map((item) => item.mmrId) },
+      trim,
+      env,
+      guidance: formatArtDirectorEvidence(hits),
+    })
     proposed = model.rationale
     modelNote = usageCost(cardId, "art-director", model.usage, env)
     costs.push(modelNote)
@@ -65,7 +76,7 @@ export async function directOneCard(input: {
     logTokenCost(rules)
   }
   const viewed = await viewSelection(records, { ...selection, imageIds: cited.map((item) => item.mmrId) }, env)
-  const directed = directDesign({ brief: input.brief, selection, trim, proposed, slot: 0 })
+  const directed = directDesign({ brief: input.brief, selection, trim, proposed, slot: 0, layoutTune: tune ?? undefined })
   const repaired = repairCard({
     brief: input.brief,
     spec: input.spec,
@@ -74,6 +85,7 @@ export async function directOneCard(input: {
     costs,
     env,
     cardId,
+    gold: goldExpectationFromHits(hits),
   })
   return noteViews(repaired, viewed)
 }
@@ -86,6 +98,7 @@ export function repairCard(input: {
   costs?: TokenCost[]
   env?: NodeJS.ProcessEnv
   cardId?: string
+  gold?: import("@/lib/research-library/types").GoldExpectation | null
 }): DirectedCard {
   const env = input.env ?? process.env
   const cap = criticCap(env)
@@ -112,7 +125,7 @@ export function repairCard(input: {
       complianceMark: attorneyAdMark(facts),
     })
     const copy = cardCopy(spec, input.businessName, attorneyAdMark(facts))
-    const critique = critiqueCard(card, rationale, copy, undefined, clientFactText(input.brief, spec.offer))
+    const critique = critiqueCard(card, rationale, copy, undefined, clientFactText(input.brief, spec.offer), input.gold)
     const similarity = checkSimilarity(card, copy, input.brief)
     const passed = critiquePasses(critique, similarity)
     const attempt: DirectedCard = {
@@ -171,6 +184,9 @@ export async function applyDesignIntelligence(
     records = []
   }
   const selection = records.length > 0 ? selectReferences(records, brief) : null
+  const hits = await researchHitsForBrief(brief)
+  const tune = layoutTuneFromHits(hits)
+  const libraryGuidance = formatArtDirectorEvidence(hits)
   const trim = trimFromCanvas(canvas)
   const leadIndex = Math.max(0, result.directions.findIndex((direction) => direction.recommended))
   let leadRationale: DesignRationale | null = null
@@ -182,22 +198,23 @@ export async function applyDesignIntelligence(
       selection: { ...selection, imageIds: leadCited.map((item) => item.mmrId) },
       trim,
       env,
+      guidance: libraryGuidance,
     })
     const cost = usageCost("generation", "art-director", model.usage, env)
     costs.push(cost)
     logTokenCost(cost)
-    leadRationale = directDesign({ brief, selection, trim, proposed: model.rationale }).rationale
+    leadRationale = directDesign({ brief, selection, trim, proposed: model.rationale, layoutTune: tune ?? undefined }).rationale
   }
 
   const directions: GenerateDirectionsResult["directions"] = []
   for (const [index, direction] of result.directions.entries()) {
     const slot = directionSlot(index, leadIndex, result.directions.length)
     const selectionForSlot = selection ?? selectReferences(records, brief)
-    const cited = citationsForDirection(
+    const cited = mergeLibraryCitations(hits, citationsForDirection(
       records,
       brief,
-      directionRecipe({ brief, selection: selectionForSlot, trim }, slot).mode
-    )
+      directionRecipe({ brief, selection: selectionForSlot, trim, layoutTune: tune ?? undefined }, slot).mode
+    ))
     const viewed = await viewSelection(records, { ...selectionForSlot, imageIds: cited.map((item) => item.mmrId) }, env)
     const rationale = directDesign({
       brief,
@@ -205,6 +222,7 @@ export async function applyDesignIntelligence(
       trim,
       proposed: index === leadIndex ? leadRationale ?? undefined : undefined,
       slot,
+      layoutTune: tune ?? undefined,
     }).rationale
     let directed = repairCard({
       brief,
@@ -214,6 +232,7 @@ export async function applyDesignIntelligence(
       costs: index === leadIndex ? costs : [emptyCost(direction.id, "art-director")],
       env,
       cardId: direction.id,
+      gold: goldExpectationFromHits(hits),
     })
     if (index === leadIndex && criticUsesVision(env)) {
       directed = await applyVisionRound(directed, brief, direction.spec, env)
@@ -224,6 +243,19 @@ export async function applyDesignIntelligence(
   }
 
   return { ...result, directions }
+}
+
+function mergeLibraryCitations(
+  hits: Awaited<ReturnType<typeof researchHitsForBrief>>,
+  cited: DirectionCitation[]
+): DirectionCitation[] {
+  const fromLibrary = hits.slice(0, 4).map((hit) => ({
+    mmrId: hit.entry.id,
+    title: hit.entry.gold ? "Gold recipe" : "Research library",
+    whyItWorks: hit.entry.whyItWorks || hit.entry.structures[0] || "Retrieved from the research library.",
+  }))
+  const rest = cited.filter((item) => !fromLibrary.some((hit) => hit.mmrId === item.mmrId))
+  return [...fromLibrary, ...rest].slice(0, 6)
 }
 
 function noteViews(directed: DirectedCard, viewed: ImageView[]): DirectedCard {

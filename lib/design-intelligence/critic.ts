@@ -11,6 +11,8 @@ import { measureBackdropContrast, type ContrastPhoto } from "./backdrop"
 import { normalizedPanel, textInsideSafe, textIsClipped, type GridCard } from "./grid-composer"
 import { attorneyCompliance } from "./attorney-compliance"
 import { checkPersuasion } from "./persuasion"
+import { goldComparisonNotes } from "@/lib/research-library/evidence"
+import type { GoldExpectation } from "@/lib/research-library/types"
 import type { DesignRationale, GridName } from "./rationale"
 
 /**
@@ -50,7 +52,8 @@ export function critiqueCard(
   rationale: DesignRationale,
   copy: string,
   photo?: ContrastPhoto | null,
-  clientText = ""
+  clientText = "",
+  gold?: GoldExpectation | null
 ): Critique {
   const autoFails: string[] = []
   const size = rationale.format.trim
@@ -154,7 +157,16 @@ export function critiqueCard(
     brokenRule: passed ? null : brokenRule,
     edit: passed ? null : editFor(brokenRule, rationale),
     scoreKind: "machine estimate",
-    warnings: attorney.warnings,
+    warnings: [
+      ...attorney.warnings,
+      ...goldComparisonNotes({
+        photoAreaPct: card.photoAreaPct,
+        offerFont: offer?.fontPt,
+        headlineFont: headline?.fontPt,
+        palette: [rationale.palette.neutral_hex[0], rationale.palette.neutral_hex[1], rationale.palette.accent_hex].filter((color): color is string => Boolean(color)),
+        gold: gold ?? null,
+      }),
+    ],
   }
 }
 

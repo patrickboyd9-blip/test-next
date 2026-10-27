@@ -29,6 +29,8 @@ export interface ArtDirectorInput {
   proposed?: unknown
   /** 0 is the lead. Each slot is a different composition. */
   slot?: number
+  /** Photo share and offer prominence from a retrieved mailer. */
+  layoutTune?: { photoShare?: number; offerProminent?: boolean }
 }
 
 export type CompositionMode =
@@ -93,7 +95,7 @@ export function directionRecipe(input: ArtDirectorInput, slot: number): Directio
       { grid: "full-bleed-plus-panel", mode: "full-bleed", hero: "headline", offerToHeadline: 0.42, headlineToBody: 2.8, offerToBody: 1.55, alignment: "left" },
       { grid: "thirds", mode: "panel", hero: "headline", offerToHeadline: 0.58, headlineToBody: 3.6, offerToBody: 1.7, alignment: "left" },
     ]
-    return calm[slot] ?? calm[0]!
+    return tuneDirectionRecipe(calm[slot] ?? calm[0]!, input.layoutTune, vertical, slot)
   }
   const recipes: DirectionRecipe[] = [
     {
@@ -124,7 +126,25 @@ export function directionRecipe(input: ArtDirectorInput, slot: number): Directio
       alignment: "left",
     },
   ]
-  return recipes[slot] ?? recipes[0]!
+  return tuneDirectionRecipe(recipes[slot] ?? recipes[0]!, input.layoutTune, vertical, slot)
+}
+
+/** The lead card follows a retrieved recipe. Later slots stay distinct. Medicare stays calm. */
+export function tuneDirectionRecipe(
+  recipe: DirectionRecipe,
+  tune: { photoShare?: number; offerProminent?: boolean } | undefined,
+  vertical: string,
+  slot = 0
+): DirectionRecipe {
+  if (!tune || slot !== 0 || vertical === "medicare_insurance") return recipe
+  let next = recipe
+  if ((tune.photoShare ?? 0) >= 0.55 && recipe.mode !== "full-bleed") {
+    next = { ...next, grid: "full-bleed-plus-panel", mode: "full-bleed" }
+  }
+  if (tune.offerProminent) {
+    next = { ...next, hero: "offer", offerToHeadline: Math.max(next.offerToHeadline, 1.7) }
+  }
+  return next
 }
 
 /** True when two directions would paint the same grid at the same scale. */

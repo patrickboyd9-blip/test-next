@@ -23,7 +23,7 @@ export async function generateLeadDirectionImage(
 
   const spec =
     getActiveSpec(campaign.creative, directionId) ?? direction.spec
-  const brief = toImageBrief(spec, imageBriefContextFor(directionId, campaign.brief))
+  const brief = toImageBrief(spec, imageBriefContextFor(directionId, campaign.brief, undefined, direction.research?.photoDirection))
   if (!brief) {
     return { directionId, generated: null }
   }

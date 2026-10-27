@@ -309,6 +309,13 @@ export interface DirectionResearch {
   layoutSummary: string
   parameters: ResearchLayoutParameters
   quality?: ResearchQuality
+  /**
+   * Research ids that influenced this card.
+   * Hidden in the customer UI unless design debug is on.
+   */
+  influencedBy?: string[]
+  /** Photograph description borrowed from the library. Not printed on the card. */
+  photoDirection?: string
 }
 
 /** A distinct creative direction presented to the customer for selection. */

@@ -36,6 +36,9 @@ import { briefHasNumeralOffer, verticalForBrief } from "./vertical"
 import { assignTemplates } from "@/lib/postcard-layouts/assign"
 import { loadTasteCorpus, visionTasteStore, type VisionTaste } from "./vision-taste"
 import { referencePicksForCritique, requestComparativeCritique } from "./vision-critic"
+import { formatArtDirectorEvidence, goldExpectationFromHits, layoutTuneFromHits } from "@/lib/research-library/evidence"
+import { researchHitsForBrief } from "@/lib/research-library"
+import type { GoldExpectation } from "@/lib/research-library/types"
 
 /**
  * Generates a board of composition families, ranks them, and keeps three
@@ -152,9 +155,12 @@ export async function rankCandidates(input: {
   const tastes = input.tastes ?? await safeTastes()
   const signals = input.signals ?? await safeSignals(input.ownerId)
   const retrieved = retrieveTaste({ tastes, brief: input.brief, signals, limit: 4 })
-  const guidance = guidanceFromRetrieval(retrieved, signals)
+  const libraryHits = await researchHitsForBrief(input.brief)
+  const libraryTune = layoutTuneFromHits(libraryHits)
+  const gold = goldExpectationFromHits(libraryHits)
+  const guidance = [guidanceFromRetrieval(retrieved, signals), formatArtDirectorEvidence(libraryHits)].filter((line) => line.trim()).join("\n")
   const costs: TokenCost[] = []
-  let base = directDesign({ brief: input.brief, selection, trim: input.trim }).rationale
+  let base = directDesign({ brief: input.brief, selection, trim: input.trim, layoutTune: libraryTune ?? undefined }).rationale
   if (directorMode(env) === "model") {
     const model = await requestModelRationale({
       brief: input.brief,
@@ -173,7 +179,7 @@ export async function rankCandidates(input: {
     }
     costs.push(note)
     logTokenCost(note)
-    base = directDesign({ brief: input.brief, selection, trim: input.trim, proposed: model.rationale }).rationale
+    base = directDesign({ brief: input.brief, selection, trim: input.trim, proposed: model.rationale, layoutTune: libraryTune ?? undefined }).rationale
   } else {
     const rules = emptyCost("board", "art-director")
     costs.push(rules)
@@ -213,6 +219,7 @@ export async function rankCandidates(input: {
       retrieved,
       blueprint,
       env,
+      gold,
     })
   }))
   const revised: ScoredCandidate[] = []
@@ -221,7 +228,7 @@ export async function rankCandidates(input: {
       revised.push(candidate)
       continue
     }
-    const redesigned = await redesignOnce(candidate, input, selection, base, retrieved)
+    const redesigned = await redesignOnce(candidate, input, selection, base, retrieved, gold)
     revised.push(candidate)
     if (redesigned.familyId !== candidate.familyId) revised.push(redesigned)
   }
@@ -251,6 +258,7 @@ async function scoreFamily(input: {
   redesigned?: boolean
   blueprint?: MailerBlueprint
   env?: NodeJS.ProcessEnv
+  gold?: GoldExpectation | null
 }): Promise<ScoredCandidate> {
   const family = input.family.mode === "type-led"
     ? COMPOSITION_FAMILIES.find((item) => item.id === "integrated-headline") ?? input.family
@@ -353,7 +361,7 @@ async function scoreFamily(input: {
   const copy = [spec.headline, spec.offer, spec.body, spec.phone, input.brief.businessInfo?.name, complianceMark]
     .filter(Boolean)
     .join(" ")
-  const critique = critiqueCard(card, rationale, copy, undefined, clientFactText(input.brief, spec.offer))
+  const critique = critiqueCard(card, rationale, copy, undefined, clientFactText(input.brief, spec.offer), input.gold)
   const sampled = gradeComposition({
     card,
     rationale,
@@ -381,7 +389,8 @@ async function redesignOnce(
   input: { brief: CampaignBrief; trim: TrimSize },
   selection: ReferenceSelection,
   base: DesignRationale,
-  retrieved: TastePick[]
+  retrieved: TastePick[],
+  gold?: GoldExpectation | null
 ): Promise<ScoredCandidate> {
   const separated = usesSeparatedPanel(candidate.rationale.grid.intentional_break)
   const next = (separated
@@ -401,6 +410,7 @@ async function redesignOnce(
     costs: candidate.costs,
     retrieved,
     redesigned: true,
+    gold,
   })
   if (revised.grade.score >= candidate.grade.score) return revised
   return { ...candidate, redesigned: true }
