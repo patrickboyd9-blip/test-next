@@ -1,7 +1,6 @@
 import type { CampaignBrief } from "@/lib/campaign-creator/types"
-import { verticalForBrief } from "@/lib/design-intelligence/vertical"
 
-import { industriesAdjacent, neighborRank, normalizeIndustry, researchEmotion, researchOfferType } from "./industry"
+import { industriesAdjacent, industryForBrief, neighborRank, normalizeIndustry, researchEmotion, researchOfferType } from "./industry"
 import type { ResearchEntry, RetrievalHit, RetrievalQuery, RetrievalResult } from "./types"
 
 const DEFAULT_LIMIT = 6
@@ -20,7 +19,7 @@ export function queryFromBrief(brief: CampaignBrief, direction?: { name?: string
     direction?.offer,
   ].filter((value): value is string => Boolean(value?.trim())).join(" ")
   return {
-    industry: industryFromBrief(brief, text),
+    industry: industryForBrief(brief, [direction?.name, direction?.headline, direction?.offer].filter(Boolean).join(" ")),
     offerType: researchOfferType(`${brief.offer ?? ""} ${direction?.offer ?? ""} ${brief.goal ?? ""}`),
     audience: brief.audience?.description?.trim() ?? "",
     direction: [direction?.name, direction?.headline, brief.goal].filter(Boolean).join(" "),
@@ -75,23 +74,23 @@ export function retrieveResearch(entries: readonly ResearchEntry[], query: Retri
 }
 
 function scoreEntry(entry: ResearchEntry, query: RetrievalQuery): { score: number; band: RetrievalHit["band"] } {
-  if (query.industry !== "medicare" && query.industry !== "final_expense" && medicareSpecific(entry)) {
+  const queryIndustry = normalizeIndustry(query.industry)
+  const entryIndustry = normalizeIndustry(entry.industry)
+  if (queryIndustry !== "medicare" && medicareSpecific(entry)) {
     return { score: 0, band: "broader" }
   }
   let score = 2
   let band: RetrievalHit["band"] = "broader"
-  const neighbor = neighborRank(query.industry, entry.industry)
-  if (entry.industry === query.industry) {
+  const neighbor = neighborRank(queryIndustry, entryIndustry)
+  if (entryIndustry !== "none" && entryIndustry === queryIndustry) {
     score += 50
     band = "same"
   } else if (neighbor > 0) {
     score += neighbor === 1 ? 28 : neighbor === 2 ? 22 : 16
     band = "adjacent"
-  } else if (industriesAdjacent(entry.industry, query.industry)) {
+  } else if (industriesAdjacent(entryIndustry, queryIndustry)) {
     score += 18
     band = "adjacent"
-  } else if (entry.industry === "home_services" || entry.industry === "insurance" || query.industry === "home_services") {
-    score += 6
   } else {
     score -= 4
   }
@@ -135,19 +134,3 @@ function tokens(value: string): string[] {
   return value.toLowerCase().split(/[^a-z0-9]+/).filter((word) => word.length > 3)
 }
 
-function industryFromBrief(brief: CampaignBrief, text: string): string {
-  if (/\bauto insurance\b|\bcar insurance\b|\bvehicle insurance\b/i.test(text)) return "auto_insurance"
-  if (/\bhomeowners insurance\b|\bhome insurance\b/i.test(text)) return "home_insurance"
-  if (/\blife insurance\b/i.test(text)) return "life_insurance"
-  if (/\bfinal expense\b/i.test(text)) return "final_expense"
-  if (/\bmedicare\b|\bmedicaid\b/i.test(text)) return "medicare"
-  if (/\bhvac\b|\bair condition|\bfurnace\b/i.test(text)) return "hvac"
-  if (/\broof|shingle|gutter/i.test(text)) return "roofing"
-  if (/\bplumb|drain|water heater/i.test(text)) return "plumbing"
-  if (/\bdental|dentist/i.test(text)) return "dental"
-  if (/\breal estate\b|\brealtor\b/i.test(text)) return "real_estate"
-  const vertical = verticalForBrief(brief)
-  if (vertical === "medicare_insurance") return "insurance"
-  if (vertical === "general_local_service") return "home_services"
-  return normalizeIndustry(vertical)
-}

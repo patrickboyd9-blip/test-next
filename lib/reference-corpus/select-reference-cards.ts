@@ -14,7 +14,7 @@ export const REFERENCE_CARD_PROMPT_LIMIT = 4
 const CRAFT_QUALITY_BAR = ["MMR-011", "MMR-013", "MMR-060"] as const
 
 const VERTICAL_PATTERNS: Record<ReferenceCardVertical, readonly RegExp[]> = {
-  hvac: [/\bhvac\b/i, /\bair condition(?:ing|er)s?\b/i, /\bheating and cooling\b/i, /\bfurnace\b/i],
+  hvac: [/\bhvac\b/i, /\bair condition(?:ing|er)s?\b/i, /\bheating and (?:cooling|air)\b/i, /\bheating & air\b/i, /\bfurnace\b/i, /\ba\s*\/\s*c\b/i, /\bac\b/i],
   plumbing: [/\bplumb(?:er|ing|ers)?\b/i, /\bdrains?\b/i, /\bwater heaters?\b/i],
   electrical: [/\belectricians?\b/i, /\belectrical\b/i],
   roofing: [/\broof(?:er|ing|s)?\b/i],

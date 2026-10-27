@@ -86,6 +86,7 @@ export function composeGridCard(input: GridComposeInput): GridCard {
   const offerParts = offerIsHero
     ? { numeral: spoken.numeral, rest: spoken.rest }
     : { numeral: [spoken.numeral, spoken.rest].filter(Boolean).join(" "), rest: "" }
+  const keepOfferRest = input.rationale.vertical === "hvac" && offerParts.rest.split(/\s+/).filter(Boolean).length >= 2
   const trust = trustLine(input)
   const phone = clean(input.spec.phone) || ""
   const website = displayHost(input.spec.website || input.spec.qrDestination || "")
@@ -104,12 +105,12 @@ export function composeGridCard(input: GridComposeInput): GridCard {
   const bodyFloor = input.rationale.format.trim === "6x9" ? 12 : 11
   const smallFloor = onPhotograph ? 12 : bodyFloor
   const headlineFloor = bodyFloor * 2.5
-  const offerFloor = offerIsHero ? headlineFloor * 1.6 : bodyFloor * 1.5
+  const offerFloor = offerIsHero ? headlineFloor * (keepOfferRest ? 1.15 : 1.6) : bodyFloor * 1.5
   const protectOffer = Boolean(input.rationale.refine?.minOfferPt)
   const blocks: StackBlock[] = []
   if (offerIsHero) {
-    blocks.push({ text: offerParts.numeral, role: "offer", pt: sizes.offer, floor: offerFloor, color: offerColor, protect: protectOffer, ratioLock: true })
-    if (offerParts.rest) blocks.push({ text: offerParts.rest, role: "body", pt: sizes.support, floor: smallFloor, color: ink })
+    blocks.push({ text: offerParts.numeral, role: "offer", pt: sizes.offer, floor: offerFloor, color: offerColor, protect: protectOffer, ratioLock: !keepOfferRest })
+    if (offerParts.rest) blocks.push({ text: offerParts.rest, role: "offer", pt: keepOfferRest ? Math.max(18, sizes.headline * 0.7) : sizes.support, floor: keepOfferRest ? 16 : smallFloor, color: ink })
     blocks.push({ text: headline, role: "headline", pt: sizes.headline, floor: headlineFloor, color: ink })
   } else {
     blocks.push({ text: headline, role: "headline", pt: sizes.headline, floor: headlineFloor, color: ink })
@@ -307,7 +308,8 @@ function composeIntegrated(
   const phoneY = round2(websiteY - 0.05 - phoneBoxH)
   const showName = !nameAlreadyOnCard(headlineTexts, name)
   const nameBoxH = showName ? 0.5 : 0
-  const restBoxH = offerParts.rest ? 0.46 : 0
+  const keepOfferRest = input.rationale.vertical === "hvac" && offerParts.rest.split(/\s+/).filter(Boolean).length >= 2
+  const restBoxH = offerParts.rest ? (keepOfferRest ? 0.9 : 0.46) : 0
   const tail = (restBoxH ? restBoxH + 0.04 : 0) + (nameBoxH ? nameBoxH + 0.06 : 0)
   const offerBottomLimit = round2(phoneY - 0.1 - tail)
   const offerRoom = Math.max(0.4, offerBottomLimit - offerTop)
@@ -321,7 +323,7 @@ function composeIntegrated(
   )))
   const offerMin = roundPt(Math.min(
     offerMax,
-    offerIsHero ? Math.max(bodyPt * 1.5, paintedHeadline * 1.6) : Math.max(bodyPt * 1.5, paintedHeadline * 0.68),
+    offerIsHero ? Math.max(bodyPt * 1.5, paintedHeadline * (keepOfferRest ? 1.15 : 1.6)) : Math.max(bodyPt * 1.5, paintedHeadline * 0.68),
   ))
   const offerLine = shrinkToInk(fitText({
     text: offerParts.numeral,
@@ -341,8 +343,8 @@ function composeIntegrated(
       role: "body",
       pairing,
       color: ink,
-      minPt: 11,
-      maxPt: 14,
+      minPt: keepOfferRest ? 16 : 11,
+      maxPt: keepOfferRest ? 22 : 14,
     }), pairing)
     if (rest.text) texts.push(rest)
     cursor = round2((rest.text ? rest.rect.y + rest.rect.h : cursor) + 0.04)
@@ -596,18 +598,19 @@ function composeOfferStrip(
   const offerX = SAFE_IN
   const offerW = round2(phoneX - offerX - 0.14)
   const offerColor = contrastRatio(accent, bandFill) >= 4.5 ? accent : bandInk
+  const keepOfferRest = input.rationale.vertical === "hvac" && offerParts.rest.split(/\s+/).filter(Boolean).length >= 2
   const offerLine = shrinkToInk(fitText({
-    text: offerParts.numeral,
-    rect: { x: offerX, y: round2(band.y + 0.14), w: offerW, h: 0.7 },
+    text: keepOfferRest ? `${offerParts.numeral} ${offerParts.rest}` : offerParts.numeral,
+    rect: { x: offerX, y: round2(band.y + 0.14), w: offerW, h: keepOfferRest ? 1.05 : 0.7 },
     role: "offer",
     pairing,
     color: offerColor,
-    minPt: Math.max(22, sizes.headline * 1.4),
-    maxPt: Math.max(36, sizes.offer),
+    minPt: keepOfferRest ? 16 : Math.max(22, sizes.headline * 1.4),
+    maxPt: keepOfferRest ? 28 : Math.max(36, sizes.offer),
   }), pairing)
   if (offerLine.text) texts.push(offerLine)
   let offerBottom = offerLine.text ? offerLine.rect.y + offerLine.rect.h : band.y + 0.2
-  if (offerParts.rest) {
+  if (offerParts.rest && !keepOfferRest) {
     const rest = shrinkToInk(fitText({
       text: offerParts.rest,
       rect: { x: offerX, y: round2(offerBottom + 0.02), w: offerW, h: 0.34 },

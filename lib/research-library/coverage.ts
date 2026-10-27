@@ -31,7 +31,24 @@ export function formatCoverageReport(index: Pick<ResearchIndex, "entries" | "cov
   const missing = skipped.filter((row) => !row.reason?.trim())
   if (missing.length > 0) lines.push(`ERROR: ${missing.length} skipped row(s) have no reason.`)
   else lines.push("Every skipped row has an explicit reason.")
+  lines.push("Records by industry:")
+  for (const [industry, count] of industryCountEntries(index.entries)) {
+    lines.push(`- ${industry}: ${count}`)
+  }
   return lines.join("\n")
+}
+
+export function industryCounts(entries: readonly ResearchEntry[]): Record<string, number> {
+  const counts: Record<string, number> = {}
+  for (const entry of entries) {
+    const industry = entry.industry || "none"
+    counts[industry] = (counts[industry] ?? 0) + 1
+  }
+  return counts
+}
+
+function industryCountEntries(entries: readonly ResearchEntry[]): [string, number][] {
+  return Object.entries(industryCounts(entries)).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
 }
 
 export function coverageBalances(coverage: readonly CoverageRow[]): boolean {

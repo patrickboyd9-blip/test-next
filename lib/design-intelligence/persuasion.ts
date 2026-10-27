@@ -79,7 +79,7 @@ const GOVERNMENT = /\bofficial notice\b|\bfinal notice\b|\bofficial business\b|\
 const OUTCOME: Record<string, string> = {
   roofing: "A safe, dry home.",
   plumbing: "Water you can trust.",
-  hvac: "A house that feels right.",
+  hvac: "The house cools down again.",
   we_buy: "A fresh start.",
   real_estate: "The right house, clearly.",
   medicare: "Confidence in the choice.",
@@ -175,9 +175,9 @@ const ROLE_COPY: Record<string, Record<DirectionRole, readonly [string, string]>
     trust: ["A local plumber takes this call", "This plumber takes the call"],
   },
   hvac: {
-    outcome: ["A house that feels right", "The rooms feel right again"],
-    threat: ["Call before the next breakdown", "Book a check before it breaks"],
-    trust: ["A local tech checks the system", "This tech checks the system"],
+    outcome: ["The house cools down again", "A tune-up before the heat"],
+    threat: ["Call before the AC quits", "Book a check before it breaks"],
+    trust: ["A local tech checks the AC", "This tech checks the system"],
   },
   medicare: {
     outcome: ["A plan you can check", "The choice can feel clear"],

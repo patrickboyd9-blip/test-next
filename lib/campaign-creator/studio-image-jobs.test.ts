@@ -136,10 +136,10 @@ test("a photograph job returns before the provider runs, then polls to ready", a
 
   const running = scheduled[0]!()
   const started = Date.now()
-  while (calls.length === 0 && Date.now() - started < 2000) {
+  while (calls.length < 2 && Date.now() - started < 2000) {
     await new Promise((resolve) => setTimeout(resolve, 10))
   }
-  assert.deepEqual(calls, ["dir-a:preview"])
+  assert.deepEqual(calls.slice().sort(), ["dir-a:preview", "dir-b:preview"])
   release?.()
   await running
 
@@ -307,8 +307,9 @@ test("a stale running job can be retried and a fresh one is left alone", async (
       },
     }),
   })
-  assert.equal(calls, 1)
+  assert.equal(calls, 2)
   assert.equal(retried.records.some((record) => record.directionId === "dir-a"), true)
+  assert.equal(retried.records.some((record) => record.directionId === "dir-b"), true)
 
   await rm(cacheRoot, { recursive: true, force: true })
 })

@@ -55,6 +55,18 @@ test("a Medicare brief does not receive a construction stand-in", () => {
   )
 })
 
+test("an HVAC brief uses the condenser stand-in instead of the teal house", () => {
+  const brief = { goal: "Book an HVAC tune-up", offer: "Free inspection for broken AC units" }
+  assert.equal(
+    resolveCreativeImage(undefined, "neighborhood", null, { campaign: brief }).src,
+    "/creative-studio/imagery/hvac-stand-in.svg"
+  )
+  assert.equal(
+    resolveCreativeImage("stock_generic_local", undefined, null, { campaign: brief }).src,
+    "/creative-studio/imagery/hvac-stand-in.svg"
+  )
+})
+
 test("a roofing brief still uses the trade stand-in when no campaign filter is required", () => {
   const brief = { goal: "Book roof inspections", businessInfo: { name: "Summit Roofing" } }
   assert.equal(

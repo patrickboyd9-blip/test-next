@@ -1,6 +1,6 @@
 import { isForbiddenResearchPath } from "@/lib/design-intelligence/images"
 
-import { normalizeIndustry, researchEmotion, researchOfferType } from "./industry"
+import { NONE_INDUSTRY, normalizeIndustry, researchEmotion, researchOfferType, resolveIndustry } from "./industry"
 import type { CoverageRow, ResearchEntry, ResearchLayout, ResearchOrigin } from "./types"
 
 export interface SourceFile {
@@ -82,6 +82,9 @@ export function parseSourceFile(file: SourceFile): { entries: ResearchEntry[]; r
       }],
     }
   }
+  if (isProvenancePath(file.path) && !file.path.endsWith(".json") && file.json === undefined) {
+    return provenanceFromText(file)
+  }
   if (file.path.endsWith(".json") || file.json !== undefined) {
     return parseJsonFile(file)
   }
@@ -125,7 +128,11 @@ function parseMarkdownFile(file: SourceFile): { entry?: ResearchEntry; row: Cove
     }
   }
   const fields = readFields(`${sections.observed}\n${sections.inferred}\n${sections.interpretation}\n${text.slice(0, 1500)}`)
-  const industry = normalizeIndustry(fields.industry || industryFromPath(file.path))
+  const industry = resolveIndustry({
+    explicit: fields.industry,
+    path: file.path,
+    notes: text,
+  })
   const headlines = unique(fields.headlines)
   const offers = unique(fields.offers)
   const photoStyle = fields.photoStyle
@@ -179,6 +186,9 @@ function parseJsonFile(file: SourceFile): { entries: ResearchEntry[]; rows: Cove
       }],
     }
   }
+  if (isProvenancePath(file.path)) {
+    return provenanceFromJson(value, file)
+  }
   const records = goldRecords(value)
   if (records.length === 0) {
     return {
@@ -227,9 +237,6 @@ function parseJsonFile(file: SourceFile): { entries: ResearchEntry[]; rows: Cove
 export function entryFromGold(record: Record<string, unknown>, file: Pick<SourceFile, "path" | "ref" | "sha">): ResearchEntry | null {
   const id = stringField(record, ["id", "gold_id", "goldId", "mmr_id", "mmrId"]) || idFrom(file.path, "")
   if (!id || !SAFE_ID.test(id)) return null
-  const industry = normalizeIndustry(
-    stringField(record, ["industry", "vertical", "slug"]) || industryFromPath(file.path)
-  )
   const headline = objectField(record, ["headline"])
   const offer = objectField(record, ["offer"])
   const headlineText = stringField(headline, ["text", "line"]) || stringField(record, ["headlineText", "headline_text"])
@@ -245,6 +252,18 @@ export function entryFromGold(record: Record<string, unknown>, file: Pick<Source
   const similarity = similarityField(record)
   const why = stringField(record, ["whyItWorks", "why_it_works", "why", "summary"])
   const response = responseField(record)
+  const industry = resolveIndustry({
+    explicit: stringField(record, ["industry", "vertical", "slug", "trade"]),
+    path: file.path,
+    notes: [
+      stringField(record, ["advertiser", "company", "sender", "business", "brand", "title", "notes", "provenance", "description"]),
+      headlineText,
+      offerText,
+      why,
+      photoStyle,
+      collectNoteText(record),
+    ].filter(Boolean).join(" "),
+  })
   const layout: ResearchLayout = {
     size: stringField(record, ["size", "format", "trim"]),
     photoShare,
@@ -301,7 +320,7 @@ function attachImageCatalog(entries: ResearchEntry[], catalog: unknown, catalogP
     if (existing) {
       if (!existing.imageRefs.includes(row.path)) existing.imageRefs.push(row.path)
       existing.evidence = "visual"
-      if (existing.industry === "unknown" && row.industry) existing.industry = normalizeIndustry(row.industry)
+      if (!knownIndustry(existing.industry) && row.industry) existing.industry = normalizeIndustry(row.industry)
       continue
     }
     if (!SAFE_ID.test(row.id)) continue
@@ -346,6 +365,7 @@ function richer(left: ResearchEntry, right: ResearchEntry): ResearchEntry {
   const other = preferred === left ? right : left
   return {
     ...preferred,
+    industry: knownIndustry(preferred.industry) ? preferred.industry : knownIndustry(other.industry) ? other.industry : preferred.industry,
     imageRefs: unique([...preferred.imageRefs, ...other.imageRefs]),
     colors: preferred.colors.length > 0 ? preferred.colors : other.colors,
     headlines: preferred.headlines.length > 0 ? preferred.headlines : other.headlines,
@@ -573,9 +593,75 @@ function isIgnorableDoc(filePath: string): boolean {
 }
 
 function industryFromPath(filePath: string): string | undefined {
-  const blob = filePath.replace(/[_./-]+/g, " ")
-  const industry = normalizeIndustry(blob)
-  return industry === "unknown" ? undefined : industry
+  const industry = resolveIndustry({ path: filePath })
+  return knownIndustry(industry) ? industry : undefined
+}
+
+function knownIndustry(value: string | undefined): boolean {
+  return Boolean(value && value !== NONE_INDUSTRY && value !== "unknown")
+}
+
+function isProvenancePath(filePath: string): boolean {
+  return /assets\/physical\/PM-\d+\/(?:[^/]*provenance[^/]*|notes)\.(json|md|txt)$/i.test(filePath)
+}
+
+function provenanceFromText(file: SourceFile): { entries: ResearchEntry[]; rows: CoverageRow[] } {
+  const text = file.text ?? ""
+  return provenanceFromJson({
+    id: idFrom(file.path, text),
+    notes: text,
+    headline_text: labeledLine(text, "headline"),
+    offer_text: labeledLine(text, "offer") || pricedLine(text),
+    industry: labeledLine(text, "industry") || labeledLine(text, "vertical"),
+    advertiser: labeledLine(text, "company") || labeledLine(text, "advertiser") || labeledLine(text, "sender"),
+  }, file)
+}
+
+function provenanceFromJson(value: unknown, file: SourceFile): { entries: ResearchEntry[]; rows: CoverageRow[] } {
+  const record = value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {}
+  const text = collectNoteText(record)
+  const id = stringField(record, ["id", "piece_id", "pieceId", "pm_id", "pmId"]) || idFrom(file.path, text)
+  const entry = id
+    ? entryFromGold({
+      ...record,
+      id,
+      notes: stringField(record, ["notes", "note", "provenance", "summary", "description"]) || text,
+      headline_text: stringField(record, ["headlineText", "headline_text", "headline"]) || labeledLine(text, "headline"),
+      offer_text: stringField(record, ["offerText", "offer_text", "offer"]) || labeledLine(text, "offer") || pricedLine(text),
+    }, file)
+    : null
+  if (!entry) {
+    return {
+      entries: [],
+      rows: [{ path: file.path, status: "skipped", kind: "mailer", reason: "Provenance note has no safe source id." }],
+    }
+  }
+  return {
+    entries: [entry],
+    rows: [{ path: file.path, id: entry.id, status: "indexed", kind: "mailer" }],
+  }
+}
+
+function labeledLine(text: string, key: string): string | undefined {
+  const match = new RegExp(`^\\s*(?:${key})\\s*[:—–-]\\s*(.+)$`, "im").exec(text)
+  const value = match?.[1]?.replace(/^["']|["']$/g, "").trim()
+  return value || undefined
+}
+
+function pricedLine(text: string): string | undefined {
+  const line = text.split(/\n+/).map((item) => item.trim()).find((item) => item.length > 0 && item.length < 140 && /(\$\s?\d|\bfree\b)/i.test(item))
+  return line?.replace(/^[-*]\s*/, "")
+}
+
+function collectNoteText(value: unknown, depth = 0): string {
+  if (depth > 5 || value == null) return ""
+  if (typeof value === "string") return value
+  if (typeof value === "number") return String(value)
+  if (Array.isArray(value)) return value.map((item) => collectNoteText(item, depth + 1)).filter(Boolean).join(" ")
+  if (typeof value === "object") {
+    return Object.values(value).map((item) => collectNoteText(item, depth + 1)).filter(Boolean).join(" ")
+  }
+  return ""
 }
 
 function photoShareField(record: Record<string, unknown>, headline: Record<string, unknown>): number | undefined {

@@ -237,7 +237,7 @@ function candidatesFromTree(entries: { path: string; type: "blob" | "tree"; sha?
     found.push({
       ref,
       path,
-      json: { id, images, industry: "unknown" },
+      json: { id, images },
     })
   }
   return found
@@ -249,6 +249,7 @@ function isRecordPath(filePath: string, ref: "mando" | "c3po"): boolean {
   if (/(^|\/)gold\/.+\.json$/i.test(filePath)) return true
   if (/(^|\/)indexes\/gold\/.+\.json$/i.test(filePath)) return true
   if (filePath.endsWith(".md")) return true
+  if (ref === "c3po" && /assets\/physical\/PM-\d+\/(?:[^/]*provenance[^/]*|notes)\.(json|md|txt)$/i.test(filePath)) return true
   if (ref === "c3po" && /physical-intake-manifest\.json$/i.test(filePath)) return true
   return false
 }

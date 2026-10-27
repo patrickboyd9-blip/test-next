@@ -83,7 +83,7 @@ test("retrieval prefers the same industry, then gold and image-backed mailers", 
 
   const auto = retrieveResearch(index.entries, queryFromBrief(autoBrief), 4)
   assert.equal(auto.hits[0]?.entry.id, "GOLD-auto-insurance-001")
-  assert.equal(auto.hits[0]?.entry.industry, "auto_insurance")
+  assert.equal(auto.hits[0]?.entry.industry, "auto-insurance")
   assert.equal(auto.hits[0]?.band, "same")
   assert.ok(auto.hits.findIndex((hit) => hit.entry.id === "MMR-9003") > 0)
 })

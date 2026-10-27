@@ -329,7 +329,7 @@ test("final settings cover the bleed canvas and stay configurable", () => {
     OPENAI_IMAGE_CANDIDATES_PREVIEW: "9",
   })
   assert.equal(invalid.size, OPENAI_IMAGE_SIZE)
-  assert.equal(invalid.quality, "medium")
+  assert.equal(invalid.quality, OPENAI_IMAGE_QUALITY)
   assert.equal(invalid.candidateCount, 3)
   assert.equal(resolveOpenAIImageModel({}), OPENAI_IMAGE_MODEL_PIN)
   assert.equal(

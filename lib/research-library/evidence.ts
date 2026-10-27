@@ -4,6 +4,7 @@ import type { PostcardTemplateId } from "@/lib/postcard-layouts/ids"
 import { verticalPaletteForBrief } from "@/lib/postcard-layouts/assign"
 import { templatesForPalette } from "@/lib/postcard-layouts/templates"
 
+import { normalizeIndustry } from "./industry"
 import type { GoldExpectation, LayoutTune, ResearchEntry, RetrievalHit } from "./types"
 
 const COMPLIANCE = `Research evidence for this campaign. Use it to choose the structure, the offer pattern, the photograph description, and the layout. Do not print a response rate, a statistic, a count, or a deadline on the card unless that exact fact is already in the customer brief. Do not copy another company's name, slogan, phone number, or artwork.`
@@ -230,7 +231,8 @@ function offerIsProminent(entry: ResearchEntry): boolean {
 function templateBias(entry: ResearchEntry): string | undefined {
   const share = entry.layout.photoShare ?? 0
   const prominent = offerIsProminent(entry)
-  if (entry.industry === "roofing") {
+  const industry = normalizeIndustry(entry.industry)
+  if (industry === "roofing") {
     // The retrieved roofing mailer picks the roofing layout.
     const text = `${entry.structures.join(" ")} ${entry.whyItWorks ?? ""} ${entry.offerType} ${entry.emotion}`.toLowerCase()
     if (/\bstorm|hail|hurricane|insurance claim/.test(text)) return "roof_storm"
@@ -240,13 +242,12 @@ function templateBias(entry: ResearchEntry): string | undefined {
     if (/season|winter|spring|fall/.test(text)) return "roof_seasonal"
     return "roof_split"
   }
-  if (entry.industry === "hvac" || entry.industry === "plumbing") {
+  if (industry === "hvac" || industry === "plumbing") {
     if (prominent && share >= 0.45) return "service_band"
     if (share >= 0.55) return "hero_scrim"
   }
-  if (entry.industry === "auto_insurance" || entry.industry === "home_insurance" || entry.industry === "life_insurance") return "neighbor_letter"
-  if (entry.industry === "medicare") return "medicare_calm"
-  if (entry.industry === "insurance") return "neighbor_letter"
+  if (industry === "auto-insurance" || industry === "home-insurance" || industry === "life-insurance") return "neighbor_letter"
+  if (industry === "medicare") return "medicare_calm"
   if (share >= 0.6) return "hero_scrim"
   if (prominent) return "service_band"
   return undefined
