@@ -68,7 +68,7 @@ export function buildOpenAIImagePrompt(brief: ImageBrief): string {
     ]
       .filter((line): line is string => Boolean(line))
       .join(" "),
-    `Light: ${brief.lookBlock}`,
+    art.trade === "roofing" ? `Light: ${art.lighting}` : `Light: ${brief.lookBlock}`,
     `Camera and lens: ${cameraLine(brief)}`,
     "Imperfections: Ordinary wear only: a wrinkle, a scuff, dust in the light, uneven paint or a tired edge. Skin is not retouched. The place looks used.",
     `Negative space: ${art.negativeSpace}`,

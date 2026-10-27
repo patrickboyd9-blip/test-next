@@ -230,9 +230,19 @@ function offerIsProminent(entry: ResearchEntry): boolean {
 function templateBias(entry: ResearchEntry): string | undefined {
   const share = entry.layout.photoShare ?? 0
   const prominent = offerIsProminent(entry)
-  if (entry.industry === "roofing" || entry.industry === "hvac" || entry.industry === "plumbing") {
-    if (prominent && share >= 0.45) return entry.industry === "roofing" ? "roof_coupon" : "service_band"
-    if (share >= 0.55) return entry.industry === "roofing" ? "roof_full_bleed" : "hero_scrim"
+  if (entry.industry === "roofing") {
+    // The retrieved roofing mailer picks the roofing layout.
+    const text = `${entry.structures.join(" ")} ${entry.whyItWorks ?? ""} ${entry.offerType} ${entry.emotion}`.toLowerCase()
+    if (/\bstorm|hail|hurricane|insurance claim/.test(text)) return "roof_storm"
+    if (prominent) return "roof_coupon"
+    if (share >= 0.55) return "roof_full_bleed"
+    if (/review|testimonial|trust|family|years in business|warranty|neighbor/.test(text)) return "roof_trust"
+    if (/season|winter|spring|fall/.test(text)) return "roof_seasonal"
+    return "roof_split"
+  }
+  if (entry.industry === "hvac" || entry.industry === "plumbing") {
+    if (prominent && share >= 0.45) return "service_band"
+    if (share >= 0.55) return "hero_scrim"
   }
   if (entry.industry === "auto_insurance" || entry.industry === "home_insurance" || entry.industry === "life_insurance") return "neighbor_letter"
   if (entry.industry === "medicare") return "medicare_calm"

@@ -91,6 +91,19 @@ const ROOFING: SceneBank = {
   ],
 }
 
+/**
+ * Roofing heroes show the result the homeowner wants: an attractive house
+ * with a clean new roof on a sunny day. People are optional and small.
+ * Round 1 of the quality loop showed that worker-on-gray-sky scenes read as
+ * stock and crop badly, so roofing always uses this bank.
+ */
+const ROOFING_HERO: readonly string[] = [
+  "An attractive two-story suburban house with a clean, freshly installed dark charcoal architectural shingle roof, seen from across the street at a slight angle. Trimmed lawn, a tree at one side, deep blue sky with a few white clouds. Curb appeal. No people.",
+  "A well-kept single-story ranch house with a crisp new shingle roof and clean gutters, shot from the sidewalk in warm late-morning sun under a clear blue sky. Green lawn and a tidy front walk. The whole roof is in frame.",
+  "A handsome craftsman-style home with a brand-new roof, photographed from the street on a bright sunny day with blue sky. Flowers along the porch. One roofer, small in frame, waves from the driveway beside a ladder, face fully visible and not cropped.",
+  "A bright, welcoming family home on a quiet tree-lined street, its new roof clean and even, blue sky and soft sun. Shot from the curb so the full house and roofline sit inside the frame with margin on every side. No people.",
+]
+
 const HVAC: SceneBank = {
   consequence: [
     "An unused thermostat and a closed window in a warm, still room. Summer light, no people mugging for the camera. Illustrative, not this home.",
@@ -430,15 +443,20 @@ export function buildPhotographyArtDirection(input: {
         ? pick(bank[input.imageryRole], `${input.variationKey ?? "direction"}:${input.leadJob}`)
         : conceived
 
+  const roofing = trade === "roofing"
   const art: ImageBriefArtDirection = {
     revision: PHOTOGRAPHY_ART_DIRECTION_REVISION,
     trade,
-    subject,
-    lighting: lightingFor(input.imageryRole, input.campaign, trade),
+    subject: roofing ? pick(ROOFING_HERO, `${input.variationKey ?? "direction"}:${input.leadJob}`) : subject,
+    lighting: roofing
+      ? "Bright sunny daylight, deep blue sky with a few white clouds, warm and inviting. Never overcast and never a flat gray sky."
+      : lightingFor(input.imageryRole, input.campaign, trade),
     framing: FRAMING[input.occupancy],
     emotion: EMOTION[input.leadJob],
     refuse: refuseFor(trade),
-    negativeSpace: negativeSpaceForLayout(input.layoutVariant, input.occupancy),
+    negativeSpace: roofing
+      ? "Keep the whole house, the whole roof, and any face well inside the central two-thirds of the frame, with generous sky above and lawn below, so any crop to a wide or tall panel keeps them. Leave some calm blue sky in the upper third for type."
+      : negativeSpaceForLayout(input.layoutVariant, input.occupancy),
   }
 
   const craft = craftNote(input.campaign, trade)
@@ -454,10 +472,23 @@ function tradeForCampaign(campaign: CampaignBrief | undefined): string {
   if (!campaign) return "local-service"
   const matched = referenceVerticalsForBrief(campaign)
   const preferred = TRADE_PREFERENCE.find((trade) => matched.includes(trade))
+  if (preferred && preferred !== "roofing" && STORM_ROOF_INSURANCE.has(preferred)) return preferred
+  // A storm-restoration or hail company is a roofer for the photo: route it
+  // through the sunny-house roofing brief, never a storm-damage or studio shot.
+  if (preferred === "roofing" || STORM_ROOF.test(campaignText(campaign))) return "roofing"
   if (preferred) return preferred
   if (isFinalExpenseBrief(campaign)) return "final_expense"
   if (isMedicareAgentBrief(campaign)) return "medicare_agent"
   return "local-service"
+}
+
+const STORM_ROOF = /\b(?:roof(?:s|ing|er|ers)?|shingles?|storm|hail|wind damage)\b/i
+const STORM_ROOF_INSURANCE = new Set(["final_expense", "medicare_agent", "medicare_seminar", "medicare_plan", "life_insurance", "auto_insurance"])
+
+function campaignText(campaign: CampaignBrief): string {
+  return [campaign.goal, campaign.offer, campaign.audience?.description, campaign.businessInfo?.name, campaign.otherRequirements]
+    .filter((value): value is string => Boolean(value?.trim()))
+    .join(" ")
 }
 
 function bankKey(trade: string): string {

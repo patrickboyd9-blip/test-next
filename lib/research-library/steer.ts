@@ -1,10 +1,11 @@
 import type { CampaignBrief, CreativeSpec } from "@/lib/campaign-creator/types"
-import { headlineCopiesCampaign } from "@/lib/design-intelligence/ad-psych/lessons-data"
 import type { DesignRationale, DesignVertical } from "@/lib/design-intelligence/rationale"
 import {
   clientFactText,
   isNonMedicareInsurance,
+  isStockHeadline,
   onCardLine,
+  specificHeadline,
   persuasionVertical,
   type DirectionRole,
 } from "@/lib/design-intelligence/persuasion"
@@ -12,6 +13,7 @@ import type { PostcardTemplateId } from "@/lib/postcard-layouts/ids"
 import { verticalPaletteForBrief } from "@/lib/postcard-layouts/assign"
 import { templatesForPalette } from "@/lib/postcard-layouts/templates"
 
+import { copiesLibrary } from "./guard"
 import { layoutTuneFromHits, photoNoteFromHits } from "./evidence"
 import { entryHasContent } from "./retrieve"
 import type { RetrievalHit } from "./types"
@@ -53,7 +55,10 @@ export function steerSpecFromResearch(input: {
   const kind = persuasionVertical(input.brief, input.vertical)
   const canned = input.role ? onCardLine(kind, input.role) : ""
   const incoming = input.headline.replace(/\s+/g, " ").trim()
-  const usable = input.hits.filter((hit) => entryHasContent(hit.entry) && !blockedMedicare(hit, input.brief))
+  const clean = input.hits.filter((hit) => entryHasContent(hit.entry) && !blockedMedicare(hit, input.brief))
+  // When same-industry mailers exist, an adjacent or broader one never sets the offer, photo or layout.
+  const same = clean.filter((hit) => hit.band === "same")
+  const usable = same.length > 0 ? same : clean
   const copyHit = usable[0]
   const tune = layoutTuneFromHits(usable.length > 0 ? usable : input.hits.filter((hit) => !blockedMedicare(hit, input.brief)))
   const layoutHit = usable.find((hit) => hit.entry.id === tune?.sourceId) ?? copyHit
@@ -61,9 +66,15 @@ export function steerSpecFromResearch(input: {
   const photoDirection = photoFits(photoNoteFromHits(photoHit ? [photoHit] : []), input.brief)
     ? photoNoteFromHits(photoHit ? [photoHit] : [])
     : undefined
-  const kept = incoming && !isCanned(incoming, canned) && passesQuality(incoming, offer, kind)
-  const researched = !kept && copyHit ? researchHeadline(copyHit, input.brief) : undefined
-  const headline = kept ? incoming : researched ?? (canned || incoming)
+  const fallback = kind === "roofing"
+    ? specificHeadline({ offer, role: input.role, city: input.brief.businessInfo?.city, businessName: input.brief.businessInfo?.name, goal: input.brief.goal })
+    : canned && !isStockHeadline(canned) ? canned : ""
+  // Research is a pattern, never words: no library headline is ever printed,
+  // and a headline too close to a library line is replaced.
+  const entries = input.hits.map((hit) => hit.entry)
+  const tooClose = (line: string) => copiesLibrary(line, entries)
+  const kept = incoming && !isStockHeadline(incoming) && !tooClose(incoming) && (kind === "roofing" || (!isCanned(incoming, canned) && passesQuality(incoming, offer, kind)))
+  const headline = kept ? incoming : (fallback && !tooClose(fallback) ? fallback : incoming)
   const templateId = allowedTemplate(tune?.templateBias, input.brief)
   return {
     headline,
@@ -73,7 +84,7 @@ export function steerSpecFromResearch(input: {
     templateId,
     photoDirection,
     trace: {
-      headlineId: kept ? undefined : researched ? copyHit?.entry.id : undefined,
+      headlineId: undefined,
       offerId: tune?.offerProminent ? tune.sourceId : copyHit?.entry.id,
       layoutId: templateId || tune?.photoShare !== undefined ? layoutHit?.entry.id ?? tune?.sourceId : undefined,
       photoId: photoDirection ? photoHit?.entry.id : undefined,
@@ -91,23 +102,6 @@ export function photoFits(note: string | undefined, brief: CampaignBrief): boole
   const facts = clientFactText(brief)
   if (!/\bmedicare\b/i.test(facts) && MEDICARE_COPY.test(text)) return false
   if (isNonMedicareInsurance(facts) && TRADE_PHOTO.test(text)) return false
-  return true
-}
-
-function researchHeadline(hit: RetrievalHit, brief: CampaignBrief): string | undefined {
-  const line = hit.entry.headlines.find((item) => item.trim())?.replace(/\s+/g, " ").trim()
-  if (!line) return undefined
-  if (!safeResearchLine(line, brief)) return undefined
-  return /[.!?]$/.test(line) ? line : `${line}.`
-}
-
-function safeResearchLine(line: string, brief: CampaignBrief): boolean {
-  const words = line.split(/\s+/).filter(Boolean)
-  if (words.length < 2 || words.length > 10) return false
-  if (/\d/.test(line)) return false
-  if (headlineCopiesCampaign(line)) return false
-  if (/^(?:unknown|n\/a)\b/i.test(line)) return false
-  if (!isMedicareBrief(brief) && MEDICARE_COPY.test(line)) return false
   return true
 }
 

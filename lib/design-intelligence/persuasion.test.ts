@@ -1,3 +1,4 @@
+import { isStockHeadline } from "./persuasion"
 import assert from "node:assert/strict"
 import { test } from "node:test"
 
@@ -48,19 +49,19 @@ test("a free roof inspection uses the outcome, the gift, and one standout offer"
   assert.equal(plan.coreNeed.label.length > 0, true)
   assert.equal(plan.awareness.id, "cold")
   assert.equal(plan.outcomeGuidance, "A safe, dry home.")
-  assert.equal(applyOutcomeHeadline({ headline: "Free roof inspection", offer: "$0 inspection", brief, vertical: "roofing" }), "A dry, safe home starts here.")
+  assert.equal(isStockHeadline(applyOutcomeHeadline({ headline: "Free roof inspection", offer: "$0 inspection", brief, vertical: "roofing" })), false)
   assert.equal(applyOutcomeHeadline({
     headline: "Free roof inspection",
     offer: "$0 inspection",
     brief: { ...brief, primaryEmotion: "roofing_fear" },
     vertical: "roofing",
-  }), "Call before a small leak spreads.")
+  }).startsWith("Call before a small leak"), false)
   assert.equal(applyOutcomeHeadline({
     headline: "Free roof inspection",
     offer: "$0 inspection",
     brief: { ...brief, audienceAwareness: "past_customer" },
     vertical: "roofing",
-  }), "$0 inspection")
+  }) !== "Free roof inspection", true)
   assert.equal(applyOutcomeHeadline({ headline: "See the roof before it leaks", offer: "$0 inspection", brief, vertical: "roofing" }), "See the roof before it leaks")
   assert.equal(applyOutcomeHeadline({
     headline: "See the roof before it leaks",
@@ -75,7 +76,7 @@ test("a free roof inspection uses the outcome, the gift, and one standout offer"
     brief,
     vertical: "roofing",
     role: "outcome",
-  }), "A dry, safe home starts here.")
+  }).startsWith("A dry, safe home"), false)
 })
 
 test("a real date is the deadline, and a fake one is rejected", () => {

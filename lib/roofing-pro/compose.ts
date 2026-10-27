@@ -579,9 +579,8 @@ function fitBounded(input: {
   minPt?: number
   maxPt?: number
 }): FittedText {
-  const offer = input.role === "offer"
-  let text = offer ? input.text.replace(/\s+/g, " ").trim() : limitChars(input.text, input.maxChars)
-  let minPt = input.minPt
+  const text = limitChars(input.text, input.maxChars)
+  const minPt = input.minPt
   const empty = fitText({
     text: "",
     rect: input.rect,
@@ -593,7 +592,12 @@ function fitBounded(input: {
     maxPt: input.maxPt,
   })
   if (!text) return empty
-  for (let attempt = 0; attempt < 14; attempt += 1) {
+  // Never drop words. Step the floor down until the whole text fits.
+  // If it still overflows at the smallest size, the painter shrinks it to fit.
+  const floors = [minPt, 10, 9, 8, 7].filter((value, index, all): value is number =>
+    typeof value === "number" && all.indexOf(value) === index && (minPt === undefined || value <= minPt))
+  let last: FittedText = empty
+  for (const floor of floors.length > 0 ? floors : [8, 7]) {
     const fitted = fitText({
       text,
       rect: input.rect,
@@ -601,23 +605,13 @@ function fitBounded(input: {
       pairing: input.pairing,
       color: input.color,
       align: input.align,
-      minPt,
+      minPt: floor,
       maxPt: input.maxPt,
     })
+    last = fitted
     if (!fitted.overflows && fitted.lines.length > 0) return fitted
-    const words = text.split(" ")
-    if (!offer && words.length > 1) {
-      words.pop()
-      text = words.join(" ")
-      continue
-    }
-    if ((minPt ?? 8) > 8) {
-      minPt = 8
-      continue
-    }
-    return fitted
   }
-  return empty
+  return last
 }
 
 function paletteFor(id: RoofingProTemplateId): VerticalPalette {

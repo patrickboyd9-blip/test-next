@@ -45,7 +45,9 @@ Generation constraints:
 - oneLineDifference: required for the two non-lead directions (≤ 80 characters); omit or leave empty on the lead
 - Recommend the direction that best serves the Primary Success Metric, and say why in the rationale without performance claims
 - For a local service, that recommendation is photography-forward. Do not recommend a text-only direction unless the strategy truly has no honest image job
-- Headline is 3 to 6 words, never a sentence. Put the offer in the subheadline
+- Headline is 3 to 8 words. It must be specific to this business and its offer: name the real job (financing, a senior discount, a metal roof, gutters, storm or hail, a repair) or the city, so it could not run unchanged for another roofer. Put the offer in the subheadline
+- Never use these stock lines or close paraphrases of them: "A dry, safe home in [city]", "Call before a small leak spreads", "[Business name] checks this". Research mailers are patterns only: learn their structure, tone and offer placement, and never reuse or lightly reword any of their headlines or offers. Never tell the reader they have damage or that they "qualify". The three headlines must not share an opening
+- The offer field is the brief's offer copied word for word, character for character. Do not shorten, abbreviate (no "12 mo"), reword, or add to it
 - Prefer image_grounded when the photograph should fill the card, or a split when type and photograph share it. A split gives the photograph at least half the card. Use type_only only when there is no honest image job. Use imagePresence accent only when the piece is deliberately type-led
 - When Creative Intelligence names the layouts the matched research supports, use only those layouts. That list overrides this general preference. The three directions must still differ`
 }

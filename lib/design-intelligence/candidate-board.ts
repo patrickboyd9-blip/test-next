@@ -30,10 +30,11 @@ import {
 } from "./taste-retrieval"
 import { ATTORNEY_AD_LABEL, attorneyAdMark } from "./attorney-compliance"
 import { scrubUnstatedAudience, scrubUnstatedName, statedNameFallback } from "./audience-facts"
-import { applyOutcomeHeadline, clientFactText, roleForDirection, selectPersuasion, type DirectionRole } from "./persuasion"
+import { applyOutcomeHeadline, clientFactText, distinctRoofingHeadlines, headlineVariants, persuasionVertical, roleForDirection, selectPersuasion, type DirectionRole } from "./persuasion"
 import type { ImageryRole, LeadJob } from "@/lib/campaign-creator/types"
 import { briefHasNumeralOffer, verticalForBrief } from "./vertical"
 import { assignTemplates } from "@/lib/postcard-layouts/assign"
+import { offerIsFigure } from "./offer-copy"
 import { loadTasteCorpus, visionTasteStore, type VisionTaste } from "./vision-taste"
 import { referencePicksForCritique, requestComparativeCritique } from "./vision-critic"
 import { formatArtDirectorEvidence, goldExpectationFromHits, layoutTuneFromHits } from "@/lib/research-library/evidence"
@@ -205,9 +206,21 @@ export async function rankCandidates(input: {
     favorites: ownerFavoriteIds(env),
     limit: Math.max(1, blueprintSlots),
   })
+  // Every direction for one business gets its own headline. The copy AI's
+  // line is kept whenever it passes the checks.
+  const distinct = persuasionVertical(input.brief, base.vertical) === "roofing"
+    ? distinctRoofingHeadlines({
+        headlines: input.directions.map((direction) => direction.spec?.headline ?? ""),
+        offer: input.brief.offer ?? "",
+        city: input.brief.businessInfo?.city,
+        goal: input.brief.goal,
+        businessName: input.brief.businessInfo?.name,
+      })
+    : null
   const built = await Promise.all(families.map((family, index) => {
     const directionIndex = index % input.directions.length
-    const spec = input.directions[directionIndex]?.spec ?? {}
+    const raw = input.directions[directionIndex]?.spec ?? {}
+    const spec = distinct ? { ...raw, headline: distinct[directionIndex] } : raw
     const blueprint = index < blueprintSlots && pickedBlueprints.length > 0
       ? pickedBlueprints[index % pickedBlueprints.length]
       : undefined
@@ -294,6 +307,9 @@ async function scoreFamily(input: {
       }
     }
   }
+  // The offer is the business's own words. Never the AI's shortened version.
+  const verbatimOffer = input.brief.offer?.replace(/\s+/g, " ").trim()
+  if (verbatimOffer) spec = { ...spec, offer: verbatimOffer }
   spec = {
     ...spec,
     headline: applyOutcomeHeadline({
@@ -303,6 +319,14 @@ async function scoreFamily(input: {
       vertical: rationale.vertical,
       role,
     }),
+  }
+  // A blueprint rewrite that only fell back to a stock option never replaces
+  // this direction's own distinct headline.
+  if (persuasionVertical(input.brief, rationale.vertical) === "roofing" && input.spec.headline) {
+    const fallbacks = headlineVariants({ offer: spec.offer ?? input.brief.offer ?? "", city: input.brief.businessInfo?.city, goal: input.brief.goal })
+    if (spec.headline !== input.spec.headline && fallbacks.some((line) => line === spec.headline)) {
+      spec = { ...spec, headline: input.spec.headline }
+    }
   }
   rationale = {
     ...rationale,
@@ -320,26 +344,37 @@ async function scoreFamily(input: {
     }),
   }
   const presentation = rolePresentation(role)
+  const figure = offerIsFigure(spec.offer ?? input.brief.offer ?? "")
+  const offerHero = figure && rationale.vertical !== "medicare_insurance" && role !== "trust"
   rationale = {
     ...rationale,
     grid: { name: presentation.grid, alignment: "left", intentional_break: presentation.mode },
     scale_ratios: {
       ...rationale.scale_ratios,
-      hero: "headline",
-      offer_to_headline_cap: 0.48,
-      offer_to_body: 1.6,
+      hero: offerHero ? "offer" : "headline",
+      offer_to_headline_cap: offerHero ? 1.9 : 0.8,
+      offer_to_body: offerHero ? 5.2 : 1.8,
     },
     offer_treatment: {
       ...rationale.offer_treatment,
-      kind: rationale.vertical === "medicare_insurance" ? "concrete_step_no_discount" : "headline_is_the_offer",
-      placement: presentation.placement,
+      kind: offerHero
+        ? "numeral_hero"
+        : rationale.vertical === "medicare_insurance"
+          ? "concrete_step_no_discount"
+          : "headline_is_the_offer",
+      placement: offerHero
+        ? "The offer is the largest type. The headline is the result or the risk, and it does not repeat the offer."
+        : presentation.placement,
     },
     focal_element: {
       ...rationale.focal_element,
-      kind: "headline",
-      description: presentation.placement,
-      lead_modality: presentation.mode === "full-bleed" ? "image" : "type",
+      kind: offerHero ? "offer_numeral" : "headline",
+      description: offerHero ? "One figure leads. The headline stays shorter." : presentation.placement,
+      lead_modality: offerHero ? "offer_field" : presentation.mode === "full-bleed" ? "image" : "type",
     },
+    type_seat: presentation.mode === "full-bleed" && !offerHero
+      ? { side: "left", ink: "dark", scrim: true, shadow: false, rect: { x: 0.05, y: 0.08, w: 0.5, h: 0.7 } }
+      : rationale.type_seat,
     photo_brief: {
       ...rationale.photo_brief,
       mode: presentation.photoMode,
@@ -668,7 +703,7 @@ export function strategyName(role: DirectionRole): string {
 export function customerWhyLine(role: DirectionRole): string {
   if (role === "threat") return "One honest risk, then one easy step. No deadline and no made-up number."
   if (role === "trust") return "A local face and the business name carry the proof."
-  return "The headline is the result the homeowner wants. The offer stays small."
+  return "The headline is the result the homeowner wants. A free, dollar, or percent offer is the largest type."
 }
 
 function orderFamilies(feel: string, signals?: TasteSignals): Family[] {

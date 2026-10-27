@@ -396,23 +396,52 @@ function drawFitted(page: PDFPage, spec: PostcardGeometry, line: FittedText, dis
   if (line.lines.length === 0) return
   const font = line.font === "display" ? display : text
   const pdf = canvasRectToPdf(canvasRect(line.rect), spec.artworkCanvasInches.heightInches)
+  const ratio = line.font === "display" ? 1.02 : 1.18
+  // Every word is painted. When the planned lines do not fit the box with the
+  // real font, re-wrap with real widths and step the size down. Never drop a row.
   let size = line.fontPt
-  const widest = Math.max(...line.lines.map((item) => font.widthOfTextAtSize(item, size)))
-  if (widest > pdf.widthPoints) size = fitWidth(line.lines.join(" "), font, size, pdf.widthPoints)
-  const leading = size * (line.font === "display" ? 1.02 : 1.18)
-  const block = line.lines.length * leading
+  let rows = line.lines
+  const fits = (candidate: string[], pt: number) =>
+    candidate.every((row) => font.widthOfTextAtSize(row, pt) <= pdf.widthPoints + 0.5) &&
+    candidate.length * pt * ratio <= pdf.heightPoints + pt * (ratio - 1) + 1
+  if (!fits(rows, size)) {
+    const words = line.lines.join(" ").split(/\s+/).filter(Boolean)
+    for (let pt = size; pt >= 5; pt -= 0.25) {
+      const wrapped = wrapReal(words, font, pt, pdf.widthPoints)
+      size = pt
+      rows = wrapped
+      if (fits(wrapped, pt)) break
+    }
+  }
+  const leading = size * ratio
+  const block = rows.length * leading
   const spare =
     line.role === "offer" || line.role === "label" || line.role === "contact"
       ? Math.max(0, pdf.heightPoints - block) / 2
       : 0
   let cursor = pdf.yPoints + pdf.heightPoints - spare - size
-  for (const row of line.lines) {
-    if (cursor < pdf.yPoints - 1) break
+  for (const row of rows) {
     const rowWidth = font.widthOfTextAtSize(row, size)
     const x = line.align === "center" ? pdf.xPoints + Math.max(0, (pdf.widthPoints - rowWidth) / 2) : pdf.xPoints
     page.drawText(row, { x, y: cursor, size, font, color: paint(line.color) })
     cursor -= leading
   }
+}
+
+function wrapReal(words: string[], font: PDFFont, size: number, width: number): string[] {
+  const rows: string[] = []
+  let current = ""
+  for (const word of words) {
+    const next = current ? `${current} ${word}` : word
+    if (!current || font.widthOfTextAtSize(next, size) <= width) {
+      current = next
+      continue
+    }
+    rows.push(current)
+    current = word
+  }
+  if (current) rows.push(current)
+  return rows
 }
 
 function drawFrontLockup(
@@ -485,18 +514,27 @@ function drawScrim(
   color: string,
   steep = false
 ) {
-  const steps = 16
-  const band = rect.heightPoints / steps
+  // Stacked layers, each running from its start line to the bottom edge.
+  // Neighbouring strips never overlap, so no darker stripe appears at a seam.
+  // Each layer's alpha is chosen so the composite follows the target curve.
+  const steps = 72
   const ink = paint(color)
+  const target = (t: number) => (steep ? steepScrimOpacity(t) : t * t * 0.94)
+  let previous = 0
   for (let index = 0; index < steps; index += 1) {
     const t = index / (steps - 1)
+    const goal = Math.min(0.97, target(t))
+    if (goal <= previous) continue
+    const alpha = 1 - (1 - goal) / (1 - previous)
+    previous = goal
+    const top = rect.yPoints + rect.heightPoints - (index / steps) * rect.heightPoints
     page.drawRectangle({
       x: rect.xPoints,
-      y: rect.yPoints + rect.heightPoints - (index + 1) * band,
+      y: rect.yPoints,
       width: rect.widthPoints,
-      height: band + 0.6,
+      height: top - rect.yPoints,
       color: ink,
-      opacity: steep ? steepScrimOpacity(t) : t * t * 0.94,
+      opacity: alpha,
     })
   }
 }

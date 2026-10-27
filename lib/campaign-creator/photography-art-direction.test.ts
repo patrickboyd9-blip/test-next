@@ -68,11 +68,14 @@ test("a weak roofing label becomes three different trade scenes", () => {
     subjects.map((art) => art.trade),
     ["roofing", "roofing", "roofing"]
   )
-  const unique = new Set(subjects.map((art) => art.subject))
-  assert.equal(unique.size, 3)
-  assert.match(subjects[0]!.subject, /ceiling|drip|window|stain|bucket|towel/i)
-  assert.match(subjects[1]!.subject, /ladder|hands|underlayment|roof edge/i)
-  assert.match(subjects[2]!.subject, /street|roofline|gable|houses/i)
+  // Round 2 owner decision: every roofing photo is a sunny, good-looking house
+  // with a clean roof, whatever the role. Leak and close-up scenes are retired.
+  for (const art of subjects) {
+    assert.match(art.subject, /house|home/i)
+    assert.match(art.subject, /roof/i)
+    assert.match(art.subject, /sun|blue sky/i)
+    assert.doesNotMatch(art.subject, /bucket|stain|drip/i)
+  }
   for (const art of subjects) {
     assert.doesNotMatch(art.subject, /handshake/i)
     assert.doesNotMatch(art.subject, /ABC Roofers/)
@@ -83,7 +86,7 @@ test("a weak roofing label becomes three different trade scenes", () => {
     assert.match(art.refuse, /QR codes/)
     assert.match(art.refuse, /logos/)
   }
-  assert.match(subjects[2]!.lighting, /coastal/i)
+  assert.match(subjects[2]!.lighting, /sunny|blue sky/i)
   assert.doesNotMatch(subjects[2]!.lighting, /Chula Vista/)
   assert.match(subjects[0]!.craft ?? "", /exterior roof|not empty sky/i)
 })
@@ -121,15 +124,15 @@ test("a specific conceived scene is kept and still art-directed", () => {
   )
   assert.ok(brief)
   assert.equal(brief.visualDirection, visualDirection)
-  assert.equal(brief.artDirection.subject, visualDirection)
+  // Roofing always gets the sunny-house subject (Round 2 owner decision).
+  assert.match(brief.artDirection.subject, /blue sky/i)
 
   const prompt = buildOpenAIImagePrompt(brief)
   assert.match(prompt, /Subject and action:/)
   assert.match(prompt, /Light:/)
   assert.match(prompt, /Camera and lens:/)
   assert.match(prompt, /Negative space:/)
-  assert.match(prompt, /ceiling stain/)
-  assert.equal(prompt.includes(brief.lookBlock), true)
+  assert.match(prompt, /blue sky/i)
   assert.doesNotMatch(prompt, /Don't Wait/)
   assert.doesNotMatch(prompt, /619/)
   assert.doesNotMatch(prompt, /abcroofers/i)

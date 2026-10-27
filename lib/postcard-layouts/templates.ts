@@ -1,5 +1,5 @@
 import type { FontPairingId, PostcardSizeId, PostcardTemplateId } from "./ids"
-import { ROOFING_PRO_META, ROOFING_PRO_TEMPLATE_IDS } from "@/lib/roofing-pro/ids"
+import { BEFORE_AFTER_ENABLED, ROOFING_PRO_AVAILABLE_IDS, ROOFING_PRO_META } from "@/lib/roofing-pro/ids"
 import type { InchRect } from "./typefit"
 
 export interface DesignRegion {
@@ -58,11 +58,13 @@ export const TEMPLATE_META: Record<PostcardTemplateId, TemplateMeta> = {
  * forward. Medicare never enters this list.
  */
 const TEMPLATES_FOR: Record<string, readonly PostcardTemplateId[]> = {
-  roofing: ROOFING_PRO_TEMPLATE_IDS,
+  roofing: ROOFING_PRO_AVAILABLE_IDS,
   plumbing: ["offer_starburst", "deadline_coupon", "hero_scrim", "neighbor_letter"],
   hvac: ["service_band", "deadline_coupon", "hero_scrim", "color_block"],
   medicare: ["medicare_calm", "portrait_aside", "neighbor_letter"],
-  real_estate: ["hero_scrim", "portrait_aside", "before_after", "neighbor_letter"],
+  real_estate: BEFORE_AFTER_ENABLED
+    ? ["hero_scrim", "portrait_aside", "before_after", "neighbor_letter"]
+    : ["hero_scrim", "portrait_aside", "neighbor_letter"],
   general: ["hero_scrim", "color_block", "trust_proof", "service_band", "offer_starburst"],
 }
 

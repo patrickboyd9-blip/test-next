@@ -5,6 +5,7 @@
  * The critic rejects false claims and a threat that has no easy action.
  */
 
+import { headlinePasses, sameHeadline } from "@/lib/research-library/guard"
 import type { CampaignBrief } from "@/lib/campaign-creator/types"
 
 import { headlineCopiesCampaign, lessonFor, textHasAgencyResult, type DirectionRole } from "./ad-psych/lessons-data"
@@ -273,6 +274,46 @@ export function onCardLine(kind: string, role: DirectionRole): string {
   return finishLine(rolePair(kind, role)[0])
 }
 
+/**
+ * The line that actually goes on one direction.
+ * The psychology stays (result, risk, or the local name). The words follow
+ * the offer and the city the client typed. No count and no deadline.
+ */
+export function headlineForRole(input: {
+  kind: string
+  role: DirectionRole
+  offer: string
+  goal?: string
+  city?: string
+  businessName?: string
+}): string {
+  if (input.role === "trust") {
+    const named = namedTrustLine(input.kind, input.businessName, rolePair(input.kind, "trust")[0])
+    if (input.businessName && named.split(/\s+/).length <= 8 && !/^a\b/i.test(named)) return finishLine(named)
+    return onCardLine(input.kind, "trust")
+  }
+  if (input.role === "threat") return finishLine(threatLine(input.kind, `${input.offer} ${input.goal ?? ""}`))
+  return finishLine(outcomeLine(input.kind, input.city))
+}
+
+function outcomeLine(kind: string, city?: string): string {
+  const place = usableCity(city)
+  if (kind === "roofing" && place) return `A dry, safe home in ${place}`
+  return rolePair(kind, "outcome")[0]
+}
+
+function threatLine(kind: string, facts: string): string {
+  if (kind === "roofing" && /storm|hail|wind/i.test(facts)) return "Call before the next storm"
+  return rolePair(kind, "threat")[0]
+}
+
+function usableCity(city: string | undefined): string | null {
+  const place = city?.replace(/\s+/g, " ").trim() ?? ""
+  if (!place || place.split(/\s+/).length > 3) return null
+  if (!/^[A-Za-z][A-Za-z .'-]*$/.test(place)) return null
+  return place
+}
+
 function finishLine(line: string): string {
   const trimmed = line.replace(/\s+/g, " ").trim()
   return /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`
@@ -363,6 +404,101 @@ export function persuasionWarnings(rationale: unknown): string[] {
 
 const WEAK_HEADLINE = /^(?:know your|know who)\b/i
 
+/** The three roofing lines that landed on every card in Rounds 1 and 2. Never printed. */
+export const STOCK_HEADLINE =
+  /^(?:a dry,? safe home\b|call before a small leak spreads\b|.{1,80}\bchecks this\.?$|a local crew checks this roof\b|a named crew checks this roof\b|the house stays dry after this\b|book a look before damage spreads\b)/i
+
+export function isStockHeadline(line: string): boolean {
+  return STOCK_HEADLINE.test(line.replace(/\s+/g, " ").trim())
+}
+
+/**
+ * A fallback headline built from this business's own offer and city, used only
+ * when the copy AI's line is empty, weak, or one of the banned stock lines.
+ * The offer itself is never rewritten here.
+ */
+export function specificHeadline(input: {
+  offer: string
+  role?: DirectionRole
+  city?: string
+  businessName?: string
+  goal?: string
+  variant?: number
+}): string {
+  const lines = headlineVariants(input)
+  const index = input.variant ?? (input.role === "threat" ? 1 : input.role === "trust" ? 2 : 0)
+  return lines[index % lines.length]!
+}
+
+/**
+ * Four distinct fallback headlines for this offer. Only the business's own
+ * offer and goal choose the set. The business name never does, so a name
+ * like "... Roofing and Gutter Company" does not turn every card into a gutter card.
+ */
+export function headlineVariants(input: { offer: string; city?: string; goal?: string }): string[] {
+  const offer = input.offer.replace(/\s+/g, " ").trim()
+  const facts = `${offer} ${input.goal ?? ""}`
+  const place = usableCity(input.city)
+  const at = place ? ` in ${place}` : ""
+  const pick = (lines: string[]) => lines.map((line) => finishLine(line))
+  if (/\b(?:0%|financ|no payments?)/i.test(facts)) {
+    return pick([`A new roof now${at}, paid over time`, "Don't wait on a roof you can finance", "Fix the roof now. Pay later", "A new roof that fits your monthly budget"])
+  }
+  if (/\bsenior\b/i.test(facts)) {
+    return pick([`A sound roof costs seniors less${at}`, "Retired? Your roof just got cheaper", "A roof deal made for seniors", "Seniors keep more for the roof that lasts"])
+  }
+  if (/\bmetal\b/i.test(facts)) {
+    return pick([`The last roof your ${place ? place + " " : ""}home will need`, "Tired of moss and leaks? Go metal", "Metal roofs, built for wet winters", "One metal roof. Fifty years of rain"])
+  }
+  if (/\bgutter/i.test(facts)) {
+    return pick(["Roof checked, gutters cleared, one visit", "Clogged gutters rot roofs. Fix both", "Two jobs, one visit, no cost", `Ready for the rain${at}, top to gutter`])
+  }
+  if (/\b(?:hurricane|storm|hail|wind)\b/i.test(facts)) {
+    return pick([`Storm season is coming${at}. Is your roof ready?`, "Hail damage hides. We find it", "Find storm damage before the next storm", "Know your roof before the next storm"])
+  }
+  if (/\brepair\b/i.test(facts)) {
+    return pick([`Leak or missing shingles${at}? Fix it for less`, "That small leak won't fix itself", "A repair now beats a roof later", "Fix the leak before it finds the ceiling"])
+  }
+  if (/\binspection\b|\bfree\b|\$\s*0\b/i.test(offer)) {
+    return pick([`Is your${at ? " " + place : ""} roof ready for winter?`, "See what your roof is hiding", "A free look, no pressure, no pitch", "Ten minutes on your roof tells a lot"])
+  }
+  if (/\$\s?\d|%\s*off|\boff\b/i.test(facts)) {
+    return pick([`Your new roof${at}, for less`, "Real savings on a new roof", "A full new roof, priced to say yes", "Replace the roof, keep the savings"])
+  }
+  return pick([`A better roof${at}`, "Get your roof looked at this month", "Your roof, done right", "A roof you never think about"])
+}
+
+/**
+ * One distinct headline per direction. A copy-AI headline is kept when it
+ * passes every check and no earlier direction already uses it; otherwise the
+ * next unused fallback for this offer fills in.
+ */
+export function distinctRoofingHeadlines(input: {
+  headlines: readonly string[]
+  offer: string
+  city?: string
+  goal?: string
+  businessName?: string
+  taken?: readonly string[]
+}): string[] {
+  const used: string[] = [...(input.taken ?? [])]
+  const fallbacks = headlineVariants(input)
+  const ok = (line: string) =>
+    Boolean(line) && !isStockHeadline(line) && !WEAK_HEADLINE.test(line) && !headlineRepeatsOffer(line, input.offer) &&
+    headlinePasses({ headline: line, offer: input.offer, goal: input.goal, businessName: input.businessName }) &&
+    !used.some((other) => sameHeadline(other, line)) &&
+    !(input.businessName && sameHeadline(line.replace(/[.!?]+$/, ""), input.businessName))
+  return input.headlines.map((raw, index) => {
+    const line = raw.replace(/\s+/g, " ").trim()
+    const chosen = ok(line)
+      ? line
+      : [...fallbacks.slice(index), ...fallbacks.slice(0, index)].find(ok) ??
+        fallbacks.find((item) => !used.some((other) => sameHeadline(other, item))) ?? fallbacks[index % fallbacks.length]!
+    used.push(chosen)
+    return chosen
+  })
+}
+
 export function applyOutcomeHeadline(input: {
   headline: string
   offer: string
@@ -372,14 +508,22 @@ export function applyOutcomeHeadline(input: {
 }): string {
   const headline = input.headline.replace(/\s+/g, " ").trim()
   const kind = persuasionVertical(input.brief, input.vertical)
-  if (headline && !headlineIsFeature(headline, input.offer, kind) && !WEAK_HEADLINE.test(headline)) return headline
-  if (input.role === "trust") {
+  if (kind === "roofing") {
+    return distinctRoofingHeadlines({
+      headlines: [headline],
+      offer: input.offer,
+      city: input.brief.businessInfo?.city,
+      goal: input.brief.goal,
+      businessName: input.brief.businessInfo?.name,
+    })[0]!
+  }
+  if (headline && !isStockHeadline(headline) && !headlineIsFeature(headline, input.offer, kind) && !WEAK_HEADLINE.test(headline)) return headline
+  if (input.role === "trust" && kind !== "roofing") {
     const named = namedTrustLine(kind, input.brief.businessInfo?.name, rolePair(kind, input.role)[0])
     if (input.brief.businessInfo?.name && named.split(/\s+/).length <= 8 && !/^a\b/i.test(named)) {
       return finishLine(named)
     }
   }
-  if (input.role) return onCardLine(kind, input.role)
   if (input.brief.audienceAwareness === "past_customer" && headlineIsFeature(headline, input.offer, kind)) {
     const resolved = resolveEmotion(kind, clientFactText(input.brief), input.brief.primaryEmotion)
     return headlineFor({ emotion: resolved.emotion, awareness: input.brief.audienceAwareness, offer: input.offer })

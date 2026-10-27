@@ -242,9 +242,16 @@ test("different retrieved evidence changes the headline, the offer framing, and 
   assert.equal(roof.offer, "Free roof inspection")
   assert.equal(hvac.offer, "$89 tune-up")
   assert.equal(auto.offer, "A written quote")
-  assert.equal(roof.trace.headlineId, "GOLD-roofing-001")
+  // Research is a pattern source: no library headline is printed, so no headline id is traced.
+  assert.equal(roof.trace.headlineId, undefined)
   assert.equal(roof.trace.layoutId, "GOLD-roofing-001")
-  assert.equal(auto.trace.headlineId, "GOLD-auto-insurance-001")
+  assert.equal(auto.trace.headlineId, undefined)
+  for (const hit of [...roofHits, ...hvacHits, ...autoHits]) {
+    for (const line of hit.entry.headlines) {
+      assert.notEqual(roof.headline.toLowerCase(), line.toLowerCase())
+      assert.notEqual(auto.headline.toLowerCase(), line.toLowerCase())
+    }
+  }
   assert.doesNotMatch(`${roof.headline} ${hvac.headline} ${auto.headline}`, /medicare|coverage gap/i)
   assert.doesNotMatch(auto.photoDirection ?? "", /ladder|handyman|medicare/i)
 
@@ -302,14 +309,17 @@ test("different retrieved evidence changes the headline, the offer framing, and 
   const leadOn = withLibrary.surfaced.find((item) => item.directionIndex === 0)
   const leadOff = withoutLibrary.surfaced.find((item) => item.directionIndex === 0)
   assert.ok(leadOn && leadOff)
-  assert.notEqual(leadOn.spec.headline, leadOff.spec.headline)
+  // The library changes the layout, never the words.
+  assert.notEqual(leadOn.spec.layoutHints?.templateId, leadOff.spec.layoutHints?.templateId)
   assert.notEqual(leadOn.rationale.grid.intentional_break, leadOff.rationale.grid.intentional_break)
   assert.equal(leadOn.rationale.scale_ratios.hero, "offer")
-  assert.equal(leadOff.rationale.scale_ratios.hero, "headline")
+  // A figure offer leads with or without the library (Round 1 owner decision).
+  assert.equal(leadOff.spec.layoutHints?.templateId, undefined)
   assert.equal(leadOn.spec.layoutHints?.templateId, "roof_coupon")
   assert.equal(leadOn.evidenceTrace?.layoutId, "GOLD-roofing-001")
   assert.equal(leadOff.evidenceTrace, undefined)
-  assert.match(leadOn.spec.headline ?? "", /See the roof/)
+  // A library headline is never printed, even when the copy AI's line is replaced.
+  for (const hit of roofHits) for (const line of hit.entry.headlines) assert.notEqual((leadOn.spec.headline ?? "").replace(/[.!?]$/, "").toLowerCase(), line.replace(/[.!?]$/, "").toLowerCase())
   assert.doesNotMatch(leadOn.spec.offer ?? "", /A written\.$/)
 })
 

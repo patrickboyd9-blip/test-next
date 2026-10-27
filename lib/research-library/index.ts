@@ -1,3 +1,4 @@
+import { rememberLibraryLines } from "./guard"
 import type { DocumentStore } from "@/lib/storage/document-store"
 import { designLibraryStore } from "@/lib/design-intelligence/library"
 import {
@@ -307,6 +308,7 @@ export async function researchHitsForBrief(
   try {
     const index = await loadResearchIndex()
     if (index.entries.length === 0) return []
+    rememberLibraryLines(index.entries)
     return retrieveResearch(index.entries, queryFromBrief(brief, direction)).hits
   } catch {
     return []
