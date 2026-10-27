@@ -267,6 +267,46 @@ export function onCardLine(kind: string, role: DirectionRole): string {
   return finishLine(rolePair(kind, role)[0])
 }
 
+/**
+ * The line that actually goes on one direction.
+ * The psychology stays (result, risk, or the local name). The words follow
+ * the offer and the city the client typed. No count and no deadline.
+ */
+export function headlineForRole(input: {
+  kind: string
+  role: DirectionRole
+  offer: string
+  goal?: string
+  city?: string
+  businessName?: string
+}): string {
+  if (input.role === "trust") {
+    const named = namedTrustLine(input.kind, input.businessName, rolePair(input.kind, "trust")[0])
+    if (input.businessName && named.split(/\s+/).length <= 8 && !/^a\b/i.test(named)) return finishLine(named)
+    return onCardLine(input.kind, "trust")
+  }
+  if (input.role === "threat") return finishLine(threatLine(input.kind, `${input.offer} ${input.goal ?? ""}`))
+  return finishLine(outcomeLine(input.kind, input.city))
+}
+
+function outcomeLine(kind: string, city?: string): string {
+  const place = usableCity(city)
+  if (kind === "roofing" && place) return `A dry, safe home in ${place}`
+  return rolePair(kind, "outcome")[0]
+}
+
+function threatLine(kind: string, facts: string): string {
+  if (kind === "roofing" && /storm|hail|wind/i.test(facts)) return "Call before the next storm"
+  return rolePair(kind, "threat")[0]
+}
+
+function usableCity(city: string | undefined): string | null {
+  const place = city?.replace(/\s+/g, " ").trim() ?? ""
+  if (!place || place.split(/\s+/).length > 3) return null
+  if (!/^[A-Za-z][A-Za-z .'-]*$/.test(place)) return null
+  return place
+}
+
 function finishLine(line: string): string {
   const trimmed = line.replace(/\s+/g, " ").trim()
   return /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`
@@ -366,13 +406,16 @@ export function applyOutcomeHeadline(input: {
 }): string {
   const headline = input.headline.replace(/\s+/g, " ").trim()
   const kind = persuasionVertical(input.brief, input.vertical)
-  if (input.role === "trust") {
-    const named = namedTrustLine(kind, input.brief.businessInfo?.name, rolePair(kind, input.role)[0])
-    if (input.brief.businessInfo?.name && named.split(/\s+/).length <= 8 && !/^a\b/i.test(named)) {
-      return finishLine(named)
-    }
+  if (input.role) {
+    return headlineForRole({
+      kind,
+      role: input.role,
+      offer: input.offer,
+      goal: input.brief.goal,
+      city: input.brief.businessInfo?.city,
+      businessName: input.brief.businessInfo?.name,
+    })
   }
-  if (input.role) return onCardLine(kind, input.role)
   if (input.brief.audienceAwareness === "past_customer" && headlineIsFeature(headline, input.offer, kind)) {
     const resolved = resolveEmotion(kind, clientFactText(input.brief), input.brief.primaryEmotion)
     return headlineFor({ emotion: resolved.emotion, awareness: input.brief.audienceAwareness, offer: input.offer })

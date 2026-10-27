@@ -32,6 +32,7 @@ import { ATTORNEY_AD_LABEL, attorneyAdMark } from "./attorney-compliance"
 import { scrubUnstatedAudience, scrubUnstatedName, statedNameFallback } from "./audience-facts"
 import { applyOutcomeHeadline, clientFactText, roleForDirection, selectPersuasion, type DirectionRole } from "./persuasion"
 import type { ImageryRole, LeadJob } from "@/lib/campaign-creator/types"
+import { offerIsFigure } from "./offer-copy"
 import { briefHasNumeralOffer } from "./vertical"
 import { loadTasteCorpus, visionTasteStore, type VisionTaste } from "./vision-taste"
 import { referencePicksForCritique, requestComparativeCritique } from "./vision-critic"
@@ -304,26 +305,37 @@ async function scoreFamily(input: {
     }),
   }
   const presentation = rolePresentation(role)
+  const figure = offerIsFigure(spec.offer ?? input.brief.offer ?? "")
+  const offerHero = figure && rationale.vertical !== "medicare_insurance" && role !== "trust"
   rationale = {
     ...rationale,
     grid: { name: presentation.grid, alignment: "left", intentional_break: presentation.mode },
     scale_ratios: {
       ...rationale.scale_ratios,
-      hero: "headline",
-      offer_to_headline_cap: 0.48,
-      offer_to_body: 1.6,
+      hero: offerHero ? "offer" : "headline",
+      offer_to_headline_cap: offerHero ? 1.9 : 0.8,
+      offer_to_body: offerHero ? 5.2 : 1.8,
     },
     offer_treatment: {
       ...rationale.offer_treatment,
-      kind: rationale.vertical === "medicare_insurance" ? "concrete_step_no_discount" : "headline_is_the_offer",
-      placement: presentation.placement,
+      kind: offerHero
+        ? "numeral_hero"
+        : rationale.vertical === "medicare_insurance"
+          ? "concrete_step_no_discount"
+          : "headline_is_the_offer",
+      placement: offerHero
+        ? "The offer is the largest type. The headline is the result or the risk, and it does not repeat the offer."
+        : presentation.placement,
     },
     focal_element: {
       ...rationale.focal_element,
-      kind: "headline",
-      description: presentation.placement,
-      lead_modality: presentation.mode === "full-bleed" ? "image" : "type",
+      kind: offerHero ? "offer_numeral" : "headline",
+      description: offerHero ? "One figure leads. The headline stays shorter." : presentation.placement,
+      lead_modality: offerHero ? "offer_field" : presentation.mode === "full-bleed" ? "image" : "type",
     },
+    type_seat: presentation.mode === "full-bleed" && !offerHero
+      ? { side: "left", ink: "dark", scrim: true, shadow: false, rect: { x: 0.05, y: 0.08, w: 0.5, h: 0.7 } }
+      : rationale.type_seat,
     photo_brief: {
       ...rationale.photo_brief,
       mode: presentation.photoMode,
@@ -624,7 +636,7 @@ export function strategyName(role: DirectionRole): string {
 export function customerWhyLine(role: DirectionRole): string {
   if (role === "threat") return "One honest risk, then one easy step. No deadline and no made-up number."
   if (role === "trust") return "A local face and the business name carry the proof."
-  return "The headline is the result the homeowner wants. The offer stays small."
+  return "The headline is the result the homeowner wants. A free, dollar, or percent offer is the largest type."
 }
 
 function orderFamilies(feel: string, signals?: TasteSignals): Family[] {

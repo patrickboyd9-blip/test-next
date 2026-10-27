@@ -61,6 +61,14 @@ export function resolveFrontCopy(input: {
   return { headline: fallback, ...lockup }
 }
 
+/** A free offer, a dollar figure, or a percent. "Storm inspection" is a phrase, not a figure. */
+export function offerIsFigure(offer: string): boolean {
+  const cleaned = offer.replace(/\s+/g, " ").trim()
+  if (!cleaned) return false
+  if (isFreeOffer(cleaned)) return true
+  return /^\$?\d[\d,]*(?:\.\d+)?%?(?:\s|$)/.test(cleaned)
+}
+
 export function heroLockup(offer: string): { numeral: string; rest: string } {
   const cleaned = offer.replace(/\s+/g, " ").trim()
   if (isFreeOffer(cleaned)) {
@@ -72,11 +80,9 @@ export function heroLockup(offer: string): { numeral: string; rest: string } {
       .trim()
     return { numeral: "FREE", rest }
   }
-  const priced = cleaned.match(/^(\$?\d[\d,]*(?:\.\d+)?%?)\b\s*(.*)$/)
-  if (priced) return { numeral: priced[1] ?? cleaned, rest: (priced[2] ?? "").trim() }
-  const parts = cleaned.split(/\s+/).filter(Boolean)
-  if (parts.length > 1 && (parts[0] ?? "").length <= 12) {
-    return { numeral: parts[0] ?? cleaned, rest: parts.slice(1).join(" ") }
+  const priced = cleaned.match(/^(\$?\d[\d,]*(?:\.\d+)?%?)\s+(.*)$/)
+  if (priced && /^\$?\d/.test(priced[1] ?? "")) {
+    return { numeral: priced[1] ?? cleaned, rest: (priced[2] ?? "").trim() }
   }
   return { numeral: cleaned, rest: "" }
 }
