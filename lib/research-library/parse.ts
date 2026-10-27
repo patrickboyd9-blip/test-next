@@ -133,9 +133,15 @@ function parseMarkdownFile(file: SourceFile): { entry?: ResearchEntry; row: Cove
     path: file.path,
     notes: text,
   })
-  const headlines = unique(fields.headlines)
-  const offers = unique(fields.offers)
-  const photoStyle = fields.photoStyle
+  const copy = referenceCopy({
+    headlines: unique(fields.headlines),
+    offers: unique(fields.offers),
+    photoStyle: fields.photoStyle,
+    notes: text,
+  })
+  const headlines = copy.headlines
+  const offers = copy.offers
+  const photoStyle = copy.photoStyle
   const imageRefs = unique([...fields.images, ...markdownImages(text)]).filter((item) => !isForbiddenResearchPath(item))
   const layout = layoutFrom(fields, text)
   const favorite = favoriteFrom(text, fields.favoriteOf, fields.favoriteSimilarity)
@@ -247,10 +253,23 @@ export function entryFromGold(record: Record<string, unknown>, file: Pick<Source
   const offerPosition = stringField(offer, ["position"]) || stringField(record, ["offerPosition", "offer_position"])
   const offerSize = stringField(offer, ["size"]) || stringField(record, ["offerSize", "offer_size"])
   const colors = colorList(record.colors ?? record.palette ?? record.color)
-  const photoStyle = stringField(record, ["photoStyle", "photo_style", "photo", "subject"])
+  const why = stringField(record, ["whyItWorks", "why_it_works", "why", "summary"])
+  const noteBlob = [
+    stringField(record, ["advertiser", "company", "sender", "business", "brand", "title", "notes", "provenance", "description"]),
+    headlineText,
+    offerText,
+    why,
+    collectNoteText(record),
+  ].filter(Boolean).join("\n")
+  const copy = referenceCopy({
+    headlines: headlineText ? [clip(headlineText, 120)] : [],
+    offers: offerText ? [clip(offerText, 120)] : [],
+    photoStyle: stringField(record, ["photoStyle", "photo_style", "photo", "subject"]),
+    notes: noteBlob,
+  })
+  const photoStyle = copy.photoStyle
   const images = stringList(record.images ?? record.image ?? record.imageRefs).filter((item) => !isForbiddenResearchPath(item))
   const similarity = similarityField(record)
-  const why = stringField(record, ["whyItWorks", "why_it_works", "why", "summary"])
   const response = responseField(record)
   const industry = resolveIndustry({
     explicit: stringField(record, ["industry", "vertical", "slug", "trade"]),
@@ -289,8 +308,8 @@ export function entryFromGold(record: Record<string, unknown>, file: Pick<Source
     layout,
     photoStyle,
     colors,
-    headlines: headlineText ? [clip(headlineText, 120)] : [],
-    offers: offerText ? [clip(offerText, 120)] : [],
+    headlines: copy.headlines,
+    offers: copy.offers,
     structures: structureFromLayout(layout),
     responseEvidence: response,
     whyItWorks: why ? clip(why, 280) : undefined,
@@ -299,7 +318,7 @@ export function entryFromGold(record: Record<string, unknown>, file: Pick<Source
     imageRefs: images,
     evidence: images.length > 0 ? "visual" : "text",
     gold,
-    searchText: clip([industry, headlineText, offerText, photoStyle, why].filter(Boolean).join(" "), 500),
+    searchText: clip([industry, copy.headlines.join(" "), copy.offers.join(" "), photoStyle, why].filter(Boolean).join(" "), 500),
   }
 }
 
@@ -660,9 +679,56 @@ function provenanceFromJson(value: unknown, file: SourceFile): { entries: Resear
 }
 
 function labeledLine(text: string, key: string): string | undefined {
-  const match = new RegExp(`^\\s*(?:printed\\s+)?(?:${key})\\s*[:—–-]\\s*(.+)$`, "im").exec(text)
-  const value = match?.[1]?.replace(/^["']|["']$/g, "").trim()
-  return value || undefined
+  const match = new RegExp(
+    `(?:^|[\\n\\r]|\\s)(?:[-*]\\s*)?(?:\\*\\*)?\\s*(?:printed\\s+)?${key}\\s*(?:\\*\\*)?\\s*[:\\-—–]\\s*([^\\n\\r]{1,180})`,
+    "i"
+  ).exec(text)
+  const value = match?.[1]?.replace(/^["'`]+|["'`]+$/g, "").replace(/\*\*/g, "").trim()
+  if (!value) return undefined
+  const cut = value.split(/\s+(?=(?:printed\s+)?(?:headline|offer|industry|vertical|company|advertiser)\s*[:\-—–])/i)[0]
+  return cut?.trim() || undefined
+}
+
+/**
+ * A piece with no printed line still stays in the library.
+ * The first useful sentence is the layout and style reference.
+ */
+export function referenceCopy(input: {
+  headlines: string[]
+  offers: string[]
+  photoStyle?: string
+  notes: string
+}): { headlines: string[]; offers: string[]; photoStyle?: string } {
+  const printedHeadline = labeledLine(input.notes, "headline")
+  const printedOffer = labeledLine(input.notes, "offer") || pricedLine(input.notes)
+  const headlines = unique(input.headlines.length > 0 ? input.headlines : printedHeadline ? [clip(printedHeadline, 120)] : [])
+  const offers = unique(input.offers.length > 0 ? input.offers : printedOffer ? [clip(printedOffer, 120)] : [])
+  const described = descriptiveLines(input.notes).filter((line) => line !== headlines[0] && line !== offers[0])
+  const nextHeadlines = headlines.length > 0 ? headlines : described[0] ? [clip(described[0], 120)] : []
+  const nextOffers = offers.length > 0
+    ? offers
+    : described.find((line) => line !== nextHeadlines[0])
+      ? [clip(described.find((line) => line !== nextHeadlines[0])!, 120)]
+      : nextHeadlines[0]
+        ? [clip(nextHeadlines[0], 120)]
+        : []
+  const invented = input.headlines.length === 0 && nextHeadlines.length > 0
+  const photoStyle = input.photoStyle?.trim() || (invented ? nextHeadlines[0] : undefined)
+  return { headlines: nextHeadlines, offers: nextOffers, photoStyle }
+}
+
+function descriptiveLines(text: string): string[] {
+  const lines = text
+    .split(/\n+/)
+    .flatMap((line) => line.split(/(?<=[.!])\s+/))
+    .map((line) => line.replace(/^[-*#\s]+/, "").replace(/\*\*/g, "").trim())
+    .map((line) => line.replace(/^(?:printed\s+)?(?:headline|offer|industry|vertical|company|advertiser|notes?|provenance)\s*[:\-—–]\s*/i, "").trim())
+    .filter((line) => line.length >= 12 && line.length <= 180)
+    .filter((line) => !/^(?:pm|mmr|gold)-\d+$/i.test(line))
+    .filter((line) => !/(?:^|\s)(?:pm|mmr|gold)-\d+\b/i.test(line) || /[a-z]{4,}/i.test(line.replace(/(?:pm|mmr|gold)-\d+/gi, "")))
+    .filter((line) => !/\.(?:jpe?g|png|webp)\b|assets\/physical\//i.test(line))
+    .filter((line) => !/^(?:unknown|n\/a|na|none|not stated)$/i.test(line))
+  return unique(lines)
 }
 
 function pricedLine(text: string): string | undefined {

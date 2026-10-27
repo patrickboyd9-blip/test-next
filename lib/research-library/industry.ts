@@ -1,19 +1,32 @@
 /**
- * The 28 gold file names are the only industries a brief or a mailer can have.
+ * The gold file names are the only industries a brief or a mailer can have.
  * `gold/<slug>.json` is the master list. Anything else is "none".
  * HVAC is decided before roofing and plumbing. Windows, gutters, and siding
- * are not roofing. Insurance splits into Medicare, auto, home, and life.
+ * are not roofing. Garage doors are not remodeling. A salon is not a med spa.
+ * Insurance splits into Medicare, auto, home, and life.
+ *
+ * Bump TAGGER_VERSION when the rules below change. The fingerprint also
+ * includes the master list, so a new slug rebuilds a saved index.
  */
 
+import { createHash } from "node:crypto"
+
 import type { CampaignBrief } from "@/lib/campaign-creator/types"
+
+export const TAGGER_VERSION = "2026-10-27-39"
 
 export const GOLD_INDUSTRIES = [
   "auto-insurance",
   "auto",
+  "bakery",
   "churches-community",
   "cleaning-pressure-washing",
+  "consumer-products",
   "dental",
+  "garage-doors",
   "gyms-fitness",
+  "hair-salon",
+  "handyman",
   "home-buying",
   "home-insurance",
   "home-remodeling",
@@ -21,17 +34,23 @@ export const GOLD_INDUSTRIES = [
   "hvac",
   "junk-removal",
   "landscaping",
+  "laundromat",
   "life-insurance",
   "med-spa-chiro",
   "medicare",
   "mortgage-financial",
   "moving-storage",
+  "optometry",
+  "outdoor-living",
   "pest-control",
   "plumbing",
+  "precious-metals",
   "real-estate-agents",
   "restaurants-food",
   "retail-grand-openings",
   "roofing",
+  "sauna",
+  "senior-living",
   "solar",
   "tutoring-childcare",
   "vet-pet",
@@ -44,14 +63,23 @@ export const NONE_INDUSTRY = "none"
 
 const GOLD_SET = new Set<string>(GOLD_INDUSTRIES)
 
+/** Saved indexes store this. A change means every file is parsed again. */
+export function taggerFingerprint(): string {
+  return createHash("sha256")
+    .update(`${TAGGER_VERSION}|${GOLD_INDUSTRIES.join("|")}`)
+    .digest("hex")
+    .slice(0, 20)
+}
+
 const GROUPS: readonly (readonly string[])[] = [
-  ["roofing", "hvac", "plumbing", "windows-gutters-siding", "solar", "pest-control", "landscaping", "junk-removal", "cleaning-pressure-washing", "home-remodeling", "home-security"],
+  ["roofing", "hvac", "plumbing", "windows-gutters-siding", "garage-doors", "solar", "pest-control", "landscaping", "outdoor-living", "junk-removal", "cleaning-pressure-washing", "home-remodeling", "handyman", "home-security"],
   ["auto-insurance", "home-insurance", "life-insurance"],
-  ["medicare", "dental", "med-spa-chiro"],
+  ["medicare", "dental", "med-spa-chiro", "optometry", "hair-salon"],
   ["auto", "auto-insurance"],
   ["real-estate-agents", "home-buying", "mortgage-financial", "home-insurance"],
-  ["restaurants-food", "retail-grand-openings"],
-  ["churches-community", "tutoring-childcare", "gyms-fitness", "moving-storage"],
+  ["restaurants-food", "bakery", "retail-grand-openings", "consumer-products", "laundromat", "precious-metals"],
+  ["churches-community", "tutoring-childcare", "gyms-fitness", "sauna", "moving-storage"],
+  ["senior-living", "home-buying"],
   ["vet-pet"],
 ]
 
@@ -158,6 +186,16 @@ function classify(value: string, mode: ClassifyMode): string {
     const slug = exactSlug(text)
     if (slug) return slug
   }
+  if (/\bprecious metals?\b|\bbullion\b|\bwe buy gold\b|\bgold buyers?\b|\bsilver buyers?\b|\bscrap gold\b|\bcoin dealers?\b/.test(text)) return "precious-metals"
+  if (/\bgarage doors?\b/.test(text)) return "garage-doors"
+  if (outdoorSignal(text)) return "outdoor-living"
+  if (/\bsenior living\b|\bassisted living\b|\bretirement communit|\bmemory care\b|\bindependent living\b/.test(text)) return "senior-living"
+  if (/\blife alert\b|\bmedical alerts?\b|\bmedical alarms?\b/.test(text)) return "home-security"
+  if (/\boptometr|\beye exams?\b|\beye doctors?\b|\beyeglasses\b|\bvision centers?\b/.test(text)) return "optometry"
+  if (/\bsaunas?\b|\bsteam rooms?\b/.test(text)) return "sauna"
+  if (/\blaundromats?\b|\bcoin laundry\b|\bwash and fold\b|\blaundry service\b/.test(text)) return "laundromat"
+  if (/\bbaker(?:y|ies)\b|\bbake shop\b|\bpastr(?:y|ies)\b|\bcupcakes?\b|\bdonut shop\b/.test(text)) return "bakery"
+  if (hairSalonSignal(text)) return "hair-salon"
   if (medicareSignal(text, mode)) return "medicare"
   if (/\bauto insurance\b|\bcar insurance\b|\bvehicle insurance\b/.test(text)) return "auto-insurance"
   // Life is named on purpose. "Life insurance for homeowners" is not a home policy.
@@ -168,25 +206,27 @@ function classify(value: string, mode: ClassifyMode): string {
   if (windowSignal(text, mode)) return "windows-gutters-siding"
   if (plumbingSignal(text)) return "plumbing"
   if (/\bpest\b|\btermite\b|\bmosquito\b|\btick\b/.test(text)) return "pest-control"
-  if (/\blandscap|\blawn\b|\byard\b/.test(text) && !/\bjunk\b/.test(text)) return "landscaping"
+  if (landscapingSignal(text, mode)) return "landscaping"
   if (/\bsolar\b/.test(text)) return "solar"
   if (/\broof\b|\broofs\b|\broofing\b|\broofer\b|\bshingles?\b/.test(text)) return "roofing"
   if (/\bdental\b|\bdentist\b|\bdentures?\b/.test(text)) return "dental"
   if (/\bmed spa\b|\bmedspa\b|\bchiro\b|\bbotox\b|\baesthetic\b/.test(text)) return "med-spa-chiro"
   if (vetSignal(text, mode)) return "vet-pet"
-  if (restaurantSignal(text)) return "restaurants-food"
+  if (restaurantSignal(text, mode)) return "restaurants-food"
   if (/\bgym\b|\bfitness\b|\byoga\b/.test(text)) return "gyms-fitness"
   if (cleaningSignal(text, mode)) return "cleaning-pressure-washing"
   if (/\bjunk\b|\bhaul away\b|\bhauling\b/.test(text)) return "junk-removal"
   if (/\bmovers?\b|\bmoving company\b|\bstorage unit\b|\bself storage\b/.test(text)) return "moving-storage"
   if (/\bhome security\b|\balarm\b|\bsecurity system\b/.test(text)) return "home-security"
-  if (/\bremodel|\brenovat|\bkitchen remodel\b|\bbathroom remodel\b/.test(text)) return "home-remodeling"
+  if (remodelingSignal(text)) return "home-remodeling"
+  if (/\bhandym[ae]n\b|\bhandy man\b|\bodd jobs\b/.test(text)) return "handyman"
   if (/\bwe buy\b|\bcash offer\b|\bhome buying\b|\bbuy your house\b|\bsell your house\b/.test(text)) return "home-buying"
   if (realEstateSignal(text, mode)) return "real-estate-agents"
   if (mortgageSignal(text, mode)) return "mortgage-financial"
   if (/\bchurch\b|\bcongregation\b|\bnonprofit\b|\bcommunity center\b/.test(text)) return "churches-community"
   if (/\btutors?\b|\btutoring\b|\bchildcare\b|\bchild care\b|\bdaycare\b|\bday care\b|\bpreschool\b|\bafter school\b|\bhomework\b|\blearning center\b/.test(text)) return "tutoring-childcare"
-  if (autoSignal(text)) return "auto"
+  if (autoSignal(text, mode)) return "auto"
+  if (consumerSignal(text, mode)) return "consumer-products"
   if (retailSignal(text, mode)) return "retail-grand-openings"
   return NONE_INDUSTRY
 }
@@ -197,16 +237,27 @@ function classify(value: string, mode: ClassifyMode): string {
  */
 function medicareSignal(text: string, mode: ClassifyMode): boolean {
   const cleaned = text
-    .replace(/\bnot affiliated with (?:medicare|medicaid|cms)\b/g, " ")
-    .replace(/\bnot (?:a )?medicare\b/g, " ")
+    .replace(/[^.]*\bnot affiliated with (?:medicare|medicaid|cms)\b[^.]*/g, " ")
+    .replace(/[^.]*\bnot (?:a |an )?medicare\b[^.]*/g, " ")
   if (!/\bmedicare\b|\bmedicaid\b|\bmedigap\b/.test(cleaned)) return false
-  if (mode === "label" || cleaned.split(" ").length <= 32) return true
-  return /\bmedicare\b/.test(cleaned) && /\b(?:advantage|supplement|plan|enrollment|medigap|senior|aep)\b/.test(cleaned)
+  if (mode === "label") return true
+  if (/\bmedicare advantage\b|\bmedigap\b|\bmedicare supplement\b|\bmedicare plan\b|\bannual enrollment\b|\baep\b/.test(cleaned)) return true
+  return signalHits(cleaned, [/\bmedicare\b|\bmedicaid\b/, /\badvantage\b/, /\bsupplement\b/, /\benrollment\b/, /\bmedigap\b/, /\bplan\b/]) >= 2
 }
 
-function restaurantSignal(text: string): boolean {
-  if (/\brestaurant\b|\bdining\b|\bpizza\b|\bqsr\b|\bgrocery\b|\bmenu\b/.test(text)) return true
-  return /\bdairy queen\b|\bmcdonald|\bburger king\b|\btaco bell\b|\bwendy\b|\bdomino|\bpizza hut\b|\bchipotle\b|\bstarbucks\b|\bdunkin\b|\bkfc\b/.test(text)
+function restaurantSignal(text: string, mode: ClassifyMode): boolean {
+  if (/\bmeal kits?\b/.test(text)) return true
+  const chain = /\bdairy queen\b|\bmcdonald|\bburger king\b|\btaco bell\b|\bwendy\b|\bdomino|\bpizza hut\b|\bchipotle\b|\bstarbucks\b|\bdunkin\b|\bkfc\b/
+  return notesAssign(text, mode, /$^/, [
+    /\brestaurants?\b/,
+    /\bdining\b/,
+    /\bpizza\b/,
+    /\bqsr\b/,
+    /\bgrocery\b/,
+    /\bmenus?\b/,
+    chain,
+    /\bcoupons?\b/,
+  ])
 }
 
 function realEstateSignal(text: string, mode: ClassifyMode): boolean {
@@ -216,20 +267,82 @@ function realEstateSignal(text: string, mode: ClassifyMode): boolean {
 }
 
 function mortgageSignal(text: string, mode: ClassifyMode): boolean {
-  if (/\bmortgage\b|\bcredit union\b|\brefinance\b/.test(text)) return true
-  if (/\b(?:home|house)\s+loans?\b/.test(text)) return true
-  return mode === "label" && /\bdebt\b|\bbank\b|\bfinancial\b|\bloan\b/.test(text)
+  if (/\bhome equity\b|\bheloc\b/.test(text)) return true
+  if (mode === "label" && /\bdebt\b|\bbank\b|\bfinancial\b|\bloan\b|\bmortgage\b|\bcredit union\b|\brefinance\b/.test(text)) return true
+  if (mode === "label" && /\b(?:home|house)\s+loans?\b/.test(text)) return true
+  if (mode === "notes" && /\bdebt\b/.test(text) && /\b(?:home|mortgage|equity|consolidat)\b/.test(text)) return true
+  return notesAssign(text, mode, /\b(?:home|house)\s+loans?\b|\brefinance\b/, [
+    /\bmortgage\b/,
+    /\brefinance\b/,
+    /\bcredit unions?\b/,
+    /\b(?:home|house)\s+loans?\b/,
+    /\brates?\b/,
+    /\bapr\b/,
+    /\blenders?\b/,
+    /\bbrokers?\b/,
+  ])
 }
 
 function retailSignal(text: string, mode: ClassifyMode): boolean {
-  if (/\bgrand opening\b|\bretail\b/.test(text)) return true
-  if (!/\bstore\b|\bshop\b/.test(text)) return false
-  if (mode === "label") return true
-  return text.split(" ").length <= 24
+  return notesAssign(text, mode, /\bgrand openings?\b/, [/\bgrand openings?\b/, /\bretail\b/, /\bstores?\b/, /\bshops?\b/])
+}
+
+function landscapingSignal(text: string, mode: ClassifyMode): boolean {
+  if (/\bjunk\b/.test(text)) return false
+  if (/\btree care\b|\btree service\b|\barborists?\b|\btree trimming\b|\blawn care\b/.test(text)) return true
+  return notesAssign(text, mode, /$^/, [/\blandscap/, /\blawn\b/, /\bmow(?:ing)?\b/, /\byard\b/, /\bmulch\b/, /\bsod\b/])
+}
+
+function consumerSignal(text: string, mode: ClassifyMode): boolean {
+  return notesAssign(text, mode, /\bhiking gear\b|\bapparel\b/, [
+    /\bshoes?\b/,
+    /\bshirts?\b/,
+    /\bjackets?\b/,
+    /\bsuits?\b/,
+    /\bsocks?\b/,
+    /\bhiking gear\b/,
+    /\bscarves?\b|\bscarfs?\b/,
+    /\bboots?\b/,
+    /\bpants\b/,
+    /\bapparel\b/,
+  ])
+}
+
+function hairSalonSignal(text: string): boolean {
+  if (/\bmed spa\b|\bmedspa\b|\bchiro\b|\bbotox\b|\baesthetic\b/.test(text)) return false
+  return /\bsalons?\b|\bhaircuts?\b|\bbarbers?\b|\bstylists?\b|\bhair salons?\b/.test(text)
+}
+
+function outdoorSignal(text: string): boolean {
+  return /\boutdoor living\b|\boutdoor kitchens?\b|\bpergolas?\b|\bpatios?\b|\bpavers?\b|\bdecks?\b/.test(text)
+}
+
+function remodelingSignal(text: string): boolean {
+  if (/\bgarage doors?\b/.test(text)) return false
+  if (/\bremodel|\brenovat|\bkitchen and bath\b|\b(?:kitchen|bath(?:room)?)\s+remodel\b/.test(text)) return true
+  if (/\bcabinets?\b|\bcountertops?\b|\bflooring\b|\bbasements?\b|\bclosets?\b|\bchimneys?\b|\bchimney sweeps?\b/.test(text)) return true
+  if (/\b(?:home|room|house) additions?\b|\baddition to the (?:home|house)\b/.test(text)) return true
+  if (/\bgeneral contractors?\b|\bhome contractors?\b|\bremodeling contractors?\b/.test(text)) return true
+  return /\bcontractors?\b/.test(text) && /\b(?:home|kitchen|bath|remodel|renovat|addition)\b/.test(text)
+}
+
+/**
+ * Notes need two signals, or one phrase specific enough to be a title.
+ * A short explicit label still matches on one word. A gold path never gets here.
+ */
+function notesAssign(text: string, mode: ClassifyMode, specific: RegExp, signals: readonly RegExp[]): boolean {
+  if (mode === "label") return specific.test(text) || signalHits(text, signals) > 0
+  if (specific.test(text)) return true
+  return signalHits(text, signals) >= 2
+}
+
+function signalHits(text: string, signals: readonly RegExp[]): number {
+  return signals.reduce((count, pattern) => count + (pattern.test(text) ? 1 : 0), 0)
 }
 
 function hvacSignal(text: string, mode: ClassifyMode): boolean {
   if (/\bseptic\b|\bwater treatment\b|\bwater softener\b|\bsoftener\b/.test(text)) return false
+  if (/\bair ducts?\b|\bduct cleaning\b|\bductwork\b/.test(text)) return true
   if (/\bhvac\b|\bair condition|\bfurnace\b|\bheat pump\b/.test(text)) return true
   if (/heating and air|heating and cooling|heat and air/.test(text)) return true
   if (/\bplumb/.test(text) && /\bair\b/.test(text)) return true
@@ -239,6 +352,7 @@ function hvacSignal(text: string, mode: ClassifyMode): boolean {
 }
 
 function windowSignal(text: string, mode: ClassifyMode): boolean {
+  if (/\bblinds?\b|\bwindow shades?\b|\bwindow coverings?\b/.test(text)) return true
   if (/\bgutters?\b|\bsiding\b/.test(text)) return true
   if (/\bwindow replacement\b|\bvinyl windows?\b|\breplacement windows?\b/.test(text)) return true
   if (/\bwindows?\s+and\s+doors?\b|\bdoors?\s+and\s+windows?\b/.test(text)) return true
@@ -263,8 +377,17 @@ function cleaningSignal(text: string, mode: ClassifyMode): boolean {
   return false
 }
 
-function autoSignal(text: string): boolean {
-  return /\bcar wash\b|\bdealership\b|\btires?\b|\boil change\b|\bauto repair\b|\bmechanic\b|\bcollision\b|\bbody shop\b/.test(text)
+function autoSignal(text: string, mode: ClassifyMode): boolean {
+  return notesAssign(text, mode, /\bcar wash\b|\boil changes?\b|\bauto repairs?\b|\bbody shops?\b|\bdealerships?\b/, [
+    /\bcar wash\b/,
+    /\bdealerships?\b/,
+    /\btires?\b/,
+    /\boil changes?\b/,
+    /\bauto repairs?\b/,
+    /\bmechanics?\b/,
+    /\bcollision\b/,
+    /\bbody shops?\b/,
+  ])
 }
 
 const PATH_NOISE = new Set(["gold", "json", "md", "txt", "examples", "assets", "physical", "notes", "provenance"])

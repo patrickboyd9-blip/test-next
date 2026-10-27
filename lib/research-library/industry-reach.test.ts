@@ -8,6 +8,9 @@ import type { LibraryRecord } from "@/lib/design-intelligence/library"
 import { verticalForBrief } from "@/lib/design-intelligence/vertical"
 
 import { industryCounts } from "./coverage"
+import { buildPhotographyArtDirection } from "@/lib/campaign-creator/photography-art-direction"
+import { designVerticalForIndustry } from "@/lib/design-intelligence/vertical"
+
 import { GOLD_INDUSTRIES, industryForBrief, normalizeIndustry, resolveIndustry, type GoldIndustry } from "./industry"
 import { dedupeResearchEntries, indexSourceFiles, type SourceFile } from "./parse"
 import { queryFromBrief, retrieveResearch } from "./retrieve"
@@ -15,10 +18,15 @@ import { queryFromBrief, retrieveResearch } from "./retrieve"
 const SAMPLE_BRIEFS: Record<GoldIndustry, CampaignBrief> = {
   "auto-insurance": { goal: "Ask for an auto insurance quote", offer: "A written car insurance quote" },
   auto: { goal: "Book a car wash", offer: "A free oil change at the dealership" },
+  bakery: { goal: "Order from the bakery", offer: "A free pastry" },
   "churches-community": { goal: "Invite the church congregation", offer: "Sunday at the church" },
   "cleaning-pressure-washing": { goal: "Book pressure washing", offer: "Free pressure wash estimate" },
+  "consumer-products": { goal: "Shop hiking gear and boots", offer: "A jacket and socks sale" },
   dental: { goal: "Book a dental cleaning", offer: "Free dental exam" },
+  "garage-doors": { goal: "Replace the garage door", offer: "Free garage door estimate" },
   "gyms-fitness": { goal: "Join the gym", offer: "A free fitness week" },
+  "hair-salon": { goal: "Book a haircut at the salon", offer: "A free haircut consult" },
+  handyman: { goal: "Hire a handyman", offer: "Free handyman estimate" },
   "home-buying": { goal: "We buy houses for cash", offer: "A cash offer this week" },
   "home-insurance": { goal: "Review homeowners insurance", offer: "A home insurance quote" },
   "home-remodeling": { goal: "Remodel the kitchen", offer: "Free remodeling estimate" },
@@ -26,17 +34,23 @@ const SAMPLE_BRIEFS: Record<GoldIndustry, CampaignBrief> = {
   hvac: { goal: "Cool the house", offer: "Free inspection for broken AC units" },
   "junk-removal": { goal: "Haul the junk away", offer: "Free junk removal estimate" },
   landscaping: { goal: "Mow and landscape the lawn", offer: "Free lawn estimate" },
+  laundromat: { goal: "Visit the laundromat", offer: "Wash and fold this week" },
   "life-insurance": { goal: "Review life insurance", offer: "A life insurance quote" },
   "med-spa-chiro": { goal: "Book a chiropractic visit", offer: "Free chiro consult" },
   medicare: { goal: "Review Medicare coverage", offer: "A Medicare plan review" },
   "mortgage-financial": { goal: "Refinance the mortgage", offer: "A credit union check" },
   "moving-storage": { goal: "Book movers and a storage unit", offer: "Free moving estimate" },
+  optometry: { goal: "Book an eye exam", offer: "Free eyeglasses consult" },
+  "outdoor-living": { goal: "Build a deck and a pergola", offer: "Free patio estimate" },
   "pest-control": { goal: "Treat the house for termites", offer: "Free pest inspection" },
   plumbing: { goal: "Clear a drain and check the water heater", offer: "Free plumbing check" },
+  "precious-metals": { goal: "We buy gold and silver", offer: "A precious metals quote" },
   "real-estate-agents": { goal: "List the house with a realtor", offer: "A free listing consult" },
   "restaurants-food": { goal: "Fill the restaurant on Tuesday", offer: "A pizza night special" },
   "retail-grand-openings": { goal: "Announce a grand opening", offer: "Store opening week" },
   roofing: { goal: "Replace the roof shingles", offer: "Free roof inspection" },
+  sauna: { goal: "Install a sauna", offer: "A sauna estimate" },
+  "senior-living": { goal: "Tour senior living", offer: "A senior living visit" },
   solar: { goal: "Install solar panels", offer: "Free solar quote" },
   "tutoring-childcare": { goal: "Enroll in childcare and tutoring", offer: "A daycare visit" },
   "vet-pet": { goal: "Book a vet visit for the dog", offer: "Free pet exam" },
@@ -340,7 +354,7 @@ test("life insurance and tutoring briefs reach their own industries", () => {
   assert.equal(industryForBrief({ goal: "Ask the bank for a home loan", offer: "A written quote" }), "mortgage-financial")
 })
 
-test("a record outside the 28 industries stays none and is not a same-industry example", () => {
+test("a record outside the master list stays none and is not a same-industry example", () => {
   const filler = "conference brochure ".repeat(20)
   const notes = `${filler} hotel gift shop and a bank financial webinar job listing. Not affiliated with Medicare.`
   assert.equal(resolveIndustry({ notes }), "none")
@@ -384,6 +398,110 @@ test("a record outside the 28 industries stays none and is not a same-industry e
   )
   assert.equal(picked.peers.some((peer) => peer.id === "MMR-900"), false)
   assert.ok(picked.peers.some((peer) => peer.id === "PM-015"))
+})
+
+test("the eleven new industries resolve, and garage doors and salons leave their old buckets", () => {
+  assert.equal(GOLD_INDUSTRIES.length, 39)
+  assert.equal(industryForBrief({ goal: "Replace the garage door", offer: "Free estimate" }), "garage-doors")
+  assert.notEqual(industryForBrief({ goal: "Remodel the kitchen cabinets", offer: "Free estimate" }), "garage-doors")
+  assert.equal(industryForBrief({ goal: "Book a haircut", offer: "Salon week" }), "hair-salon")
+  assert.notEqual(industryForBrief({ goal: "Book a haircut", offer: "Salon week" }), "med-spa-chiro")
+  assert.equal(industryForBrief({ goal: "Book botox", offer: "A med spa visit" }), "med-spa-chiro")
+  assert.equal(designVerticalForIndustry("senior-living"), "general_local_service")
+  assert.notEqual(designVerticalForIndustry("senior-living"), "medicare_insurance")
+  assert.equal(designVerticalForIndustry("garage-doors"), "general_local_service")
+  const salon = buildPhotographyArtDirection({
+    imageryRole: "neighborhood",
+    leadJob: "offer",
+    occupancy: "field",
+    visualDirection: "The finished result of the job",
+    campaign: { goal: "Book a haircut at the salon", offer: "A free consult" },
+  })
+  assert.match(salon.subject, /salon/i)
+  assert.doesNotMatch(salon.subject, /condenser|furnace/i)
+  const deck = buildPhotographyArtDirection({
+    imageryRole: "neighborhood",
+    leadJob: "offer",
+    occupancy: "field",
+    visualDirection: "The finished result of the job",
+    campaign: { goal: "Build a deck and a pergola", offer: "Free patio estimate" },
+  })
+  assert.match(deck.subject, /deck|patio|pergola|paver/i)
+})
+
+test("missed home trades land in an industry, including the broadened remodel list", () => {
+  const cases: ReadonlyArray<readonly [string, string]> = [
+    ["custom closets for the bedroom", "home-remodeling"],
+    ["new blinds for the windows", "windows-gutters-siding"],
+    ["kitchen cabinets and countertops", "home-remodeling"],
+    ["a chimney sweep before winter", "home-remodeling"],
+    ["tree care for the yard", "landscaping"],
+    ["a paver patio", "outdoor-living"],
+    ["home equity and debt", "mortgage-financial"],
+    ["a weekly meal kit", "restaurants-food"],
+    ["the hair salon downtown", "hair-salon"],
+    ["Life Alert medical alert", "home-security"],
+    ["air duct cleaning", "hvac"],
+    ["kitchen and bath remodel", "home-remodeling"],
+    ["new hardwood flooring", "home-remodeling"],
+    ["finish the basement", "home-remodeling"],
+    ["a home addition", "home-remodeling"],
+    ["a general contractor for the renovation", "home-remodeling"],
+  ]
+  for (const [notes, industry] of cases) {
+    assert.equal(resolveIndustry({ notes }), industry, notes)
+  }
+  assert.equal(resolveIndustry({ notes: "garage door springs" }), "garage-doors")
+})
+
+test("a long note needs two signals or a title field before it takes an industry", () => {
+  const filler = "quarterly newsletter ".repeat(40)
+  assert.equal(resolveIndustry({ notes: `${filler} the restaurant was mentioned once.` }), "none")
+  assert.equal(resolveIndustry({ notes: `${filler} tires on sale.` }), "none")
+  assert.equal(resolveIndustry({ notes: `${filler} a gift shop.` }), "none")
+  assert.equal(resolveIndustry({ notes: `${filler} one mortgage mention.` }), "none")
+  assert.equal(resolveIndustry({ notes: `${filler} the yard.` }), "none")
+  assert.equal(resolveIndustry({ notes: `${filler} medicare was named in a footer.` }), "none")
+  assert.equal(resolveIndustry({ notes: `${filler} Dairy Queen coupon for Tuesday.` }), "restaurants-food")
+  assert.equal(resolveIndustry({ notes: `${filler} oil change and new tires.` }), "auto")
+  assert.equal(resolveIndustry({ notes: `${filler} grand opening of the retail store.` }), "retail-grand-openings")
+  assert.equal(resolveIndustry({ notes: `${filler} mortgage rate and a refinance.` }), "mortgage-financial")
+  assert.equal(resolveIndustry({ notes: `${filler} lawn mowing and mulch.` }), "landscaping")
+  assert.equal(resolveIndustry({ notes: `${filler} Medicare Advantage enrollment.` }), "medicare")
+  assert.equal(resolveIndustry({ explicit: "restaurant", notes: filler }), "restaurants-food")
+})
+
+test("a C-3PO note without a printed line stays usable as a layout reference", () => {
+  const indexed = indexSourceFiles([
+    {
+      path: "assets/physical/PM-045/notes.md",
+      ref: "c3po",
+      text: "PM-045\nCustom closet mailer for a bedroom organizer.\n",
+    },
+    {
+      path: "assets/physical/PM-046/notes.md",
+      ref: "c3po",
+      text: "PM-046\nPrinted headline: Gold in hand\nPrinted offer: We buy gold today\n",
+    },
+    {
+      path: "assets/physical/PM-050/provenance.json",
+      ref: "c3po",
+      json: {
+        id: "PM-050",
+        notes: "A paver patio mailer.\nPrinted headline: The outdoor room\nPrinted offer: Free paver estimate",
+      },
+    },
+  ])
+  const byId = new Map(indexed.entries.map((entry) => [entry.id, entry]))
+  assert.equal(byId.get("PM-045")?.industry, "home-remodeling")
+  assert.ok((byId.get("PM-045")?.headlines[0]?.length ?? 0) > 8)
+  assert.ok((byId.get("PM-045")?.offers[0]?.length ?? 0) > 8)
+  assert.match(byId.get("PM-046")?.headlines.join(" ") ?? "", /Gold in hand/)
+  assert.match(byId.get("PM-046")?.offers.join(" ") ?? "", /buy gold/i)
+  assert.equal(byId.get("PM-046")?.industry, "precious-metals")
+  assert.equal(byId.get("PM-050")?.industry, "outdoor-living")
+  assert.match(byId.get("PM-050")?.headlines.join(" ") ?? "", /outdoor room/i)
+  assert.match(byId.get("PM-050")?.offers.join(" ") ?? "", /paver/i)
 })
 
 test("customer lines hide blueprint ids and internal notes", () => {

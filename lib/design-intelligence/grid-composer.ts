@@ -382,7 +382,14 @@ function composeIntegrated(
     w: round2(trim.w - photoX),
     h: round2(Math.max(1.8, trim.h - photoTop)),
   }
-  const photos: PhotoSlotPlan[] = [{ id: "subject", role: "photo", rect: photoRect, bleed: false, treatment: "cutout" }]
+  const equipmentScene = input.rationale.vertical === "hvac"
+  const photos: PhotoSlotPlan[] = [{
+    id: "subject",
+    role: "photo",
+    rect: photoRect,
+    bleed: false,
+    treatment: equipmentScene ? "cover" : "cutout",
+  }]
   const shapes: ShapePlan[] = [
     { id: "paper", role: "paper", rect: { x: 0, y: 0, w: trim.w, h: trim.h }, fill: paper },
   ]

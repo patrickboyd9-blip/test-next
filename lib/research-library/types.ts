@@ -48,6 +48,8 @@ export interface ResearchEntry {
   gold: boolean
   /** Short searchable text. Not the raw markdown. */
   searchText: string
+  /** Tagger fingerprint that produced this row. Absent on an index built before versioning. */
+  taggerVersion?: string
 }
 
 export interface CoverageRow {
@@ -56,10 +58,14 @@ export interface CoverageRow {
   status: "indexed" | "skipped"
   reason?: string
   kind: "mailer" | "catalog" | "private" | "library" | "other"
+  /** Set when this path was parsed under the current tagger. */
+  taggerVersion?: string
 }
 
 export interface ResearchIndex {
   version: 1
+  /** Fingerprint of the tagger and the master list. A mismatch rebuilds every file. */
+  taggerVersion: string
   builtAt: string
   entries: ResearchEntry[]
   coverage: CoverageRow[]

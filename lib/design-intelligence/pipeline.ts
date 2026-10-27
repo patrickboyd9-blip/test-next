@@ -1,6 +1,7 @@
 import type { CampaignBrief, CreativeDirection, ResearchQuality } from "@/lib/campaign-creator/types"
 import type { GenerateDirectionsResult } from "@/lib/campaign-creator/creative-engine"
 import { MEDICARE_AGENT_DISCLAIMER, isMedicareAgentBrief } from "@/lib/campaign-creator/medicare-compliance"
+import { withBriefContact } from "@/lib/campaign-creator/studio-contact"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 
 import { directDesign, directionRecipe } from "./art-director"
@@ -138,6 +139,7 @@ export function repairCard(input: {
   const rounds = Math.max(1, cap)
   for (let round = 1; round <= rounds; round += 1) {
     const facts = clientFactText(input.brief, spec.offer)
+    spec = withBriefContact(spec, input.brief)
     const card = composeGridCard({
       rationale,
       spec,

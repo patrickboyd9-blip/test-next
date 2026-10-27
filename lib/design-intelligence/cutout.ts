@@ -19,8 +19,9 @@ const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0
 
 export function cutoutSubjectRequested(spec: { designRationale?: unknown }): boolean {
   if (!spec.designRationale || typeof spec.designRationale !== "object") return false
-  const grid = (spec.designRationale as { grid?: { intentional_break?: string } }).grid
-  return grid?.intentional_break === "integrated"
+  const rationale = spec.designRationale as { vertical?: string; grid?: { intentional_break?: string } }
+  if (rationale.vertical === "hvac") return false
+  return rationale.grid?.intentional_break === "integrated"
 }
 
 export function cutoutSubjectLine(subject: string): string {

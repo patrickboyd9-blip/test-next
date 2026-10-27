@@ -13,11 +13,13 @@ import { isForbiddenResearchPath } from "@/lib/design-intelligence/images"
 import type { CampaignBrief } from "@/lib/campaign-creator/types"
 
 import { coverageStats } from "./coverage"
+import { taggerFingerprint } from "./industry"
 import { dedupeResearchEntries, indexSourceFiles, type SourceFile } from "./parse"
 import { queryFromBrief, retrieveResearch } from "./retrieve"
 import type { PendingFile, ResearchIndex, RetrievalHit } from "./types"
 
-const INDEX_ID = "research-text-index"
+export const RESEARCH_INDEX_ID = "research-text-index"
+const INDEX_ID = RESEARCH_INDEX_ID
 const VERSION = 1 as const
 
 let memory: ResearchIndex | null = null
@@ -26,6 +28,7 @@ export function emptyResearchIndex(reason: string, now = new Date().toISOString(
   const coverage = [{ path: "modern-mail-research", status: "skipped" as const, kind: "library" as const, reason }]
   return {
     version: VERSION,
+    taggerVersion: taggerFingerprint(),
     builtAt: now,
     entries: [],
     coverage,
@@ -147,6 +150,8 @@ async function refreshOnce(input: {
       stats: coverageStats(input.previous.entries, [...input.previous.coverage, ...coverageNotes], input.previous.pending.length),
     }
   }
+  const target = taggerFingerprint()
+  const migrating = (input.previous.taggerVersion || "") !== target
   const known = new Map(input.previous.entries.map((entry) => [entry.sourcePath, entry]))
   const decided = new Set(
     input.previous.coverage
@@ -155,6 +160,12 @@ async function refreshOnce(input: {
   )
   const pending = wanted.filter((item) => {
     const existing = known.get(item.path)
+    if (migrating) {
+      if (existing?.taggerVersion === target && shaUnchanged(item.sha, existing.sha)) return false
+      const refreshed = input.previous.coverage.some((row) => (row.path.split("#")[0] ?? row.path) === item.path && row.taggerVersion === target)
+      if (refreshed) return false
+      return true
+    }
     if (item.sha && existing?.sha && item.sha !== existing.sha) return true
     if (existing) return false
     if (decided.has(item.path)) return false
@@ -184,6 +195,10 @@ async function refreshOnce(input: {
     }
   })
   const parsed = indexSourceFiles(files)
+  const targetTag = taggerFingerprint()
+  for (const entry of parsed.entries) entry.taggerVersion = targetTag
+  for (const row of parsed.coverage) row.taggerVersion = targetTag
+  const parsedIds = new Set(parsed.entries.map((entry) => entry.id))
   const parsedPaths = new Set(files.map((file) => file.path))
   const kept = input.previous.entries.filter((entry) => !parsedPaths.has(entry.sourcePath) && wanted.some((item) => item.path === entry.sourcePath))
   const entries = [...kept, ...parsed.entries].sort((a, b) => a.id.localeCompare(b.id))
@@ -198,15 +213,22 @@ async function refreshOnce(input: {
     })
   }
   const stillPending = pending.slice(input.batchSize)
+  const merged = dedupe(entries).map((entry) => parsedIds.has(entry.id) ? { ...entry, taggerVersion: targetTag } : entry)
   const index: ResearchIndex = {
     version: VERSION,
+    taggerVersion: migrating && stillPending.length > 0 ? (input.previous.taggerVersion || "") : targetTag,
     builtAt: input.now,
-    entries: dedupe(entries),
+    entries: merged,
     coverage,
     pending: stillPending.map(({ ref, path, sha }) => ({ ref, path, sha })),
-    stats: coverageStats(dedupe(entries), coverage, stillPending.length),
+    stats: coverageStats(merged, coverage, stillPending.length),
   }
   return index
+}
+
+function shaUnchanged(next: string | undefined, previous: string | undefined): boolean {
+  if (next && previous) return next === previous
+  return true
 }
 
 interface Candidate extends PendingFile {
@@ -271,6 +293,7 @@ function parseStoredIndex(raw: unknown): ResearchIndex | null {
   const pending = Array.isArray(record.pending) ? record.pending : []
   return {
     version: 1,
+    taggerVersion: typeof record.taggerVersion === "string" ? record.taggerVersion : "",
     builtAt: typeof record.builtAt === "string" ? record.builtAt : new Date(0).toISOString(),
     entries,
     coverage,

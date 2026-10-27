@@ -1,4 +1,4 @@
-import { normalizeIndustry } from "@/lib/research-library/industry"
+import { industryForBrief, normalizeIndustry } from "@/lib/research-library/industry"
 
 import { isHomeServicesBrief } from "./creative-intelligence"
 import {
@@ -322,7 +322,52 @@ const LOCAL_SERVICE: SceneBank = {
   ],
 }
 
+function tradeScene(subject: string): SceneBank {
+  return {
+    consequence: [
+      `${subject} Ordinary daylight, no logos, no type, and no postcard chrome.`,
+      `${subject} A closer detail of that same work, calm surroundings, nothing from another trade.`,
+      `${subject} The job as a customer would recognize it, not a stock pose and not a grey cut-out.`,
+    ],
+    crew: [
+      `${subject} Hands at the work, the person secondary, no logo on clothing.`,
+      `${subject} A worker seen from a little distance, with room left for type.`,
+      `${subject} Only the tools of this trade, no unrelated equipment.`,
+    ],
+    neighborhood: [
+      `${subject} A normal home or shop in daylight, no readable signs.`,
+      `${subject} The place of business, one time of day, no landmark.`,
+      `${subject} Open light, and nothing that belongs to a different trade.`,
+    ],
+  }
+}
+
+const INDUSTRY_PHOTO: Record<string, string> = {
+  "precious-metals": "precious-metals",
+  "hair-salon": "hair-salon",
+  laundromat: "laundromat",
+  "garage-doors": "garage-doors",
+  bakery: "bakery",
+  handyman: "handyman",
+  optometry: "optometry",
+  "senior-living": "senior-living",
+  sauna: "sauna",
+  "outdoor-living": "outdoor-living",
+  "consumer-products": "consumer-products",
+}
+
 const BANKS: Record<string, SceneBank> = {
+  "precious-metals": tradeScene("Gold and silver coins or bars on a plain tray, a buyer's counter, no currency collage."),
+  "hair-salon": tradeScene("A hair salon chair and a cut in progress, mirrors and daylight, no spa table and no medical equipment."),
+  laundromat: tradeScene("A row of washing machines in a laundromat, clean and lit, no car wash and no dry cleaner storefront unless the machines are the subject."),
+  "garage-doors": tradeScene("A residential garage door, open or being repaired, the door and the opener in frame, not a kitchen remodel."),
+  bakery: tradeScene("A bakery case of bread and pastry, warm light, no restaurant dining room as the subject."),
+  handyman: tradeScene("A handyman's tool belt and a small home repair, one task in frame, not a roof replacement or an HVAC condenser."),
+  optometry: tradeScene("An optometry lane, eyeglasses and an eye chart, no dental chair and no med spa."),
+  "senior-living": tradeScene("A bright senior-living common room or garden walk, capable residents, no hospital bed and no Medicare card."),
+  sauna: tradeScene("A wooden sauna interior, benches and warm light, no gym floor and no pool party."),
+  "outdoor-living": tradeScene("A deck, patio, pergola, or paver outdoor kitchen at a home, daylight, not a lawn mower as the subject."),
+  "consumer-products": tradeScene("Apparel and gear — shoes, a jacket, boots, or hiking clothes — on a clean surface, no store-opening balloon arch."),
   medicare: MEDICARE,
   final_expense: FINAL_EXPENSE,
   roofing: ROOFING,
@@ -480,6 +525,9 @@ export function buildPhotographyArtDirection(input: {
 
 function tradeForCampaign(campaign: CampaignBrief | undefined): string {
   if (!campaign) return "local-service"
+  const industry = industryForBrief(campaign)
+  const photographed = INDUSTRY_PHOTO[industry]
+  if (photographed) return photographed
   const matched = referenceVerticalsForBrief(campaign)
   const preferred = TRADE_PREFERENCE.find((trade) => matched.includes(trade))
   if (preferred && preferred !== "roofing" && STORM_ROOF_INSURANCE.has(preferred)) return preferred

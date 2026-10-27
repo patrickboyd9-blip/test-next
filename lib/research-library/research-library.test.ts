@@ -19,7 +19,8 @@ import {
   stampLibraryResearch,
 } from "./evidence"
 import { fixtureResearchIndex, fixtureSourceFiles } from "./fixtures"
-import { clearResearchIndexMemory, refreshResearchIndex } from "./index"
+import { taggerFingerprint } from "./industry"
+import { clearResearchIndexMemory, refreshResearchIndex, RESEARCH_INDEX_ID } from "./index"
 import { indexSourceFiles } from "./parse"
 import { queryFromBrief, retrieveResearch } from "./retrieve"
 import { steerSpecFromResearch } from "./steer"
@@ -199,6 +200,85 @@ test("a defensive gold file and a private path survive a partial sync", async ()
   assert.ok(fetched > 0)
   const skipped = done.coverage.filter((row) => row.status === "skipped")
   assert.ok(skipped.every((row) => Boolean(row.reason?.trim())))
+  clearResearchIndexMemory()
+  await rm(directory, { recursive: true })
+})
+
+test("a saved index rebuilds every file when the tagger version changes", async () => {
+  clearResearchIndexMemory()
+  const directory = await mkdtemp(path.join(os.tmpdir(), "research-tagger-"))
+  const files = new Map(fixtureSourceFiles().map((file) => [`${file.ref}:${file.path}`, file]))
+  let fetched = 0
+  const reader: GithubReader = {
+    async getJson(filePath) {
+      fetched += 1
+      return files.get(`mando:${filePath}`)?.json ?? files.get(`c3po:${filePath}`)?.json ?? null
+    },
+    async getBytes() {
+      return null
+    },
+    async getText(filePath) {
+      fetched += 1
+      const file = files.get(`mando:${filePath}`) ?? files.get(`c3po:${filePath}`)
+      return file?.text ?? null
+    },
+    async listTree() {
+      return {
+        truncated: false,
+        entries: fixtureSourceFiles()
+          .filter((file) => !file.path.endsWith("/"))
+          .map((file) => ({ path: file.path, type: "blob" as const, sha: "same-sha" })),
+      }
+    },
+  }
+  const store = createFileDocumentStore(directory)
+  const built = await refreshResearchIndex({
+    env: { RESEARCH_GITHUB_TOKEN: "test" } as unknown as NodeJS.ProcessEnv,
+    reader,
+    store,
+    now: "2026-10-27T02:00:00.000Z",
+    batchSize: 80,
+    rounds: 4,
+  })
+  assert.equal(built.pending.length, 0)
+  assert.equal(built.taggerVersion, taggerFingerprint())
+  assert.ok(fetched > 0)
+  const firstFetch = fetched
+  fetched = 0
+  const again = await refreshResearchIndex({
+    env: { RESEARCH_GITHUB_TOKEN: "test" } as unknown as NodeJS.ProcessEnv,
+    reader,
+    store,
+    now: "2026-10-27T03:00:00.000Z",
+    batchSize: 80,
+    rounds: 2,
+  })
+  assert.equal(again.pending.length, 0)
+  assert.equal(fetched, 0)
+
+  const stored = await store.get(RESEARCH_INDEX_ID) as {
+    taggerVersion: string
+    entries: Array<{ taggerVersion?: string }>
+    coverage: Array<{ taggerVersion?: string }>
+  }
+  stored.taggerVersion = "stale-tagger"
+  for (const entry of stored.entries) delete entry.taggerVersion
+  for (const row of stored.coverage) delete row.taggerVersion
+  await store.put(RESEARCH_INDEX_ID, stored)
+  clearResearchIndexMemory()
+  fetched = 0
+  const rebuilt = await refreshResearchIndex({
+    env: { RESEARCH_GITHUB_TOKEN: "test" } as unknown as NodeJS.ProcessEnv,
+    reader,
+    store,
+    now: "2026-10-27T04:00:00.000Z",
+    batchSize: 80,
+    rounds: 4,
+  })
+  assert.equal(rebuilt.pending.length, 0)
+  assert.equal(rebuilt.taggerVersion, taggerFingerprint())
+  assert.equal(fetched, firstFetch)
+  assert.ok(rebuilt.entries.every((entry) => entry.taggerVersion === taggerFingerprint()))
   clearResearchIndexMemory()
   await rm(directory, { recursive: true })
 })

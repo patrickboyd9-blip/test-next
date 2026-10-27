@@ -1,5 +1,6 @@
 import { indexSourceFiles, type SourceFile } from "./parse"
 import { coverageStats } from "./coverage"
+import { taggerFingerprint } from "./industry"
 import type { ResearchIndex } from "./types"
 
 /**
@@ -182,6 +183,7 @@ export function fixtureResearchIndex(): ResearchIndex {
   const { entries, coverage } = indexSourceFiles(fixtureSourceFiles())
   return {
     version: 1,
+    taggerVersion: taggerFingerprint(),
     builtAt: "2026-10-27T00:00:00.000Z",
     entries,
     coverage,

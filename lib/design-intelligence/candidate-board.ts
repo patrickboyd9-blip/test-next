@@ -2,6 +2,7 @@ import type { GenerateDirectionsResult } from "@/lib/campaign-creator/creative-e
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import type { CampaignBrief, CreativeDirection, CreativeSpec } from "@/lib/campaign-creator/types"
 import { MEDICARE_AGENT_DISCLAIMER, isMedicareAgentBrief } from "@/lib/campaign-creator/medicare-compliance"
+import { withBriefContact } from "@/lib/campaign-creator/studio-contact"
 
 import { directDesign, usesSeparatedPanel, type CompositionMode } from "./art-director"
 import { normalizeToneTag, normalizeVerticalTag, selectBlueprints, type MailerBlueprint } from "./blueprint"
@@ -416,6 +417,7 @@ async function scoreFamily(input: {
   }
   const facts = clientFactText(input.brief, spec.offer)
   const complianceMark = attorneyAdMark(facts)
+  spec = withBriefContact(spec, input.brief)
   const card = composeGridCard({
     rationale,
     spec,

@@ -91,6 +91,8 @@ export function lineHeightFor(font: "display" | "text"): number {
   return font === "display" ? DISPLAY_LINE : TEXT_LINE
 }
 
+const ORPHAN_WORD = /^(?:a|an|the|of|to|and|or|for|in|on|at|by|as|if|is|be)$/i
+
 function wrapLines(text: string, fontPt: number, widthIn: number, em: number): string[] {
   const words = text.split(/\s+/).filter(Boolean)
   const lines: string[] = []
@@ -105,7 +107,23 @@ function wrapLines(text: string, fontPt: number, widthIn: number, em: number): s
     current = word
   }
   if (current) lines.push(current)
-  return lines.length > 0 ? lines : [text]
+  return repairOrphans(lines.length > 0 ? lines : [text])
+}
+
+/** A function word does not sit on a line by itself. */
+function repairOrphans(lines: string[]): string[] {
+  const next = [...lines]
+  for (let index = 1; index < next.length; index += 1) {
+    const words = next[index]!.split(/\s+/)
+    const only = words.length === 1 ? words[0]!.replace(/[^A-Za-z]/g, "") : ""
+    if (!only || !ORPHAN_WORD.test(only)) continue
+    const previous = next[index - 1]!.split(/\s+/)
+    if (previous.length < 2) continue
+    const moved = previous.pop()!
+    next[index - 1] = previous.join(" ")
+    next[index] = `${moved} ${next[index]}`
+  }
+  return next.filter((line) => line.trim().length > 0)
 }
 
 function measure(text: string, fontPt: number, em: number): number {
