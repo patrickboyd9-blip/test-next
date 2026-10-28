@@ -1,3 +1,4 @@
+import { emotionByOfferGuidance } from "@/lib/design-intelligence/emotion-by-offer"
 import type { CreativeCanvas } from "../creative-canvas"
 import type { CreativeIntelligenceContext } from "../creative-intelligence"
 import type { CampaignBrief } from "../types"
@@ -45,10 +46,17 @@ Generation constraints:
 - oneLineDifference: required for the two non-lead directions (≤ 80 characters); omit or leave empty on the lead
 - Recommend the direction that best serves the Primary Success Metric, and say why in the rationale without performance claims
 - For a local service, that recommendation is photography-forward. Do not recommend a text-only direction unless the strategy truly has no honest image job
-- Headline is 3 to 8 words. It must be specific to this business and its offer: name the real job (financing, a senior discount, a metal roof, gutters, storm or hail, a repair) or the city, so it could not run unchanged for another roofer. Put the offer in the subheadline
+- Headline is 3 to 8 words. It must be specific to this business and its offer: name the real job (a discount, a metal roof, gutters, storm or hail, a repair) or the city, so it could not run unchanged for another roofer. Put the offer in the subheadline. Never use an age angle (seniors, retirees, "golden years", fixed incomes) unless the brief's audience explicitly names an age group
 - Never use these stock lines or close paraphrases of them: "A dry, safe home in [city]", "Call before a small leak spreads", "[Business name] checks this". Research mailers are patterns only: learn their structure, tone and offer placement, and never reuse or lightly reword any of their headlines or offers. Never tell the reader they have damage or that they "qualify". The three headlines must not share an opening
 - The offer field is the brief's offer copied word for word, character for character. Do not shorten, abbreviate (no "12 mo"), reword, or add to it
-- Prefer image_grounded when the photograph should fill the card, or a split when type and photograph share it. A split gives the photograph at least half the card. Use type_only only when there is no honest image job. Use imagePresence accent only when the piece is deliberately type-led
+- Prefer image_grounded: a full-bleed photograph of the finished outcome (the real home or job, people visible, heads in frame) with the type on a scrim or band. Do not use split layouts or cream side panels. Use type_only only when there is no honest image job
+- One service per front, and the photograph shows that same service. Never put financing in a headline
+- When the brief allows a choice of offer, prefer a dollar-off offer ("$500 off a full roof replacement") over a percentage or a bundle
+- Financing copy: the only allowed line is "Financing available", and any rate must say APR ("0% APR"). Never print a monthly payment, a term ("18 months", "no payments for 12 months") or a down payment
+- Never write "free X with purchase" on bid-priced jobs (roofs, siding, windows); say "gutters included" or "installation included" and put any condition next to the offer, never in an asterisk footnote
+- "Lifetime" must say whose life or what it covers. Promise a money-back or satisfaction guarantee only for a full-price refund. Write "or we come back at no charge", never "or it's free"
+- Never write: "no cost solar", "free solar", federal tax credits on solar, HVAC or windows, "free insurance replacement", "You have hail damage!", or that a bill is cut in half. For storm offers ask "Did it hit your roof?"
+- For water heaters, the headline is "Is your water heater more than 10 years old?"
 - When Creative Intelligence names the layouts the matched research supports, use only those layouts. That list overrides this general preference. The three directions must still differ`
 }
 
@@ -62,6 +70,7 @@ ${buildCreativeCanvasPromptContext(canvas)}
 
 Campaign brief (JSON):
 ${JSON.stringify(brief, null, 2)}
+${emotionByOfferGuidance(brief)}
 
 Return your answer only through the structured tool.`
 }

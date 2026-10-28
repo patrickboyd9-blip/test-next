@@ -169,7 +169,7 @@ test("a thumbs-down on a family pushes that family down for the same owner", asy
   }
 })
 
-test("a separated panel roofing card lands at B- or C+, and an integrated card can clear B", () => {
+test("a panel rationale composes full-bleed (split panels retired), and an integrated card can clear B", () => {
   const brief = { goal: "Book a free roof inspection", offer: "$0 inspection", businessInfo: { name: "Northline Roofing" } }
   const selection = selectReferences([], brief)
   const spec = { headline: "Free roof inspection", offer: "$0 inspection", phone: "(619) 555-0148", website: "northline.example/book" }
@@ -184,9 +184,8 @@ test("a separated panel roofing card lands at B- or C+, and an integrated card c
   })
   const panelReading = readComposition(panelCard, panel.rationale)
   assert.equal(panel.rationale.grid.intentional_break, "panel")
-  assert.equal(panelReading.typePanel, true)
-  assert.ok(panelGrade.letter === "B-" || panelGrade.letter === "C+", `${panelGrade.letter} ${panelGrade.score} panel ${panelReading.panelShare}`)
-  assert.equal(panelGrade.cleared, false)
+  // Split cream panels are retired: a "panel" rationale now composes full-bleed.
+  assert.equal(panelReading.typePanel, false)
   assert.equal(panelGrade.scoreKind, "machine estimate")
 
   const open = directDesign({ brief, selection, trim: "5x8", slot: 0 })
@@ -211,7 +210,7 @@ test("a separated panel roofing card lands at B- or C+, and an integrated card c
   assert.equal(qr.x + qr.w <= subject.x, true)
   assert.ok(Math.abs(qr.x - phone.x) < 0.08)
   assert.equal(openGrade.cleared, true)
-  assert.ok(openGrade.score > panelGrade.score)
+  // The retired panel now composes full-bleed, so it can grade as well as the open card.
   assert.equal(openGrade.scoreKind, "machine estimate")
 
   const bleed = directDesign({ brief, selection, trim: "5x8", slot: 1 })
@@ -338,7 +337,7 @@ test("the board shows three diverse concepts and cites only what it retrieved", 
   assert.deepEqual(surfacedModes, ["integrated", "full-bleed", "panel"])
   assert.equal(surfacedModes.includes("type-led"), false)
   assert.equal(board.surfaced.some((item) => item.card.front.photos.some((slot) => slot.treatment === "cutout")), true)
-  assert.equal(board.surfaced.filter((item) => item.card.front.shapes.some((shape) => shape.role === "type-panel")).length, 1)
+  assert.equal(board.surfaced.filter((item) => item.card.front.shapes.some((shape) => shape.role === "type-panel")).length, 0)
   const headlines = board.surfaced.map((item) => item.spec.headline)
   assert.equal(new Set(headlines).size, 3)
   assert.equal(new Set(board.surfaced.map((item) => item.rationale.persuasion?.primaryEmotion.id)).size, 3)

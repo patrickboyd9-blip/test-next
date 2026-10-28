@@ -1,3 +1,4 @@
+import { compliantLine } from "@/lib/research-library/compliance"
 import { composeAddressSideFace } from "@/lib/campaign-creator/address-side-layout"
 import type { AddressSideEdit, CreativeSpec } from "@/lib/campaign-creator/types"
 import type { PostcardFacePlan, PhotoSlotPlan, ShapePlan } from "@/lib/postcard-layouts/compose"
@@ -788,7 +789,7 @@ function paintBack(
   })
 }
 
-function composeBack(input: {
+function composeBackRaw(input: {
   trim: TrimSize
   geometry: PostcardGeometry
   palette: VerticalPalette
@@ -978,6 +979,9 @@ export function compositionMode(rationale: DesignRationale): CompositionMode {
     mode === "type-led" ||
     mode === "calm-column"
   ) {
+    // Owner votes: split cream-panel fronts lose to full-bleed outcome photos.
+    // Only regulated pieces (Medicare) keep the calm paper column.
+    if ((mode === "panel" || mode === "calm-column") && rationale.vertical !== "medicare_insurance") return "full-bleed"
     return mode
   }
   return "overlapping-card"
@@ -1498,4 +1502,11 @@ export function normalizedPanel(panel: InchRect, size: TrimSize): { x: number; y
     w: panel.w / trim.w,
     h: panel.h / trim.h,
   }
+}
+
+
+/** The back runs through the same compliance rules as the front (financing, free, warranty wording). */
+function composeBack(...args: Parameters<typeof composeBackRaw>): ReturnType<typeof composeBackRaw> {
+  const face = composeBackRaw(...args)
+  return { ...face, texts: face.texts.map((text) => ({ ...text, text: compliantLine(text.text) })) }
 }

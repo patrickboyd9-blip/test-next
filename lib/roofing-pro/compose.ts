@@ -1,3 +1,4 @@
+import { compliantLine } from "@/lib/research-library/compliance"
 import { composeAddressSideFace } from "@/lib/campaign-creator/address-side-layout"
 import { qrScanLabel } from "@/components/campaign-creator/studio/design-rules"
 import type { CreativeSpec } from "@/lib/campaign-creator/types"
@@ -162,7 +163,7 @@ function composeFront(
   }
 }
 
-function composeBack(
+function composeBackRaw(
   input: RoofingProInput,
   size: PostcardSizeId,
   pairing: PostcardFacePlan["pairing"],
@@ -649,17 +650,18 @@ function paletteFor(id: RoofingProTemplateId): VerticalPalette {
     }
   }
   if (id === "roof_premium") {
+    // Navy, white and one warm accent. The old cream-and-black read as a bank letter.
     return {
       ...base,
-      paper: "#f6f3ee",
-      ink: "#1c1916",
-      field: "#1c1915",
-      fieldInk: "#f6f3ee",
-      accent: "#6e5838",
-      accentInk: "#f6f3ee",
-      offerTile: "#1c1915",
-      offerInk: "#f6f3ee",
-      scrim: "#1c1915",
+      paper: "#ffffff",
+      ink: "#14213d",
+      field: "#14213d",
+      fieldInk: "#ffffff",
+      accent: "#f2b632",
+      accentInk: "#14213d",
+      offerTile: "#f2b632",
+      offerInk: "#14213d",
+      scrim: "#14213d",
     }
   }
   if (id === "roof_storm") {
@@ -697,4 +699,11 @@ function clean(value: string | undefined): string {
 
 function same(a: string, b: string): boolean {
   return a.length > 0 && a.trim().toLowerCase() === b.trim().toLowerCase()
+}
+
+
+/** The back runs through the same compliance rules as the front (financing, free, warranty wording). */
+function composeBack(...args: Parameters<typeof composeBackRaw>): ReturnType<typeof composeBackRaw> {
+  const face = composeBackRaw(...args)
+  return { ...face, texts: face.texts.map((text) => ({ ...text, text: compliantLine(text.text) })) }
 }

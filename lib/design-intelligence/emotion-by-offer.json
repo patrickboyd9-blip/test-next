@@ -1,0 +1,541 @@
+{
+ "roofing": [
+  {
+   "offer": "dollar_off",
+   "emotion": "anticipation / smart-shopper pride (gain framed as money kept)",
+   "photo": "Full-bleed real job, roofer on a ladder at the roofline, blue sky",
+   "avoid": "Several stacked discounts (dilutes the anchor); a dollar figure on a weak, roof-less photo",
+   "combos": [
+    {
+     "headline": "Replace the roof, keep the savings.",
+     "offer": "$[X] off a full roof replacement",
+     "photo": "Roofer on a ladder at the roofline, full bleed"
+    },
+    {
+     "headline": "Real savings on a new roof.",
+     "offer": "$[X] off a full replacement, real expiry date",
+     "photo": "Same scene with a dark gradient band for the headline"
+    },
+    {
+     "headline": "Your new roof in [town], for less.",
+     "offer": "$[X] off + free estimate",
+     "photo": "Crew finishing a roof on a recognizable local street"
+    }
+   ]
+  },
+  {
+   "offer": "free_inspection",
+   "emotion": "relief, via fear plus efficacy (find out before it gets worse)",
+   "photo": "An inspector on the roof, or a close-up of real granule loss or a hail bruise",
+   "avoid": "A threat headline over an undamaged sunny house; 'You qualify for a FREE roof inspection!' reads as a fake eligibility notice",
+   "combos": [
+    {
+     "headline": "See what your roof is hiding.",
+     "offer": "Free inspection with photo report",
+     "photo": "Roofer on the roof photographing shingles"
+    },
+    {
+     "headline": "A free look, no pressure, no pitch.",
+     "offer": "Free inspection",
+     "photo": "Friendly tech at the door with a ladder on the truck"
+    }
+   ]
+  },
+  {
+   "offer": "storm_emergency",
+   "emotion": "fear of loss and urgency, then relief",
+   "photo": "Real storm damage or an inspector at work. The image must show the threat the headline names.",
+   "avoid": "Storm headline with a pristine-house image; 'STORM DAMAGE ALERT' styling that looks official; 'You have hail damage!' asserts damage you haven't seen",
+   "combos": [
+    {
+     "headline": "Know your roof before the next storm.",
+     "offer": "Free storm-season inspection",
+     "photo": "Tech on a ladder, dark sky in the background"
+    },
+    {
+     "headline": "Hail hit [neighborhood] on [date]. Did it hit your roof?",
+     "offer": "Free hail inspection",
+     "photo": "Close-up of hail-bruised shingles in a gloved hand"
+    },
+    {
+     "headline": "Find storm damage before the next storm.",
+     "offer": "Free inspection, real expiry date",
+     "photo": "Full-bleed roofline with a worker, storm clouds clearing"
+    }
+   ]
+  },
+  {
+   "offer": "financing",
+   "emotion": "relief (affordability), never as the lead message",
+   "photo": "Inspector or finished roof, not a calculator or a smiling banker",
+   "avoid": "Headline leads with debt; a muted cream/black palette",
+   "combos": []
+  },
+  {
+   "offer": "neighbor_social_proof",
+   "emotion": "belonging (do what neighbors do) and trust",
+   "photo": "Real nearby job with the crew visible",
+   "avoid": "Fake counts; stock neighborhoods",
+   "combos": [
+    {
+     "headline": "We just finished a roof on [street]. Yours next?",
+     "offer": "Neighbor discount $[X] (real deadline)",
+     "photo": "Crew on a real nearby job"
+    },
+    {
+     "headline": "Your neighbors trust us with their roofs.",
+     "offer": "Free inspection",
+     "photo": "Owner with crew in front of a local job"
+    },
+    {
+     "headline": "Proud [town] homes deserve great roofs.",
+     "offer": "$[X] off",
+     "photo": "Recognizable local streetscape, finished roof"
+    }
+   ]
+  },
+  {
+   "offer": "guarantee_warranty",
+   "emotion": "trust / risk reversal",
+   "photo": "Owner or crew portrait plus a real job",
+   "avoid": "Vague 'lifetime' with no terms; 50-year claims without manufacturer backing",
+   "combos": [
+    {
+     "headline": "Done right, or we make it right.",
+     "offer": "[N]-year workmanship warranty + free estimate",
+     "photo": "Owner on site shaking a homeowner's hand"
+    },
+    {
+     "headline": "A roof you won't think about for years.",
+     "offer": "Real warranty terms on the back",
+     "photo": "Finished roof, crew packing up"
+    },
+    {
+     "headline": "Licensed. Insured. Guaranteed.",
+     "offer": "Free inspection",
+     "photo": "Crew in uniform with a truck"
+    }
+   ]
+  }
+ ],
+ "hvac": [
+  {
+   "offer": "seasonal_tuneup",
+   "emotion": "foresight / relief (avoid the breakdown)",
+   "photo": "Tech servicing the outdoor condenser (summer) or furnace (winter)",
+   "avoid": "Coupon walls with 6+ offers dilute the main offer (C-3PO accent-inflation note)",
+   "combos": [
+    {
+     "headline": "Your AC picks the worst day to quit. Beat it.",
+     "offer": "$[X] pre-summer tune-up",
+     "photo": "Tech at the condenser in bright sun"
+    },
+    {
+     "headline": "Don't forget: it's furnace tune-up time.",
+     "offer": "$[X] [N]-point tune-up",
+     "photo": "Tech at the furnace, warm interior light"
+    },
+    {
+     "headline": "Book before the first heat wave.",
+     "offer": "$[X] tune-up, real end date",
+     "photo": "Family relaxed indoors, heat shimmer outside"
+    }
+   ]
+  },
+  {
+   "offer": "dollar_off_system",
+   "emotion": "anticipation / smart-shopper pride",
+   "photo": "New unit freshly installed, tech beside it",
+   "avoid": "Fear-based replacement claims that misstate regulations",
+   "combos": [
+    {
+     "headline": "Save $[X] on a new system.",
+     "offer": "$[X] off complete install",
+     "photo": "New condenser, tech checking it"
+    },
+    {
+     "headline": "Old system? Your bill may be paying for it.",
+     "offer": "$[X] off a high-efficiency system",
+     "photo": "Tech with a new unit"
+    },
+    {
+     "headline": "Spring savings: $[X] off a new system.",
+     "offer": "$[X] off, real end date",
+     "photo": "Family on the couch, comfortable"
+    }
+   ]
+  },
+  {
+   "offer": "financing",
+   "emotion": "relief (affordability) as a secondary line",
+   "photo": "New system installed",
+   "avoid": "Headline leads with the loan",
+   "combos": [
+    {
+     "headline": "A new system without the big check.",
+     "offer": "Payments from $[X]/mo with terms",
+     "photo": "New unit installed"
+    }
+   ]
+  },
+  {
+   "offer": "new_customer_neighbor",
+   "emotion": "belonging / trust",
+   "photo": "Branded truck on a real local street",
+   "avoid": "Generic 'new customer' with no local cue",
+   "combos": [
+    {
+     "headline": "We're in your neighborhood this week.",
+     "offer": "$[X] tune-up",
+     "photo": "Tech walking up a local driveway"
+    },
+    {
+     "headline": "New customer? Welcome.",
+     "offer": "[X]% off first service, with real terms",
+     "photo": "Tech greeting a homeowner at the door"
+    }
+   ]
+  },
+  {
+   "offer": "guarantee",
+   "emotion": "trust / risk reversal",
+   "photo": "Uniformed tech at the door",
+   "avoid": "'100% satisfaction' with no terms",
+   "combos": [
+    {
+     "headline": "On time, or the visit's on us.",
+     "offer": "Real punctuality guarantee",
+     "photo": "Tech checking a watch at the door"
+    },
+    {
+     "headline": "Fixed right the first time, or we come back at no charge.",
+     "offer": "Guarantee terms on the back",
+     "photo": "Tech at work"
+    },
+    {
+     "headline": "Experts you can trust.",
+     "offer": "Free second opinion",
+     "photo": "Tech explaining to a homeowner"
+    }
+   ]
+  }
+ ],
+ "plumbing": [
+  {
+   "offer": "emergency",
+   "emotion": "fear of loss, then relief",
+   "photo": "Plumber hands-on fixing a pipe; not a staged flood",
+   "avoid": "Panic imagery with no clear action; '24/7' that isn't true",
+   "combos": [
+    {
+     "headline": "Drip? Clog? Leak? Solved.",
+     "offer": "$[X] off any repair",
+     "photo": "Plumber under a sink with a wrench"
+    },
+    {
+     "headline": "Keep this card. Your 2 a.m. leak will thank you.",
+     "offer": "24/7 emergency service (only if true)",
+     "photo": "Fridge-magnet style with a tech portrait"
+    },
+    {
+     "headline": "Burst pipe? We're on the way.",
+     "offer": "Same-day service (if true)",
+     "photo": "Van pulling up at night, porch light on"
+    }
+   ]
+  },
+  {
+   "offer": "fixed_price_service",
+   "emotion": "relief / control (no surprise bill)",
+   "photo": "Tech flushing a water heater",
+   "avoid": "Tiny prices buried in coupon grids",
+   "combos": [
+    {
+     "headline": "$[X] water heater flush.",
+     "offer": "$[X] flat price",
+     "photo": "Tech at a water heater"
+    },
+    {
+     "headline": "Is your water heater over 10 years old?",
+     "offer": "$[X] flush + inspection",
+     "photo": "Water heater with a visible date tag"
+    },
+    {
+     "headline": "Drain cleaning, one price.",
+     "offer": "$[X] drain cleaning",
+     "photo": "Clean, flowing sink"
+    }
+   ]
+  },
+  {
+   "offer": "new_mover",
+   "emotion": "belonging / welcome, plus foresight",
+   "photo": "Moving boxes, friendly tech",
+   "avoid": "Implying you know private details",
+   "combos": [
+    {
+     "headline": "Just moved in? Get the plumbing checked.",
+     "offer": "Free plumbing check (if truly free)",
+     "photo": "Boxes in a kitchen, tech at the sink"
+    },
+    {
+     "headline": "Welcome to the neighborhood.",
+     "offer": "$[X] off first service",
+     "photo": "Tech waving at a new homeowner"
+    },
+    {
+     "headline": "New home, no hidden leaks.",
+     "offer": "Free leak check",
+     "photo": "Tech with a moisture meter"
+    }
+   ]
+  },
+  {
+   "offer": "neighbor_proof",
+   "emotion": "belonging / trust",
+   "photo": "Van on a real local street",
+   "avoid": "Fake proximity claims",
+   "combos": [
+    {
+     "headline": "We just fixed a slab leak on your street.",
+     "offer": "$[X] off any repair",
+     "photo": "Van in a neighbor's driveway"
+    },
+    {
+     "headline": "Your neighbors call us first.",
+     "offer": "$[X] off",
+     "photo": "Tech with a local homeowner (with permission)"
+    },
+    {
+     "headline": "Working on [street] this week.",
+     "offer": "Free inspection",
+     "photo": "Crew at a nearby job"
+    }
+   ]
+  },
+  {
+   "offer": "guarantee",
+   "emotion": "trust / risk reversal",
+   "photo": "Tech at the door, clock cue",
+   "avoid": "Vague guarantees",
+   "combos": [
+    {
+     "headline": "We show up when we say. Or you get paid.",
+     "offer": "Real punctuality guarantee",
+     "photo": "Tech at the door checking a watch"
+    },
+    {
+     "headline": "Fixed right, or we come back at no charge.",
+     "offer": "Written terms",
+     "photo": "Tech at work"
+    },
+    {
+     "headline": "Upfront price. No surprises.",
+     "offer": "Flat-rate quote before work",
+     "photo": "Tech showing a homeowner a tablet"
+    }
+   ]
+  }
+ ],
+ "solar": [
+  {
+   "offer": "free_estimate_personalized",
+   "emotion": "curiosity, then control",
+   "photo": "Aerial of a real local roof, or a clean local install",
+   "avoid": "Fake 'chosen/prime candidate' notices",
+   "combos": [
+    {
+     "headline": "Your roof could be paying you back.",
+     "offer": "Free personalized estimate with assumptions shown",
+     "photo": "Clean local install in sun"
+    },
+    {
+     "headline": "What could your roof make?",
+     "offer": "Free design + production estimate",
+     "photo": "Aerial of a roof with a panel overlay (clearly illustrative)"
+    },
+    {
+     "headline": "See your home's solar estimate in 2 minutes.",
+     "offer": "Free estimate via QR",
+     "photo": "Homeowner scanning the card on the porch"
+    }
+   ]
+  },
+  {
+   "offer": "referral",
+   "emotion": "belonging / reciprocity plus small gain",
+   "photo": "Happy customer with neighbors, panels visible",
+   "avoid": "Pyramid-style escalating claims without terms",
+   "combos": [
+    {
+     "headline": "Share the sun. Earn $[X].",
+     "offer": "$[X] per installed referral (terms)",
+     "photo": "Two neighbors chatting over a fence, panels visible"
+    },
+    {
+     "headline": "Love your solar? Pass it on.",
+     "offer": "$[X] referral reward",
+     "photo": "Customer family under panels"
+    },
+    {
+     "headline": "Your neighbors are asking.",
+     "offer": "Tiered rewards with terms",
+     "photo": "Street with several solar homes"
+    }
+   ]
+  },
+  {
+   "offer": "financing_zero_down",
+   "emotion": "relief (affordability), with full cost visible",
+   "photo": "Installed system",
+   "avoid": "'$0 down' without total cost; 'no cost solar program'",
+   "combos": [
+    {
+     "headline": "Make your roof work for you.",
+     "offer": "Loan options; full terms disclosed",
+     "photo": "Clean install"
+    },
+    {
+     "headline": "Solar that fits your budget.",
+     "offer": "Payments from $[X]/mo, with down payment, repayment terms and APR stated next to it",
+     "photo": "Homeowner on the porch at dusk, lights on"
+    }
+   ]
+  },
+  {
+   "offer": "status_identity",
+   "emotion": "pride / smart decision",
+   "photo": "Local solar homes",
+   "avoid": "Unsubstantiated local counts",
+   "combos": [
+    {
+     "headline": "[N] homes in [town] already went solar.",
+     "offer": "Free consult",
+     "photo": "Street with real solar homes"
+    },
+    {
+     "headline": "Brilliant, right on your roof.",
+     "offer": "Free estimate",
+     "photo": "Bright, joyful home"
+    }
+   ]
+  }
+ ],
+ "windows-gutters-siding": [
+  {
+   "offer": "dollar_or_percent_off",
+   "emotion": "smart-shopper pride",
+   "photo": "Clean result photo",
+   "avoid": "Coupon walls with codes, which split attention",
+   "combos": [
+    {
+     "headline": "Never clean your gutters again.",
+     "offer": "$[X] off gutter guards",
+     "photo": "Clean gutters on a real home, autumn leaves on the lawn"
+    },
+    {
+     "headline": "Close the window. Hear nothing.",
+     "offer": "$[X] off per window (real terms)",
+     "photo": "Sunlit quiet room"
+    },
+    {
+     "headline": "Same house. Brand-new look.",
+     "offer": "$[X] off siding",
+     "photo": "Real before/after"
+    }
+   ]
+  },
+  {
+   "offer": "safety_fear",
+   "emotion": "fear plus efficacy (ladder, water damage)",
+   "photo": "Overflowing gutter with a ladder, or ice dams",
+   "avoid": "Gore; implying injury statistics without a source",
+   "combos": [
+    {
+     "headline": "Your last time on that ladder.",
+     "offer": "$[X] off gutter guards",
+     "photo": "Ladder against an overflowing gutter"
+    },
+    {
+     "headline": "Don't let this be your gutters.",
+     "offer": "Free gutter inspection",
+     "photo": "Clogged, sagging gutter close-up"
+    },
+    {
+     "headline": "Winter's coming. Are your gutters ready?",
+     "offer": "Free inspection, real deadline",
+     "photo": "Ice forming on a gutter"
+    }
+   ]
+  },
+  {
+   "offer": "time_back",
+   "emotion": "joy / relief",
+   "photo": "Homeowner enjoying the yard",
+   "avoid": "Mixing with the safety message on one card",
+   "combos": [
+    {
+     "headline": "Take your weekends back.",
+     "offer": "$[X] off installation",
+     "photo": "Family in the yard, clean gutters above"
+    },
+    {
+     "headline": "Never clean your gutters again.",
+     "offer": "Free estimate",
+     "photo": "Leaves sliding off a guard"
+    },
+    {
+     "headline": "Done with gutter duty.",
+     "offer": "$[X] off",
+     "photo": "Homeowner relaxing on the porch"
+    }
+   ]
+  },
+  {
+   "offer": "bundle_free_item",
+   "emotion": "delight / bonus value",
+   "photo": "Finished roof plus gutters",
+   "avoid": "Hidden price inflation to fund the 'free' item",
+   "combos": [
+    {
+     "headline": "Your new roof comes with new gutters.",
+     "offer": "Gutters included in the roof price (avoid 'free' if the roof is bid-priced: 16 CFR 251(g))",
+     "photo": "Finished roof and gutters"
+    },
+    {
+     "headline": "New windows, free installation.",
+     "offer": "Installation included at the regular per-window price (16 CFR 251: no markup)",
+     "photo": "Installer fitting a window"
+    },
+    {
+     "headline": "Siding plus free gutter check.",
+     "offer": "Free gutter inspection with a siding estimate",
+     "photo": "Crew on the exterior"
+    }
+   ]
+  },
+  {
+   "offer": "seasonal_deadline",
+   "emotion": "urgency",
+   "photo": "Season cue (fall leaves, winter ice)",
+   "avoid": "Fake deadlines",
+   "combos": [
+    {
+     "headline": "Book by [date] for fall install.",
+     "offer": "$[X] off before [date]",
+     "photo": "Fall leaves in gutters"
+    },
+    {
+     "headline": "Beat the winter rush.",
+     "offer": "$[X] off, real deadline",
+     "photo": "Crew working in fall light"
+    },
+    {
+     "headline": "This week only in [town].",
+     "offer": "$[X] whole-home special",
+     "photo": "Crew on a local street"
+    }
+   ]
+  }
+ ]
+}

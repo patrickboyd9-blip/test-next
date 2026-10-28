@@ -1,3 +1,4 @@
+import { headlineCompliant } from "./compliance"
 /**
  * Research is a pattern source, never a copy source.
  * These checks keep a library line, a damage claim, or an off-offer headline
@@ -93,10 +94,49 @@ export function headlineFitsOffer(headline: string, offer: string, goal = "", bu
 }
 
 /** All the checks a card headline must pass. */
+const CONCRETE = /\b(?:leaks?|shingles?|storms?|hail|hurricanes?|wind|moss|ice|gutters?|winter|weather|rain|ceiling|damage|weak|worn|old|age|prime|ready|free|cost\w*|less|sav\w*|pay\w*|financ\w*|monthly|over time|budget|seniors?|metal|last|lasts|inspect\w*|check\w*|look|find|fix\w*|protect\w*|safe|dry|hiding|hides|missing|repair\w*|replace\w*|new roof|warrant\w*|price|no cost|no pressure)\b/i
+const FILLER = /\b(?:team|experts?|specialists?|pros|professionals|company|contractors?|crew)\b\W*$/i
+
+/** An empty headline: too short, names nothing concrete, or is just a name or city plus "Team" or "Experts". */
+export function isEmptyHeadline(line: string): boolean {
+  const words = line.replace(/\s+/g, " ").trim().split(/\s+/).filter(Boolean)
+  if (words.length < 4) return true
+  if (FILLER.test(line)) return true
+  if (words.length < 6 && /^an?\s+(?:new|repaired|better|great|quality|beautiful)\b/i.test(line)) return true
+  return !CONCRETE.test(line)
+}
+
+/** Tighter fit for senior-discount and hurricane or storm-season offers. */
+export function fitsSpecialOffer(line: string, offer: string): boolean {
+  // Roofing is not an age-targeted trade. A headline never takes an age angle
+  // (seniors, retirees, "golden years") unless the offer itself names one.
+  if (/\bseniors?\b|\bretire\w*|\belderly\b|\bgolden years\b|\b(?:55|60|62|65)\s*(?:\+|and (?:older|over))/i.test(line) && !/\bseniors?\b|\bretire\w*/i.test(offer)) return false
+  // Financing goes in the offer bar or a secondary line, never the headline.
+  if (/\bfinanc\w*|\bpay(?:ing)?\b|\bpaid\b|\bmonthly\b|\bpayments?\b|\binterest\b|\b0%/i.test(line)) return false
+  // Banned on any card.
+  if (/no[- ]cost solar|free solar|tax credit|free insurance replacement|you have hail damage|(?:cut|slash)\w* (?:your )?(?:\w+ )?bills? in half|half (?:off )?your (?:\w+ )?bill/i.test(line)) return false
+  // The photo shows an intact, sunny home. A damage or hail claim contradicts it.
+  // The one approved storm question is "Did it hit your roof?".
+  if (!/^did it hit your roof\??$/i.test(line.trim()) && /\bhail\b|\bdamage\w*\b|\b(?:storm|hail) (?:hit|struck)\b|\bhit (?:your|the)\b/i.test(line)) return false
+  // Reg Z, FTC free guide, warranty wording, one service per front.
+  if (!headlineCompliant(line, offer)) return false
+  if (/\bseniors?\b/i.test(offer)) {
+    if (/\bfree\b|\bno[- ]cost\b|\binspection\b|\bcheck\b/i.test(line)) return false
+    if (!/\b(?:costs?|pay|save|savings|less|discount)\b/i.test(line)) return false
+  }
+  if (/\bhurricane|storm[- ]season\b/i.test(offer)) {
+    if (/\bhail\b/i.test(line) && !/\bhail\b/i.test(offer)) return false
+    if (/\bice\b|\bsnow\b|\bwinter\b/i.test(line)) return false
+  }
+  return true
+}
+
 export function headlinePasses(input: { headline: string; offer: string; goal?: string; businessName?: string; extra?: readonly ResearchEntry[] }): boolean {
   const line = input.headline.replace(/\s+/g, " ").trim()
   const words = line.split(/\s+/).filter(Boolean)
-  if (words.length < 3 || words.length > 10) return false
+  if (words.length < 4 || words.length > 10) return false
+  if (isEmptyHeadline(line)) return false
+  if (!fitsSpecialOffer(line, input.offer)) return false
   if (makesClaim(line)) return false
   if (!headlineFitsOffer(line, input.offer, input.goal, input.businessName)) return false
   if (copiesLibrary(line, input.extra)) return false

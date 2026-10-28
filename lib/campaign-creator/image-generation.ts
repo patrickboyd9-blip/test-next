@@ -7,6 +7,8 @@ export interface ImageGenerationOptions {
   candidateCount?: number
   campaignId?: string
   directionId?: string
+  /** Width / height of the photo slot, so providers can request the closest aspect ratio. */
+  slotAspect?: number
 }
 
 /**

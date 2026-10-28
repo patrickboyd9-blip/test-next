@@ -444,10 +444,8 @@ export function headlineVariants(input: { offer: string; city?: string; goal?: s
   const at = place ? ` in ${place}` : ""
   const pick = (lines: string[]) => lines.map((line) => finishLine(line))
   if (/\b(?:0%|financ|no payments?)/i.test(facts)) {
-    return pick([`A new roof now${at}, paid over time`, "Don't wait on a roof you can finance", "Fix the roof now. Pay later", "A new roof that fits your monthly budget"])
-  }
-  if (/\bsenior\b/i.test(facts)) {
-    return pick([`A sound roof costs seniors less${at}`, "Retired? Your roof just got cheaper", "A roof deal made for seniors", "Seniors keep more for the roof that lasts"])
+    // Financing never leads: it lives in the offer bar, so the roof does not feel like debt.
+    return pick([`A new roof${at}, built for the next 30 years`, "Replace the worn roof before winter does", "A lasting roof, one estimate away", "Fix the roof right, the first time"])
   }
   if (/\bmetal\b/i.test(facts)) {
     return pick([`The last roof your ${place ? place + " " : ""}home will need`, "Tired of moss and leaks? Go metal", "Metal roofs, built for wet winters", "One metal roof. Fifty years of rain"])
@@ -456,7 +454,8 @@ export function headlineVariants(input: { offer: string; city?: string; goal?: s
     return pick(["Roof checked, gutters cleared, one visit", "Clogged gutters rot roofs. Fix both", "Two jobs, one visit, no cost", `Ready for the rain${at}, top to gutter`])
   }
   if (/\b(?:hurricane|storm|hail|wind)\b/i.test(facts)) {
-    return pick([`Storm season is coming${at}. Is your roof ready?`, "Hail damage hides. We find it", "Find storm damage before the next storm", "Know your roof before the next storm"])
+    // Our storm photos show an intact, sunny home, so the lines sell readiness, not damage.
+    return pick([`Storm season is coming${at}. Is your roof ready?`, "Get your roof checked before storm season", "Know your roof before the next storm", "Did it hit your roof?"])
   }
   if (/\brepair\b/i.test(facts)) {
     return pick([`Leak or missing shingles${at}? Fix it for less`, "That small leak won't fix itself", "A repair now beats a roof later", "Fix the leak before it finds the ceiling"])
@@ -464,7 +463,7 @@ export function headlineVariants(input: { offer: string; city?: string; goal?: s
   if (/\binspection\b|\bfree\b|\$\s*0\b/i.test(offer)) {
     return pick([`Is your${at ? " " + place : ""} roof ready for winter?`, "See what your roof is hiding", "A free look, no pressure, no pitch", "Ten minutes on your roof tells a lot"])
   }
-  if (/\$\s?\d|%\s*off|\boff\b/i.test(facts)) {
+  if (/\$\s?\d|%\s*off|\boff\b|\bdiscount\b/i.test(facts)) {
     return pick([`Your new roof${at}, for less`, "Real savings on a new roof", "A full new roof, priced to say yes", "Replace the roof, keep the savings"])
   }
   return pick([`A better roof${at}`, "Get your roof looked at this month", "Your roof, done right", "A roof you never think about"])
@@ -475,6 +474,19 @@ export function headlineVariants(input: { offer: string; city?: string; goal?: s
  * passes every check and no earlier direction already uses it; otherwise the
  * next unused fallback for this offer fills in.
  */
+/** Spare lines so one business never repeats a headline once its four variants are used. */
+function extraHeadlines(input: { offer: string; city?: string }): string[] {
+  const place = usableCity(input.city)
+  const free = /\binspection\b|\bfree\b|\bcheck\b/i.test(input.offer)
+  const lines = free
+    ? [`A free roof check${place ? ` for ${place} homes` : ""}`, "Know where your roof stands, free", "One visit, a clear answer on your roof", "Find small roof problems while they are small"]
+    : [`Roof work${place ? ` in ${place}` : ""}, priced to save`, "Save on the roof work you need", "Fix it once, pay less for it", "A better price on a lasting roof"]
+  return lines.map((line) => finishLine(line))
+}
+
+/** A headline that leads with paying or financing. One per business at most. */
+export const FINANCING_LED = /\bfinanc\w*|\bpay(?:ing)?\b|\bpaid\b|\bmonthly\b|\bbudget\b|\bpayments?\b|\binterest\b|\b0%/i
+
 export function distinctRoofingHeadlines(input: {
   headlines: readonly string[]
   offer: string
@@ -489,13 +501,15 @@ export function distinctRoofingHeadlines(input: {
     Boolean(line) && !isStockHeadline(line) && !WEAK_HEADLINE.test(line) && !headlineRepeatsOffer(line, input.offer) &&
     headlinePasses({ headline: line, offer: input.offer, goal: input.goal, businessName: input.businessName }) &&
     !used.some((other) => sameHeadline(other, line)) &&
+    !(FINANCING_LED.test(line) && used.some((other) => FINANCING_LED.test(other))) &&
     !(input.businessName && sameHeadline(line.replace(/[.!?]+$/, ""), input.businessName))
   return input.headlines.map((raw, index) => {
     const line = raw.replace(/\s+/g, " ").trim()
     const chosen = ok(line)
       ? line
       : [...fallbacks.slice(index), ...fallbacks.slice(0, index)].find(ok) ??
-        fallbacks.find((item) => !used.some((other) => sameHeadline(other, item))) ?? fallbacks[index % fallbacks.length]!
+        extraHeadlines(input).find(ok) ??
+        [...fallbacks, ...extraHeadlines(input)].find((item) => !used.some((other) => sameHeadline(other, item))) ?? fallbacks[index % fallbacks.length]!
     used.push(chosen)
     return chosen
   })
@@ -549,6 +563,15 @@ export function applyOutcomeHeadline(input: {
   if (input.brief.audienceAwareness === "past_customer" && headlineIsFeature(headline, input.offer, kind)) {
     const resolved = resolveEmotion(kind, clientFactText(input.brief), input.brief.primaryEmotion)
     return headlineFor({ emotion: resolved.emotion, awareness: input.brief.audienceAwareness, offer: input.offer })
+  }
+  if (kind === "roofing") {
+    return specificHeadline({
+      offer: input.offer,
+      role: input.role,
+      city: input.brief.businessInfo?.city,
+      businessName: input.brief.businessInfo?.name,
+      goal: input.brief.goal,
+    })
   }
   const resolved = resolveEmotion(kind, clientFactText(input.brief), input.brief.primaryEmotion)
   return onCardLine(kind, resolved.emotion.fear ? "threat" : "outcome")
@@ -871,4 +894,37 @@ interface Flags {
   priceEnding: boolean
   offerType: string
   copyPattern: string
+}
+
+
+/** A headline that sells a storm or hail angle. */
+export const STORM_HEADLINE = /\bstorms?\b|\bhail\b|\bhurricane|\bdamage\w*|\bhit (?:your|the) roof\b|\bwind\b/i
+/** A photo brief that asks for visible storm damage. */
+export const DAMAGE_SCENE = /\b(?:visible|clear)\b[^.]*\bdamage\b|\bmissing shingles\b|\blifted shingles\b|\btarp\w*\b|\bstorm debris\b/i
+export const STORM_DAMAGE_PHOTO = "Visible storm damage on a real home: missing and lifted shingles, a blue tarp on part of the roof, scattered storm debris in the yard, overcast sky clearing; a roofer inspecting from a ladder"
+
+const NON_STORM = ["Know where your roof stands, free", "One visit, a clear answer on your roof", "Find small roof problems while they are small", "A free roof check this season"]
+
+/**
+ * A storm headline runs only over a photo that shows storm damage. The storm (threat)
+ * direction keeps its storm line and gets a damage photo brief; any other direction whose
+ * photo is not a damage scene moves to a non-storm angle.
+ */
+export function alignStormHeadlines<T extends { headline?: string; visualDirection?: string }>(specs: Array<{ spec?: T; role?: string }>): void {
+  const used = new Set(specs.map((d) => (d.spec?.headline ?? "").toLowerCase()))
+  let stormKept = false
+  const order = [...specs].sort((a, b) => Number(b.role === "threat") - Number(a.role === "threat"))
+  for (const d of order) {
+    const spec = d.spec
+    if (!spec?.headline || !STORM_HEADLINE.test(spec.headline)) continue
+    if (DAMAGE_SCENE.test(spec.visualDirection ?? "")) { stormKept = true; continue }
+    if (!stormKept && d.role === "threat") {
+      d.spec = { ...spec, visualDirection: `${STORM_DAMAGE_PHOTO}. ${spec.visualDirection ?? ""}`.trim() }
+      stormKept = true
+      continue
+    }
+    const next = NON_STORM.find((line) => !used.has(line.toLowerCase())) ?? NON_STORM[0]!
+    used.add(next.toLowerCase())
+    d.spec = { ...spec, headline: next }
+  }
 }
