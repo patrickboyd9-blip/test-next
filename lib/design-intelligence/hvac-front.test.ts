@@ -46,7 +46,7 @@ test("every HVAC front shows the phone and the website, and the photo is not a c
     designedToDrive: "calls",
     tags: [],
     spec: {
-      headline: index === 1 ? "Call before the AC quits." : "The house cools down again.",
+      headline: index === 1 ? "Don't Wait For A Heat Wave." : "The house cools down again.",
       offer: "FREE inspection",
     },
     recommended: index === 0,
@@ -99,11 +99,14 @@ test("every HVAC front shows the phone and the website, and the photo is not a c
   assert.ok((threatHeadlines[0]?.fontPt ?? 0) >= 26, "headline is large enough to read")
   for (const text of threatHeadlines) {
     for (const line of text.lines) {
-      assert.notEqual(line.replace(/[."']/g, "").trim().toLowerCase(), "before", line)
+      assert.notEqual(line.replace(/[."']/g, "").trim().toLowerCase(), "for a", line)
+      assert.equal(/for a$/i.test(line.replace(/[."']/g, "").trim()), false, line)
     }
   }
-  const accentLine = threatHeadlines.find((text) => text.color !== threatHeadlines[0]?.color)
-  if (accentLine) assert.match(accentLine.text, /^before\b/i)
+  const painted = threatHeadlines.map((text) => text.text).join(" ")
+  assert.match(painted, /Don't wait for a heat wave/)
+  assert.equal(painted.includes("Wait For A"), false)
+  assert.equal(painted.includes("For A"), false)
   for (const card of board.surfaced) {
     const offer = card.card.front.texts.find((text) => text.role === "offer")
     assert.match(offer?.text ?? "", /FREE inspection/i, card.directionIndex.toString())
@@ -117,6 +120,6 @@ test("every HVAC front shows the phone and the website, and the photo is not a c
   assert.ok(leadOffer && leadOffer.fontPt >= 16 && leadOffer.fontPt <= 32)
   for (const card of board.surfaced) {
     const headline = card.card.front.texts.filter((text) => text.role === "headline").map((text) => text.text).join(" ")
-    assert.match(headline, /before|call|cool/i, headline)
+    assert.match(headline, /before|call|cool|wait|heat/i, headline)
   }
 })

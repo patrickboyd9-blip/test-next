@@ -1,6 +1,7 @@
 import { isForbiddenResearchPath } from "@/lib/design-intelligence/images"
 
-import { NONE_INDUSTRY, copyRejectPattern, normalizeIndustry, researchEmotion, researchOfferType, resolveIndustry } from "./industry"
+import { NONE_INDUSTRY, normalizeIndustry, researchEmotion, researchOfferType, resolveIndustry } from "./industry"
+import { sanitizeCustomerCopy } from "./copy-clean"
 import type { CoverageRow, ResearchEntry, ResearchLayout, ResearchOrigin } from "./types"
 
 export interface SourceFile {
@@ -148,6 +149,7 @@ function parseMarkdownFile(file: SourceFile): { entry?: ResearchEntry; row: Cove
   const why = firstSentence(fields.why || sections.interpretation)
   const response = meaningfulResponse(fields.response)
   const origin = originFor(file, id)
+  const whyLine = sanitizeCustomerCopy(why)
   const entry: ResearchEntry = {
     id,
     origin,
@@ -166,13 +168,13 @@ function parseMarkdownFile(file: SourceFile): { entry?: ResearchEntry; row: Cove
     referenceOnly: copy.referenceOnly,
     structures: structureLines(sections, layout),
     responseEvidence: response,
-    whyItWorks: why,
+    whyItWorks: whyLine || undefined,
     favoriteSimilarity: favorite.score,
     favoriteOf: favorite.of,
     imageRefs,
     evidence: imageRefs.length > 0 ? "visual" : "text",
     gold: false,
-    searchText: clip(scrub([industry, headlines.join(" "), offers.join(" "), photoStyle, why, fields.offer].filter(Boolean).join(" ")), 500),
+    searchText: clip(scrub([industry, headlines.join(" "), offers.join(" "), photoStyle, whyLine, fields.offer].filter(Boolean).join(" ")), 500),
   }
   return {
     entry,
@@ -295,6 +297,7 @@ export function entryFromGold(record: Record<string, unknown>, file: Pick<Source
     phonePlacement: stringField(record, ["phone", "phonePlacement", "phone_placement"]),
     qrPlacement: stringField(record, ["qr", "qrPlacement", "qr_placement"]),
   }
+  const whyLine = sanitizeCustomerCopy(why)
   const gold = id.startsWith("GOLD-") || isGoldPath(file.path)
   return {
     id,
@@ -314,13 +317,13 @@ export function entryFromGold(record: Record<string, unknown>, file: Pick<Source
     referenceOnly: copy.referenceOnly,
     structures: structureFromLayout(layout),
     responseEvidence: response,
-    whyItWorks: why ? clip(why, 280) : undefined,
+    whyItWorks: whyLine ? clip(whyLine, 280) : undefined,
     favoriteSimilarity: similarity.score,
     favoriteOf: similarity.of,
     imageRefs: images,
     evidence: images.length > 0 ? "visual" : "text",
     gold,
-    searchText: clip([industry, copy.headlines.join(" "), copy.offers.join(" "), photoStyle, why].filter(Boolean).join(" "), 500),
+    searchText: clip([industry, copy.headlines.join(" "), copy.offers.join(" "), photoStyle, whyLine].filter(Boolean).join(" "), 500),
   }
 }
 
@@ -404,9 +407,9 @@ function richer(left: ResearchEntry, right: ResearchEntry): ResearchEntry {
     headlines,
     offers,
     referenceOnly: headlines.length === 0 && offers.length === 0,
-    photoStyle: preferred.photoStyle || other.photoStyle,
+    photoStyle: sanitizeCustomerCopy(preferred.photoStyle || other.photoStyle) || undefined,
     responseEvidence: preferred.responseEvidence || other.responseEvidence,
-    whyItWorks: preferred.whyItWorks || other.whyItWorks,
+    whyItWorks: sanitizeCustomerCopy(preferred.whyItWorks || other.whyItWorks) || undefined,
     favoriteSimilarity: preferred.favoriteSimilarity ?? other.favoriteSimilarity,
     favoriteOf: preferred.favoriteOf || other.favoriteOf,
     evidence: preferred.imageRefs.length + other.imageRefs.length > 0 ? "visual" : preferred.evidence,
@@ -697,59 +700,12 @@ function labeledLine(text: string, key: string): string | undefined {
   return cut?.trim() || undefined
 }
 
-const COPY_REJECT = new RegExp(copyRejectPattern(), "i")
-
-/** A camera, catalogue, or metadata sentence, not a line printed for the customer. */
-function isPhotoNote(line: string): boolean {
-  if (/\b(?:left|right|top|bottom|outer|inner)\s+edge\b/i.test(line)) return true
-  if (/\bmeets the (?:photo )?frame\b/i.test(line)) return true
-  if (/\b(?:photo|picture|image)\s+frame\b/i.test(line)) return true
-  if (/\b(?:photos?|photographs?|cameras?|cropped?|glare|scans?|scanned|lighting)\b/i.test(line)) return true
-  if (/\b(?:on|in) (?:the )?(?:table|hand)\b/i.test(line) && /\b(?:piece|card|mailer|printed|photo)\b/i.test(line)) return true
-  return false
-}
-
-function isJunkCopy(line: string): boolean {
-  const text = line.replace(/\s+/g, " ").trim()
-  if (!text) return true
-  if (/owner[-\s]?labeled/i.test(text)) return true
-  if (/\bphotographs?\b/i.test(text)) return true
-  if (/upside down/i.test(text)) return true
-  if (/\bupright\b/i.test(text)) return true
-  if (/\brotated\b/i.test(text)) return true
-  if (/(?:^|\s)channel\s*:/i.test(text)) return true
-  if (COPY_REJECT.test(text) || isPhotoNote(text)) return true
-  if (/\b[a-z]+_[a-z0-9_]+\b/.test(text) && (text.match(/\b[a-z]+_[a-z0-9_]+\b/g) || []).length >= 2) return true
-  if (/^[A-Za-z][\w .&/-]{0,40}:\s+\S/.test(text) && !/[$%]|\bfree\b|\d/i.test(text)) return true
-  return false
-}
-
-/**
- * Last gate for a headline or an offer. Junk is removed even when it was
- * clipped, cased differently, or appended after a real price.
- */
-export function sanitizeCustomerCopy(value: string | undefined): string {
-  const text = value?.replace(/\s+/g, " ").trim() ?? ""
-  if (!text) return ""
-  const marker = /owner[-\s]?labeled|\bphotographs?\b|upside down|\bupright\b|\brotated\b|(?:^|\s)channel\s*:/i
-  const kept: string[] = []
-  for (const sentence of text.split(/(?<=[.!])\s+/)) {
-    if (isJunkCopy(sentence)) continue
-    const cutAt = sentence.search(marker)
-    const head = (cutAt >= 0 ? sentence.slice(0, cutAt) : sentence).replace(/[\s,;:–—-]+$/, "").trim()
-    if (head.length < 8 || isJunkCopy(head)) continue
-    kept.push(head)
-  }
-  return kept.join(" ").trim()
-}
-
-/** Keep the printed offer and drop a photo note that was appended on the same line. */
 function stripCopy(value: string | undefined): string {
   return sanitizeCustomerCopy(value)
 }
 
 function isSceneNote(line: string): boolean {
-  return isJunkCopy(line)
+  return sanitizeCustomerCopy(line).length === 0 && Boolean(line.replace(/\s+/g, " ").trim())
 }
 
 function businessNameFrom(notes: string): string {
@@ -799,7 +755,7 @@ export function referenceCopy(input: {
   const nextHeadlines = headlines.length > 0 ? headlines : marketing[0] ? [clip(marketing[0], 120)] : []
   const offerLine = offers[0] || marketing.find((line) => /[$%]|\b(?:free|offer|save|discount|coupon)\b/i.test(line) && line !== nextHeadlines[0])
   const nextOffers = offerLine ? [offerLine] : []
-  const photo = input.photoStyle?.trim()
+  const photo = sanitizeCustomerCopy(input.photoStyle)
   const photoStyle = photo && !isSceneNote(photo) ? photo : undefined
   const finalHeadlines = nextHeadlines.map((line) => clip(sanitizeCustomerCopy(line), 120)).filter((line) => line.length > 0)
   const finalOffers = nextOffers.map((line) => clip(sanitizeCustomerCopy(line), 120)).filter((line) => line.length > 0)
@@ -818,7 +774,7 @@ function descriptiveLines(text: string): string[] {
     .map((line) => line.replace(/^[-*#\s]+/, "").replace(/\*\*/g, "").trim())
     .map((line) => line.replace(/^(?:printed\s+)?(?:headline|offer|industry|vertical|company|advertiser|notes?|provenance)\s*[:\-—–]\s*/i, "").trim())
     .filter((line) => line.length >= 12 && line.length <= 180)
-    .filter((line) => !isJunkCopy(line))
+    .filter((line) => sanitizeCustomerCopy(line).length > 0)
     .filter((line) => !/\.(?:jpe?g|png|webp)\b|assets\/physical\//i.test(line))
     .filter((line) => !/^(?:unknown|n\/a|na|none|not stated)$/i.test(line))
   return unique(lines)

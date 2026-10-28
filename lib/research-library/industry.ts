@@ -85,7 +85,7 @@ export function sceneNotePattern(): string {
 
 /** Catalogue and camera sentences. A change here rebuilds a saved index. */
 export function copyRejectPattern(): string {
-  return "owner[-\\s]?labeled|photograph(?:s|ed)?|upside down|\\bupright\\b|\\brotated\\b|channel\\s*:|\\bpm-\\d+\\b|\\bseq\\b|provisional|different artwork|pending_review|physical_photo|\\bplu\\b"
+  return "owner[-\\s]?labeled|photograph(?:s|ed)?|upside down|\\bupright\\b|\\brotated\\b|channel\\s*:|surrounding surface|\\bvisible\\b|\\bpm-\\d+\\b|\\bseq\\b|provisional|different artwork|pending_review|physical_photo|\\bplu\\b"
 }
 
 /**
@@ -306,17 +306,14 @@ function restaurantSignal(text: string, mode: ClassifyMode): boolean {
 }
 
 function realEstateSignal(text: string, mode: ClassifyMode): boolean {
-  if (/\brealtor\b|\bopen house\b|\breal estate agents?\b/.test(text)) return true
+  if (/\breal estate\b|\brealtor\b|\bopen house\b/.test(text)) return true
   if (/\b(?:home|house)\s+listing\b/.test(text)) return true
-  if (mode === "label" && (/\breal estate\b/.test(text) || /\blisting\b/.test(text))) return true
-  return mode === "notes" && /\breal estate\b/.test(text) && /\b(?:listing|agent|broker|open house)\b/.test(text)
+  return mode === "label" && /\blisting\b/.test(text)
 }
 
 function dentalSignal(text: string, mode: ClassifyMode): boolean {
-  if (/\bdentists?\b|\bdentures?\b|\bdental (?:office|practice|clinic|care|exam|cleaning|implant)/.test(text)) return true
-  if (mode === "label" && /\bdental\b/.test(text)) return true
-  const words = text.split(" ").filter((word) => word && word !== "brk")
-  return mode === "notes" && /\bdental\b/.test(text) && words.length <= 36
+  if (mode !== "label" && mode !== "notes") return false
+  return /\bdentists?\b|\bdentures?\b|\bdental\b/.test(text)
 }
 
 function mortgageSignal(text: string, mode: ClassifyMode): boolean {
@@ -344,7 +341,6 @@ const APPAREL_SIGNALS: readonly RegExp[] = [
   /\bfootwear\b/,
   /\bsneakers?\b/,
   /\bjackets?\b/,
-  /\bgear\b/,
   /\bhair extensions?\b/,
   /\bwefts?\b/,
 ]
@@ -354,7 +350,6 @@ const BRAND_SIGNALS: readonly RegExp[] = [
   /\bcollections?\b/,
   /\boutfitters?\b/,
   /\bbellami\b/,
-  /\bbrands?\b/,
 ]
 
 const MAILER_SIGNALS: readonly RegExp[] = [
@@ -398,11 +393,12 @@ function landscapingSignal(text: string, mode: ClassifyMode): boolean {
 function consumerSignal(text: string, mode: ClassifyMode): boolean {
   if (retailEvent(text)) return false
   const apparel = productHits(text)
+  if (apparel < 1) return false
   const strong = signalHits(text, BRAND_SIGNALS)
   const mailer = signalHits(text, MAILER_SIGNALS)
-  const promo = /\bpromo codes?\b/.test(text) && apparel > 0 ? 1 : 0
-  if (mode === "label") return apparel + strong + mailer > 0
-  return apparel >= 2 || (apparel >= 1 && strong + mailer + promo >= 1)
+  const promo = /\bpromo codes?\b/.test(text) ? 1 : 0
+  if (mode === "label") return true
+  return apparel >= 2 || strong + mailer + promo >= 1
 }
 
 function hairSalonSignal(text: string): boolean {

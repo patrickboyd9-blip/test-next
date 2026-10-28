@@ -5,6 +5,7 @@ import { verticalPaletteForBrief } from "@/lib/postcard-layouts/assign"
 import { templatesForPalette } from "@/lib/postcard-layouts/templates"
 
 import { normalizeIndustry } from "./industry"
+import { sanitizeCustomerCopy } from "./copy-clean"
 import type { GoldExpectation, LayoutTune, ResearchEntry, RetrievalHit } from "./types"
 
 const COMPLIANCE = `Research evidence for this campaign. Use it to choose the structure, the offer pattern, the photograph description, and the layout. Do not print a response rate, a statistic, a count, or a deadline on the card unless that exact fact is already in the customer brief. Do not copy another company's name, slogan, phone number, or artwork.`
@@ -42,7 +43,7 @@ export function layoutTuneFromHits(hits: readonly RetrievalHit[]): LayoutTune | 
     colors: hexColors(source.entry.colors),
     templateBias: templateBias(source.entry),
     headlineWords: layout.headlineWords,
-    photoStyle: source.entry.photoStyle,
+    photoStyle: sanitizeCustomerCopy(source.entry.photoStyle) || undefined,
     sourceId: source.entry.id,
   }
 }
@@ -86,7 +87,7 @@ export function goldComparisonNotes(input: {
 }
 
 export function photoNoteFromHits(hits: readonly RetrievalHit[]): string | undefined {
-  const styles = hits.map((hit) => hit.entry.photoStyle).filter((style): style is string => Boolean(style?.trim()))
+  const styles = hits.map((hit) => sanitizeCustomerCopy(hit.entry.photoStyle)).filter((style) => style.length > 0)
   if (styles.length === 0) return undefined
   return clip(styles.slice(0, 2).join(" "), 240)
 }
@@ -193,21 +194,25 @@ function evidenceLine(hit: RetrievalHit): string {
   const bits = [
     `${entry.id} (${entry.industry}, ${entry.gold ? "gold recipe" : entry.evidence === "visual" ? "image-backed" : "text-only"}, ${hit.band})`,
   ]
+  const headline = sanitizeCustomerCopy(entry.headlines[0])
+  const offer = sanitizeCustomerCopy(entry.offers[0])
+  const photo = sanitizeCustomerCopy(entry.photoStyle)
+  const why = sanitizeCustomerCopy(entry.whyItWorks)
   if (entry.referenceOnly) bits.push("layout reference only, not customer copy")
-  if (!entry.referenceOnly && entry.headlines[0]) bits.push(`headline pattern: “${clip(entry.headlines[0], 80)}”`)
-  if (!entry.referenceOnly && entry.offers[0]) bits.push(`offer pattern: ${clip(entry.offers[0], 80)}`)
+  if (!entry.referenceOnly && headline) bits.push(`headline pattern: “${clip(headline, 80)}”`)
+  if (!entry.referenceOnly && offer) bits.push(`offer pattern: ${clip(offer, 80)}`)
   if (entry.layout.photoShare !== undefined) bits.push(`photo about ${Math.round(entry.layout.photoShare * 100)}%`)
   if (entry.layout.offerPosition) bits.push(`offer ${entry.layout.offerPosition}`)
   if (entry.layout.headlineWords) bits.push(`headline about ${entry.layout.headlineWords} words`)
-  if (!entry.referenceOnly && entry.photoStyle) bits.push(`photo: ${clip(entry.photoStyle, 140)}`)
-  if (!entry.referenceOnly && entry.whyItWorks) bits.push(`why it works: ${clip(entry.whyItWorks, 160)}`)
+  if (!entry.referenceOnly && photo) bits.push(`photo: ${clip(photo, 140)}`)
+  if (!entry.referenceOnly && why) bits.push(`why it works: ${clip(why, 160)}`)
   if (entry.favoriteOf && entry.favoriteSimilarity) bits.push(`similarity ${entry.favoriteSimilarity}/5 to ${entry.favoriteOf}`)
   if (usableResponse(entry.responseEvidence)) bits.push(`internal response note, do not print: ${clip(entry.responseEvidence ?? "", 160)}`)
   return `- ${bits.join("; ")}`
 }
 
 function photoNoteForBrief(note: string | undefined, brief?: CampaignBrief): string | undefined {
-  const text = note?.replace(/\s+/g, " ").trim()
+  const text = sanitizeCustomerCopy(note)
   if (!text) return undefined
   if (!brief) return text
   const facts = clientFactText(brief)
@@ -260,7 +265,9 @@ function sourceTitle(entry: ResearchEntry): string {
 }
 
 function sourceWhy(entry: ResearchEntry): string {
-  const parts = [entry.whyItWorks, entry.structures[0], entry.photoStyle ? `Photograph: ${entry.photoStyle}` : ""].filter(Boolean)
+  const why = sanitizeCustomerCopy(entry.whyItWorks)
+  const photo = sanitizeCustomerCopy(entry.photoStyle)
+  const parts = [why, entry.structures[0], photo ? `Photograph: ${photo}` : ""].filter(Boolean)
   return clip(parts.join(" ") || "One subject and one response.", 180)
 }
 

@@ -501,20 +501,41 @@ function integratedGeometry(trim: { w: number; h: number }): {
   }
 }
 
+function sentenceCase(line: string): string {
+  const words = line.replace(/\s+/g, " ").trim().split(" ")
+  if (words.length < 3) return line
+  const letters = (word: string) => word.replace(/[^A-Za-z']/g, "")
+  const capital = words.filter((word) => /^[A-Z]/.test(letters(word))).length
+  if (capital < words.length * 0.6) return line
+  const small = new Set(["a", "an", "the", "for", "of", "to", "and", "or", "in", "on", "at", "by", "with"])
+  return words.map((word, index) => {
+    const bare = letters(word)
+    if (!bare) return word
+    if (index > 0 && small.has(bare.toLowerCase())) return word.toLowerCase()
+    if (bare === bare.toUpperCase() && bare.length >= 2 && bare.length <= 4) return word
+    if (index === 0) return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    return word.charAt(0).toLowerCase() + word.slice(1)
+  }).join(" ")
+}
+
 function splitHeadline(headline: string, phraseBoundary = false): [string, string] {
-  const cleaned = headline.replace(/\s+/g, " ").trim()
+  const cleaned = sentenceCase(headline.replace(/\s+/g, " ").trim())
   const words = cleaned.split(/\s+/).filter(Boolean)
+  const functionWord = /^(?:the|a|an|of|to|and|or|for|before)$/i
+  const bare = (word: string) => word.replace(/[^A-Za-z]/g, "")
   if (phraseBoundary) {
     const atBefore = cleaned.match(/^(.*?)\s+(before\b.+)$/i)
     if (atBefore) {
       const left = atBefore[1]!.trim()
       const right = atBefore[2]!.trim()
-      if (left.split(/\s+/).length >= 2 && right.split(/\s+/).length >= 2) return [left, right]
+      if (left.split(/\s+/).length >= 2 && right.split(/\s+/).length >= 2 && !functionWord.test(bare(left.split(/\s+/).at(-1) ?? ""))) {
+        return [left, right]
+      }
     }
     if (words.length < 4) return [cleaned, ""]
     let mid = Math.ceil(words.length / 2)
-    while (mid < words.length - 1 && /^(?:the|a|an|of|to|and|or|for|before)$/i.test(words[mid] ?? "")) mid += 1
-    if (mid < 2 || mid > words.length - 2) return [cleaned, ""]
+    while (mid > 2 && functionWord.test(bare(words[mid - 1] ?? ""))) mid -= 1
+    if (mid < 2 || functionWord.test(bare(words[mid - 1] ?? ""))) return [cleaned, ""]
     return [words.slice(0, mid).join(" "), words.slice(mid).join(" ")]
   }
   if (words.length < 2) return [cleaned, ""]

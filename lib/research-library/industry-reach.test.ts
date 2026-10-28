@@ -466,10 +466,10 @@ test("a long note needs two signals or a title field before it takes an industry
   assert.equal(resolveIndustry({ notes: `${filler} the gift shop and the store.` }), "none")
   assert.equal(resolveIndustry({ notes: `${filler} spring apparel.` }), "none")
   assert.equal(resolveIndustry({ notes: `${filler} the brand catalog.` }), "none")
+  assert.equal(resolveIndustry({ notes: `${filler} free shipping and order online.` }), "none")
+  assert.equal(resolveIndustry({ notes: `${filler} use promo code SAVE.` }), "none")
   assert.equal(resolveIndustry({ notes: "Your garage. Doors should lock. Medicare Advantage enrollment is open." }), "medicare")
   assert.equal(resolveIndustry({ notes: "Replace the garage door this spring." }), "garage-doors")
-  assert.equal(resolveIndustry({ notes: `${filler} a dental mention in the footer.` }), "none")
-  assert.equal(resolveIndustry({ notes: `${filler} real estate was named once.` }), "none")
   assert.equal(resolveIndustry({ notes: `${filler} a window.` }), "none")
   assert.equal(resolveIndustry({ notes: `${filler} the yard.` }), "none")
   assert.equal(resolveIndustry({ notes: `${filler} medicare was named in a footer.` }), "none")
@@ -605,6 +605,27 @@ test("photo notes are not copy, and the missed trades land on a gold industry", 
   const dqOffer = dq.entries[0]?.offers.join(" ") ?? ""
   assert.match(dqOffer, /\$4 off/)
   assert.doesNotMatch(dqOffer, /photograph|upright|owner[-\s]?labeled|channel\s*:/i)
+  const surface = indexSourceFiles([{
+    path: "assets/physical/PM-002/notes.md",
+    ref: "c3po",
+    text: "PM-002\nPrinted offer: $59 tune-up). Surrounding surface is visible above, below, and to the right.\n",
+  }])
+  const surfaceOffer = surface.entries[0]?.offers.join(" ") ?? ""
+  assert.match(surfaceOffer, /\$59/)
+  assert.doesNotMatch(surfaceOffer, /surface|visible|above/)
+  const labeled = indexSourceFiles([{
+    path: "assets/physical/PM-047/provenance.json",
+    ref: "c3po",
+    json: {
+      id: "PM-047",
+      notes: "Renewal by Andersen windows. Printed offer: Free window estimate.",
+      photo: "Owner-labeled back of the Renewal by Andersen window and door mailer in seq 48.",
+    },
+  }])
+  const labeledEntry = labeled.entries[0]
+  assert.equal(labeledEntry?.photoStyle, undefined)
+  assert.match(labeledEntry?.offers.join(" ") ?? "", /window estimate/i)
+  assert.doesNotMatch(`${labeledEntry?.headlines.join(" ")} ${labeledEntry?.offers.join(" ")} ${labeledEntry?.whyItWorks ?? ""}`, /owner-labeled|back of/i)
 
   const cases: ReadonlyArray<readonly [string, string]> = [
     ["a screen enclosure and a paver patio", "outdoor-living"],
