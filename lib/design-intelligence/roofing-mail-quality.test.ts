@@ -158,7 +158,7 @@ test("financing keeps 0% together and a storm card does not invent a deadline", 
   const lead = finance.surfaced[0]!
   assert.equal(lead.card.front.texts.some((text) => text.text === "0%"), true)
   assert.equal(lead.card.front.texts.some((text) => /0 %/.test(text.text)), false)
-  assert.match(lead.card.back.texts.map((text) => text.text).join(" "), /0% financing/)
+  assert.match(lead.card.back.texts.map((text) => text.text).join(" "), /0% APR financing available|Financing available/)
 
   const storm = await boardFor({
     goal: "Book a storm damage inspection",

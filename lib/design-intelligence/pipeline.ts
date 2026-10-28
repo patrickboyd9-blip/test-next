@@ -21,6 +21,8 @@ import { checkSimilarity, type SimilarityResult } from "./similarity"
 import { requestModelRationale, requestVisionCritique, type ModelUsage } from "./model"
 import { attorneyAdMark } from "./attorney-compliance"
 import { compliantSpec } from "@/lib/research-library/compliance"
+import { alignStormHeadlines } from "./persuasion"
+import { normalizeQuestion } from "@/lib/research-library/compliance"
 import { applyOutcomeHeadline, clientFactText, distinctRoofingHeadlines, persuasionVertical } from "./persuasion"
 import { renderStudioCardPng } from "./studio-render"
 import { viewSelection, type ImageView } from "./view-images"
@@ -280,7 +282,11 @@ export async function applyDesignIntelligence(
       goal: brief.goal,
       businessName: brief.businessInfo?.name,
     })
-    directions.forEach((d: any, i: number) => { if (d.spec) d.spec = { ...d.spec, headline: lines[i] } })
+    directions.forEach((d: any, i: number) => { if (d.spec) d.spec = { ...d.spec, headline: normalizeQuestion(lines[i] ?? "") } })
+    // Storm lines only over a storm-damage photo; otherwise a non-storm angle.
+    const views = directions.map((d: any) => ({ spec: d.spec, role: d.spec?.designRationale?.persuasion?.role }))
+    alignStormHeadlines(views)
+    directions.forEach((d: any, i: number) => { if (d.spec) d.spec = views[i]!.spec })
   }
   return { ...result, directions }
 }

@@ -1,3 +1,4 @@
+import { compliantLine } from "@/lib/research-library/compliance"
 import { composeAddressSideFace } from "@/lib/campaign-creator/address-side-layout"
 import { qrScanLabel } from "@/components/campaign-creator/studio/design-rules"
 import type { CreativeSpec } from "@/lib/campaign-creator/types"
@@ -162,7 +163,7 @@ function composeFront(
   }
 }
 
-function composeBack(
+function composeBackRaw(
   input: RoofingProInput,
   size: PostcardSizeId,
   pairing: PostcardFacePlan["pairing"],
@@ -698,4 +699,11 @@ function clean(value: string | undefined): string {
 
 function same(a: string, b: string): boolean {
   return a.length > 0 && a.trim().toLowerCase() === b.trim().toLowerCase()
+}
+
+
+/** The back runs through the same compliance rules as the front (financing, free, warranty wording). */
+function composeBack(...args: Parameters<typeof composeBackRaw>): ReturnType<typeof composeBackRaw> {
+  const face = composeBackRaw(...args)
+  return { ...face, texts: face.texts.map((text) => ({ ...text, text: compliantLine(text.text) })) }
 }

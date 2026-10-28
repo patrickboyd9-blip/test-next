@@ -33,7 +33,7 @@ export function compliantLine(input: string | undefined | null, context = ""): s
   // Financing: one allowed line unless the full disclosure is printed.
   if (isFinancingLine(line) && (hasTriggerTerm(line) || bareRate(line))) {
     const rate = line.match(/\b(\d+(?:\.\d+)?)%\s*(?:APR\b)?/i)
-    const keepsApr = rate && /\bAPR\b/i.test(line) && !hasTriggerTerm(line)
+    const keepsApr = rate && !hasTriggerTerm(line)
     const sentence = keepsApr ? `${rate![1]}% APR financing available` : "Financing available"
     line = line
       .split(/(?<=[.!?])\s+/)
@@ -63,7 +63,16 @@ export function compliantLine(input: string | undefined | null, context = ""): s
   if (/\bwater heater\b/i.test(line) && /\bold\b|\bage\b|\byears?\b/i.test(line) && /\?/.test(line)) {
     line = "Is your water heater more than 10 years old?"
   }
-  return line.replace(/\s{2,}/g, " ").trim()
+  return normalizeQuestion(line.replace(/\s{2,}/g, " ").trim())
+}
+
+const QUESTION_START = /^(?:is|are|am|do|does|did|can|could|will|would|should|has|have|had|was|were|how|what|why|when|where|who|which|ready for)\b/i
+
+/** A one-sentence question gets its question mark ("Is Your Roof Ready" becomes "Is Your Roof Ready?"). */
+export function normalizeQuestion(line: string): string {
+  const trimmed = line.trim()
+  if (!trimmed || /[.!?]\s+\S/.test(trimmed) || !QUESTION_START.test(trimmed) || trimmed.endsWith("?")) return line
+  return trimmed.replace(/[.!]+$/, "") + "?"
 }
 
 /** Headlines carry one service and never financing, terms, or banned claims. */

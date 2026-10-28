@@ -455,7 +455,7 @@ export function headlineVariants(input: { offer: string; city?: string; goal?: s
   }
   if (/\b(?:hurricane|storm|hail|wind)\b/i.test(facts)) {
     // Our storm photos show an intact, sunny home, so the lines sell readiness, not damage.
-    return pick([`Storm season is coming${at}. Is your roof ready?`, "Get your roof checked before storm season", "Know your roof before the next storm", "A free check now, a dry home later"])
+    return pick([`Storm season is coming${at}. Is your roof ready?`, "Get your roof checked before storm season", "Know your roof before the next storm", "Did it hit your roof?"])
   }
   if (/\brepair\b/i.test(facts)) {
     return pick([`Leak or missing shingles${at}? Fix it for less`, "That small leak won't fix itself", "A repair now beats a roof later", "Fix the leak before it finds the ceiling"])
@@ -894,4 +894,37 @@ interface Flags {
   priceEnding: boolean
   offerType: string
   copyPattern: string
+}
+
+
+/** A headline that sells a storm or hail angle. */
+export const STORM_HEADLINE = /\bstorms?\b|\bhail\b|\bhurricane|\bdamage\w*|\bhit (?:your|the) roof\b|\bwind\b/i
+/** A photo brief that asks for visible storm damage. */
+export const DAMAGE_SCENE = /\b(?:visible|clear)\b[^.]*\bdamage\b|\bmissing shingles\b|\blifted shingles\b|\btarp\w*\b|\bstorm debris\b/i
+export const STORM_DAMAGE_PHOTO = "Visible storm damage on a real home: missing and lifted shingles, a blue tarp on part of the roof, scattered storm debris in the yard, overcast sky clearing; a roofer inspecting from a ladder"
+
+const NON_STORM = ["Know where your roof stands, free", "One visit, a clear answer on your roof", "Find small roof problems while they are small", "A free roof check this season"]
+
+/**
+ * A storm headline runs only over a photo that shows storm damage. The storm (threat)
+ * direction keeps its storm line and gets a damage photo brief; any other direction whose
+ * photo is not a damage scene moves to a non-storm angle.
+ */
+export function alignStormHeadlines<T extends { headline?: string; visualDirection?: string }>(specs: Array<{ spec?: T; role?: string }>): void {
+  const used = new Set(specs.map((d) => (d.spec?.headline ?? "").toLowerCase()))
+  let stormKept = false
+  const order = [...specs].sort((a, b) => Number(b.role === "threat") - Number(a.role === "threat"))
+  for (const d of order) {
+    const spec = d.spec
+    if (!spec?.headline || !STORM_HEADLINE.test(spec.headline)) continue
+    if (DAMAGE_SCENE.test(spec.visualDirection ?? "")) { stormKept = true; continue }
+    if (!stormKept && d.role === "threat") {
+      d.spec = { ...spec, visualDirection: `${STORM_DAMAGE_PHOTO}. ${spec.visualDirection ?? ""}`.trim() }
+      stormKept = true
+      continue
+    }
+    const next = NON_STORM.find((line) => !used.has(line.toLowerCase())) ?? NON_STORM[0]!
+    used.add(next.toLowerCase())
+    d.spec = { ...spec, headline: next }
+  }
 }

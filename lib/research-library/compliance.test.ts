@@ -27,3 +27,26 @@ test("headlines carry one service and no financing", () => {
   assert.equal(fitsSpecialOffer("Did it hit your roof?", "Free storm damage inspection"), true)
   assert.equal(fitsSpecialOffer("Free gutters with purchase of a roof", "$500 off"), false)
 })
+
+test("back-of-card financing and question marks", async () => {
+  const { normalizeQuestion } = await import("./compliance")
+  assert.equal(compliantLine("0% financing"), "0% APR financing available")
+  assert.equal(compliantLine("0% financing for 18 months"), "Financing available")
+  assert.equal(normalizeQuestion("Is Your Roof Ready"), "Is Your Roof Ready?")
+  assert.equal(normalizeQuestion("Storm season is coming. Is your roof ready?"), "Storm season is coming. Is your roof ready?")
+  assert.equal(normalizeQuestion("Replace the roof, keep the savings."), "Replace the roof, keep the savings.")
+})
+
+test("storm headlines need a storm-damage photo", async () => {
+  const { alignStormHeadlines, DAMAGE_SCENE } = await import("@/lib/design-intelligence/persuasion")
+  const views = [
+    { role: "threat", spec: { headline: "Did it hit your roof?", visualDirection: "Sunny intact home" } },
+    { role: "outcome", spec: { headline: "Know your roof before the next storm", visualDirection: "Sunny intact home" } },
+    { role: "trust", spec: { headline: "A local crew you can call", visualDirection: "Roofer on a ladder" } },
+  ]
+  alignStormHeadlines(views)
+  assert.equal(views[0]!.spec.headline, "Did it hit your roof?")
+  assert.match(views[0]!.spec.visualDirection, DAMAGE_SCENE)
+  assert.doesNotMatch(views[1]!.spec.headline, /storm/i)
+  assert.equal(views[2]!.spec.headline, "A local crew you can call")
+})

@@ -1,3 +1,4 @@
+import { compliantLine } from "@/lib/research-library/compliance"
 import { composeAddressSideFace } from "@/lib/campaign-creator/address-side-layout"
 import { qrScanLabel } from "@/components/campaign-creator/studio/design-rules"
 import { headlineRestatesOffer } from "@/components/campaign-creator/studio/studio-copy-hierarchy"
@@ -195,7 +196,7 @@ function composeFront(
   }
 }
 
-function composeBack(
+function composeBackRaw(
   input: ComposeInput,
   size: PostcardSizeId,
   pairing: PostcardFacePlan["pairing"],
@@ -728,4 +729,11 @@ export function safeTrimRect(size: PostcardSizeId): InchRect {
 export function showsReviewStars(spec: ComposeInput["spec"]): boolean {
   const blob = [spec.headline, spec.subheadline, spec.body, spec.offer].filter(Boolean).join(" ")
   return /\b(5|five)[\s-]*stars?\b/i.test(blob)
+}
+
+
+/** The back runs through the same compliance rules as the front (financing, free, warranty wording). */
+function composeBack(...args: Parameters<typeof composeBackRaw>): ReturnType<typeof composeBackRaw> {
+  const face = composeBackRaw(...args)
+  return { ...face, texts: face.texts.map((text) => ({ ...text, text: compliantLine(text.text) })) }
 }
