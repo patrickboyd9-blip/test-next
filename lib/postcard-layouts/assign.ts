@@ -83,6 +83,8 @@ export function assignTemplates<T extends CreativeDirection>(
     chosen.set(item.index, next)
   }
 
+  if (palette !== "medicare") leanSoftFade(ranked.map((item) => item.index), chosen, allowed)
+
   return directions.map((direction, index) => {
     const templateId = chosen.get(index) ?? allowed[0]
     return {
@@ -127,4 +129,56 @@ function withTemplate(
 export function templateOnSpec(spec: CreativeSpec): PostcardTemplateId | undefined {
   const value = spec.layoutHints?.templateId
   return isPostcardTemplate(value) ? value : undefined
+}
+
+/**
+ * Soft-fade fronts: a full-bleed photograph with type on a gradient scrim that
+ * fades into the image, no hard band or tile. Owner preference, not a rule.
+ */
+export const SOFT_FADE_TEMPLATES: ReadonlySet<PostcardTemplateId> = new Set<PostcardTemplateId>([
+  "roof_full_bleed",
+  "roof_fade_offer",
+  "hero_scrim",
+])
+
+export function isSoftFadeTemplate(id: string | undefined): boolean {
+  return Boolean(id && SOFT_FADE_TEMPLATES.has(id as PostcardTemplateId))
+}
+
+/**
+ * Lean the set toward the soft fade: about two of every three directions use it,
+ * and at least one keeps a bordered or banded style when the vertical has one.
+ * `order` is lead first; the lead is the first to take a soft fade.
+ */
+export function leanSoftFade(
+  order: number[],
+  chosen: Map<number, PostcardTemplateId>,
+  allowed: readonly PostcardTemplateId[]
+): void {
+  const n = order.length
+  if (n === 0) return
+  const softAllowed = allowed.filter((id) => SOFT_FADE_TEMPLATES.has(id))
+  const hardAllowed = allowed.filter((id) => !SOFT_FADE_TEMPLATES.has(id))
+  if (softAllowed.length === 0) return
+  const target = n === 1 ? 1 : Math.max(1, Math.min(n - (hardAllowed.length ? 1 : 0), Math.round((2 * n) / 3)))
+  const isSoft = (i: number) => SOFT_FADE_TEMPLATES.has(chosen.get(i)!)
+  const used = new Set(chosen.values())
+  // Keep the last-ranked bordered direction as the "different style"; convert others, lead first.
+  const hardIdx = order.filter((i) => !isSoft(i))
+  // A coupon the copy asked for (a price or rate) is the bordered one we keep.
+  const keepHard = hardIdx.find((i) => chosen.get(i) === "roof_coupon" || chosen.get(i) === "deadline_coupon") ?? hardIdx[hardIdx.length - 1]
+  for (const i of order) {
+    if (order.filter(isSoft).length >= target) break
+    if (isSoft(i) || (i === keepHard && n > 1 && hardAllowed.length)) continue
+    const next = softAllowed.find((id) => !used.has(id))
+    if (!next) break
+    used.add(next)
+    chosen.set(i, next)
+  }
+  // Never 100% one style when a bordered option exists.
+  if (n > 1 && hardAllowed.length && order.every(isSoft)) {
+    const last = order[order.length - 1]!
+    const next = hardAllowed.find((id) => !used.has(id)) ?? hardAllowed[0]!
+    chosen.set(last, next)
+  }
 }

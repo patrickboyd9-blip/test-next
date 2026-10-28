@@ -33,6 +33,15 @@ export function proFrontRegions(id: RoofingProTemplateId): ProRegion[] {
         { id: "offer", kind: "text", role: "offer", x: 0.5, y: 3.36, w: 4.66, h: 0.34 },
         { id: "lockup", kind: "lockup", role: "lockup", x: 0.38, y: 3.8, w: 7.24, h: 0.88 },
       ]
+    case "roof_fade_offer":
+      return [
+        { id: "photo", kind: "photo", role: "photo", x: 0, y: 0, w: 8, h: 5, bleed: true, subject: "scene" },
+        { id: "scrim", kind: "shape", role: "solid-scrim", x: 0, y: 1.75, w: 8, h: 3.25, bleed: true, fill: "scrim" },
+        { id: "offer-tile", kind: "shape", role: "offer-tile", x: 0.38, y: 2.4, w: 4.9, h: 0.42, fill: "offer" },
+        { id: "offer", kind: "text", role: "offer", x: 0.5, y: 2.44, w: 4.66, h: 0.34 },
+        { id: "headline", kind: "text", role: "headline", x: 0.38, y: 2.92, w: 7.24, h: 0.7 },
+        { id: "lockup", kind: "lockup", role: "lockup", x: 0.38, y: 3.74, w: 7.24, h: 0.9 },
+      ]
     case "roof_split":
       return [
         { id: "photo", kind: "photo", role: "photo", x: 0, y: 0, w: 4.55, h: 5, bleed: true, subject: "person" },

@@ -93,9 +93,9 @@ function direction(index: number, layout: CreativeSpec["layoutVariant"]): Creati
   }
 }
 
-test("the catalog is 14 original compositions plus 10 roofing pro templates", () => {
-  assert.equal(POSTCARD_TEMPLATE_IDS.length, 24)
-  assert.equal(new Set(POSTCARD_TEMPLATE_IDS).size, 24)
+test("the catalog is 14 original compositions plus 11 roofing pro templates", () => {
+  assert.equal(POSTCARD_TEMPLATE_IDS.length, 25)
+  assert.equal(new Set(POSTCARD_TEMPLATE_IDS).size, 25)
   for (const id of POSTCARD_TEMPLATE_IDS) {
     assert.equal(TEMPLATE_META[id].id, id)
   }
@@ -252,7 +252,8 @@ test("each vertical gives the three directions different compositions", () => {
       assert.equal(templates.includes("financing_first"), false)
     }
     if (name === "roofing") {
-      assert.deepEqual(templates, ["roof_full_bleed", "roof_split", "roof_coupon"])
+      // Soft fade leads (about 2 of 3); one bordered style stays.
+      assert.deepEqual(templates, ["roof_full_bleed", "roof_fade_offer", "roof_split"])
     }
   }
 })
@@ -274,7 +275,7 @@ test("roofing copy can choose a matching composition without repeating one", () 
   const applied = assignTemplates(brief, [storm, price, commercial])
   assert.deepEqual(
     applied.map((item) => item.spec.layoutHints?.templateId),
-    ["roof_storm", "roof_coupon", "roof_premium"]
+    ["roof_full_bleed", "roof_coupon", "roof_fade_offer"]
   )
 })
 

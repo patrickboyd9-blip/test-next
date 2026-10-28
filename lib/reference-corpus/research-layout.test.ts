@@ -172,10 +172,10 @@ test("roofing directions cite different records for the three default pro layout
   ])
   assert.deepEqual(
     applied.map((item) => item.spec.layoutHints?.templateId),
-    ["roof_full_bleed", "roof_split", "roof_coupon"]
+    ["roof_full_bleed", "roof_fade_offer", "roof_split"]
   )
   const cited = applied.map((item) => item.research?.sources.map((source) => source.mmrId))
-  assert.deepEqual(cited, [["MMR-587"], ["MMR-583"], ["MMR-577"]])
+  assert.deepEqual(cited, [["MMR-587"], ["MMR-588"], ["MMR-583"]])
   const unique = new Set(cited.flat())
   assert.equal(unique.size, 3)
   assert.equal(unique.has("MMR-001"), false)
