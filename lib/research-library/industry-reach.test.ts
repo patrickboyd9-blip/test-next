@@ -466,6 +466,10 @@ test("a long note needs two signals or a title field before it takes an industry
   assert.equal(resolveIndustry({ notes: `${filler} the gift shop and the store.` }), "none")
   assert.equal(resolveIndustry({ notes: `${filler} spring apparel.` }), "none")
   assert.equal(resolveIndustry({ notes: `${filler} the brand catalog.` }), "none")
+  assert.equal(resolveIndustry({ notes: "Your garage. Doors should lock. Medicare Advantage enrollment is open." }), "medicare")
+  assert.equal(resolveIndustry({ notes: "Replace the garage door this spring." }), "garage-doors")
+  assert.equal(resolveIndustry({ notes: `${filler} a dental mention in the footer.` }), "none")
+  assert.equal(resolveIndustry({ notes: `${filler} real estate was named once.` }), "none")
   assert.equal(resolveIndustry({ notes: `${filler} a window.` }), "none")
   assert.equal(resolveIndustry({ notes: `${filler} the yard.` }), "none")
   assert.equal(resolveIndustry({ notes: `${filler} medicare was named in a footer.` }), "none")
@@ -575,6 +579,33 @@ test("photo notes are not copy, and the missed trades land on a gold industry", 
     assert.equal(junkById.get(id)?.offers.length, 0, id)
   }
 
+  const exactJunk = [
+    "The owner labeled this photograph as the back.",
+    "The photograph is upside down.",
+    "The photograph is upright.",
+    "Channel: mailer.",
+    "Owner-labeled back of the Renewal by Andersen window and door mailer in seq 48.",
+  ]
+  for (const [index, line] of exactJunk.entries()) {
+    const parsed = indexSourceFiles([{
+      path: `assets/physical/PM-9${index}0/notes.md`,
+      ref: "c3po",
+      text: `PM-9${index}0\n${line}\n`,
+    }])
+    const entry = parsed.entries[0]
+    const copy = `${entry?.headlines.join(" ") ?? ""} ${entry?.offers.join(" ") ?? ""}`
+    assert.equal(entry?.referenceOnly, true, line)
+    assert.doesNotMatch(copy, /owner[-\s]?labeled|photograph|upside down|upright|^channel:/i, line)
+  }
+  const dq = indexSourceFiles([{
+    path: "assets/physical/PM-057b/notes.md",
+    ref: "c3po",
+    text: "PM-057b\nPrinted offer: $4 off any DQ Cake or Blizzard Cake, 8 inch round or larger. Expires 12/31/2026. PLU 22362 is printed. The photograph is upright.\n",
+  }])
+  const dqOffer = dq.entries[0]?.offers.join(" ") ?? ""
+  assert.match(dqOffer, /\$4 off/)
+  assert.doesNotMatch(dqOffer, /photograph|upright|owner[-\s]?labeled|channel\s*:/i)
+
   const cases: ReadonlyArray<readonly [string, string]> = [
     ["a screen enclosure and a paver patio", "outdoor-living"],
     ["hardscape with a fire pit", "outdoor-living"],
@@ -588,6 +619,9 @@ test("photo notes are not copy, and the missed trades land on a gold industry", 
     ["Brilliant Earth jewelry postcard. Printed title: Vintage Inspired.", "retail-grand-openings"],
     ["White Glove Guys piece.", "moving-storage"],
     ["Bellami Hair Flex Weft postcard. World's number 1 Hair Extension Brand.", "consumer-products"],
+    ["Shop the collection of hiking boots.", "consumer-products"],
+    ["New arrivals and free shipping on jackets.", "consumer-products"],
+    ["Order online. Promo code SAVE on boots.", "consumer-products"],
     ["Grand opening of a clothing boutique.", "retail-grand-openings"],
     ["Sneaker sale event at the mall.", "retail-grand-openings"],
     ["An apparel store now open.", "retail-grand-openings"],

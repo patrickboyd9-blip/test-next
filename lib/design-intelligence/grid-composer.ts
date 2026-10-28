@@ -568,7 +568,7 @@ function composeOfferStrip(
     ? roundPt(Math.max(15, Math.min(headlinePt, maxPtForFullLine(secondLine, column.w, displayEm))))
     : headlinePt
   const blocks: StackBlock[] = [
-    { text: firstLine, role: "headline", pt: hvacBand && secondLine ? roundPt(Math.min(headlinePt, Math.max(secondPt, 22))) : headlinePt, floor: hvacBand && secondLine ? 18 : bodyPt * 2.5, color: ink },
+    { text: firstLine, role: "headline", pt: hvacBand && secondLine ? roundPt(Math.min(32, Math.max(headlinePt, 28))) : headlinePt, floor: hvacBand && secondLine ? 24 : bodyPt * 2.5, color: ink },
   ]
   if (secondLine) {
     blocks.push({
@@ -601,15 +601,6 @@ function composeOfferStrip(
       maxPt: 15,
     }), pairing)
     if (fitted.text) texts.push(fitted)
-    const top = Math.min(...texts.map((text) => text.rect.y))
-    const bottom = Math.max(...texts.map((text) => text.rect.y + text.rect.h))
-    const shift = round2(column.y + Math.max(0, (column.h - (bottom - top)) / 2) - top)
-    if (shift > 0.04) {
-      for (let index = 0; index < texts.length; index += 1) {
-        const text = texts[index]!
-        texts[index] = { ...text, rect: { ...text.rect, y: round2(text.rect.y + shift) } }
-      }
-    }
   } else if (name && !nameAlreadyOnCard(texts, name)) {
     const wordmark = shrinkToInk(fitText({
       text: name,
@@ -693,7 +684,11 @@ function composeOfferStrip(
     minPt: 9,
     maxPt: 12,
   }), pairing)
-  const plate: InchRect = { x: 0, y: 0, w: round2(column.x + column.w + 0.2), h: band.y }
+  const creamTexts = texts.filter((text) => text.rect.y + text.rect.h <= band.y - 0.05)
+  const creamBottom = creamTexts.reduce((bottom, text) => Math.max(bottom, text.rect.y + text.rect.h), column.y)
+  const plate: InchRect = hvacBand
+    ? { x: 0, y: 0, w: round2(Math.min(column.x + column.w + 0.12, trim.w * 0.42)), h: round2(Math.min(creamBottom + 0.16, band.y - 0.85)) }
+    : { x: 0, y: 0, w: round2(column.x + column.w + 0.2), h: band.y }
   const photos: PhotoSlotPlan[] = [{ id: "photo", role: "photo", rect: { x: 0, y: 0, w: trim.w, h: trim.h }, bleed: true, treatment: "cover" }]
   const shapes: ShapePlan[] = [
     { id: "paper", role: "paper", rect: { x: 0, y: 0, w: trim.w, h: trim.h }, fill: paper },

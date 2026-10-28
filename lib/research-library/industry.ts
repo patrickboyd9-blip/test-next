@@ -85,7 +85,7 @@ export function sceneNotePattern(): string {
 
 /** Catalogue and camera sentences. A change here rebuilds a saved index. */
 export function copyRejectPattern(): string {
-  return "photograph(?:ed)?|\\blabeled\\b|upside down|\\bis upright\\b|\\bpm-\\d+\\b|\\bseq\\b|provisional|different artwork|channel\\s*:\\s*mailer|pending_review|physical_photo|\\bplu\\b"
+  return "owner[-\\s]?labeled|photograph(?:s|ed)?|upside down|\\bupright\\b|\\brotated\\b|channel\\s*:|\\bpm-\\d+\\b|\\bseq\\b|provisional|different artwork|pending_review|physical_photo|\\bplu\\b"
 }
 
 /**
@@ -251,7 +251,7 @@ function classify(value: string, mode: ClassifyMode): string {
   if (landscapingSignal(text, mode)) return "landscaping"
   if (/\bsolar\b/.test(text)) return "solar"
   if (/\broof\b|\broofs\b|\broofing\b|\broofer\b|\bshingles?\b/.test(text)) return "roofing"
-  if (/\bdental\b|\bdentist\b|\bdentures?\b/.test(text)) return "dental"
+  if (dentalSignal(text, mode)) return "dental"
   if (/\bmed spa\b|\bmedspa\b|\bchiro\b|\bbotox\b|\baesthetic\b/.test(text)) return "med-spa-chiro"
   if (vetSignal(text, mode)) return "vet-pet"
   if (restaurantSignal(text, mode)) return "restaurants-food"
@@ -306,9 +306,17 @@ function restaurantSignal(text: string, mode: ClassifyMode): boolean {
 }
 
 function realEstateSignal(text: string, mode: ClassifyMode): boolean {
-  if (/\breal estate\b|\brealtor\b|\bopen house\b/.test(text)) return true
+  if (/\brealtor\b|\bopen house\b|\breal estate agents?\b/.test(text)) return true
   if (/\b(?:home|house)\s+listing\b/.test(text)) return true
-  return mode === "label" && /\blisting\b/.test(text)
+  if (mode === "label" && (/\breal estate\b/.test(text) || /\blisting\b/.test(text))) return true
+  return mode === "notes" && /\breal estate\b/.test(text) && /\b(?:listing|agent|broker|open house)\b/.test(text)
+}
+
+function dentalSignal(text: string, mode: ClassifyMode): boolean {
+  if (/\bdentists?\b|\bdentures?\b|\bdental (?:office|practice|clinic|care|exam|cleaning|implant)/.test(text)) return true
+  if (mode === "label" && /\bdental\b/.test(text)) return true
+  const words = text.split(" ").filter((word) => word && word !== "brk")
+  return mode === "notes" && /\bdental\b/.test(text) && words.length <= 36
 }
 
 function mortgageSignal(text: string, mode: ClassifyMode): boolean {
@@ -323,7 +331,7 @@ function mortgageSignal(text: string, mode: ClassifyMode): boolean {
   return false
 }
 
-const PRODUCT_SIGNALS: readonly RegExp[] = [
+const APPAREL_SIGNALS: readonly RegExp[] = [
   /\bshoes?\b/,
   /\bclothing\b/,
   /\bapparel\b/,
@@ -336,15 +344,28 @@ const PRODUCT_SIGNALS: readonly RegExp[] = [
   /\bfootwear\b/,
   /\bsneakers?\b/,
   /\bjackets?\b/,
-  /\boutfitters?\b/,
+  /\bgear\b/,
   /\bhair extensions?\b/,
   /\bwefts?\b/,
-  /\bbellami\b/,
+]
+
+const BRAND_SIGNALS: readonly RegExp[] = [
   /\bcatalogs?\b/,
+  /\bcollections?\b/,
+  /\boutfitters?\b/,
+  /\bbellami\b/,
+  /\bbrands?\b/,
+]
+
+const MAILER_SIGNALS: readonly RegExp[] = [
+  /\bshop the collection\b/,
+  /\bnew arrivals\b/,
+  /\bfree shipping\b/,
+  /\border online\b/,
 ]
 
 function productHits(text: string): number {
-  return signalHits(text, PRODUCT_SIGNALS)
+  return signalHits(text, APPAREL_SIGNALS)
 }
 
 /** A store, opening, or mall is retail even when it also sells clothes. */
@@ -355,7 +376,6 @@ function retailEvent(text: string): boolean {
 function retailSignal(text: string, mode: ClassifyMode): boolean {
   if (retailEvent(text)) return true
   if (/\b(?:retail|department|outlet|boutique) stores?\b/.test(text)) return true
-  if (/\bstores?\b/.test(text) && productHits(text) > 0) return true
   return notesAssign(text, mode, /$^/, [
     /\bgrand openings?\b/,
     /\bretail\b/,
@@ -376,9 +396,13 @@ function landscapingSignal(text: string, mode: ClassifyMode): boolean {
 }
 
 function consumerSignal(text: string, mode: ClassifyMode): boolean {
-  if (retailEvent(text) || (/\bstores?\b/.test(text) && productHits(text) > 0)) return false
-  if (mode === "label") return productHits(text) > 0
-  return productHits(text) >= 2
+  if (retailEvent(text)) return false
+  const apparel = productHits(text)
+  const strong = signalHits(text, BRAND_SIGNALS)
+  const mailer = signalHits(text, MAILER_SIGNALS)
+  const promo = /\bpromo codes?\b/.test(text) && apparel > 0 ? 1 : 0
+  if (mode === "label") return apparel + strong + mailer > 0
+  return apparel >= 2 || (apparel >= 1 && strong + mailer + promo >= 1)
 }
 
 function hairSalonSignal(text: string): boolean {
@@ -481,6 +505,7 @@ function soften(value: string): string {
     .toLowerCase()
     .replace(/\ba\s*\/\s*c\b/g, " ac ")
     .replace(/&/g, " and ")
+    .replace(/[.!?]+/g, " brk ")
     .replace(/[^a-z0-9]+/g, " ")
     .replace(/\s+/g, " ")
     .trim()

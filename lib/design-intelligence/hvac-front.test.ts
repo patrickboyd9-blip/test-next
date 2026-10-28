@@ -92,10 +92,11 @@ test("every HVAC front shows the phone and the website, and the photo is not a c
   assert.ok(threatHeadlines.length >= 1)
   const headlineBottom = Math.max(...threatHeadlines.map((text) => text.rect.y + text.rect.h))
   assert.ok(wordmark.rect.y - headlineBottom <= 0.28, "gap between the headline and the business name")
-  const plateTop = threat.card.front.shapes.find((shape) => shape.role === "calm-field")?.rect.y ?? 0
-  const spaceAbove = Math.min(...threatHeadlines.map((text) => text.rect.y)) - plateTop
-  const spaceBelow = band.rect.y - (wordmark.rect.y + wordmark.rect.h)
-  assert.ok(Math.abs(spaceAbove - spaceBelow) <= 0.55, `cream panel gap above ${spaceAbove} below ${spaceBelow}`)
+  const plate = threat.card.front.shapes.find((shape) => shape.role === "calm-field")
+  assert.ok(plate)
+  assert.ok(plate.rect.h <= band.rect.y - 0.7, "cream panel covers the subject")
+  assert.ok(Math.min(...threatHeadlines.map((text) => text.rect.y)) <= 0.4, "headline uses the top of the panel")
+  assert.ok((threatHeadlines[0]?.fontPt ?? 0) >= 26, "headline is large enough to read")
   for (const text of threatHeadlines) {
     for (const line of text.lines) {
       assert.notEqual(line.replace(/[."']/g, "").trim().toLowerCase(), "before", line)

@@ -263,8 +263,8 @@ export function entryFromGold(record: Record<string, unknown>, file: Pick<Source
     collectNoteText(record),
   ].filter(Boolean).join("\n")
   const copy = referenceCopy({
-    headlines: headlineText ? [clip(headlineText, 120)] : [],
-    offers: offerText ? [clip(offerText, 120)] : [],
+    headlines: headlineText ? [headlineText] : [],
+    offers: offerText ? [offerText] : [],
     photoStyle: stringField(record, ["photoStyle", "photo_style", "photo", "subject"]),
     notes: noteBlob,
   })
@@ -389,8 +389,12 @@ export function dedupeResearchEntries(entries: readonly ResearchEntry[]): Resear
 function richer(left: ResearchEntry, right: ResearchEntry): ResearchEntry {
   const preferred = scoreEntry(right) > scoreEntry(left) ? right : left
   const other = preferred === left ? right : left
-  const headlines = preferred.headlines.length > 0 ? preferred.headlines : other.headlines
-  const offers = preferred.offers.length > 0 ? preferred.offers : other.offers
+  const headlines = (preferred.headlines.length > 0 ? preferred.headlines : other.headlines)
+    .map((line) => sanitizeCustomerCopy(line))
+    .filter((line) => line.length > 0)
+  const offers = (preferred.offers.length > 0 ? preferred.offers : other.offers)
+    .map((line) => sanitizeCustomerCopy(line))
+    .filter((line) => line.length > 0)
   const industry = knownIndustry(preferred.industry) ? preferred.industry : knownIndustry(other.industry) ? other.industry : preferred.industry
   return {
     ...preferred,
@@ -708,22 +712,40 @@ function isPhotoNote(line: string): boolean {
 function isJunkCopy(line: string): boolean {
   const text = line.replace(/\s+/g, " ").trim()
   if (!text) return true
+  if (/owner[-\s]?labeled/i.test(text)) return true
+  if (/\bphotographs?\b/i.test(text)) return true
+  if (/upside down/i.test(text)) return true
+  if (/\bupright\b/i.test(text)) return true
+  if (/\brotated\b/i.test(text)) return true
+  if (/(?:^|\s)channel\s*:/i.test(text)) return true
   if (COPY_REJECT.test(text) || isPhotoNote(text)) return true
   if (/\b[a-z]+_[a-z0-9_]+\b/.test(text) && (text.match(/\b[a-z]+_[a-z0-9_]+\b/g) || []).length >= 2) return true
-  if (/^[A-Za-z][\w .-]{0,24}:\s+\S/.test(text) && !/[$%]|\bfree\b/i.test(text)) return true
+  if (/^[A-Za-z][\w .&/-]{0,40}:\s+\S/.test(text) && !/[$%]|\bfree\b|\d/i.test(text)) return true
   return false
+}
+
+/**
+ * Last gate for a headline or an offer. Junk is removed even when it was
+ * clipped, cased differently, or appended after a real price.
+ */
+export function sanitizeCustomerCopy(value: string | undefined): string {
+  const text = value?.replace(/\s+/g, " ").trim() ?? ""
+  if (!text) return ""
+  const marker = /owner[-\s]?labeled|\bphotographs?\b|upside down|\bupright\b|\brotated\b|(?:^|\s)channel\s*:/i
+  const kept: string[] = []
+  for (const sentence of text.split(/(?<=[.!])\s+/)) {
+    if (isJunkCopy(sentence)) continue
+    const cutAt = sentence.search(marker)
+    const head = (cutAt >= 0 ? sentence.slice(0, cutAt) : sentence).replace(/[\s,;:–—-]+$/, "").trim()
+    if (head.length < 8 || isJunkCopy(head)) continue
+    kept.push(head)
+  }
+  return kept.join(" ").trim()
 }
 
 /** Keep the printed offer and drop a photo note that was appended on the same line. */
 function stripCopy(value: string | undefined): string {
-  const text = value?.replace(/\s+/g, " ").trim() ?? ""
-  if (!text) return ""
-  const kept: string[] = []
-  for (const sentence of text.split(/(?<=[.!])\s+/)) {
-    if (isJunkCopy(sentence)) break
-    kept.push(sentence)
-  }
-  return kept.join(" ").trim()
+  return sanitizeCustomerCopy(value)
 }
 
 function isSceneNote(line: string): boolean {
@@ -776,14 +798,16 @@ export function referenceCopy(input: {
   const marketing = descriptiveLines(input.notes).filter((line) => isMarketingLine(line, business) && line !== headlines[0] && line !== offers[0])
   const nextHeadlines = headlines.length > 0 ? headlines : marketing[0] ? [clip(marketing[0], 120)] : []
   const offerLine = offers[0] || marketing.find((line) => /[$%]|\b(?:free|offer|save|discount|coupon)\b/i.test(line) && line !== nextHeadlines[0])
-  const nextOffers = offerLine ? [clip(offerLine, 120)] : []
+  const nextOffers = offerLine ? [offerLine] : []
   const photo = input.photoStyle?.trim()
   const photoStyle = photo && !isSceneNote(photo) ? photo : undefined
+  const finalHeadlines = nextHeadlines.map((line) => clip(sanitizeCustomerCopy(line), 120)).filter((line) => line.length > 0)
+  const finalOffers = nextOffers.map((line) => clip(sanitizeCustomerCopy(line), 120)).filter((line) => line.length > 0)
   return {
-    headlines: nextHeadlines,
-    offers: nextOffers,
+    headlines: finalHeadlines,
+    offers: finalOffers,
     photoStyle,
-    referenceOnly: nextHeadlines.length === 0 && nextOffers.length === 0,
+    referenceOnly: finalHeadlines.length === 0 && finalOffers.length === 0,
   }
 }
 
