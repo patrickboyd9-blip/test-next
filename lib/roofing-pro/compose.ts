@@ -43,7 +43,7 @@ export interface RoofingProInput {
   returnAddress?: string | null
 }
 
-const DARK_TYPE = new Set<RoofingProTemplateId>(["roof_full_bleed", "roof_storm", "roof_seasonal"])
+const DARK_TYPE = new Set<RoofingProTemplateId>(["roof_full_bleed", "roof_fade_offer", "roof_storm", "roof_seasonal"])
 
 export function composeRoofingProCard(input: RoofingProInput): RoofingProCard {
   const front = composeRoofingProFace({ ...input, face: "front" })

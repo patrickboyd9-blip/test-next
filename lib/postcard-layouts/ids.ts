@@ -30,6 +30,7 @@ export const POSTCARD_TEMPLATE_IDS = [
   "roof_seasonal",
   "roof_minimal",
   "roof_premium",
+  "roof_fade_offer",
 ] as const
 
 export type PostcardTemplateId = (typeof POSTCARD_TEMPLATE_IDS)[number]

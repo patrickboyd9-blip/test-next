@@ -17,6 +17,7 @@ export const ROOFING_PRO_TEMPLATE_IDS = [
   "roof_seasonal",
   "roof_minimal",
   "roof_premium",
+  "roof_fade_offer",
 ] as const
 
 export type RoofingProTemplateId = (typeof ROOFING_PRO_TEMPLATE_IDS)[number]
@@ -28,10 +29,13 @@ export type RoofingProTemplateId = (typeof ROOFING_PRO_TEMPLATE_IDS)[number]
  */
 export const BEFORE_AFTER_ENABLED = false
 
-/** The templates offered to customers today. */
-export const ROOFING_PRO_AVAILABLE_IDS: readonly RoofingProTemplateId[] = ROOFING_PRO_TEMPLATE_IDS.filter(
-  (id) => BEFORE_AFTER_ENABLED || id !== "roof_before_after"
-)
+const SOFT_FADE_FIRST: readonly RoofingProTemplateId[] = ["roof_full_bleed", "roof_fade_offer"]
+
+/** The templates offered to customers today. Soft-fade layouts lead the list; bordered ones follow. */
+export const ROOFING_PRO_AVAILABLE_IDS: readonly RoofingProTemplateId[] = [
+  ...SOFT_FADE_FIRST,
+  ...ROOFING_PRO_TEMPLATE_IDS.filter((id) => !SOFT_FADE_FIRST.includes(id)),
+].filter((id) => BEFORE_AFTER_ENABLED || id !== "roof_before_after")
 
 export function isRoofingProTemplate(value: string | undefined): value is RoofingProTemplateId {
   return Boolean(value && (ROOFING_PRO_TEMPLATE_IDS as readonly string[]).includes(value))
@@ -50,6 +54,14 @@ export interface RoofingProMeta {
 }
 
 export const ROOFING_PRO_META: Record<RoofingProTemplateId, RoofingProMeta> = {
+  roof_fade_offer: {
+    id: "roof_fade_offer",
+    name: "Photo fade, offer first",
+    summary: "One roof photograph that fades into navy, with a bright offer bar above the headline.",
+    pairing: "trade",
+    photoSlots: 1,
+    offerLed: false,
+  },
   roof_full_bleed: {
     id: "roof_full_bleed",
     name: "Full-bleed roof",

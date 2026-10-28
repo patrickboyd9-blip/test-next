@@ -40,6 +40,7 @@ export const TEMPLATE_META: Record<PostcardTemplateId, TemplateMeta> = {
   financing_first: { id: "financing_first", pairing: "signal", photoSlots: 1, label: "Payment offer beside a photograph" },
   local_pride: { id: "local_pride", pairing: "trade", photoSlots: 1, label: "Job photograph with a local headline" },
   commercial_restore: { id: "commercial_restore", pairing: "signal", photoSlots: 1, label: "Quiet commercial restoration" },
+  roof_fade_offer: { id: "roof_fade_offer", pairing: "trade", photoSlots: 1, label: ROOFING_PRO_META.roof_fade_offer.name },
   roof_full_bleed: { id: "roof_full_bleed", pairing: "trade", photoSlots: 1, label: ROOFING_PRO_META.roof_full_bleed.name },
   roof_split: { id: "roof_split", pairing: "trade", photoSlots: 1, label: ROOFING_PRO_META.roof_split.name },
   roof_coupon: { id: "roof_coupon", pairing: "signal", photoSlots: 1, label: ROOFING_PRO_META.roof_coupon.name },
