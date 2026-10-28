@@ -55,6 +55,8 @@ export interface BusinessInfo {
   phone?: string
   /** Single line, used when a Studio proof prints a return address. */
   address?: string
+  /** License line the business already stated. The card does not invent one. */
+  license?: string
   street?: string
   city?: string
   state?: string

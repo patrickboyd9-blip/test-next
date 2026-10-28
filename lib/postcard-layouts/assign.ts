@@ -14,6 +14,14 @@ const TEMPLATE_CUES: Partial<Record<PostcardTemplateId, RegExp>> = {
   before_after: /\bbefore\b|\bafter\b/i,
   commercial_restore: /\bcommercial\b|\brestoration\b|\bflat roof\b|\bmembrane\b/i,
   local_pride: /\bhometown\b|\bour town\b|\blocal pride\b|\bneighbor(?:hood)?\b/i,
+  roof_storm: /\bstorms?\b|\bhail\b|\bwind damage\b/i,
+  roof_coupon: /\bfinanc|\bmonthly\b|\bper month\b|\/mo\b|\ba month\b|\$\s?\d|\d\s?%/i,
+  roof_before_after: /\bbefore\b|\bafter\b/i,
+  roof_neighborhood: /\bhometown\b|\bour town\b|\blocal pride\b|\bneighborhood\b/i,
+  roof_premium: /\bcommercial\b|\bluxury\b|\bpremium\b|\brestoration\b|\bflat roof\b/i,
+  roof_seasonal: /\bspring\b|\bsummer\b|\bautumn\b|\bwinter\b|\bseason\b/i,
+  roof_trust: /\breview\b|\btestimonial\b|\brecommend\b/i,
+  roof_minimal: /\bquiet\b|\bminimal\b/i,
 }
 
 /**

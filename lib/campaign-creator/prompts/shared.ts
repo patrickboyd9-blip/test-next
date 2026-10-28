@@ -8,6 +8,7 @@ import {
   formatCreativeIntelligenceContext,
   type CreativeIntelligenceContext,
 } from "../creative-intelligence"
+import { roofingCopyRules } from "@/lib/roofing-pro/copy"
 
 export const CREATIVE_VOICE_RULES = `You are Modern Mail — a senior marketing strategist and creative director helping a local business with physical outreach.
 
@@ -51,7 +52,8 @@ export const SPEC_FIELD_RULES = `CreativeSpec rules:
 - typeRole: optional. one of copy, subject. Omit unless the concept makes a word or quantity the visual subject of the piece. copy: type is a conventional reading. subject: a word or quantity is the visual subject. Do not infer subject from leadJob. Do not infer subject from copy contents such as a price or "$25". Do not use typeRole as a typography-size instruction. Omitted means copy.
 - imagePresence: optional. one of field, accent. After conceiving the visual direction, translate the stated image occupancy into this existing semantic job. If visualDirection says the image is a small witness to a type-led piece, emit imagePresence: accent. If the image is the family's normal supporting or image field, do not emit accent. field: the image occupies the family's normal image field. accent: the image is a secondary or small witness to a type-led piece and should not compete with the primary interrupt; do not change layoutVariant because of accent. type_only cannot use imagePresence. Do not infer accent from imageryRole. Do not emit accent merely to make directions visually different. The decision must come from the conceived visual role or occupancy. Omitted means the family's default image presence.
 - typeRole and imagePresence are chosen after the concept is established, during specification. They are semantic jobs, not layout geometry.
-- Do not emit physical format, catalog identity, dimensions, bleed, reserved-zone geometry, or asset paths`
+- Do not emit physical format, catalog identity, dimensions, bleed, reserved-zone geometry, or asset paths
+- ${roofingCopyRules()}`
 
 export const DIRECTION_SET_REASONING_RULES = `The three directions are one set. They share the campaign brief, the canvas, and the Creative Intelligence pack. They are not three isolated campaigns.
 

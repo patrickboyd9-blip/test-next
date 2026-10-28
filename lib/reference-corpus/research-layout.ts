@@ -378,6 +378,16 @@ const TEMPLATE_PATTERN: Partial<Record<PostcardTemplateId, string>> = {
   hero_scrim: "offer",
   service_band: "offer",
   deadline_coupon: "offer",
+  roof_full_bleed: "offer",
+  roof_split: "local",
+  roof_coupon: "financing",
+  roof_before_after: "before_after",
+  roof_trust: "local",
+  roof_storm: "storm",
+  roof_neighborhood: "local",
+  roof_seasonal: "offer",
+  roof_minimal: "commercial",
+  roof_premium: "commercial",
 }
 
 /**

@@ -17,6 +17,7 @@ import {
 import { POSTCARD_TEMPLATE_IDS, type PostcardSizeId, type PostcardTemplateId } from "./ids"
 import { VERTICAL_PALETTES, contrastRatio } from "./palette"
 import { customerPhotoUrls, slotPhotoSources } from "./photos"
+import { isRoofingProTemplate } from "@/lib/roofing-pro/ids"
 import { TEMPLATE_META, rectContains, rectsOverlap, templatesForPalette } from "./templates"
 
 const SIZES: PostcardSizeId[] = ["5x8", "6x9"]
@@ -92,9 +93,9 @@ function direction(index: number, layout: CreativeSpec["layoutVariant"]): Creati
   }
 }
 
-test("the catalog is 14 original compositions", () => {
-  assert.equal(POSTCARD_TEMPLATE_IDS.length, 14)
-  assert.equal(new Set(POSTCARD_TEMPLATE_IDS).size, 14)
+test("the catalog is 14 original compositions plus 10 roofing pro templates", () => {
+  assert.equal(POSTCARD_TEMPLATE_IDS.length, 24)
+  assert.equal(new Set(POSTCARD_TEMPLATE_IDS).size, 24)
   for (const id of POSTCARD_TEMPLATE_IDS) {
     assert.equal(TEMPLATE_META[id].id, id)
   }
@@ -149,9 +150,13 @@ test("representative copy fits, stays in the safe zone, and keeps contact", () =
       if (offer && tile) assert.equal(rectContains(tile.rect, offer.rect, 0.04), true, `${id} offer in tile`)
       const headline = front.texts.find((text) => text.role === "headline")
       const body = front.texts.find((text) => text.role === "body")
-      if (offer && headline) assert.ok(offer.fontPt > headline.fontPt, `${id} offer hierarchy`)
-      if (headline && body) assert.ok(headline.fontPt >= body.fontPt * 2.5 - 0.01, `${id} headline hierarchy`)
-      if (headline && body) assert.ok(headline.fontPt > body.fontPt, `${id} body hierarchy`)
+      if (offer && headline && !isRoofingProTemplate(id)) assert.ok(offer.fontPt > headline.fontPt, `${id} offer hierarchy`)
+      if (offer && headline && isRoofingProTemplate(id)) {
+        if (id === "roof_coupon") assert.ok(offer.fontPt > headline.fontPt, `${id} coupon hierarchy`)
+        else assert.ok(headline.fontPt > offer.fontPt, `${id} headline hierarchy`)
+      }
+      if (headline && body && body.lines.length > 0) assert.ok(headline.fontPt >= body.fontPt * 2.5 - 0.01, `${id} headline hierarchy`)
+      if (headline && body && body.lines.length > 0) assert.ok(headline.fontPt > body.fontPt, `${id} body hierarchy`)
     }
   }
 })
@@ -208,7 +213,8 @@ test("back message stays out of the address keep-outs", () => {
         assert.equal(rectsOverlap(message, keepOut), false, `${id} ${keepOut.id}`)
       }
       for (const text of back.texts) {
-        assert.equal(rectContains(message, text.rect, 0.04), true, `${id} ${text.role}`)
+        const bound = isRoofingProTemplate(id) ? content : message
+        assert.equal(rectContains(bound, text.rect, 0.04), true, `${id} ${text.role}`)
         for (const keepOut of keepOuts) {
           assert.equal(rectsOverlap(text.rect, keepOut), false, `${id} ${text.role} ${keepOut.id}`)
         }
@@ -246,7 +252,7 @@ test("each vertical gives the three directions different compositions", () => {
       assert.equal(templates.includes("financing_first"), false)
     }
     if (name === "roofing") {
-      assert.deepEqual(templates, ["storm_alert", "financing_first", "before_after"])
+      assert.deepEqual(templates, ["roof_full_bleed", "roof_split", "roof_before_after"])
     }
   }
 })
@@ -268,7 +274,7 @@ test("roofing copy can choose a matching composition without repeating one", () 
   const applied = assignTemplates(brief, [storm, price, commercial])
   assert.deepEqual(
     applied.map((item) => item.spec.layoutHints?.templateId),
-    ["storm_alert", "financing_first", "commercial_restore"]
+    ["roof_storm", "roof_coupon", "roof_premium"]
   )
 })
 

@@ -32,7 +32,8 @@ import { ATTORNEY_AD_LABEL, attorneyAdMark } from "./attorney-compliance"
 import { scrubUnstatedAudience, scrubUnstatedName, statedNameFallback } from "./audience-facts"
 import { applyOutcomeHeadline, clientFactText, roleForDirection, selectPersuasion, type DirectionRole } from "./persuasion"
 import type { ImageryRole, LeadJob } from "@/lib/campaign-creator/types"
-import { briefHasNumeralOffer } from "./vertical"
+import { briefHasNumeralOffer, verticalForBrief } from "./vertical"
+import { assignTemplates } from "@/lib/postcard-layouts/assign"
 import { loadTasteCorpus, visionTasteStore, type VisionTaste } from "./vision-taste"
 import { referencePicksForCritique, requestComparativeCritique } from "./vision-critic"
 
@@ -497,9 +498,10 @@ function applyBoard(result: GenerateDirectionsResult, board: BoardResult, brief:
     }
   })
   const recommended = directions.find((direction) => direction.recommended) ?? directions[0]
+  const stamped = verticalForBrief(brief) === "roofing" ? assignTemplates(brief, directions) : directions
   return {
     ...result,
-    directions,
+    directions: stamped,
     recommendedDirectionId: recommended?.id ?? result.recommendedDirectionId,
     recommendation: result.recommendation
       ? { ...result.recommendation, directionId: recommended?.id ?? result.recommendation.directionId }

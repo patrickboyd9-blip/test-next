@@ -20,6 +20,16 @@ export const POSTCARD_TEMPLATE_IDS = [
   "financing_first",
   "local_pride",
   "commercial_restore",
+  "roof_full_bleed",
+  "roof_split",
+  "roof_before_after",
+  "roof_coupon",
+  "roof_trust",
+  "roof_storm",
+  "roof_neighborhood",
+  "roof_seasonal",
+  "roof_minimal",
+  "roof_premium",
 ] as const
 
 export type PostcardTemplateId = (typeof POSTCARD_TEMPLATE_IDS)[number]

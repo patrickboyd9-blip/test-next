@@ -28,6 +28,8 @@ import { isPostcardTemplate, type FontPairingId, type PostcardSizeId, type Postc
 import { trimInches } from "@/lib/postcard-layouts/templates"
 import type { GridCard } from "@/lib/design-intelligence/grid-composer"
 import { isDesignRationale } from "@/lib/design-intelligence/rationale"
+import { isRoofingProTemplate } from "@/lib/roofing-pro/ids"
+import { steepScrimOpacity } from "@/lib/roofing-pro/scrim"
 import type { FittedText, InchRect } from "@/lib/postcard-layouts/typefit"
 import {
   addressBackDisclaimerPlacement,
@@ -67,6 +69,8 @@ export async function renderTemplatedPostcardPdf(input: {
     qrPayload: input.copy.qrPayload,
     disclaimer: Boolean(input.copy.disclaimer),
     complianceMark: input.copy.complianceMark,
+    license: input.copy.license,
+    disclaimerText: input.copy.disclaimer,
     spec: input.copy,
   }
   const front = composePostcardFace({ ...planInput, face: "front" })
@@ -94,7 +98,8 @@ export async function renderTemplatedPostcardPdf(input: {
   markBoxes(backPage, spec)
 
   drawFront(frontPage, spec, front, images, input.copy.qrPayload, display, strong, text)
-  drawBack(backPage, spec, input.copy, back, display, strong, text)
+  if (isRoofingProTemplate(input.templateId)) drawPlanBack(backPage, spec, back, display, strong, text)
+  else drawBack(backPage, spec, input.copy, back, display, strong, text)
 
   const bytes = await doc.save({ useObjectStreams: false })
   assertTemplatedPage(bytes, spec)
@@ -111,12 +116,23 @@ export type PrintDesignSource =
   | { source: "template" }
   | { source: "plate" }
 
-/** Studio rationale wins. Otherwise a legacy template, otherwise a type plate. */
+/**
+ * A roofing pro template wins when the caller passes the card it composed.
+ * Otherwise the Studio rationale wins. Then a legacy template. Then a type plate.
+ */
 export function selectPrintDesign(input: {
   rationale: unknown
   studio: GridCard | null
   templateId?: string | null
 }): PrintDesignSource {
+  const studio = input.studio
+  if (
+    studio &&
+    isRoofingProTemplate(input.templateId ?? undefined) &&
+    studio.front.templateId === input.templateId
+  ) {
+    return { source: "studio", card: studio }
+  }
   if (isDesignRationale(input.rationale) && input.studio) return { source: "studio", card: input.studio }
   if (isPostcardTemplate(input.templateId ?? undefined)) return { source: "template" }
   return { source: "plate" }
@@ -323,12 +339,13 @@ function drawShape(page: PDFPage, spec: PostcardGeometry, plan: PostcardFacePlan
     shape.role === "paper" ||
     shape.role === "band" ||
     shape.role === "scrim" ||
+    shape.role === "solid-scrim" ||
     shape.role === "offer-tile"
       ? expandBleed(shape.rect, plan.size, spec.bleedInchesPerSide)
       : shape.rect
   const pdf = canvasRectToPdf(canvasRect(expanded, spec.bleedInchesPerSide), spec.artworkCanvasInches.heightInches)
-  if (shape.role === "scrim") {
-    drawScrim(page, pdf, plan.palette.scrim)
+  if (shape.role === "scrim" || shape.role === "solid-scrim") {
+    drawScrim(page, pdf, plan.palette.scrim, shape.role === "solid-scrim")
     return
   }
   if (shape.role === "starburst") {
@@ -465,7 +482,8 @@ function drawTrust(page: PDFPage, spec: PostcardGeometry, plan: PostcardFacePlan
 function drawScrim(
   page: PDFPage,
   rect: { xPoints: number; yPoints: number; widthPoints: number; heightPoints: number },
-  color: string
+  color: string,
+  steep = false
 ) {
   const steps = 16
   const band = rect.heightPoints / steps
@@ -478,7 +496,7 @@ function drawScrim(
       width: rect.widthPoints,
       height: band + 0.6,
       color: ink,
-      opacity: t * t * 0.94,
+      opacity: steep ? steepScrimOpacity(t) : t * t * 0.94,
     })
   }
 }

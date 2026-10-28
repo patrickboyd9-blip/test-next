@@ -1,4 +1,5 @@
 import { scrubUnstatedAudience, scrubUnstatedName, statedNameFallback } from "@/lib/design-intelligence/audience-facts"
+import { keepRoofingTemplate } from "@/lib/roofing-pro/preserve"
 import { isDesignRationale } from "@/lib/design-intelligence/rationale"
 
 import type {
@@ -404,13 +405,16 @@ export function finalizeRefinement(input: {
 
   const spec = applyResearchLayoutToSpec(
     input.brief,
-    repairMedicareAgentSpec(
-      input.brief,
-      repairSpecCustomerVoice(
-        repairSpecHeadline(
-          preserveCreativeSemantics(
-            currentSpec,
-            applyFaithfulness(input.brief, input.proposed.spec)
+    keepRoofingTemplate(
+      currentSpec,
+      repairMedicareAgentSpec(
+        input.brief,
+        repairSpecCustomerVoice(
+          repairSpecHeadline(
+            preserveCreativeSemantics(
+              currentSpec,
+              applyFaithfulness(input.brief, input.proposed.spec)
+            )
           )
         )
       )

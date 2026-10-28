@@ -62,10 +62,14 @@ export const ROOF_SLOT_BRIEFS: Record<RoofPhotoSlot, RoofSlotBrief> = {
   },
 }
 
+export function isBeforeAfterTemplate(templateId: string | undefined): boolean {
+  return templateId === "before_after" || templateId === "roof_before_after"
+}
+
 export function roofSlotForTemplate(
   templateId: string | undefined,
   photoSlot: "primary" | RoofPhotoSlot | undefined
 ): RoofPhotoSlot | null {
-  if (templateId !== "before_after") return null
+  if (!isBeforeAfterTemplate(templateId)) return null
   return photoSlot === "after" ? "after" : "before"
 }

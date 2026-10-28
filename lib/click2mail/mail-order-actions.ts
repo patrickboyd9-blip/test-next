@@ -10,6 +10,8 @@ import type { PostcardPrintCopy } from "@/lib/print-spec/render-campaign-postcar
 import { loadApprovedUploadPdf } from "@/lib/bring-your-own-design/print-source"
 import { renderPostcardPrintPdf } from "@/lib/print-spec/render-campaign-postcard-pdf"
 import { renderStudioDesignPdf, renderTemplatedPostcardPdf, selectPrintDesign } from "@/lib/print-spec/render-template-postcard-pdf"
+import { composeRoofingProCard } from "@/lib/roofing-pro/compose"
+import { isRoofingProTemplate } from "@/lib/roofing-pro/ids"
 import { composeGridCard } from "@/lib/design-intelligence/grid-composer"
 import { isDesignRationale } from "@/lib/design-intelligence/rationale"
 import { isPostcardTemplate, isVerticalPalette } from "@/lib/postcard-layouts/ids"
@@ -147,7 +149,19 @@ async function runOrder(
         const paletteId = campaign.mailPiece?.spec.layoutHints?.verticalPalette
         const copy = printCopy(campaign)
         const rationale = campaign.mailPiece?.spec.designRationale
-        const studio = isDesignRationale(rationale)
+        const size = rationale?.format?.trim === "6x9" ? "6x9" : "5x8"
+        const studio = isRoofingProTemplate(templateId)
+          ? composeRoofingProCard({
+              templateId,
+              size,
+              spec: campaign.mailPiece?.spec ?? {},
+              businessName: copy.businessName,
+              qrPayload: copy.qrPayload,
+              license: copy.license,
+              disclaimerText: copy.disclaimer,
+              complianceMark: copy.complianceMark,
+            })
+          : isDesignRationale(rationale)
           ? composeGridCard({
               rationale,
               spec: campaign.mailPiece?.spec ?? {},
@@ -235,7 +249,9 @@ function printCopy(campaign: Campaign): PostcardPrintCopy {
     website: contact.website ? displayWebsite(contact.website) : undefined,
     qrPayload: contact.qrPayload ?? undefined,
     returnLines: address ? [address] : [],
+    subheadline: spec.subheadline,
     disclaimer: medicareDisclaimerFor(campaign.brief) ?? undefined,
+    license: campaign.brief.businessInfo?.license,
     complianceMark: attorneyAdMark([
       campaign.brief.goal,
       campaign.brief.offer,
