@@ -1,20 +1,23 @@
 "use client"
 
-import { buildPostcard5x8PrintSpec } from "@/lib/print-spec/postcard-5x8-print-spec"
+import { geometryFor } from "@/lib/postcard-layouts/compose"
+import type { PostcardSizeId } from "@/lib/postcard-layouts/ids"
 
 interface ProofFrameProps {
   src: string
   mediaType: string
   face: "front" | "back"
   label: string
+  /** Defaults to 5×8, the upload flow's size. */
+  size?: PostcardSizeId
 }
 
 /**
  * The uploaded face, with the trim line and the address keep-out drawn on top.
  * Guides use the 5×8 print spec, the same geometry as the template.
  */
-export function ProofFrame({ src, mediaType, face, label }: ProofFrameProps) {
-  const spec = buildPostcard5x8PrintSpec()
+export function ProofFrame({ src, mediaType, face, label, size = "5x8" }: ProofFrameProps) {
+  const spec = geometryFor(size)
   const width = spec.artworkCanvasInches.widthInches
   const height = spec.artworkCanvasInches.heightInches
   const isPdf = mediaType === "application/pdf"

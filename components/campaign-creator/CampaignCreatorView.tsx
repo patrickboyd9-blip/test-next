@@ -45,6 +45,7 @@ import { Composer } from "./Composer"
 import { ConversationThread } from "./ConversationThread"
 import { PrintMailTestStage } from "./PrintMailTestStage"
 import { QuantityTrackingStage } from "./QuantityTrackingStage"
+import { AiPrintProof } from "./AiPrintProof"
 import { UploadDesign } from "./upload/UploadDesign"
 import { CreativeStudio } from "./studio/CreativeStudio"
 import { PersistentCreativeHeader } from "./studio/PersistentCreativeHeader"
@@ -345,6 +346,10 @@ export function CampaignCreatorView({
         <p className="mb-6 text-sm text-muted-foreground" role="status" aria-live="polite">
           Creative approved. Confirm the audience when you are ready. A staging print test is below.
         </p>
+      )}
+
+      {isCreativeApproved && !uploadPath && campaign.entry !== "upload" && Boolean(campaign.mailPiece) && (
+        <AiPrintProof campaign={campaign} />
       )}
 
       {isAtOrPastStatus(campaign.status, "creative_approved") && Boolean(campaign.mailPiece) && (

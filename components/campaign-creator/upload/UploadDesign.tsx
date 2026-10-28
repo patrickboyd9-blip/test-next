@@ -15,6 +15,7 @@ import type { Campaign, DesignFaceName, UploadedDesignIssue } from "@/lib/campai
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
+import { IssueLine } from "./IssueLine"
 import { ProofFrame } from "./ProofFrame"
 import { UploadBasicsForm } from "./UploadBasicsForm"
 
@@ -365,15 +366,5 @@ function FacePicker({
         onChange={(event) => onFile(event.target.files?.[0])}
       />
     </label>
-  )
-}
-
-function IssueLine({ issue }: { issue: UploadedDesignIssue }) {
-  const side = issue.face === "front" ? "Front" : "Back"
-  return (
-    <p className={issue.severity === "error" ? "text-sm leading-6 text-destructive" : "text-sm leading-6"}>
-      <span className="font-medium">{side}. </span>
-      {issue.message}
-    </p>
   )
 }
