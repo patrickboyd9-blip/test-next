@@ -60,13 +60,14 @@ export const TEMPLATE_META: Record<PostcardTemplateId, TemplateMeta> = {
  */
 const TEMPLATES_FOR: Record<string, readonly PostcardTemplateId[]> = {
   roofing: ROOFING_PRO_AVAILABLE_IDS,
-  plumbing: ["offer_starburst", "deadline_coupon", "hero_scrim", "neighbor_letter"],
-  hvac: ["service_band", "deadline_coupon", "hero_scrim", "color_block"],
+  // The two photo-fade compositions work for any trade; bordered layouts stay in every list.
+  plumbing: ["roof_full_bleed", "offer_starburst", "roof_fade_offer", "deadline_coupon", "neighbor_letter"],
+  hvac: ["roof_full_bleed", "service_band", "roof_fade_offer", "deadline_coupon", "color_block"],
   medicare: ["medicare_calm", "portrait_aside", "neighbor_letter"],
   real_estate: BEFORE_AFTER_ENABLED
-    ? ["hero_scrim", "portrait_aside", "before_after", "neighbor_letter"]
-    : ["hero_scrim", "portrait_aside", "neighbor_letter"],
-  general: ["hero_scrim", "color_block", "trust_proof", "service_band", "offer_starburst"],
+    ? ["roof_full_bleed", "portrait_aside", "roof_fade_offer", "before_after", "neighbor_letter"]
+    : ["roof_full_bleed", "portrait_aside", "roof_fade_offer", "neighbor_letter"],
+  general: ["roof_full_bleed", "color_block", "roof_fade_offer", "trust_proof", "service_band", "offer_starburst"],
 }
 
 export function templatesForPalette(palette: string): readonly PostcardTemplateId[] {

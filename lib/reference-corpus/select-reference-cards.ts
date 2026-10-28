@@ -17,7 +17,7 @@ const VERTICAL_PATTERNS: Record<ReferenceCardVertical, readonly RegExp[]> = {
   hvac: [/\bhvac\b/i, /\bair condition(?:ing|er)s?\b/i, /\bheating and (?:cooling|air)\b/i, /\bheating & air\b/i, /\bfurnace\b/i, /\ba\s*\/\s*c\b/i, /\bac\b/i],
   plumbing: [/\bplumb(?:er|ing|ers)?\b/i, /\bdrains?\b/i, /\bwater heaters?\b/i],
   electrical: [/\belectricians?\b/i, /\belectrical\b/i],
-  roofing: [/\broof(?:er|ing|s)?\b/i],
+  roofing: [/\broof(?:er|ing|s)?\b/i, /\bhail(?:storms?)?\b|\bstorm (?:damage|restoration)\b|\bstorm\b[^.]*\brestoration\b/i],
   pest: [/\bpest(?: control)?\b/i, /\btermites?\b/i, /\bmosquito(?:es)?\b/i],
   landscaping: [/\blandscap(?:e|ing|er)s?\b/i, /\blawn\b/i],
   exterior_cleaning: [/\bpressure wash(?:ing)?\b/i, /\bsoft wash(?:ing)?\b/i, /\bpower wash(?:ing)?\b/i],

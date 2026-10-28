@@ -599,7 +599,8 @@ function applyBoard(result: GenerateDirectionsResult, board: BoardResult, brief:
     }
   })
   const recommended = directions.find((direction) => direction.recommended) ?? directions[0]
-  const stamped = verticalForBrief(brief) === "roofing" ? assignTemplates(brief, directions) : directions
+  // Every trade but Medicare gets a template set that leans toward the photo fade.
+  const stamped = verticalForBrief(brief) !== "medicare_insurance" ? assignTemplates(brief, directions) : directions
   return {
     ...result,
     directions: stamped,

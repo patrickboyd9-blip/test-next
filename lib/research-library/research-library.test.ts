@@ -324,7 +324,7 @@ test("different retrieved evidence changes the headline, the offer framing, and 
   assert.notEqual(roof.templateId, auto.templateId)
   assert.equal(auto.templateId, "neighbor_letter")
   assert.equal(roof.offerProminent, true)
-  assert.equal(hvac.templateId, "hero_scrim")
+  assert.equal(hvac.templateId, "roof_full_bleed")
   assert.equal(hvac.offerProminent, false)
   assert.equal(auto.offerProminent, false)
   assert.equal(roof.offer, "Free roof inspection")

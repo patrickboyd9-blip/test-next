@@ -64,7 +64,7 @@ export const ROOFING_PRO_META: Record<RoofingProTemplateId, RoofingProMeta> = {
   },
   roof_full_bleed: {
     id: "roof_full_bleed",
-    name: "Full-bleed roof",
+    name: "Full-bleed photo",
     summary: "One roof photograph, a dark gradient, then the headline and a smaller offer.",
     pairing: "trade",
     photoSlots: 1,

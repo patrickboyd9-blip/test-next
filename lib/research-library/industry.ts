@@ -250,7 +250,8 @@ function classify(value: string, mode: ClassifyMode): string {
   if (/\bpest\b|\btermite\b|\bmosquito\b|\btick\b|\brodents?\b|\bmice\b|\bmouse\b|\brats\b|\brodent[ -]?proof|\bexterminat/.test(text)) return "pest-control"
   if (landscapingSignal(text, mode)) return "landscaping"
   if (/\bsolar\b/.test(text)) return "solar"
-  if (/\broof\b|\broofs\b|\broofing\b|\broofer\b|\bshingles?\b/.test(text)) return "roofing"
+  // Storm and hail restoration is roofing work.
+  if (/\broof\b|\broofs\b|\broofing\b|\broofer\b|\bshingles?\b|\bhail\b|\bhailstorms?\b|\bstorm (?:damage|restoration)\b|\bstorm\b[^.]*\brestoration\b/.test(text)) return "roofing"
   if (dentalSignal(text, mode)) return "dental"
   if (/\bmed spa\b|\bmedspa\b|\bchiro\b|\bbotox\b|\baesthetic\b/.test(text)) return "med-spa-chiro"
   if (vetSignal(text, mode)) return "vet-pet"
