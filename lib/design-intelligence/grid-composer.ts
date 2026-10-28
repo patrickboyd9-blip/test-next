@@ -501,11 +501,31 @@ function integratedGeometry(trim: { w: number; h: number }): {
   }
 }
 
-function splitHeadline(headline: string): [string, string] {
-  const words = headline.split(/\s+/).filter(Boolean)
-  if (words.length < 2) return [headline, ""]
+function splitHeadline(headline: string, phraseBoundary = false): [string, string] {
+  const cleaned = headline.replace(/\s+/g, " ").trim()
+  const words = cleaned.split(/\s+/).filter(Boolean)
+  if (phraseBoundary) {
+    const atBefore = cleaned.match(/^(.*?)\s+(before\b.+)$/i)
+    if (atBefore) {
+      const left = atBefore[1]!.trim()
+      const right = atBefore[2]!.trim()
+      if (left.split(/\s+/).length >= 2 && right.split(/\s+/).length >= 2) return [left, right]
+    }
+    if (words.length < 4) return [cleaned, ""]
+    let mid = Math.ceil(words.length / 2)
+    while (mid < words.length - 1 && /^(?:the|a|an|of|to|and|or|for|before)$/i.test(words[mid] ?? "")) mid += 1
+    if (mid < 2 || mid > words.length - 2) return [cleaned, ""]
+    return [words.slice(0, mid).join(" "), words.slice(mid).join(" ")]
+  }
+  if (words.length < 2) return [cleaned, ""]
   const mid = Math.ceil(words.length / 2)
   return [words.slice(0, mid).join(" "), words.slice(mid).join(" ")]
+}
+
+function maxPtForFullLine(text: string, width: number, em: number): number {
+  const chars = Math.max(text.replace(/\s+/g, " ").trim().length, 1)
+  if (width <= 0 || em <= 0) return 16
+  return Math.floor(((width * 72) / (chars * em)) * 2) / 2
 }
 
 /**
@@ -529,7 +549,7 @@ function composeOfferStrip(
   const spoken = spokenCopy(input)
   const offerParts = { numeral: spoken.numeral, rest: spoken.rest }
   const headline = spoken.headline
-  const [firstLine, secondLine] = splitHeadline(headline)
+  const [firstLine, secondLine] = splitHeadline(headline, input.rationale.vertical === "hvac")
   const column: InchRect = {
     x: SAFE_IN,
     y: SAFE_IN,
@@ -541,26 +561,29 @@ function composeOfferStrip(
   const headlinePt = roundPt(Math.max(bodyPt * 2.5, Math.min(sizes.headline, trim.h >= 6 ? 34 : 30)))
   const accent = input.rationale.palette.accent_hex
   const accentOnPaper = contrastRatio(accent, paper) >= 4.5 ? accent : ink
+  const name = clean(input.businessName)
+  const hvacBand = input.rationale.vertical === "hvac"
+  const displayEm = PAIRING_MEASURE[pairing].display
+  const secondPt = secondLine
+    ? roundPt(Math.max(15, Math.min(headlinePt, maxPtForFullLine(secondLine, column.w, displayEm))))
+    : headlinePt
   const blocks: StackBlock[] = [
-    { text: firstLine, role: "headline", pt: headlinePt, floor: bodyPt * 2.5, color: ink },
+    { text: firstLine, role: "headline", pt: hvacBand && secondLine ? roundPt(Math.min(headlinePt, Math.max(secondPt, 22))) : headlinePt, floor: hvacBand && secondLine ? 18 : bodyPt * 2.5, color: ink },
   ]
   if (secondLine) {
     blocks.push({
       text: secondLine,
       role: "headline",
-      pt: headlinePt,
-      floor: bodyPt * 2.5,
+      pt: hvacBand ? secondPt : headlinePt,
+      floor: hvacBand ? 15 : bodyPt * 2.5,
       color: accentOnPaper === ink ? ink : accentOnPaper,
     })
   }
-  const name = clean(input.businessName)
-  const hvacBand = input.rationale.vertical === "hvac"
   const reserveName = hvacBand && Boolean(name) && !headline.toLowerCase().includes(name.toLowerCase())
-  const nameH = reserveName ? 0.52 : 0
   const stacked = placeStack({
     blocks,
     cursor: column.y,
-    bottom: reserveName ? round2(column.y + column.h - nameH - 0.08) : column.y + column.h * 0.72,
+    bottom: column.y + column.h * (hvacBand ? 0.92 : 0.72),
     content: column,
     pairing,
     align: "left",
@@ -570,20 +593,22 @@ function composeOfferStrip(
   if (reserveName && name) {
     const fitted = shrinkToInk(fitText({
       text: name,
-      rect: { x: column.x, y: round2(column.y + column.h - nameH), w: column.w, h: nameH },
+      rect: { x: column.x, y: round2(cursor + 0.08), w: column.w, h: 0.5 },
       role: "label",
       pairing,
       color: ink,
       minPt: 11,
       maxPt: 15,
     }), pairing)
-    if (fitted.text) {
-      const targetBottom = round2(column.y + column.h)
-      const wordmark = {
-        ...fitted,
-        rect: { ...fitted.rect, y: round2(targetBottom - fitted.rect.h) },
+    if (fitted.text) texts.push(fitted)
+    const top = Math.min(...texts.map((text) => text.rect.y))
+    const bottom = Math.max(...texts.map((text) => text.rect.y + text.rect.h))
+    const shift = round2(column.y + Math.max(0, (column.h - (bottom - top)) / 2) - top)
+    if (shift > 0.04) {
+      for (let index = 0; index < texts.length; index += 1) {
+        const text = texts[index]!
+        texts[index] = { ...text, rect: { ...text.rect, y: round2(text.rect.y + shift) } }
       }
-      texts.push(wordmark)
     }
   } else if (name && !nameAlreadyOnCard(texts, name)) {
     const wordmark = shrinkToInk(fitText({

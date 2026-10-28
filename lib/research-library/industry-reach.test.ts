@@ -464,6 +464,8 @@ test("a long note needs two signals or a title field before it takes an industry
   assert.equal(resolveIndustry({ notes: `${filler} the contractor came to the home.` }), "none")
   assert.equal(resolveIndustry({ notes: `${filler} medicare and a health plan.` }), "none")
   assert.equal(resolveIndustry({ notes: `${filler} the gift shop and the store.` }), "none")
+  assert.equal(resolveIndustry({ notes: `${filler} spring apparel.` }), "none")
+  assert.equal(resolveIndustry({ notes: `${filler} the brand catalog.` }), "none")
   assert.equal(resolveIndustry({ notes: `${filler} a window.` }), "none")
   assert.equal(resolveIndustry({ notes: `${filler} the yard.` }), "none")
   assert.equal(resolveIndustry({ notes: `${filler} medicare was named in a footer.` }), "none")
@@ -532,12 +534,63 @@ test("photo notes are not copy, and the missed trades land on a gold industry", 
   assert.equal(byId.get("PM-091")?.referenceOnly, false)
   assert.equal(byId.get("PM-091")?.industry, "outdoor-living")
 
+  const junk = indexSourceFiles([
+    {
+      path: "assets/physical/PM-057/notes.md",
+      ref: "c3po",
+      text: "PM-057\nDairy Queen coupon.\nPrinted offer: $4 off any DQ Cake or Blizzard Cake, 8 inch round or larger. Expires 12/31/2026. PLU 22362 is printed. The photograph is upright.\n",
+    },
+    {
+      path: "assets/physical/PM-053/notes.md",
+      ref: "c3po",
+      text: "PM-053\nThe owner labeled this photograph as the back.\n",
+    },
+    {
+      path: "assets/physical/PM-018/notes.md",
+      ref: "c3po",
+      text: "PM-018 pending_review front front 1 20 4 physical_photo\n",
+    },
+    {
+      path: "assets/physical/PM-064/notes.md",
+      ref: "c3po",
+      text: "PM-064\nChannel: mailer.\n",
+    },
+    {
+      path: "assets/physical/PM-002/notes.md",
+      ref: "c3po",
+      text: "Different artwork from PM-002. provisional Seq 26 is the staged back.\n",
+    },
+    {
+      path: "assets/physical/PM-055/notes.md",
+      ref: "c3po",
+      text: "PM-055\nThe photograph is upside down in the frame.\n",
+    },
+  ])
+  const junkById = new Map(junk.entries.map((entry) => [entry.id, entry]))
+  assert.match(junkById.get("PM-057")?.offers.join(" ") ?? "", /\$4 off/)
+  assert.doesNotMatch(`${junkById.get("PM-057")?.offers.join(" ")} ${junkById.get("PM-057")?.headlines.join(" ")}`, /photograph|upright|PLU/i)
+  for (const id of ["PM-053", "PM-018", "PM-064", "PM-002", "PM-055"]) {
+    assert.equal(junkById.get(id)?.referenceOnly, true, id)
+    assert.equal(junkById.get(id)?.headlines.length, 0, id)
+    assert.equal(junkById.get(id)?.offers.length, 0, id)
+  }
+
   const cases: ReadonlyArray<readonly [string, string]> = [
     ["a screen enclosure and a paver patio", "outdoor-living"],
     ["hardscape with a fire pit", "outdoor-living"],
     ["cash for gold from a local buyer", "precious-metals"],
     ["spring apparel and a sneaker catalog", "consumer-products"],
     ["an outfitter jacket and boots", "consumer-products"],
+    ["SPF motorized screens and awnings piece.", "outdoor-living"],
+    ["Swimming-pool and landscape piece with a sandiegooutdoor website.", "outdoor-living"],
+    ["Western Outdoor design piece.", "outdoor-living"],
+    ["CVS Photo piece.", "retail-grand-openings"],
+    ["Brilliant Earth jewelry postcard. Printed title: Vintage Inspired.", "retail-grand-openings"],
+    ["White Glove Guys piece.", "moving-storage"],
+    ["Bellami Hair Flex Weft postcard. World's number 1 Hair Extension Brand.", "consumer-products"],
+    ["Grand opening of a clothing boutique.", "retail-grand-openings"],
+    ["Sneaker sale event at the mall.", "retail-grand-openings"],
+    ["An apparel store now open.", "retail-grand-openings"],
     ["a window company for the front of the house", "windows-gutters-siding"],
     ["storm windows", "windows-gutters-siding"],
     ["ribbon cutting at the new boutique", "retail-grand-openings"],

@@ -1,6 +1,6 @@
 import { isForbiddenResearchPath } from "@/lib/design-intelligence/images"
 
-import { NONE_INDUSTRY, normalizeIndustry, researchEmotion, researchOfferType, resolveIndustry, sceneNotePattern } from "./industry"
+import { NONE_INDUSTRY, copyRejectPattern, normalizeIndustry, researchEmotion, researchOfferType, resolveIndustry } from "./industry"
 import type { CoverageRow, ResearchEntry, ResearchLayout, ResearchOrigin } from "./types"
 
 export interface SourceFile {
@@ -693,9 +693,9 @@ function labeledLine(text: string, key: string): string | undefined {
   return cut?.trim() || undefined
 }
 
-const SCENE_NOTE = new RegExp(`\\b(?:${sceneNotePattern()})\\b`, "i")
+const COPY_REJECT = new RegExp(copyRejectPattern(), "i")
 
-/** A camera or table note, not a line that was printed for the customer. */
+/** A camera, catalogue, or metadata sentence, not a line printed for the customer. */
 function isPhotoNote(line: string): boolean {
   if (/\b(?:left|right|top|bottom|outer|inner)\s+edge\b/i.test(line)) return true
   if (/\bmeets the (?:photo )?frame\b/i.test(line)) return true
@@ -705,8 +705,29 @@ function isPhotoNote(line: string): boolean {
   return false
 }
 
+function isJunkCopy(line: string): boolean {
+  const text = line.replace(/\s+/g, " ").trim()
+  if (!text) return true
+  if (COPY_REJECT.test(text) || isPhotoNote(text)) return true
+  if (/\b[a-z]+_[a-z0-9_]+\b/.test(text) && (text.match(/\b[a-z]+_[a-z0-9_]+\b/g) || []).length >= 2) return true
+  if (/^[A-Za-z][\w .-]{0,24}:\s+\S/.test(text) && !/[$%]|\bfree\b/i.test(text)) return true
+  return false
+}
+
+/** Keep the printed offer and drop a photo note that was appended on the same line. */
+function stripCopy(value: string | undefined): string {
+  const text = value?.replace(/\s+/g, " ").trim() ?? ""
+  if (!text) return ""
+  const kept: string[] = []
+  for (const sentence of text.split(/(?<=[.!])\s+/)) {
+    if (isJunkCopy(sentence)) break
+    kept.push(sentence)
+  }
+  return kept.join(" ").trim()
+}
+
 function isSceneNote(line: string): boolean {
-  return isPhotoNote(line) || SCENE_NOTE.test(line)
+  return isJunkCopy(line)
 }
 
 function businessNameFrom(notes: string): string {
@@ -743,13 +764,13 @@ export function referenceCopy(input: {
   notes: string
 }): { headlines: string[]; offers: string[]; photoStyle?: string; referenceOnly: boolean } {
   const business = businessNameFrom(input.notes)
-  const explicitHeadline = input.headlines.map((line) => line.trim()).find((line) => line && !isPhotoNote(line))
-  const explicitOffer = input.offers.map((line) => line.trim()).find((line) => line && !isPhotoNote(line))
-  const printedHeadline = labeledLine(input.notes, "headline")
-  const printedOffer = labeledLine(input.notes, "offer") || pricedLine(input.notes)
+  const explicitHeadline = input.headlines.map((line) => stripCopy(line)).find((line) => line.length > 0) ?? ""
+  const explicitOffer = input.offers.map((line) => stripCopy(line)).find((line) => line.length > 0) ?? ""
+  const printedHeadline = stripCopy(labeledLine(input.notes, "headline") || labeledLine(input.notes, "title"))
+  const printedOffer = stripCopy(labeledLine(input.notes, "offer") || pricedLine(input.notes))
   const quoted = quotedLines(input.notes)
-  const headlineSource = explicitHeadline || (printedHeadline && !isPhotoNote(printedHeadline) ? printedHeadline : "") || quoted[0] || ""
-  const offerSource = explicitOffer || (printedOffer && !isPhotoNote(printedOffer) ? printedOffer : "") || ""
+  const headlineSource = explicitHeadline || printedHeadline || quoted[0] || ""
+  const offerSource = explicitOffer || printedOffer || ""
   const headlines = unique(headlineSource ? [clip(headlineSource, 120)] : [])
   const offers = unique(offerSource ? [clip(offerSource, 120)] : [])
   const marketing = descriptiveLines(input.notes).filter((line) => isMarketingLine(line, business) && line !== headlines[0] && line !== offers[0])
@@ -773,16 +794,18 @@ function descriptiveLines(text: string): string[] {
     .map((line) => line.replace(/^[-*#\s]+/, "").replace(/\*\*/g, "").trim())
     .map((line) => line.replace(/^(?:printed\s+)?(?:headline|offer|industry|vertical|company|advertiser|notes?|provenance)\s*[:\-—–]\s*/i, "").trim())
     .filter((line) => line.length >= 12 && line.length <= 180)
-    .filter((line) => !/^(?:pm|mmr|gold)-\d+$/i.test(line))
-    .filter((line) => !/(?:^|\s)(?:pm|mmr|gold)-\d+\b/i.test(line) || /[a-z]{4,}/i.test(line.replace(/(?:pm|mmr|gold)-\d+/gi, "")))
+    .filter((line) => !isJunkCopy(line))
     .filter((line) => !/\.(?:jpe?g|png|webp)\b|assets\/physical\//i.test(line))
     .filter((line) => !/^(?:unknown|n\/a|na|none|not stated)$/i.test(line))
   return unique(lines)
 }
 
 function pricedLine(text: string): string | undefined {
-  const line = text.split(/\n+/).map((item) => item.trim()).find((item) => item.length > 0 && item.length < 140 && /(\$\s?\d|\bfree\b)/i.test(item))
-  return line?.replace(/^[-*]\s*/, "")
+  const line = text.split(/\n+/).map((item) => item.trim()).find((item) => {
+    const kept = stripCopy(item.replace(/^[-*]\s*/, ""))
+    return kept.length > 0 && kept.length < 180 && /(\$\s?\d|\bfree\b|\d\s*%)/i.test(kept)
+  })
+  return line ? stripCopy(line.replace(/^[-*]\s*/, "")) : undefined
 }
 
 function collectNoteText(value: unknown, depth = 0): string {

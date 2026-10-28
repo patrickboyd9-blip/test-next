@@ -83,6 +83,11 @@ export function sceneNotePattern(): string {
   return "photos?|photographs?|frames?|edges?|lighting|angles?|cameras?|crops?|cropped|glare|tables?|hands?|scans?|scanned"
 }
 
+/** Catalogue and camera sentences. A change here rebuilds a saved index. */
+export function copyRejectPattern(): string {
+  return "photograph(?:ed)?|\\blabeled\\b|upside down|\\bis upright\\b|\\bpm-\\d+\\b|\\bseq\\b|provisional|different artwork|channel\\s*:\\s*mailer|pending_review|physical_photo|\\bplu\\b"
+}
+
 /**
  * The live text of the rules. A keyword edit changes this string, so the
  * saved index rebuilds without a hand-typed version bump. No filesystem
@@ -100,6 +105,7 @@ export function taggerSource(): string {
     restaurantSignal,
     windowSignal,
     sceneNotePattern,
+    copyRejectPattern,
   ].map((fn) => fn.toString()).join("\n")
 }
 
@@ -252,7 +258,7 @@ function classify(value: string, mode: ClassifyMode): string {
   if (/\bgym\b|\bfitness\b|\byoga\b/.test(text)) return "gyms-fitness"
   if (cleaningSignal(text, mode)) return "cleaning-pressure-washing"
   if (/\bjunk\b|\bhaul away\b|\bhauling\b/.test(text)) return "junk-removal"
-  if (/\bmovers?\b|\bmoving compan|\bmoving services?\b|\bstorage units?\b|\bself storage\b|\bvan lines?\b/.test(text)) return "moving-storage"
+  if (/\bmovers?\b|\bmoving compan|\bmoving services?\b|\bstorage units?\b|\bself storage\b|\bvan lines?\b|\bwhite glove\b/.test(text)) return "moving-storage"
   if (/\bmoving\b/.test(text) && /\b(?:truck|van|belongings|relocat|mover)\b/.test(text)) return "moving-storage"
   if (/\bhome security\b|\balarm\b|\bsecurity system\b/.test(text)) return "home-security"
   if (remodelingSignal(text)) return "home-remodeling"
@@ -263,8 +269,8 @@ function classify(value: string, mode: ClassifyMode): string {
   if (/\bchurch\b|\bcongregation\b|\bnonprofit\b|\bcommunity center\b|\bsymphon|\borchestras?\b|\bphilharmonic\b/.test(text)) return "churches-community"
   if (/\btutors?\b|\btutoring\b|\bchildcare\b|\bchild care\b|\bdaycare\b|\bday care\b|\bpreschool\b|\bafter[- ]school\b|\bhomework\b|\blearning centers?\b|\btest prep\b|\bsat prep\b|\bact prep\b|\bthe sat\b|\bkumon\b|\bmathnasium\b|\bsummer camps?\b|\bday camps?\b/.test(text)) return "tutoring-childcare"
   if (autoSignal(text, mode)) return "auto"
-  if (consumerSignal(text, mode)) return "consumer-products"
   if (retailSignal(text, mode)) return "retail-grand-openings"
+  if (consumerSignal(text, mode)) return "consumer-products"
   return NONE_INDUSTRY
 }
 
@@ -317,9 +323,39 @@ function mortgageSignal(text: string, mode: ClassifyMode): boolean {
   return false
 }
 
+const PRODUCT_SIGNALS: readonly RegExp[] = [
+  /\bshoes?\b/,
+  /\bclothing\b/,
+  /\bapparel\b/,
+  /\bouterwear\b/,
+  /\bsocks?\b/,
+  /\bhiking gear\b/,
+  /\boutdoor gear\b/,
+  /\bboots?\b/,
+  /\bpants\b/,
+  /\bfootwear\b/,
+  /\bsneakers?\b/,
+  /\bjackets?\b/,
+  /\boutfitters?\b/,
+  /\bhair extensions?\b/,
+  /\bwefts?\b/,
+  /\bbellami\b/,
+  /\bcatalogs?\b/,
+]
+
+function productHits(text: string): number {
+  return signalHits(text, PRODUCT_SIGNALS)
+}
+
+/** A store, opening, or mall is retail even when it also sells clothes. */
+function retailEvent(text: string): boolean {
+  return /\bgrand openings?\b|\bribbon cuttings?\b|\bnow open\b|\bstorewide\b|\bsale events?\b|\bboutiques?\b|\bmalls?\b|\bshopping centers?\b|\bdepartment stores?\b|\bcvs\b|\bjewelry\b|\bbrilliant earth\b/.test(text)
+}
+
 function retailSignal(text: string, mode: ClassifyMode): boolean {
-  if (/\bgrand openings?\b|\bribbon cuttings?\b|\bnow open\b|\bstorewide\b/.test(text)) return true
+  if (retailEvent(text)) return true
   if (/\b(?:retail|department|outlet|boutique) stores?\b/.test(text)) return true
+  if (/\bstores?\b/.test(text) && productHits(text) > 0) return true
   return notesAssign(text, mode, /$^/, [
     /\bgrand openings?\b/,
     /\bretail\b/,
@@ -329,6 +365,7 @@ function retailSignal(text: string, mode: ClassifyMode): boolean {
     /\bshopping centers?\b/,
     /\bmalls?\b/,
     /\bribbon cuttings?\b/,
+    /\bsale events?\b/,
   ])
 }
 
@@ -339,22 +376,9 @@ function landscapingSignal(text: string, mode: ClassifyMode): boolean {
 }
 
 function consumerSignal(text: string, mode: ClassifyMode): boolean {
-  if (/\b(?:apparel|clothing|footwear|sneakers?|outfitters?|hiking gear)\b/.test(text)) return true
-  return notesAssign(text, mode, /$^/, [
-    /\bshoes?\b/,
-    /\bshirts?\b/,
-    /\bjackets?\b/,
-    /\bsuits?\b/,
-    /\bsocks?\b/,
-    /\bhiking gear\b/,
-    /\bscarves?\b|\bscarfs?\b/,
-    /\bboots?\b/,
-    /\bpants\b/,
-    /\bcatalogs?\b/,
-    /\bcollections?\b/,
-    /\bbrands?\b/,
-    /\bgear\b/,
-  ])
+  if (retailEvent(text) || (/\bstores?\b/.test(text) && productHits(text) > 0)) return false
+  if (mode === "label") return productHits(text) > 0
+  return productHits(text) >= 2
 }
 
 function hairSalonSignal(text: string): boolean {
@@ -363,7 +387,7 @@ function hairSalonSignal(text: string): boolean {
 }
 
 function outdoorSignal(text: string): boolean {
-  return /\boutdoor living\b|\boutdoor kitchens?\b|\boutdoor rooms?\b|\bpergolas?\b|\bpatios?\b|\bpavers?\b|\bdecks?\b|\bhardscapes?\b|\bfire pits?\b|\bscreen enclosures?\b|\bpool cages?\b|\bsunrooms?\b|\bgazebos?\b|\blanais?\b|\bscreened porches?\b|\bcabanas?\b/.test(text)
+  return /\boutdoor living\b|\boutdoor kitchens?\b|\boutdoor rooms?\b|\boutdoor design\b|\bpergolas?\b|\bpatios?\b|\bpavers?\b|\bdecks?\b|\bhardscapes?\b|\bfire pits?\b|\bscreen enclosures?\b|\bpool cages?\b|\bsunrooms?\b|\bgazebos?\b|\blanais?\b|\bscreened porches?\b|\bcabanas?\b|\bawnings?\b|\bmotorized screens?\b|\bswimming pools?\b/.test(text)
 }
 
 function remodelingSignal(text: string): boolean {

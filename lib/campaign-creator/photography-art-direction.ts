@@ -482,17 +482,20 @@ export function buildPhotographyArtDirection(input: {
   const weak = isWeakVisualDirection(conceived)
   const genericJob = /finished result of the job|the problem itself|from this business|one local person/i.test(conceived)
   const portrait = trade.startsWith("medicare") ? uploadedAgentPortrait(input.campaign) : undefined
+  const acUnit = trade === "hvac" && acUnitOffer(input.campaign)
   const replace =
     weak ||
     badSubject(conceived, trade) ||
     offIndustry(conceived, trade) ||
     genericJob ||
-    (trade === "hvac" && !hvacDepiction(conceived))
+    (trade === "hvac" && !hvacDepiction(conceived, acUnit)) ||
+    (acUnit && /\b(vents?|ducts?|grilles?|duct cleaning)\b/i.test(conceived))
+  const scenes = hvacScenes(bank[input.imageryRole], trade, acUnit)
   const subject =
     portrait && input.imageryRole === "crew"
       ? `The uploaded agent photograph: ${portrait}. A friendly headshot, eyes to the camera, natural color, capable and local. Not a stock model and not a government portrait.`
       : replace
-        ? pick(bank[input.imageryRole], `${input.variationKey ?? "direction"}:${input.leadJob}`)
+        ? pick(scenes, `${input.variationKey ?? "direction"}:${input.leadJob}`)
         : conceived
 
   const roofing = trade === "roofing"
@@ -519,6 +522,9 @@ export function buildPhotographyArtDirection(input: {
   }
   if (trade === "hvac") {
     art.refuse = `${art.refuse} No gutters, window trim, siding, termite treatment, or someone painting a window. The photograph is heating and air equipment.`
+    if (acUnit) {
+      art.refuse = `${art.refuse} No ceiling vent, return grille, or duct cleaning. Show an outdoor condenser or a technician servicing the AC unit.`
+    }
   }
   return art
 }
@@ -585,7 +591,22 @@ function offIndustry(value: string, trade: string): boolean {
   return found !== "none" && found !== expected
 }
 
-function hvacDepiction(value: string): boolean {
+function acUnitOffer(campaign: CampaignBrief | undefined): boolean {
+  const text = `${campaign?.offer ?? ""} ${campaign?.goal ?? ""}`
+  if (/\bducts?\b/i.test(text) && !/\b(?:\bac\b|a\/c|air condition)/i.test(text)) return false
+  return /\b(?:\bac\b|a\/c|air condition)/i.test(text)
+}
+
+function hvacScenes(scenes: readonly string[], trade: string, acUnit: boolean): readonly string[] {
+  if (trade !== "hvac" || !acUnit) return scenes
+  const condensers = scenes.filter((scene) => /\bcondensers?\b/i.test(scene) && !/\b(vents?|ducts?|grilles?|duct cleaning)\b/i.test(scene))
+  return condensers.length > 0
+    ? condensers
+    : ["An outdoor condenser beside the house, a technician at the open service panel, coils and copper visible, working daylight."]
+}
+
+function hvacDepiction(value: string, acUnit = false): boolean {
+  if (acUnit && /\b(vents?|ducts?|grilles?|duct cleaning)\b/i.test(value)) return false
   return /\b(hvac|condensers?|furnaces?|thermostats?|air condition|ducts?|vents?|filters?|coils?|\bac\b)\b/i.test(value)
 }
 

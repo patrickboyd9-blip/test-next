@@ -87,8 +87,22 @@ test("every HVAC front shows the phone and the website, and the photo is not a c
   const lowest = Math.max(phone.y + phone.h, website.y + website.h)
   assert.ok(bandBottom - lowest <= 0.4, `empty band tail ${bandBottom - lowest}`)
   const wordmark = threat.card.front.texts.find((text) => text.role === "label" && /coastal comfort/i.test(text.text))
+  const threatHeadlines = threat.card.front.texts.filter((text) => text.role === "headline")
   assert.ok(wordmark)
-  assert.ok(band.rect.y - (wordmark.rect.y + wordmark.rect.h) <= 0.2, "dead space under the business name")
+  assert.ok(threatHeadlines.length >= 1)
+  const headlineBottom = Math.max(...threatHeadlines.map((text) => text.rect.y + text.rect.h))
+  assert.ok(wordmark.rect.y - headlineBottom <= 0.28, "gap between the headline and the business name")
+  const plateTop = threat.card.front.shapes.find((shape) => shape.role === "calm-field")?.rect.y ?? 0
+  const spaceAbove = Math.min(...threatHeadlines.map((text) => text.rect.y)) - plateTop
+  const spaceBelow = band.rect.y - (wordmark.rect.y + wordmark.rect.h)
+  assert.ok(Math.abs(spaceAbove - spaceBelow) <= 0.55, `cream panel gap above ${spaceAbove} below ${spaceBelow}`)
+  for (const text of threatHeadlines) {
+    for (const line of text.lines) {
+      assert.notEqual(line.replace(/[."']/g, "").trim().toLowerCase(), "before", line)
+    }
+  }
+  const accentLine = threatHeadlines.find((text) => text.color !== threatHeadlines[0]?.color)
+  if (accentLine) assert.match(accentLine.text, /^before\b/i)
   for (const card of board.surfaced) {
     const offer = card.card.front.texts.find((text) => text.role === "offer")
     assert.match(offer?.text ?? "", /FREE inspection/i, card.directionIndex.toString())

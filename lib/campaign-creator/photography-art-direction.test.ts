@@ -378,8 +378,8 @@ test("an HVAC photograph depicts heating and air, not a borrowed gutter or windo
       layoutVariant: "image_grounded",
     })
     assert.equal(art.trade, "hvac")
-    assert.match(art.subject, /condenser|furnace|thermostat|vent|filter|coil|duct/i)
-    assert.doesNotMatch(art.subject, /gutter|window trim|termite|siding/i)
+    assert.match(art.subject, /condenser/i)
+    assert.doesNotMatch(art.subject, /gutter|window trim|termite|siding|\bvents?\b|\bducts?\b|\bgrilles?\b/i)
   }
   const brief = toImageBrief(
     spec({
