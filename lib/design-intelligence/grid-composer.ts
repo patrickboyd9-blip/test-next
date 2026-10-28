@@ -1,4 +1,5 @@
-import type { CreativeSpec } from "@/lib/campaign-creator/types"
+import { composeAddressSideFace } from "@/lib/campaign-creator/address-side-layout"
+import type { AddressSideEdit, CreativeSpec } from "@/lib/campaign-creator/types"
 import type { PostcardFacePlan, PhotoSlotPlan, ShapePlan } from "@/lib/postcard-layouts/compose"
 import type { FontPairingId, PostcardTemplateId, VerticalPaletteId } from "@/lib/postcard-layouts/ids"
 import type { VerticalPalette } from "@/lib/postcard-layouts/palette"
@@ -38,11 +39,15 @@ const QR_IN = 0.8
 
 export interface GridComposeInput {
   rationale: DesignRationale
-  spec: Pick<CreativeSpec, "headline" | "subheadline" | "body" | "offer" | "callToAction" | "phone" | "website" | "qrDestination">
+  spec: Pick<CreativeSpec, "headline" | "subheadline" | "body" | "offer" | "callToAction" | "phone" | "website" | "qrDestination" | "addressSide">
   businessName?: string
   disclaimer?: string | null
   /** Printed on the address side when a regulated vertical requires a label. */
   complianceMark?: string | null
+  /** License the business already supplied. Printed only when that section is on. */
+  license?: string | null
+  /** Return lines for the message column. The mailing panel stays blank. */
+  returnAddress?: string | null
 }
 
 export interface GridCard {
@@ -62,6 +67,9 @@ export function composeGridCard(input: GridComposeInput): GridCard {
   const palette = paletteFromRationale(input.rationale)
   const mode = compositionMode(input.rationale)
   if (mode === "integrated") return composeIntegrated(input, trim, pairing, palette)
+  if (mode === "full-bleed" && leadsWithOffer(input.rationale.scale_ratios.hero)) {
+    return composeOfferStrip(input, trim, pairing, palette)
+  }
   const seat = mode === "full-bleed" ? input.rationale.type_seat : undefined
   const regions = panelLayout(mode, trim, seat)
   const paper = isLight(palette.paper) ? palette.paper : "#F4F1EA"
@@ -83,6 +91,7 @@ export function composeGridCard(input: GridComposeInput): GridCard {
   const offerParts = offerIsHero
     ? { numeral: spoken.numeral, rest: spoken.rest }
     : { numeral: [spoken.numeral, spoken.rest].filter(Boolean).join(" "), rest: "" }
+  const keepOfferRest = input.rationale.vertical === "hvac" && offerParts.rest.split(/\s+/).filter(Boolean).length >= 2
   const trust = trustLine(input)
   const phone = clean(input.spec.phone) || ""
   const website = displayHost(input.spec.website || input.spec.qrDestination || "")
@@ -101,12 +110,12 @@ export function composeGridCard(input: GridComposeInput): GridCard {
   const bodyFloor = input.rationale.format.trim === "6x9" ? 12 : 11
   const smallFloor = onPhotograph ? 12 : bodyFloor
   const headlineFloor = bodyFloor * 2.5
-  const offerFloor = offerIsHero ? headlineFloor * 1.6 : bodyFloor * 1.5
+  const offerFloor = offerIsHero ? headlineFloor * (keepOfferRest ? 1.15 : 1.6) : bodyFloor * 1.5
   const protectOffer = Boolean(input.rationale.refine?.minOfferPt)
   const blocks: StackBlock[] = []
   if (offerIsHero) {
-    blocks.push({ text: offerParts.numeral, role: "offer", pt: sizes.offer, floor: offerFloor, color: offerColor, protect: protectOffer, ratioLock: true })
-    if (offerParts.rest) blocks.push({ text: offerParts.rest, role: "body", pt: sizes.support, floor: smallFloor, color: ink })
+    blocks.push({ text: offerParts.numeral, role: "offer", pt: sizes.offer, floor: offerFloor, color: offerColor, protect: protectOffer, ratioLock: !keepOfferRest })
+    if (offerParts.rest) blocks.push({ text: offerParts.rest, role: "offer", pt: keepOfferRest ? Math.max(18, sizes.headline * 0.7) : sizes.support, floor: keepOfferRest ? 16 : smallFloor, color: ink })
     blocks.push({ text: headline, role: "headline", pt: sizes.headline, floor: headlineFloor, color: ink })
   } else {
     blocks.push({ text: headline, role: "headline", pt: sizes.headline, floor: headlineFloor, color: ink })
@@ -122,9 +131,19 @@ export function composeGridCard(input: GridComposeInput): GridCard {
     align: input.rationale.grid.alignment,
   })
   const texts = stacked.texts
-  const qrRect = response.qrRect
-  const phoneText = response.phone
-  const websiteText = response.website
+  let qrRect = response.qrRect
+  let phoneText = response.phone
+  let websiteText = response.website
+  if ((mode === "panel" || mode === "calm-column") && texts.length > 0) {
+    const stackBottom = texts.reduce((max, text) => Math.max(max, text.rect.y + text.rect.h), content.y)
+    const gap = qrRect.y - stackBottom
+    if (gap > 0.7) {
+      const shift = round2(gap - 0.16)
+      qrRect = { ...qrRect, y: round2(qrRect.y - shift) }
+      phoneText = shiftFitted(phoneText, shift)
+      websiteText = shiftFitted(websiteText, shift)
+    }
+  }
 
   const photos: PhotoSlotPlan[] = input.rationale.photo_brief.placement === "none"
     ? []
@@ -164,7 +183,7 @@ export function composeGridCard(input: GridComposeInput): GridCard {
     texts: texts.filter((text) => text.text),
     trust: [],
     lockup: {
-      rect: lockupBounds(responseContent, response),
+      rect: lockupBounds(responseContent, { qrRect, website: websiteText }),
       qrRect,
       qrInches: QR_IN,
       qrLabel: SCAN_LABEL,
@@ -179,19 +198,7 @@ export function composeGridCard(input: GridComposeInput): GridCard {
     ].filter((item) => item.length > 0),
   }
 
-  const back = composeBack({
-    trim: input.rationale.format.trim,
-    geometry: input.rationale.format.trim === "6x9" ? buildPostcard6x9PrintSpec() : buildPostcard5x8PrintSpec(),
-    palette,
-    pairing,
-    ink,
-    businessName: clean(input.businessName),
-    phone,
-    website,
-    proof: input.rationale.trust.back_only[0] ?? "Proof stays on this side",
-    disclaimer: input.disclaimer ?? null,
-    complianceMark: input.complianceMark ?? null,
-  })
+  const back = paintBack(input, palette, pairing, ink, clean(input.businessName), phone, website)
 
   const headlineText = texts.find((text) => text.role === "headline")
   return finishCard({
@@ -235,109 +242,160 @@ function composeIntegrated(
   const phone = clean(input.spec.phone) || ""
   const website = displayHost(input.spec.website || input.spec.qrDestination || "")
   const name = clean(input.businessName) || "Local crew"
-  const column = geometry.column
-  const sizes = typeSizes(input.rationale, column.h * 0.72, offerIsHero ? "offer" : "headline")
+  const photoX = geometry.photo.x
+  const calmWidth = round2(Math.max(1.7, photoX - SAFE_IN - 0.1))
+  const typeColumn: InchRect = { x: SAFE_IN, y: SAFE_IN, w: calmWidth, h: round2(trim.h - SAFE_IN * 2) }
+  const sizes = typeSizes(input.rationale, typeColumn.h * 0.72, offerIsHero ? "offer" : "headline")
+  const bodyPt = trim.h >= 6 ? 12 : 11
+  const displayEm = PAIRING_MEASURE[pairing].display
+  const offerWidthCap = maxPtForWidth(offerParts.numeral, calmWidth, displayEm)
+  const headlineCeiling = trim.h >= 6 ? 32 : 30
+  const headlineTarget = roundPt(Math.min(
+    headlineCeiling,
+    Math.max(bodyPt * 2.5, offerIsHero ? Math.min(sizes.headline, offerWidthCap / 1.65) : Math.min(sizes.headline, headlineCeiling)),
+  ))
+  const headlineBand: InchRect = {
+    x: SAFE_IN,
+    y: SAFE_IN,
+    w: round2(trim.w - SAFE_IN * 2),
+    h: round2(trim.h >= 6 ? 1.25 : 1.15),
+  }
   const offerColor = offerIsHero && contrastRatio(accent, paper) >= 4.5 ? accent : ink
   const blocks: StackBlock[] = [
-    { text: firstLine, role: "headline", pt: sizes.headline, floor: (input.rationale.format.trim === "6x9" ? 12 : 11) * 2.5, color: headlineInk },
+    { text: firstLine, role: "headline", pt: headlineTarget, floor: bodyPt * 2.5, color: headlineInk },
   ]
   if (secondLine) {
     blocks.push({
       text: secondLine,
       role: "headline",
-      pt: sizes.headline,
-      floor: (input.rationale.format.trim === "6x9" ? 12 : 11) * 2.5,
+      pt: headlineTarget,
+      floor: bodyPt * 2.5,
       color: accentOnPaper === headlineInk ? ink : accentOnPaper,
     })
   }
   const stacked = placeStack({
     blocks,
-    cursor: column.y,
-    bottom: column.y + column.h * 0.42,
-    content: column,
+    cursor: headlineBand.y,
+    bottom: round2(headlineBand.y + headlineBand.h),
+    content: headlineBand,
     pairing,
     align: "left",
   })
   const headlineTexts = stacked.texts.map((text) => shrinkToInk(text, pairing))
-  const headlineBottom = headlineTexts.reduce((bottom, text) => Math.max(bottom, text.rect.y + text.rect.h), column.y)
+  const headlineBottom = headlineTexts.reduce((bottom, text) => Math.max(bottom, text.rect.y + text.rect.h), headlineBand.y)
   const offerTop = round2(headlineBottom + 0.1)
-  const offerWidth = round2(Math.min(3.3, geometry.photo.x - column.x - 0.08))
-  const offerFloor = offerIsHero ? sizes.headline * 1.6 : (input.rationale.format.trim === "6x9" ? 12 : 11) * 1.5
-  const aboveThumbs = round2(geometry.thumbTop - 0.1)
-  const clusterReserve = QR_IN + 0.28
-  const trailing = (offerParts.rest ? 0.3 : 0) + 0.26
-  const offerRoom = Math.max(0.42, aboveThumbs - offerTop - trailing - clusterReserve)
-  const roomPt = Math.floor(((Math.max(0.2, offerRoom) / 0.84) * 72) * 2) / 2
-  const offerCap = Math.max(18, Math.min(sizes.offer, roomPt))
+  const offerWidth = typeColumn.w
+  const safeBottom = round2(trim.h - SAFE_IN)
+  const textEm = PAIRING_MEASURE[pairing].text
+  const urlLinePt = maxPtForWidth(website, typeColumn.w, textEm)
+  const websiteFits = urlLinePt >= URL_MIN_PT
+  const websiteBoxH = 0.22
+  const phoneBoxH = 0.34
+  const qrRect: InchRect = {
+    x: typeColumn.x,
+    y: round2(safeBottom - QR_IN),
+    w: QR_IN,
+    h: QR_IN,
+  }
+  const websiteY = round2(qrRect.y - 0.06 - websiteBoxH)
+  const phoneY = round2(websiteY - 0.05 - phoneBoxH)
+  const showName = !nameAlreadyOnCard(headlineTexts, name)
+  const nameBoxH = showName ? 0.5 : 0
+  const joinedOffer = hvacOfferPhrase(input.rationale.vertical, offerParts.numeral, offerParts.rest)
+  const keepOfferRest = !joinedOffer && input.rationale.vertical === "hvac" && offerParts.rest.split(/\s+/).filter(Boolean).length >= 2
+  const restBoxH = joinedOffer ? 0 : offerParts.rest ? (keepOfferRest ? 0.9 : 0.46) : 0
+  const tail = (restBoxH ? restBoxH + 0.04 : 0) + (nameBoxH ? nameBoxH + 0.06 : 0)
+  const offerBottomLimit = round2(phoneY - 0.1 - tail)
+  const offerRoom = Math.max(0.4, offerBottomLimit - offerTop)
+  const paintedHeadline = headlineTexts.reduce((max, text) => Math.max(max, text.fontPt), bodyPt * 2.5)
+  const heightCap = Math.floor((offerRoom / (0.8 * 1.04)) * 72 * 2) / 2
+  const offerMax = roundPt(Math.max(16, Math.min(
+    sizes.offer,
+    offerWidthCap,
+    heightCap,
+    offerIsHero ? 64 : paintedHeadline * 0.85,
+  )))
+  const offerMin = roundPt(Math.min(
+    offerMax,
+    joinedOffer ? 16 : offerIsHero ? Math.max(bodyPt * 1.5, paintedHeadline * (keepOfferRest ? 1.15 : 1.6)) : Math.max(bodyPt * 1.5, paintedHeadline * 0.68),
+  ))
+  const offerMaxUsed = joinedOffer ? roundPt(Math.min(offerMax, 28)) : Math.max(offerMin, offerMax)
   const offerLine = shrinkToInk(fitText({
-    text: offerParts.numeral,
-    rect: { x: column.x, y: offerTop, w: offerWidth, h: offerRoom },
+    text: joinedOffer || offerParts.numeral,
+    rect: { x: typeColumn.x, y: offerTop, w: offerWidth, h: offerRoom },
     role: "offer",
     pairing,
     color: offerColor,
-    minPt: Math.min(offerFloor, offerCap),
-    maxPt: offerCap,
+    minPt: offerMin,
+    maxPt: Math.max(offerMin, offerMaxUsed),
   }), pairing)
   const texts = [...headlineTexts, offerLine].filter((text) => text.text)
   let cursor = round2(offerLine.rect.y + offerLine.rect.h + 0.02)
-  if (offerParts.rest) {
+  if (offerParts.rest && !joinedOffer) {
     const rest = shrinkToInk(fitText({
       text: offerParts.rest,
-      rect: { x: column.x, y: cursor, w: offerWidth, h: 0.26 },
+      rect: { x: typeColumn.x, y: cursor, w: offerWidth, h: restBoxH || 0.46 },
       role: "body",
       pairing,
       color: ink,
-      minPt: 12,
-      maxPt: 14,
+      minPt: keepOfferRest ? 16 : 11,
+      maxPt: keepOfferRest ? 22 : 14,
     }), pairing)
     if (rest.text) texts.push(rest)
     cursor = round2((rest.text ? rest.rect.y + rest.rect.h : cursor) + 0.04)
   }
-  const wordmark = shrinkToInk(fitText({
-    text: name,
-    rect: { x: column.x, y: cursor, w: offerWidth, h: 0.22 },
-    role: "label",
-    pairing,
-    color: ink,
-    minPt: 11,
-    maxPt: 12,
-  }), pairing)
-  if (wordmark.text) {
-    texts.push(wordmark)
-    cursor = round2(wordmark.rect.y + wordmark.rect.h + 0.06)
-  }
-  const responseWidth = round2(Math.max(1.4, geometry.photo.x - column.x - 0.08))
+  const wordmark = showName
+    ? shrinkToInk(fitText({
+      text: name,
+      rect: { x: typeColumn.x, y: cursor, w: offerWidth, h: nameBoxH || 0.5 },
+      role: "label",
+      pairing,
+      color: ink,
+      minPt: 8,
+      maxPt: 12,
+    }), pairing)
+    : null
+  if (wordmark?.text) texts.push(wordmark)
+  const responseWidth = typeColumn.w
   const phoneText = shrinkToInk(fitText({
     text: phone,
-    rect: { x: column.x, y: cursor, w: responseWidth, h: 0.36 },
+    rect: { x: typeColumn.x, y: phoneY, w: responseWidth, h: phoneBoxH },
     role: "contact",
     pairing,
     color: ink,
-    minPt: 16,
-    maxPt: column.w >= 6 ? 22 : 20,
+    minPt: 14,
+    maxPt: 18,
   }), pairing)
   const websiteText = shrinkToInk(fitText({
     text: website,
-    rect: { x: column.x, y: round2(phoneText.rect.y + phoneText.rect.h + 0.03), w: responseWidth, h: 0.24 },
+    rect: { x: typeColumn.x, y: websiteY, w: responseWidth, h: websiteBoxH },
     role: "label",
     pairing,
     color: ink,
-    minPt: URL_MIN_PT,
-    maxPt: 12,
+    minPt: websiteFits ? URL_MIN_PT : Math.max(7.5, urlLinePt),
+    maxPt: websiteFits ? 12 : Math.max(7.5, urlLinePt),
   }), pairing)
-  const qrRect: InchRect = {
-    x: column.x,
-    y: round2(websiteText.rect.y + websiteText.rect.h + 0.06),
-    w: QR_IN,
-    h: QR_IN,
-  }
   const clusterTop = phoneText.rect.y
   const clusterBottom = Math.max(qrRect.y + qrRect.h, websiteText.rect.y + websiteText.rect.h)
-  const photos: PhotoSlotPlan[] = [{ id: "subject", role: "photo", rect: geometry.photo, bleed: false, treatment: "cutout" }]
+  const photoTop = round2(headlineBottom + 0.06)
+  const photoRect: InchRect = {
+    x: photoX,
+    y: photoTop,
+    w: round2(trim.w - photoX),
+    h: round2(Math.max(1.8, trim.h - photoTop)),
+  }
+  const equipmentScene = input.rationale.vertical === "hvac"
+  const photos: PhotoSlotPlan[] = [{
+    id: "subject",
+    role: "photo",
+    rect: photoRect,
+    bleed: false,
+    treatment: equipmentScene ? "cover" : "cutout",
+  }]
   const shapes: ShapePlan[] = [
     { id: "paper", role: "paper", rect: { x: 0, y: 0, w: trim.w, h: trim.h }, fill: paper },
   ]
-  const photoArea = (geometry.photo.w * geometry.photo.h) / (trim.w * trim.h)
+  const photoArea = (photoRect.w * photoRect.h) / (trim.w * trim.h)
   const front: PostcardFacePlan = {
     templateId: scaffoldFor(input.rationale.vertical),
     size: input.rationale.format.trim,
@@ -350,9 +408,9 @@ function composeIntegrated(
     trust: [],
     lockup: {
       rect: {
-        x: column.x,
+        x: typeColumn.x,
         y: clusterTop,
-        w: round2(qrRect.x + qrRect.w - column.x),
+        w: round2(qrRect.x + qrRect.w - typeColumn.x),
         h: round2(clusterBottom - clusterTop),
       },
       qrRect,
@@ -365,19 +423,7 @@ function composeIntegrated(
     overflows: faceOverflows(texts, [phoneText, websiteText]),
     missingContact: [phoneText.text ? "" : "phone", websiteText.text ? "" : "website"].filter((item) => item.length > 0),
   }
-  const back = composeBack({
-    trim: input.rationale.format.trim,
-    geometry: input.rationale.format.trim === "6x9" ? buildPostcard6x9PrintSpec() : buildPostcard5x8PrintSpec(),
-    palette,
-    pairing,
-    ink,
-    businessName: name,
-    phone,
-    website,
-    proof: input.rationale.trust.back_only[0] ?? "Proof stays on this side",
-    disclaimer: input.disclaimer ?? null,
-    complianceMark: input.complianceMark ?? null,
-  })
+  const back = paintBack(input, palette, pairing, ink, name, phone, website)
   const offerText = texts.find((text) => text.role === "offer")
   const headlineText = texts.find((text) => text.role === "headline")
   return finishCard({
@@ -391,11 +437,22 @@ function composeIntegrated(
     },
     photoAreaPct: Math.round(photoArea * 100),
     calmFieldPct: 55,
-    panel: column,
+    panel: typeColumn,
   }, input)
 }
 
+/** Largest point size whose longest word fits the column. A figure stays one line. */
+function maxPtForWidth(text: string, width: number, em: number): number {
+  const longest = text.split(/\s+/).filter(Boolean).reduce((max, word) => Math.max(max, word.length), 1)
+  if (width <= 0 || em <= 0 || longest <= 0) return 18
+  return Math.floor((((width + 0.01) * 72) / (longest * em)) * 2) / 2
+}
+
 /** The box the critic samples is the ink, so a cut-out can sit in the empty margin. */
+function shiftFitted(text: FittedText, shift: number): FittedText {
+  return { ...text, rect: { ...text.rect, y: round2(text.rect.y - shift) } }
+}
+
 function shrinkToInk(text: FittedText, pairing: FontPairingId): FittedText {
   if (!text.text || text.lines.length === 0) return text
   const em = text.font === "display" ? PAIRING_MEASURE[pairing].display : PAIRING_MEASURE[pairing].text
@@ -444,11 +501,291 @@ function integratedGeometry(trim: { w: number; h: number }): {
   }
 }
 
-function splitHeadline(headline: string): [string, string] {
-  const words = headline.split(/\s+/).filter(Boolean)
-  if (words.length < 2) return [headline, ""]
+function sentenceCase(line: string): string {
+  const words = line.replace(/\s+/g, " ").trim().split(" ")
+  if (words.length < 3) return line
+  const letters = (word: string) => word.replace(/[^A-Za-z']/g, "")
+  const capital = words.filter((word) => /^[A-Z]/.test(letters(word))).length
+  if (capital < words.length * 0.6) return line
+  const small = new Set(["a", "an", "the", "for", "of", "to", "and", "or", "in", "on", "at", "by", "with"])
+  return words.map((word, index) => {
+    const bare = letters(word)
+    if (!bare) return word
+    if (index > 0 && small.has(bare.toLowerCase())) return word.toLowerCase()
+    if (bare === bare.toUpperCase() && bare.length >= 2 && bare.length <= 4) return word
+    if (index === 0) return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    return word.charAt(0).toLowerCase() + word.slice(1)
+  }).join(" ")
+}
+
+function splitHeadline(headline: string, phraseBoundary = false): [string, string] {
+  const cleaned = sentenceCase(headline.replace(/\s+/g, " ").trim())
+  const words = cleaned.split(/\s+/).filter(Boolean)
+  const functionWord = /^(?:the|a|an|of|to|and|or|for|before)$/i
+  const bare = (word: string) => word.replace(/[^A-Za-z]/g, "")
+  if (phraseBoundary) {
+    const atBefore = cleaned.match(/^(.*?)\s+(before\b.+)$/i)
+    if (atBefore) {
+      const left = atBefore[1]!.trim()
+      const right = atBefore[2]!.trim()
+      if (left.split(/\s+/).length >= 2 && right.split(/\s+/).length >= 2 && !functionWord.test(bare(left.split(/\s+/).at(-1) ?? ""))) {
+        return [left, right]
+      }
+    }
+    if (words.length < 4) return [cleaned, ""]
+    let mid = Math.ceil(words.length / 2)
+    while (mid > 2 && functionWord.test(bare(words[mid - 1] ?? ""))) mid -= 1
+    if (mid < 2 || functionWord.test(bare(words[mid - 1] ?? ""))) return [cleaned, ""]
+    return [words.slice(0, mid).join(" "), words.slice(mid).join(" ")]
+  }
+  if (words.length < 2) return [cleaned, ""]
   const mid = Math.ceil(words.length / 2)
   return [words.slice(0, mid).join(" "), words.slice(mid).join(" ")]
+}
+
+function maxPtForFullLine(text: string, width: number, em: number): number {
+  const chars = Math.max(text.replace(/\s+/g, " ").trim().length, 1)
+  if (width <= 0 || em <= 0) return 16
+  return Math.floor(((width * 72) / (chars * em)) * 2) / 2
+}
+
+/**
+ * Full-bleed photograph, headline on a calm scrim, and the offer in a
+ * strip along the bottom with the phone and the code. The Dairy Queen
+ * coupon is the reference for this arrangement: one photo, one offer, one
+ * way to respond.
+ */
+function composeOfferStrip(
+  input: GridComposeInput,
+  trim: { w: number; h: number },
+  pairing: FontPairingId,
+  palette: VerticalPalette
+): GridCard {
+  const bandH = trim.h >= 6 ? 1.85 : 1.7
+  const band: InchRect = { x: 0, y: round2(trim.h - bandH), w: trim.w, h: bandH }
+  const bandFill = "#14120F"
+  const bandInk = inkForBackground(bandFill)
+  const paper = "#F7F4EE"
+  const ink = inkForBackground(paper)
+  const spoken = spokenCopy(input)
+  const offerParts = { numeral: spoken.numeral, rest: spoken.rest }
+  const headline = spoken.headline
+  const [firstLine, secondLine] = splitHeadline(headline, input.rationale.vertical === "hvac")
+  const column: InchRect = {
+    x: SAFE_IN,
+    y: SAFE_IN,
+    w: round2(Math.min(3.5, trim.w * 0.46)),
+    h: round2(band.y - SAFE_IN - 0.12),
+  }
+  const sizes = typeSizes(input.rationale, column.h * 0.8, "offer")
+  const bodyPt = trim.h >= 6 ? 12 : 11
+  const headlinePt = roundPt(Math.max(bodyPt * 2.5, Math.min(sizes.headline, trim.h >= 6 ? 34 : 30)))
+  const accent = input.rationale.palette.accent_hex
+  const accentOnPaper = contrastRatio(accent, paper) >= 4.5 ? accent : ink
+  const name = clean(input.businessName)
+  const hvacBand = input.rationale.vertical === "hvac"
+  const displayEm = PAIRING_MEASURE[pairing].display
+  const secondPt = secondLine
+    ? roundPt(Math.max(15, Math.min(headlinePt, maxPtForFullLine(secondLine, column.w, displayEm))))
+    : headlinePt
+  const blocks: StackBlock[] = [
+    { text: firstLine, role: "headline", pt: hvacBand && secondLine ? roundPt(Math.min(32, Math.max(headlinePt, 28))) : headlinePt, floor: hvacBand && secondLine ? 24 : bodyPt * 2.5, color: ink },
+  ]
+  if (secondLine) {
+    blocks.push({
+      text: secondLine,
+      role: "headline",
+      pt: hvacBand ? secondPt : headlinePt,
+      floor: hvacBand ? 15 : bodyPt * 2.5,
+      color: accentOnPaper === ink ? ink : accentOnPaper,
+    })
+  }
+  const reserveName = hvacBand && Boolean(name) && !headline.toLowerCase().includes(name.toLowerCase())
+  const stacked = placeStack({
+    blocks,
+    cursor: column.y,
+    bottom: column.y + column.h * (hvacBand ? 0.92 : 0.72),
+    content: column,
+    pairing,
+    align: "left",
+  })
+  const texts = stacked.texts.map((text) => shrinkToInk(text, pairing)).filter((text) => text.text)
+  const cursor = texts.reduce((bottom, text) => Math.max(bottom, text.rect.y + text.rect.h), column.y)
+  if (reserveName && name) {
+    const fitted = shrinkToInk(fitText({
+      text: name,
+      rect: { x: column.x, y: round2(cursor + 0.08), w: column.w, h: 0.5 },
+      role: "label",
+      pairing,
+      color: ink,
+      minPt: 11,
+      maxPt: 15,
+    }), pairing)
+    if (fitted.text) texts.push(fitted)
+  } else if (name && !nameAlreadyOnCard(texts, name)) {
+    const wordmark = shrinkToInk(fitText({
+      text: name,
+      rect: { x: column.x, y: round2(cursor + 0.06), w: column.w, h: Math.max(0.28, column.y + column.h - cursor - 0.08) },
+      role: "label",
+      pairing,
+      color: ink,
+      minPt: 8,
+      maxPt: 12,
+    }), pairing)
+    if (wordmark.text) texts.push(wordmark)
+  }
+  const safeBottom = trim.h - SAFE_IN
+  const innerBottom = round2(Math.min(band.y + band.h - 0.08, safeBottom))
+  const qrRect: InchRect = {
+    x: round2(trim.w - SAFE_IN - QR_IN),
+    y: round2(hvacBand ? innerBottom - QR_IN : Math.min(band.y + 0.28, safeBottom - QR_IN)),
+    w: QR_IN,
+    h: QR_IN,
+  }
+  const phoneW = 2.15
+  const phoneX = round2(qrRect.x - phoneW - 0.12)
+  const offerX = SAFE_IN
+  const offerW = round2(phoneX - offerX - 0.14)
+  const offerColor = contrastRatio(accent, bandFill) >= 4.5 ? accent : bandInk
+  const joinedOffer = hvacOfferPhrase(input.rationale.vertical, offerParts.numeral, offerParts.rest)
+  const phone = clean(input.spec.phone) || ""
+  const website = displayHost(input.spec.website || input.spec.qrDestination || "")
+  const webH = 0.26
+  const phoneH = 0.34
+  const websiteY = hvacBand ? round2(innerBottom - webH) : 0
+  const phoneY = hvacBand ? round2(websiteY - 0.06 - phoneH) : round2(qrRect.y + (QR_IN - phoneH) / 2)
+  const offerTop = round2(band.y + 0.12)
+  const offerH = hvacBand ? round2(Math.max(0.48, phoneY - offerTop - 0.06)) : joinedOffer ? 1.05 : 0.7
+  const offerLine = shrinkToInk(fitText({
+    text: joinedOffer || offerParts.numeral,
+    rect: { x: offerX, y: offerTop, w: offerW, h: offerH },
+    role: "offer",
+    pairing,
+    color: offerColor,
+    minPt: joinedOffer ? 16 : Math.max(22, sizes.headline * 1.4),
+    maxPt: joinedOffer ? 26 : Math.max(36, sizes.offer),
+  }), pairing)
+  if (offerLine.text) texts.push(offerLine)
+  let offerBottom = offerLine.text ? offerLine.rect.y + offerLine.rect.h : band.y + 0.2
+  if (offerParts.rest && !joinedOffer) {
+    const rest = shrinkToInk(fitText({
+      text: offerParts.rest,
+      rect: { x: offerX, y: round2(offerBottom + 0.02), w: offerW, h: 0.34 },
+      role: "body",
+      pairing,
+      color: bandInk,
+      minPt: 12,
+      maxPt: 15,
+    }), pairing)
+    if (rest.text) {
+      texts.push(rest)
+      offerBottom = rest.rect.y + rest.rect.h
+    }
+  }
+  const phoneText = shrinkToInk(fitText({
+    text: phone,
+    rect: { x: phoneX, y: phoneY, w: phoneW, h: phoneH },
+    role: "contact",
+    pairing,
+    color: bandInk,
+    minPt: trim.h >= 6 ? 14 : 13,
+    maxPt: 18,
+  }), pairing)
+  const websiteText = shrinkToInk(fitText({
+    text: website,
+    rect: {
+      x: offerX,
+      y: hvacBand ? websiteY : round2(Math.min(offerBottom + 0.04, safeBottom - webH)),
+      w: offerW,
+      h: webH,
+    },
+    role: "label",
+    pairing,
+    color: bandInk,
+    minPt: 9,
+    maxPt: 12,
+  }), pairing)
+  const creamTexts = texts.filter((text) => text.rect.y + text.rect.h <= band.y - 0.05)
+  const creamBottom = creamTexts.reduce((bottom, text) => Math.max(bottom, text.rect.y + text.rect.h), column.y)
+  const plate: InchRect = hvacBand
+    ? { x: 0, y: 0, w: round2(Math.min(column.x + column.w + 0.12, trim.w * 0.42)), h: round2(Math.min(creamBottom + 0.16, band.y - 0.85)) }
+    : { x: 0, y: 0, w: round2(column.x + column.w + 0.2), h: band.y }
+  const photos: PhotoSlotPlan[] = [{ id: "photo", role: "photo", rect: { x: 0, y: 0, w: trim.w, h: trim.h }, bleed: true, treatment: "cover" }]
+  const shapes: ShapePlan[] = [
+    { id: "paper", role: "paper", rect: { x: 0, y: 0, w: trim.w, h: trim.h }, fill: paper },
+    { id: "headline-field", role: "calm-field", rect: plate, fill: paper },
+    { id: "offer-strip", role: "band", rect: band, fill: bandFill },
+  ]
+  const front: PostcardFacePlan = {
+    templateId: scaffoldFor(input.rationale.vertical),
+    size: input.rationale.format.trim,
+    face: "front",
+    pairing,
+    palette,
+    photos,
+    shapes,
+    texts,
+    trust: [],
+    lockup: {
+      rect: {
+        x: offerX,
+        y: qrRect.y,
+        w: round2(qrRect.x + qrRect.w - offerX),
+        h: qrRect.h,
+      },
+      qrRect,
+      qrInches: QR_IN,
+      qrLabel: SCAN_LABEL,
+      qrLabelPt: 9,
+      phone: phoneText.text ? phoneText : undefined,
+      website: websiteText.text ? websiteText : undefined,
+    },
+    overflows: faceOverflows(texts, [phoneText, websiteText]),
+    missingContact: [phoneText.text ? "" : "phone", websiteText.text ? "" : "website"].filter((item) => item.length > 0),
+  }
+  const back = paintBack(input, palette, pairing, ink, name || "Local crew", phone, website)
+  return finishCard({
+    front,
+    back,
+    typePt: {
+      offer: offerLine.fontPt || sizes.offer,
+      headline: texts.find((text) => text.role === "headline")?.fontPt ?? sizes.headline,
+      support: texts.find((text) => text.role === "body")?.fontPt ?? 12,
+      phone: phoneText.fontPt || 16,
+    },
+    photoAreaPct: 100,
+    calmFieldPct: 46,
+    panel: column,
+  }, input)
+}
+
+function paintBack(
+  input: GridComposeInput,
+  palette: VerticalPalette,
+  pairing: FontPairingId,
+  ink: string,
+  businessName: string,
+  phone: string,
+  website: string
+): PostcardFacePlan {
+  return composeBack({
+    trim: input.rationale.format.trim,
+    geometry: input.rationale.format.trim === "6x9" ? buildPostcard6x9PrintSpec() : buildPostcard5x8PrintSpec(),
+    palette,
+    pairing,
+    ink,
+    businessName,
+    phone,
+    website,
+    proof: backProof(input.rationale.trust.back_only[0], clean(input.spec.offer)),
+    disclaimer: input.disclaimer ?? null,
+    complianceMark: input.complianceMark ?? null,
+    addressSide: input.spec.addressSide,
+    offer: clean(input.spec.offer),
+    license: input.license ?? undefined,
+    returnAddress: input.returnAddress ?? undefined,
+    qrDestination: clean(input.spec.qrDestination),
+  })
 }
 
 function composeBack(input: {
@@ -463,31 +800,62 @@ function composeBack(input: {
   proof: string
   disclaimer: string | null
   complianceMark?: string | null
+  addressSide?: AddressSideEdit
+  offer?: string
+  license?: string
+  returnAddress?: string
+  qrDestination?: string
 }): PostcardFacePlan {
+  if (input.addressSide) {
+    return composeAddressSideFace({
+      size: input.trim,
+      pairing: input.pairing,
+      palette: input.palette,
+      ink: input.ink,
+      spec: {
+        addressSide: input.addressSide,
+        offer: input.offer,
+        phone: input.phone,
+        website: input.website,
+        qrDestination: input.qrDestination,
+      },
+      businessName: input.businessName,
+      phone: input.phone,
+      website: input.website,
+      proof: input.proof,
+      license: input.license,
+      returnAddress: input.returnAddress,
+      qrDestination: input.qrDestination,
+      disclaimer: input.disclaimer,
+      complianceMark: input.complianceMark,
+    })
+  }
   const content = canvasToTrim(addressSideContentRect(input.geometry), input.geometry.bleedInchesPerSide)
   const texts: FittedText[] = []
   let cursor = content.y
+  const bottom = content.y + content.h
   const lines = [
-    ...(input.complianceMark ? [{ text: input.complianceMark, role: "label" as const, pt: 8 }] : []),
-    { text: input.businessName, role: "proof" as const, pt: 12 },
-    { text: input.phone, role: "contact" as const, pt: input.trim === "6x9" ? 16 : 14 },
-    { text: input.website, role: "label" as const, pt: 11 },
-    { text: input.proof, role: "body" as const, pt: 11 },
+    ...(input.complianceMark ? [{ text: input.complianceMark, role: "label" as const, min: 7, max: 8, room: 0.28 }] : []),
+    { text: input.businessName, role: "proof" as const, min: 8, max: 13, room: 0.85 },
+    { text: input.phone, role: "contact" as const, min: 12, max: input.trim === "6x9" ? 16 : 14, room: 0.36 },
+    { text: input.website, role: "label" as const, min: 9, max: 11, room: 0.46 },
+    { text: input.proof, role: "body" as const, min: 10, max: 13, room: 0.7 },
   ]
   for (const line of lines) {
-    if (!line.text) continue
-    const rect = { x: content.x, y: cursor, w: content.w, h: 0.32 }
-    if (rect.y + rect.h > content.y + content.h) break
-    texts.push(fitText({
+    if (!line.text || cursor >= bottom - 0.18) continue
+    const rect = { x: content.x, y: cursor, w: content.w, h: Math.min(line.room, bottom - cursor) }
+    const fitted = fitText({
       text: line.text,
       rect,
       role: line.role,
       pairing: input.pairing,
       color: input.ink,
-      minPt: line.pt,
-      maxPt: line.pt,
-    }))
-    cursor += 0.36
+      minPt: line.min,
+      maxPt: line.max,
+    })
+    const inkH = Math.max(0.2, fitted.lines.length * (fitted.fontPt / 72) * 1.2)
+    texts.push({ ...fitted, rect: { ...fitted.rect, h: round2(Math.min(fitted.rect.h, inkH)) } })
+    cursor = round2(cursor + inkH + 0.08)
   }
   if (input.disclaimer) {
     const height = Math.min(1.05, content.y + content.h - cursor)
@@ -1026,6 +1394,14 @@ function scaffoldFor(vertical: DesignVertical): PostcardTemplateId {
   return "hero_scrim"
 }
 
+/** HVAC keeps FREE and the rest of the offer as one phrase, not a giant word over tiny type. */
+function hvacOfferPhrase(vertical: string, numeral: string, rest: string): string {
+  if (vertical !== "hvac") return ""
+  const tail = rest.replace(/\s+/g, " ").trim()
+  if (!tail) return ""
+  return `${numeral} ${tail}`.replace(/\s+/g, " ").trim()
+}
+
 function spokenCopy(input: GridComposeInput): { headline: string; numeral: string; rest: string } {
   const spoken = resolveFrontCopy({
     headline: clean(input.spec.headline) || "One clear next step",
@@ -1047,6 +1423,8 @@ function spokenCopy(input: GridComposeInput): { headline: string; numeral: strin
 
 function trustLine(input: GridComposeInput): string {
   const name = clean(input.businessName)
+  const headline = clean(input.spec.headline)
+  if (name && headline.toLowerCase().includes(name.toLowerCase())) return ""
   if (input.rationale.vertical === "medicare_insurance") {
     return name || "A local licensed advisor"
   }
@@ -1054,6 +1432,20 @@ function trustLine(input: GridComposeInput): string {
   const line = input.rationale.trust.front_line
   if (/license/i.test(line)) return "Licensed and local"
   return "Local crew"
+}
+
+function backProof(line: string | undefined, offer: string): string {
+  const text = (line ?? "").replace(/\s+/g, " ").trim()
+  if (!text || /^one proof line$/i.test(text) || /^proof stays on this side$/i.test(text)) {
+    return offer || "The offer is on the front."
+  }
+  return text
+}
+
+function nameAlreadyOnCard(texts: Array<{ text: string }>, name: string): boolean {
+  const needle = name.replace(/\s+/g, " ").trim().toLowerCase()
+  if (!needle) return true
+  return texts.some((text) => text.text.toLowerCase().includes(needle))
 }
 
 function displayHost(value: string): string {

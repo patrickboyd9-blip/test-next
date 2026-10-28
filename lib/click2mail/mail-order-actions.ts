@@ -1,12 +1,13 @@
 "use server"
 
+import { postcardImageFromDataUrl, resolveAddressSideSections } from "@/lib/campaign-creator/address-side"
 import { attorneyAdMark } from "@/lib/design-intelligence/attorney-compliance"
 import { isAtOrPastStatus } from "@/lib/campaign-creator/campaign-status"
 import { medicareDisclaimerFor } from "@/lib/campaign-creator/medicare-compliance"
 import { getCampaignRepository } from "@/lib/campaign-creator/repository"
 import { displayWebsite, postcardIdentityFromBrief, resolveStudioContact } from "@/lib/campaign-creator/studio-contact"
 import type { Campaign, CreativeSpec } from "@/lib/campaign-creator/types"
-import type { PostcardPrintCopy } from "@/lib/print-spec/render-campaign-postcard-pdf"
+import type { PostcardPrintCopy, PostcardPrintImage } from "@/lib/print-spec/render-campaign-postcard-pdf"
 import { loadApprovedUploadPdf } from "@/lib/bring-your-own-design/print-source"
 import { renderPostcardPrintPdf } from "@/lib/print-spec/render-campaign-postcard-pdf"
 import { renderStudioDesignPdf, renderTemplatedPostcardPdf, selectPrintDesign } from "@/lib/print-spec/render-template-postcard-pdf"
@@ -148,8 +149,10 @@ async function runOrder(
         const templateId = campaign.mailPiece?.spec.layoutHints?.templateId
         const paletteId = campaign.mailPiece?.spec.layoutHints?.verticalPalette
         const copy = printCopy(campaign)
+        const backImage = backPrintImage(campaign.mailPiece?.spec, photo)
         const rationale = campaign.mailPiece?.spec.designRationale
         const size = rationale?.format?.trim === "6x9" ? "6x9" : "5x8"
+        const returnAddress = (copy.returnLines ?? []).join("\n")
         const studio = isRoofingProTemplate(templateId)
           ? composeRoofingProCard({
               templateId,
@@ -158,6 +161,7 @@ async function runOrder(
               businessName: copy.businessName,
               qrPayload: copy.qrPayload,
               license: copy.license,
+              returnAddress,
               disclaimerText: copy.disclaimer,
               complianceMark: copy.complianceMark,
             })
@@ -168,6 +172,8 @@ async function runOrder(
               businessName: copy.businessName,
               disclaimer: copy.disclaimer,
               complianceMark: copy.complianceMark,
+              license: copy.license,
+              returnAddress,
             })
           : null
         const design = selectPrintDesign({ rationale, studio, templateId })
@@ -176,6 +182,7 @@ async function runOrder(
               card: design.card,
               copy,
               image: photo ?? undefined,
+              backImage,
             })
           : isPostcardTemplate(templateId)
           ? await renderTemplatedPostcardPdf({
@@ -183,10 +190,12 @@ async function runOrder(
               templateId,
               paletteId: isVerticalPalette(paletteId) ? paletteId : undefined,
               image: photo ?? undefined,
+              backImage,
             })
           : await renderPostcardPrintPdf({
               copy,
               image: photo ?? undefined,
+              backImage,
               plateColor: plateFromSpec(campaign.mailPiece?.spec),
             })
         pdf = rendered.bytes
@@ -248,10 +257,11 @@ function printCopy(campaign: Campaign): PostcardPrintCopy {
     phone: contact.phone,
     website: contact.website ? displayWebsite(contact.website) : undefined,
     qrPayload: contact.qrPayload ?? undefined,
-    returnLines: address ? [address] : [],
+    returnLines: addressReturnLines(spec, address),
     subheadline: spec.subheadline,
     disclaimer: medicareDisclaimerFor(campaign.brief) ?? undefined,
-    license: campaign.brief.businessInfo?.license,
+    license: spec.addressSide?.license || campaign.brief.businessInfo?.license,
+    addressSide: spec.addressSide,
     complianceMark: attorneyAdMark([
       campaign.brief.goal,
       campaign.brief.offer,
@@ -262,6 +272,25 @@ function printCopy(campaign: Campaign): PostcardPrintCopy {
       spec.offer,
     ].filter(Boolean).join(" ")) ?? undefined,
   }
+}
+
+function addressReturnLines(spec: CreativeSpec, briefAddress: string | undefined): string[] {
+  if (!spec.addressSide) return briefAddress ? [briefAddress] : []
+  const sections = resolveAddressSideSections(spec.addressSide)
+  if (!sections.returnAddress) return []
+  const text = (spec.addressSide.returnAddress ?? briefAddress ?? "").trim()
+  return text.split("\n").map((line) => line.trim()).filter(Boolean).slice(0, 3)
+}
+
+function backPrintImage(
+  spec: CreativeSpec | undefined,
+  front: PostcardPrintImage | null
+): PostcardPrintImage | undefined {
+  const edit = spec?.addressSide
+  if (!edit || !resolveAddressSideSections(edit).photo) return undefined
+  if (edit.photoSrc === "none") return undefined
+  if (typeof edit.photoSrc === "string") return postcardImageFromDataUrl(edit.photoSrc) ?? undefined
+  return front ?? undefined
 }
 
 function returnAddressFor(campaign: Campaign): ReturnAddress {

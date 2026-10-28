@@ -4,7 +4,7 @@ import { useState } from "react"
 
 import { chooseRoofingProTemplate } from "@/lib/campaign-creator/actions"
 import type { Campaign } from "@/lib/campaign-creator/types"
-import { ROOFING_PRO_META, ROOFING_PRO_TEMPLATE_IDS, type RoofingProTemplateId } from "@/lib/roofing-pro/ids"
+import { ROOFING_PRO_AVAILABLE_IDS, ROOFING_PRO_META, type RoofingProTemplateId } from "@/lib/roofing-pro/ids"
 import { cn } from "@/lib/utils"
 
 export function ProTemplatePicker({
@@ -39,7 +39,7 @@ export function ProTemplatePicker({
         The layout is already designed. Your headline, offer, and phone fill it in.
       </p>
       <div className="flex flex-wrap gap-2" role="group" aria-label="Pro templates">
-        {ROOFING_PRO_TEMPLATE_IDS.map((id) => {
+        {ROOFING_PRO_AVAILABLE_IDS.map((id) => {
           const meta = ROOFING_PRO_META[id]
           const pressed = current === id
           return (

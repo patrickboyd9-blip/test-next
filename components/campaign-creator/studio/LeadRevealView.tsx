@@ -13,6 +13,7 @@ import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
 import { ConceptFeedback } from "./ConceptFeedback"
 import { PostcardPreview, PostcardSideToggle } from "./PostcardPreview"
+import { designDebugEnabled } from "@/lib/campaign-creator/customer-direction-line"
 import { ResearchBasis } from "./ResearchBasis"
 import { StrategyTags } from "./StrategyTags"
 import { StudioPhotoNote } from "./StudioPhotoNote"
@@ -47,6 +48,7 @@ export function LeadRevealView({
   feedback,
 }: LeadRevealViewProps) {
   const reducedMotion = useReducedMotion()
+  const debug = designDebugEnabled()
   const [side, setSide] = useState<"front" | "back">("front")
 
   const fadeUp = (delay: number) =>
@@ -96,7 +98,7 @@ export function LeadRevealView({
         </p>
         <h3 className="text-xl font-semibold">{direction.name}</h3>
         <p className="text-sm text-muted-foreground">{direction.rationale}</p>
-        <ResearchBasis research={direction.research} />
+        {debug ? <ResearchBasis research={direction.research} /> : null}
         {campaignId ? (
           <ConceptFeedback campaignId={campaignId} directionId={direction.id} initial={feedback} />
         ) : null}

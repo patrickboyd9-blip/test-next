@@ -145,6 +145,26 @@ test("roofing before and after slots reject the wrong subject", () => {
   )
 })
 
+test("an HVAC campaign rejects a gutter or window-trim photograph", () => {
+  const expectation = photoExpectationForBrief({
+    offer: "Free inspection for broken AC units",
+    businessInfo: { name: "Coastal Comfort Heating & Air" },
+  })
+  assert.equal(expectation.industry, "hvac")
+  assert.equal(
+    matchPhotoTags({ describedSubject: "a man on a ladder at a gutter" }, expectation),
+    "mismatch"
+  )
+  assert.equal(
+    matchPhotoTags({ describedSubject: "a man painting window trim" }, expectation),
+    "mismatch"
+  )
+  assert.equal(
+    matchPhotoTags({ describedSubject: "a technician at an outdoor condenser" }, expectation),
+    "match"
+  )
+})
+
 test("final expense refuses a casket description", () => {
   const expectation = photoExpectationForBrief({ goal: "Final expense insurance" })
   assert.equal(

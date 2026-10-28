@@ -212,6 +212,43 @@ export interface SpecDiff {
 }
 
 /**
+ * Customer edits for the address side. Absent means the generated back:
+ * business name, phone, website, and one proof line. The mailing panel,
+ * postage, and barcode are not fields — they stay blank for the mailer.
+ */
+export interface AddressSideEdit {
+  sections?: Partial<AddressSideSections>
+  businessName?: string
+  offer?: string
+  /** One benefit per line. */
+  benefits?: string
+  proof?: string
+  license?: string
+  phone?: string
+  website?: string
+  returnAddress?: string
+  qrDestination?: string
+  /**
+   * Omitted: the campaign photograph, when the photo section is on.
+   * "none": no photograph.
+   * A data URL: the customer's replacement.
+   * null: clear a replacement and use the campaign photograph again.
+   */
+  photoSrc?: string | null
+}
+
+export interface AddressSideSections {
+  offer: boolean
+  benefits: boolean
+  proof: boolean
+  license: boolean
+  contact: boolean
+  returnAddress: boolean
+  qr: boolean
+  photo: boolean
+}
+
+/**
  * Structured creative content rendered into mail-piece previews.
  * Fields expand as the template system is built — keep serializable.
  */
@@ -246,6 +283,8 @@ export interface CreativeSpec {
    */
   imagePresence?: ImagePresence
   backLayout?: BackLayout
+  /** Address-side copy the customer edited. Omitted on cards they have not edited. */
+  addressSide?: AddressSideEdit
   layoutHints?: LayoutHints
   /**
    * Art-director decision for this card. The painter follows it.
@@ -309,6 +348,23 @@ export interface DirectionResearch {
   layoutSummary: string
   parameters: ResearchLayoutParameters
   quality?: ResearchQuality
+  /**
+   * Research ids that influenced this card.
+   * Hidden in the customer UI unless design debug is on.
+   */
+  influencedBy?: string[]
+  /** Photograph description borrowed from the library. Not printed on the card. */
+  photoDirection?: string
+  /**
+   * Which retrieved record drove the headline, the offer framing, the layout, and the photograph.
+   * Hidden in the customer UI unless design debug is on.
+   */
+  evidenceTrace?: {
+    headlineId?: string
+    offerId?: string
+    layoutId?: string
+    photoId?: string
+  }
 }
 
 /** A distinct creative direction presented to the customer for selection. */

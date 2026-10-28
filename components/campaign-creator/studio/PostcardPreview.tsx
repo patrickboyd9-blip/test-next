@@ -22,12 +22,20 @@ import { useReducedMotion } from "@/hooks/use-reduced-motion"
 import { ShimmerOverlay, SpecDiffHighlight } from "./SpecDiffHighlight"
 import { PostcardBackFace, PostcardFrontFace } from "./PostcardComposition"
 import { PremiumBackMessage, PremiumPostcardFront } from "./PremiumPostcard"
+import {
+  addressSideLocks,
+  addressSidePreviewSrc,
+  addressSideQrPayload,
+  resolveAddressSide,
+} from "@/lib/campaign-creator/address-side"
+import { composeAddressSideFace } from "@/lib/campaign-creator/address-side-layout"
 import { composeGridCard } from "@/lib/design-intelligence/grid-composer"
 import { isDesignRationale } from "@/lib/design-intelligence/rationale"
 import { composeRoofingProCard } from "@/lib/roofing-pro/compose"
 import { isRoofingProTemplate } from "@/lib/roofing-pro/ids"
 import { attorneyAdMark } from "@/lib/design-intelligence/attorney-compliance"
 import { isPostcardTemplate, isVerticalPalette } from "@/lib/postcard-layouts/ids"
+import { paletteById } from "@/lib/postcard-layouts/palette"
 import { slotPhotoSources } from "@/lib/postcard-layouts/photos"
 import { TEMPLATE_META } from "@/lib/postcard-layouts/templates"
 
@@ -139,6 +147,7 @@ export function PostcardPreview({
         businessName: contact.businessName,
         qrPayload: contact.qrPayload,
         license: identity?.license,
+        returnAddress: brief?.businessInfo?.address,
         disclaimerText: disclaimer,
         complianceMark,
       })
@@ -150,17 +159,54 @@ export function PostcardPreview({
         businessName: contact.businessName,
         disclaimer,
         complianceMark,
+        license: identity?.license,
+        returnAddress: brief?.businessInfo?.address,
       })
     : null)
+  const editedBack = !studioCard && spec.addressSide
+    ? composeAddressSideFace({
+        size: trimSize,
+        pairing: "trade",
+        palette: paletteById(
+          isVerticalPalette(spec.layoutHints?.verticalPalette) ? spec.layoutHints.verticalPalette : "general"
+        ),
+        spec: sharedSpec,
+        businessName: contact.businessName,
+        phone: contact.phone,
+        website: contact.website,
+        license: identity?.license,
+        returnAddress: brief?.businessInfo?.address,
+        qrDestination: contact.qrPayload ?? undefined,
+        disclaimer,
+        complianceMark,
+        templateId: template,
+      })
+    : null
+  const backPlan = studioCard?.back ?? editedBack
+  const backResolved = isAddressSide
+    ? resolveAddressSide(sharedSpec, {
+        businessName: contact.businessName,
+        phone: contact.phone,
+        website: contact.website,
+        license: identity?.license,
+        returnAddress: brief?.businessInfo?.address,
+        qrDestination: contact.qrPayload ?? undefined,
+      })
+    : null
+  const backPhoto = backResolved ? addressSidePreviewSrc(backResolved, sources[0] ?? imagery.src) : null
+  const backContact = {
+    ...contact,
+    qrPayload: isAddressSide ? addressSideQrPayload(sharedSpec, contact.qrPayload) ?? null : contact.qrPayload,
+  }
 
   const content = isAddressSide ? (
-    studioCard ? (
+    backPlan ? (
       <PremiumPostcardFront
-        plan={studioCard.back}
-        templateId={studioCard.back.templateId}
+        plan={backPlan}
+        templateId={backPlan.templateId}
         spec={spec}
-        contact={contact}
-        photoSrc={null}
+        contact={backContact}
+        photoSrc={backPhoto}
         compact={compact}
       />
     ) : (
@@ -239,6 +285,7 @@ export function PostcardPreview({
         {...hoverProps}
       >
         {face}
+        {isAddressSide ? <AddressSideLocks size={trimSize} /> : null}
         {!isAddressSide && (
           <>
             <ShimmerOverlay active={isShimmering} />
@@ -246,6 +293,29 @@ export function PostcardPreview({
           </>
         )}
       </motion.div>
+    </div>
+  )
+}
+
+function AddressSideLocks({ size }: { size: "5x8" | "6x9" }) {
+  const trim = size === "6x9" ? { w: 9, h: 6 } : { w: 8, h: 5 }
+  return (
+    <div className="pointer-events-none absolute inset-0 z-20" data-address-locks="locked">
+      {addressSideLocks(size).map((lock) => (
+        <div
+          key={lock.id}
+          data-locked={lock.id}
+          className="absolute flex items-end border border-dashed border-stone-500/70 bg-[#f4f1ea] px-2 py-1"
+          style={{
+            left: `${(lock.x / trim.w) * 100}%`,
+            top: `${(lock.y / trim.h) * 100}%`,
+            width: `${(lock.w / trim.w) * 100}%`,
+            height: `${(lock.h / trim.h) * 100}%`,
+          }}
+        >
+          <span className="text-[7px] uppercase tracking-[0.14em] text-stone-600">{lock.label}</span>
+        </div>
+      ))}
     </div>
   )
 }

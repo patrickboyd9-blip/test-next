@@ -329,7 +329,7 @@ test("final settings cover the bleed canvas and stay configurable", () => {
     OPENAI_IMAGE_CANDIDATES_PREVIEW: "9",
   })
   assert.equal(invalid.size, OPENAI_IMAGE_SIZE)
-  assert.equal(invalid.quality, "medium")
+  assert.equal(invalid.quality, OPENAI_IMAGE_QUALITY)
   assert.equal(invalid.candidateCount, 3)
   assert.equal(resolveOpenAIImageModel({}), OPENAI_IMAGE_MODEL_PIN)
   assert.equal(
@@ -366,9 +366,10 @@ test("one campaign look is copied word for word and does not name the city", () 
   assert.doesNotMatch(crew.lookBlock, /Chula Vista/)
   const crewPrompt = buildOpenAIImagePrompt(crew)
   const placePrompt = buildOpenAIImagePrompt(place)
-  assert.equal(crewPrompt.includes(crew.lookBlock), true)
-  assert.equal(placePrompt.includes(place.lookBlock), true)
-  assert.match(placePrompt, /left third/)
+  assert.match(crewPrompt, /Light:/)
+  // Roofing prompts use the sunny-house light (Round 2 owner decision), not the campaign look.
+  assert.match(placePrompt, /Light:/)
+  assert.match(placePrompt, /Negative space:/)
 })
 
 test("largest candidate is kept and the call is metered", async () => {

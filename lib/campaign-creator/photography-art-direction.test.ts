@@ -68,11 +68,14 @@ test("a weak roofing label becomes three different trade scenes", () => {
     subjects.map((art) => art.trade),
     ["roofing", "roofing", "roofing"]
   )
-  const unique = new Set(subjects.map((art) => art.subject))
-  assert.equal(unique.size, 3)
-  assert.match(subjects[0]!.subject, /ceiling|drip|window|stain|bucket|towel/i)
-  assert.match(subjects[1]!.subject, /ladder|hands|underlayment|roof edge/i)
-  assert.match(subjects[2]!.subject, /street|roofline|gable|houses/i)
+  // Round 2 owner decision: every roofing photo is a sunny, good-looking house
+  // with a clean roof, whatever the role. Leak and close-up scenes are retired.
+  for (const art of subjects) {
+    assert.match(art.subject, /house|home/i)
+    assert.match(art.subject, /roof/i)
+    assert.match(art.subject, /sun|blue sky/i)
+    assert.doesNotMatch(art.subject, /bucket|stain|drip/i)
+  }
   for (const art of subjects) {
     assert.doesNotMatch(art.subject, /handshake/i)
     assert.doesNotMatch(art.subject, /ABC Roofers/)
@@ -83,7 +86,7 @@ test("a weak roofing label becomes three different trade scenes", () => {
     assert.match(art.refuse, /QR codes/)
     assert.match(art.refuse, /logos/)
   }
-  assert.match(subjects[2]!.lighting, /coastal/i)
+  assert.match(subjects[2]!.lighting, /sunny|blue sky/i)
   assert.doesNotMatch(subjects[2]!.lighting, /Chula Vista/)
   assert.match(subjects[0]!.craft ?? "", /exterior roof|not empty sky/i)
 })
@@ -121,15 +124,15 @@ test("a specific conceived scene is kept and still art-directed", () => {
   )
   assert.ok(brief)
   assert.equal(brief.visualDirection, visualDirection)
-  assert.equal(brief.artDirection.subject, visualDirection)
+  // Roofing always gets the sunny-house subject (Round 2 owner decision).
+  assert.match(brief.artDirection.subject, /blue sky/i)
 
   const prompt = buildOpenAIImagePrompt(brief)
   assert.match(prompt, /Subject and action:/)
   assert.match(prompt, /Light:/)
   assert.match(prompt, /Camera and lens:/)
   assert.match(prompt, /Negative space:/)
-  assert.match(prompt, /ceiling stain/)
-  assert.equal(prompt.includes(brief.lookBlock), true)
+  assert.match(prompt, /blue sky/i)
   assert.doesNotMatch(prompt, /Don't Wait/)
   assert.doesNotMatch(prompt, /619/)
   assert.doesNotMatch(prompt, /abcroofers/i)
@@ -315,6 +318,86 @@ test("an uploaded agent photo becomes the crew portrait", () => {
     )!
   )
   assert.match(prompt, /looking at the camera/i)
+})
+
+test("an auto insurance photo brief shows the car, not a handyman on a ladder", () => {
+  const campaign: CampaignBrief = {
+    goal: "Ask for an auto insurance quote",
+    offer: "A written quote",
+    audience: { description: "Drivers who own one family car" },
+    businessInfo: { name: "Harbor Auto Cover" },
+  }
+  const art = buildPhotographyArtDirection({
+    imageryRole: "neighborhood",
+    leadJob: "offer",
+    occupancy: "field",
+    visualDirection: "The finished result of the job, daylight, no person in the frame. Not a portrait and not the problem.",
+    campaign,
+    variationKey: "auto-lead",
+    layoutVariant: "image_grounded",
+  })
+  assert.match(art.subject, /car|driveway/i)
+  assert.doesNotMatch(art.subject, /ladder|handyman|roofer|shingle/i)
+  assert.match(art.negativeSpace, /No ladders/i)
+  const brief = toImageBrief(
+    spec({
+      visualDirection: art.subject,
+      imageryRole: "neighborhood",
+      leadJob: "offer",
+      headline: "What the car costs to cover",
+      offer: "A written quote",
+    }),
+    {
+      campaign,
+      variationKey: "auto-lead",
+      researchPhotoNote: "A handyman on a ladder at a worn roof, and a Medicare card on the table.",
+    }
+  )
+  assert.ok(brief)
+  assert.doesNotMatch(brief.artDirection.subject, /handyman|ladder|on the table/i)
+  assert.match(brief.artDirection.subject, /car|driveway/i)
+})
+
+test("an HVAC photograph depicts heating and air, not a borrowed gutter or window", () => {
+  const campaign: CampaignBrief = {
+    goal: "Cool the house",
+    offer: "Free inspection for broken AC units",
+    businessInfo: { name: "Coastal Comfort Heating & Air" },
+  }
+  const roles = ["consequence", "crew", "neighborhood"] as const
+  for (const imageryRole of roles) {
+    const art = buildPhotographyArtDirection({
+      imageryRole,
+      leadJob: imageryRole === "crew" ? "trust" : imageryRole === "consequence" ? "problem" : "offer",
+      occupancy: "field",
+      visualDirection: imageryRole === "crew"
+        ? "A man painting window trim"
+        : "A man on a ladder at a gutter",
+      campaign,
+      variationKey: `hvac-${imageryRole}`,
+      layoutVariant: "image_grounded",
+    })
+    assert.equal(art.trade, "hvac")
+    assert.match(art.subject, /condenser/i)
+    assert.doesNotMatch(art.subject, /gutter|window trim|termite|siding|\bvents?\b|\bducts?\b|\bgrilles?\b/i)
+  }
+  const brief = toImageBrief(
+    spec({
+      visualDirection: "Hands and gauges at an outdoor condenser.",
+      imageryRole: "crew",
+      leadJob: "trust",
+      headline: "Call before the AC quits",
+      offer: "Free inspection for broken AC units",
+    }),
+    {
+      campaign,
+      variationKey: "hvac-note",
+      researchPhotoNote: "A man on a ladder at a gutter, borrowed from a windows layout.",
+    }
+  )
+  assert.ok(brief)
+  assert.match(brief.artDirection.subject, /condenser|furnace|thermostat|coil/i)
+  assert.doesNotMatch(brief.artDirection.subject, /gutter|window trim/i)
 })
 
 test("final expense refuses a casket", () => {

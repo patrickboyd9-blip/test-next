@@ -107,7 +107,7 @@ test("every roofing pro template keeps type and the QR in the safe zone", () => 
   }
 })
 
-test("a long headline shrinks on a word boundary and does not clip", () => {
+test("a long headline keeps every word and shrinks instead of being cut", () => {
   const front = composePostcardFace({
     templateId: "roof_full_bleed",
     size: "5x8",
@@ -125,7 +125,8 @@ test("a long headline shrinks on a word boundary and does not clip", () => {
   const offer = front.texts.find((text) => text.role === "offer")
   assert.ok(headline)
   assert.ok(offer)
-  assert.equal(headline!.text.endsWith("night"), false)
+  assert.equal(headline!.text.endsWith("night"), true)
+  assert.equal(offer!.text.endsWith("block"), true)
   assert.equal(/\S$/.test(headline!.text), true)
   assert.ok(headline!.fontPt >= 8)
   assert.ok(headline!.fontPt > offer!.fontPt)

@@ -16,6 +16,8 @@ import {
   getMockRecommendation,
 } from "./mock-creative-data"
 import { applyStudioBoard } from "@/lib/design-intelligence/candidate-board"
+import { stampLibraryResearch } from "@/lib/research-library/evidence"
+import { researchHitsForBrief } from "@/lib/research-library"
 
 import { applyMockRefinement } from "./mock-refinement-engine"
 
@@ -78,6 +80,7 @@ export class MockCreativeEngine implements CreativeEngine {
 async function normalizeMockGeneration(
   input: GenerateDirectionsInput
 ): Promise<GenerateDirectionsResult> {
+  const hits = await researchHitsForBrief(input.brief)
   const directions = getMockCreativeDirections(input.brief)
   const result = normalizeGenerationResult(input.brief, directions, {
     stripInventedFacts: false,
@@ -90,5 +93,5 @@ async function normalizeMockGeneration(
       rationale: result.recommendation.rationale,
     },
   }, input.canvas, { ownerId: input.ownerId })
-  return designed
+  return stampLibraryResearch(designed, hits, input.brief)
 }

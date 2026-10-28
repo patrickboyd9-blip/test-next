@@ -11,9 +11,9 @@
 export const OPENAI_IMAGE_MODEL_PIN = "gpt-image-2.5-flare-2026-09-08"
 export const OPENAI_IMAGE_MODEL_FALLBACK = "gpt-image-2"
 
-/** Landscape preview. Standard GPT Image size, medium quality, fast enough for three directions. */
-export const OPENAI_IMAGE_SIZE_PREVIEW = "1536x1024"
-export const OPENAI_IMAGE_QUALITY_PREVIEW = "medium"
+/** Square preview. Smaller and lower quality so three directions can finish inside a 60s function. */
+export const OPENAI_IMAGE_SIZE_PREVIEW = "1024x1024"
+export const OPENAI_IMAGE_QUALITY_PREVIEW = "low"
 
 /**
  * 5×8 trim at 300 DPI is 2400×1500. 2400×1504 is a valid Images API size

@@ -19,8 +19,10 @@ import {
   applyStrategyConfirmation,
 } from "./mail-piece"
 import { applyAiGenerationStart, applyAiStart } from "./start-path"
+import { writeAddressSide } from "./address-side"
 import { cloneSpec } from "./spec-diff"
 import type {
+  AddressSideEdit,
   Campaign,
   CampaignBrief,
   CampaignCreative,
@@ -120,6 +122,7 @@ export interface CampaignRepository {
     note: string,
     customerPrompt?: string
   ): Promise<Campaign>
+  saveAddressSide(id: string, directionId: string, edit: AddressSideEdit): Promise<Campaign>
   approveCreative(id: string): Promise<Campaign>
   unapproveCreative(id: string): Promise<Campaign>
   setDesignSource(id: string, source: DesignSource): Promise<Campaign>
@@ -420,6 +423,12 @@ class StoredCampaignRepository implements CampaignRepository {
     campaign.creative.activeSpec = cloneSpec(next)
     campaign.creative.activeRevisionId = revision.id
     campaign.updatedAt = now
+    return this.write(campaign)
+  }
+
+  async saveAddressSide(id: string, directionId: string, edit: AddressSideEdit): Promise<Campaign> {
+    const campaign = await this.require(id)
+    writeAddressSide(campaign, directionId, edit)
     return this.write(campaign)
   }
 

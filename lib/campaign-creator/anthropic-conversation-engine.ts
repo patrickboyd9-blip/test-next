@@ -17,6 +17,8 @@ import {
   createAnthropicClient,
   type AnthropicToolUseBlock,
 } from "./load-anthropic-sdk"
+import { formatStrategyEvidence } from "@/lib/research-library/evidence"
+import { researchHitsForBrief } from "@/lib/research-library"
 
 const MODEL = "claude-sonnet-5"
 const MAX_TOKENS = 1024
@@ -126,7 +128,10 @@ const updateBriefTool: Anthropic.Tool = {
   },
 } as const
 
-function buildSystemPrompt(brief: CampaignBrief): string {
+function buildSystemPrompt(brief: CampaignBrief, libraryEvidence?: string): string {
+  const evidence = libraryEvidence?.trim()
+    ? `\n\nResearch library evidence for this conversation. Use it to recommend a structure, an offer pattern, and a photograph. Do not quote a response rate, a statistic, or a deadline unless the customer already said it.\n${libraryEvidence.trim()}\n`
+    : ""
   return `You are Modern Mail's Campaign Creator — a knowledgeable marketing strategist \
 helping a small business turn an idea into a physical mail campaign. You are having a \
 real conversation, not administering a form.
@@ -172,7 +177,12 @@ brandAssets), give the complete list as currently understood. For grouped fields
 updating — they will be merged with what's already known.
 
 Current Campaign Brief (JSON, may be incomplete):
-${JSON.stringify(brief, null, 2)}`
+${JSON.stringify(brief, null, 2)}${evidence}`
+}
+
+async function libraryEvidenceFor(brief: CampaignBrief): Promise<string> {
+  const hits = await researchHitsForBrief(brief)
+  return formatStrategyEvidence(hits)
 }
 
 function toAnthropicMessages(
@@ -247,7 +257,7 @@ export class AnthropicConversationEngine implements ConversationEngine {
     const response = await this.client.messages.create({
       model: MODEL,
       max_tokens: MAX_TOKENS,
-      system: buildSystemPrompt(input.brief),
+      system: buildSystemPrompt(input.brief, await libraryEvidenceFor(input.brief)),
       messages: toAnthropicMessages(input.transcript),
       tools: [updateBriefTool],
       tool_choice: { type: "tool", name: UPDATE_BRIEF_TOOL_NAME },

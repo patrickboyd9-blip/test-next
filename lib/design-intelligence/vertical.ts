@@ -1,34 +1,26 @@
 import type { CampaignBrief } from "@/lib/campaign-creator/types"
+import { industryForBrief } from "@/lib/research-library/industry"
 
 import type { DesignVertical } from "./rationale"
 
 /**
- * Maps a campaign brief onto the six verticals the playbook knows.
- * Medicare and other insurance are recognized first so a roofing word
- * inside a benefits mailer cannot pull the card into a trade layout.
+ * Layout families the art director can paint.
+ * The research industry is one of the gold slugs. This maps that industry
+ * onto the six families the card schema knows. Insurance other than Medicare
+ * does not use the Medicare family. Windows, gutters, siding, and garage doors
+ * do not use roofing. Senior living does not use the Medicare family.
+ * The newer local trades use the general local-service family.
  */
 export function verticalForBrief(brief: CampaignBrief): DesignVertical {
-  const text = [
-    brief.goal,
-    brief.offer,
-    brief.audience?.description,
-    brief.businessInfo?.name,
-    brief.emotionalTone,
-    brief.otherRequirements,
-    brief.desiredRecipientAction,
-  ]
-    .filter((value): value is string => Boolean(value?.trim()))
-    .join(" ")
+  return designVerticalForIndustry(industryForBrief(brief))
+}
 
-  if (/\bmedicare\b|\bmedicaid\b|\binsurance\b|\bfinal expense\b|\bsupplement\b|\bannuit/i.test(text)) {
-    return "medicare_insurance"
-  }
-  if (/\broof|shingle|gutter|storm damage\b/i.test(text)) return "roofing"
-  if (/\bplumb|drain|water heater|pipe\b/i.test(text)) return "plumbing"
-  if (/\bhvac\b|\bair condition|\bfurnace\b|\bheating\b|\bcooling\b|\bduct\b/i.test(text)) return "hvac"
-  if (/\breal estate\b|\brealtor\b|\blisting\b|\bopen house\b|\bhome for sale\b/i.test(text)) {
-    return "real_estate"
-  }
+export function designVerticalForIndustry(industry: string): DesignVertical {
+  if (industry === "medicare") return "medicare_insurance"
+  if (industry === "roofing") return "roofing"
+  if (industry === "plumbing") return "plumbing"
+  if (industry === "hvac") return "hvac"
+  if (industry === "real-estate-agents" || industry === "home-buying") return "real_estate"
   return "general_local_service"
 }
 

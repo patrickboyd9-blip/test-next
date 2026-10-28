@@ -15,6 +15,7 @@ import {
   type PDFPage,
 } from "pdf-lib"
 
+import { addressSideQrPayload } from "@/lib/campaign-creator/address-side"
 import { buildQrMatrix, QR_QUIET_MODULES } from "@/lib/campaign-creator/studio-qr"
 import {
   canvasRect,
@@ -36,12 +37,14 @@ import {
   addressBackPlan,
   addressBackQrPlacement,
   addressSideContentRect,
+  assertPrintImageDpi,
+  MIN_EFFECTIVE_DPI,
   type PostcardPrintCopy,
   type PostcardPrintImage,
   type RenderedPostcardPdf,
 } from "@/lib/print-spec/render-campaign-postcard-pdf"
 import { canvasRectToPdf, type PostcardGeometry } from "@/lib/print-spec/postcard-5x8-print-spec"
-import { assertPrintImageDpi } from "@/lib/print-spec/render-campaign-postcard-pdf"
+import { upscaleToPrintCanvas } from "@/lib/print-spec/upscale-print-image"
 
 const FONT_DIR = path.join(process.cwd(), "lib/print-spec/fonts")
 
@@ -58,6 +61,7 @@ export async function renderTemplatedPostcardPdf(input: {
   size?: PostcardSizeId
   image?: PostcardPrintImage
   alternateImage?: PostcardPrintImage
+  backImage?: PostcardPrintImage
 }): Promise<RenderedPostcardPdf> {
   const size = input.size ?? "5x8"
   const spec = geometryFor(size)
@@ -90,6 +94,7 @@ export async function renderTemplatedPostcardPdf(input: {
   const text = await doc.embedFont(readFileSync(path.join(FONT_DIR, "SourceSans3-Regular.ttf")), { subset: true })
   const strong = await doc.embedFont(readFileSync(path.join(FONT_DIR, "SourceSans3-Semibold.ttf")), { subset: true })
   const images = await embedImages(doc, input.image, input.alternateImage, spec)
+  const backPhoto = await embedLoose(doc, input.backImage)
 
   const pageSize: [number, number] = [spec.pdfPagePoints.widthPoints, spec.pdfPagePoints.heightPoints]
   const frontPage = doc.addPage(pageSize)
@@ -98,8 +103,11 @@ export async function renderTemplatedPostcardPdf(input: {
   markBoxes(backPage, spec)
 
   drawFront(frontPage, spec, front, images, input.copy.qrPayload, display, strong, text)
-  if (isRoofingProTemplate(input.templateId)) drawPlanBack(backPage, spec, back, display, strong, text)
-  else drawBack(backPage, spec, input.copy, back, display, strong, text)
+  if (isRoofingProTemplate(input.templateId) || input.copy.addressSide) {
+    drawPlanBack(backPage, spec, back, display, strong, text, backPhoto, addressSideQrPayload(input.copy, input.copy.qrPayload))
+  } else {
+    drawBack(backPage, spec, input.copy, back, display, strong, text)
+  }
 
   const bytes = await doc.save({ useObjectStreams: false })
   assertTemplatedPage(bytes, spec)
@@ -147,6 +155,7 @@ export async function renderStudioDesignPdf(input: {
   copy: PostcardPrintCopy
   image?: PostcardPrintImage
   alternateImage?: PostcardPrintImage
+  backImage?: PostcardPrintImage
 }): Promise<RenderedPostcardPdf & { design: GridCard }> {
   const spec = geometryFor(input.card.front.size)
   const doc = await PDFDocument.create()
@@ -155,13 +164,23 @@ export async function renderStudioDesignPdf(input: {
   const text = await doc.embedFont(readFileSync(path.join(FONT_DIR, "SourceSans3-Regular.ttf")), { subset: true })
   const strong = await doc.embedFont(readFileSync(path.join(FONT_DIR, "SourceSans3-Semibold.ttf")), { subset: true })
   const images = await embedImages(doc, input.image, input.alternateImage, spec)
+  const backPhoto = await embedLoose(doc, input.backImage)
   const pageSize: [number, number] = [spec.pdfPagePoints.widthPoints, spec.pdfPagePoints.heightPoints]
   const frontPage = doc.addPage(pageSize)
   const backPage = doc.addPage(pageSize)
   markBoxes(frontPage, spec)
   markBoxes(backPage, spec)
   drawFront(frontPage, spec, input.card.front, images, input.copy.qrPayload, display, strong, text)
-  drawPlanBack(backPage, spec, input.card.back, display, strong, text)
+  drawPlanBack(
+    backPage,
+    spec,
+    input.card.back,
+    display,
+    strong,
+    text,
+    backPhoto,
+    addressSideQrPayload(input.copy, input.copy.qrPayload)
+  )
   const bytes = await doc.save({ useObjectStreams: false })
   await assertTemplatedPage(bytes, spec)
   return {
@@ -179,7 +198,9 @@ function drawPlanBack(
   plan: PostcardFacePlan,
   display: PDFFont,
   strong: PDFFont,
-  text: PDFFont
+  text: PDFFont,
+  backPhoto: PDFImage | null = null,
+  qrPayload?: string
 ) {
   const paper = plan.shapes.find((shape) => shape.role === "paper")?.fill ?? "#FFFFFF"
   page.drawRectangle({
@@ -190,8 +211,11 @@ function drawPlanBack(
     color: paint(paper),
   })
   for (const shape of plan.shapes) drawShape(page, spec, plan, shape)
+  for (const slot of plan.photos) {
+    drawPhoto(page, spec, plan, slot, backPhoto, plan.palette.field)
+  }
   for (const line of plan.texts) drawFitted(page, spec, line, display, text)
-  if (plan.lockup) drawFrontLockup(page, spec, plan, undefined, display, strong, text)
+  if (plan.lockup) drawFrontLockup(page, spec, plan, qrPayload, display, strong, text)
 }
 
 function drawFront(
@@ -396,23 +420,52 @@ function drawFitted(page: PDFPage, spec: PostcardGeometry, line: FittedText, dis
   if (line.lines.length === 0) return
   const font = line.font === "display" ? display : text
   const pdf = canvasRectToPdf(canvasRect(line.rect), spec.artworkCanvasInches.heightInches)
+  const ratio = line.font === "display" ? 1.02 : 1.18
+  // Every word is painted. When the planned lines do not fit the box with the
+  // real font, re-wrap with real widths and step the size down. Never drop a row.
   let size = line.fontPt
-  const widest = Math.max(...line.lines.map((item) => font.widthOfTextAtSize(item, size)))
-  if (widest > pdf.widthPoints) size = fitWidth(line.lines.join(" "), font, size, pdf.widthPoints)
-  const leading = size * (line.font === "display" ? 1.02 : 1.18)
-  const block = line.lines.length * leading
+  let rows = line.lines
+  const fits = (candidate: string[], pt: number) =>
+    candidate.every((row) => font.widthOfTextAtSize(row, pt) <= pdf.widthPoints + 0.5) &&
+    candidate.length * pt * ratio <= pdf.heightPoints + pt * (ratio - 1) + 1
+  if (!fits(rows, size)) {
+    const words = line.lines.join(" ").split(/\s+/).filter(Boolean)
+    for (let pt = size; pt >= 5; pt -= 0.25) {
+      const wrapped = wrapReal(words, font, pt, pdf.widthPoints)
+      size = pt
+      rows = wrapped
+      if (fits(wrapped, pt)) break
+    }
+  }
+  const leading = size * ratio
+  const block = rows.length * leading
   const spare =
     line.role === "offer" || line.role === "label" || line.role === "contact"
       ? Math.max(0, pdf.heightPoints - block) / 2
       : 0
   let cursor = pdf.yPoints + pdf.heightPoints - spare - size
-  for (const row of line.lines) {
-    if (cursor < pdf.yPoints - 1) break
+  for (const row of rows) {
     const rowWidth = font.widthOfTextAtSize(row, size)
     const x = line.align === "center" ? pdf.xPoints + Math.max(0, (pdf.widthPoints - rowWidth) / 2) : pdf.xPoints
     page.drawText(row, { x, y: cursor, size, font, color: paint(line.color) })
     cursor -= leading
   }
+}
+
+function wrapReal(words: string[], font: PDFFont, size: number, width: number): string[] {
+  const rows: string[] = []
+  let current = ""
+  for (const word of words) {
+    const next = current ? `${current} ${word}` : word
+    if (!current || font.widthOfTextAtSize(next, size) <= width) {
+      current = next
+      continue
+    }
+    rows.push(current)
+    current = word
+  }
+  if (current) rows.push(current)
+  return rows
 }
 
 function drawFrontLockup(
@@ -485,18 +538,27 @@ function drawScrim(
   color: string,
   steep = false
 ) {
-  const steps = 16
-  const band = rect.heightPoints / steps
+  // Stacked layers, each running from its start line to the bottom edge.
+  // Neighbouring strips never overlap, so no darker stripe appears at a seam.
+  // Each layer's alpha is chosen so the composite follows the target curve.
+  const steps = 72
   const ink = paint(color)
+  const target = (t: number) => (steep ? steepScrimOpacity(t) : t * t * 0.94)
+  let previous = 0
   for (let index = 0; index < steps; index += 1) {
     const t = index / (steps - 1)
+    const goal = Math.min(0.97, target(t))
+    if (goal <= previous) continue
+    const alpha = 1 - (1 - goal) / (1 - previous)
+    previous = goal
+    const top = rect.yPoints + rect.heightPoints - (index / steps) * rect.heightPoints
     page.drawRectangle({
       x: rect.xPoints,
-      y: rect.yPoints + rect.heightPoints - (index + 1) * band,
+      y: rect.yPoints,
       width: rect.widthPoints,
-      height: band + 0.6,
+      height: top - rect.yPoints,
       color: ink,
-      opacity: steep ? steepScrimOpacity(t) : t * t * 0.94,
+      opacity: alpha,
     })
   }
 }
@@ -560,6 +622,16 @@ interface EmbeddedImages {
   dpi: { x: number; y: number }
 }
 
+async function embedLoose(doc: PDFDocument, image: PostcardPrintImage | undefined): Promise<PDFImage | null> {
+  if (!image) return null
+  try {
+    const kind = image.bytes[0] === 0xff && image.bytes[1] === 0xd8 ? "jpeg" : "png"
+    return kind === "jpeg" ? doc.embedJpg(image.bytes) : doc.embedPng(image.bytes)
+  } catch {
+    return null
+  }
+}
+
 async function embedImages(
   doc: PDFDocument,
   primary: PostcardPrintImage | undefined,
@@ -571,10 +643,16 @@ async function embedImages(
     const kind = image.bytes[0] === 0xff && image.bytes[1] === 0xd8 ? "jpeg" : "png"
     return kind === "jpeg" ? doc.embedJpg(image.bytes) : doc.embedPng(image.bytes)
   }
-  const dpi = primary
-    ? assertPrintImageDpi({ width: primary.width, height: primary.height }, spec.artworkCanvasInches)
+  const fittedPrimary = primary
+    ? upscaleToPrintCanvas(primary, spec.artworkCanvasInches, MIN_EFFECTIVE_DPI)
+    : undefined
+  const fittedAlternate = alternate
+    ? upscaleToPrintCanvas(alternate, spec.artworkCanvasInches, MIN_EFFECTIVE_DPI)
+    : undefined
+  const dpi = fittedPrimary
+    ? assertPrintImageDpi({ width: fittedPrimary.width, height: fittedPrimary.height }, spec.artworkCanvasInches)
     : { x: 300, y: 300 }
-  return { primary: await embed(primary), alternate: await embed(alternate), dpi }
+  return { primary: await embed(fittedPrimary), alternate: await embed(fittedAlternate), dpi }
 }
 
 function expandBleed(rect: InchRect, size: PostcardSizeId, bleed: number): InchRect {

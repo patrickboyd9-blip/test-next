@@ -36,10 +36,19 @@ export interface GithubContentEntry {
   type: "file" | "dir"
 }
 
+export interface GithubTreeEntry {
+  path: string
+  type: "blob" | "tree"
+  sha?: string
+}
+
 export interface GithubReader {
   getJson(filePath: string, ref: string): Promise<unknown | null>
   getBytes(filePath: string, ref: string): Promise<{ bytes: Buffer; contentType: string } | null>
+  getText?(filePath: string, ref: string): Promise<string | null>
   listDir?(dirPath: string, ref: string): Promise<GithubContentEntry[]>
+  /** Recursive git tree. Callers must not fetch anything under a private/ folder. */
+  listTree?(ref: string): Promise<{ truncated: boolean; entries: GithubTreeEntry[] }>
 }
 
 export interface SyncReport {
@@ -259,6 +268,32 @@ export function githubReader(token: string, env: NodeJS.ProcessEnv): GithubReade
       const bytes = Buffer.from(await response.arrayBuffer())
       const contentType = response.headers.get("content-type")?.split(";")[0] || contentTypeFor(filePath)
       return { bytes, contentType }
+    },
+    async getText(filePath, ref) {
+      if (isForbiddenResearchPath(filePath)) return null
+      if (/\.(jpe?g|png|webp|gif|pdf|zip)$/i.test(filePath)) return null
+      const response = await fetch(contentsUrl(repo, filePath, ref), { headers: githubHeaders(token, "application/vnd.github.raw") })
+      if (response.status === 404) return null
+      if (!response.ok) throw new Error(`GitHub ${response.status} for ${filePath}`)
+      return response.text()
+    },
+    async listTree(ref) {
+      const response = await fetch(`https://api.github.com/repos/${repo}/git/trees/${encodeURIComponent(ref)}?recursive=1`, {
+        headers: githubHeaders(token, "application/vnd.github+json"),
+      })
+      if (response.status === 404) return { truncated: false, entries: [] }
+      if (!response.ok) throw new Error(`GitHub ${response.status} for the ${ref} tree`)
+      const payload = (await response.json()) as { truncated?: unknown; tree?: unknown }
+      const tree = Array.isArray(payload.tree) ? payload.tree : []
+      const entries: GithubTreeEntry[] = []
+      for (const item of tree) {
+        if (!item || typeof item !== "object") continue
+        const row = item as { path?: unknown; type?: unknown; sha?: unknown }
+        if (typeof row.path !== "string") continue
+        if (row.type !== "blob" && row.type !== "tree") continue
+        entries.push({ path: row.path, type: row.type, sha: typeof row.sha === "string" ? row.sha : undefined })
+      }
+      return { truncated: payload.truncated === true, entries }
     },
     async listDir(dirPath, ref) {
       if (isForbiddenResearchPath(dirPath)) return []

@@ -350,7 +350,13 @@ test("the board shows three diverse concepts and cites only what it retrieved", 
   for (const item of board.surfaced) {
     const offer = item.card.front.texts.find((text) => text.role === "offer")
     const headline = item.card.front.texts.find((text) => text.role === "headline")
-    assert.ok(offer && headline && headline.fontPt > offer.fontPt)
+    assert.ok(offer && headline)
+    if (item.rationale.scale_ratios.hero === "offer") {
+      assert.ok(offer.fontPt >= headline.fontPt * 1.5, `${item.familyId} offer ${offer.fontPt} vs headline ${headline.fontPt}`)
+    } else {
+      assert.ok(headline.fontPt > offer.fontPt)
+      assert.ok(offer.fontPt >= headline.fontPt * 0.65, `${item.familyId} offer still readable`)
+    }
     assert.equal(item.card.front.lockup?.qrLabel, "Scan to book")
     assert.match(item.card.front.lockup?.phone?.text ?? "", /555/)
     assert.ok(item.card.front.lockup?.website?.text)

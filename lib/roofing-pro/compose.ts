@@ -1,3 +1,4 @@
+import { composeAddressSideFace } from "@/lib/campaign-creator/address-side-layout"
 import { qrScanLabel } from "@/components/campaign-creator/studio/design-rules"
 import type { CreativeSpec } from "@/lib/campaign-creator/types"
 import type { LockupPlan, PhotoSlotPlan, PostcardFacePlan, ShapePlan, TrustChipPlan } from "@/lib/postcard-layouts/compose"
@@ -30,13 +31,15 @@ export interface RoofingProInput {
   face?: "front" | "back"
   spec: Pick<
     CreativeSpec,
-    "headline" | "subheadline" | "body" | "offer" | "callToAction" | "phone" | "website" | "qrDestination"
+    "headline" | "subheadline" | "body" | "offer" | "callToAction" | "phone" | "website" | "qrDestination" | "addressSide"
   >
   businessName?: string
   qrPayload?: string | null
   license?: string | null
   disclaimerText?: string | null
   complianceMark?: string | null
+  /** Return lines for the message column. The mailing panel stays blank. */
+  returnAddress?: string | null
 }
 
 const DARK_TYPE = new Set<RoofingProTemplateId>(["roof_full_bleed", "roof_storm", "roof_seasonal"])
@@ -165,6 +168,23 @@ function composeBack(
   pairing: PostcardFacePlan["pairing"],
   palette: VerticalPalette
 ): PostcardFacePlan {
+  if (input.spec.addressSide) {
+    return composeAddressSideFace({
+      size,
+      pairing,
+      palette,
+      spec: input.spec,
+      businessName: input.businessName,
+      phone: input.spec.phone,
+      website: input.spec.website,
+      license: input.license ?? undefined,
+      returnAddress: input.returnAddress ?? undefined,
+      qrDestination: input.qrPayload ?? input.spec.qrDestination,
+      disclaimer: input.disclaimerText,
+      complianceMark: input.complianceMark,
+      templateId: input.templateId,
+    })
+  }
   const box = contentBox(size)
   const trim = trimInches(size)
   const copy = resolveCopy(input, ROOFING_PRO_META[input.templateId].offerLed)
@@ -549,7 +569,7 @@ function resolveCopy(input: RoofingProInput, offerLed: boolean): Copy {
   if (!offerLed && nextHeadline && same(nextHeadline, offer)) nextOffer = ""
   const expiry = statedExpiryLine([offer, sub, body].filter(Boolean).join(" "))
   return {
-    offer: limitChars(nextOffer, offerLed ? ROOFING_COPY_LIMITS.offerLed : ROOFING_COPY_LIMITS.offer),
+    offer: nextOffer.replace(/\s+/g, " ").trim(),
     headline: limitChars(nextHeadline, ROOFING_COPY_LIMITS.headline),
     body: same(body, nextHeadline) || same(body, nextOffer) ? "" : limitChars(body, ROOFING_COPY_LIMITS.body),
     business: limitChars(clean(input.businessName), ROOFING_COPY_LIMITS.business),
@@ -579,8 +599,8 @@ function fitBounded(input: {
   minPt?: number
   maxPt?: number
 }): FittedText {
-  let text = limitChars(input.text, input.maxChars)
-  let minPt = input.minPt
+  const text = limitChars(input.text, input.maxChars)
+  const minPt = input.minPt
   const empty = fitText({
     text: "",
     rect: input.rect,
@@ -592,7 +612,12 @@ function fitBounded(input: {
     maxPt: input.maxPt,
   })
   if (!text) return empty
-  for (let attempt = 0; attempt < 14; attempt += 1) {
+  // Never drop words. Step the floor down until the whole text fits.
+  // If it still overflows at the smallest size, the painter shrinks it to fit.
+  const floors = [minPt, 10, 9, 8, 7].filter((value, index, all): value is number =>
+    typeof value === "number" && all.indexOf(value) === index && (minPt === undefined || value <= minPt))
+  let last: FittedText = empty
+  for (const floor of floors.length > 0 ? floors : [8, 7]) {
     const fitted = fitText({
       text,
       rect: input.rect,
@@ -600,23 +625,13 @@ function fitBounded(input: {
       pairing: input.pairing,
       color: input.color,
       align: input.align,
-      minPt,
+      minPt: floor,
       maxPt: input.maxPt,
     })
+    last = fitted
     if (!fitted.overflows && fitted.lines.length > 0) return fitted
-    const words = text.split(" ")
-    if (words.length > 1) {
-      words.pop()
-      text = words.join(" ")
-      continue
-    }
-    if ((minPt ?? 8) > 8) {
-      minPt = 8
-      continue
-    }
-    return fitted
   }
-  return empty
+  return last
 }
 
 function paletteFor(id: RoofingProTemplateId): VerticalPalette {

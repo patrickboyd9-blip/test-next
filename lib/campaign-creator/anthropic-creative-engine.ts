@@ -18,6 +18,9 @@ import { applyStudioBoard } from "@/lib/design-intelligence/candidate-board"
 
 import { buildCreativeIntelligenceContext } from "./creative-intelligence"
 import { loadReferenceMailerImages, type ReferenceMailerImage } from "@/lib/reference-corpus/mailer-images"
+import { stampLibraryResearch } from "@/lib/research-library/evidence"
+import { researchHitsForBrief } from "@/lib/research-library"
+import type { RetrievalHit } from "@/lib/research-library/types"
 import { RESEARCH_QUALITY_THRESHOLD } from "./research-quality"
 import {
   CREATIVE_PROMPT_VERSION,
@@ -259,11 +262,12 @@ export class AnthropicCreativeEngine implements CreativeEngine {
   async generateDirections(
     input: GenerateDirectionsInput
   ): Promise<GenerateDirectionsResult> {
-    const intelligence = buildCreativeIntelligenceContext(input.brief)
+    const hits = await researchHitsForBrief(input.brief)
+    const intelligence = buildCreativeIntelligenceContext(input.brief, { hits })
     const images = await loadReferenceMailerImages(
       (intelligence.referenceCards ?? []).map((card) => card.mmrId)
     )
-    return this.generateWithRetry(input.brief, input.canvas, images, input.ownerId, (reasons) =>
+    return this.generateWithRetry(input.brief, input.canvas, images, input.ownerId, hits, (reasons) =>
       this.requestDirections({
         system: buildGenerateSystemPrompt(input.canvas, intelligence),
         user: withGenerationRetryFeedback(
@@ -300,11 +304,12 @@ export class AnthropicCreativeEngine implements CreativeEngine {
   async regenerateDirections(
     input: RegenerateDirectionsInput
   ): Promise<GenerateDirectionsResult> {
-    const intelligence = buildCreativeIntelligenceContext(input.brief)
+    const hits = await researchHitsForBrief(input.brief)
+    const intelligence = buildCreativeIntelligenceContext(input.brief, { hits })
     const images = await loadReferenceMailerImages(
       (intelligence.referenceCards ?? []).map((card) => card.mmrId)
     )
-    return this.generateWithRetry(input.brief, input.canvas, images, input.ownerId, (reasons) =>
+    return this.generateWithRetry(input.brief, input.canvas, images, input.ownerId, hits, (reasons) =>
       this.requestDirections({
         system: buildRegenerateSystemPrompt(input.canvas, intelligence),
         user: withGenerationRetryFeedback(buildRegenerateUserMessage(input), reasons),
@@ -318,6 +323,7 @@ export class AnthropicCreativeEngine implements CreativeEngine {
     canvas: GenerateDirectionsInput["canvas"],
     images: ReferenceMailerImage[],
     ownerId: string | undefined,
+    hits: RetrievalHit[],
     request: (reasons?: string[]) => Promise<CreativeDirection[]>
   ): Promise<GenerateDirectionsResult> {
     let reasons: string[] | undefined
@@ -344,20 +350,31 @@ export class AnthropicCreativeEngine implements CreativeEngine {
           best = result
           continue
         }
-        return applyStudioBoard(brief, result, canvas, { ownerId })
+        return this.finishGeneration(brief, result, canvas, ownerId, hits)
       } catch (error) {
         lastError = error
         if (!(error instanceof CreativeGenerationInvalidError) || attempt === 1) {
-          if (best) return applyStudioBoard(brief, best, canvas, { ownerId })
+          if (best) return this.finishGeneration(brief, best, canvas, ownerId, hits)
           throw error
         }
         reasons = error.reasons
       }
     }
-    if (best) return applyStudioBoard(brief, best, canvas, { ownerId })
+    if (best) return this.finishGeneration(brief, best, canvas, ownerId, hits)
     throw lastError instanceof Error
       ? lastError
       : new CreativeGenerationInvalidError(["generation failed"])
+  }
+
+  private async finishGeneration(
+    brief: GenerateDirectionsInput["brief"],
+    result: GenerateDirectionsResult,
+    canvas: GenerateDirectionsInput["canvas"],
+    ownerId: string | undefined,
+    hits: RetrievalHit[]
+  ): Promise<GenerateDirectionsResult> {
+    const boarded = await applyStudioBoard(brief, result, canvas, { ownerId })
+    return stampLibraryResearch(boarded, hits, brief)
   }
 
   private async requestDirections(input: {
@@ -501,12 +518,13 @@ export class AnthropicCreativeEngine implements CreativeEngine {
     spec?: CreativeSpec
     studioResponse?: string
   }> {
+    const hits = await researchHitsForBrief(input.brief)
     const response = await this.client.messages.create({
       model: MODEL,
       max_tokens: REFINE_MAX_TOKENS,
       system: buildRefineSystemPrompt(
         input.canvas,
-        buildCreativeIntelligenceContext(input.brief)
+        buildCreativeIntelligenceContext(input.brief, { hits })
       ),
       messages: [
         {

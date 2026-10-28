@@ -2,10 +2,12 @@ import { readFileSync } from "node:fs"
 import path from "node:path"
 
 import fontkit from "@pdf-lib/fontkit"
-import { PDFDocument, rgb, type PDFFont, type PDFPage } from "pdf-lib"
+import { PDFDocument, rgb, type PDFFont, type PDFImage, type PDFPage } from "pdf-lib"
 
+import { resolveAddressSide } from "../campaign-creator/address-side"
 import { repairCustomerVoice } from "../campaign-creator/customer-voice"
 import { buildQrMatrix, QR_QUIET_MODULES } from "../campaign-creator/studio-qr"
+import type { AddressSideEdit } from "../campaign-creator/types"
 
 import { addressSideContentRect, rectsOverlap } from "./address-side-content"
 import type { InchesRect } from "./postcard-5x8-print-spec"
@@ -17,6 +19,7 @@ import {
 
 export { addressSideContentRect, rectsOverlap }
 import { encodeSolidPng, effectiveDpi, readRasterSize } from "./raster"
+import { upscaleToPrintCanvas } from "./upscale-print-image"
 
 export const MIN_EFFECTIVE_DPI = 300
 
@@ -45,6 +48,8 @@ export interface PostcardPrintCopy {
   subheadline?: string
   /** License text the business supplied. */
   license?: string
+  /** Customer edits for the address side. Absent keeps the generated back. */
+  addressSide?: AddressSideEdit
 }
 
 export interface AddressBackPlan {
@@ -58,11 +63,13 @@ export interface AddressBackPlan {
   callToAction?: string
   qrPayload?: string
   disclaimer?: string
+  license?: string
 }
 
 const QR_MAX_INCHES = 1.05
 
 export function addressBackPlan(copy: PostcardPrintCopy): AddressBackPlan {
+  if (copy.addressSide) return editedAddressBackPlan(copy)
   const voiced = voicePrintCopy(copy)
   const brand = textOf(voiced.businessName)
   const headline = textOf(voiced.headline)
@@ -93,8 +100,59 @@ export function postcardPrintLines(copy: PostcardPrintCopy): string[] {
     plan.website,
     plan.callToAction,
     plan.disclaimer,
+    plan.license,
     ...plan.returnLines,
   ].filter((line): line is string => Boolean(line))
+}
+
+function editedAddressBackPlan(copy: PostcardPrintCopy): AddressBackPlan {
+  const resolved = resolveAddressSide(
+    {
+      addressSide: copy.addressSide,
+      offer: copy.offer,
+      phone: copy.phone,
+      website: copy.website,
+      qrDestination: copy.qrPayload,
+    },
+    {
+      businessName: copy.businessName,
+      proof: copy.offer,
+      phone: copy.phone,
+      website: copy.website,
+      license: copy.license,
+      returnAddress: (copy.returnLines ?? []).join("\n"),
+      qrDestination: copy.qrPayload,
+    }
+  )
+  const sections = resolved.sections
+  return {
+    returnLines: sections.returnAddress
+      ? resolved.returnAddress.split("\n").map((line) => line.trim()).filter(Boolean).slice(0, 3)
+      : [],
+    brand: resolved.businessName || undefined,
+    message: sections.proof ? resolved.proof || undefined : undefined,
+    supporting: sections.benefits && resolved.benefits.length > 0 ? resolved.benefits.join(" · ") : undefined,
+    offer: sections.offer ? resolved.offer || undefined : undefined,
+    phone: sections.contact ? resolved.phone || undefined : undefined,
+    website: sections.contact ? resolved.website || undefined : undefined,
+    qrPayload: sections.qr ? resolved.qrDestination || undefined : undefined,
+    disclaimer: textOf(copy.disclaimer),
+    license: sections.license ? resolved.license || undefined : undefined,
+  }
+}
+
+function planHasPhoto(copy: PostcardPrintCopy): boolean {
+  return Boolean(copy.addressSide?.sections?.photo) && copy.addressSide?.photoSrc !== "none"
+}
+
+async function embedBackImage(doc: PDFDocument, image: PostcardPrintImage | undefined): Promise<PDFImage | null> {
+  if (!image) return null
+  try {
+    const kind = image.bytes[0] === 0xff && image.bytes[1] === 0xd8 ? "jpeg" : "png"
+    return kind === "jpeg" ? doc.embedJpg(image.bytes) : doc.embedPng(image.bytes)
+  } catch {
+    return null
+  }
 }
 
 function voicePrintCopy(copy: PostcardPrintCopy): PostcardPrintCopy {
@@ -197,13 +255,16 @@ export function assertPrintImageDpi(
 export async function renderPostcardPrintPdf(input: {
   copy: PostcardPrintCopy
   image?: PostcardPrintImage
+  backImage?: PostcardPrintImage
   plateColor?: readonly [number, number, number]
 }): Promise<RenderedPostcardPdf> {
   const spec = buildPostcard5x8PrintSpec()
   const backContent = addressSideContentRect(spec)
   const plateColor = input.plateColor ?? [30, 58, 95]
   const artwork = input.image ? "final-photo" : "type-plate"
-  const image = input.image ?? solidPlate(spec, plateColor)
+  const image = input.image
+    ? upscaleToPrintCanvas(input.image, spec.artworkCanvasInches, MIN_EFFECTIVE_DPI)
+    : solidPlate(spec, plateColor)
   const imageDpi = assertPrintImageDpi(
     { width: image.width, height: image.height },
     spec.artworkCanvasInches
@@ -219,6 +280,7 @@ export async function renderPostcardPrintPdf(input: {
   const regular = await doc.embedFont(readFont("SourceSans3-Regular.ttf"), { subset: true })
   const semibold = await doc.embedFont(readFont("SourceSans3-Semibold.ttf"), { subset: true })
   const embedded = measured.kind === "jpeg" ? await doc.embedJpg(image.bytes) : await doc.embedPng(image.bytes)
+  const backEmbedded = await embedBackImage(doc, input.backImage)
 
   const width = spec.pdfPagePoints.widthPoints
   const height = spec.pdfPagePoints.heightPoints
@@ -229,7 +291,7 @@ export async function renderPostcardPrintPdf(input: {
 
   front.drawImage(embedded, { x: 0, y: 0, width, height })
   drawFrontCaption(front, spec, copy, regular, semibold)
-  drawBack(back, spec, backContent, copy, regular, semibold)
+  drawBack(back, spec, backContent, copy, regular, semibold, backEmbedded)
 
   doc.setTitle("Modern Mail 5x8 postcard")
   doc.setProducer("Modern Mail")
@@ -382,7 +444,8 @@ function drawBack(
   content: InchesRect,
   copy: PostcardPrintCopy,
   regular: PDFFont,
-  semibold: PDFFont
+  semibold: PDFFont,
+  backPhoto: PDFImage | null = null
 ) {
   page.drawRectangle({
     x: 0,
@@ -411,6 +474,14 @@ function drawBack(
   const ink = rgb(0.12, 0.14, 0.18)
   const muted = rgb(0.28, 0.32, 0.38)
   let top = box.yPoints + box.heightPoints - 2
+  if (backPhoto && planHasPhoto(copy)) {
+    const size = Math.min(box.widthPoints * 0.42, 86)
+    const imageBottom = top - size
+    if (imageBottom > textFloor) {
+      page.drawImage(backPhoto, { x: box.xPoints, y: imageBottom, width: size, height: size })
+      top = imageBottom - 8
+    }
+  }
 
   if (plan.brand && top > textFloor) {
     top = drawWrapped({
@@ -483,6 +554,21 @@ function drawBack(
       maxLines: linesThatFit(top, textFloor, 13, 4),
     })
     top -= 8
+  }
+  if (plan.license && top > textFloor) {
+    top = drawWrapped({
+      page,
+      font: regular,
+      text: plan.license,
+      x: box.xPoints,
+      top,
+      width: box.widthPoints,
+      size: 9,
+      leading: 12,
+      color: muted,
+      maxLines: linesThatFit(top, textFloor, 12, 2),
+    })
+    top -= 6
   }
   if (!qr && plan.callToAction && top > textFloor) {
     drawWrapped({

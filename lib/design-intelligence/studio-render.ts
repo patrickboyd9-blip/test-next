@@ -269,7 +269,8 @@ function runChrome(htmlPath: string, pngPath: string, width: number, height: num
 
 async function capturePostcard(port: number, width: number, height: number): Promise<Buffer> {
   const page = await pageSocket(port)
-  const ws = new WebSocket(page)
+  const Socket = await webSocketClass()
+  const ws = new Socket(page) as WebSocket
   await new Promise<void>((resolve, reject) => {
     ws.addEventListener("open", () => resolve())
     ws.addEventListener("error", () => reject(new Error("Could not connect to Chrome.")))
@@ -359,4 +360,11 @@ async function removeDirectory(directory: string) {
       await new Promise((resolve) => setTimeout(resolve, 150))
     }
   }
+}
+
+/** Node 22+ has a global WebSocket. Node 20 does not, so fall back to undici's. */
+async function webSocketClass(): Promise<typeof WebSocket> {
+  if (typeof globalThis.WebSocket === "function") return globalThis.WebSocket
+  const undici = (await import("undici")) as unknown as { WebSocket: typeof WebSocket }
+  return undici.WebSocket
 }

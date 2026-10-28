@@ -67,6 +67,19 @@ export function businessNameForCard(
   return name
 }
 
+/** Paint the brief's phone and website when a direction left them off the spec. */
+export function withBriefContact<T extends { phone?: string; website?: string; qrDestination?: string }>(
+  spec: T,
+  brief: Parameters<typeof postcardIdentityFromBrief>[0]
+): T {
+  const contact = resolveStudioContact(spec, postcardIdentityFromBrief(brief))
+  return {
+    ...spec,
+    ...(contact.phone ? { phone: contact.phone } : {}),
+    ...(contact.website ? { website: displayWebsite(contact.website) } : {}),
+  }
+}
+
 export function resolveStudioContact(
   spec: { phone?: string; website?: string; qrDestination?: string },
   identity?: PostcardIdentity

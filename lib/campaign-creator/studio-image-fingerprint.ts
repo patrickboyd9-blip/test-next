@@ -21,9 +21,10 @@ export interface StudioImageRecord {
 export function imageBriefContextFor(
   directionId: string,
   campaign?: CampaignBrief,
-  photoSlot?: ImageBriefContext["photoSlot"]
+  photoSlot?: ImageBriefContext["photoSlot"],
+  researchPhotoNote?: string
 ): ImageBriefContext {
-  return { campaign, variationKey: directionId, photoSlot }
+  return { campaign, variationKey: directionId, photoSlot, researchPhotoNote }
 }
 
 export function imageBriefFingerprint(brief: ImageBrief): string {
@@ -83,15 +84,15 @@ export function lookupStudioImage(
 
 export function studioImageEntries(
   creative: {
-    directions: readonly { id: string; spec: CreativeSpec }[]
+    directions: readonly { id: string; spec: CreativeSpec; research?: { photoDirection?: string } }[]
     selectedDirectionId?: string
     activeSpec?: CreativeSpec
   },
   campaign?: CampaignBrief
-): Array<{ directionId: string; spec: CreativeSpec }> {
-  const entries: Array<{ directionId: string; spec: CreativeSpec }> = []
+): Array<{ directionId: string; spec: CreativeSpec; researchPhotoNote?: string }> {
+  const entries: Array<{ directionId: string; spec: CreativeSpec; researchPhotoNote?: string }> = []
   for (const direction of creative.directions) {
-    entries.push({ directionId: direction.id, spec: direction.spec })
+    entries.push({ directionId: direction.id, spec: direction.spec, researchPhotoNote: direction.research?.photoDirection })
     const context = imageBriefContextFor(direction.id, campaign)
     if (
       direction.id === creative.selectedDirectionId &&
@@ -103,6 +104,7 @@ export function studioImageEntries(
       entries.push({
         directionId: direction.id,
         spec: creative.activeSpec,
+        researchPhotoNote: direction.research?.photoDirection,
       })
     }
   }

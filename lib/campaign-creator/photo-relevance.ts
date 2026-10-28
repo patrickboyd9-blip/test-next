@@ -30,6 +30,8 @@ const SIGNATURES: Record<string, RegExp> = {
   construction: /\b(construction|hard hats?|scaffolding|excavators?|job sites?)\b/i,
   roofing: /\b(shingles?|roofers?|flashing|roof edge|ceiling stains?)\b/i,
   hvac: /\b(condensers?|furnaces?|thermostats?|hvac)\b/i,
+  windows: /\b(gutters?|siding|window trims?|vinyl windows?)\b/i,
+  pest: /\b(termites?|pest control|exterminators?)\b/i,
   plumbing: /\b(water heaters?|pipe wrenches?|plumbing)\b/i,
   electrical: /\b(electrical panels?|circuit breakers?)\b/i,
   restaurant: /\b(pizzas?|plating|dining rooms?)\b/i,
@@ -80,7 +82,7 @@ export function photoExpectationForBrief(
     industry,
     audience: "local",
     accept: acceptFor(industry),
-    refuse: industry === "restaurant" ? ["construction", "hard hat"] : ["casket", "capitol"],
+    refuse: refuseFor(industry),
   }
   if ((slot === "before" || slot === "after") && industry === "roofing") {
     const roof = ROOF_SLOT_BRIEFS[slot]
@@ -133,6 +135,7 @@ function compatibleIndustries(industry: string): readonly string[] {
     "chimney",
     "remodeling",
   ]
+  if (industry === "roofing") return ["construction", "windows"]
   if (trades.includes(industry)) return ["construction"]
   if (industry === "final_expense") return ["life_insurance"]
   if (industry === "life_insurance") return ["final_expense"]
@@ -224,6 +227,12 @@ export async function openAIVisionPhotoCheck(input: {
   if (word.startsWith("MATCH")) return true
   if (word.startsWith("MISMATCH")) return false
   return null
+}
+
+function refuseFor(industry: string): readonly string[] {
+  if (industry === "restaurant" || industry === "pizza_qsr") return ["construction", "hard hat"]
+  if (industry === "hvac") return ["casket", "capitol", "gutter", "gutters", "window trim", "siding", "termite"]
+  return ["casket", "capitol"]
 }
 
 function acceptFor(industry: string): readonly string[] {

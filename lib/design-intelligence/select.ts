@@ -8,6 +8,7 @@ import {
   type MailerAnalysis,
 } from "./library"
 import { ownerFavoriteIds } from "./owner-favorites"
+import { industriesAdjacent, industryForBrief, normalizeIndustry, resolveIndustry } from "@/lib/research-library/industry"
 import type { DesignVertical } from "./rationale"
 import { verticalForBrief } from "./vertical"
 
@@ -184,13 +185,15 @@ function citationSentence(raw: string): string {
   return /[.!?]$/.test(borrowed) ? borrowed : `${borrowed}.`
 }
 
-function peerScore(record: LibraryRecord, vertical: DesignVertical, brief: CampaignBrief): number {
+function peerScore(record: LibraryRecord, _vertical: DesignVertical, brief: CampaignBrief): number {
   const analysis = record.analysis
-  const recordVertical = normalizeVertical(record.vertical ?? analysis?.vertical)
+  const briefIndustry = industryForBrief(brief)
+  const recordIndustry = recordIndustryFor(record.vertical ?? analysis?.vertical, `${analysis?.summary ?? ""} ${analysis?.offer_placement ?? ""} ${analysis?.focal_point ?? ""}`)
+  if (recordIndustry === "none") return 0
   let score = 0
-  if (recordVertical === vertical) score += 8
-  else if (vertical === "general_local_service" && recordVertical) score += 2
-  else if (recordVertical === "general_local_service") score += 1
+  if (briefIndustry !== "none" && recordIndustry === briefIndustry) score += 8
+  else if (briefIndustry !== "none" && industriesAdjacent(briefIndustry, recordIndustry)) score += 3
+  else if (briefIndustry === "none") score += 2
   else return 0
 
   const rank = gradeRank(record.grade ?? analysis?.grade)
@@ -244,21 +247,12 @@ function clip(value: string): string {
   return text.length > 220 ? `${text.slice(0, 217)}...` : text
 }
 
-function normalizeVertical(value: string | undefined): DesignVertical | null {
-  if (!value) return null
-  if (value === "medicare" || value === "insurance" || value === "healthcare") return "medicare_insurance"
-  if (
-    value === "roofing" ||
-    value === "plumbing" ||
-    value === "hvac" ||
-    value === "medicare_insurance" ||
-    value === "real_estate" ||
-    value === "general_local_service"
-  ) {
-    return value
+function recordIndustryFor(vertical: string | undefined, notes: string): string {
+  const fromLabel = normalizeIndustry(vertical)
+  if (fromLabel === "plumbing" || fromLabel === "roofing") {
+    const fromNotes = normalizeIndustry(notes)
+    if (fromNotes === "hvac" || fromNotes === "windows-gutters-siding") return fromNotes
   }
-  if (value === "retail" || value === "finance" || value === "auto_service" || value === "education") {
-    return "general_local_service"
-  }
-  return null
+  if (fromLabel !== "none") return fromLabel
+  return resolveIndustry({ notes })
 }

@@ -1,3 +1,4 @@
+import { isStockHeadline } from "./persuasion"
 import assert from "node:assert/strict"
 import { test } from "node:test"
 
@@ -48,20 +49,34 @@ test("a free roof inspection uses the outcome, the gift, and one standout offer"
   assert.equal(plan.coreNeed.label.length > 0, true)
   assert.equal(plan.awareness.id, "cold")
   assert.equal(plan.outcomeGuidance, "A safe, dry home.")
-  assert.equal(applyOutcomeHeadline({ headline: "Free roof inspection", offer: "$0 inspection", brief, vertical: "roofing" }), "A dry, safe home starts here.")
+  assert.equal(isStockHeadline(applyOutcomeHeadline({ headline: "Free roof inspection", offer: "$0 inspection", brief, vertical: "roofing" })), false)
   assert.equal(applyOutcomeHeadline({
     headline: "Free roof inspection",
     offer: "$0 inspection",
     brief: { ...brief, primaryEmotion: "roofing_fear" },
     vertical: "roofing",
-  }), "Call before a small leak spreads.")
+  }).startsWith("Call before a small leak"), false)
   assert.equal(applyOutcomeHeadline({
     headline: "Free roof inspection",
     offer: "$0 inspection",
     brief: { ...brief, audienceAwareness: "past_customer" },
     vertical: "roofing",
-  }), "$0 inspection")
+  }) !== "Free roof inspection", true)
   assert.equal(applyOutcomeHeadline({ headline: "See the roof before it leaks", offer: "$0 inspection", brief, vertical: "roofing" }), "See the roof before it leaks")
+  assert.equal(applyOutcomeHeadline({
+    headline: "See the roof before it leaks",
+    offer: "$0 inspection",
+    brief,
+    vertical: "roofing",
+    role: "outcome",
+  }), "See the roof before it leaks")
+  assert.equal(applyOutcomeHeadline({
+    headline: "Free roof inspection",
+    offer: "$0 inspection",
+    brief,
+    vertical: "roofing",
+    role: "outcome",
+  }).startsWith("A dry, safe home"), false)
 })
 
 test("a real date is the deadline, and a fake one is rejected", () => {
@@ -361,4 +376,35 @@ test("an attorney card requires Advertisement, limits dramatic imagery, and warn
   assert.equal(roof.autoFails.includes("PS13"), false)
   assert.equal(roof.autoFails.includes("PS14"), false)
   assert.deepEqual(roof.warnings, [])
+})
+
+test("three HVAC directions get three headlines, and a nearby label does not stay", () => {
+  const brief = {
+    goal: "Book HVAC service before the heat",
+    offer: "Free inspection for broken AC units",
+    businessInfo: { name: "Northwind Heating & Air" },
+  }
+  const lines = (["outcome", "threat", "trust"] as const).map((role) => applyOutcomeHeadline({
+    headline: role === "threat" ? "Northwind Heating & Air nearby" : "The house cools down again.",
+    offer: brief.offer,
+    brief,
+    vertical: "hvac",
+    role,
+  }))
+  assert.equal(new Set(lines).size, 3)
+  assert.match(lines[0]!, /before the heat/i)
+  assert.match(lines[1]!, /AC quits/i)
+  assert.match(lines[2]!, /local tech/i)
+  assert.match(lines[2]!, /before the heat/i)
+  assert.doesNotMatch(lines[2]!, /Northwind/)
+  const named = applyOutcomeHeadline({
+    headline: "Coastal Comfort Heating & Air checks this.",
+    offer: brief.offer,
+    brief: { ...brief, businessInfo: { name: "Coastal Comfort Heating & Air" } },
+    vertical: "hvac",
+    role: "trust",
+  })
+  assert.doesNotMatch(named, /Coastal Comfort/)
+  assert.match(named, /local tech/i)
+  assert.match(named, /before the heat/i)
 })

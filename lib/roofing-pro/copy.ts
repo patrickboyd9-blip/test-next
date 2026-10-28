@@ -18,13 +18,14 @@ export const ROOFING_COPY_LIMITS = {
 const REAL_DATE =
   /\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\.?\s+\d{1,2}(?:,\s*\d{4})?\b|\b\d{1,2}\/\d{1,2}(?:\/\d{2,4})?\b/i
 
+/**
+ * Collapses whitespace. It never drops words: the fitter shrinks or wraps
+ * long copy instead, so an offer, a name, or a sentence is never cut short.
+ * `max` is kept for callers and documents the target length only.
+ */
 export function limitChars(value: string, max: number): string {
-  const text = value.replace(/\s+/g, " ").trim()
-  if (text.length <= max) return text
-  const slice = text.slice(0, max + 1)
-  const space = slice.lastIndexOf(" ")
-  if (space > 0) return slice.slice(0, space).trim()
-  return text.slice(0, max).trim()
+  void max
+  return value.replace(/\s+/g, " ").trim()
 }
 
 /** A date line only when the customer already wrote an expiry. */

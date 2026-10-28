@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Outdoor air conditioner condenser beside a house wall">
+  <rect width="1024" height="1024" fill="#E7EEF2"/>
+  <rect x="80" y="180" width="520" height="700" fill="#F4F1EA"/>
+  <rect x="80" y="180" width="520" height="36" fill="#C5D0D6"/>
+  <rect x="140" y="280" width="160" height="220" fill="#D5DEE3"/>
+  <rect x="360" y="280" width="160" height="220" fill="#D5DEE3"/>
+  <rect x="620" y="430" width="280" height="360" rx="8" fill="#8AA0A8"/>
+  <rect x="648" y="468" width="224" height="250" fill="#6E868F"/>
+  <g fill="#D5DEE3">
+    <rect x="668" y="488" width="184" height="10"/>
+    <rect x="668" y="516" width="184" height="10"/>
+    <rect x="668" y="544" width="184" height="10"/>
+    <rect x="668" y="572" width="184" height="10"/>
+    <rect x="668" y="600" width="184" height="10"/>
+    <rect x="668" y="628" width="184" height="10"/>
+    <rect x="668" y="656" width="184" height="10"/>
+    <rect x="668" y="684" width="184" height="10"/>
+  </g>
+  <rect x="700" y="790" width="36" height="70" fill="#5E727A"/>
+  <rect x="784" y="790" width="36" height="70" fill="#5E727A"/>
+  <rect x="80" y="860" width="860" height="40" fill="#C9D3C2"/>
+</svg>

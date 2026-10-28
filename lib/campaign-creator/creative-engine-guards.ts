@@ -616,6 +616,7 @@ function preserveCreativeSemantics(
   if (!isDesignRationale(next.designRationale) && isDesignRationale(current.designRationale)) {
     next.designRationale = current.designRationale
   }
+  if (current.addressSide) next.addressSide = current.addressSide
   return next
 }
 

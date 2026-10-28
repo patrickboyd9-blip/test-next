@@ -1,4 +1,5 @@
 import { cutoutSubjectLine, cutoutSubjectRequested } from "@/lib/design-intelligence/cutout"
+import { photoFits } from "@/lib/research-library/steer"
 
 import { buildCampaignLookBlock } from "./campaign-look"
 import { roofSlotForTemplate, ROOF_SLOT_BRIEFS, ROOF_SLOT_NEGATIVE_SPACE } from "./roof-photo-slots"
@@ -56,6 +57,8 @@ export interface ImageBriefContext {
   variationKey?: string
   /** Before/after compositions ask for a second, different photograph. */
   photoSlot?: "primary" | "before" | "after"
+  /** Text description from retrieved mailers. Not an image. */
+  researchPhotoNote?: string
 }
 
 export interface ImageBrief {
@@ -158,6 +161,14 @@ export function toImageBrief(
     if (roofSlot === "after") brief.imageryRole = "neighborhood"
     if (roofSlot === "before") {
       brief.doNotInvent = brief.doNotInvent.filter((item) => item !== "invented property damage")
+    }
+  }
+
+  const researchNote = context.researchPhotoNote?.trim()
+  if (researchNote && (!context.campaign || photoFits(researchNote, context.campaign))) {
+    brief.artDirection = {
+      ...brief.artDirection,
+      subject: `${brief.artDirection.subject} Photograph direction from researched mailers, as a description only: ${researchNote}`,
     }
   }
 

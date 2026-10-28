@@ -10,9 +10,11 @@ import { REFINEMENT_SLOW_NETWORK_LINE } from "@/lib/campaign-creator/studio-copy
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import type { GeneratedAsset } from "@/lib/campaign-creator/image-generation"
 import type { PostcardIdentity } from "@/lib/campaign-creator/studio-contact"
-import type { Campaign, CreativeDirection, CreativeSpec } from "@/lib/campaign-creator/types"
+import { fallbackBackProof } from "@/lib/campaign-creator/address-side"
+import type { AddressSideEdit, Campaign, CreativeDirection, CreativeSpec } from "@/lib/campaign-creator/types"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 
+import { AddressSideEditor } from "./AddressSideEditor"
 import { PostcardPreview, PostcardSideToggle } from "./PostcardPreview"
 import { StudioPhotoNote } from "./StudioPhotoNote"
 import { RevisionHistoryPanel } from "./RevisionHistoryPanel"
@@ -32,6 +34,7 @@ interface RefinementViewProps {
   onApprove: () => void
   onApplyRefinement: (prompt: string) => Promise<CampaignUpdateResult>
   onRestoreRevision: (revisionId: string) => Promise<CampaignUpdateResult>
+  onCampaignUpdate?: (campaign: Campaign) => void
 }
 
 export interface CampaignUpdateResult {
@@ -55,9 +58,17 @@ export function RefinementView({
   onApprove,
   onApplyRefinement,
   onRestoreRevision,
+  onCampaignUpdate,
 }: RefinementViewProps) {
   const reducedMotion = useReducedMotion()
   const [side, setSide] = useState<"front" | "back">("front")
+  const [backEdit, setBackEdit] = useState<AddressSideEdit | undefined>(activeSpec.addressSide)
+  const [backDirection, setBackDirection] = useState(direction.id)
+  if (backDirection !== direction.id) {
+    setBackDirection(direction.id)
+    setBackEdit(activeSpec.addressSide)
+  }
+  const previewSpec = backEdit ? { ...activeSpec, addressSide: backEdit } : activeSpec
   const [composerValue, setComposerValue] = useState("")
   const [isApplying, setIsApplying] = useState(false)
   const [isRestoring, setIsRestoring] = useState(false)
@@ -241,7 +252,7 @@ export function RefinementView({
                   <p className="text-xs font-medium text-muted-foreground">After</p>
                   <PostcardPreview
                     canvas={canvas}
-                    spec={activeSpec}
+                    spec={previewSpec}
                     side={side}
                     size="medium"
                     identity={identity}
@@ -258,7 +269,7 @@ export function RefinementView({
             ) : (
               <PostcardPreview
                 canvas={canvas}
-                spec={activeSpec}
+                spec={previewSpec}
                 side={side}
                 size="hero"
                 identity={identity}
@@ -273,6 +284,25 @@ export function RefinementView({
             )}
             <StudioPhotoNote note={photoNote} />
             <PostcardSideToggle side={side} onSideChange={setSide} />
+            {side === "back" ? (
+              <AddressSideEditor
+                key={direction.id}
+                spec={previewSpec}
+                campaignId={campaign.id}
+                fallbacks={{
+                  businessName: identity?.businessName,
+                  offer: activeSpec.offer,
+                  proof: fallbackBackProof(activeSpec.designRationale?.trust.back_only[0], activeSpec.offer ?? ""),
+                  license: identity?.license,
+                  phone: identity?.phone ?? activeSpec.phone,
+                  website: identity?.website ?? activeSpec.website,
+                  returnAddress: campaign.brief.businessInfo?.address,
+                  qrDestination: identity?.qrDestination ?? activeSpec.qrDestination,
+                }}
+                onPreview={setBackEdit}
+                onSaved={onCampaignUpdate}
+              />
+            ) : null}
           </div>
 
           <RevisionHistoryPanel

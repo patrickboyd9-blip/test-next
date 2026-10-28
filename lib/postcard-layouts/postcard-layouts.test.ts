@@ -252,7 +252,7 @@ test("each vertical gives the three directions different compositions", () => {
       assert.equal(templates.includes("financing_first"), false)
     }
     if (name === "roofing") {
-      assert.deepEqual(templates, ["roof_full_bleed", "roof_split", "roof_before_after"])
+      assert.deepEqual(templates, ["roof_full_bleed", "roof_split", "roof_coupon"])
     }
   }
 })

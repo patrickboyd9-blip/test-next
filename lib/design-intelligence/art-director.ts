@@ -11,7 +11,7 @@ import {
 } from "./rationale"
 import type { ReferenceSelection } from "./select"
 import { isAttorneyMatter } from "./attorney-compliance"
-import { clientFactText, selectPersuasion } from "./persuasion"
+import { clientFactText, isNonMedicareInsurance, selectPersuasion } from "./persuasion"
 import { briefHasNumeralOffer, verticalForBrief } from "./vertical"
 
 /**
@@ -29,6 +29,8 @@ export interface ArtDirectorInput {
   proposed?: unknown
   /** 0 is the lead. Each slot is a different composition. */
   slot?: number
+  /** Photo share and offer prominence from a retrieved mailer. */
+  layoutTune?: { photoShare?: number; offerProminent?: boolean; insuranceQuote?: boolean }
 }
 
 export type CompositionMode =
@@ -81,19 +83,22 @@ export function directDesign(input: ArtDirectorInput): ArtDirectorResult {
 }
 
 export function hasConcreteOffer(brief: CampaignBrief): boolean {
+  if (brief.offer?.trim() && isNonMedicareInsurance(clientFactText(brief))) return true
   return Boolean(brief.offer?.trim()) && verticalForBrief(brief) !== "medicare_insurance"
 }
 
 export function directionRecipe(input: ArtDirectorInput, slot: number): DirectionRecipe {
   const vertical = input.selection.vertical
   const offer = hasConcreteOffer(input.brief)
+  const insuranceQuote = isNonMedicareInsurance(clientFactText(input.brief))
+  const tune = input.layoutTune || insuranceQuote ? { ...input.layoutTune, insuranceQuote } : undefined
   if (vertical === "medicare_insurance") {
     const calm: DirectionRecipe[] = [
       { grid: "centered-stack", mode: "integrated", hero: "headline", offerToHeadline: 0.5, headlineToBody: 3.1, offerToBody: 1.6, alignment: "left" },
       { grid: "full-bleed-plus-panel", mode: "full-bleed", hero: "headline", offerToHeadline: 0.42, headlineToBody: 2.8, offerToBody: 1.55, alignment: "left" },
       { grid: "thirds", mode: "panel", hero: "headline", offerToHeadline: 0.58, headlineToBody: 3.6, offerToBody: 1.7, alignment: "left" },
     ]
-    return calm[slot] ?? calm[0]!
+    return tuneDirectionRecipe(calm[slot] ?? calm[0]!, tune, vertical, slot)
   }
   const recipes: DirectionRecipe[] = [
     {
@@ -124,7 +129,26 @@ export function directionRecipe(input: ArtDirectorInput, slot: number): Directio
       alignment: "left",
     },
   ]
-  return recipes[slot] ?? recipes[0]!
+  return tuneDirectionRecipe(recipes[slot] ?? recipes[0]!, tune, vertical, slot)
+}
+
+/** The lead card follows a retrieved recipe. Later slots stay distinct. Medicare stays calm. */
+export function tuneDirectionRecipe(
+  recipe: DirectionRecipe,
+  tune: { photoShare?: number; offerProminent?: boolean; insuranceQuote?: boolean } | undefined,
+  vertical: string,
+  slot = 0
+): DirectionRecipe {
+  if (!tune || slot !== 0) return recipe
+  if (vertical === "medicare_insurance" && !tune.insuranceQuote) return recipe
+  let next = recipe
+  if ((tune.photoShare ?? 0) >= 0.55 && recipe.mode !== "full-bleed") {
+    next = { ...next, grid: "full-bleed-plus-panel", mode: "full-bleed" }
+  }
+  if (tune.offerProminent) {
+    next = { ...next, hero: "offer", offerToHeadline: Math.max(next.offerToHeadline, 1.7) }
+  }
+  return next
 }
 
 /** True when two directions would paint the same grid at the same scale. */

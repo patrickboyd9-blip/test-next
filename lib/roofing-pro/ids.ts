@@ -21,6 +21,18 @@ export const ROOFING_PRO_TEMPLATE_IDS = [
 
 export type RoofingProTemplateId = (typeof ROOFING_PRO_TEMPLATE_IDS)[number]
 
+/**
+ * Before-and-after needs a true matching pair of photographs (same house,
+ * same angle). The image pipeline cannot make one yet, so the layout is
+ * hidden from the chooser and from automatic assignment until it can.
+ */
+export const BEFORE_AFTER_ENABLED = false
+
+/** The templates offered to customers today. */
+export const ROOFING_PRO_AVAILABLE_IDS: readonly RoofingProTemplateId[] = ROOFING_PRO_TEMPLATE_IDS.filter(
+  (id) => BEFORE_AFTER_ENABLED || id !== "roof_before_after"
+)
+
 export function isRoofingProTemplate(value: string | undefined): value is RoofingProTemplateId {
   return Boolean(value && (ROOFING_PRO_TEMPLATE_IDS as readonly string[]).includes(value))
 }

@@ -10,6 +10,8 @@ import {
 import {
   OPENAI_IMAGE_MODEL_FALLBACK,
   OPENAI_IMAGE_MODEL_PIN,
+  OPENAI_IMAGE_QUALITY_PREVIEW,
+  OPENAI_IMAGE_SIZE_PREVIEW,
   estimateImageCostUsd,
   logImageCost,
   resolveOpenAIImageSettings,
@@ -25,8 +27,8 @@ import {
 export const OPENAI_IMAGE_PROVIDER = "openai"
 /** Documented GPT Image 2.5 Flare snapshot. Override with OPENAI_IMAGE_MODEL. */
 export const OPENAI_IMAGE_MODEL = OPENAI_IMAGE_MODEL_PIN
-export const OPENAI_IMAGE_SIZE = "1536x1024"
-export const OPENAI_IMAGE_QUALITY = "medium"
+export const OPENAI_IMAGE_SIZE = OPENAI_IMAGE_SIZE_PREVIEW
+export const OPENAI_IMAGE_QUALITY = OPENAI_IMAGE_QUALITY_PREVIEW
 export const OPENAI_IMAGES_GENERATIONS_URL =
   "https://api.openai.com/v1/images/generations"
 

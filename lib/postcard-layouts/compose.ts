@@ -1,3 +1,4 @@
+import { composeAddressSideFace } from "@/lib/campaign-creator/address-side-layout"
 import { qrScanLabel } from "@/components/campaign-creator/studio/design-rules"
 import { headlineRestatesOffer } from "@/components/campaign-creator/studio/studio-copy-hierarchy"
 import type { CreativeSpec } from "@/lib/campaign-creator/types"
@@ -85,7 +86,7 @@ export interface ComposeInput {
   face?: "front" | "back"
   spec: Pick<
     CreativeSpec,
-    "headline" | "subheadline" | "body" | "offer" | "callToAction" | "phone" | "website" | "qrDestination"
+    "headline" | "subheadline" | "body" | "offer" | "callToAction" | "phone" | "website" | "qrDestination" | "addressSide"
   >
   businessName?: string
   qrPayload?: string | null
@@ -200,6 +201,22 @@ function composeBack(
   pairing: PostcardFacePlan["pairing"],
   palette: VerticalPalette
 ): PostcardFacePlan {
+  if (input.spec.addressSide) {
+    return composeAddressSideFace({
+      size,
+      pairing,
+      palette,
+      spec: input.spec,
+      businessName: input.businessName,
+      phone: input.spec.phone,
+      website: input.spec.website,
+      license: input.license ?? undefined,
+      qrDestination: input.qrPayload ?? input.spec.qrDestination,
+      disclaimer: input.disclaimerText,
+      complianceMark: input.complianceMark,
+      templateId: input.templateId,
+    })
+  }
   const box = backMessageRect(size, Boolean(input.disclaimer))
   const copy = resolveCopy(input)
   const roles = backRoles(input.templateId)

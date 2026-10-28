@@ -136,10 +136,14 @@ function toPick(taste: VisionTaste): TastePick {
 }
 
 function industryFromText(text: string): string {
-  if (/\bmedicare\b|\bmedicaid\b|\binsurance\b/i.test(text)) return "medicare"
-  if (/\broof|shingle|gutter/i.test(text)) return "roofing"
+  if (/\bmedicare\b|\bmedicaid\b/i.test(text)) return "medicare"
+  if (/\bauto insurance\b|\bcar insurance\b/i.test(text)) return "auto_insurance"
+  if (/\bhomeowners insurance\b|\bhome insurance\b/i.test(text)) return "home_insurance"
+  if (/\blife insurance\b/i.test(text)) return "life_insurance"
+  if (/\bhvac\b|\bair condition|\bfurnace\b|\bheating and air\b|\bheating & air\b|\ba\s*\/\s*c\b|\bac\b|\btune-up\b|\btune up\b/i.test(text)) return "hvac"
+  if (/\bgutter|\bsiding|\bwindows?\b/i.test(text)) return "windows"
+  if (/\broof|shingle/i.test(text)) return "roofing"
   if (/\bplumb|drain|water heater/i.test(text)) return "plumbing"
-  if (/\bhvac\b|\bair condition|\bfurnace\b|\btune-up\b|\btune up\b/i.test(text)) return "hvac"
   if (/\breal estate\b|\bwe buy\b|\bhome for sale\b/i.test(text)) return "real_estate"
   if (/\bsolar\b|\bpanel install/i.test(text)) return "solar"
   if (/\bdental\b|\bdentist\b/i.test(text)) return "dental"

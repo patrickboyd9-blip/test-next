@@ -14,6 +14,8 @@ import {
   type ReferenceCardMatch,
 } from "../reference-corpus/select-reference-cards"
 import type { ReferenceCard } from "../reference-corpus/reference-card"
+import type { RetrievalHit } from "../research-library/types"
+import { formatCopyEvidence } from "../research-library/evidence"
 import type { CampaignBrief } from "./types"
 
 /**
@@ -29,6 +31,9 @@ export interface CreativeIntelligenceContext {
   referenceCardMatch?: ReferenceCardMatch
   /** Present when the context was built from a brief. Open means no vertical cards. */
   layoutPolicy?: VerticalLayoutPolicy
+  /** Concise evidence from the full research library. Absent when the index is empty. */
+  libraryEvidence?: string
+  libraryIds?: readonly string[]
 }
 
 export const CREATIVE_PRINCIPLE_KINDS = [
@@ -363,9 +368,11 @@ const HOME_SERVICES_PATTERNS = [
 ]
 
 export function buildCreativeIntelligenceContext(
-  brief: CampaignBrief
+  brief: CampaignBrief,
+  options?: { hits?: readonly RetrievalHit[] }
 ): CreativeIntelligenceContext {
   const taste = selectReferenceCards(brief)
+  const hits = options?.hits ?? []
   return {
     principles: [
       ...CREATIVE_DIRECT_MAIL_PRINCIPLES,
@@ -376,6 +383,8 @@ export function buildCreativeIntelligenceContext(
     referenceCards: taste.cards,
     referenceCardMatch: taste.match,
     layoutPolicy: layoutPolicyForBrief(brief),
+    libraryEvidence: hits.length > 0 ? formatCopyEvidence(hits) : undefined,
+    libraryIds: hits.map((hit) => hit.entry.id),
   }
 }
 
@@ -427,6 +436,10 @@ None. No plumbing playbook matched this campaign. Do not invent plumbing knowled
       ? `\n\nMedicare agent principles (matched vertical only):\n${formatPrincipleList(medicare)}`
       : ""
 
+  const libraryBlock = context.libraryEvidence?.trim()
+    ? `\n\nFull research library (retrieved for this brief):\n${context.libraryEvidence}`
+    : ""
+
   return `Creative Intelligence principles — decision guidance only.
 
 Knowledge classification:
@@ -450,7 +463,7 @@ ${formatPrincipleList(general)}
 
 ${homeServicesBlock}
 
-${plumbingBlock}${medicareBlock}${taste}`
+${plumbingBlock}${medicareBlock}${taste}${libraryBlock}`
 }
 
 export function isHomeServicesBrief(brief: CampaignBrief): boolean {

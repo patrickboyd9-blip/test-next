@@ -2,6 +2,7 @@ import type { GenerateDirectionsResult } from "@/lib/campaign-creator/creative-e
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import type { CampaignBrief, CreativeDirection, CreativeSpec } from "@/lib/campaign-creator/types"
 import { MEDICARE_AGENT_DISCLAIMER, isMedicareAgentBrief } from "@/lib/campaign-creator/medicare-compliance"
+import { withBriefContact } from "@/lib/campaign-creator/studio-contact"
 
 import { directDesign, usesSeparatedPanel, type CompositionMode } from "./art-director"
 import { normalizeToneTag, normalizeVerticalTag, selectBlueprints, type MailerBlueprint } from "./blueprint"
@@ -30,12 +31,17 @@ import {
 } from "./taste-retrieval"
 import { ATTORNEY_AD_LABEL, attorneyAdMark } from "./attorney-compliance"
 import { scrubUnstatedAudience, scrubUnstatedName, statedNameFallback } from "./audience-facts"
-import { applyOutcomeHeadline, clientFactText, roleForDirection, selectPersuasion, type DirectionRole } from "./persuasion"
+import { applyOutcomeHeadline, clientFactText, distinctRoofingHeadlines, headlineVariants, persuasionVertical, roleForDirection, selectPersuasion, type DirectionRole } from "./persuasion"
 import type { ImageryRole, LeadJob } from "@/lib/campaign-creator/types"
 import { briefHasNumeralOffer, verticalForBrief } from "./vertical"
 import { assignTemplates } from "@/lib/postcard-layouts/assign"
+import { offerIsFigure } from "./offer-copy"
 import { loadTasteCorpus, visionTasteStore, type VisionTaste } from "./vision-taste"
 import { referencePicksForCritique, requestComparativeCritique } from "./vision-critic"
+import { formatArtDirectorEvidence, goldExpectationFromHits, layoutTuneFromHits } from "@/lib/research-library/evidence"
+import { researchHitsForBrief } from "@/lib/research-library"
+import { applySteeredCopy, applySteeredRationale, steerSpecFromResearch, type EvidenceTrace } from "@/lib/research-library/steer"
+import type { GoldExpectation, RetrievalHit } from "@/lib/research-library/types"
 
 /**
  * Generates a board of composition families, ranks them, and keeps three
@@ -95,6 +101,8 @@ export interface ScoredCandidate {
   weakness?: string
   /** Set when this candidate was rebuilt from a mailer blueprint. */
   blueprint?: { sourceId: string; tone: string; similarity: number; offerType?: string; copyPattern?: string }
+  /** Which retrieved record drove the lead headline, offer, layout, and photograph. */
+  evidenceTrace?: EvidenceTrace
 }
 
 export interface BoardResult {
@@ -145,6 +153,8 @@ export async function rankCandidates(input: {
   tastes?: VisionTaste[]
   signals?: TasteSignals
   blueprints?: MailerBlueprint[]
+  /** Pass [] to score the board with the library off. Omit to load the index. */
+  researchHits?: RetrievalHit[]
 }): Promise<BoardResult> {
   const env = input.env ?? process.env
   const records = input.records ?? await safeLibrary()
@@ -152,9 +162,12 @@ export async function rankCandidates(input: {
   const tastes = input.tastes ?? await safeTastes()
   const signals = input.signals ?? await safeSignals(input.ownerId)
   const retrieved = retrieveTaste({ tastes, brief: input.brief, signals, limit: 4 })
-  const guidance = guidanceFromRetrieval(retrieved, signals)
+  const libraryHits = input.researchHits ?? await researchHitsForBrief(input.brief)
+  const libraryTune = layoutTuneFromHits(libraryHits)
+  const gold = goldExpectationFromHits(libraryHits)
+  const guidance = [guidanceFromRetrieval(retrieved, signals), formatArtDirectorEvidence(libraryHits)].filter((line) => line.trim()).join("\n")
   const costs: TokenCost[] = []
-  let base = directDesign({ brief: input.brief, selection, trim: input.trim }).rationale
+  let base = directDesign({ brief: input.brief, selection, trim: input.trim, layoutTune: libraryTune ?? undefined }).rationale
   if (directorMode(env) === "model") {
     const model = await requestModelRationale({
       brief: input.brief,
@@ -173,7 +186,7 @@ export async function rankCandidates(input: {
     }
     costs.push(note)
     logTokenCost(note)
-    base = directDesign({ brief: input.brief, selection, trim: input.trim, proposed: model.rationale }).rationale
+    base = directDesign({ brief: input.brief, selection, trim: input.trim, proposed: model.rationale, layoutTune: libraryTune ?? undefined }).rationale
   } else {
     const rules = emptyCost("board", "art-director")
     costs.push(rules)
@@ -194,9 +207,21 @@ export async function rankCandidates(input: {
     favorites: ownerFavoriteIds(env),
     limit: Math.max(1, blueprintSlots),
   })
+  // Every direction for one business gets its own headline. The copy AI's
+  // line is kept whenever it passes the checks.
+  const distinct = persuasionVertical(input.brief, base.vertical) === "roofing"
+    ? distinctRoofingHeadlines({
+        headlines: input.directions.map((direction) => direction.spec?.headline ?? ""),
+        offer: input.brief.offer ?? "",
+        city: input.brief.businessInfo?.city,
+        goal: input.brief.goal,
+        businessName: input.brief.businessInfo?.name,
+      })
+    : null
   const built = await Promise.all(families.map((family, index) => {
     const directionIndex = index % input.directions.length
-    const spec = input.directions[directionIndex]?.spec ?? {}
+    const raw = input.directions[directionIndex]?.spec ?? {}
+    const spec = distinct ? { ...raw, headline: distinct[directionIndex] } : raw
     const blueprint = index < blueprintSlots && pickedBlueprints.length > 0
       ? pickedBlueprints[index % pickedBlueprints.length]
       : undefined
@@ -213,6 +238,8 @@ export async function rankCandidates(input: {
       retrieved,
       blueprint,
       env,
+      gold,
+      researchHits: libraryHits,
     })
   }))
   const revised: ScoredCandidate[] = []
@@ -221,7 +248,7 @@ export async function rankCandidates(input: {
       revised.push(candidate)
       continue
     }
-    const redesigned = await redesignOnce(candidate, input, selection, base, retrieved)
+    const redesigned = await redesignOnce(candidate, input, selection, base, retrieved, gold, libraryHits)
     revised.push(candidate)
     if (redesigned.familyId !== candidate.familyId) revised.push(redesigned)
   }
@@ -251,6 +278,8 @@ async function scoreFamily(input: {
   redesigned?: boolean
   blueprint?: MailerBlueprint
   env?: NodeJS.ProcessEnv
+  gold?: GoldExpectation | null
+  researchHits?: RetrievalHit[]
 }): Promise<ScoredCandidate> {
   const family = input.family.mode === "type-led"
     ? COMPOSITION_FAMILIES.find((item) => item.id === "integrated-headline") ?? input.family
@@ -279,6 +308,9 @@ async function scoreFamily(input: {
       }
     }
   }
+  // The offer is the business's own words. Never the AI's shortened version.
+  const verbatimOffer = input.brief.offer?.replace(/\s+/g, " ").trim()
+  if (verbatimOffer) spec = { ...spec, offer: verbatimOffer }
   spec = {
     ...spec,
     headline: applyOutcomeHeadline({
@@ -288,6 +320,23 @@ async function scoreFamily(input: {
       vertical: rationale.vertical,
       role,
     }),
+  }
+  // "Then [the whole offer]" is the offer said twice, and it reads as a broken sentence.
+  const restated = spec.subheadline?.replace(/^then\s+/i, "").replace(/[.!?]+$/, "").trim()
+  if (
+    verbatimOffer &&
+    restated &&
+    restated.toLowerCase() === verbatimOffer.replace(/[.!?]+$/, "").trim().toLowerCase()
+  ) {
+    spec = { ...spec, subheadline: "Call today." }
+  }
+  // A blueprint rewrite that only fell back to a stock option never replaces
+  // this direction's own distinct headline.
+  if (persuasionVertical(input.brief, rationale.vertical) === "roofing" && input.spec.headline) {
+    const fallbacks = headlineVariants({ offer: spec.offer ?? input.brief.offer ?? "", city: input.brief.businessInfo?.city, goal: input.brief.goal })
+    if (spec.headline !== input.spec.headline && fallbacks.some((line) => line === spec.headline)) {
+      spec = { ...spec, headline: input.spec.headline }
+    }
   }
   rationale = {
     ...rationale,
@@ -305,26 +354,37 @@ async function scoreFamily(input: {
     }),
   }
   const presentation = rolePresentation(role)
+  const figure = offerIsFigure(spec.offer ?? input.brief.offer ?? "")
+  const offerHero = figure && rationale.vertical !== "medicare_insurance" && role !== "trust"
   rationale = {
     ...rationale,
     grid: { name: presentation.grid, alignment: "left", intentional_break: presentation.mode },
     scale_ratios: {
       ...rationale.scale_ratios,
-      hero: "headline",
-      offer_to_headline_cap: 0.48,
-      offer_to_body: 1.6,
+      hero: offerHero ? "offer" : "headline",
+      offer_to_headline_cap: offerHero ? 1.9 : 0.8,
+      offer_to_body: offerHero ? 5.2 : 1.8,
     },
     offer_treatment: {
       ...rationale.offer_treatment,
-      kind: rationale.vertical === "medicare_insurance" ? "concrete_step_no_discount" : "headline_is_the_offer",
-      placement: presentation.placement,
+      kind: offerHero
+        ? "numeral_hero"
+        : rationale.vertical === "medicare_insurance"
+          ? "concrete_step_no_discount"
+          : "headline_is_the_offer",
+      placement: offerHero
+        ? "The offer is the largest type. The headline is the result or the risk, and it does not repeat the offer."
+        : presentation.placement,
     },
     focal_element: {
       ...rationale.focal_element,
-      kind: "headline",
-      description: presentation.placement,
-      lead_modality: presentation.mode === "full-bleed" ? "image" : "type",
+      kind: offerHero ? "offer_numeral" : "headline",
+      description: offerHero ? "One figure leads. The headline stays shorter." : presentation.placement,
+      lead_modality: offerHero ? "offer_field" : presentation.mode === "full-bleed" ? "image" : "type",
     },
+    type_seat: presentation.mode === "full-bleed" && !offerHero
+      ? { side: "left", ink: "dark", scrim: true, shadow: false, rect: { x: 0.05, y: 0.08, w: 0.5, h: 0.7 } }
+      : rationale.type_seat,
     photo_brief: {
       ...rationale.photo_brief,
       mode: presentation.photoMode,
@@ -341,8 +401,23 @@ async function scoreFamily(input: {
     layoutVariant: "image_grounded",
     imagePresence: "field",
   }
+  let evidenceTrace: EvidenceTrace | undefined
+  if ((input.researchHits?.length ?? 0) > 0 && input.directionIndex === 0) {
+    const steered = steerSpecFromResearch({
+      headline: spec.headline ?? "",
+      offer: spec.offer ?? input.brief.offer ?? "",
+      brief: input.brief,
+      hits: input.researchHits ?? [],
+      vertical: rationale.vertical,
+      role,
+    })
+    spec = applySteeredCopy(spec, steered)
+    rationale = applySteeredRationale(rationale, steered, input.brief)
+    evidenceTrace = steered.trace
+  }
   const facts = clientFactText(input.brief, spec.offer)
   const complianceMark = attorneyAdMark(facts)
+  spec = withBriefContact(spec, input.brief)
   const card = composeGridCard({
     rationale,
     spec,
@@ -353,7 +428,7 @@ async function scoreFamily(input: {
   const copy = [spec.headline, spec.offer, spec.body, spec.phone, input.brief.businessInfo?.name, complianceMark]
     .filter(Boolean)
     .join(" ")
-  const critique = critiqueCard(card, rationale, copy, undefined, clientFactText(input.brief, spec.offer))
+  const critique = critiqueCard(card, rationale, copy, undefined, clientFactText(input.brief, spec.offer), input.gold)
   const sampled = gradeComposition({
     card,
     rationale,
@@ -373,6 +448,7 @@ async function scoreFamily(input: {
     costs: input.costs,
     redesigned: Boolean(input.redesigned),
     blueprint: blueprintMeta,
+    evidenceTrace,
   }
 }
 
@@ -381,7 +457,9 @@ async function redesignOnce(
   input: { brief: CampaignBrief; trim: TrimSize },
   selection: ReferenceSelection,
   base: DesignRationale,
-  retrieved: TastePick[]
+  retrieved: TastePick[],
+  gold?: GoldExpectation | null,
+  researchHits?: RetrievalHit[]
 ): Promise<ScoredCandidate> {
   const separated = usesSeparatedPanel(candidate.rationale.grid.intentional_break)
   const next = (separated
@@ -401,6 +479,8 @@ async function redesignOnce(
     costs: candidate.costs,
     retrieved,
     redesigned: true,
+    gold,
+    researchHits,
   })
   if (revised.grade.score >= candidate.grade.score) return revised
   return { ...candidate, redesigned: true }
@@ -424,6 +504,11 @@ function chooseDiverse(candidates: ScoredCandidate[], directionCount: number): S
     chosen[index] = pick
   }
   return chosen.filter((candidate): candidate is ScoredCandidate => Boolean(candidate))
+}
+
+function traceIds(trace: EvidenceTrace | undefined): string[] {
+  if (!trace) return []
+  return [trace.headlineId, trace.offerId, trace.layoutId, trace.photoId].filter((id): id is string => Boolean(id))
 }
 
 function applyBoard(result: GenerateDirectionsResult, board: BoardResult, brief: CampaignBrief): GenerateDirectionsResult {
@@ -476,6 +561,9 @@ function applyBoard(result: GenerateDirectionsResult, board: BoardResult, brief:
           offerBadge: "none",
           colorBlock: "field",
         },
+        influencedBy: traceIds(winner.evidenceTrace).length > 0 ? traceIds(winner.evidenceTrace) : direction.research?.influencedBy,
+        photoDirection: winner.evidenceTrace?.photoId ? winner.spec.visualDirection : direction.research?.photoDirection,
+        evidenceTrace: winner.evidenceTrace,
         quality: {
           score: Math.round((winner.grade.score / 10) * 10) / 10,
           rubricPassed: winner.grade.cleared ? 10 : 6,
@@ -625,8 +713,8 @@ export function strategyName(role: DirectionRole): string {
 
 export function customerWhyLine(role: DirectionRole): string {
   if (role === "threat") return "One honest risk, then one easy step. No deadline and no made-up number."
-  if (role === "trust") return "A local face and the business name carry the proof."
-  return "The headline is the result the homeowner wants. The offer stays small."
+  if (role === "trust") return "The business name carries the proof."
+  return "The headline is the result the homeowner wants. A free, dollar, or percent offer is the largest type."
 }
 
 function orderFamilies(feel: string, signals?: TasteSignals): Family[] {

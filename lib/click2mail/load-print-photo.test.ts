@@ -8,6 +8,7 @@ import { studioImageFileBase } from "@/lib/campaign-creator/studio-image-jobs"
 import { defaultStudioImageCacheRoot } from "@/lib/campaign-creator/studio-image-paths"
 import type { Campaign, CreativeSpec } from "@/lib/campaign-creator/types"
 import { encodeSolidPng } from "@/lib/print-spec/raster"
+import { assertPrintImageDpi } from "@/lib/print-spec/render-campaign-postcard-pdf"
 
 import { loadFinalPostcardPhoto } from "./load-print-photo"
 
@@ -34,6 +35,7 @@ test("the print file reads the saved final photograph, including one stored as b
   assert.ok(fingerprint)
   const fileName = `${studioImageFileBase(directionId, fingerprint, "final")}.png`
   const dir = path.join(defaultStudioImageCacheRoot(), campaignId)
+  const previewDir = path.join(defaultStudioImageCacheRoot(), "camp-print-preview")
   const png = encodeSolidPng(32, 16, [10, 20, 30])
   await mkdir(dir, { recursive: true })
   await writeFile(path.join(dir, fileName), png)
@@ -56,9 +58,20 @@ test("the print file reads the saved final photograph, including one stored as b
   try {
     const photo = await loadFinalPostcardPhoto(campaign)
     assert.ok(photo)
-    assert.equal(photo.width, 32)
-    assert.equal(photo.height, 16)
-    assert.equal(photo.bytes.equals(png), true)
+    assert.ok(photo.width >= 2550)
+    assert.ok(photo.height >= 1650)
+    assertPrintImageDpi({ width: photo.width, height: photo.height })
+
+    const previewOnly = {
+      ...campaign,
+      id: "camp-print-preview",
+    }
+    const previewName = `${studioImageFileBase(directionId, fingerprint, "preview")}.png`
+    await mkdir(previewDir, { recursive: true })
+    await writeFile(path.join(previewDir, previewName), png)
+    const fromPreview = await loadFinalPostcardPhoto(previewOnly)
+    assert.ok(fromPreview)
+    assertPrintImageDpi({ width: fromPreview.width, height: fromPreview.height })
 
     const missing = await loadFinalPostcardPhoto({
       ...campaign,
@@ -67,5 +80,6 @@ test("the print file reads the saved final photograph, including one stored as b
     assert.equal(missing, null)
   } finally {
     await rm(dir, { recursive: true, force: true })
+    await rm(previewDir, { recursive: true, force: true })
   }
 })

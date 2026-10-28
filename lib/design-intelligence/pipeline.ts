@@ -1,6 +1,7 @@
 import type { CampaignBrief, CreativeDirection, ResearchQuality } from "@/lib/campaign-creator/types"
 import type { GenerateDirectionsResult } from "@/lib/campaign-creator/creative-engine"
 import { MEDICARE_AGENT_DISCLAIMER, isMedicareAgentBrief } from "@/lib/campaign-creator/medicare-compliance"
+import { withBriefContact } from "@/lib/campaign-creator/studio-contact"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 
 import { directDesign, directionRecipe } from "./art-director"
@@ -22,6 +23,9 @@ import { attorneyAdMark } from "./attorney-compliance"
 import { applyOutcomeHeadline, clientFactText } from "./persuasion"
 import { renderStudioCardPng } from "./studio-render"
 import { viewSelection, type ImageView } from "./view-images"
+import { formatArtDirectorEvidence, goldExpectationFromHits, layoutTuneFromHits } from "@/lib/research-library/evidence"
+import { researchHitsForBrief } from "@/lib/research-library"
+import { applySteeredCopy, applySteeredRationale, steerSpecFromResearch, type EvidenceTrace } from "@/lib/research-library/steer"
 
 export interface DirectedCard {
   rationale: DesignRationale
@@ -33,6 +37,9 @@ export interface DirectedCard {
   costs: TokenCost[]
   shown: boolean
   viewed: ImageView[]
+  evidenceTrace?: EvidenceTrace
+  /** Headline, offer, and layout after research steering. */
+  resolvedSpec: CreativeDirection["spec"]
 }
 
 export async function directOneCard(input: {
@@ -43,18 +50,27 @@ export async function directOneCard(input: {
   records?: LibraryRecord[]
   env?: NodeJS.ProcessEnv
   cardId?: string
+  researchHits?: import("@/lib/research-library/types").RetrievalHit[]
 }): Promise<DirectedCard> {
   const env = input.env ?? process.env
   const records = input.records ?? (await loadLibrary())
   const selection = selectReferences(records, input.brief)
   const trim = input.trim ?? "5x8"
   const cardId = input.cardId ?? "card"
-  const cited = citationsForDirection(records, input.brief, directionRecipe({ brief: input.brief, selection, trim }, 0).mode)
+  const hits = input.researchHits ?? []
+  const tune = layoutTuneFromHits(hits)
+  const cited = citationsForDirection(records, input.brief, directionRecipe({ brief: input.brief, selection, trim, layoutTune: tune ?? undefined }, 0).mode)
   const costs: TokenCost[] = []
   let proposed: unknown
   let modelNote: TokenCost | null = null
   if (directorMode(env) === "model") {
-    const model = await requestModelRationale({ brief: input.brief, selection: { ...selection, imageIds: cited.map((item) => item.mmrId) }, trim, env })
+    const model = await requestModelRationale({
+      brief: input.brief,
+      selection: { ...selection, imageIds: cited.map((item) => item.mmrId) },
+      trim,
+      env,
+      guidance: formatArtDirectorEvidence(hits),
+    })
     proposed = model.rationale
     modelNote = usageCost(cardId, "art-director", model.usage, env)
     costs.push(modelNote)
@@ -65,7 +81,7 @@ export async function directOneCard(input: {
     logTokenCost(rules)
   }
   const viewed = await viewSelection(records, { ...selection, imageIds: cited.map((item) => item.mmrId) }, env)
-  const directed = directDesign({ brief: input.brief, selection, trim, proposed, slot: 0 })
+  const directed = directDesign({ brief: input.brief, selection, trim, proposed, slot: 0, layoutTune: tune ?? undefined })
   const repaired = repairCard({
     brief: input.brief,
     spec: input.spec,
@@ -74,6 +90,8 @@ export async function directOneCard(input: {
     costs,
     env,
     cardId,
+    gold: goldExpectationFromHits(hits),
+    hits,
   })
   return noteViews(repaired, viewed)
 }
@@ -86,24 +104,42 @@ export function repairCard(input: {
   costs?: TokenCost[]
   env?: NodeJS.ProcessEnv
   cardId?: string
+  gold?: import("@/lib/research-library/types").GoldExpectation | null
+  hits?: import("@/lib/research-library/types").RetrievalHit[]
 }): DirectedCard {
   const env = input.env ?? process.env
   const cap = criticCap(env)
   let rationale = input.rationale
-  let spec = {
-    ...input.spec,
-    headline: applyOutcomeHeadline({
+  let evidenceTrace: EvidenceTrace | undefined
+  let spec = { ...input.spec }
+  if (input.hits && input.hits.length > 0) {
+    const steered = steerSpecFromResearch({
       headline: input.spec.headline ?? "",
       offer: input.spec.offer ?? input.brief.offer ?? "",
       brief: input.brief,
+      hits: input.hits,
       vertical: input.rationale.vertical,
-    }),
+    })
+    spec = applySteeredCopy(spec, steered)
+    rationale = applySteeredRationale(rationale, steered, input.brief)
+    evidenceTrace = steered.trace
+  } else {
+    spec = {
+      ...spec,
+      headline: applyOutcomeHeadline({
+        headline: input.spec.headline ?? "",
+        offer: input.spec.offer ?? input.brief.offer ?? "",
+        brief: input.brief,
+        vertical: input.rationale.vertical,
+      }),
+    }
   }
   const edits: string[] = []
   let best: DirectedCard | null = null
   const rounds = Math.max(1, cap)
   for (let round = 1; round <= rounds; round += 1) {
     const facts = clientFactText(input.brief, spec.offer)
+    spec = withBriefContact(spec, input.brief)
     const card = composeGridCard({
       rationale,
       spec,
@@ -112,7 +148,7 @@ export function repairCard(input: {
       complianceMark: attorneyAdMark(facts),
     })
     const copy = cardCopy(spec, input.businessName, attorneyAdMark(facts))
-    const critique = critiqueCard(card, rationale, copy, undefined, clientFactText(input.brief, spec.offer))
+    const critique = critiqueCard(card, rationale, copy, undefined, clientFactText(input.brief, spec.offer), input.gold)
     const similarity = checkSimilarity(card, copy, input.brief)
     const passed = critiquePasses(critique, similarity)
     const attempt: DirectedCard = {
@@ -125,6 +161,8 @@ export function repairCard(input: {
       costs: input.costs ?? [],
       shown: passed,
       viewed: [],
+      evidenceTrace,
+      resolvedSpec: spec,
     }
     if (preferAttempt(attempt, best)) best = attempt
     if (passed || round === rounds) break
@@ -171,6 +209,9 @@ export async function applyDesignIntelligence(
     records = []
   }
   const selection = records.length > 0 ? selectReferences(records, brief) : null
+  const hits = await researchHitsForBrief(brief)
+  const tune = layoutTuneFromHits(hits)
+  const libraryGuidance = formatArtDirectorEvidence(hits)
   const trim = trimFromCanvas(canvas)
   const leadIndex = Math.max(0, result.directions.findIndex((direction) => direction.recommended))
   let leadRationale: DesignRationale | null = null
@@ -182,22 +223,23 @@ export async function applyDesignIntelligence(
       selection: { ...selection, imageIds: leadCited.map((item) => item.mmrId) },
       trim,
       env,
+      guidance: libraryGuidance,
     })
     const cost = usageCost("generation", "art-director", model.usage, env)
     costs.push(cost)
     logTokenCost(cost)
-    leadRationale = directDesign({ brief, selection, trim, proposed: model.rationale }).rationale
+    leadRationale = directDesign({ brief, selection, trim, proposed: model.rationale, layoutTune: tune ?? undefined }).rationale
   }
 
   const directions: GenerateDirectionsResult["directions"] = []
   for (const [index, direction] of result.directions.entries()) {
     const slot = directionSlot(index, leadIndex, result.directions.length)
     const selectionForSlot = selection ?? selectReferences(records, brief)
-    const cited = citationsForDirection(
+    const cited = mergeLibraryCitations(hits, citationsForDirection(
       records,
       brief,
-      directionRecipe({ brief, selection: selectionForSlot, trim }, slot).mode
-    )
+      directionRecipe({ brief, selection: selectionForSlot, trim, layoutTune: tune ?? undefined }, slot).mode
+    ))
     const viewed = await viewSelection(records, { ...selectionForSlot, imageIds: cited.map((item) => item.mmrId) }, env)
     const rationale = directDesign({
       brief,
@@ -205,6 +247,7 @@ export async function applyDesignIntelligence(
       trim,
       proposed: index === leadIndex ? leadRationale ?? undefined : undefined,
       slot,
+      layoutTune: tune ?? undefined,
     }).rationale
     let directed = repairCard({
       brief,
@@ -214,9 +257,11 @@ export async function applyDesignIntelligence(
       costs: index === leadIndex ? costs : [emptyCost(direction.id, "art-director")],
       env,
       cardId: direction.id,
+      gold: goldExpectationFromHits(hits),
+      hits: index === leadIndex ? hits : [],
     })
     if (index === leadIndex && criticUsesVision(env)) {
-      directed = await applyVisionRound(directed, brief, direction.spec, env)
+      directed = await applyVisionRound(directed, brief, direction.spec, env, hits)
     } else {
       logTokenCost(emptyCost(direction.id, "critic"))
     }
@@ -224,6 +269,19 @@ export async function applyDesignIntelligence(
   }
 
   return { ...result, directions }
+}
+
+function mergeLibraryCitations(
+  hits: Awaited<ReturnType<typeof researchHitsForBrief>>,
+  cited: DirectionCitation[]
+): DirectionCitation[] {
+  const fromLibrary = hits.slice(0, 4).map((hit) => ({
+    mmrId: hit.entry.id,
+    title: hit.entry.gold ? "Gold recipe" : "Research library",
+    whyItWorks: hit.entry.whyItWorks || hit.entry.structures[0] || "Retrieved from the research library.",
+  }))
+  const rest = cited.filter((item) => !fromLibrary.some((hit) => hit.mmrId === item.mmrId))
+  return [...fromLibrary, ...rest].slice(0, 6)
 }
 
 function noteViews(directed: DirectedCard, viewed: ImageView[]): DirectedCard {
@@ -261,6 +319,11 @@ function attachDirection(
     ...direction,
     spec: {
       ...direction.spec,
+      headline: directed.resolvedSpec.headline ?? direction.spec.headline,
+      offer: directed.resolvedSpec.offer ?? direction.spec.offer,
+      visualDirection: directed.resolvedSpec.visualDirection ?? direction.spec.visualDirection,
+      leadJob: directed.resolvedSpec.leadJob ?? direction.spec.leadJob,
+      layoutHints: directed.resolvedSpec.layoutHints ?? direction.spec.layoutHints,
       designRationale: directed.rationale,
       palette: [
         directed.rationale.palette.neutral_hex[0] ?? "#F4F1EA",
@@ -280,8 +343,16 @@ function attachDirection(
         colorBlock: "field",
       },
       quality,
+      influencedBy: traceIds(directed.evidenceTrace),
+      evidenceTrace: directed.evidenceTrace,
     },
   }
+}
+
+function traceIds(trace: EvidenceTrace | undefined): string[] | undefined {
+  if (!trace) return undefined
+  const ids = [trace.headlineId, trace.offerId, trace.layoutId, trace.photoId].filter((id): id is string => Boolean(id))
+  return ids.length > 0 ? ids : undefined
 }
 
 export function qualityFrom(directed: DirectedCard): ResearchQuality {
@@ -384,7 +455,8 @@ async function applyVisionRound(
   directed: DirectedCard,
   brief: CampaignBrief,
   spec: CreativeDirection["spec"],
-  env: NodeJS.ProcessEnv
+  env: NodeJS.ProcessEnv,
+  hits?: import("@/lib/research-library/types").RetrievalHit[]
 ): Promise<DirectedCard> {
   let png: Buffer
   try {
@@ -417,6 +489,7 @@ async function applyVisionRound(
     costs: [...directed.costs, cost],
     env,
     cardId: directed.costs[0]?.cardId,
+    hits,
   })
   return {
     ...shifted,

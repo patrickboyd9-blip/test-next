@@ -6,7 +6,7 @@ import { renderToStaticMarkup } from "react-dom/server"
 import { toCreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import type { CreativeDirection, CreativeSpec } from "@/lib/campaign-creator/types"
 import { POSTCARD_5X8_V1 } from "@/lib/mail-catalog/pieces/postcard-5x8"
-import { ROOFING_PRO_META, ROOFING_PRO_TEMPLATE_IDS } from "@/lib/roofing-pro/ids"
+import { ROOFING_PRO_AVAILABLE_IDS, ROOFING_PRO_META } from "@/lib/roofing-pro/ids"
 
 import { FocusView } from "./FocusView"
 
@@ -39,7 +39,7 @@ function direction(): CreativeDirection {
   }
 }
 
-test("roofing focus offers the ten pro templates and marks the current one", () => {
+test("roofing focus offers the available pro templates and marks the current one", () => {
   const item = direction()
   const html = renderToStaticMarkup(
     createElement(FocusView, {
@@ -58,9 +58,11 @@ test("roofing focus offers the ten pro templates and marks the current one", () 
   )
   assert.match(html, /Pro templates/)
   assert.match(html, /The layout is already designed/)
-  for (const id of ROOFING_PRO_TEMPLATE_IDS) {
+  for (const id of ROOFING_PRO_AVAILABLE_IDS) {
     assert.match(html, new RegExp(ROOFING_PRO_META[id].name))
   }
+  assert.equal(ROOFING_PRO_AVAILABLE_IDS.includes("roof_before_after"), false)
+  assert.doesNotMatch(html, /Before and after/)
   assert.match(html, /aria-pressed="true"/)
   assert.match(html, /Split photo/)
 })

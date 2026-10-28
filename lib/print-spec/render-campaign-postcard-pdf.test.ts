@@ -135,15 +135,14 @@ test("a photograph under 300 DPI is refused", () => {
 })
 
 test("print PDF is two 612 by 396 point pages with embedded fonts", async () => {
-  const tiny = encodeSolidPng(32, 32, [10, 20, 30])
-  await assert.rejects(
-    () =>
-      renderPostcardPrintPdf({
-        copy: { headline: "Too small" },
-        image: { bytes: tiny, width: 32, height: 32 },
-      }),
-    /300 DPI/
-  )
+  const preview = encodeSolidPng(1024, 1024, [10, 20, 30])
+  const enlarged = await renderPostcardPrintPdf({
+    copy: { headline: "The house cools down again" },
+    image: { bytes: preview, width: 1024, height: 1024 },
+  })
+  assert.equal(enlarged.artwork, "final-photo")
+  assert.ok(enlarged.imageDpi.x >= 300)
+  assert.ok(enlarged.imageDpi.y >= 300)
 
   const rendered = await renderPostcardPrintPdf({
     copy: {

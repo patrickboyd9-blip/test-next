@@ -1,3 +1,5 @@
+import { industryForBrief, normalizeIndustry } from "@/lib/research-library/industry"
+
 import { isHomeServicesBrief } from "./creative-intelligence"
 import {
   isFinalExpenseBrief,
@@ -91,6 +93,19 @@ const ROOFING: SceneBank = {
   ],
 }
 
+/**
+ * Roofing heroes show the result the homeowner wants: an attractive house
+ * with a clean new roof on a sunny day. People are optional and small.
+ * Round 1 of the quality loop showed that worker-on-gray-sky scenes read as
+ * stock and crop badly, so roofing always uses this bank.
+ */
+const ROOFING_HERO: readonly string[] = [
+  "An attractive two-story suburban house with a clean, freshly installed dark charcoal architectural shingle roof, seen from across the street at a slight angle. Trimmed lawn, a tree at one side, deep blue sky with a few white clouds. Curb appeal. No people.",
+  "A well-kept single-story ranch house with a crisp new shingle roof and clean gutters, shot from the sidewalk in warm late-morning sun under a clear blue sky. Green lawn and a tidy front walk. The whole roof is in frame.",
+  "A handsome craftsman-style home with a brand-new roof, photographed from the street on a bright sunny day with blue sky. Flowers along the porch. One roofer, small in frame, waves from the driveway beside a ladder, face fully visible and not cropped.",
+  "A bright, welcoming family home on a quiet tree-lined street, its new roof clean and even, blue sky and soft sun. Shot from the curb so the full house and roofline sit inside the frame with margin on every side. No people.",
+]
+
 const HVAC: SceneBank = {
   consequence: [
     "An unused thermostat and a closed window in a warm, still room. Summer light, no people mugging for the camera. Illustrative, not this home.",
@@ -99,7 +114,7 @@ const HVAC: SceneBank = {
   ],
   crew: [
     "Hands and gauges at an outdoor condenser. Coils, copper, working daylight. No logo and no face as the subject.",
-    "A technician on a ladder at a soffit vent, seen from the yard, tools in a bag. Sky left quiet. Not a handshake.",
+    "A technician kneeling beside an outdoor condenser with the service panel open, coils and copper visible, working daylight.",
     "A filter being slid from a return grille, only hands and the grille, interior daylight. Not a stock smile.",
   ],
   neighborhood: [
@@ -253,6 +268,42 @@ const FINAL_EXPENSE: SceneBank = {
   ],
 }
 
+const AUTO_INSURANCE: SceneBank = {
+  consequence: [
+    "A parked family car in a residential driveway, daylight, intact, no collision. No person on a ladder and no work crew.",
+    "A quiet house front and one car in the drive, ordinary daylight, no damage and no tools.",
+    "The side of a family car and an empty driveway, calm sky, no crash and no one climbing.",
+  ],
+  crew: [
+    "The same parked family car, quiet daylight, no driver posed at the camera, no tools and no ladder.",
+    "A local advisor only when that photograph was uploaded. Otherwise the parked car and the house, no hard hat and no roof work.",
+    "Hands are out of frame. The subject is the car in the driveway, daylight, no collision.",
+  ],
+  neighborhood: [
+    "A quiet residential street with ordinary cars in driveways, daylight, no crash and no work crew.",
+    "Houses and parked cars along a sidewalk, one time of day, no readable signs and no ladders.",
+    "A shaded driveway and a family car, the house intact, no repair and no Medicare card.",
+  ],
+}
+
+const LIFE_INSURANCE: SceneBank = {
+  consequence: [
+    "A living family at a kitchen table in daylight, well and connected, contemporary color. Not grief and not a work site.",
+    "Two generations on a front porch, alive and at ease. Not a ladder, not a cemetery, and not a hospital.",
+    "A family walking a quiet block, capable and ordinary. Not a crash and not a construction crew.",
+  ],
+  crew: [
+    "A living family photographed together, faces natural, contemporary color. Not a casket and not a hard hat.",
+    "Hands of two generations around a table, only the people and the table, daylight.",
+    "A parent and an adult child in a bright kitchen, well and ordinary. Not a job site.",
+  ],
+  neighborhood: [
+    "An ordinary home with a family on the walk, living and well, daylight, no readable signs.",
+    "A residential street and a family out together, contemporary color. Not a capitol and not a ladder.",
+    "A front yard in open light, people alive and capable. Not a roof repair.",
+  ],
+}
+
 const LOCAL_SERVICE: SceneBank = {
   consequence: [
     "The visible cost of waiting, in an ordinary home, shown as a category situation: one small problem in a calm room. Not gore and not a ruined kitchen used as stock proof.",
@@ -271,7 +322,52 @@ const LOCAL_SERVICE: SceneBank = {
   ],
 }
 
+function tradeScene(subject: string): SceneBank {
+  return {
+    consequence: [
+      `${subject} Ordinary daylight, no logos, no type, and no postcard chrome.`,
+      `${subject} A closer detail of that same work, calm surroundings, nothing from another trade.`,
+      `${subject} The job as a customer would recognize it, not a stock pose and not a grey cut-out.`,
+    ],
+    crew: [
+      `${subject} Hands at the work, the person secondary, no logo on clothing.`,
+      `${subject} A worker seen from a little distance, with room left for type.`,
+      `${subject} Only the tools of this trade, no unrelated equipment.`,
+    ],
+    neighborhood: [
+      `${subject} A normal home or shop in daylight, no readable signs.`,
+      `${subject} The place of business, one time of day, no landmark.`,
+      `${subject} Open light, and nothing that belongs to a different trade.`,
+    ],
+  }
+}
+
+const INDUSTRY_PHOTO: Record<string, string> = {
+  "precious-metals": "precious-metals",
+  "hair-salon": "hair-salon",
+  laundromat: "laundromat",
+  "garage-doors": "garage-doors",
+  bakery: "bakery",
+  handyman: "handyman",
+  optometry: "optometry",
+  "senior-living": "senior-living",
+  sauna: "sauna",
+  "outdoor-living": "outdoor-living",
+  "consumer-products": "consumer-products",
+}
+
 const BANKS: Record<string, SceneBank> = {
+  "precious-metals": tradeScene("Gold and silver coins or bars on a plain tray, a buyer's counter, no currency collage."),
+  "hair-salon": tradeScene("A hair salon chair and a cut in progress, mirrors and daylight, no spa table and no medical equipment."),
+  laundromat: tradeScene("A row of washing machines in a laundromat, clean and lit, no car wash and no dry cleaner storefront unless the machines are the subject."),
+  "garage-doors": tradeScene("A residential garage door, open or being repaired, the door and the opener in frame, not a kitchen remodel."),
+  bakery: tradeScene("A bakery case of bread and pastry, warm light, no restaurant dining room as the subject."),
+  handyman: tradeScene("A handyman's tool belt and a small home repair, one task in frame, not a roof replacement or an HVAC condenser."),
+  optometry: tradeScene("An optometry lane, eyeglasses and an eye chart, no dental chair and no med spa."),
+  "senior-living": tradeScene("A bright senior-living common room or garden walk, capable residents, no hospital bed and no Medicare card."),
+  sauna: tradeScene("A wooden sauna interior, benches and warm light, no gym floor and no pool party."),
+  "outdoor-living": tradeScene("A deck, patio, pergola, or paver outdoor kitchen at a home, daylight, not a lawn mower as the subject."),
+  "consumer-products": tradeScene("Apparel and gear — shoes, a jacket, boots, or hiking clothes — on a clean surface, no store-opening balloon arch."),
   medicare: MEDICARE,
   final_expense: FINAL_EXPENSE,
   roofing: ROOFING,
@@ -285,6 +381,9 @@ const BANKS: Record<string, SceneBank> = {
   pizza_qsr: RESTAURANT,
   dental: DENTAL,
   med_spa: DENTAL,
+  auto_insurance: AUTO_INSURANCE,
+  home_insurance: AUTO_INSURANCE,
+  life_insurance: LIFE_INSURANCE,
   "local-service": LOCAL_SERVICE,
 }
 
@@ -381,38 +480,79 @@ export function buildPhotographyArtDirection(input: {
   const bank = BANKS[bankKey(trade)] ?? LOCAL_SERVICE
   const conceived = input.visualDirection.trim()
   const weak = isWeakVisualDirection(conceived)
+  const genericJob = /finished result of the job|the problem itself|from this business|one local person/i.test(conceived)
   const portrait = trade.startsWith("medicare") ? uploadedAgentPortrait(input.campaign) : undefined
+  const acUnit = trade === "hvac" && acUnitOffer(input.campaign)
+  const replace =
+    weak ||
+    badSubject(conceived, trade) ||
+    offIndustry(conceived, trade) ||
+    genericJob ||
+    (trade === "hvac" && !hvacDepiction(conceived, acUnit)) ||
+    (acUnit && /\b(vents?|ducts?|grilles?|duct cleaning)\b/i.test(conceived))
+  const scenes = hvacScenes(bank[input.imageryRole], trade, acUnit)
   const subject =
     portrait && input.imageryRole === "crew"
       ? `The uploaded agent photograph: ${portrait}. A friendly headshot, eyes to the camera, natural color, capable and local. Not a stock model and not a government portrait.`
-      : weak || badSubject(conceived, trade)
-        ? pick(bank[input.imageryRole], `${input.variationKey ?? "direction"}:${input.leadJob}`)
+      : replace
+        ? pick(scenes, `${input.variationKey ?? "direction"}:${input.leadJob}`)
         : conceived
 
+  const roofing = trade === "roofing"
   const art: ImageBriefArtDirection = {
     revision: PHOTOGRAPHY_ART_DIRECTION_REVISION,
     trade,
-    subject,
-    lighting: lightingFor(input.imageryRole, input.campaign, trade),
+    subject: roofing ? pick(ROOFING_HERO, `${input.variationKey ?? "direction"}:${input.leadJob}`) : subject,
+    lighting: roofing
+      ? "Bright sunny daylight, deep blue sky with a few white clouds, warm and inviting. Never overcast and never a flat gray sky."
+      : lightingFor(input.imageryRole, input.campaign, trade),
     framing: FRAMING[input.occupancy],
     emotion: EMOTION[input.leadJob],
     refuse: refuseFor(trade),
-    negativeSpace: negativeSpaceForLayout(input.layoutVariant, input.occupancy),
+    negativeSpace: roofing
+      ? "Keep the whole house, the whole roof, and any face well inside the central two-thirds of the frame, with generous sky above and lawn below, so any crop to a wide or tall panel keeps them. Leave some calm blue sky in the upper third for type."
+      : negativeSpaceForLayout(input.layoutVariant, input.occupancy),
   }
 
   const craft = craftNote(input.campaign, trade)
   if (craft) art.craft = craft
+  if (trade === "auto_insurance" || trade === "home_insurance" || trade === "life_insurance") {
+    art.negativeSpace = "Leave a calm third of the frame as open sky, driveway, or a plain wall. No ladders, tools, work crews, roofs being repaired, or people climbing."
+    art.refuse = `${art.refuse} No ladders, handymen, roofers, hard hats, crashes, collisions, or Medicare cards.`
+  }
+  if (trade === "hvac") {
+    art.refuse = `${art.refuse} No gutters, window trim, siding, termite treatment, or someone painting a window. The photograph is heating and air equipment.`
+    if (acUnit) {
+      art.refuse = `${art.refuse} No ceiling vent, return grille, or duct cleaning. Show an outdoor condenser or a technician servicing the AC unit.`
+    }
+  }
   return art
 }
 
 function tradeForCampaign(campaign: CampaignBrief | undefined): string {
   if (!campaign) return "local-service"
+  const industry = industryForBrief(campaign)
+  const photographed = INDUSTRY_PHOTO[industry]
+  if (photographed) return photographed
   const matched = referenceVerticalsForBrief(campaign)
   const preferred = TRADE_PREFERENCE.find((trade) => matched.includes(trade))
+  if (preferred && preferred !== "roofing" && STORM_ROOF_INSURANCE.has(preferred)) return preferred
+  // A storm-restoration or hail company is a roofer for the photo: route it
+  // through the sunny-house roofing brief, never a storm-damage or studio shot.
+  if (preferred === "roofing" || STORM_ROOF.test(campaignText(campaign))) return "roofing"
   if (preferred) return preferred
   if (isFinalExpenseBrief(campaign)) return "final_expense"
   if (isMedicareAgentBrief(campaign)) return "medicare_agent"
   return "local-service"
+}
+
+const STORM_ROOF = /\b(?:roof(?:s|ing|er|ers)?|shingles?|storm|hail|wind damage)\b/i
+const STORM_ROOF_INSURANCE = new Set(["final_expense", "medicare_agent", "medicare_seminar", "medicare_plan", "life_insurance", "auto_insurance"])
+
+function campaignText(campaign: CampaignBrief): string {
+  return [campaign.goal, campaign.offer, campaign.audience?.description, campaign.businessInfo?.name, campaign.otherRequirements]
+    .filter((value): value is string => Boolean(value?.trim()))
+    .join(" ")
 }
 
 function bankKey(trade: string): string {
@@ -430,7 +570,50 @@ function refuseFor(trade: string): string {
   return REFUSE
 }
 
+const TRADE_GOLD: Record<string, string> = {
+  hvac: "hvac",
+  plumbing: "plumbing",
+  roofing: "roofing",
+  pest: "pest-control",
+  landscaping: "landscaping",
+  restaurant: "restaurants-food",
+  pizza_qsr: "restaurants-food",
+  dental: "dental",
+  auto_insurance: "auto-insurance",
+  home_insurance: "home-insurance",
+  life_insurance: "life-insurance",
+}
+
+function offIndustry(value: string, trade: string): boolean {
+  const expected = TRADE_GOLD[trade]
+  if (!expected) return false
+  const found = normalizeIndustry(value)
+  return found !== "none" && found !== expected
+}
+
+function acUnitOffer(campaign: CampaignBrief | undefined): boolean {
+  const text = `${campaign?.offer ?? ""} ${campaign?.goal ?? ""}`
+  if (/\bducts?\b/i.test(text) && !/\b(?:\bac\b|a\/c|air condition)/i.test(text)) return false
+  return /\b(?:\bac\b|a\/c|air condition)/i.test(text)
+}
+
+function hvacScenes(scenes: readonly string[], trade: string, acUnit: boolean): readonly string[] {
+  if (trade !== "hvac" || !acUnit) return scenes
+  const condensers = scenes.filter((scene) => /\bcondensers?\b/i.test(scene) && !/\b(vents?|ducts?|grilles?|duct cleaning)\b/i.test(scene))
+  return condensers.length > 0
+    ? condensers
+    : ["An outdoor condenser beside the house, a technician at the open service panel, coils and copper visible, working daylight."]
+}
+
+function hvacDepiction(value: string, acUnit = false): boolean {
+  if (acUnit && /\b(vents?|ducts?|grilles?|duct cleaning)\b/i.test(value)) return false
+  return /\b(hvac|condensers?|furnaces?|thermostats?|air condition|ducts?|vents?|filters?|coils?|\bac\b)\b/i.test(value)
+}
+
 function badSubject(value: string, trade: string): boolean {
+  if (trade === "auto_insurance" || trade === "home_insurance" || trade === "life_insurance") {
+    return /\b(ladders?|handymen|handyman|roofers?|shingles?|hard hats?|condensers?|technicians?|construction|job sites?|medicare|crashes?|collisions?|caskets?|funerals?)\b/i.test(value)
+  }
   if (!trade.startsWith("medicare") && trade !== "final_expense" && trade !== "life_insurance") {
     return false
   }

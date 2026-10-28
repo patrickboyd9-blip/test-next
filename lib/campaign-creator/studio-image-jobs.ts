@@ -61,9 +61,10 @@ export type StudioPhotoCheck = (input: StudioPhotoCheckInput) => Promise<boolean
  * picture finishes or the 60s cap kills it. @vercel/functions waitUntil is
  * the same mechanism with an extra package, so it is not used.
  *
- * One photograph is started per request. The browser polls. A killed run
- * leaves the job stale; the next poll retries it once. A picture that already
- * landed in storage is never generated again.
+ * Every preview that is ready to run starts in the same request, together.
+ * The browser still polls, and each finished photograph shows up on its own.
+ * A killed run leaves that job stale; the next poll retries it once.
+ * A picture that already landed in storage is never generated again.
  *
  * after() only keeps the function alive for the promise the callback returns.
  * Dropping that promise (void work()) lets Vercel freeze the invocation
@@ -78,12 +79,15 @@ export function scheduleAfterResponse(
 
 const MAX_ATTEMPTS = 2
 const STALE_MS = 75_000
+const PREVIEW_TIMEOUT_MS = 25_000
+const FINAL_TIMEOUT_MS = 50_000
 
 interface WorkItem {
   directionId: string
   spec: CreativeSpec
   tier: StudioImageTier
   photoSlot?: "primary" | "before" | "after"
+  researchPhotoNote?: string
 }
 
 interface PreparedSlot {
@@ -141,19 +145,19 @@ export async function syncStudioDirectionImages(options: {
     })
 
   const first = await read()
-  const due = first.due
-  if (!due) return first.load
+  if (first.due.length === 0) return first.load
 
-  const work = () =>
-    executeStudioImageJob({
+  const work = async () => {
+    await Promise.all(first.due.map((slot) => executeStudioImageJob({
       campaignId: options.campaignId,
       campaignBrief: options.campaignBrief,
       store,
       createAdapter: options.createAdapter,
-      slot: due,
+      slot,
       now,
       photoCheck: options.photoCheck,
-    })
+    })))
+  }
 
   if (options.runInline) {
     await work()
@@ -172,18 +176,22 @@ async function readStudioImageSlots(input: {
   store: StudioImageStore
   now: Date
   configured: boolean
-}): Promise<{ load: StudioImageLoad; due: PreparedSlot | null }> {
+}): Promise<{ load: StudioImageLoad; due: PreparedSlot[] }> {
   const records: StudioImageRecord[] = []
   const misses: StudioImageMiss[] = []
   let pending = false
-  let due: PreparedSlot | null = null
+  const due: PreparedSlot[] = []
+  if (!input.configured) {
+    console.error("Studio photographs need OPENAI_API_KEY on the server. Set it for Vercel Production and Preview. The name is OPENAI_API_KEY.")
+  }
 
   for (const item of workItems(input.creative, input.campaignBrief)) {
     if (!isSafeStudioId(item.directionId)) continue
     const context = imageBriefContextFor(
       item.directionId,
       input.campaignBrief,
-      item.photoSlot ?? (isBeforeAfterTemplate(item.spec.layoutHints?.templateId) ? "before" : "primary")
+      item.photoSlot ?? (isBeforeAfterTemplate(item.spec.layoutHints?.templateId) ? "before" : "primary"),
+      item.researchPhotoNote
     )
     const brief = toImageBrief(item.spec, context)
     if (!brief) continue
@@ -234,7 +242,7 @@ async function readStudioImageSlots(input: {
     }
 
     pending = true
-    if (!due) due = slot
+    due.push(slot)
   }
 
   return { load: { records, misses, pending }, due }
@@ -249,13 +257,15 @@ function workItems(
       directionId: entry.directionId,
       spec: entry.spec,
       tier: "preview",
+      researchPhotoNote: entry.researchPhotoNote,
     })
   )
   const selected = creative.selectedDirectionId
   if (!selected) return previews
   const spec = getApprovedSpec(creative) ?? getActiveSpec(creative, selected)
   if (!spec) return previews
-  return [...previews, ...expandPhotoSlots({ directionId: selected, spec, tier: "final" })]
+  const note = creative.directions.find((direction) => direction.id === selected)?.research?.photoDirection
+  return [...previews, ...expandPhotoSlots({ directionId: selected, spec, tier: "final", researchPhotoNote: note })]
 }
 
 function expandPhotoSlots(item: WorkItem): WorkItem[] {
@@ -371,11 +381,11 @@ async function executeStudioImageJob(input: {
               "The previous photograph did not match this slot. Replace it with the requested subject. Do not repeat an interior ceiling, empty sky, or the other state of the roof.",
           }
         : brief
-    const generated = await generateImage(adapter, promptBrief, {
+    const generated = await withTimeout(generateImage(adapter, promptBrief, {
       tier: slot.item.tier,
       campaignId: input.campaignId,
       directionId: slot.item.directionId,
-    })
+    }), slot.item.tier === "preview" ? PREVIEW_TIMEOUT_MS : FINAL_TIMEOUT_MS)
     const check = input.photoCheck ?? defaultPhotoCheck
     const candidates = [generated.asset, ...generated.alternates]
     const matched: GeneratedAsset[] = []
@@ -392,14 +402,14 @@ async function executeStudioImageJob(input: {
     if (chosenAsset) {
       const firstReading = readingFromDataUrl(chosenAsset.src)
       if (firstReading && (firstReading.cluttered || firstReading.stocky)) {
-        const retake = await generateImage(adapter, {
+        const retake = await withTimeout(generateImage(adapter, {
           ...promptBrief,
           correction: "The previous frame was cluttered behind the type, or it looked like a stock portrait. Leave one third of the frame as calm sky or a plain wall. Put the person, the face, and any ladder on the other side. Off-axis, a real lived-in house, ordinary daylight.",
         }, {
           tier: slot.item.tier,
           campaignId: input.campaignId,
           directionId: slot.item.directionId,
-        })
+        }), slot.item.tier === "preview" ? PREVIEW_TIMEOUT_MS : FINAL_TIMEOUT_MS)
         const retakeMatches = await check({
           src: retake.asset.src,
           describedSubject: promptBrief.artDirection.subject,
@@ -480,7 +490,10 @@ async function executeStudioImageJob(input: {
       claim,
       claimedAt,
     })
-    if (!notConfigured) console.error("Studio image generation failed:", error)
+    if (!notConfigured) {
+      const reason = error instanceof Error ? error.message : "Image generation failed."
+      console.error(`Studio image generation failed for ${slot.item.directionId} (${slot.item.tier}, attempt ${attempts}): ${reason}`)
+    }
   } finally {
     const currentLock = await input.store.readSidecar(input.campaignId, lockBase)
     if (currentLock?.claim === claim) {
@@ -510,6 +523,16 @@ async function defaultPhotoCheck(input: StudioPhotoCheckInput): Promise<boolean>
           openAIVisionPhotoCheck({ src, expectation: expected, apiKey })
       : undefined
   )
+}
+
+function withTimeout<T>(work: Promise<T>, ms: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`Image generation timed out after ${ms} ms`)), ms)
+  })
+  return Promise.race([work, timeout]).finally(() => {
+    if (timer) clearTimeout(timer)
+  })
 }
 
 async function generateImage(
