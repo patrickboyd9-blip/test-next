@@ -1,3 +1,4 @@
+import { scrubUnstatedAudience, scrubUnstatedName, statedNameFallback } from "@/lib/design-intelligence/audience-facts"
 import { isDesignRationale } from "@/lib/design-intelligence/rationale"
 
 import type {
@@ -561,15 +562,25 @@ function normalizeDirection(
     brief.primarySuccessMetric?.description ||
     brief.desiredRecipientAction ||
     "your campaign goal"
-  const rationale = sanitizeStudioResponse(
-    direction.rationale,
-    `A strong direction for ${designedToDrive}.`
-  )
+  const facts = [brief.goal, brief.offer, brief.audience?.description, brief.businessInfo?.name, brief.otherRequirements]
+    .filter((value): value is string => Boolean(value?.trim()))
+    .join(" ")
+  const rationale = scrubUnstatedAudience(
+    sanitizeStudioResponse(
+      direction.rationale,
+      `A strong direction for ${designedToDrive}.`
+    ),
+    facts
+  ) || `A strong direction for ${designedToDrive}.`
 
   return {
     ...direction,
     id: crypto.randomUUID(),
-    name: repairDirectionName(direction.name, spec.headline),
+    name: scrubUnstatedName(
+      repairDirectionName(direction.name, spec.headline),
+      facts,
+      statedNameFallback(brief.offer, brief.goal)
+    ),
     rationale,
     tags: repairDirectionTags(direction.tags),
     designedToDrive,

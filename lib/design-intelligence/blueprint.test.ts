@@ -119,7 +119,8 @@ test("a rebuilt card keeps the font class and writes the offer into the copy pat
   })
   assert.ok(rebuilt)
   assert.equal(rebuilt.spec.blueprint?.sourceId, "PM-056")
-  assert.equal(rebuilt.spec.headline, "FREE inspection.")
+  assert.equal(rebuilt.spec.headline, "A dry, safe home starts here.")
+  assert.equal(rebuilt.rationale.persuasion?.outcomeGuidance, "A safe, dry home.")
   assert.equal(rebuilt.spec.subheadline, "Call today.")
   assert.equal(rebuilt.spec.headline?.includes("See the roof"), false)
   assert.equal(rebuilt.rationale.font_pairing, "signal")
@@ -284,10 +285,11 @@ test("deadline-loss framing is not forced onto a free inspection", async () => {
   assert.ok(rebuilt)
   const written = `${rebuilt.spec.headline} ${rebuilt.spec.subheadline ?? ""}`
   assert.equal(/don'?t lose/i.test(written), false)
-  assert.match(written, /inspection/i)
+  assert.match(written, /A dry, safe home starts here\./)
   assert.equal(rebuilt.spec.blueprint?.copyPattern === "deadline_warning", false)
   assert.equal(seen.some((line) => /don'?t lose/i.test(line)), false)
-  assert.equal(rebuilt.spec.headline, "A free roof inspection.")
+  assert.equal(rebuilt.spec.headline, "A dry, safe home starts here.")
+  assert.equal(rebuilt.rationale.persuasion?.outcomeGuidance, "A safe, dry home.")
 })
 
 test("a copy editor can reject one pattern and the next fitting pattern is used", async () => {

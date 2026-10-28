@@ -103,6 +103,8 @@ Thumbs in Studio are stored per campaign and per the campaign’s owner, in the 
 
 The fixed exam is `npx tsx scripts/design-exam.ts --mode baseline` and `--mode after`. It writes scores and images under `artifacts/design-exam/`, which is not committed. Without `ANTHROPIC_API_KEY` those scores are machine estimates.
 
+The persuasion layer is the list in `lib/design-intelligence/persuasion-principles.ts`. The art director picks two or three principles and records one emotion and one core need. The client can choose the emotion; otherwise the art director recommends one. Audience awareness defaults to a cold list, which leads with the problem. A past customer leads with the offer. Every card also keeps a sell-the-outcome line, and the studio shows a second angle (a threat plus one easy action) labeled as A/B test options. The critic rejects a fake deadline, an invented count, an unsupplied testimonial, a threat with no easy action, a fake check, a government look-alike, steering language on a housing card, and the word free on a Medicare card. An attorney card that does not say Advertisement, or that uses dramatic injury imagery, is also a hard fail. The studio warns that Florida Bar 4-7.18 requires a 30-day wait after an accident before mailing. That check is rules, so it adds no model cost. When the vision critic runs, the same checklist is in its prompt.
+
 On a laptop, put the photographs in `.data/reference-library` (that folder is not committed) and run `npx tsx scripts/seed-reference-library.ts`. If the Blob token is present, the script also uploads them. If it is not, the benchmark reads the local files.
 
 ## How long the AI calls can run

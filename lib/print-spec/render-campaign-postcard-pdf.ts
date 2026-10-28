@@ -39,6 +39,8 @@ export interface PostcardPrintCopy {
    * It is not rewritten into customer voice.
    */
   disclaimer?: string
+  /** Printed on the address side when a regulated vertical requires it. */
+  complianceMark?: string
 }
 
 export interface AddressBackPlan {

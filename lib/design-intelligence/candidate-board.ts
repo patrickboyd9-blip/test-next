@@ -5,7 +5,7 @@ import { MEDICARE_AGENT_DISCLAIMER, isMedicareAgentBrief } from "@/lib/campaign-
 
 import { directDesign, usesSeparatedPanel, type CompositionMode } from "./art-director"
 import { normalizeToneTag, normalizeVerticalTag, selectBlueprints, type MailerBlueprint } from "./blueprint"
-import { blueprintMatchLine, copyPatternFromText, offerTypeFromText, patternFitsOffer } from "./blueprint-tags"
+import { copyPatternFromText, offerTypeFromText, patternFitsOffer } from "./blueprint-tags"
 import { ownerFavoriteIds } from "./owner-favorites"
 import { loadBlueprintCorpus } from "./blueprint-store"
 import { rebuildFromBlueprint } from "./blueprint-rebuild"
@@ -28,6 +28,10 @@ import {
   type TastePick,
   type TasteSignals,
 } from "./taste-retrieval"
+import { ATTORNEY_AD_LABEL, attorneyAdMark } from "./attorney-compliance"
+import { scrubUnstatedAudience, scrubUnstatedName, statedNameFallback } from "./audience-facts"
+import { applyOutcomeHeadline, clientFactText, roleForDirection, selectPersuasion, type DirectionRole } from "./persuasion"
+import type { ImageryRole, LeadJob } from "@/lib/campaign-creator/types"
 import { briefHasNumeralOffer } from "./vertical"
 import { loadTasteCorpus, visionTasteStore, type VisionTaste } from "./vision-taste"
 import { referencePicksForCritique, requestComparativeCritique } from "./vision-critic"
@@ -127,7 +131,7 @@ export async function applyStudioBoard(
     records: options?.records,
     tastes: options?.tastes,
   })
-  return applyBoard(result, board)
+  return applyBoard(result, board, brief)
 }
 
 export async function rankCandidates(input: {
@@ -247,7 +251,11 @@ async function scoreFamily(input: {
   blueprint?: MailerBlueprint
   env?: NodeJS.ProcessEnv
 }): Promise<ScoredCandidate> {
-  let rationale = rationaleForFamily(input.base, input.family, input)
+  const family = input.family.mode === "type-led"
+    ? COMPOSITION_FAMILIES.find((item) => item.id === "integrated-headline") ?? input.family
+    : input.family
+  const role = roleForDirection(input.directionIndex, input.brief.primaryEmotion)
+  let rationale = rationaleForFamily(input.base, family, input)
   let spec = input.spec
   let blueprintMeta: ScoredCandidate["blueprint"]
   if (input.blueprint) {
@@ -270,16 +278,81 @@ async function scoreFamily(input: {
       }
     }
   }
+  spec = {
+    ...spec,
+    headline: applyOutcomeHeadline({
+      headline: spec.headline ?? "",
+      offer: spec.offer ?? input.brief.offer ?? "",
+      brief: input.brief,
+      vertical: rationale.vertical,
+      role,
+    }),
+  }
+  rationale = {
+    ...rationale,
+    persuasion: selectPersuasion({
+      brief: input.brief,
+      vertical: rationale.vertical,
+      role,
+      blueprint: input.blueprint
+        ? {
+            tone: input.blueprint.tones[0]?.tag,
+            offerType: spec.blueprint?.offerType ?? input.blueprint.offerTypes[0]?.tag,
+            copyPattern: spec.blueprint?.copyPattern ?? input.blueprint.copyPatterns[0]?.tag,
+          }
+        : undefined,
+    }),
+  }
+  const presentation = rolePresentation(role)
+  rationale = {
+    ...rationale,
+    grid: { name: presentation.grid, alignment: "left", intentional_break: presentation.mode },
+    scale_ratios: {
+      ...rationale.scale_ratios,
+      hero: "headline",
+      offer_to_headline_cap: 0.48,
+      offer_to_body: 1.6,
+    },
+    offer_treatment: {
+      ...rationale.offer_treatment,
+      kind: rationale.vertical === "medicare_insurance" ? "concrete_step_no_discount" : "headline_is_the_offer",
+      placement: presentation.placement,
+    },
+    focal_element: {
+      ...rationale.focal_element,
+      kind: "headline",
+      description: presentation.placement,
+      lead_modality: presentation.mode === "full-bleed" ? "image" : "type",
+    },
+    photo_brief: {
+      ...rationale.photo_brief,
+      mode: presentation.photoMode,
+      subject: presentation.subject,
+      crop: presentation.crop,
+      placement: presentation.mode === "panel" ? "panel_bleed_two_edges" : "full_bleed",
+    },
+  }
+  spec = {
+    ...spec,
+    visualDirection: presentation.visualDirection,
+    imageryRole: presentation.imageryRole,
+    leadJob: presentation.leadJob,
+    layoutVariant: "image_grounded",
+    imagePresence: "field",
+  }
+  const facts = clientFactText(input.brief, spec.offer)
+  const complianceMark = attorneyAdMark(facts)
   const card = composeGridCard({
     rationale,
     spec,
     businessName: input.brief.businessInfo?.name,
     disclaimer: isMedicareAgentBrief(input.brief) ? MEDICARE_AGENT_DISCLAIMER : null,
+    complianceMark,
   })
-  const copy = [spec.headline, spec.offer, spec.body, spec.phone, input.brief.businessInfo?.name]
+  const copy = [spec.headline, spec.offer, spec.body, spec.phone, input.brief.businessInfo?.name, complianceMark]
     .filter(Boolean)
     .join(" ")
-  const critique = critiqueCard(card, rationale, copy)
+  const critique = critiqueCard(card, rationale, copy, undefined, clientFactText(input.brief, spec.offer))
   const sampled = gradeComposition({
     card,
     rationale,
@@ -287,10 +360,10 @@ async function scoreFamily(input: {
     worstContrast: critique.autoFails.includes("AF1") ? 3 : 7,
   })
   return {
-    familyId: input.family.id,
+    familyId: family.id,
     grid: rationale.grid.name,
-    feel: input.family.feel,
-    summary: blueprintMeta ? `Blueprint: ${blueprintMatchLine(blueprintMeta)}` : input.family.summary,
+    feel: family.feel,
+    summary: presentation.summary,
     directionIndex: input.directionIndex,
     rationale,
     card,
@@ -339,6 +412,7 @@ function chooseDiverse(candidates: ScoredCandidate[], directionCount: number): S
   for (let index = 0; index < directionCount; index += 1) {
     const options = candidates
       .filter((candidate) => candidate.directionIndex === index)
+      .filter((candidate) => candidate.rationale.grid.intentional_break !== "type-led")
       .sort((a, b) => Number(b.grade.cleared) - Number(a.grade.cleared) || b.grade.score - a.grade.score)
     const pick = options.find((candidate) => !usedModes.has(candidate.rationale.grid.intentional_break) && !usedIds.has(candidate.familyId))
       ?? options.find((candidate) => !usedIds.has(candidate.familyId))
@@ -351,7 +425,8 @@ function chooseDiverse(candidates: ScoredCandidate[], directionCount: number): S
   return chosen.filter((candidate): candidate is ScoredCandidate => Boolean(candidate))
 }
 
-function applyBoard(result: GenerateDirectionsResult, board: BoardResult): GenerateDirectionsResult {
+function applyBoard(result: GenerateDirectionsResult, board: BoardResult, brief: CampaignBrief): GenerateDirectionsResult {
+  const facts = clientFactText(brief)
   const best = [...board.surfaced].sort((a, b) => b.grade.score - a.grade.score)[0]
   const directions = result.directions.map((direction, index) => {
     const winner = board.surfaced.find((candidate) => candidate.directionIndex === index)
@@ -362,10 +437,15 @@ function applyBoard(result: GenerateDirectionsResult, board: BoardResult): Gener
       title: pick.principle.split(".")[0] || pick.principle,
       whyItWorks: pick.principle,
     }))
+    const lesson = winner.rationale.persuasion?.lesson
+    const researchId = winner.blueprint ? `Research id ${winner.blueprint.sourceId}.` : ""
+    const role = winner.rationale.persuasion?.role
     return {
       ...direction,
+      name: role ? strategyName(role) : scrubUnstatedName(direction.name, facts, statedNameFallback(brief.offer, brief.goal)),
+      rationale: scrubUnstatedAudience(direction.rationale, facts) || `Offers ${brief.offer?.trim() || brief.goal?.trim() || "the stated offer"}.`,
       recommended: best ? winner === best : false,
-      oneLineDifference: winner.summary,
+      oneLineDifference: role ? customerWhyLine(role) : winner.summary,
       spec: {
         ...direction.spec,
         ...winner.spec,
@@ -386,7 +466,7 @@ function applyBoard(result: GenerateDirectionsResult, board: BoardResult): Gener
       },
       research: {
         sources,
-        layoutSummary: winner.summary,
+        layoutSummary: [winner.summary, winner.rationale.persuasion?.line, lesson, researchId].filter(Boolean).join(" "),
         parameters: direction.research?.parameters ?? {
           headlineScale: winner.rationale.scale_ratios.headline_to_body_cap,
           headlinePosition: "on_color_field",
@@ -481,6 +561,72 @@ function rationaleForFamily(
   return checked.rationale
 }
 
+function rolePresentation(role: DirectionRole): {
+  mode: CompositionMode
+  grid: GridName
+  summary: string
+  placement: string
+  subject: string
+  crop: string
+  photoMode: DesignRationale["photo_brief"]["mode"]
+  visualDirection: string
+  imageryRole: ImageryRole
+  leadJob: LeadJob
+} {
+  if (role === "threat") {
+    return {
+      mode: "full-bleed",
+      grid: "full-bleed-plus-panel",
+      summary: "The headline sits on the photograph. The offer is a small line.",
+      placement: "Headline on a calm area of the photograph. Offer is a small line.",
+      subject: "The problem itself, shown honestly and quietly, with no wreckage and no invented damage",
+      crop: "Close on the problem, with a calm area left for the headline",
+      photoMode: "documentary_job",
+      visualDirection: "The problem itself, quiet and honest. No wreckage, no countdown, and no made-up damage.",
+      imageryRole: "consequence",
+      leadJob: "problem",
+    }
+  }
+  if (role === "trust") {
+    return {
+      mode: "panel",
+      grid: "thirds",
+      summary: "A full-height portrait beside the headline.",
+      placement: "A full-height portrait. The headline is the proof. The offer is a small line.",
+      subject: "One local person from this business, face fully in frame with room above the head, calm daylight",
+      crop: "Head and shoulders, the face complete, space above the head",
+      photoMode: "advisor_portrait",
+      visualDirection: "One local person, face fully in frame, room above the head, calm daylight. Not the same scene as the other cards.",
+      imageryRole: "crew",
+      leadJob: "trust",
+    }
+  }
+  return {
+    mode: "integrated",
+    grid: "centered-stack",
+    summary: "The headline is the result, on an open canvas.",
+    placement: "The result headline sits on the open canvas. The offer is a small line.",
+    subject: "The finished result of the job, in daylight, no person in the frame",
+    crop: "The finished work, open sky, no person",
+    photoMode: "result",
+    visualDirection: "The finished result of the job, daylight, no person in the frame. Not a portrait and not the problem.",
+    imageryRole: "neighborhood",
+    leadJob: "offer",
+  }
+}
+
+export function strategyName(role: DirectionRole): string {
+  if (role === "threat") return "Before it spreads"
+  if (role === "trust") return "Local proof"
+  return "The outcome"
+}
+
+export function customerWhyLine(role: DirectionRole): string {
+  if (role === "threat") return "One honest risk, then one easy step. No deadline and no made-up number."
+  if (role === "trust") return "A local face and the business name carry the proof."
+  return "The headline is the result the homeowner wants. The offer stays small."
+}
+
 function orderFamilies(feel: string, signals?: TasteSignals): Family[] {
   return COMPOSITION_FAMILIES.map((family, index) => ({ family, index, score: familyRank(family, feel, signals) }))
     .sort((a, b) => b.score - a.score || a.index - b.index)
@@ -489,6 +635,7 @@ function orderFamilies(feel: string, signals?: TasteSignals): Family[] {
 
 function familyRank(family: Family, feel: string, signals?: TasteSignals): number {
   let score = 0
+  if (family.mode === "type-led") score -= 12
   if (family.feel === feel) score += 3
   const keys = [family.id, family.mode]
   if (keys.some((key) => signals?.likedFamilies.includes(key))) score += 6
@@ -553,6 +700,7 @@ function applyVisionImprovement(candidate: ScoredCandidate, businessName?: strin
     rationale: proposal.rationale,
     spec: candidate.spec,
     businessName,
+    complianceMark: (proposal.rationale.persuasion?.complianceWarnings.length ?? 0) > 0 ? ATTORNEY_AD_LABEL : null,
   })
   const critique = critiqueCard(card, proposal.rationale, candidate.spec.headline ?? "")
   if (critique.autoFails.includes("AF7") || critique.autoFails.includes("AF6") || critique.autoFails.includes("AF1")) {

@@ -14,7 +14,8 @@ import {
   scoreReferenceWriteup,
 } from "./composition-grade"
 import { directDesign } from "./art-director"
-import { composeGridCard } from "./grid-composer"
+import { composeGridCard, paintedTextRects, textInsideSafe, trimInches } from "./grid-composer"
+import { briefShowsPerson, cardRenderFailures } from "./subject-crop"
 import { gradeComposition, readComposition } from "./composition-grade"
 import { critiqueCard } from "./critic"
 import { EXAM_BRIEFS } from "./exam"
@@ -218,10 +219,10 @@ test("a separated panel roofing card lands at B- or C+, and an integrated card c
   const bleedOffer = bleedCard.front.texts.find((text) => text.role === "offer")
   const bleedHeadline = bleedCard.front.texts.find((text) => text.role === "headline")
   assert.equal(bleed.rationale.scale_ratios.hero, "headline")
-  assert.equal(bleedOffer?.text, "FREE")
-  assert.equal(bleedCard.front.texts.some((text) => text.role === "body" && /inspection/i.test(text.text)), true)
+  assert.equal(bleedOffer?.text, "FREE inspection")
+  assert.equal(/\bfree\b/i.test(bleedHeadline?.text ?? ""), false)
   assert.equal(bleedCard.front.texts.some((text) => /\$\s*0\b/.test(text.text)), false)
-  assert.ok(bleedOffer && bleedHeadline && bleedOffer.fontPt >= bleedHeadline.fontPt * 1.55)
+  assert.ok(bleedOffer && bleedHeadline && bleedHeadline.fontPt > bleedOffer.fontPt)
   const bleedQr = bleedCard.front.lockup?.qrRect
   const bleedPhone = bleedCard.front.lockup?.phone?.rect
   const bleedSite = bleedCard.front.lockup?.website?.rect
@@ -334,10 +335,35 @@ test("the board shows three diverse concepts and cites only what it retrieved", 
   assert.equal(familyModes.has("integrated") && familyModes.has("full-bleed") && familyModes.has("panel"), true)
   assert.equal(board.surfaced.length, 3)
   const surfacedModes = board.surfaced.map((item) => item.rationale.grid.intentional_break)
-  assert.equal(new Set(surfacedModes).size, 3)
-  for (const mode of surfacedModes) assert.equal(familyModes.has(mode as "integrated"), true, mode)
-  assert.equal(surfacedModes.includes("integrated"), true)
-  assert.equal(board.surfaced.some((item) => item.card.front.shapes.some((shape) => shape.role === "type-panel")), true)
+  assert.deepEqual(surfacedModes, ["integrated", "full-bleed", "panel"])
+  assert.equal(surfacedModes.includes("type-led"), false)
+  assert.equal(board.surfaced.some((item) => item.card.front.photos.some((slot) => slot.treatment === "cutout")), true)
+  assert.equal(board.surfaced.filter((item) => item.card.front.shapes.some((shape) => shape.role === "type-panel")).length, 1)
+  const headlines = board.surfaced.map((item) => item.spec.headline)
+  assert.equal(new Set(headlines).size, 3)
+  assert.equal(new Set(board.surfaced.map((item) => item.rationale.persuasion?.primaryEmotion.id)).size, 3)
+  assert.equal(new Set(board.surfaced.map((item) => item.rationale.persuasion?.coreNeed.id)).size, 3)
+  assert.equal(new Set(board.surfaced.map((item) => item.spec.visualDirection)).size, 3)
+  assert.equal(new Set(board.surfaced.map((item) => item.rationale.photo_brief.subject)).size, 3)
+  const offerLines = board.surfaced.map((item) => item.card.front.texts.find((text) => text.role === "offer")?.text)
+  assert.equal(headlines.filter((line) => offerLines.includes(line)).length <= 1, true)
+  for (const item of board.surfaced) {
+    const offer = item.card.front.texts.find((text) => text.role === "offer")
+    const headline = item.card.front.texts.find((text) => text.role === "headline")
+    assert.ok(offer && headline && headline.fontPt > offer.fontPt)
+    assert.equal(item.card.front.lockup?.qrLabel, "Scan to book")
+    assert.match(item.card.front.lockup?.phone?.text ?? "", /555/)
+    assert.ok(item.card.front.lockup?.website?.text)
+    assert.equal(textInsideSafe(item.card.front.lockup!.qrRect, "5x8"), true)
+    for (const box of paintedTextRects(item.card.front)) {
+      assert.equal(textInsideSafe(box.rect, "5x8"), true, box.role)
+    }
+    const failures = cardRenderFailures(item.card.front, {
+      person: briefShowsPerson(item.rationale.photo_brief),
+      trim: trimInches("5x8"),
+    })
+    assert.deepEqual(failures, [])
+  }
   const ids = new Set(board.retrieved.map((pick) => pick.id))
   assert.equal(ids.has("PM-047"), true)
   const fewer = await rankCandidates({

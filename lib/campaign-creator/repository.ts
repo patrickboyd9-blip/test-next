@@ -392,9 +392,6 @@ class StoredCampaignRepository implements CampaignRepository {
     if (!direction) throw new Error(`Direction ${directionId} not found`)
     const next = cloneSpec(spec)
     direction.spec = next
-    if (next.blueprint) {
-      direction.oneLineDifference = `Blueprint: ${next.blueprint.sourceId}`
-    }
     const now = new Date().toISOString()
     const revision: CreativeRevision = {
       id: randomUUID(),

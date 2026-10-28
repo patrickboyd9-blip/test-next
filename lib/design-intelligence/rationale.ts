@@ -106,6 +106,26 @@ export interface DesignRationale {
   }
   principles_invoked: string[]
   /**
+   * Two or three persuasion principles for this campaign, in plain language.
+   * Absent on older rationales written before the psychology layer.
+   */
+  persuasion?: {
+    picks: Array<{ id: string; why: string }>
+    line: string
+    primaryEmotion: { id: string; label: string; source: "client" | "recommended" }
+    coreNeed: { id: string; label: string }
+    awareness: { id: string; label: string }
+    outcomeGuidance: string
+    /** outcome, threat, or trust. The three directions do not share one. */
+    role?: "outcome" | "threat" | "trust"
+    /** Client-safe research lesson. No slogans and no result figures. */
+    lesson?: string
+    /** Two copy angles for the same concept, labeled as an A/B test. */
+    angles: Array<{ id: "A" | "B"; label: string; line: string; onCard?: boolean }>
+    /** Shown to the client. These do not change the letter. */
+    complianceWarnings: string[]
+  }
+  /**
    * Where type sits on a full-bleed photograph.
    * Measured from the real photo. Absent until a photograph has been read.
    */
@@ -280,6 +300,64 @@ export function validateDesignRationale(
 
   if (!Array.isArray(raw.principles_invoked) || raw.principles_invoked.length < 3 || raw.principles_invoked.some((item) => typeof item !== "string")) {
     errors.push("principles_invoked needs at least three ids.")
+  }
+  if (raw.persuasion !== undefined) {
+    const persuasion = record(raw.persuasion)
+    const picks = Array.isArray(persuasion?.picks) ? persuasion.picks : null
+    const line = persuasion?.line
+    const picksOk = Boolean(
+      picks &&
+      picks.length >= 2 &&
+      picks.length <= 3 &&
+      picks.every((pick) => {
+        if (!pick || typeof pick !== "object") return false
+        const row = pick as { id?: unknown; why?: unknown }
+        return typeof row.id === "string" && row.id.trim().length > 0 && typeof row.why === "string" && row.why.trim().length > 0
+      })
+    )
+    const emotion = record(persuasion?.primaryEmotion)
+    const need = record(persuasion?.coreNeed)
+    const awareness = record(persuasion?.awareness)
+    const guidance = persuasion?.outcomeGuidance
+    const recordOk = Boolean(
+      emotion &&
+      typeof emotion.id === "string" &&
+      emotion.id.trim() &&
+      typeof emotion.label === "string" &&
+      (emotion.source === "client" || emotion.source === "recommended") &&
+      need &&
+      typeof need.id === "string" &&
+      typeof need.label === "string" &&
+      awareness &&
+      typeof awareness.id === "string" &&
+      typeof awareness.label === "string" &&
+      typeof guidance === "string" &&
+      guidance.trim().length > 0
+    )
+    const role = persuasion?.role
+    const lesson = persuasion?.lesson
+    const roleOk = role === undefined || role === "outcome" || role === "threat" || role === "trust"
+    const lessonOk = lesson === undefined || (typeof lesson === "string" && lesson.trim().length > 0 && !/\b(?:impressions?|views?|lift|roi)\b/i.test(lesson))
+    const angles = Array.isArray(persuasion?.angles) ? persuasion.angles : null
+    const anglesOk = Boolean(
+      angles &&
+      angles.length === 2 &&
+      angles.every((angle, index) => {
+        if (!angle || typeof angle !== "object") return false
+        const row = angle as { id?: unknown; label?: unknown; line?: unknown; onCard?: unknown }
+        return row.id === (index === 0 ? "A" : "B") &&
+          typeof row.label === "string" &&
+          row.label.trim().length > 0 &&
+          typeof row.line === "string" &&
+          row.line.trim().length > 0 &&
+          (row.onCard === undefined || typeof row.onCard === "boolean")
+      })
+    )
+    const warnings = persuasion?.complianceWarnings
+    const warningsOk = Array.isArray(warnings) && warnings.every((warning) => typeof warning === "string")
+    if (!picksOk || typeof line !== "string" || !line.startsWith("Uses:") || !recordOk || !roleOk || !lessonOk || !anglesOk || !warningsOk) {
+      errors.push("persuasion needs two or three principles, a Uses line, one emotion, one need, an outcome version, and two A/B angles.")
+    }
   }
 
   if (errors.length > 0) return { ok: false, errors }

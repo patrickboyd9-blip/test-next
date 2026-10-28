@@ -62,9 +62,9 @@ test("type sits on the calm side of a photograph and off the subject", () => {
   for (const text of card.front.texts) {
     assert.equal(rectsIntersect(text.rect, subjectRect), false, text.role)
   }
-  assert.equal(card.front.texts.some((text) => text.role === "offer" && text.text === "FREE"), true)
+  assert.match(card.front.texts.find((text) => text.role === "offer")?.text ?? "", /^FREE/)
   assert.ok((card.front.lockup?.website?.fontPt ?? 0) >= 12)
-  const qualifier = card.front.texts.find((text) => text.role === "body" || text.role === "proof")
+  const qualifier = card.front.texts.find((text) => text.role === "body" || text.role === "proof" || text.role === "offer")
   assert.ok((qualifier?.fontPt ?? 0) >= 12)
 })
 

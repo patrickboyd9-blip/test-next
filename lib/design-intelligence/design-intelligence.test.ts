@@ -198,7 +198,7 @@ test("three directions do not share a grid and proportions", () => {
   assert.ok(leadOffer.fontPt >= leadHeadlines[0].fontPt * 1.55)
   assert.equal(lead.shapes.some((shape) => shape.role === "offer-tile" || shape.role === "type-panel"), false)
   assert.equal(lead.photos.filter((slot) => slot.treatment === "cutout").length, 1)
-  assert.equal(lead.photos.filter((slot) => slot.treatment === "thumbnail").length, 4)
+  assert.equal(lead.photos.filter((slot) => slot.treatment === "thumbnail").length, 0)
   assert.equal(new Set(leadHeadlines.map((text) => text.color)).size, 2)
   assert.equal(lead.texts.filter((text) => text.text === "Northline Roofing").length, 1)
   const qr = lead.lockup?.qrRect
@@ -227,7 +227,12 @@ test("three directions do not share a grid and proportions", () => {
     const headline = card.front.texts.find((text) => text.role === "headline")
     assert.equal(offer?.text, "FREE")
     assert.equal(card.front.texts.some((text) => /\$\s*0\b/.test(text.text)), false)
-    assert.ok(offer && headline && offer.fontPt >= headline.fontPt * 1.55)
+    assert.ok(offer && headline)
+    if (rationales[cards.indexOf(card)]?.scale_ratios.hero === "offer") {
+      assert.ok(offer.fontPt >= headline.fontPt * 1.55)
+    } else {
+      assert.ok(headline.fontPt > offer.fontPt)
+    }
   }
 })
 

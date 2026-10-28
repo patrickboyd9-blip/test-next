@@ -250,6 +250,83 @@
       "minItems": 3,
       "items": { "type": "string" },
       "description": "IDs such as P1, TP-04, AF8."
+    },
+    "persuasion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["picks", "line", "primaryEmotion", "coreNeed", "awareness", "outcomeGuidance", "angles", "complianceWarnings"],
+      "properties": {
+        "picks": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "why"],
+            "properties": {
+              "id": { "type": "string" },
+              "why": { "type": "string" }
+            }
+          }
+        },
+        "line": { "type": "string" },
+        "primaryEmotion": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "label", "source"],
+          "properties": {
+            "id": { "type": "string" },
+            "label": { "type": "string" },
+            "source": { "enum": ["client", "recommended"] }
+          }
+        },
+        "coreNeed": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "label"],
+          "properties": {
+            "id": { "type": "string" },
+            "label": { "type": "string" }
+          }
+        },
+        "awareness": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "label"],
+          "properties": {
+            "id": { "type": "string" },
+            "label": { "type": "string" }
+          }
+        },
+        "outcomeGuidance": { "type": "string" },
+        "role": { "enum": ["outcome", "threat", "trust"] },
+        "lesson": { "type": "string" },
+        "angles": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "prefixItems": [
+            { "properties": { "id": { "const": "A" } } },
+            { "properties": { "id": { "const": "B" } } }
+          ],
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "label", "line"],
+            "properties": {
+              "id": { "enum": ["A", "B"] },
+              "label": { "type": "string", "minLength": 1 },
+              "line": { "type": "string", "minLength": 1 },
+              "onCard": { "type": "boolean" }
+            }
+          }
+        },
+        "complianceWarnings": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
     }
   },
   "allOf": [
