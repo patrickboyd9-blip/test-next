@@ -26,11 +26,12 @@ export type DocumentCollection =
   | "design_library"
   | "vision_taste"
   | "concept_feedback"
+  | "blueprints"
 
 const SAFE_FILE_ID = /^[A-Za-z0-9_-]{1,200}$/
 
 interface CollectionSql {
-  table: "campaigns" | "reference_corpus" | "design_library" | "vision_taste" | "concept_feedback"
+  table: "campaigns" | "reference_corpus" | "design_library" | "vision_taste" | "concept_feedback" | "blueprints"
   ddl: string
 }
 
@@ -80,6 +81,15 @@ const COLLECTIONS: Record<DocumentCollection, CollectionSql> = {
       updated_at timestamptz NOT NULL DEFAULT now()
     )`,
   },
+  blueprints: {
+    table: "blueprints",
+    ddl: `CREATE TABLE IF NOT EXISTS blueprints (
+      id text PRIMARY KEY,
+      data jsonb NOT NULL,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      updated_at timestamptz NOT NULL DEFAULT now()
+    )`,
+  },
 }
 
 export function postgresUrl(env: NodeJS.ProcessEnv = process.env): string | null {
@@ -106,6 +116,9 @@ export function defaultDocumentDirectory(collection: DocumentCollection): string
   }
   if (collection === "concept_feedback") {
     return path.join(process.cwd(), ".data", "concept-feedback")
+  }
+  if (collection === "blueprints") {
+    return path.join(process.cwd(), ".data", "blueprints")
   }
   return path.join(process.cwd(), ".data", "reference-corpus")
 }

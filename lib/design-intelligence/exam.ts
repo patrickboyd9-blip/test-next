@@ -33,6 +33,8 @@ export interface ExamRow {
   retrieved: string[]
   explanation: string
   image: string | null
+  tone: string
+  blueprint: string | null
 }
 
 export interface ExamReport {
@@ -115,7 +117,7 @@ export async function runExam(options: {
   const env = options.env ?? process.env
   const scoredAt = new Date().toISOString()
   const rows: ExamRow[] = []
-  for (const item of EXAM_BRIEFS) {
+  for (const item of [...EXAM_BRIEFS, ...examToneVariants()]) {
     rows.push(options.mode === "baseline"
       ? await scoreBaseline(item, options.outDir, env, options.render !== false)
       : await scoreAfter(item, options.outDir, env, options.render !== false))
@@ -159,6 +161,8 @@ async function scoreBaseline(item: ExamBrief, outDir: string, env: NodeJS.Proces
     retrieved: directed.viewed.map((view) => view.id),
     explanation: `Phase-2 machine score ${score}. Auto-fails: ${critique.autoFails.join(", ") || "none"}.`,
     image,
+    tone: item.brief.emotionalTone ?? "",
+    blueprint: null,
   }
 }
 
@@ -182,6 +186,8 @@ async function scoreAfter(item: ExamBrief, outDir: string, env: NodeJS.ProcessEn
       retrieved: board.retrieved.map((pick) => pick.id),
       explanation: "The board produced no candidate.",
       image: null,
+      tone: item.brief.emotionalTone ?? "",
+      blueprint: null,
     }
   }
   const image = render ? await writeCard(outDir, item.id, winner.card.front, item) : null
@@ -198,8 +204,12 @@ function rowFrom(item: ExamBrief, winner: ScoredCandidate, retrieved: string[], 
     family: winner.familyId,
     cleared: winner.grade.cleared,
     retrieved,
-    explanation: winner.grade.explanation,
+    explanation: winner.blueprint
+      ? `${winner.grade.explanation} Blueprint: ${winner.blueprint.sourceId} · ${winner.blueprint.tone}. Similarity ${winner.blueprint.similarity.toFixed(2)}.`
+      : winner.grade.explanation,
     image,
+    tone: winner.blueprint?.tone ?? item.brief.emotionalTone ?? "",
+    blueprint: winner.blueprint?.sourceId ?? null,
   }
 }
 
@@ -244,9 +254,9 @@ function markdown(report: ExamReport): string {
     "",
     report.summary,
     "",
-    "| Brief | Letter | Score | Kind | Cleared B | Family | Retrieved |",
-    "| --- | --- | --- | --- | --- | --- | --- |",
-    ...report.rows.map((row) => `| ${row.label} | ${row.letter} | ${row.score} | ${row.scoreKind} | ${row.cleared ? "yes" : "no"} | ${row.family} | ${row.retrieved.slice(0, 4).join(", ") || "—"} |`),
+    "| Brief | Letter | Score | Kind | Cleared B | Family | Tone | Blueprint | Retrieved |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+    ...report.rows.map((row) => `| ${row.label} | ${row.letter} | ${row.score} | ${row.scoreKind} | ${row.cleared ? "yes" : "no"} | ${row.family} | ${row.tone || "—"} | ${row.blueprint ?? "—"} | ${row.retrieved.slice(0, 4).join(", ") || "—"} |`),
     "",
     ...report.rows.map((row) => `**${row.label}.** ${row.explanation}${row.image ? ` Image: ${row.image}.` : " No image."}`),
     "",
@@ -295,6 +305,32 @@ function examBrief(
       callToAction: "Call or scan",
     },
   }
+}
+
+const EXAM_TONES = [
+  "urgent",
+  "fearful",
+  "friendly",
+  "professional",
+  "scarcity",
+  "joyful",
+  "friendly",
+  "fearful",
+  "joyful",
+  "luxury",
+] as const
+
+/** One extra brief per standard exam, each with a different emotional tone. */
+export function examToneVariants(briefs: readonly ExamBrief[] = EXAM_BRIEFS): ExamBrief[] {
+  return briefs.map((item, index) => {
+    const tone = EXAM_TONES[index] ?? "professional"
+    return {
+      ...item,
+      id: `${item.id}--${tone}`,
+      label: `${item.label}, ${tone}`,
+      brief: { ...item.brief, emotionalTone: tone },
+    }
+  })
 }
 
 export function examUsesMachineEstimate(env: NodeJS.ProcessEnv): boolean {

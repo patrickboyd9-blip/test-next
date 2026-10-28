@@ -47,7 +47,8 @@ export interface GridCard {
 
 export function composeGridCard(input: GridComposeInput): GridCard {
   const trim = trimInches(input.rationale.format.trim)
-  const pairing: FontPairingId = input.rationale.vertical === "medicare_insurance" ? "letter" : "trade"
+  const pairing: FontPairingId = input.rationale.font_pairing
+    ?? (input.rationale.vertical === "medicare_insurance" ? "letter" : "trade")
   const palette = paletteFromRationale(input.rationale)
   const mode = compositionMode(input.rationale)
   if (mode === "integrated") return composeIntegrated(input, trim, pairing, palette)

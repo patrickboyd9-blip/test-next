@@ -1,3 +1,4 @@
+import { backfillBlueprints, type BlueprintBackfillReport } from "./blueprint-store"
 import { analyzeNewMailer } from "./model"
 import { syncReferenceLibraries, type SyncReport } from "./sync"
 import { backfillVisionTaste, type TasteBackfillReport } from "./vision-taste"
@@ -7,7 +8,7 @@ import { backfillVisionTaste, type TasteBackfillReport } from "./vision-taste"
  * that do not have one yet. The backfill endpoint clears the rest.
  */
 
-export async function runDesignLibraryJob(env: NodeJS.ProcessEnv = process.env): Promise<SyncReport & { visionTaste: TasteBackfillReport }> {
+export async function runDesignLibraryJob(env: NodeJS.ProcessEnv = process.env): Promise<SyncReport & { visionTaste: TasteBackfillReport; blueprints: BlueprintBackfillReport }> {
   const report = await syncReferenceLibraries({
     env,
     analyze: env.ANTHROPIC_API_KEY?.trim()
@@ -18,7 +19,8 @@ export async function runDesignLibraryJob(env: NodeJS.ProcessEnv = process.env):
       : undefined,
   })
   const visionTaste = await backfillVisionTaste({ env })
-  return { ...report, visionTaste }
+  const blueprints = await backfillBlueprints({ env })
+  return { ...report, visionTaste, blueprints }
 }
 
 export function cronAuthorized(request: Request, env: NodeJS.ProcessEnv = process.env): boolean {

@@ -241,6 +241,16 @@ export interface CreativeSpec {
    * The critic score is not stored here.
    */
   designRationale?: DesignRationale
+  /**
+   * Structure this card was rebuilt from. The id is the source mailer.
+   * The tone is the tag that matched. The source art is not on the card.
+   */
+  blueprint?: {
+    sourceId: string
+    tone: string
+    offerType?: string
+    copyPattern?: string
+  }
 }
 
 export type PhotoToTypeBalance = "photo_led" | "balanced" | "type_led"
