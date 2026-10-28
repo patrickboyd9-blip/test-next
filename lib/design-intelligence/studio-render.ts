@@ -38,14 +38,14 @@ export function printPixels(size: TrimSize, ppi = PRINT_PPI): { width: number; h
 export async function renderStudioCardPng(
   plan: PostcardFacePlan,
   qrPayload: string,
-  options?: { ppi?: number }
+  options?: { ppi?: number; photoJpeg?: Buffer }
 ): Promise<Buffer> {
   const size = printPixels(plan.size, options?.ppi)
   const directory = await mkdtemp(path.join(os.tmpdir(), "studio-card-"))
   const htmlPath = path.join(directory, "card.html")
   const pngPath = path.join(directory, "card.png")
   try {
-    await writeFile(htmlPath, cardHtml(plan, qrPayload, options?.ppi), "utf8")
+    await writeFile(htmlPath, cardHtml(plan, qrPayload, options?.ppi, options?.photoJpeg), "utf8")
     await runChrome(htmlPath, pngPath, size.width, size.height)
     const png = await readFile(pngPath)
     const actual = pngSize(png)
@@ -58,10 +58,10 @@ export async function renderStudioCardPng(
   }
 }
 
-function cardHtml(plan: PostcardFacePlan, qrPayload: string, ppi?: number): string {
+function cardHtml(plan: PostcardFacePlan, qrPayload: string, ppi?: number, photoJpeg?: Buffer): string {
   const trim = trimInches(plan.size)
   const size = printPixels(plan.size, ppi)
-  const photo = standInPhotoJpeg().toString("base64")
+  const photo = (photoJpeg ?? standInPhotoJpeg()).toString("base64")
   const cutout = standInCutoutPng().toString("base64")
   const displayFamily = plan.pairing === "letter" ? "Fraunces" : plan.pairing === "signal" ? "Barlow Condensed" : "Archivo"
   const parts: string[] = []
@@ -84,6 +84,14 @@ function cardHtml(plan: PostcardFacePlan, qrPayload: string, ppi?: number): stri
       parts.push(
         `<div style="${box(shape.rect, trim)}background:linear-gradient(to bottom, transparent 0%, ${withAlpha(plan.palette.scrim, 0.5)} 30%, ${withAlpha(plan.palette.scrim, 0.9)} 68%, ${withAlpha(plan.palette.scrim, 0.94)} 100%);"></div>`
       )
+    } else if (shape.role === "local-scrim") {
+      const fromRight = shape.rect.x > trim.w * 0.45
+      const solid = withAlpha(shape.fill, 0.4)
+      const clear = withAlpha(shape.fill, 0)
+      const gradient = fromRight
+        ? `linear-gradient(to left, ${solid} 0%, ${solid} 62%, ${clear} 100%)`
+        : `linear-gradient(to right, ${solid} 0%, ${solid} 62%, ${clear} 100%)`
+      parts.push(`<div data-role="local-scrim" style="${box(shape.rect, trim)}background:${gradient};"></div>`)
     } else {
       parts.push(shapeDiv(shape.rect, trim, shape.fill, shape.role))
     }
@@ -97,8 +105,9 @@ function cardHtml(plan: PostcardFacePlan, qrPayload: string, ppi?: number): stri
     const weight = text.font === "display" ? 800 : 600
     const lineHeight = text.role === "offer" ? 0.8 : lineHeightFor(text.font)
     const lines = text.lines.map((line) => `<span style="display:block">${escapeHtml(line)}</span>`).join("")
+    const shadow = plan.shapes.some((shape) => shape.role === "local-scrim") ? "text-shadow:0 1px 1px rgba(20,18,15,0.35);" : ""
     parts.push(
-      `<p style="${box(text.rect, trim)}margin:0;color:${text.color};font-family:'${family}',sans-serif;font-weight:${weight};font-size:${pointsToCqw(text.fontPt, trim.w)};line-height:${lineHeight};letter-spacing:${text.font === "display" ? "-0.03em" : "0"};text-align:${text.align};">${lines}</p>`
+      `<p style="${box(text.rect, trim)}margin:0;color:${text.color};font-family:'${family}',sans-serif;font-weight:${weight};font-size:${pointsToCqw(text.fontPt, trim.w)};line-height:${lineHeight};letter-spacing:${text.font === "display" ? "-0.03em" : "0"};text-align:${text.align};${shadow}">${lines}</p>`
     )
   }
   const lockup = plan.lockup

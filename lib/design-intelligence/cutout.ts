@@ -122,6 +122,10 @@ function colorDistance(rgba: Buffer, index: number, sample: [number, number, num
   )
 }
 
+export function decodeImageRaster(bytes: Buffer): Raster | null {
+  return decodeRaster(bytes)
+}
+
 function decodeRaster(bytes: Buffer): Raster | null {
   if (bytes.length > 8 && bytes.subarray(0, 8).equals(PNG_SIGNATURE)) return decodePng(bytes)
   if (bytes.length > 3 && bytes[0] === 0xff && bytes[1] === 0xd8) {

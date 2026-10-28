@@ -1,5 +1,10 @@
+import type { CreativeSpec } from "@/lib/campaign-creator/types"
+
 import { estimateUsd, logTokenCost, type TokenCost } from "./cost"
-import { VISION_GRADE_ANCHOR, letterFor, type LetterGrade } from "./composition-grade"
+import { visionGradeAnchor, letterFor, type LetterGrade } from "./composition-grade"
+import { ownerFavoriteIds } from "./owner-favorites"
+import { composeGridCard } from "./grid-composer"
+import { isDesignRationale } from "./rationale"
 import type { TastePick } from "./taste-retrieval"
 
 /**
@@ -16,6 +21,7 @@ export interface VisionCritique {
   letter: LetterGrade
   explanation: string
   redesign: string
+  weakness: string
   usage: TokenCost
 }
 
@@ -53,8 +59,8 @@ export async function requestComparativeCritique(input: {
         "You grade one candidate postcard against an A+ direct-mail rubric.",
         "The first image is the candidate. The later images are A-grade references for comparison only.",
         "Never tell the designer to copy a reference brand, photo, layout, or line.",
-        VISION_GRADE_ANCHOR,
-        'Return JSON only: {"score": number 0-100, "letter": "A"|"A-"|"B+"|"B"|"B-"|"C+"|"C"|"C-"|"D"|"F", "explanation": "two sentences", "redesign": "one structural change"}',
+        visionGradeAnchor(input.env),
+        'Return JSON only: {"score": number 0-100, "letter": "A"|"A-"|"B+"|"B"|"B-"|"C+"|"C"|"C-"|"D"|"F", "explanation": "two sentences", "weakness": "the single biggest weakness, one sentence", "redesign": "the one structural change that fixes that weakness"}',
       ].join("\n"),
       messages: [
         {
@@ -76,7 +82,7 @@ export async function requestComparativeCritique(input: {
     })
     const parsed = parseJson(response.content.filter((block) => block.type === "text").map((block) => block.text).join("\n"))
     if (!parsed || typeof parsed !== "object") return null
-    const row = parsed as { score?: unknown; letter?: unknown; explanation?: unknown; redesign?: unknown }
+    const row = parsed as { score?: unknown; letter?: unknown; explanation?: unknown; redesign?: unknown; weakness?: unknown }
     const score = typeof row.score === "number" ? Math.max(0, Math.min(100, row.score)) : null
     if (score === null) return null
     const letter = typeof row.letter === "string" ? row.letter : letterFor(score)
@@ -94,6 +100,7 @@ export async function requestComparativeCritique(input: {
       letter: letterFor(typeof row.letter === "string" ? scoreFromLetter(letter, score) : score),
       explanation: typeof row.explanation === "string" ? row.explanation.slice(0, 500) : "",
       redesign: typeof row.redesign === "string" ? row.redesign.slice(0, 240) : "Open the field and let the offer float.",
+      weakness: typeof row.weakness === "string" ? row.weakness.slice(0, 240) : "",
       usage,
     }
   } catch (error) {
@@ -102,10 +109,82 @@ export async function requestComparativeCritique(input: {
   }
 }
 
-export function referencePicksForCritique(picks: readonly TastePick[]): TastePick[] {
+export function parseRefinementReview(text: string): { addressed: boolean; regression: string } | null {
+  const parsed = parseJson(text)
+  if (!parsed || typeof parsed !== "object") return null
+  const row = parsed as { addressed?: unknown; regression?: unknown }
+  if (typeof row.addressed !== "boolean") return null
+  return {
+    addressed: row.addressed,
+    regression: typeof row.regression === "string" ? row.regression.slice(0, 240) : "",
+  }
+}
+
+/**
+ * Asks the vision critic whether a plain-English note shows up on the card
+ * and whether anything else slipped. No key, no render: the machine check stands.
+ */
+export async function reviewRefinementNote(input: {
+  before: CreativeSpec
+  after: CreativeSpec
+  note: string
+  businessName?: string
+  env?: NodeJS.ProcessEnv
+}): Promise<{ addressed: boolean; regression: string } | null> {
+  const env = input.env ?? process.env
+  const apiKey = env.ANTHROPIC_API_KEY?.trim()
+  if (!apiKey || env.DESIGN_CRITIC === "machine") return null
+  if (!isDesignRationale(input.before.designRationale) || !isDesignRationale(input.after.designRationale)) return null
+  try {
+    const beforeCard = composeGridCard({
+      rationale: input.before.designRationale,
+      spec: input.before,
+      businessName: input.businessName,
+    })
+    const afterCard = composeGridCard({
+      rationale: input.after.designRationale,
+      spec: input.after,
+      businessName: input.businessName,
+    })
+    const { renderStudioCardPng } = await import("./studio-render")
+    const payload = input.after.qrDestination ?? input.after.website ?? input.after.phone ?? "https://example.com/book"
+    const beforePng = await renderStudioCardPng(beforeCard.front, payload, { ppi: 72 })
+    const afterPng = await renderStudioCardPng(afterCard.front, payload, { ppi: 72 })
+    const Anthropic = (await import("@anthropic-ai/sdk")).default
+    const client = new Anthropic({ apiKey })
+    const response = await client.messages.create({
+      model: env.DESIGN_MODEL?.trim() || MODEL,
+      max_tokens: 200,
+      system: [
+        "You check one design revision.",
+        "The first image is the card before the note. The second image is the card after.",
+        "Addressed means the note is visibly fixed. A regression is a phone, offer, or line that got worse.",
+        'Return JSON only: {"addressed": true or false, "regression": "one sentence, or empty"}',
+      ].join("\n"),
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "image", source: { type: "base64", media_type: "image/png", data: beforePng.toString("base64") } },
+            { type: "image", source: { type: "base64", media_type: "image/png", data: afterPng.toString("base64") } },
+            { type: "text", text: `The note was: ${input.note}` },
+          ],
+        },
+      ],
+    })
+    const text = response.content.filter((block) => block.type === "text").map((block) => block.text).join("\n")
+    return parseRefinementReview(text)
+  } catch (error) {
+    console.info(`[design-intelligence] ${JSON.stringify({ step: "refine-review", error: error instanceof Error ? error.message : "review failed" })}`)
+    return null
+  }
+}
+
+export function referencePicksForCritique(picks: readonly TastePick[], favorites: readonly string[] = ownerFavoriteIds()): TastePick[] {
   const graded = picks.filter((pick) => pick.grade === "A" || pick.grade === "A-")
   const pool = graded.length >= 2 ? graded : picks
-  return pool.slice(0, 3)
+  const favorite = new Set(favorites)
+  return [...pool].sort((a, b) => Number(favorite.has(b.id)) - Number(favorite.has(a.id))).slice(0, 3)
 }
 
 function scoreFromLetter(letter: string, fallback: number): number {

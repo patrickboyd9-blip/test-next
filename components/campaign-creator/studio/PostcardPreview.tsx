@@ -138,6 +138,7 @@ export function PostcardPreview({
       showMonogram={imagery.showMonogram}
       contact={contact}
       photoAlt={spec.visualDirection?.trim() || "Campaign photography"}
+      photoSeat={generatedAsset?.typeSeat}
     />
   )
 

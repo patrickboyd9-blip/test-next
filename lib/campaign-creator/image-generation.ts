@@ -1,3 +1,5 @@
+import type { TypeSeat } from "@/lib/design-intelligence/rationale"
+
 import type { ImageBrief } from "./image-brief"
 
 export interface ImageGenerationOptions {
@@ -31,4 +33,6 @@ export interface GeneratedAsset {
   provider: string
   model: string
   generatedAt: string
+  /** Calm patch measured on this photograph, so type can avoid the subject. */
+  typeSeat?: TypeSeat
 }
