@@ -216,7 +216,8 @@ test("three directions do not share a grid and proportions", () => {
   assert.equal(lead.texts.some((text) => text.role === "headline" && /\bfree\b/i.test(text.text)), false)
   assert.ok(subject.rect.x < 2.4)
   assert.equal(cards[1]!.front.shapes.some((shape) => shape.role === "type-panel" || shape.role === "offer-tile"), false)
-  assert.ok(cards[2]!.front.shapes.some((shape) => shape.role === "type-panel"))
+  // Split cream panels are retired: the panel direction now composes full-bleed.
+  assert.equal(cards[2]!.front.shapes.some((shape) => shape.role === "type-panel"), false)
   for (const card of cards) {
     assert.equal(card.front.shapes.some((shape) => shape.role === "offer-tile"), false)
     assert.equal(intersectingPairs(card.front).length, 0, intersectingPairs(card.front).join(", "))

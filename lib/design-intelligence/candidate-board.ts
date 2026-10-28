@@ -140,7 +140,20 @@ export async function applyStudioBoard(
     records: options?.records,
     tastes: options?.tastes,
   })
-  return applyBoard(result, board, brief)
+  return guardRoofingHeadlines(applyBoard(result, board, brief), brief)
+}
+
+/** Last check for roofing: every printed headline passes the guard and is distinct. */
+function guardRoofingHeadlines(result: GenerateDirectionsResult, brief: CampaignBrief): GenerateDirectionsResult {
+  if (persuasionVertical(brief) !== "roofing") return result
+  const lines = distinctRoofingHeadlines({
+    headlines: result.directions.map((direction) => direction.spec?.headline ?? ""),
+    offer: brief.offer ?? "",
+    city: brief.businessInfo?.city,
+    goal: brief.goal,
+    businessName: brief.businessInfo?.name,
+  })
+  return { ...result, directions: result.directions.map((direction, index) => direction.spec ? { ...direction, spec: { ...direction.spec, headline: lines[index]! } } : direction) }
 }
 
 export async function rankCandidates(input: {
@@ -713,7 +726,7 @@ export function strategyName(role: DirectionRole): string {
 
 export function customerWhyLine(role: DirectionRole): string {
   if (role === "threat") return "One honest risk, then one easy step. No deadline and no made-up number."
-  if (role === "trust") return "The business name carries the proof."
+  if (role === "trust") return "A local face and the business name carry the proof."
   return "The headline is the result the homeowner wants. A free, dollar, or percent offer is the largest type."
 }
 

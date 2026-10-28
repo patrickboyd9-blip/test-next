@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import test from "node:test"
 
-import { copiesLibrary, headlineFitsOffer, headlinePasses, lineOverlap, makesClaim, rememberLibraryLines, clearLibraryLines } from "./guard"
+import { isEmptyHeadline, fitsSpecialOffer, copiesLibrary, headlineFitsOffer, headlinePasses, lineOverlap, makesClaim, rememberLibraryLines, clearLibraryLines } from "./guard"
 import { distinctRoofingHeadlines, headlineVariants } from "@/lib/design-intelligence/persuasion"
 
 test("a line close to a library line is rejected, a fresh one is not", () => {
@@ -39,4 +39,17 @@ test("the business name never picks the offer theme, and directions never share 
   })
   assert.equal(new Set(picked.map((line) => line.toLowerCase())).size, 4)
   assert.equal(/gutter/i.test(picked[0]!), false)
+})
+
+test("empty headlines and special offers are rejected", () => {
+  for (const line of ["A New Roof", "A Repaired Roof", "A New Shingle Roof", "Denver's Roof Replacement Team", "Milwaukee's Licensed Roof Experts", "Tacoma's Roofing Specialists"]) assert.equal(isEmptyHeadline(line), true, line)
+  assert.equal(isEmptyHeadline("Fix the leak before it finds the ceiling."), false)
+  assert.equal(fitsSpecialOffer("Free Roof Check in Scottsdale", "15% senior discount"), false)
+  assert.equal(fitsSpecialOffer("A sound roof costs seniors less in Scottsdale.", "15% senior discount"), true)
+  assert.equal(fitsSpecialOffer("Fix the roof now. Pay later", "0% financing for 18 months"), false)
+  assert.equal(fitsSpecialOffer("Cut your energy bill in half", "Free solar quote"), false)
+  assert.equal(fitsSpecialOffer("Hail damage hides. We find it", "Free storm damage inspection"), false)
+  assert.equal(fitsSpecialOffer("Retired? Your roof just got cheaper", "15% off a tile roof underlayment replacement"), false)
+  assert.equal(fitsSpecialOffer("Hail damage hides. We find it.", "Free hurricane-season roof inspection"), false)
+  assert.equal(fitsSpecialOffer("Storms Find Weak Roofs Fast", "Free hurricane-season roof inspection"), true)
 })

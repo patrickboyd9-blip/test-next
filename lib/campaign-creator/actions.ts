@@ -17,7 +17,7 @@ import { toCreativeCanvas } from "./creative-canvas"
 import { getCreativeEngine } from "./creative-engine-provider"
 import { generateLeadDirectionImage as runGenerateLeadDirectionImage } from "./generate-lead-direction-image"
 import type { GeneratedAsset } from "./image-generation"
-import { createOpenAIImageGenerationAdapter } from "./openai-image-generation"
+import { createDefaultImageGenerationAdapter } from "./default-image-generation"
 import type { StudioImageLoad } from "./studio-image-cache"
 import { scheduleAfterResponse, syncStudioDirectionImages } from "./studio-image-jobs"
 import {
@@ -254,7 +254,7 @@ export async function loadStudioDirectionImages(
     campaignId,
     creative: campaign.creative,
     campaignBrief: campaign.brief,
-    createAdapter: createOpenAIImageGenerationAdapter,
+    createAdapter: createDefaultImageGenerationAdapter,
     schedule(work) {
       scheduleAfterResponse(after, work)
     },
@@ -271,7 +271,7 @@ export async function generateLeadDirectionImage(
   return runGenerateLeadDirectionImage(
     campaign,
     directionId,
-    createOpenAIImageGenerationAdapter
+    createDefaultImageGenerationAdapter
   )
 }
 

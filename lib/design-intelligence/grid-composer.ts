@@ -978,6 +978,9 @@ export function compositionMode(rationale: DesignRationale): CompositionMode {
     mode === "type-led" ||
     mode === "calm-column"
   ) {
+    // Owner votes: split cream-panel fronts lose to full-bleed outcome photos.
+    // Only regulated pieces (Medicare) keep the calm paper column.
+    if ((mode === "panel" || mode === "calm-column") && rationale.vertical !== "medicare_insurance") return "full-bleed"
     return mode
   }
   return "overlapping-card"

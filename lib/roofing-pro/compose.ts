@@ -649,17 +649,18 @@ function paletteFor(id: RoofingProTemplateId): VerticalPalette {
     }
   }
   if (id === "roof_premium") {
+    // Navy, white and one warm accent. The old cream-and-black read as a bank letter.
     return {
       ...base,
-      paper: "#f6f3ee",
-      ink: "#1c1916",
-      field: "#1c1915",
-      fieldInk: "#f6f3ee",
-      accent: "#6e5838",
-      accentInk: "#f6f3ee",
-      offerTile: "#1c1915",
-      offerInk: "#f6f3ee",
-      scrim: "#1c1915",
+      paper: "#ffffff",
+      ink: "#14213d",
+      field: "#14213d",
+      fieldInk: "#ffffff",
+      accent: "#f2b632",
+      accentInk: "#14213d",
+      offerTile: "#f2b632",
+      offerInk: "#14213d",
+      scrim: "#14213d",
     }
   }
   if (id === "roof_storm") {

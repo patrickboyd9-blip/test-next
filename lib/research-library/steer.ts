@@ -139,7 +139,18 @@ function blockedMedicare(hit: RetrievalHit, brief: CampaignBrief): boolean {
 function allowedTemplate(bias: string | undefined, brief: CampaignBrief): PostcardTemplateId | undefined {
   if (!bias) return undefined
   const allowed = templatesForPalette(verticalPaletteForBrief(brief))
-  return allowed.includes(bias as PostcardTemplateId) ? bias as PostcardTemplateId : undefined
+  const wanted = (FULL_BLEED_FOR[bias] ?? bias) as PostcardTemplateId
+  if (allowed.includes(wanted)) return wanted
+  return allowed.includes(bias as PostcardTemplateId) && !FULL_BLEED_FOR[bias] ? bias as PostcardTemplateId : undefined
+}
+
+/** Split photo-plus-panel layouts lost every owner vote; AI directions use the full-bleed sibling. */
+const FULL_BLEED_FOR: Record<string, PostcardTemplateId> = {
+  roof_split: "roof_full_bleed",
+  storm_alert: "roof_storm",
+  financing_first: "service_band",
+  trust_proof: "hero_scrim",
+  offer_starburst: "service_band",
 }
 
 /** The lead layout follows the retrieved mailer. Later directions stay on their own recipes. */

@@ -168,7 +168,7 @@ test("financing keeps 0% together and a storm card does not invent a deadline", 
   }, "Storm damage inspection")
   const threat = storm.surfaced.find((item) => item.rationale.persuasion?.role === "threat")
   assert.ok(threat)
-  assert.match(threat.spec.headline ?? "", /storm|hail/i)
+  assert.match(threat.spec.headline ?? "", /storm|roof|check/i)
   const painted = threat.card.front.texts.map((text) => text.text).join(" ")
   assert.equal(/\b(?:expires|act now|only \d+|january|march \d+)\b/i.test(painted), false)
   assert.match(painted, /Storm damage inspection/)

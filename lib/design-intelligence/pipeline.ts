@@ -20,7 +20,8 @@ import { citationsForDirection, selectReferences, type DirectionCitation } from 
 import { checkSimilarity, type SimilarityResult } from "./similarity"
 import { requestModelRationale, requestVisionCritique, type ModelUsage } from "./model"
 import { attorneyAdMark } from "./attorney-compliance"
-import { applyOutcomeHeadline, clientFactText } from "./persuasion"
+import { compliantSpec } from "@/lib/research-library/compliance"
+import { applyOutcomeHeadline, clientFactText, distinctRoofingHeadlines, persuasionVertical } from "./persuasion"
 import { renderStudioCardPng } from "./studio-render"
 import { viewSelection, type ImageView } from "./view-images"
 import { formatArtDirectorEvidence, goldExpectationFromHits, layoutTuneFromHits } from "@/lib/research-library/evidence"
@@ -134,6 +135,7 @@ export function repairCard(input: {
       }),
     }
   }
+  spec = compliantSpec(spec, `${input.brief.offer ?? ""} ${input.brief.goal ?? ""}`)
   const edits: string[] = []
   let best: DirectedCard | null = null
   const rounds = Math.max(1, cap)
@@ -268,6 +270,18 @@ export async function applyDesignIntelligence(
     directions.push(attachDirection(direction, noteViews(directed, viewed), cited))
   }
 
+  // Last check for roofing: every printed headline passes the guard and is distinct.
+  const roofish = /\broof|\bshingle|\bstorm (?:damage|restoration)|\bhail\b/i.test(`${brief.offer ?? ""} ${brief.goal ?? ""} ${brief.businessInfo?.name ?? ""}`)
+  if (persuasionVertical(brief) === "roofing" || roofish) {
+    const lines = distinctRoofingHeadlines({
+      headlines: directions.map((d: any) => d.spec?.headline ?? ""),
+      offer: brief.offer ?? "",
+      city: brief.businessInfo?.city,
+      goal: brief.goal,
+      businessName: brief.businessInfo?.name,
+    })
+    directions.forEach((d: any, i: number) => { if (d.spec) d.spec = { ...d.spec, headline: lines[i] } })
+  }
   return { ...result, directions }
 }
 

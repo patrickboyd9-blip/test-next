@@ -246,11 +246,12 @@ function templateBias(entry: ResearchEntry): string | undefined {
     if (share >= 0.55) return "roof_full_bleed"
     if (/review|testimonial|trust|family|years in business|warranty|neighbor/.test(text)) return "roof_trust"
     if (/season|winter|spring|fall/.test(text)) return "roof_seasonal"
-    return "roof_split"
+    // Owner votes: full-bleed outcome photos win; split cream panels lose.
+    return "roof_full_bleed"
   }
   if (industry === "hvac" || industry === "plumbing") {
     if (prominent && share >= 0.45) return "service_band"
-    if (share >= 0.55) return "hero_scrim"
+    return "hero_scrim"
   }
   if (industry === "auto-insurance" || industry === "home-insurance" || industry === "life-insurance") return "neighbor_letter"
   if (industry === "medicare") return "medicare_calm"
