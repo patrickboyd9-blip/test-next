@@ -251,11 +251,11 @@ function templateBias(entry: ResearchEntry): string | undefined {
   }
   if (industry === "hvac" || industry === "plumbing") {
     if (prominent && share >= 0.45) return "service_band"
-    return "hero_scrim"
+    return "roof_full_bleed"
   }
   if (industry === "auto-insurance" || industry === "home-insurance" || industry === "life-insurance") return "neighbor_letter"
   if (industry === "medicare") return "medicare_calm"
-  if (share >= 0.6) return "hero_scrim"
+  if (share >= 0.6) return "roof_full_bleed"
   if (prominent) return "service_band"
   return undefined
 }

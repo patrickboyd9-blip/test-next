@@ -541,7 +541,9 @@ function drawScrim(
   // Stacked layers, each running from its start line to the bottom edge.
   // Neighbouring strips never overlap, so no darker stripe appears at a seam.
   // Each layer's alpha is chosen so the composite follows the target curve.
-  const steps = 72
+  // About two layers per point. With 72 layers the steep knee jumped ~5% per
+  // layer and printed as faint horizontal seams across bright sky.
+  const steps = Math.max(72, Math.ceil(rect.heightPoints * 2))
   const ink = paint(color)
   const target = (t: number) => (steep ? steepScrimOpacity(t) : t * t * 0.94)
   let previous = 0
