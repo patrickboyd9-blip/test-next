@@ -392,9 +392,10 @@ test("three HVAC directions get three headlines, and a nearby label does not sta
     role,
   }))
   assert.equal(new Set(lines).size, 3)
-  assert.match(lines[0]!, /cools down/i)
+  assert.match(lines[0]!, /before the heat/i)
   assert.match(lines[1]!, /AC quits/i)
-  assert.match(lines[2]!, /local tech checks the AC/i)
+  assert.match(lines[2]!, /local tech/i)
+  assert.match(lines[2]!, /before the heat/i)
   assert.doesNotMatch(lines[2]!, /Northwind/)
   const named = applyOutcomeHeadline({
     headline: "Coastal Comfort Heating & Air checks this.",
@@ -404,5 +405,6 @@ test("three HVAC directions get three headlines, and a nearby label does not sta
     role: "trust",
   })
   assert.doesNotMatch(named, /Coastal Comfort/)
-  assert.match(named, /local tech checks the AC/i)
+  assert.match(named, /local tech/i)
+  assert.match(named, /before the heat/i)
 })

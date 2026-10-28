@@ -79,7 +79,7 @@ const GOVERNMENT = /\bofficial notice\b|\bfinal notice\b|\bofficial business\b|\
 const OUTCOME: Record<string, string> = {
   roofing: "A safe, dry home.",
   plumbing: "Water you can trust.",
-  hvac: "The house cools down again.",
+  hvac: "Cool the house before the heat hits.",
   we_buy: "A fresh start.",
   real_estate: "The right house, clearly.",
   medicare: "Confidence in the choice.",
@@ -175,9 +175,9 @@ const ROLE_COPY: Record<string, Record<DirectionRole, readonly [string, string]>
     trust: ["A local plumber takes this call", "This plumber takes the call"],
   },
   hvac: {
-    outcome: ["The house cools down again", "A tune-up before the heat"],
-    threat: ["Call before the AC quits", "Book a check before it breaks"],
-    trust: ["A local tech checks the AC", "This tech checks the system"],
+    outcome: ["Cool the house before the heat hits", "Book the cool-down before the heat"],
+    threat: ["Stay cool before the AC quits", "Call before the heat wins"],
+    trust: ["Call a local tech before the heat", "A local tech keeps this house cool"],
   },
   medicare: {
     outcome: ["A plan you can check", "The choice can feel clear"],
@@ -542,6 +542,7 @@ export function applyOutcomeHeadline(input: {
     !repeatsAnotherRole &&
     !isStockHeadline(headline) &&
     !headlineIsFeature(headline, input.offer, kind) &&
+    !headlineNeedsAReason(headline, kind) &&
     !WEAK_HEADLINE.test(headline)
   ) return headline
   if (roleLine) return roleLine
@@ -661,6 +662,15 @@ export function persuasionVertical(brief: CampaignBrief, vertical?: DesignVertic
   if (/\bpest\b|\bants\b/i.test(text)) return "pest"
   if (/\blandscap|yard\b/i.test(text)) return "landscaping"
   return "general"
+}
+
+/** A description of the result, with no benefit and no reason to call. */
+function headlineNeedsAReason(headline: string, kind: string): boolean {
+  if (kind !== "hvac") return false
+  const benefit = /\b(?:cool|heat|house|home|comfort)\b/i.test(headline)
+  const reason = /\b(?:call|book|before)\b/i.test(headline)
+  if (benefit && reason) return false
+  return /\b(?:cools down|should cool|stays cool|tune-up before|the house cools|ac quits|before it breaks|checks the ac|checks the system)\b/i.test(headline)
 }
 
 function headlineIsFeature(headline: string, offer: string, kind: string): boolean {

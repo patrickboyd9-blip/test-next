@@ -28,6 +28,7 @@ export function queryFromBrief(brief: CampaignBrief, direction?: { name?: string
 }
 
 export function entryHasContent(entry: ResearchEntry): boolean {
+  if (entry.referenceOnly) return false
   return Boolean(entry.headlines.some((line) => line.trim()) || entry.offers.some((line) => line.trim()) || entry.photoStyle?.trim())
 }
 
@@ -70,7 +71,55 @@ export function retrieveResearch(entries: readonly ResearchEntry[], query: Retri
     hits.push({ entry: hit.entry, score: hit.score, band: hit.band })
     if (hits.length >= cap) break
   }
-  return { hits, fallback }
+  return { hits: reservePhysicalSlots(hits, ranked, query, cap), fallback }
+}
+
+/**
+ * Gold recipes fill a large industry. Keep one or two slots for a physical
+ * C-3PO piece that is actually tagged to the query, including a layout-only piece.
+ */
+function reservePhysicalSlots(
+  hits: RetrievalHit[],
+  ranked: readonly { entry: ResearchEntry; score: number; band: RetrievalHit["band"] }[],
+  query: RetrievalQuery,
+  cap: number,
+): RetrievalHit[] {
+  const reserve = cap >= 6 ? 2 : 0
+  const industry = normalizeIndustry(query.industry)
+  if (reserve === 0 || industry === "none") return hits
+  const physical = ranked.filter((hit) =>
+    hit.entry.origin === "c3po" &&
+    hit.band === "same" &&
+    normalizeIndustry(hit.entry.industry) === industry
+  )
+  if (physical.length === 0) return hits
+  const next = hits.map((hit) => ({ ...hit }))
+  const want = Math.min(reserve, physical.length)
+  let kept = 0
+  for (const hit of physical) {
+    if (kept >= want) break
+    if (next.some((item) => item.entry.id === hit.entry.id)) {
+      kept += 1
+      continue
+    }
+    const replacement: RetrievalHit = { entry: hit.entry, score: hit.score, band: hit.band }
+    if (next.length < cap) {
+      next.push(replacement)
+      kept += 1
+      continue
+    }
+    let index = -1
+    for (let i = next.length - 1; i >= 0; i -= 1) {
+      if (next[i]!.entry.origin !== "c3po") {
+        index = i
+        break
+      }
+    }
+    if (index < 0) break
+    next[index] = replacement
+    kept += 1
+  }
+  return next
 }
 
 function scoreEntry(entry: ResearchEntry, query: RetrievalQuery): { score: number; band: RetrievalHit["band"] } {
@@ -98,7 +147,8 @@ function scoreEntry(entry: ResearchEntry, query: RetrievalQuery): { score: numbe
   } else {
     score -= 4
   }
-  if (!entryHasContent(entry)) score -= 80
+  if (entry.referenceOnly) score -= 6
+  else if (!entryHasContent(entry)) score -= 80
   if (entry.gold) score += 28
   if (entry.evidence === "visual") score += 22
   else score += 3

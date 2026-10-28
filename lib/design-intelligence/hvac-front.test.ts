@@ -5,6 +5,7 @@ import type { CampaignBrief, CreativeDirection } from "@/lib/campaign-creator/ty
 import { fitText } from "@/lib/postcard-layouts/typefit"
 
 import { rankCandidates } from "./candidate-board"
+import { textInsideSafe } from "./grid-composer"
 
 const env = {
   DESIGN_DIRECTOR: "rules",
@@ -32,7 +33,7 @@ test("a headline does not leave a function word alone on a line", () => {
 test("every HVAC front shows the phone and the website, and the photo is not a cut-out", async () => {
   const brief: CampaignBrief = {
     goal: "Book an HVAC tune-up before the heat",
-    offer: "$89 tune-up",
+    offer: "FREE inspection",
     phone: "(619) 555-0199",
     website: "https://coastalcomfort.example/tune-up",
     audience: { description: "Homeowners before summer" },
@@ -46,7 +47,7 @@ test("every HVAC front shows the phone and the website, and the photo is not a c
     tags: [],
     spec: {
       headline: index === 1 ? "Call before the AC quits." : "The house cools down again.",
-      offer: "$89 tune-up",
+      offer: "FREE inspection",
     },
     recommended: index === 0,
     createdAt: "2026-10-27T00:00:00.000Z",
@@ -77,9 +78,30 @@ test("every HVAC front shows the phone and the website, and the photo is not a c
   const band = threat?.card.front.shapes.find((shape) => shape.role === "band")
   const phone = threat?.card.front.lockup?.phone?.rect
   const website = threat?.card.front.lockup?.website?.rect
-  assert.ok(band && phone && website)
+  assert.ok(band && phone && website && threat)
   assert.ok(phone.y >= band.rect.y - 0.08)
   assert.ok(phone.y + phone.h <= band.rect.y + band.rect.h + 0.08)
   assert.ok(website.y >= band.rect.y - 0.08)
   assert.ok(website.y + website.h <= band.rect.y + band.rect.h + 0.08)
+  const bandBottom = band.rect.y + band.rect.h
+  const lowest = Math.max(phone.y + phone.h, website.y + website.h)
+  assert.ok(bandBottom - lowest <= 0.4, `empty band tail ${bandBottom - lowest}`)
+  const wordmark = threat.card.front.texts.find((text) => text.role === "label" && /coastal comfort/i.test(text.text))
+  assert.ok(wordmark)
+  assert.ok(band.rect.y - (wordmark.rect.y + wordmark.rect.h) <= 0.2, "dead space under the business name")
+  for (const card of board.surfaced) {
+    const offer = card.card.front.texts.find((text) => text.role === "offer")
+    assert.match(offer?.text ?? "", /FREE inspection/i, card.directionIndex.toString())
+    assert.equal(card.card.front.texts.some((text) => text.role === "body" && /^inspection$/i.test(text.text)), false)
+    assert.equal(card.card.front.overflows, false, card.directionIndex.toString())
+    for (const text of card.card.front.texts) {
+      assert.equal(textInsideSafe(text.rect, "5x8"), true, text.text)
+    }
+  }
+  const leadOffer = outcome?.card.front.texts.find((text) => text.role === "offer")
+  assert.ok(leadOffer && leadOffer.fontPt >= 16 && leadOffer.fontPt <= 32)
+  for (const card of board.surfaced) {
+    const headline = card.card.front.texts.filter((text) => text.role === "headline").map((text) => text.text).join(" ")
+    assert.match(headline, /before|call|cool/i, headline)
+  }
 })

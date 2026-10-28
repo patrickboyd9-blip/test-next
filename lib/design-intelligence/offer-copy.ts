@@ -9,7 +9,7 @@ const STOP = new Set(["a", "an", "the", "one", "your", "our", "and", "for", "to"
 const PROBLEM_BY_VERTICAL: Record<string, string> = {
   roofing: "See the roof before it leaks.",
   plumbing: "The drain should run clear.",
-  hvac: "The house should cool down.",
+  hvac: "Cool the house before the heat hits.",
   real_estate: "Sell the house as it stands.",
   solar: "See what the roof could save.",
   dental: "A visit before it hurts.",

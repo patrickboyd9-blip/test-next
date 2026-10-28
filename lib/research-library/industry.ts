@@ -5,8 +5,8 @@
  * are not roofing. Garage doors are not remodeling. A salon is not a med spa.
  * Insurance splits into Medicare, auto, home, and life.
  *
- * Bump TAGGER_VERSION when the rules below change. The fingerprint also
- * includes the master list, so a new slug rebuilds a saved index.
+ * The saved-index fingerprint is a hash of the live rule functions and the
+ * slug list. A rule edit rebuilds the index even if TAGGER_VERSION stays put.
  */
 
 import { createHash } from "node:crypto"
@@ -63,12 +63,48 @@ export const NONE_INDUSTRY = "none"
 
 const GOLD_SET = new Set<string>(GOLD_INDUSTRIES)
 
-/** Saved indexes store this. A change means every file is parsed again. */
-export function taggerFingerprint(): string {
+/**
+ * Saved indexes store this. A change means every file is parsed again.
+ * `source` is the tagger text. Tests pass a different string to prove a rule
+ * edit changes the fingerprint without a version bump.
+ */
+export function fingerprintFor(source: string, slugs: readonly string[]): string {
   return createHash("sha256")
-    .update(`${TAGGER_VERSION}|${GOLD_INDUSTRIES.join("|")}`)
+    .update(`${source}\n${slugs.join("|")}`)
     .digest("hex")
     .slice(0, 20)
+}
+
+/**
+ * Words that describe the photograph rather than the printed piece.
+ * The literal lives in this function so a change rebuilds the index.
+ */
+export function sceneNotePattern(): string {
+  return "photos?|photographs?|frames?|edges?|lighting|angles?|cameras?|crops?|cropped|glare|tables?|hands?|scans?|scanned"
+}
+
+/**
+ * The live text of the rules. A keyword edit changes this string, so the
+ * saved index rebuilds without a hand-typed version bump. No filesystem
+ * read: this module is imported by the client.
+ */
+export function taggerSource(): string {
+  return [
+    classify,
+    medicareSignal,
+    mortgageSignal,
+    remodelingSignal,
+    outdoorSignal,
+    consumerSignal,
+    retailSignal,
+    restaurantSignal,
+    windowSignal,
+    sceneNotePattern,
+  ].map((fn) => fn.toString()).join("\n")
+}
+
+export function taggerFingerprint(): string {
+  return fingerprintFor(taggerSource(), GOLD_INDUSTRIES)
 }
 
 const GROUPS: readonly (readonly string[])[] = [
@@ -186,7 +222,7 @@ function classify(value: string, mode: ClassifyMode): string {
     const slug = exactSlug(text)
     if (slug) return slug
   }
-  if (/\bprecious metals?\b|\bbullion\b|\bwe buy gold\b|\bgold buyers?\b|\bsilver buyers?\b|\bscrap gold\b|\bcoin dealers?\b/.test(text)) return "precious-metals"
+  if (/\bprecious metals?\b|\bbullion\b|\bwe buy gold\b|\bgold buyers?\b|\bsilver buyers?\b|\bscrap gold\b|\bcoin dealers?\b|\bcash for gold\b|\bsell your gold\b|\bbuy(?:ing)? gold\b|\bgold and silver\b/.test(text)) return "precious-metals"
   if (/\bgarage doors?\b/.test(text)) return "garage-doors"
   if (outdoorSignal(text)) return "outdoor-living"
   if (/\bsenior living\b|\bassisted living\b|\bretirement communit|\bmemory care\b|\bindependent living\b/.test(text)) return "senior-living"
@@ -205,7 +241,7 @@ function classify(value: string, mode: ClassifyMode): string {
   if (hvacSignal(text, mode)) return "hvac"
   if (windowSignal(text, mode)) return "windows-gutters-siding"
   if (plumbingSignal(text)) return "plumbing"
-  if (/\bpest\b|\btermite\b|\bmosquito\b|\btick\b/.test(text)) return "pest-control"
+  if (/\bpest\b|\btermite\b|\bmosquito\b|\btick\b|\brodents?\b|\bmice\b|\bmouse\b|\brats\b|\brodent[ -]?proof|\bexterminat/.test(text)) return "pest-control"
   if (landscapingSignal(text, mode)) return "landscaping"
   if (/\bsolar\b/.test(text)) return "solar"
   if (/\broof\b|\broofs\b|\broofing\b|\broofer\b|\bshingles?\b/.test(text)) return "roofing"
@@ -216,15 +252,16 @@ function classify(value: string, mode: ClassifyMode): string {
   if (/\bgym\b|\bfitness\b|\byoga\b/.test(text)) return "gyms-fitness"
   if (cleaningSignal(text, mode)) return "cleaning-pressure-washing"
   if (/\bjunk\b|\bhaul away\b|\bhauling\b/.test(text)) return "junk-removal"
-  if (/\bmovers?\b|\bmoving company\b|\bstorage unit\b|\bself storage\b/.test(text)) return "moving-storage"
+  if (/\bmovers?\b|\bmoving compan|\bmoving services?\b|\bstorage units?\b|\bself storage\b|\bvan lines?\b/.test(text)) return "moving-storage"
+  if (/\bmoving\b/.test(text) && /\b(?:truck|van|belongings|relocat|mover)\b/.test(text)) return "moving-storage"
   if (/\bhome security\b|\balarm\b|\bsecurity system\b/.test(text)) return "home-security"
   if (remodelingSignal(text)) return "home-remodeling"
   if (/\bhandym[ae]n\b|\bhandy man\b|\bodd jobs\b/.test(text)) return "handyman"
   if (/\bwe buy\b|\bcash offer\b|\bhome buying\b|\bbuy your house\b|\bsell your house\b/.test(text)) return "home-buying"
   if (realEstateSignal(text, mode)) return "real-estate-agents"
   if (mortgageSignal(text, mode)) return "mortgage-financial"
-  if (/\bchurch\b|\bcongregation\b|\bnonprofit\b|\bcommunity center\b/.test(text)) return "churches-community"
-  if (/\btutors?\b|\btutoring\b|\bchildcare\b|\bchild care\b|\bdaycare\b|\bday care\b|\bpreschool\b|\bafter school\b|\bhomework\b|\blearning center\b/.test(text)) return "tutoring-childcare"
+  if (/\bchurch\b|\bcongregation\b|\bnonprofit\b|\bcommunity center\b|\bsymphon|\borchestras?\b|\bphilharmonic\b/.test(text)) return "churches-community"
+  if (/\btutors?\b|\btutoring\b|\bchildcare\b|\bchild care\b|\bdaycare\b|\bday care\b|\bpreschool\b|\bafter[- ]school\b|\bhomework\b|\blearning centers?\b|\btest prep\b|\bsat prep\b|\bact prep\b|\bthe sat\b|\bkumon\b|\bmathnasium\b|\bsummer camps?\b|\bday camps?\b/.test(text)) return "tutoring-childcare"
   if (autoSignal(text, mode)) return "auto"
   if (consumerSignal(text, mode)) return "consumer-products"
   if (retailSignal(text, mode)) return "retail-grand-openings"
@@ -239,15 +276,17 @@ function medicareSignal(text: string, mode: ClassifyMode): boolean {
   const cleaned = text
     .replace(/[^.]*\bnot affiliated with (?:medicare|medicaid|cms)\b[^.]*/g, " ")
     .replace(/[^.]*\bnot (?:a |an )?medicare\b[^.]*/g, " ")
+    .replace(/[^.]*\bmedicare has neither\b[^.]*/g, " ")
+    .replace(/[^.]*\bnot endorsed by (?:medicare|medicaid|cms)\b[^.]*/g, " ")
+    .replace(/[^.]*\bnot connected with (?:medicare|medicaid)\b[^.]*/g, " ")
   if (!/\bmedicare\b|\bmedicaid\b|\bmedigap\b/.test(cleaned)) return false
   if (mode === "label") return true
-  if (/\bmedicare advantage\b|\bmedigap\b|\bmedicare supplement\b|\bmedicare plan\b|\bannual enrollment\b|\baep\b/.test(cleaned)) return true
-  return signalHits(cleaned, [/\bmedicare\b|\bmedicaid\b/, /\badvantage\b/, /\bsupplement\b/, /\benrollment\b/, /\bmedigap\b/, /\bplan\b/]) >= 2
+  return /\bmedicare advantage\b|\bmedigap\b|\bmedicare supplement\b|\bmedicare plan\b|\bannual enrollment\b|\baep\b|\bmedicaid\b/.test(cleaned)
 }
 
 function restaurantSignal(text: string, mode: ClassifyMode): boolean {
-  if (/\bmeal kits?\b/.test(text)) return true
-  const chain = /\bdairy queen\b|\bmcdonald|\bburger king\b|\btaco bell\b|\bwendy\b|\bdomino|\bpizza hut\b|\bchipotle\b|\bstarbucks\b|\bdunkin\b|\bkfc\b/
+  if (/\bmeal kits?\b|\bgelson\b|\bgrocery stores?\b/.test(text)) return true
+  const chain = /\bdairy queen\b|\bmcdonald|\bburger king\b|\btaco bell\b|\bwendy\b|\bdomino|\bpizza hut\b|\bchipotle\b|\bstarbucks\b|\bdunkin\b|\bkfc\b|\bgelson\b/
   return notesAssign(text, mode, /$^/, [
     /\brestaurants?\b/,
     /\bdining\b/,
@@ -270,21 +309,27 @@ function mortgageSignal(text: string, mode: ClassifyMode): boolean {
   if (/\bhome equity\b|\bheloc\b/.test(text)) return true
   if (mode === "label" && /\bdebt\b|\bbank\b|\bfinancial\b|\bloan\b|\bmortgage\b|\bcredit union\b|\brefinance\b/.test(text)) return true
   if (mode === "label" && /\b(?:home|house)\s+loans?\b/.test(text)) return true
+  if (mode === "notes" && /\brefinance\b/.test(text) && /\b(?:mortgage|loan|rate|home|house)\b/.test(text)) return true
   if (mode === "notes" && /\bdebt\b/.test(text) && /\b(?:home|mortgage|equity|consolidat)\b/.test(text)) return true
-  return notesAssign(text, mode, /\b(?:home|house)\s+loans?\b|\brefinance\b/, [
-    /\bmortgage\b/,
-    /\brefinance\b/,
-    /\bcredit unions?\b/,
-    /\b(?:home|house)\s+loans?\b/,
-    /\brates?\b/,
-    /\bapr\b/,
-    /\blenders?\b/,
-    /\bbrokers?\b/,
-  ])
+  if (mode === "notes" && /\bmortgage\b/.test(text) && /\b(?:rate|apr|lender|loan|refinance|broker|credit)\b/.test(text)) return true
+  if (mode === "notes" && /\b(?:home|house)\s+loans?\b/.test(text)) return true
+  if (mode === "notes" && /\bcredit unions?\b/.test(text) && /\b(?:mortgage|loan|rate|member)\b/.test(text)) return true
+  return false
 }
 
 function retailSignal(text: string, mode: ClassifyMode): boolean {
-  return notesAssign(text, mode, /\bgrand openings?\b/, [/\bgrand openings?\b/, /\bretail\b/, /\bstores?\b/, /\bshops?\b/])
+  if (/\bgrand openings?\b|\bribbon cuttings?\b|\bnow open\b|\bstorewide\b/.test(text)) return true
+  if (/\b(?:retail|department|outlet|boutique) stores?\b/.test(text)) return true
+  return notesAssign(text, mode, /$^/, [
+    /\bgrand openings?\b/,
+    /\bretail\b/,
+    /\bboutiques?\b/,
+    /\bdepartment stores?\b/,
+    /\boutlets?\b/,
+    /\bshopping centers?\b/,
+    /\bmalls?\b/,
+    /\bribbon cuttings?\b/,
+  ])
 }
 
 function landscapingSignal(text: string, mode: ClassifyMode): boolean {
@@ -294,7 +339,8 @@ function landscapingSignal(text: string, mode: ClassifyMode): boolean {
 }
 
 function consumerSignal(text: string, mode: ClassifyMode): boolean {
-  return notesAssign(text, mode, /\bhiking gear\b|\bapparel\b/, [
+  if (/\b(?:apparel|clothing|footwear|sneakers?|outfitters?|hiking gear)\b/.test(text)) return true
+  return notesAssign(text, mode, /$^/, [
     /\bshoes?\b/,
     /\bshirts?\b/,
     /\bjackets?\b/,
@@ -304,7 +350,10 @@ function consumerSignal(text: string, mode: ClassifyMode): boolean {
     /\bscarves?\b|\bscarfs?\b/,
     /\bboots?\b/,
     /\bpants\b/,
-    /\bapparel\b/,
+    /\bcatalogs?\b/,
+    /\bcollections?\b/,
+    /\bbrands?\b/,
+    /\bgear\b/,
   ])
 }
 
@@ -314,16 +363,18 @@ function hairSalonSignal(text: string): boolean {
 }
 
 function outdoorSignal(text: string): boolean {
-  return /\boutdoor living\b|\boutdoor kitchens?\b|\bpergolas?\b|\bpatios?\b|\bpavers?\b|\bdecks?\b/.test(text)
+  return /\boutdoor living\b|\boutdoor kitchens?\b|\boutdoor rooms?\b|\bpergolas?\b|\bpatios?\b|\bpavers?\b|\bdecks?\b|\bhardscapes?\b|\bfire pits?\b|\bscreen enclosures?\b|\bpool cages?\b|\bsunrooms?\b|\bgazebos?\b|\blanais?\b|\bscreened porches?\b|\bcabanas?\b/.test(text)
 }
 
 function remodelingSignal(text: string): boolean {
   if (/\bgarage doors?\b/.test(text)) return false
   if (/\bremodel|\brenovat|\bkitchen and bath\b|\b(?:kitchen|bath(?:room)?)\s+remodel\b/.test(text)) return true
+  if (/\bfoundation\b/.test(text) && /\b(?:repairs?|cracks?|waterproof|level(?:ing)?|piers?)\b/.test(text)) return true
+  if (/\bfireplaces?\b|\bfireplace inserts?\b/.test(text)) return true
   if (/\bcabinets?\b|\bcountertops?\b|\bflooring\b|\bbasements?\b|\bclosets?\b|\bchimneys?\b|\bchimney sweeps?\b/.test(text)) return true
   if (/\b(?:home|room|house) additions?\b|\baddition to the (?:home|house)\b/.test(text)) return true
   if (/\bgeneral contractors?\b|\bhome contractors?\b|\bremodeling contractors?\b/.test(text)) return true
-  return /\bcontractors?\b/.test(text) && /\b(?:home|kitchen|bath|remodel|renovat|addition)\b/.test(text)
+  return /\bcontractors?\b/.test(text) && /\b(?:kitchen|bath|remodel|renovat|addition)\b/.test(text)
 }
 
 /**
@@ -352,12 +403,14 @@ function hvacSignal(text: string, mode: ClassifyMode): boolean {
 }
 
 function windowSignal(text: string, mode: ClassifyMode): boolean {
-  if (/\bblinds?\b|\bwindow shades?\b|\bwindow coverings?\b/.test(text)) return true
+  if (/\bblinds?\b|\bwindow shades?\b|\bwindow coverings?\b|\bwindow treatments?\b/.test(text)) return true
   if (/\bgutters?\b|\bsiding\b/.test(text)) return true
-  if (/\bwindow replacement\b|\bvinyl windows?\b|\breplacement windows?\b/.test(text)) return true
+  if (/\bwindow replacement\b|\bvinyl windows?\b|\breplacement windows?\b|\bstorm windows?\b/.test(text)) return true
+  if (/\bwindow (?:company|install(?:ation)?|contractor|world)\b/.test(text)) return true
   if (/\bwindows?\s+and\s+doors?\b|\bdoors?\s+and\s+windows?\b/.test(text)) return true
   if (mode === "label" && /\bwindows?\b/.test(text)) return true
   if (mode === "notes" && /\b(?:new|replacement|vinyl)\s+windows\b/.test(text)) return true
+  if (mode === "notes" && /\bwindows?\b/.test(text) && text.split(" ").filter(Boolean).length <= 36 && !/\bwindow shopping\b/.test(text)) return true
   return false
 }
 

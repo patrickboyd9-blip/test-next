@@ -19,7 +19,7 @@ import {
   stampLibraryResearch,
 } from "./evidence"
 import { fixtureResearchIndex, fixtureSourceFiles } from "./fixtures"
-import { taggerFingerprint } from "./industry"
+import { fingerprintFor, GOLD_INDUSTRIES, taggerFingerprint, taggerSource } from "./industry"
 import { clearResearchIndexMemory, refreshResearchIndex, RESEARCH_INDEX_ID } from "./index"
 import { indexSourceFiles } from "./parse"
 import { queryFromBrief, retrieveResearch } from "./retrieve"
@@ -68,6 +68,14 @@ test("every fixture record is indexed or skipped with a reason", () => {
   assert.match(report, /Records usable:/)
   const discovered = index.coverage.length
   assert.equal(index.stats.indexed + index.stats.skipped, discovered)
+})
+
+test("the fingerprint follows the tagger source and the slug list", () => {
+  const source = taggerSource()
+  assert.match(source, /screen enclosure/)
+  assert.equal(taggerFingerprint(), fingerprintFor(source, GOLD_INDUSTRIES))
+  assert.notEqual(fingerprintFor(source, GOLD_INDUSTRIES), fingerprintFor(`${source}\nfire pit rule`, GOLD_INDUSTRIES))
+  assert.notEqual(fingerprintFor(source, GOLD_INDUSTRIES), fingerprintFor(source, [...GOLD_INDUSTRIES, "extra-slug"]))
 })
 
 test("retrieval prefers the same industry, then gold and image-backed mailers", () => {

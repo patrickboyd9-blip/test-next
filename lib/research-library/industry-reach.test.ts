@@ -460,6 +460,11 @@ test("a long note needs two signals or a title field before it takes an industry
   assert.equal(resolveIndustry({ notes: `${filler} tires on sale.` }), "none")
   assert.equal(resolveIndustry({ notes: `${filler} a gift shop.` }), "none")
   assert.equal(resolveIndustry({ notes: `${filler} one mortgage mention.` }), "none")
+  assert.equal(resolveIndustry({ notes: `${filler} rates and lenders.` }), "none")
+  assert.equal(resolveIndustry({ notes: `${filler} the contractor came to the home.` }), "none")
+  assert.equal(resolveIndustry({ notes: `${filler} medicare and a health plan.` }), "none")
+  assert.equal(resolveIndustry({ notes: `${filler} the gift shop and the store.` }), "none")
+  assert.equal(resolveIndustry({ notes: `${filler} a window.` }), "none")
   assert.equal(resolveIndustry({ notes: `${filler} the yard.` }), "none")
   assert.equal(resolveIndustry({ notes: `${filler} medicare was named in a footer.` }), "none")
   assert.equal(resolveIndustry({ notes: `${filler} Dairy Queen coupon for Tuesday.` }), "restaurants-food")
@@ -494,14 +499,89 @@ test("a C-3PO note without a printed line stays usable as a layout reference", (
   ])
   const byId = new Map(indexed.entries.map((entry) => [entry.id, entry]))
   assert.equal(byId.get("PM-045")?.industry, "home-remodeling")
-  assert.ok((byId.get("PM-045")?.headlines[0]?.length ?? 0) > 8)
-  assert.ok((byId.get("PM-045")?.offers[0]?.length ?? 0) > 8)
+  assert.equal(byId.get("PM-045")?.headlines.length, 0)
+  assert.equal(byId.get("PM-045")?.offers.length, 0)
+  assert.equal(byId.get("PM-045")?.referenceOnly, true)
   assert.match(byId.get("PM-046")?.headlines.join(" ") ?? "", /Gold in hand/)
   assert.match(byId.get("PM-046")?.offers.join(" ") ?? "", /buy gold/i)
   assert.equal(byId.get("PM-046")?.industry, "precious-metals")
   assert.equal(byId.get("PM-050")?.industry, "outdoor-living")
   assert.match(byId.get("PM-050")?.headlines.join(" ") ?? "", /outdoor room/i)
   assert.match(byId.get("PM-050")?.offers.join(" ") ?? "", /paver/i)
+})
+
+test("photo notes are not copy, and the missed trades land on a gold industry", () => {
+  const indexed = indexSourceFiles([
+    {
+      path: "assets/physical/PM-090/notes.md",
+      ref: "c3po",
+      text: "PM-090\nLeft edge of the printed piece meets the photo frame. The lighting angle shows the camera crop and the glare on the table.\n",
+    },
+    {
+      path: "assets/physical/PM-091/notes.md",
+      ref: "c3po",
+      text: "PM-091\n\"Call today for a free deck estimate.\"\n",
+    },
+  ])
+  const byId = new Map(indexed.entries.map((entry) => [entry.id, entry]))
+  assert.equal(byId.get("PM-090")?.headlines.length, 0)
+  assert.equal(byId.get("PM-090")?.offers.length, 0)
+  assert.equal(byId.get("PM-090")?.referenceOnly, true)
+  assert.equal(byId.get("PM-090")?.photoStyle, undefined)
+  assert.match(byId.get("PM-091")?.headlines.join(" ") ?? "", /free deck/i)
+  assert.equal(byId.get("PM-091")?.referenceOnly, false)
+  assert.equal(byId.get("PM-091")?.industry, "outdoor-living")
+
+  const cases: ReadonlyArray<readonly [string, string]> = [
+    ["a screen enclosure and a paver patio", "outdoor-living"],
+    ["hardscape with a fire pit", "outdoor-living"],
+    ["cash for gold from a local buyer", "precious-metals"],
+    ["spring apparel and a sneaker catalog", "consumer-products"],
+    ["an outfitter jacket and boots", "consumer-products"],
+    ["a window company for the front of the house", "windows-gutters-siding"],
+    ["storm windows", "windows-gutters-siding"],
+    ["ribbon cutting at the new boutique", "retail-grand-openings"],
+    ["foundation repair before the crack spreads", "home-remodeling"],
+    ["a fireplace insert for the living room", "home-remodeling"],
+    ["rodent-proofing for the attic", "pest-control"],
+    ["local movers and a storage unit", "moving-storage"],
+    ["Gelson's grocery", "restaurants-food"],
+    ["the city symphony season", "churches-community"],
+    ["SAT prep at Kumon", "tutoring-childcare"],
+    ["summer camp after school", "tutoring-childcare"],
+  ]
+  for (const [notes, industry] of cases) {
+    assert.equal(resolveIndustry({ notes }), industry, notes)
+  }
+})
+
+test("a physical C-3PO piece keeps a slot when gold fills the industry", () => {
+  const gold = Array.from({ length: 8 }, (_, index) => ({
+    path: "gold/hvac.json",
+    ref: "mando" as const,
+    json: { id: `GOLD-hvac-${index}`, headline_text: `Gold line ${index}`, offer_text: "$89 tune-up" },
+  }))
+  const indexed = indexSourceFiles([
+    ...gold,
+    {
+      path: "assets/physical/PM-015/provenance.json",
+      ref: "c3po" as const,
+      json: {
+        id: "PM-015",
+        notes: "Heating and air.\nPrinted headline: One service call\nPrinted offer: $99 service",
+      },
+    },
+    {
+      path: "assets/physical/PM-090/notes.md",
+      ref: "c3po" as const,
+      text: "PM-090\nHeating and air layout. Left edge of the printed piece meets the photo frame.\n",
+    },
+  ])
+  const hits = retrieveResearch(indexed.entries, queryFromBrief({ goal: "Cool the house", offer: "Free AC inspection" }), 8)
+  const physical = hits.hits.filter((hit) => hit.entry.origin === "c3po")
+  assert.ok(physical.length >= 1 && physical.length <= 2)
+  assert.ok(physical.every((hit) => hit.entry.industry === "hvac"))
+  assert.ok(hits.hits.some((hit) => hit.entry.id === "PM-015"))
 })
 
 test("customer lines hide blueprint ids and internal notes", () => {

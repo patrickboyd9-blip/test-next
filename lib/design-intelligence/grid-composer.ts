@@ -301,8 +301,9 @@ function composeIntegrated(
   const phoneY = round2(websiteY - 0.05 - phoneBoxH)
   const showName = !nameAlreadyOnCard(headlineTexts, name)
   const nameBoxH = showName ? 0.5 : 0
-  const keepOfferRest = input.rationale.vertical === "hvac" && offerParts.rest.split(/\s+/).filter(Boolean).length >= 2
-  const restBoxH = offerParts.rest ? (keepOfferRest ? 0.9 : 0.46) : 0
+  const joinedOffer = hvacOfferPhrase(input.rationale.vertical, offerParts.numeral, offerParts.rest)
+  const keepOfferRest = !joinedOffer && input.rationale.vertical === "hvac" && offerParts.rest.split(/\s+/).filter(Boolean).length >= 2
+  const restBoxH = joinedOffer ? 0 : offerParts.rest ? (keepOfferRest ? 0.9 : 0.46) : 0
   const tail = (restBoxH ? restBoxH + 0.04 : 0) + (nameBoxH ? nameBoxH + 0.06 : 0)
   const offerBottomLimit = round2(phoneY - 0.1 - tail)
   const offerRoom = Math.max(0.4, offerBottomLimit - offerTop)
@@ -316,20 +317,21 @@ function composeIntegrated(
   )))
   const offerMin = roundPt(Math.min(
     offerMax,
-    offerIsHero ? Math.max(bodyPt * 1.5, paintedHeadline * (keepOfferRest ? 1.15 : 1.6)) : Math.max(bodyPt * 1.5, paintedHeadline * 0.68),
+    joinedOffer ? 16 : offerIsHero ? Math.max(bodyPt * 1.5, paintedHeadline * (keepOfferRest ? 1.15 : 1.6)) : Math.max(bodyPt * 1.5, paintedHeadline * 0.68),
   ))
+  const offerMaxUsed = joinedOffer ? roundPt(Math.min(offerMax, 28)) : Math.max(offerMin, offerMax)
   const offerLine = shrinkToInk(fitText({
-    text: offerParts.numeral,
+    text: joinedOffer || offerParts.numeral,
     rect: { x: typeColumn.x, y: offerTop, w: offerWidth, h: offerRoom },
     role: "offer",
     pairing,
     color: offerColor,
     minPt: offerMin,
-    maxPt: Math.max(offerMin, offerMax),
+    maxPt: Math.max(offerMin, offerMaxUsed),
   }), pairing)
   const texts = [...headlineTexts, offerLine].filter((text) => text.text)
   let cursor = round2(offerLine.rect.y + offerLine.rect.h + 0.02)
-  if (offerParts.rest) {
+  if (offerParts.rest && !joinedOffer) {
     const rest = shrinkToInk(fitText({
       text: offerParts.rest,
       rect: { x: typeColumn.x, y: cursor, w: offerWidth, h: restBoxH || 0.46 },
@@ -551,18 +553,39 @@ function composeOfferStrip(
       color: accentOnPaper === ink ? ink : accentOnPaper,
     })
   }
+  const name = clean(input.businessName)
+  const hvacBand = input.rationale.vertical === "hvac"
+  const reserveName = hvacBand && Boolean(name) && !headline.toLowerCase().includes(name.toLowerCase())
+  const nameH = reserveName ? 0.52 : 0
   const stacked = placeStack({
     blocks,
     cursor: column.y,
-    bottom: column.y + column.h * 0.72,
+    bottom: reserveName ? round2(column.y + column.h - nameH - 0.08) : column.y + column.h * 0.72,
     content: column,
     pairing,
     align: "left",
   })
   const texts = stacked.texts.map((text) => shrinkToInk(text, pairing)).filter((text) => text.text)
   const cursor = texts.reduce((bottom, text) => Math.max(bottom, text.rect.y + text.rect.h), column.y)
-  const name = clean(input.businessName)
-  if (name && !nameAlreadyOnCard(texts, name)) {
+  if (reserveName && name) {
+    const fitted = shrinkToInk(fitText({
+      text: name,
+      rect: { x: column.x, y: round2(column.y + column.h - nameH), w: column.w, h: nameH },
+      role: "label",
+      pairing,
+      color: ink,
+      minPt: 11,
+      maxPt: 15,
+    }), pairing)
+    if (fitted.text) {
+      const targetBottom = round2(column.y + column.h)
+      const wordmark = {
+        ...fitted,
+        rect: { ...fitted.rect, y: round2(targetBottom - fitted.rect.h) },
+      }
+      texts.push(wordmark)
+    }
+  } else if (name && !nameAlreadyOnCard(texts, name)) {
     const wordmark = shrinkToInk(fitText({
       text: name,
       rect: { x: column.x, y: round2(cursor + 0.06), w: column.w, h: Math.max(0.28, column.y + column.h - cursor - 0.08) },
@@ -575,9 +598,10 @@ function composeOfferStrip(
     if (wordmark.text) texts.push(wordmark)
   }
   const safeBottom = trim.h - SAFE_IN
+  const innerBottom = round2(Math.min(band.y + band.h - 0.08, safeBottom))
   const qrRect: InchRect = {
     x: round2(trim.w - SAFE_IN - QR_IN),
-    y: round2(Math.min(band.y + 0.28, safeBottom - QR_IN)),
+    y: round2(hvacBand ? innerBottom - QR_IN : Math.min(band.y + 0.28, safeBottom - QR_IN)),
     w: QR_IN,
     h: QR_IN,
   }
@@ -586,19 +610,27 @@ function composeOfferStrip(
   const offerX = SAFE_IN
   const offerW = round2(phoneX - offerX - 0.14)
   const offerColor = contrastRatio(accent, bandFill) >= 4.5 ? accent : bandInk
-  const keepOfferRest = input.rationale.vertical === "hvac" && offerParts.rest.split(/\s+/).filter(Boolean).length >= 2
+  const joinedOffer = hvacOfferPhrase(input.rationale.vertical, offerParts.numeral, offerParts.rest)
+  const phone = clean(input.spec.phone) || ""
+  const website = displayHost(input.spec.website || input.spec.qrDestination || "")
+  const webH = 0.26
+  const phoneH = 0.34
+  const websiteY = hvacBand ? round2(innerBottom - webH) : 0
+  const phoneY = hvacBand ? round2(websiteY - 0.06 - phoneH) : round2(qrRect.y + (QR_IN - phoneH) / 2)
+  const offerTop = round2(band.y + 0.12)
+  const offerH = hvacBand ? round2(Math.max(0.48, phoneY - offerTop - 0.06)) : joinedOffer ? 1.05 : 0.7
   const offerLine = shrinkToInk(fitText({
-    text: keepOfferRest ? `${offerParts.numeral} ${offerParts.rest}` : offerParts.numeral,
-    rect: { x: offerX, y: round2(band.y + 0.14), w: offerW, h: keepOfferRest ? 1.05 : 0.7 },
+    text: joinedOffer || offerParts.numeral,
+    rect: { x: offerX, y: offerTop, w: offerW, h: offerH },
     role: "offer",
     pairing,
     color: offerColor,
-    minPt: keepOfferRest ? 16 : Math.max(22, sizes.headline * 1.4),
-    maxPt: keepOfferRest ? 28 : Math.max(36, sizes.offer),
+    minPt: joinedOffer ? 16 : Math.max(22, sizes.headline * 1.4),
+    maxPt: joinedOffer ? 26 : Math.max(36, sizes.offer),
   }), pairing)
   if (offerLine.text) texts.push(offerLine)
   let offerBottom = offerLine.text ? offerLine.rect.y + offerLine.rect.h : band.y + 0.2
-  if (offerParts.rest && !keepOfferRest) {
+  if (offerParts.rest && !joinedOffer) {
     const rest = shrinkToInk(fitText({
       text: offerParts.rest,
       rect: { x: offerX, y: round2(offerBottom + 0.02), w: offerW, h: 0.34 },
@@ -613,11 +645,9 @@ function composeOfferStrip(
       offerBottom = rest.rect.y + rest.rect.h
     }
   }
-  const phone = clean(input.spec.phone) || ""
-  const website = displayHost(input.spec.website || input.spec.qrDestination || "")
   const phoneText = shrinkToInk(fitText({
     text: phone,
-    rect: { x: phoneX, y: round2(qrRect.y + (QR_IN - 0.34) / 2), w: phoneW, h: 0.34 },
+    rect: { x: phoneX, y: phoneY, w: phoneW, h: phoneH },
     role: "contact",
     pairing,
     color: bandInk,
@@ -626,7 +656,12 @@ function composeOfferStrip(
   }), pairing)
   const websiteText = shrinkToInk(fitText({
     text: website,
-    rect: { x: offerX, y: round2(Math.min(offerBottom + 0.04, safeBottom - 0.26)), w: offerW, h: 0.26 },
+    rect: {
+      x: offerX,
+      y: hvacBand ? websiteY : round2(Math.min(offerBottom + 0.04, safeBottom - webH)),
+      w: offerW,
+      h: webH,
+    },
     role: "label",
     pairing,
     color: bandInk,
@@ -1316,6 +1351,14 @@ function scaffoldFor(vertical: DesignVertical): PostcardTemplateId {
   if (vertical === "plumbing") return "service_band"
   if (vertical === "hvac") return "service_band"
   return "hero_scrim"
+}
+
+/** HVAC keeps FREE and the rest of the offer as one phrase, not a giant word over tiny type. */
+function hvacOfferPhrase(vertical: string, numeral: string, rest: string): string {
+  if (vertical !== "hvac") return ""
+  const tail = rest.replace(/\s+/g, " ").trim()
+  if (!tail) return ""
+  return `${numeral} ${tail}`.replace(/\s+/g, " ").trim()
 }
 
 function spokenCopy(input: GridComposeInput): { headline: string; numeral: string; rest: string } {

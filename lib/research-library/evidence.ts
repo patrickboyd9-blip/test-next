@@ -193,13 +193,14 @@ function evidenceLine(hit: RetrievalHit): string {
   const bits = [
     `${entry.id} (${entry.industry}, ${entry.gold ? "gold recipe" : entry.evidence === "visual" ? "image-backed" : "text-only"}, ${hit.band})`,
   ]
-  if (entry.headlines[0]) bits.push(`headline pattern: “${clip(entry.headlines[0], 80)}”`)
-  if (entry.offers[0]) bits.push(`offer pattern: ${clip(entry.offers[0], 80)}`)
+  if (entry.referenceOnly) bits.push("layout reference only, not customer copy")
+  if (!entry.referenceOnly && entry.headlines[0]) bits.push(`headline pattern: “${clip(entry.headlines[0], 80)}”`)
+  if (!entry.referenceOnly && entry.offers[0]) bits.push(`offer pattern: ${clip(entry.offers[0], 80)}`)
   if (entry.layout.photoShare !== undefined) bits.push(`photo about ${Math.round(entry.layout.photoShare * 100)}%`)
   if (entry.layout.offerPosition) bits.push(`offer ${entry.layout.offerPosition}`)
   if (entry.layout.headlineWords) bits.push(`headline about ${entry.layout.headlineWords} words`)
-  if (entry.photoStyle) bits.push(`photo: ${clip(entry.photoStyle, 140)}`)
-  if (entry.whyItWorks) bits.push(`why it works: ${clip(entry.whyItWorks, 160)}`)
+  if (!entry.referenceOnly && entry.photoStyle) bits.push(`photo: ${clip(entry.photoStyle, 140)}`)
+  if (!entry.referenceOnly && entry.whyItWorks) bits.push(`why it works: ${clip(entry.whyItWorks, 160)}`)
   if (entry.favoriteOf && entry.favoriteSimilarity) bits.push(`similarity ${entry.favoriteSimilarity}/5 to ${entry.favoriteOf}`)
   if (usableResponse(entry.responseEvidence)) bits.push(`internal response note, do not print: ${clip(entry.responseEvidence ?? "", 160)}`)
   return `- ${bits.join("; ")}`

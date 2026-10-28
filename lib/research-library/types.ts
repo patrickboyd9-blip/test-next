@@ -36,6 +36,11 @@ export interface ResearchEntry {
   /** Observed lines used as strategy evidence. Not copied onto a card. */
   headlines: string[]
   offers: string[]
+  /**
+   * Layout and style only. Headline and offer are empty, so this piece is
+   * not presented as customer copy.
+   */
+  referenceOnly?: boolean
   structures: string[]
   responseEvidence?: string
   whyItWorks?: string

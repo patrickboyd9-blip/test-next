@@ -1,6 +1,6 @@
 import { isForbiddenResearchPath } from "@/lib/design-intelligence/images"
 
-import { NONE_INDUSTRY, normalizeIndustry, researchEmotion, researchOfferType, resolveIndustry } from "./industry"
+import { NONE_INDUSTRY, normalizeIndustry, researchEmotion, researchOfferType, resolveIndustry, sceneNotePattern } from "./industry"
 import type { CoverageRow, ResearchEntry, ResearchLayout, ResearchOrigin } from "./types"
 
 export interface SourceFile {
@@ -163,6 +163,7 @@ function parseMarkdownFile(file: SourceFile): { entry?: ResearchEntry; row: Cove
     colors: fields.colors,
     headlines,
     offers,
+    referenceOnly: copy.referenceOnly,
     structures: structureLines(sections, layout),
     responseEvidence: response,
     whyItWorks: why,
@@ -310,6 +311,7 @@ export function entryFromGold(record: Record<string, unknown>, file: Pick<Source
     colors,
     headlines: copy.headlines,
     offers: copy.offers,
+    referenceOnly: copy.referenceOnly,
     structures: structureFromLayout(layout),
     responseEvidence: response,
     whyItWorks: why ? clip(why, 280) : undefined,
@@ -356,6 +358,7 @@ function attachImageCatalog(entries: ResearchEntry[], catalog: unknown, catalogP
       colors: [],
       headlines: [],
       offers: [],
+      referenceOnly: true,
       structures: ["Image-backed mailer. The written record was not in this batch."],
       imageRefs: [row.path],
       evidence: "visual",
@@ -396,6 +399,7 @@ function richer(left: ResearchEntry, right: ResearchEntry): ResearchEntry {
     colors: preferred.colors.length > 0 ? preferred.colors : other.colors,
     headlines,
     offers,
+    referenceOnly: headlines.length === 0 && offers.length === 0,
     photoStyle: preferred.photoStyle || other.photoStyle,
     responseEvidence: preferred.responseEvidence || other.responseEvidence,
     whyItWorks: preferred.whyItWorks || other.whyItWorks,
@@ -689,32 +693,77 @@ function labeledLine(text: string, key: string): string | undefined {
   return cut?.trim() || undefined
 }
 
+const SCENE_NOTE = new RegExp(`\\b(?:${sceneNotePattern()})\\b`, "i")
+
+/** A camera or table note, not a line that was printed for the customer. */
+function isPhotoNote(line: string): boolean {
+  if (/\b(?:left|right|top|bottom|outer|inner)\s+edge\b/i.test(line)) return true
+  if (/\bmeets the (?:photo )?frame\b/i.test(line)) return true
+  if (/\b(?:photo|picture|image)\s+frame\b/i.test(line)) return true
+  if (/\b(?:photos?|photographs?|cameras?|cropped?|glare|scans?|scanned|lighting)\b/i.test(line)) return true
+  if (/\b(?:on|in) (?:the )?(?:table|hand)\b/i.test(line) && /\b(?:piece|card|mailer|printed|photo)\b/i.test(line)) return true
+  return false
+}
+
+function isSceneNote(line: string): boolean {
+  return isPhotoNote(line) || SCENE_NOTE.test(line)
+}
+
+function businessNameFrom(notes: string): string {
+  const match = notes.match(/(?:company|advertiser|business|sender)\s*[:\-—–]\s*([^\n]{2,80})/i)
+  return match?.[1]?.replace(/\*\*/g, "").trim() ?? ""
+}
+
+function quotedLines(text: string): string[] {
+  const found: string[] = []
+  for (const match of text.matchAll(/["“]([^"”\n]{8,160})["”]/g)) {
+    const line = match[1]?.replace(/\s+/g, " ").trim() ?? ""
+    if (line && !isSceneNote(line)) found.push(line)
+  }
+  return found
+}
+
+function isMarketingLine(line: string, business: string): boolean {
+  if (isSceneNote(line)) return false
+  if (/[$%]/.test(line)) return true
+  if (/\b(?:free|offer|save|call|discount|coupon|special)\b/i.test(line)) return true
+  if (business.length > 2 && line.toLowerCase().includes(business.toLowerCase())) return true
+  return false
+}
+
 /**
- * A piece with no printed line still stays in the library.
- * The first useful sentence is the layout and style reference.
+ * Printed lines, quotes, and marketing sentences can be copy.
+ * A photo note stays out of the headline and the offer. With none of those,
+ * the piece is still a layout reference and is not presented as copy.
  */
 export function referenceCopy(input: {
   headlines: string[]
   offers: string[]
   photoStyle?: string
   notes: string
-}): { headlines: string[]; offers: string[]; photoStyle?: string } {
+}): { headlines: string[]; offers: string[]; photoStyle?: string; referenceOnly: boolean } {
+  const business = businessNameFrom(input.notes)
+  const explicitHeadline = input.headlines.map((line) => line.trim()).find((line) => line && !isPhotoNote(line))
+  const explicitOffer = input.offers.map((line) => line.trim()).find((line) => line && !isPhotoNote(line))
   const printedHeadline = labeledLine(input.notes, "headline")
   const printedOffer = labeledLine(input.notes, "offer") || pricedLine(input.notes)
-  const headlines = unique(input.headlines.length > 0 ? input.headlines : printedHeadline ? [clip(printedHeadline, 120)] : [])
-  const offers = unique(input.offers.length > 0 ? input.offers : printedOffer ? [clip(printedOffer, 120)] : [])
-  const described = descriptiveLines(input.notes).filter((line) => line !== headlines[0] && line !== offers[0])
-  const nextHeadlines = headlines.length > 0 ? headlines : described[0] ? [clip(described[0], 120)] : []
-  const nextOffers = offers.length > 0
-    ? offers
-    : described.find((line) => line !== nextHeadlines[0])
-      ? [clip(described.find((line) => line !== nextHeadlines[0])!, 120)]
-      : nextHeadlines[0]
-        ? [clip(nextHeadlines[0], 120)]
-        : []
-  const invented = input.headlines.length === 0 && nextHeadlines.length > 0
-  const photoStyle = input.photoStyle?.trim() || (invented ? nextHeadlines[0] : undefined)
-  return { headlines: nextHeadlines, offers: nextOffers, photoStyle }
+  const quoted = quotedLines(input.notes)
+  const headlineSource = explicitHeadline || (printedHeadline && !isPhotoNote(printedHeadline) ? printedHeadline : "") || quoted[0] || ""
+  const offerSource = explicitOffer || (printedOffer && !isPhotoNote(printedOffer) ? printedOffer : "") || ""
+  const headlines = unique(headlineSource ? [clip(headlineSource, 120)] : [])
+  const offers = unique(offerSource ? [clip(offerSource, 120)] : [])
+  const marketing = descriptiveLines(input.notes).filter((line) => isMarketingLine(line, business) && line !== headlines[0] && line !== offers[0])
+  const nextHeadlines = headlines.length > 0 ? headlines : marketing[0] ? [clip(marketing[0], 120)] : []
+  const offerLine = offers[0] || marketing.find((line) => /[$%]|\b(?:free|offer|save|discount|coupon)\b/i.test(line) && line !== nextHeadlines[0])
+  const nextOffers = offerLine ? [clip(offerLine, 120)] : []
+  const photo = input.photoStyle?.trim()
+  const photoStyle = photo && !isSceneNote(photo) ? photo : undefined
+  return {
+    headlines: nextHeadlines,
+    offers: nextOffers,
+    photoStyle,
+    referenceOnly: nextHeadlines.length === 0 && nextOffers.length === 0,
+  }
 }
 
 function descriptiveLines(text: string): string[] {
