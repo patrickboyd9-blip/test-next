@@ -156,7 +156,8 @@ export function toImageBrief(
     brief.tone = spec.tone
   }
 
-  const roofSlot = roofSlotForTemplate(spec.layoutHints?.templateId, context.photoSlot)
+  // Roof slot briefs are for roofing only. A dental or pest card on a fade template keeps its own trade photo.
+  const roofSlot = brief.artDirection.trade === "roofing" ? roofSlotForTemplate(spec.layoutHints?.templateId, context.photoSlot) : null
   if (roofSlot) {
     const slot = ROOF_SLOT_BRIEFS[roofSlot]
     brief.artDirection = {
@@ -186,6 +187,17 @@ export function toImageBrief(
     brief.visualDirection = subject
     brief.doNotInvent = brief.doNotInvent.filter((item) => item !== "invented property damage")
     brief.damage = damage
+  }
+
+  // A metal-roof offer must show a metal roof. Shingle photos under "$750 off a new metal roof" sank every
+  // Cascade Ridge card in Round 7. Damage shots keep the worn old roof but show the metal going on.
+  const material = `${spec.offer ?? ""} ${spec.headline ?? ""} ${context.campaign?.offer ?? ""}`
+  if (brief.artDirection.trade === "roofing" && /\bmetal\b|standing[- ]seam/i.test(material)) {
+    const metal = brief.damage
+      ? `${brief.artDirection.subject} New standing-seam metal panels are stacked by the ladder and the first metal panels are already fastened along the upper roof; the roofer is installing them.`
+      : `${brief.artDirection.subject.replace(/(?:dark charcoal )?(?:architectural )?shingle roof/gi, "standing-seam metal roof").replace(/\bnew roof\b/gi, "new standing-seam metal roof")} The roof is standing-seam metal (long vertical charcoal metal panels with raised seams), not asphalt shingles. One roofer on the roof fastening a metal panel, face visible.`
+    brief.artDirection = { ...brief.artDirection, subject: metal, refuse: `${brief.artDirection.refuse} No asphalt shingle roof on the finished house.` }
+    brief.visualDirection = metal
   }
 
   const researchNote = context.researchPhotoNote?.trim()

@@ -53,3 +53,15 @@ test("bordered roofing fronts keep the plain back", () => {
   })
   assert.equal(isSoftFadeBack(card.back), false)
 })
+
+test("damage front starts the fade lower; voted-out headline never returns; editor defaults follow soft-fade", async () => {
+  const { distinctRoofingHeadlines } = await import("@/lib/design-intelligence/persuasion")
+  const lines = distinctRoofingHeadlines({ headlines: ["Roof work in Tacoma, priced to save."], offer: "$1,500 off a full roof replacement", businessName: "Acme Roofing" })
+  assert.ok(!/priced to save/i.test(lines[0]!))
+  const a = distinctRoofingHeadlines({ headlines: ["", ""], offer: "$1,500 off a full roof replacement", businessName: "Acme Roofing" })
+  const b = distinctRoofingHeadlines({ headlines: ["", ""], offer: "$1,500 off a full roof replacement", businessName: "Summit Roof Co" })
+  assert.equal(a.length, 2); assert.equal(b.length, 2)
+  const { defaultBackSections } = await import("@/lib/campaign-creator/soft-fade-back")
+  assert.equal(defaultBackSections(true).photo, true)
+  assert.equal(defaultBackSections(false).photo, false)
+})

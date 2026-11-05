@@ -1,9 +1,10 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 import { mergeAddressSide } from "@/lib/campaign-creator/address-side"
 import type { AddressSideFallbacks } from "@/lib/campaign-creator/address-side"
+import { defaultBackSections, specUsesSoftFadeBack } from "@/lib/campaign-creator/soft-fade-back"
 import { updateAddressSide } from "@/lib/campaign-creator/actions"
 import type { AddressSideEdit, AddressSideSections, Campaign, CreativeSpec } from "@/lib/campaign-creator/types"
 
@@ -34,15 +35,9 @@ export function AddressSideEditor({
   onSaved,
 }: AddressSideEditorProps) {
   const edit = spec.addressSide
+  const softFade = useMemo(() => specUsesSoftFadeBack(spec), [spec])
   const sections = {
-    offer: false,
-    benefits: false,
-    proof: true,
-    license: false,
-    contact: true,
-    returnAddress: false,
-    qr: false,
-    photo: false,
+    ...defaultBackSections(softFade),
     ...edit?.sections,
   }
   const [note, setNote] = useState<string | null>(null)

@@ -39,7 +39,7 @@ export async function requestModelRationale(input: {
     const images = await imageBlocks(input.selection, input.env)
     const response = await client.messages.create({
       model: input.env.DESIGN_MODEL?.trim() || MODEL,
-      max_tokens: 1800,
+      max_tokens: 3500,
       system: directorSystem(),
       messages: [
         {

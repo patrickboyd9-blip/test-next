@@ -464,7 +464,7 @@ export function headlineVariants(input: { offer: string; city?: string; goal?: s
     return pick([`Is your${at ? " " + place : ""} roof ready for winter?`, "See what your roof is hiding", "A free look, no pressure, no pitch", "Ten minutes on your roof tells a lot"])
   }
   if (/\$\s?\d|%\s*off|\boff\b|\bdiscount\b/i.test(facts)) {
-    return pick([`Your new roof${at}, for less`, "Real savings on a new roof", "A full new roof, priced to say yes", "Replace the roof, keep the savings"])
+    return pick([`Your new roof${at}, for less`, "Real savings on a new roof", "A full new roof, priced to say yes", "Replace the roof, keep the savings", `${place ? place + " homes" : "Your home"} deserve a roof that lasts`, "New roof, real money back in your pocket", "The roof you need, for less than you think", "Put the savings toward a better roof"])
   }
   return pick([`A better roof${at}`, "Get your roof looked at this month", "Your roof, done right", "A roof you never think about"])
 }
@@ -480,12 +480,30 @@ function extraHeadlines(input: { offer: string; city?: string }): string[] {
   const free = /\binspection\b|\bfree\b|\bcheck\b/i.test(input.offer)
   const lines = free
     ? [`A free roof check${place ? ` for ${place} homes` : ""}`, "Know where your roof stands, free", "One visit, a clear answer on your roof", "Find small roof problems while they are small"]
-    : [`Roof work${place ? ` in ${place}` : ""}, priced to save`, "Save on the roof work you need", "Fix it once, pay less for it", "A better price on a lasting roof"]
+    : ["Money off the roof you have been putting off", "Save on the roof work you need", "Fix it once, pay less for it", "Cut the cost of your next roof", "Big savings, one roof, no runaround", "A stronger roof for less"]
   return lines.map((line) => finishLine(line))
 }
 
 /** A headline that leads with paying or financing. One per business at most. */
 export const FINANCING_LED = /\bfinanc\w*|\bpay(?:ing)?\b|\bpaid\b|\bmonthly\b|\bbudget\b|\bpayments?\b|\binterest\b|\b0%/i
+
+/** Headlines the owner voted down in the quality loop. Never chosen again. */
+export const VOTED_OUT_HEADLINES: readonly string[] = [
+  "Storm season is coming in Oklahoma City. Is your roof ready?",
+  "Find small roof problems while they are small",
+]
+
+/** Generic line shapes the owner voted down ("Roof work in <city>, priced to save"). */
+const VOTED_OUT_PATTERN = /\bpriced to save\b|^roof work in [a-z .'-]+,/i
+
+function hashText(value: string): number {
+  let hash = 2166136261
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index)
+    hash = Math.imul(hash, 16777619)
+  }
+  return hash >>> 0
+}
 
 export function distinctRoofingHeadlines(input: {
   headlines: readonly string[]
@@ -496,9 +514,12 @@ export function distinctRoofingHeadlines(input: {
   taken?: readonly string[]
 }): string[] {
   const used: string[] = [...(input.taken ?? [])]
-  const fallbacks = headlineVariants(input)
+  // Rotate the fallback bank by business so different customers do not all get the same lines.
+  const bank = headlineVariants(input)
+  const shift = input.businessName ? hashText(input.businessName) % bank.length : 0
+  const fallbacks = [...bank.slice(shift), ...bank.slice(0, shift)]
   const ok = (line: string) =>
-    Boolean(line) && !isStockHeadline(line) && !WEAK_HEADLINE.test(line) && !headlineRepeatsOffer(line, input.offer) &&
+    Boolean(line) && !VOTED_OUT_HEADLINES.some((bad) => sameHeadline(bad, line)) && !VOTED_OUT_PATTERN.test(line) && !isStockHeadline(line) && !WEAK_HEADLINE.test(line) && !headlineRepeatsOffer(line, input.offer) &&
     headlinePasses({ headline: line, offer: input.offer, goal: input.goal, businessName: input.businessName }) &&
     !used.some((other) => sameHeadline(other, line)) &&
     !(FINANCING_LED.test(line) && used.some((other) => FINANCING_LED.test(other))) &&
@@ -513,6 +534,39 @@ export function distinctRoofingHeadlines(input: {
     used.push(chosen)
     return chosen
   })
+}
+
+/**
+ * Offer-specific fallback headlines for non-roofing trades. Compliance basics: no "safe",
+ * "non-toxic", or EPA lines for pest control; no people or "family" lines for real estate
+ * (Fair Housing); no "painless", "best", or guarantee claims for dental.
+ */
+export function tradeHeadlineVariants(kind: string, offer: string, city?: string): string[] {
+  const place = usableCity(city)
+  const at = place ? ` in ${place}` : ""
+  const o = offer.toLowerCase()
+  const pick = (lines: string[]) => lines.map((line) => finishLine(line))
+  if (kind === "plumbing") {
+    if (/water heater|tank/.test(o)) return pick(["Cold showers are a warning sign", "Replace the water heater before it floods the garage", `Hot water${at}, installed this week`, "A ten-year-old tank is living on borrowed time", "New water heater, real money off"])
+    if (/drain|clog|sewer|rooter/.test(o)) return pick(["Slow drain? Clear it before it backs up", "That gurgle in the drain means call now", `Drains cleared${at}, same week`, "Stop plunging. Get it cleared right", "One visit, every drain flowing"])
+    return pick([`A plumber${at} who shows up on time`, "Small leak today, big bill tomorrow", "Fix the drip before it finds the floor"])
+  }
+  if (kind === "dental") {
+    if (/new patient|exam|cleaning|x-?ray/.test(o)) return pick([`New to ${place ?? "town"}? Your dentist is ready`, "Exam, cleaning, and x-rays in one visit", "Overdue for a cleaning? Start here", "Your first visit, priced up front", "Book the checkup you keep putting off"])
+    if (/invisalign|aligner|braces|ortho/.test(o)) return pick(["Straighter teeth, no metal brackets", "Clear aligners, real money off", "The smile you hide in photos, fixed", `Clear aligners${at}, start this month`, "See your new smile before you start"])
+    if (/whiten/.test(o)) return pick(["A brighter smile in one visit", "Whitening, done in the chair"])
+    return pick([`A dentist${at} with openings this week`, "Book the checkup you keep putting off"])
+  }
+  if (kind === "real_estate") {
+    if (/value|valuation|cma/.test(o)) return pick([`What is your ${place ? place + " " : ""}home worth today?`, "Find out what your home would sell for", "Homes on your street are selling. See your number", "Your home value, in writing, free", "Thinking of selling? Start with the number"])
+    if (/list|photo|staging|commission|cleaning/.test(o)) return pick(["List this winter, sell before spring", "Your home, photographed to sell", `Sell your ${place ? place + " " : ""}home with less work`, "Professional photos sell homes faster", "Ready to sell? We handle the prep"])
+    return pick([`Thinking of selling${at}?`, "Your home could sell sooner than you think"])
+  }
+  if (kind === "pest") {
+    if (/termite/.test(o)) return pick(["Termites work quietly. Find them first", "Mud tubes on the foundation? Call today", "Find termite damage before it spreads", `A termite inspection${at}, on us`, "Wood-frame home? Get it inspected"])
+    return pick(["Ants in the kitchen? Not for long", "Roaches after dark mean call now", "Stop seeing bugs on the baseboards", `Pest service${at}, every quarter`, "Keep the bugs outside where they belong"])
+  }
+  return []
 }
 
 export function applyOutcomeHeadline(input: {
@@ -559,6 +613,13 @@ export function applyOutcomeHeadline(input: {
     !headlineNeedsAReason(headline, kind) &&
     !WEAK_HEADLINE.test(headline)
   ) return headline
+  // Trade lines that follow this offer, rotated by business, before the small shared role bank.
+  const trade = tradeHeadlineVariants(kind, input.offer, input.brief.businessInfo?.city)
+  if (trade.length > 0) {
+    const roleIndex = input.role === "threat" ? 1 : input.role === "trust" ? 2 : 0
+    const shift = input.brief.businessInfo?.name ? hashText(input.brief.businessInfo.name) : 0
+    return trade[(roleIndex + shift) % trade.length]!
+  }
   if (roleLine) return roleLine
   if (input.brief.audienceAwareness === "past_customer" && headlineIsFeature(headline, input.offer, kind)) {
     const resolved = resolveEmotion(kind, clientFactText(input.brief), input.brief.primaryEmotion)
@@ -680,9 +741,9 @@ export function persuasionVertical(brief: CampaignBrief, vertical?: DesignVertic
   if (vertical === "roofing" || /\broof(?:ing|er)?\b|\bshingle\b/i.test(text)) return "roofing"
   if (vertical === "plumbing" || /\bplumb|drain\b/i.test(text)) return "plumbing"
   if (vertical === "hvac" || /\bhvac\b|\btune-?up\b|\bair condition/i.test(text)) return "hvac"
-  if (vertical === "real_estate") return "real_estate"
+  if (vertical === "real_estate" || /\brealt(?:y|or)\b|\breal estate\b|\blisting\b|\bhome value\b/i.test(text)) return "real_estate"
   if (/\bdental|dentist\b/i.test(text)) return "dental"
-  if (/\bpest\b|\bants\b/i.test(text)) return "pest"
+  if (/\bpest\b|\bants\b|\btermites?\b|\broach(?:es)?\b/i.test(text)) return "pest"
   if (/\blandscap|yard\b/i.test(text)) return "landscaping"
   return "general"
 }

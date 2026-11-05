@@ -1,3 +1,4 @@
+import { roofDamageInHeadline } from "@/lib/campaign-creator/roof-damage-photo"
 import { compliantLine } from "@/lib/research-library/compliance"
 import { composeAddressSideFace } from "@/lib/campaign-creator/address-side-layout"
 import { qrScanLabel } from "@/components/campaign-creator/studio/design-rules"
@@ -43,7 +44,10 @@ export interface RoofingProInput {
   returnAddress?: string | null
 }
 
-const DARK_TYPE = new Set<RoofingProTemplateId>(["roof_full_bleed", "roof_fade_offer", "roof_storm", "roof_seasonal"])
+/** Inches the fade starts lower on a damage-headline front (5x8 layout units). */
+const DAMAGE_SCRIM_DROP = 0.3
+
+export const DARK_TYPE = new Set<RoofingProTemplateId>(["roof_full_bleed", "roof_fade_offer", "roof_storm", "roof_seasonal"])
 
 export function composeRoofingProCard(input: RoofingProInput): RoofingProCard {
   const front = composeRoofingProFace({ ...input, face: "front" })
@@ -89,10 +93,13 @@ function composeFront(
   offerLed: boolean
 ): PostcardFacePlan {
   const trim = trimInches(size)
-  const regions = proFrontRegions(input.templateId).map((region) => ({
-    ...region,
-    ...scaleRect(region, size),
-  }))
+  // A damage headline's photo keeps the damaged roof in the upper part of the frame.
+  // Start the fade a little lower there so it does not sit over the damage.
+  const damageLed = Boolean(roofDamageInHeadline(input.spec.headline))
+  const regions = proFrontRegions(input.templateId).map((region) => {
+    const lowered = damageLed && region.role === "solid-scrim" ? { ...region, y: region.y + DAMAGE_SCRIM_DROP, h: region.h - DAMAGE_SCRIM_DROP } : region
+    return { ...lowered, ...scaleRect(lowered, size) }
+  })
   const copy = resolveCopy(input, offerLed)
   const onDark = DARK_TYPE.has(input.templateId)
   const texts: FittedText[] = []

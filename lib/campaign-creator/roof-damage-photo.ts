@@ -115,7 +115,7 @@ export function roofDamageInHeadline(...texts: Array<string | undefined | null>)
 /** The photograph subject for a damage headline: the damage, plus a roofer fixing it. */
 export function roofDamageScene(kind: RoofDamageKind): string {
   const rule = RULES.find((item) => item.kind === kind)!
-  return `${rule.scene} ${ROOFER} Shot from across the street so the house, the damaged section, and the roofer all sit well inside the frame. Illustrative example of this kind of damage, not a specific customer's house.`
+  return `${rule.scene} ${ROOFER} Low camera from the lawn looking up at the front slope: the damaged section and the roofer sit in the upper half of the frame, between 10% and 45% from the top, large and sharp. The lower half of the frame is the house wall, windows, and lawn, with no damage there, because postcard text covers it. Illustrative example of this kind of damage, not a specific customer's house.`
 }
 
 export const ROOF_DAMAGE_REFUSE =

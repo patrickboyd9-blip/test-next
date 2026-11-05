@@ -40,9 +40,13 @@ export interface AddressSideLayoutInput {
 /** Photo slot id for the soft-fade back. Renderers fill it with the front photo. */
 export const SOFT_FADE_BACK_PHOTO_ID = "back-fade-photo"
 /** Share of the message column kept as photo above the copy. */
-const FADE_PHOTO_SHARE = 0.34
+const FADE_PHOTO_SHARE = 0.42
 /** Bigger type on the fade so it reads like the front. */
-const FADE_BOOST: Partial<Record<FittedText["role"], number>> = { offer: 6, contact: 4, body: 1, proof: 1 }
+const FADE_BOOST: Partial<Record<FittedText["role"], number>> = { offer: 11, contact: 8, body: 1, proof: 2 }
+/** Inches of the fade photo pushed above the top trim, so the back shows more house and roof, less sky. */
+const FADE_SKY_CROP = 0.9
+/** Owner votes: the fade back needs fewer words. Longer proof lines stay off it. */
+const FADE_PROOF_MAX = 70
 
 export function isSoftFadeBack(plan: { photos: Array<{ id: string }> } | null | undefined): boolean {
   return Boolean(plan?.photos.some((slot) => slot.id === SOFT_FADE_BACK_PHOTO_ID))
@@ -74,7 +78,8 @@ export function composeAddressSideFace(input: AddressSideLayoutInput): PostcardF
   const trim = input.size === "6x9" ? { w: 9, h: 6 } : { w: 8, h: 5 }
   const fade = input.style === "soft-fade" && resolved.photo !== "none"
   const ink = fade ? input.palette.fieldInk : input.ink ?? input.palette.ink
-  const offerInk = fade ? input.palette.offerTile : ink
+  // On the fade the offer sits on a yellow tile like the front bar, in the tile ink.
+  const offerInk = fade ? input.palette.offerInk : ink
   const lineInput = { ...input, ink }
   const texts: FittedText[] = []
   const contentBottom = content.y + content.h
@@ -94,12 +99,12 @@ export function composeAddressSideFace(input: AddressSideLayoutInput): PostcardF
   if (mark) lines.push({ text: mark, role: "label", min: 7, max: 8 })
   if (resolved.businessName) lines.push({ text: resolved.businessName, role: "proof", min: 8, max: 13 })
   if (resolved.sections.offer && resolved.offer) lines.push({ text: resolved.offer, role: "offer", min: 11, max: 15 })
-  if (resolved.sections.benefits) {
+  if (resolved.sections.benefits && !fade) {
     for (const benefit of resolved.benefits) {
       lines.push({ text: `• ${benefit}`, role: "body", min: 9, max: 12 })
     }
   }
-  if (resolved.sections.proof && resolved.proof) lines.push({ text: resolved.proof, role: "body", min: 9, max: 12 })
+  if (resolved.sections.proof && resolved.proof && (!fade || resolved.proof.length <= FADE_PROOF_MAX)) lines.push({ text: resolved.proof, role: "body", min: 9, max: 12 })
   if (resolved.sections.license && resolved.license) lines.push({ text: resolved.license, role: "label", min: 8, max: 11 })
   if (resolved.sections.contact && resolved.phone) lines.push({ text: resolved.phone, role: "contact", min: 10, max: 14 })
   if (resolved.sections.contact && resolved.website) lines.push({ text: resolved.website, role: "label", min: 9, max: 11 })
@@ -125,10 +130,12 @@ export function composeAddressSideFace(input: AddressSideLayoutInput): PostcardF
     if (cursor >= floor - 0.16) break
     const rect = { x: content.x, y: cursor, w: content.w, h: Math.min(roomEach, floor - cursor) }
     const boost = fade ? FADE_BOOST[line.role] ?? 0 : 0
+    const tile = fade && line.role === "offer" ? 0.12 : 0
+    if (tile) rect.x = round2(rect.x + tile), rect.w = round2(rect.w - tile * 2), rect.y = round2(rect.y + 0.06)
     const fitted = fitLine(line.text, rect, line.role, { ...lineInput, ink: line.role === "offer" ? offerInk : ink }, line.min, line.max + boost)
     const inkH = Math.max(0.18, Math.min(rect.h, fitted.lines.length * (fitted.fontPt / 72) * 1.15))
     texts.push({ ...fitted, rect: { ...fitted.rect, h: round2(inkH) } })
-    cursor = round2(cursor + inkH + (fade ? 0.07 : 0.04))
+    cursor = round2(cursor + inkH + (fade ? 0.07 : 0.04) + tile)
   }
   // On the fade the copy sits low on the dark field, like the front, leaving the photo above.
   if (fade && texts.length > 0) {
@@ -171,14 +178,19 @@ export function composeAddressSideFace(input: AddressSideLayoutInput): PostcardF
     photos.unshift({
       id: SOFT_FADE_BACK_PHOTO_ID,
       role: "photo",
-      rect: { x: 0, y: 0, w: right, h: trim.h },
+      rect: { x: 0, y: -FADE_SKY_CROP, w: right, h: round2(trim.h + FADE_SKY_CROP) },
       bleed: true,
       treatment: "cover",
-      focal: { x: 0.5, y: 0.35 },
+      focal: { x: 0.5, y: 0.5 },
     })
     const copyTop = texts[messageStart]?.rect.y ?? textTop
     const fadeTop = round2(Math.max(0, copyTop - content.h * 0.3))
     shapes.push({ id: "back-fade", role: "solid-scrim", rect: { x: 0, y: fadeTop, w: right, h: round2(trim.h - fadeTop) }, fill: input.palette.scrim })
+    const offerText = texts.slice(messageStart).find((text) => text.role === "offer")
+    if (offerText) {
+      const r = offerText.rect
+      shapes.push({ id: "back-offer-tile", role: "offer-tile", rect: { x: round2(r.x - 0.12), y: round2(r.y - 0.08), w: round2(Math.min(r.w + 0.24, right - r.x)), h: round2(r.h + 0.16) }, fill: input.palette.offerTile })
+    }
   }
   return {
     templateId: input.templateId ?? "medicare_calm",

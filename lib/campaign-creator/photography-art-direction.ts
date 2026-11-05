@@ -216,19 +216,19 @@ const RESTAURANT: SceneBank = {
 
 const DENTAL: SceneBank = {
   consequence: [
-    "A calm treatment chair in soft daylight, empty, no people, no brand, no clinical gore.",
-    "A window and a waiting chair, quiet and specific. Not a stock smile.",
-    "Folded linen and a rinsing cup, tight and clean. No type.",
+    "A bright, modern dental treatment room with a patient reclined in the chair and a hygienist in scrubs and mask beside them, overhead light on, window daylight. Real dental office, chair and tray clearly visible. No gore, no open mouth close-up.",
+    "A smiling adult patient sitting up in a dental chair after a cleaning, a dentist in a white coat beside them pointing to an x-ray on a screen. Real operatory, soft daylight.",
+    "A dental hygienist in scrubs preparing a clean instrument tray next to a dental chair, the chair and overhead lamp in frame. Calm and specific.",
   ],
   crew: [
-    "Hands in gloves at a tray, only hands and instruments, calm light. No logo and no patient face.",
-    "A clinician seen from the shoulder at a window, face not the subject.",
-    "A hallway of a small practice, one figure walking away, quiet.",
+    "A friendly dentist in a white coat and a hygienist in scrubs in a bright dental operatory, the dental chair and lamp behind them, faces visible, no logo.",
+    "A dentist showing a patient a clear aligner tray in a bright dental office, dental chair behind them, both seen from the side.",
+    "A front desk of a small dental office with a receptionist in scrubs greeting a patient, dental posters blank, daylight.",
   ],
   neighborhood: [
-    "A small practice storefront on a local street, daylight, no readable sign.",
-    "A shaded entry and a bench. Recognition of a kind of place, not a fake office.",
-    "Street trees and a modest commercial front. No logo.",
+    "The bright waiting room of a modern dental office, a dental chair visible through an open doorway, daylight, no readable sign.",
+    "A small dental practice exterior on a local street with a glass front, a dental chair visible inside, daylight, no readable sign.",
+    "A hygienist in scrubs greeting a patient at the door of a dental office, a dental chair in the room behind.",
   ],
 }
 
@@ -354,6 +354,7 @@ const INDUSTRY_PHOTO: Record<string, string> = {
   sauna: "sauna",
   "outdoor-living": "outdoor-living",
   "consumer-products": "consumer-products",
+  "real-estate-agents": "real-estate-agents",
 }
 
 const BANKS: Record<string, SceneBank> = {
@@ -367,6 +368,24 @@ const BANKS: Record<string, SceneBank> = {
   "senior-living": tradeScene("A bright senior-living common room or garden walk, capable residents, no hospital bed and no Medicare card."),
   sauna: tradeScene("A wooden sauna interior, benches and warm light, no gym floor and no pool party."),
   "outdoor-living": tradeScene("A deck, patio, pergola, or paver outdoor kitchen at a home, daylight, not a lawn mower as the subject."),
+  // Fair Housing: the house is the subject. No families, couples, or people standing in for a buyer.
+  "real-estate-agents": {
+    consequence: [
+      "A well-kept single-family home exterior in warm daylight, a blank real-estate yard sign on a post at the lawn edge, the house is the subject, no people, no readable text.",
+      "A bright, freshly staged living room with daylight through large windows, no people, no readable text.",
+      "A tidy front porch and entry of a house for sale, a blank yard sign at the walk, golden hour, no people.",
+    ],
+    crew: [
+      "A real-estate photographer's tripod and camera on the front lawn pointed at a well-kept house, the house fills the frame, no faces.",
+      "A blank real-estate yard sign being set at the lawn edge of a well-kept house, only hands and the sign post, the house behind.",
+      "An open front door of a staged home with a blank open-house sign on the walk, no people.",
+    ],
+    neighborhood: [
+      "A quiet residential street of well-kept homes in daylight, one blank yard sign, no people, not an address-level photo.",
+      "A well-kept single-family home exterior in warm daylight, the house is the subject, no people.",
+      "Two neighboring homes with fresh landscaping in soft evening light, one blank yard sign, no people.",
+    ],
+  },
   "consumer-products": tradeScene("Apparel and gear — shoes, a jacket, boots, or hiking clothes — on a clean surface, no store-opening balloon arch."),
   medicare: MEDICARE,
   final_expense: FINAL_EXPENSE,
