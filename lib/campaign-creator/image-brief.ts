@@ -204,8 +204,10 @@ export function toImageBrief(
   // The offer decides the subject outside roofing (water heater, house exterior, operatory, ...).
   const offerSubject = brief.artDirection.trade !== "roofing" ? offerPhotoSubject(brief.artDirection.trade, material) : null
   if (offerSubject) {
-    brief.artDirection = { ...brief.artDirection, subject: offerSubject }
+    const nobody = /\bno people\b/i.test(offerSubject) ? " No people, no hands, no workers, no tools, no ladders, no drills in frame." : ""
+    brief.artDirection = { ...brief.artDirection, subject: offerSubject, refuse: `${brief.artDirection.refuse}${nobody}` }
     brief.visualDirection = offerSubject
+    if (nobody && typeof brief.lookBlock === "string") brief.lookBlock = brief.lookBlock.replace(/\s*Wardrobe:[^.]*\./, " No people in frame.")
   }
 
   const researchNote = context.researchPhotoNote?.trim()
