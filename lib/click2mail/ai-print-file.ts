@@ -12,6 +12,7 @@ import { composeGridCard } from "@/lib/design-intelligence/grid-composer"
 import { isDesignRationale } from "@/lib/design-intelligence/rationale"
 import { isPostcardTemplate, isVerticalPalette } from "@/lib/postcard-layouts/ids"
 
+import { isSoftFadeBack } from "@/lib/campaign-creator/address-side-layout"
 import { loadFinalPostcardPhoto } from "./load-print-photo"
 
 /**
@@ -55,12 +56,13 @@ export async function renderAiPrintFile(campaign: Campaign): Promise<{
       })
     : null
   const design = selectPrintDesign({ rationale, studio, templateId })
+  const backPhoto = backImage ?? (design.source === "studio" && isSoftFadeBack(design.card.back) ? photo ?? undefined : undefined)
   const rendered = design.source === "studio"
     ? await renderStudioDesignPdf({
         card: design.card,
         copy,
         image: photo ?? undefined,
-        backImage,
+        backImage: backPhoto,
       })
     : isPostcardTemplate(templateId)
     ? await renderTemplatedPostcardPdf({

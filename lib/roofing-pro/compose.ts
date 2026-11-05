@@ -169,8 +169,11 @@ function composeBackRaw(
   pairing: PostcardFacePlan["pairing"],
   palette: VerticalPalette
 ): PostcardFacePlan {
-  if (input.spec.addressSide) {
+  const fade = DARK_TYPE.has(input.templateId)
+  if (input.spec.addressSide || fade) {
     return composeAddressSideFace({
+      style: fade ? "soft-fade" : "plain",
+      proof: fade ? resolveCopy(input, ROOFING_PRO_META[input.templateId].offerLed).body || undefined : undefined,
       size,
       pairing,
       palette,

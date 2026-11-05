@@ -2,6 +2,7 @@ import { cutoutSubjectLine, cutoutSubjectRequested } from "@/lib/design-intellig
 import { photoFits } from "@/lib/research-library/steer"
 
 import { buildCampaignLookBlock } from "./campaign-look"
+import { ROOF_DAMAGE_REFUSE, roofDamageInHeadline, roofDamagePhotoMismatch, roofDamageScene } from "./roof-damage-photo"
 import { roofSlotForTemplate, ROOF_SLOT_BRIEFS, ROOF_SLOT_NEGATIVE_SPACE } from "./roof-photo-slots"
 import {
   buildPhotographyArtDirection,
@@ -76,6 +77,14 @@ export interface ImageBrief {
    * Not part of the cache identity. Not shown to the customer.
    */
   correction?: string
+  /** Damage the headline names; the photograph must show it. */
+  damage?: import("./roof-damage-photo").RoofDamageKind
+}
+
+/** Null when the brief's photo matches its headline; otherwise the problem. */
+export function imageBriefDamageMismatch(spec: Pick<CreativeSpec, "headline">, brief: ImageBrief | null): string | null {
+  if (!brief || brief.artDirection.trade !== "roofing") return null
+  return roofDamagePhotoMismatch(spec.headline, `${brief.artDirection.subject} ${brief.visualDirection}`)
 }
 
 function isImageBriefRole(
@@ -162,6 +171,21 @@ export function toImageBrief(
     if (roofSlot === "before") {
       brief.doNotInvent = brief.doNotInvent.filter((item) => item !== "invented property damage")
     }
+  }
+
+  // A roofing headline that names damage gets a photo of that damage being fixed.
+  // The before/after "after" frame stays a finished roof.
+  const damage = brief.artDirection.trade === "roofing" && roofSlot !== "after" ? roofDamageInHeadline(spec.headline) : null
+  if (damage) {
+    const subject = roofDamageScene(damage)
+    brief.artDirection = {
+      ...brief.artDirection,
+      subject,
+      refuse: `${brief.artDirection.refuse} ${ROOF_DAMAGE_REFUSE}`,
+    }
+    brief.visualDirection = subject
+    brief.doNotInvent = brief.doNotInvent.filter((item) => item !== "invented property damage")
+    brief.damage = damage
   }
 
   const researchNote = context.researchPhotoNote?.trim()

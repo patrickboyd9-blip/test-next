@@ -767,9 +767,11 @@ function paintBack(
   ink: string,
   businessName: string,
   phone: string,
-  website: string
+  website: string,
+  style: "plain" | "soft-fade" = "plain"
 ): PostcardFacePlan {
   return composeBack({
+    style,
     trim: input.rationale.format.trim,
     geometry: input.rationale.format.trim === "6x9" ? buildPostcard6x9PrintSpec() : buildPostcard5x8PrintSpec(),
     palette,
@@ -806,9 +808,11 @@ function composeBackRaw(input: {
   license?: string
   returnAddress?: string
   qrDestination?: string
+  style?: "plain" | "soft-fade"
 }): PostcardFacePlan {
-  if (input.addressSide) {
+  if (input.addressSide || input.style === "soft-fade") {
     return composeAddressSideFace({
+      style: input.style,
       size: input.trim,
       pairing: input.pairing,
       palette: input.palette,
@@ -954,7 +958,17 @@ function finishCard(card: GridCard, input: GridComposeInput): GridCard {
       }),
     }
   }
+  if (isFadeFront(front)) {
+    const back = paintBack(input, front.palette, front.pairing, front.palette.fieldInk, clean(input.businessName) || "Local crew", clean(input.spec.phone), displayHost(input.spec.website || input.spec.qrDestination || ""), "soft-fade")
+    return { ...card, front, back: { ...back, templateId: card.back.templateId } }
+  }
   return { ...card, front }
+}
+
+/** A front with type on a photo fade gets the matching soft-fade back. */
+export function isFadeFront(front: PostcardFacePlan): boolean {
+  return front.photos.some((slot) => slot.treatment !== "cutout" && slot.treatment !== "thumbnail") &&
+    front.shapes.some((shape) => shape.role === "scrim" || shape.role === "solid-scrim")
 }
 
 export function textInsideSafe(rect: InchRect, size: TrimSize): boolean {

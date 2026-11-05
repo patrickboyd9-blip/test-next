@@ -1,0 +1,55 @@
+import assert from "node:assert/strict"
+import { test } from "node:test"
+
+import { composeRoofingProCard } from "@/lib/roofing-pro/compose"
+import { addressSideContentRect } from "@/lib/print-spec/address-side-content"
+import { buildPostcard5x8PrintSpec } from "@/lib/print-spec/postcard-5x8-print-spec"
+import { isSoftFadeBack } from "./address-side-layout"
+import { roofDamageInHeadline, roofDamagePhotoMismatch, roofDamageScene } from "./roof-damage-photo"
+
+test("damage headlines are detected", () => {
+  assert.equal(roofDamageInHeadline("Curling Shingles Get Worse Fast"), "curling")
+  assert.equal(roofDamageInHeadline("Hail hit Oklahoma City hard."), "hail")
+  assert.equal(roofDamageInHeadline("Storm season is coming"), "storm")
+  assert.equal(roofDamageInHeadline("Moss is eating your roof"), "moss")
+  assert.equal(roofDamageInHeadline("Real savings on a new roof."), null)
+  assert.equal(roofDamageInHeadline("A free look, no pressure, no pitch."), null)
+})
+
+test("the damage scene passes the check and a new-roof prompt fails it", () => {
+  assert.equal(roofDamagePhotoMismatch("Curling Shingles Get Worse Fast", roofDamageScene("curling")), null)
+  assert.match(
+    roofDamagePhotoMismatch("Curling Shingles Get Worse Fast", "A house with a clean, freshly installed dark charcoal architectural shingle roof") ?? "",
+    /curling/
+  )
+  assert.equal(roofDamagePhotoMismatch("Real savings on a new roof.", "freshly installed roof"), null)
+})
+
+test("fade roofing fronts get a soft-fade back that stays out of the address zone", () => {
+  const card = composeRoofingProCard({
+    templateId: "roof_full_bleed",
+    size: "5x8",
+    spec: { headline: "Real savings on a new roof.", offer: "$500 off a full roof replacement", phone: "(512) 555-0190", website: "example.com" },
+    businessName: "Hernandez Roofing",
+    license: "TX 123",
+  })
+  assert.equal(isSoftFadeBack(card.back), true)
+  const spec = buildPostcard5x8PrintSpec()
+  const content = addressSideContentRect(spec)
+  const right = content.xInches - spec.bleedInchesPerSide + content.widthInches
+  for (const slot of card.back.photos) assert.ok(slot.rect.x + slot.rect.w <= right + 0.01)
+  for (const shape of card.back.shapes.filter((item) => item.role !== "paper")) assert.ok(shape.rect.x + shape.rect.w <= right + 0.01)
+  for (const text of card.back.texts) assert.ok(text.rect.x + text.rect.w <= right + 0.01)
+  assert.ok(card.back.texts.some((text) => text.role === "offer"))
+  assert.ok(card.back.texts.some((text) => text.role === "contact"))
+})
+
+test("bordered roofing fronts keep the plain back", () => {
+  const card = composeRoofingProCard({
+    templateId: "roof_coupon",
+    size: "5x8",
+    spec: { headline: "Real savings.", offer: "$500 off", phone: "(512) 555-0190", website: "example.com" },
+    businessName: "Hernandez Roofing",
+  })
+  assert.equal(isSoftFadeBack(card.back), false)
+})

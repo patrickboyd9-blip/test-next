@@ -28,7 +28,7 @@ import {
   addressSideQrPayload,
   resolveAddressSide,
 } from "@/lib/campaign-creator/address-side"
-import { composeAddressSideFace } from "@/lib/campaign-creator/address-side-layout"
+import { composeAddressSideFace, isSoftFadeBack } from "@/lib/campaign-creator/address-side-layout"
 import { composeGridCard } from "@/lib/design-intelligence/grid-composer"
 import { isDesignRationale } from "@/lib/design-intelligence/rationale"
 import { composeRoofingProCard } from "@/lib/roofing-pro/compose"
@@ -193,7 +193,9 @@ export function PostcardPreview({
         qrDestination: contact.qrPayload ?? undefined,
       })
     : null
-  const backPhoto = backResolved ? addressSidePreviewSrc(backResolved, sources[0] ?? imagery.src) : null
+  const backPhoto = backResolved
+    ? addressSidePreviewSrc(backResolved, sources[0] ?? imagery.src) ?? (isSoftFadeBack(backPlan) ? sources[0] ?? imagery.src : null)
+    : null
   const backContact = {
     ...contact,
     qrPayload: isAddressSide ? addressSideQrPayload(sharedSpec, contact.qrPayload) ?? null : contact.qrPayload,
