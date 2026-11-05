@@ -6,6 +6,7 @@ import pb_auto from "./auto.json"
 import pb_bakery from "./bakery.json"
 import pb_churches_community from "./churches-community.json"
 import pb_cleaning_pressure_washing from "./cleaning-pressure-washing.json"
+import pb_consumer_products from "./consumer-products.json"
 import pb_dental from "./dental.json"
 import pb_garage_doors from "./garage-doors.json"
 import pb_gyms_fitness from "./gyms-fitness.json"
@@ -25,6 +26,7 @@ import pb_medicare from "./medicare.json"
 import pb_mortgage_financial from "./mortgage-financial.json"
 import pb_moving_storage from "./moving-storage.json"
 import pb_optometry from "./optometry.json"
+import pb_outdoor_living from "./outdoor-living.json"
 import pb_pest_control from "./pest-control.json"
 import pb_plumbing from "./plumbing.json"
 import pb_precious_metals from "./precious-metals.json"
@@ -32,6 +34,8 @@ import pb_real_estate_agents from "./real-estate-agents.json"
 import pb_restaurants_food from "./restaurants-food.json"
 import pb_retail_grand_openings from "./retail-grand-openings.json"
 import pb_roofing from "./roofing.json"
+import pb_sauna from "./sauna.json"
+import pb_senior_living from "./senior-living.json"
 import pb_solar from "./solar.json"
 import pb_tutoring_childcare from "./tutoring-childcare.json"
 import pb_vet_pet from "./vet-pet.json"
@@ -43,6 +47,7 @@ export const PLAYBOOKS: Record<string, Playbook> = {
   "bakery": pb_bakery as unknown as Playbook,
   "churches-community": pb_churches_community as unknown as Playbook,
   "cleaning-pressure-washing": pb_cleaning_pressure_washing as unknown as Playbook,
+  "consumer-products": pb_consumer_products as unknown as Playbook,
   "dental": pb_dental as unknown as Playbook,
   "garage-doors": pb_garage_doors as unknown as Playbook,
   "gyms-fitness": pb_gyms_fitness as unknown as Playbook,
@@ -62,6 +67,7 @@ export const PLAYBOOKS: Record<string, Playbook> = {
   "mortgage-financial": pb_mortgage_financial as unknown as Playbook,
   "moving-storage": pb_moving_storage as unknown as Playbook,
   "optometry": pb_optometry as unknown as Playbook,
+  "outdoor-living": pb_outdoor_living as unknown as Playbook,
   "pest-control": pb_pest_control as unknown as Playbook,
   "plumbing": pb_plumbing as unknown as Playbook,
   "precious-metals": pb_precious_metals as unknown as Playbook,
@@ -69,6 +75,8 @@ export const PLAYBOOKS: Record<string, Playbook> = {
   "restaurants-food": pb_restaurants_food as unknown as Playbook,
   "retail-grand-openings": pb_retail_grand_openings as unknown as Playbook,
   "roofing": pb_roofing as unknown as Playbook,
+  "sauna": pb_sauna as unknown as Playbook,
+  "senior-living": pb_senior_living as unknown as Playbook,
   "solar": pb_solar as unknown as Playbook,
   "tutoring-childcare": pb_tutoring_childcare as unknown as Playbook,
   "vet-pet": pb_vet_pet as unknown as Playbook,
