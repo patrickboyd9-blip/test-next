@@ -7,6 +7,8 @@
 
 import { headlinePasses, sameHeadline } from "@/lib/research-library/guard"
 import type { CampaignBrief } from "@/lib/campaign-creator/types"
+import { hasBlockedClaim } from "@/lib/research-library/compliance"
+import { industryForBrief } from "@/lib/research-library/industry"
 
 import { headlineCopiesCampaign, lessonFor, textHasAgencyResult, type DirectionRole } from "./ad-psych/lessons-data"
 import { attorneyWarnings, isAttorneyMatter } from "./attorney-compliance"
@@ -988,4 +990,12 @@ export function alignStormHeadlines<T extends { headline?: string; visualDirecti
     used.add(next.toLowerCase())
     d.spec = { ...spec, headline: next }
   }
+}
+
+/** A compliant trade headline to replace one that tripped a playbook compliance flag. */
+export function tradeHeadlineFallback(brief: CampaignBrief, offer: string): string {
+  const kind = persuasionVertical(brief)
+  const trade = industryForBrief(brief)
+  const lines = tradeHeadlineVariants(kind, offer, brief.businessInfo?.city)
+  return lines.find((line) => !hasBlockedClaim(line, trade)) ?? "Real savings from a local pro"
 }

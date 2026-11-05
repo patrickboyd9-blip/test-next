@@ -20,7 +20,10 @@ import { citationsForDirection, selectReferences, type DirectionCitation } from 
 import { checkSimilarity, type SimilarityResult } from "./similarity"
 import { requestModelRationale, requestVisionCritique, type ModelUsage } from "./model"
 import { attorneyAdMark } from "./attorney-compliance"
-import { compliantSpec } from "@/lib/research-library/compliance"
+import { compliantSpec, compliantSpecForIndustry, hasBlockedClaim } from "@/lib/research-library/compliance"
+import { industryForBrief } from "@/lib/research-library/industry"
+import { isFillerSubline, offerSubline } from "./trade-subline"
+import { tradeHeadlineFallback } from "./persuasion"
 import { alignStormHeadlines } from "./persuasion"
 import { normalizeQuestion } from "@/lib/research-library/compliance"
 import { applyOutcomeHeadline, clientFactText, distinctRoofingHeadlines, persuasionVertical } from "./persuasion"
@@ -138,6 +141,18 @@ export function repairCard(input: {
     }
   }
   spec = compliantSpec(spec, `${input.brief.offer ?? ""} ${input.brief.goal ?? ""}`)
+  {
+    // Playbook compliance: drop blocked claims for this trade; replace a blocked headline or a filler subline.
+    const trade = industryForBrief(input.brief)
+    const headlineBlocked = hasBlockedClaim(spec.headline ?? "", trade)
+    spec = compliantSpecForIndustry(spec, trade)
+    if (headlineBlocked) {
+      spec = { ...spec, headline: tradeHeadlineFallback(input.brief, spec.offer ?? input.brief.offer ?? "") }
+    }
+    if (isFillerSubline(spec.subheadline)) {
+      spec = { ...spec, subheadline: offerSubline({ brief: input.brief, offer: spec.offer, headline: spec.headline }) }
+    }
+  }
   const edits: string[] = []
   let best: DirectedCard | null = null
   const rounds = Math.max(1, cap)

@@ -1,0 +1,247 @@
+{
+  "schema_version": "1.1",
+  "slug": "gyms-fitness",
+  "industry": "Gyms, fitness studios, boutique fitness, martial arts/kids activity programs",
+  "last_updated": "2026-11-02",
+  "words_and_claims_to_avoid": [
+    "'Results guaranteed or your money back' (GOLD-gyms-fitness-054) unless the guarantee's conditions are clearly stated (16 CFR 239) and the results claim is substantiated",
+    "Weight-loss numbers ('Lose 20 lbs in 30 days') or before/afters with 'results not typical' disclaimers; disclose generally expected results (16 CFR 255.2)",
+    "'Founding member rate for life' / 'lifetime membership' (GOLD-gyms-fitness-042/043) in California, where lifetime health-studio contracts are prohibited (Civ. Code 1812.80+); elsewhere state the real terms ('locked while your membership stays active')",
+    "'Free' trials or '$1 join' that silently roll into paid memberships; 'cancel anytime' unless cancellation is genuinely simple",
+    "'Up to 50% off' (GOLD-gyms-fitness-025) unless a meaningful share of items/plans actually get the maximum discount (16 CFR 233)",
+    "Contest/prize promotions ('Biggest Winner', GOLD-gyms-fitness-064) without official rules; with purchase requirement they may become illegal lotteries",
+    "Disease or medical claims (e.g., 'reverse diabetes')"
+  ],
+  "compliance_notes": [
+    "Negative options (verified): FTC's 2024 click-to-cancel amendments were vacated by the 8th Circuit (July 2025). The pre-2024 Negative Option Rule is back (effective 2/12/2026) and covers only prenotification plans. FTC issued a new ANPRM on 3/13/2026 (comments closed 4/13/2026); no new rule yet. ROSCA still governs online sign-ups (clear terms, express consent, simple cancellation).",
+    "FTC v. LA Fitness (filed Aug 2025; amended Jan 2026) alleges cancellation made unreasonably hard; LA Fitness argues ROSCA doesn't apply to in-person gyms. Unresolved as of 2026-11-02 (verify before relying).",
+    "California health-studio law (verified via DCA): Civ. Code 1812.85 right to cancel by midnight of the 5th business day with refund within 10 days; contract terms max 3 years; lifetime contracts prohibited. California ARL (B&P 17602, amended by AB 2863 for contracts on/after 7/1/2025): express consent, clear disclosure, online cancellation where sign-up was online, notices before price changes and free-trial conversions.",
+    "Many other states have health-club/'health spa' statutes (cooling-off periods, bonding, term limits); not verified per state tonight.",
+    "Endorsements and results (16 CFR 255, 2023 Guides): before/after and member testimonials imply typical results; 'results not typical' won't cure; disclose what members generally achieve.",
+    "Guarantees (16 CFR 239): state conditions and how to claim; 'money-back' must be honored as stated.",
+    "Sweepstakes/contests by mail (39 USC 3001(k)): 'no purchase necessary' and 'a purchase will not improve your chances' clearly and conspicuously, plus rules, odds and prizes. Skill contests also need clear rules.",
+    "Kids' programs: children's photos only with parent written consent; no data collection from children under 13 online without verifiable parental consent (COPPA) for QR landing pages."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear, joy, pride, relief are all options; the client chooses.",
+    "Only laws/compliance are hard limits.",
+    "Every angle carries a sell-the-outcome line.",
+    "Unverified (agency-only) results are labeled; never quote them as fact on a card."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "free_trial_or_low_join",
+      "primary_emotion": "hope / anticipation",
+      "why": "Lowers the first step at a fresh-start moment; buyers overestimate future use, so the trial must convert on experience, not fine print.",
+      "headline_offer_patterns": [
+        "'First week free'",
+        "'$1 to join' with full monthly price and terms",
+        "'Start [Monday/Jan 1]'"
+      ],
+      "reinforcing_photo": "Real members mid-class, energetic",
+      "what_backfires": "Hidden auto-renew; tiny-type monthly price; 'cancel anytime' that isn't easy",
+      "combos": [
+        {
+          "headline": "New month. New you starts Monday.",
+          "offer": "First week free (no auto-charge unless you choose a plan)",
+          "photo_scene": "Sunrise class in the real studio",
+          "sell_the_outcome_line": "Feel stronger every week, starting with this one."
+        },
+        {
+          "headline": "$1 gets you in the door.",
+          "offer": "$1 enrollment; membership $[X]/mo; [term/cancel terms]",
+          "photo_scene": "Front-desk welcome",
+          "sell_the_outcome_line": "Your best shape, without the big upfront cost."
+        },
+        {
+          "headline": "Try us free for 7 days.",
+          "offer": "7-day pass, no strings",
+          "photo_scene": "Friends laughing between sets",
+          "sell_the_outcome_line": "Find the workout you actually look forward to."
+        }
+      ],
+      "compliance_flags": [
+        "ROSCA online sign-ups; CA ARL/AB 2863 free-trial conversion notices; CA 1812.85 cancellation rights.",
+        "Pre-2024 FTC Negative Option Rule restored (prenotification plans); click-to-cancel vacated, new rulemaking pending."
+      ],
+      "evidence": [
+        "SRC-FRESHSTART",
+        "SRC-DELLAVIGNA-2006",
+        "GOLD-gyms-fitness-030/063"
+      ],
+      "evidence_strength": "strong principle; card-level directional"
+    },
+    {
+      "offer_type": "founding_or_grand_opening_presale",
+      "primary_emotion": "anticipation / exclusivity",
+      "why": "New gyms sell presales with a locked rate; scarcity and status motivate early joiners.",
+      "headline_offer_patterns": [
+        "'Founding member rate, locked while you stay active'",
+        "'Only [N] founding spots'"
+      ],
+      "reinforcing_photo": "Construction/preview with real coaches; renderings labeled as such",
+      "what_backfires": "'For life' in California; fake countdowns; renderings presented as the finished gym",
+      "combos": [
+        {
+          "headline": "Be a founding member.",
+          "offer": "Founding rate $[X]/mo locked while your membership stays active; [N] spots",
+          "photo_scene": "Coach in the half-finished space, hard hat",
+          "sell_the_outcome_line": "Be part of it from day one."
+        },
+        {
+          "headline": "Grand re-opening: $5 down.",
+          "offer": "$5 down, $[X]/mo (all terms printed)",
+          "photo_scene": "Bright renovated floor",
+          "sell_the_outcome_line": "A fresh gym for a fresh start."
+        },
+        {
+          "headline": "The first [N] get in for less.",
+          "offer": "Presale rate until [date] or [N] members",
+          "photo_scene": "Crowd at an opening event",
+          "sell_the_outcome_line": "Bragging rights, and a better rate."
+        }
+      ],
+      "compliance_flags": [
+        "CA prohibits lifetime health-studio contracts; avoid 'for life' anywhere (16 CFR 239: whose life, what conditions).",
+        "Scarcity must be real ([N] spots actually limited)."
+      ],
+      "evidence": [
+        "GOLD-gyms-fitness-037/042/043",
+        "Worchel et al. 1975 scarcity"
+      ],
+      "evidence_strength": "moderate principle"
+    },
+    {
+      "offer_type": "challenge_results_program",
+      "primary_emotion": "hope / pride (with fear of staying stuck)",
+      "why": "Time-boxed challenges create commitment and a fresh start; results claims are the legal hot spot.",
+      "headline_offer_patterns": [
+        "'30-day challenge starts [date]'",
+        "'Money back if you complete every session and don't [measurable, substantiated result]'"
+      ],
+      "reinforcing_photo": "Group finishing a workout, arms up",
+      "what_backfires": "Dramatic before/afters as typical; unsubstantiated pounds-lost claims",
+      "combos": [
+        {
+          "headline": "30 days. A stronger you.",
+          "offer": "30-day challenge: $[X], starts [date]",
+          "photo_scene": "Group celebrating at the finish",
+          "sell_the_outcome_line": "Feel proud of what your body can do."
+        },
+        {
+          "headline": "Your fresh start begins [date].",
+          "offer": "Challenge + nutrition coaching $[X]",
+          "photo_scene": "Coach high-fiving a member",
+          "sell_the_outcome_line": "More energy, better sleep, real confidence."
+        },
+        {
+          "headline": "Commit to 6 weeks. We'll commit to you.",
+          "offer": "Guarantee: [clear conditions and remedy]",
+          "photo_scene": "Coach and member planning",
+          "sell_the_outcome_line": "A plan you finish, and results you can see."
+        }
+      ],
+      "compliance_flags": [
+        "Before/after: disclose generally expected results (16 CFR 255.2).",
+        "Guarantees: conditions and remedy clearly stated (16 CFR 239).",
+        "Contests with prizes: official rules; 39 USC 3001(k) if a sweepstakes element."
+      ],
+      "evidence": [
+        "SRC-FRESHSTART",
+        "GOLD-gyms-fitness-005/054/064"
+      ],
+      "evidence_strength": "moderate principle"
+    },
+    {
+      "offer_type": "kids_program_trial",
+      "primary_emotion": "love / pride (parent)",
+      "why": "Parents buy confidence and character; a free trial class removes risk.",
+      "headline_offer_patterns": [
+        "'Free trial class'",
+        "'Confidence, focus, friends'"
+      ],
+      "reinforcing_photo": "Proud child mid-move with instructor (parent consent)",
+      "what_backfires": "Fear-of-bullying scare with no action; generic stock kids",
+      "combos": [
+        {
+          "headline": "Watch your child's confidence grow.",
+          "offer": "Free trial class + free uniform with enrollment",
+          "photo_scene": "Child bowing to instructor",
+          "sell_the_outcome_line": "A kid who walks taller at school."
+        },
+        {
+          "headline": "Summer camp that wears them out (in a good way).",
+          "offer": "Early-bird camp rate until [date]",
+          "photo_scene": "Kids laughing on mats",
+          "sell_the_outcome_line": "Happy, tired kids, and a calm evening for you."
+        },
+        {
+          "headline": "Focus. Respect. Fun.",
+          "offer": "2 weeks for $[X]",
+          "photo_scene": "Small group of kids high-fiving",
+          "sell_the_outcome_line": "Skills they'll use for life."
+        }
+      ],
+      "compliance_flags": [
+        "Children's images need parent written consent; COPPA for online sign-ups from under-13s.",
+        "Early-bird deadlines must be real."
+      ],
+      "evidence": [
+        "GOLD-gyms-fitness-004/008/048-051/055/068 (vendor-reported results, agency-only unverified)"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "referral_bring_a_friend",
+      "primary_emotion": "belonging / fun",
+      "why": "Social commitment and liking; friends make attendance stickier (principle, not verified for gyms).",
+      "headline_offer_patterns": [
+        "'Bring a friend free'",
+        "'You both get $[X] off'"
+      ],
+      "reinforcing_photo": "Two friends training together",
+      "what_backfires": "Cash bounties that feel spammy",
+      "combos": [
+        {
+          "headline": "Workouts are better with friends.",
+          "offer": "Bring a friend free all month",
+          "photo_scene": "Two friends laughing on rowers",
+          "sell_the_outcome_line": "Friends who keep you coming back."
+        },
+        {
+          "headline": "Your friend's first month is on us.",
+          "offer": "Referral: both get $[X] off",
+          "photo_scene": "Friends in class",
+          "sell_the_outcome_line": "Get fit together, stay fit together."
+        },
+        {
+          "headline": "Squad goals.",
+          "offer": "Free group-class week for you and 2 friends",
+          "photo_scene": "Small group stretching",
+          "sell_the_outcome_line": "More fun, more consistency."
+        }
+      ],
+      "compliance_flags": [
+        "If a 'free' month converts to paid: ROSCA/ARL consent and disclosures."
+      ],
+      "evidence": [
+        "GOLD-gyms-fitness-006"
+      ],
+      "evidence_strength": "thin"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "Gold set 'founding member for life' (GOLD-gyms-fitness-042/043) vs California's ban on lifetime health-studio contracts",
+      "resolution": "Law wins: 'locked while your membership stays active' everywhere, never lifetime contracts in CA."
+    },
+    {
+      "conflict": "Before/after transformation cards (GOLD-gyms-fitness-054) vs FTC 255 typical-results rule",
+      "resolution": "Compliance wins: allowed only with generally expected results disclosed; outcome-feeling photos are the default."
+    },
+    {
+      "conflict": "MMR-011 premium restraint (Equinox) vs discount-heavy mass gym cards",
+      "resolution": "Not a rule conflict: match the client's positioning. Patrick's votes will settle tone defaults when they exist."
+    }
+  ]
+}

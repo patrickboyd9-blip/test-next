@@ -1,0 +1,352 @@
+{
+  "schema_version": "1.1",
+  "slug": "auto",
+  "industry": "Automotive: repair/service shops, collision/hail/glass, detailing, and dealerships (sales + service)",
+  "last_updated": "2026-10-30",
+  "words_and_claims_to_avoid": [
+    "Dealer: advertised price that excludes mandatory dealer fees, add-ons, reconditioning or 'market adjustment'; rebates the buyer can't get; prices requiring dealer financing or a down payment not stated; vehicles you don't have (FTC Sec. 5; Leader Automotive; March 2026 warning letters; CA SB 766; CA VEH 11713.1).",
+    "'$500 OFF any vehicle on the lot' (gold 020) without conditions stated clearly next to it; '$X below MSRP' without the MSRP basis.",
+    "Credit trigger terms ('$0 down', '$299/month', '72 months', finance charge) without the Reg Z disclosures: down payment, repayment terms, APR (1026.24(d)).",
+    "Lease payments or 'due at signing' without Reg M disclosures: it's a lease, total due at signing, number/amount/timing of payments, security deposit, end-of-term charges (1013.7).",
+    "Bait pricing: advertising a car or service you don't intend to sell at that price (16 CFR 238).",
+    "'We'll pay your deductible', 'deductible assistance', 'save $500 off your deductible' (gold 016/029) - illegal in Texas for auto claims (Class B misdemeanor, Bus. & Com. Code via HB 1656, 2023) and flagged as possible fraud by Colorado DOI (2025).",
+    "'Dealer-only service keeps your warranty' style claims (false under Magnuson-Moss) - and the reverse overclaim 'never any warranty issues' for a shop.",
+    "Recall- or DMV-styled 'NOTICE' mail from a private shop (39 USC 3001(h); state law) - the NHTSA letterhead lift (MMR-683) is not available to private businesses.",
+    "'Free' inspections that require a purchase or come with undisclosed fees (16 CFR 251); low price ads without likely extra parts/labor disclosed (CA BAR rules).",
+    "Unaudited vendor ROI as fact."
+  ],
+  "compliance_notes": [
+    "FTC CARS Rule: vacated by the 5th Circuit on Jan 27 2025 (NADA v. FTC) on procedural grounds. FTC Section 5 still applies: Leader Automotive/AutoCanada $20M (stipulated order Jan 2025) for bait advertising and junk fees; March 2026 warning letters to 97 dealer groups said advertised prices must be the total price including mandatory dealer fees (excluding government charges), and flagged unavailable rebates, required down payments, financing conditions, undisclosed add-ons and nonexistent vehicles.",
+    "California CARS Act (SB 766), operative Oct 1 2026: total price clearly disclosed in any ad for a specific vehicle or financing term and in the first written communication; 2-year record retention including ads.",
+    "California VEH 11713.1: specific-vehicle ads identify model, year and license number or VIN portion (stock number alone not enough); price includes all costs except taxes, registration, tire fee, emission charges, finance charges and document/electronic registration fees, with the statutory 'plus government fees and taxes...' language; doc fees can't be called government fees.",
+    "Reg Z 12 CFR 1026.24 for credit ads (trigger terms -> down payment, terms, APR). Reg M 12 CFR 1013.7 for lease ads.",
+    "Auto repair: California BAR requires firm name, ARD registration number and phone in internet advertising since Oct 1 2025; price ads must disclose likely additional parts/labor. Other states: check repair-shop registration and estimate laws.",
+    "Deductible waivers/rebates: Texas HB 1656 (eff. Sept 1 2023) extended the ban to auto insurance; Colorado DOI bulletin (Oct 2025) warns it may be fraud. Check every state before any deductible language.",
+    "Magnuson-Moss: manufacturers can't condition warranty on dealer service (unless free); honest 'warranty-safe' messaging is lawful.",
+    "Mail lists: DMV-derived data requires express consent for marketing (DPPA 18 USC 2721(b)(12)); use customer DMS data and lawful compiled lists.",
+    "Testimonials/reviews genuine and typical (16 CFR 255); FTC also cited bogus reviews in Leader Automotive."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear, joy, pride, status, relief, nostalgia are all options; the client chooses.",
+    "Only laws/compliance are hard limits.",
+    "Every angle and combo carries a sell-the-outcome line.",
+    "Unverified (agency/vendor-only) results are labeled; never quote them as fact on a card.",
+    "No age/demographic angle unless a cited source supports it for this industry; even then, check Fair Housing / ECOA before using it in housing or credit."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "free_or_low_cost_inspection",
+      "primary_emotion": "fear -> protection",
+      "why": "Breakdown risk is vivid; one easy check is the efficacy step. Many gold cards (007, 011, 012, 017, 018, 031, 034).",
+      "headline_offer_patterns": [
+        "'Winter's coming. Will your battery make it?'",
+        "'Free [N]-point safety check.'"
+      ],
+      "reinforcing_photo": "Technician testing a battery with the owner watching.",
+      "what_backfires": "Stranded-woman-on-roadside imagery (gold 012) that reads as stereotyping and offers no action; 'free' checks that upsell without a written estimate.",
+      "combos": [
+        {
+          "headline": "Winter's coming. Will your battery make it?",
+          "offer": "Free battery + tire check, 15 minutes",
+          "photo_scene": "Tech testing a battery in the bay, owner watching",
+          "sell_the_outcome_line": "Start every cold morning without a second thought."
+        },
+        {
+          "headline": "Road trip coming up? Let's check before you go.",
+          "offer": "Free [N]-point inspection; written estimate before any work",
+          "photo_scene": "Family packing the trunk while a tech checks tires",
+          "sell_the_outcome_line": "Spend the trip on the road, not on the shoulder."
+        },
+        {
+          "headline": "That noise isn't going away on its own.",
+          "offer": "Free brake check",
+          "photo_scene": "Tech measuring brake pads, wheel off",
+          "sell_the_outcome_line": "Stop worrying every time you stop."
+        }
+      ],
+      "compliance_flags": [
+        "'Free' with no purchase required (16 CFR 251).",
+        "CA BAR: firm name, ARD # and phone in online ads; written estimate rules."
+      ],
+      "evidence": [
+        "SRC-ROGERS-1975",
+        "SRC-WITTE-1992",
+        "SRC-TANNENBAUM-2015",
+        "SRC-GOLD-AUTO",
+        "SRC-CA-BAR"
+      ],
+      "evidence_strength": "moderate (theory) / thin (creative)"
+    },
+    {
+      "offer_type": "service_discount_or_coupon",
+      "primary_emotion": "smart-shopper",
+      "why": "Coupons are the gold-set staple (001, 002, 005, 006, 014, 024, 027, 028, 033, 035); Quality Auto 480 redeemed (vendor). Price is a main reason owners leave the dealer (Cox).",
+      "headline_offer_patterns": [
+        "'$[X] off your next oil change'",
+        "'[X]% off labor for new customers'"
+      ],
+      "reinforcing_photo": "Tech handing keys back with a smile.",
+      "what_backfires": "Crowded coupon collage (AP-006); 'starting at' prices that never apply; hidden shop fees.",
+      "combos": [
+        {
+          "headline": "Oil change, done right, $[X].",
+          "offer": "Price includes [what's included]; most vehicles; [conditions]",
+          "photo_scene": "Tech pouring oil, hood up",
+          "sell_the_outcome_line": "In and out, and your engine thanks you."
+        },
+        {
+          "headline": "New to [Shop]? Your first visit is on us: $[X] off.",
+          "offer": "New-customer discount, valid through [date]",
+          "photo_scene": "Advisor greeting a customer at the counter",
+          "sell_the_outcome_line": "Find a shop you'll actually trust."
+        },
+        {
+          "headline": "Bring any competitor's coupon. We'll honor it.",
+          "offer": "Competitor coupons accepted (gold 035) with stated limits",
+          "photo_scene": "Customer handing a coupon to an advisor",
+          "sell_the_outcome_line": "Better service at the price you already found."
+        }
+      ],
+      "compliance_flags": [
+        "Price ads disclose likely additional parts/labor (CA BAR); 'most vehicles' limits stated.",
+        "Expiration dates real; no bait (16 CFR 238)."
+      ],
+      "evidence": [
+        "SRC-GOLD-AUTO",
+        "SRC-COX-SERVICE-2025",
+        "SRC-MMR-AUTO",
+        "SRC-FTC-BAIT"
+      ],
+      "evidence_strength": "thin (vendor)"
+    },
+    {
+      "offer_type": "lapsed_service_winback",
+      "primary_emotion": "belonging / care",
+      "why": "Best-evidenced auto mail (MMR-360 319 ROs/2.0%/~10x ROI, third-party; MMR-160 18.5x email, agency).",
+      "headline_offer_patterns": [
+        "'Your [model] is due. We saved you a spot.'",
+        "'We miss you - here's $[X] off.'"
+      ],
+      "reinforcing_photo": "Customer's model in the bay.",
+      "what_backfires": "Generic 'we miss you' with no vehicle data; guilt-heavy copy.",
+      "combos": [
+        {
+          "headline": "Your [year make model] is due. We saved you a spot.",
+          "offer": "$[X] off next service through [date]",
+          "photo_scene": "Same model on the lift, tech at work",
+          "sell_the_outcome_line": "Keep your car running like the day you bought it."
+        },
+        {
+          "headline": "It's been [N] months. How's the [model] doing?",
+          "offer": "Free check-up + comeback discount",
+          "photo_scene": "Advisor waving from the service drive",
+          "sell_the_outcome_line": "Catch small things before they're big bills."
+        },
+        {
+          "headline": "Your service history is here. Let's keep it complete.",
+          "offer": "Factory-schedule service, records kept",
+          "photo_scene": "Printed service record on the counter",
+          "sell_the_outcome_line": "A car that's worth more when you sell it."
+        }
+      ],
+      "compliance_flags": [
+        "Use customer data you lawfully hold; no DMV data without consent (DPPA).",
+        "Clear expiration and conditions."
+      ],
+      "evidence": [
+        "SRC-MMR-AUTO",
+        "SRC-ZAJONC-1968",
+        "SRC-DPPA"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "vehicle_sale_price_or_discount",
+      "primary_emotion": "desire / smart-shopper",
+      "why": "In-market buyers want a clear, efficient deal (Cox CBJ). Gold 008 'THE TOTAL PACKAGE' (11 sold, vendor), 020 '$500 off any vehicle'.",
+      "headline_offer_patterns": [
+        "'[Year make model], VIN ...[####]: $[total price] + govt fees/taxes'",
+        "'The price is the price.'"
+      ],
+      "reinforcing_photo": "Buyer receiving keys beside the actual car.",
+      "what_backfires": "Prices that exclude dealer fees/add-ons; unavailable rebates; 'any vehicle' discounts with hidden exclusions; CGI cars.",
+      "combos": [
+        {
+          "headline": "The price on this card is the price you pay.",
+          "offer": "[Vehicle, VIN/stock]: $[total] plus government fees and taxes",
+          "photo_scene": "Salesperson handing keys to a buyer beside the car",
+          "sell_the_outcome_line": "Drive home at the price you expected."
+        },
+        {
+          "headline": "Your next car, without the back-room surprise.",
+          "offer": "Total price online before you visit",
+          "photo_scene": "Buyer on a phone at home looking at the listing",
+          "sell_the_outcome_line": "Spend Saturday driving it, not negotiating it."
+        },
+        {
+          "headline": "[N] [models] in stock. Real prices inside.",
+          "offer": "Listed inventory with total prices; availability as of [date]",
+          "photo_scene": "Row of actual inventory on the lot at dusk",
+          "sell_the_outcome_line": "Pick the one you love, know what it costs."
+        }
+      ],
+      "compliance_flags": [
+        "Total price incl. all mandatory dealer fees/add-ons (FTC 2026 letters; CA SB 766; VEH 11713.1 statutory fee line).",
+        "Vehicles actually available; rebates only if every buyer can get them or conditions are clear."
+      ],
+      "evidence": [
+        "SRC-FTC-97-2026",
+        "SRC-FTC-LEADER",
+        "SRC-CA-CARS-ACT",
+        "SRC-CA-VEH-11713",
+        "SRC-COX-CBJ-2025",
+        "SRC-GOLD-AUTO"
+      ],
+      "evidence_strength": "moderate (law)"
+    },
+    {
+      "offer_type": "financing_or_lease_payment",
+      "primary_emotion": "possibility / attainability",
+      "why": "Payment framing makes a car feel reachable; heavy disclosure load.",
+      "headline_offer_patterns": [
+        "'[APR]% APR for [N] months on [model] (with approved credit)'",
+        "'Lease a [model]: $[X]/mo, $[Y] due at signing (terms below)'"
+      ],
+      "reinforcing_photo": "Driver's first drive, window down.",
+      "what_backfires": "'$0 down!' or monthly payment alone; 'everyone approved'; hiding the total due at signing.",
+      "combos": [
+        {
+          "headline": "Make the [model] yours for $[X]/month.",
+          "offer": "Full Reg Z terms: down payment, number of payments, APR",
+          "photo_scene": "New owner's first drive, window down",
+          "sell_the_outcome_line": "The car you want, at a payment that fits your life."
+        },
+        {
+          "headline": "Lease a [model] for $[X]/month.",
+          "offer": "Lease; $[Y] due at signing; [N] payments; security deposit [Y/N]; end-of-term charges may apply",
+          "photo_scene": "Couple loading the trunk at the curb",
+          "sell_the_outcome_line": "A newer car every few years, no long-term commitment."
+        },
+        {
+          "headline": "[APR]% APR on [model]. Real terms, right here.",
+          "offer": "Rate with all terms; with approved credit",
+          "photo_scene": "Signing table with a smiling buyer",
+          "sell_the_outcome_line": "Know the deal before you walk in."
+        }
+      ],
+      "compliance_flags": [
+        "Reg Z 1026.24(d) trigger terms; Reg M 1013.7 lease disclosures.",
+        "No financing condition hidden in the price (FTC 2026 letters)."
+      ],
+      "evidence": [
+        "SRC-REGZ-1026-24",
+        "SRC-REGM-1013-7",
+        "SRC-FTC-97-2026"
+      ],
+      "evidence_strength": "strong (law) / thin (creative)"
+    },
+    {
+      "offer_type": "trade_in_or_equity",
+      "primary_emotion": "curiosity / pleasant surprise",
+      "why": "Equity mailers to owners of in-demand used cars (MMR-220: 200 dealers, 13 incremental sales, $112 CPS vs ~$616 NADA benchmark, industry press). Also 'I Buy Motor Homes' (gold 025).",
+      "headline_offer_patterns": [
+        "'Your [model] may be worth more than you think.'",
+        "'We'll buy your car, even if you don't buy ours.'"
+      ],
+      "reinforcing_photo": "Owner beside their own model with appraiser.",
+      "what_backfires": "Guaranteed values or 'we'll pay off your loan no matter what' (negative-equity misrepresentation risk); fake 'recall'/'notice' framing.",
+      "combos": [
+        {
+          "headline": "Your [model] may be worth more than you think.",
+          "offer": "Free appraisal; written offer good for [N] days",
+          "photo_scene": "Appraiser and owner walking around the car",
+          "sell_the_outcome_line": "Turn your current car into your next one."
+        },
+        {
+          "headline": "We'll buy your car, even if you don't buy ours.",
+          "offer": "Cash offer after inspection",
+          "photo_scene": "Handshake beside the owner's car",
+          "sell_the_outcome_line": "Sell it in an afternoon, skip the listing headaches."
+        },
+        {
+          "headline": "Used [models] are in demand at [dealer].",
+          "offer": "Free equity check: trade value vs payoff",
+          "photo_scene": "Advisor showing a tablet to an owner",
+          "sell_the_outcome_line": "Upgrade without guessing what your car is worth."
+        }
+      ],
+      "compliance_flags": [
+        "No guaranteed value; state any conditions.",
+        "Payoff/negative-equity statements must be accurate (FTC Sec. 5)."
+      ],
+      "evidence": [
+        "SRC-MMR-AUTO",
+        "SRC-FTC5",
+        "SRC-GOLD-AUTO"
+      ],
+      "evidence_strength": "thin-moderate (industry press)"
+    },
+    {
+      "offer_type": "collision_hail_glass_claim_help",
+      "primary_emotion": "relief",
+      "why": "After hail/accidents, owners want a fast, hassle-free repair (gold 009 glass, 016/029 hail).",
+      "headline_offer_patterns": [
+        "'Hail damage? We handle the insurance paperwork.'"
+      ],
+      "reinforcing_photo": "Tech doing paintless dent repair under a light board.",
+      "what_backfires": "Deductible waivers/rebates ('save up to $500 off your deductible', 'deductible assistance') - illegal in TX, flagged as possible fraud in CO.",
+      "combos": [
+        {
+          "headline": "Hail damage? We'll work with your insurer.",
+          "offer": "Free estimate; we handle claim paperwork",
+          "photo_scene": "PDR tech working under a light board",
+          "sell_the_outcome_line": "Your car looks like the storm never happened."
+        },
+        {
+          "headline": "Cracked windshield? Same-day replacement.",
+          "offer": "Free quote; insurance billing help",
+          "photo_scene": "Glass tech fitting a windshield",
+          "sell_the_outcome_line": "See clearly, drive safely, today."
+        },
+        {
+          "headline": "Lifetime warranty on our repairs.",
+          "offer": "Written warranty terms (if offered)",
+          "photo_scene": "Finished panel gleaming in the shop",
+          "sell_the_outcome_line": "Repair it once, forget it."
+        }
+      ],
+      "compliance_flags": [
+        "No deductible waiver/rebate language (TX HB 1656; CO DOI bulletin); deductible is the policyholder's.",
+        "Warranty terms written and available (Magnuson-Moss for written warranties)."
+      ],
+      "evidence": [
+        "SRC-TX-HB1656",
+        "SRC-CO-DOI-DEDUCT",
+        "SRC-GOLD-AUTO"
+      ],
+      "evidence_strength": "thin (creative) / clear law (TX, CO)"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "Gold hail cards 'Save up to $500 OFF your deductible' / 'deductible assistance' (016, 029) vs Texas HB 1656 and Colorado DOI bulletin",
+      "resolution": "Law wins: no deductible language; offer claim help, speed and a written warranty."
+    },
+    {
+      "conflict": "Gold 020 '$500 OFF any vehicle on the lot' and 'starting at' prices vs FTC Sec. 5 enforcement (Leader Automotive; 2026 warning letters) and CA SB 766",
+      "resolution": "Law wins: total price for specific vehicles; conditions next to any discount."
+    },
+    {
+      "conflict": "CARS Rule vacated (some read it as 'rules relaxed') vs FTC warning letters and California CARS Act",
+      "resolution": "Law wins: the FTC still enforces total-price advertising under Section 5, and California codified it from Oct 1 2026."
+    },
+    {
+      "conflict": "NHTSA DMV-letterhead recall letters lifted repairs 161-348% (MMR-683, official) vs 39 USC 3001(h) / state law for private mail",
+      "resolution": "Law wins: private shops can't use government letterhead; borrow the plain, specific, personal format only."
+    },
+    {
+      "conflict": "Gold 012 stranded-woman roadside fear image vs C-3PO stereotype/anti-pattern notes and EPPM",
+      "resolution": "Verified fear research + design notes win over the gold example: keep the breakdown fear, show the fix (technician + owner), avoid stereotyped helplessness."
+    }
+  ]
+}

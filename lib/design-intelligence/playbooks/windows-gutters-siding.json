@@ -1,0 +1,235 @@
+{
+  "schema_version": "1.1",
+  "slug": "windows-gutters-siding",
+  "industry": "Windows, gutters & siding",
+  "last_updated": "2026-10-27",
+  "words_and_claims_to_avoid": [
+    "Government look-alike design, 'official notice', fake checks or invoices (39 USC 3001)",
+    "Unsubstantiated 'best', '#1', 'guaranteed savings', percent-savings claims (FTC Act s.5)",
+    "Invented or composite testimonials, star ratings or review counts (16 CFR 255)",
+    "'Free' unless it truly costs nothing and carries no hidden obligation",
+    "Fake expiration dates or fake scarcity; any deadline printed must be real",
+    "Demographic/age targeting language (e.g., 'seniors', 'retirees') unless the client has evidence it fits their actual buyers",
+    "Energy-savings percentages for windows ('cut your bill in half', '40% savings pledge') - the FTC settled with five window companies over exactly these claims in 2012",
+    "Federal tax credit for windows/doors (25C ended for property placed in service after 12/31/2025)",
+    "Combining gutters + roofing + siding in one front message (round-5 lesson)"
+  ],
+  "compliance_notes": [
+    "If the sale closes in the home: FTC Cooling-Off Rule (16 CFR 429) applies to $25+ in-home sales; the client's contract must carry the 3-day cancel notice. States can add longer windows (e.g., California's 5-day window for buyers 65+ is documented for solar contracts).",
+    "Print the client's contractor license number where the state requires it in ads; requirements vary by state, and the client must confirm their own state's rule (we only verified the specific state rules named below).",
+    "Any discount must be off a real, recently charged price.",
+    "FTC 2012 orders (Gorell, Long Fence & Home, Serious Energy, THV, Winchester): energy-savings claims need competent and reliable scientific evidence; 'up to' claims must be achievable by nearly all consumers.",
+    "Gutter 'lifetime' warranties: state real terms.",
+    "Reg Z, 12 CFR 1026.24 (verified): if a card states a down payment amount or %, the number of payments or repayment period (e.g., 'for 18 months', 'no payments for 12 months'), a payment amount ('$99/mo'), or a finance charge amount, it must also state the down payment, the full repayment terms and the 'annual percentage rate' using that term. Any rate (e.g., '0%') must be stated as an APR. Terms must be ones actually offered. Safe alternative: 'Financing available', which uses no trigger terms. Have the lender review.",
+    "FTC 'Free' Guide, 16 CFR 251 (verified): (1) 'free with purchase' means the paid item is at its regular price (sold openly for about 30 days), with no markup or downgrade to cover the free item; (2) all conditions go right next to the offer, not in an asterisk footnote; (3) if the main job is priced by negotiation or bid (typical for roofs, siding and window packages), 'free [item] with purchase' is improper; (4) don't run the same 'free' offer more than 6 months in any 12; (5) 'gift' or 'bonus' wording doesn't cure a deceptive 'free'.",
+    "Warranty ads, 16 CFR 239 + 702 (verified): 'lifetime/life' must say whose or what life (239.4); 'satisfaction/money-back guarantee' only if the full price is refunded on request, with conditions disclosed (239.3); advertise a warranty only if it is promptly honored (239.5). For consumer products over $15 with a written warranty, the terms must be available before sale; door-to-door sellers must tell buyers before closing that copies are available (702.3); ads should say where the full warranty can be seen (239.2)."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear, joy, pride, relief are all options; the client chooses.",
+    "Only laws/compliance are hard limits.",
+    "Every angle carries a sell-the-outcome line.",
+    "Unverified (agency-only) results are labeled; never quote them as fact on a card."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "dollar_or_percent_off",
+      "primary_emotion": "smart-shopper pride",
+      "why": "Most WGS gold pieces lead with a discount ($50/$100 off, 10-25% off: GOLD-WGS-001..009).",
+      "headline_offer_patterns": [
+        "'$[X] off gutter guards'"
+      ],
+      "reinforcing_photo": "Clean result photo",
+      "what_backfires": "Coupon walls with codes (GOLD-WGS-001), which split attention",
+      "combos": [
+        {
+          "headline": "Never clean your gutters again.",
+          "offer": "$[X] off gutter guards",
+          "photo_scene": "Clean gutters on a real home, autumn leaves on the lawn",
+          "sell_the_outcome_line": "Your Saturdays, back."
+        },
+        {
+          "headline": "Close the window. Hear nothing.",
+          "offer": "$[X] off per window (real terms)",
+          "photo_scene": "Sunlit quiet room",
+          "sell_the_outcome_line": "A calmer home the minute you close them."
+        },
+        {
+          "headline": "Same house. Brand-new look.",
+          "offer": "$[X] off siding",
+          "photo_scene": "Real before/after",
+          "sell_the_outcome_line": "The house you're proud to come home to."
+        }
+      ],
+      "compliance_flags": [
+        "Real reference price."
+      ],
+      "evidence": [
+        "GOLD-windows-gutters-siding-001..009 (vendor; response UNKNOWN)"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "safety_fear",
+      "primary_emotion": "fear plus efficacy (ladder, water damage)",
+      "why": "LeafGuard's 'Stay Off Your Ladders' won in one market (platform case study). GOLD-WGS-006: 'Don't let this be your gutters... costly winter damage'.",
+      "headline_offer_patterns": [
+        "'Your last time on that ladder.'"
+      ],
+      "reinforcing_photo": "Overflowing gutter with a ladder, or ice dams",
+      "what_backfires": "Gore; implying injury statistics without a source",
+      "combos": [
+        {
+          "headline": "Your last time on that ladder.",
+          "offer": "$[X] off gutter guards",
+          "photo_scene": "Ladder against an overflowing gutter",
+          "sell_the_outcome_line": "Clean gutters forever, feet on the ground."
+        },
+        {
+          "headline": "Don't let this be your gutters.",
+          "offer": "Free gutter inspection",
+          "photo_scene": "Clogged, sagging gutter close-up",
+          "sell_the_outcome_line": "Water goes where it should: away from your home."
+        },
+        {
+          "headline": "Winter's coming. Are your gutters ready?",
+          "offer": "Free inspection, real deadline",
+          "photo_scene": "Ice forming on a gutter",
+          "sell_the_outcome_line": "A dry basement all winter."
+        }
+      ],
+      "compliance_flags": [
+        "Injury statistics only from a cited source."
+      ],
+      "evidence": [
+        "LeafGuard Nextdoor (platform)",
+        "GOLD-WGS-006"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "time_back",
+      "primary_emotion": "joy / relief",
+      "why": "LeafGuard's 'Take Your Time Back' won in another market (platform case study).",
+      "headline_offer_patterns": [
+        "'Never clean your gutters again.'"
+      ],
+      "reinforcing_photo": "Homeowner enjoying the yard",
+      "what_backfires": "Mixing with the safety message on one card",
+      "combos": [
+        {
+          "headline": "Take your weekends back.",
+          "offer": "$[X] off installation",
+          "photo_scene": "Family in the yard, clean gutters above",
+          "sell_the_outcome_line": "Saturdays for what you love."
+        },
+        {
+          "headline": "Never clean your gutters again.",
+          "offer": "Free estimate",
+          "photo_scene": "Leaves sliding off a guard",
+          "sell_the_outcome_line": "One less chore, forever."
+        },
+        {
+          "headline": "Done with gutter duty.",
+          "offer": "$[X] off",
+          "photo_scene": "Homeowner relaxing on the porch",
+          "sell_the_outcome_line": "Time back, every fall."
+        }
+      ],
+      "compliance_flags": [],
+      "evidence": [
+        "LeafGuard Nextdoor (platform)",
+        "GOLD-WGS-009"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "bundle_free_item",
+      "primary_emotion": "delight / bonus value",
+      "why": "GOLD-WGS-010: 'FREE Gutters with Complete Roof Installation'.",
+      "headline_offer_patterns": [
+        "'Free [item] with [main job]'"
+      ],
+      "reinforcing_photo": "Finished roof plus gutters",
+      "what_backfires": "Hidden price inflation to fund the 'free' item",
+      "combos": [
+        {
+          "headline": "Your new roof comes with new gutters.",
+          "offer": "Gutters included in the roof price (avoid 'free' if the roof is bid-priced: 16 CFR 251(g))",
+          "photo_scene": "Finished roof and gutters",
+          "sell_the_outcome_line": "A complete, protected exterior in one job."
+        },
+        {
+          "headline": "New windows, free installation.",
+          "offer": "Installation included at the regular per-window price (16 CFR 251: no markup)",
+          "photo_scene": "Installer fitting a window",
+          "sell_the_outcome_line": "A brighter home without install costs."
+        },
+        {
+          "headline": "Siding plus free gutter check.",
+          "offer": "Free gutter inspection with a siding estimate",
+          "photo_scene": "Crew on the exterior",
+          "sell_the_outcome_line": "Your whole exterior, sorted."
+        }
+      ],
+      "compliance_flags": [
+        "FTC 'Free' Guide, 16 CFR 251 (verified): (1) 'free with purchase' means the paid item is at its regular price (sold openly for about 30 days), with no markup or downgrade to cover the free item; (2) all conditions go right next to the offer, not in an asterisk footnote; (3) if the main job is priced by negotiation or bid (typical for roofs, siding and window packages), 'free [item] with purchase' is improper; (4) don't run the same 'free' offer more than 6 months in any 12; (5) 'gift' or 'bonus' wording doesn't cure a deceptive 'free'.",
+        "Florida: roofers can't tie free items to inspections or claims."
+      ],
+      "evidence": [
+        "GOLD-WGS-010"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "seasonal_deadline",
+      "primary_emotion": "urgency",
+      "why": "GOLD-WGS-002 'book by Friday'; seasonal pattern in Mando's library.",
+      "headline_offer_patterns": [
+        "Real 'book by [date]'"
+      ],
+      "reinforcing_photo": "Season cue (fall leaves, winter ice)",
+      "what_backfires": "Fake deadlines",
+      "combos": [
+        {
+          "headline": "Book by [date] for fall install.",
+          "offer": "$[X] off before [date]",
+          "photo_scene": "Fall leaves in gutters",
+          "sell_the_outcome_line": "Ready before the leaves fall."
+        },
+        {
+          "headline": "Beat the winter rush.",
+          "offer": "$[X] off, real deadline",
+          "photo_scene": "Crew working in fall light",
+          "sell_the_outcome_line": "Warm, draft-free rooms all winter."
+        },
+        {
+          "headline": "This week only in [town].",
+          "offer": "$[X] whole-home special",
+          "photo_scene": "Crew on a local street",
+          "sell_the_outcome_line": "A sparkling home this week."
+        }
+      ],
+      "compliance_flags": [
+        "Deadlines must be real."
+      ],
+      "evidence": [
+        "GOLD-WGS-002"
+      ],
+      "evidence_strength": "moderate"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "Window energy-savings percentage offers (common in the industry) vs FTC 2012 orders",
+      "resolution": "Compliance wins. No % savings without scientific substantiation."
+    },
+    {
+      "conflict": "Gold multi-service lists (GOLD-WGS-007) vs round-5 lesson (mixed roof+gutter cards hated)",
+      "resolution": "Patrick's direct feedback wins: one service per front. Lists go on the back."
+    },
+    {
+      "conflict": "LeafGuard: safety won in one market, time-back in another",
+      "resolution": "No winner. Offer both versions and split-test by market."
+    }
+  ]
+}

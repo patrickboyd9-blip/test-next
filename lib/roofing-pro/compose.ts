@@ -6,6 +6,7 @@ import type { CreativeSpec } from "@/lib/campaign-creator/types"
 import type { LockupPlan, PhotoSlotPlan, PostcardFacePlan, ShapePlan, TrustChipPlan } from "@/lib/postcard-layouts/compose"
 import type { PostcardSizeId } from "@/lib/postcard-layouts/ids"
 import { contrastRatio, paletteById, type VerticalPalette } from "@/lib/postcard-layouts/palette"
+import { tradePalette } from "@/lib/postcard-layouts/trade-palettes"
 import { scaleRect, trimInches } from "@/lib/postcard-layouts/templates"
 import { fitText, type FittedText, type InchRect, type TextRole } from "@/lib/postcard-layouts/typefit"
 import { addressSideContentRect } from "@/lib/print-spec/address-side-content"
@@ -42,6 +43,8 @@ export interface RoofingProInput {
   complianceMark?: string | null
   /** Return lines for the message column. The mailing panel stays blank. */
   returnAddress?: string | null
+  /** Gold industry slug. Non-roofing trades get their own palette. */
+  trade?: string | null
 }
 
 /** Inches the fade starts lower on a damage-headline front (5x8 layout units). */
@@ -80,7 +83,7 @@ export function composeRoofingProFace(input: RoofingProInput): PostcardFacePlan 
   const size = input.size ?? "5x8"
   const face = input.face ?? "front"
   const meta = ROOFING_PRO_META[input.templateId]
-  const palette = paletteFor(input.templateId)
+  const palette = paletteFor(input.templateId, input.trade)
   if (face === "back") return composeBack(input, size, meta.pairing, palette)
   return composeFront(input, size, meta.pairing, palette, meta.offerLed)
 }
@@ -645,7 +648,8 @@ function fitBounded(input: {
   return last
 }
 
-function paletteFor(id: RoofingProTemplateId): VerticalPalette {
+function paletteFor(id: RoofingProTemplateId, trade?: string | null): VerticalPalette {
+  if (trade && trade !== "roofing") return tradePalette(trade)
   const base = paletteById("roofing")
   if (id === "roof_seasonal") {
     return {

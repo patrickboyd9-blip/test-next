@@ -1,3 +1,4 @@
+import { offerPhotoSubject } from "./offer-photo-subject"
 import { cutoutSubjectLine, cutoutSubjectRequested } from "@/lib/design-intelligence/cutout"
 import { photoFits } from "@/lib/research-library/steer"
 
@@ -198,6 +199,13 @@ export function toImageBrief(
       : `${brief.artDirection.subject.replace(/(?:dark charcoal )?(?:architectural )?shingle roof/gi, "standing-seam metal roof").replace(/\bnew roof\b/gi, "new standing-seam metal roof")} The roof is standing-seam metal (long vertical charcoal metal panels with raised seams), not asphalt shingles. One roofer on the roof fastening a metal panel, face visible.`
     brief.artDirection = { ...brief.artDirection, subject: metal, refuse: `${brief.artDirection.refuse} No asphalt shingle roof on the finished house.` }
     brief.visualDirection = metal
+  }
+
+  // The offer decides the subject outside roofing (water heater, house exterior, operatory, ...).
+  const offerSubject = brief.artDirection.trade !== "roofing" ? offerPhotoSubject(brief.artDirection.trade, material) : null
+  if (offerSubject) {
+    brief.artDirection = { ...brief.artDirection, subject: offerSubject }
+    brief.visualDirection = offerSubject
   }
 
   const researchNote = context.researchPhotoNote?.trim()

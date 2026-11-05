@@ -53,7 +53,7 @@ export async function getCreativeEngine(): Promise<CreativeEngine> {
 export async function reviewUploadedArtwork(input: {
   front: UploadedArtworkFace
   back: UploadedArtworkFace
-}): Promise<string[]> {
+}): Promise<{ suggestions: string[]; printedText: string }> {
   const apiKey = process.env.ANTHROPIC_API_KEY?.trim()
   if (!isDesignReviewAvailable() || !apiKey) {
     throw new Error("Review is not available right now. You can still approve the proof.")

@@ -1,3 +1,4 @@
+import { isFillerSubline, offerSubline } from "./trade-subline"
 import type { GenerateDirectionsResult } from "@/lib/campaign-creator/creative-engine"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import type { CampaignBrief, CreativeDirection, CreativeSpec } from "@/lib/campaign-creator/types"
@@ -341,7 +342,10 @@ async function scoreFamily(input: {
     restated &&
     restated.toLowerCase() === verbatimOffer.replace(/[.!?]+$/, "").trim().toLowerCase()
   ) {
-    spec = { ...spec, subheadline: "Call today." }
+    spec = { ...spec, subheadline: "" }
+  }
+  if (isFillerSubline(spec.subheadline)) {
+    spec = { ...spec, subheadline: offerSubline({ brief: input.brief, offer: spec.offer, headline: spec.headline, seed: input.directionIndex }) }
   }
   // A blueprint rewrite that only fell back to a stock option never replaces
   // this direction's own distinct headline.

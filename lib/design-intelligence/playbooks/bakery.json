@@ -1,0 +1,206 @@
+{
+  "schema_version": "1.1",
+  "slug": "bakery",
+  "industry": "Retail bakeries, custom cake boutiques, cupcake shops, and artisan bread bakeries (on-premise bake / take-home)",
+  "last_updated": "2026-11-04",
+  "words_and_claims_to_avoid": [
+    "'Gluten-free', 'allergen-free', 'nut-free' without meeting the real standard and kitchen controls (FDA gluten-free labeling 21 CFR 101.91 for labels; FTC substantiation for ads)",
+    "Disease/medical claims ('cures inflammation', 'diabetic-safe miracle') without competent scientific support — high FTC/FDA risk",
+    "'Fresh daily' if product is frozen/thawed or not baked that day",
+    "'Organic' without compliant organic certification for the claimed products",
+    "'Up to 25% off' that almost never reaches 25%",
+    "Fake scarcity on tasting slots"
+  ],
+  "compliance_notes": [
+    "FTC Act s.5 + Health Products Compliance Guidance: food ads must be truthful and substantiated; health claims need competent reliable evidence; FTC defers heavily to FDA labeling standards for food health claims.",
+    "FDA 21 CFR 101.91: 'gluten-free' on labels means <20 ppm and no prohibited gluten ingredients — ads implying the same should be able to meet it.",
+    "Allergen statements: do not promise 'allergen-free kitchen' if shared equipment creates cross-contact risk — disclose honestly.",
+    "16 CFR 233/251: cake $ off, cupcake BOGO, complimentary tasting thresholds need clear conditions.",
+    "No medical cure claims for bakery foods.",
+    "Coupon fine print: end dates, exclusions (wedding cakes vs sheet cakes), and one-per-customer rules beside the offer."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: joy, anticipation, belonging, relief are fine when they fit and stay legal.",
+    "Only laws/compliance are hard limits.",
+    "Every angle and emotion_by_offer combo carries sell_the_outcome_line.",
+    "Vendor ROI labeled agency-only unverified; never print as fact on a client card.",
+    "Prefer one clear offer + one real photo + one QR (roofing-round5 directional) unless client insists on a coupon grid.",
+    "Leave thin industries thin — do not invent studies or pad gold."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "cake_order_dollar_off",
+      "primary_emotion": "joy / anticipation",
+      "why": "Simple savings on the celebration centerpiece; appears in GOLD-001/006.",
+      "headline_offer_patterns": [
+        "'$5 OFF any cake order'",
+        "'$[X] off custom cakes'"
+      ],
+      "reinforcing_photo": "Hero custom cake on a stand",
+      "what_backfires": "Tiny cake photo; exclusions that remove birthday/wedding cakes after the fact",
+      "combos": [
+        {
+          "headline": "Celebrate with a cake that is uniquely you.",
+          "offer": "$5 OFF any cake order (ends [date])",
+          "photo_scene": "Aqua or floral custom cake, full bleed",
+          "sell_the_outcome_line": "Put a cake on the table that feels personal — not grocery-generic."
+        },
+        {
+          "headline": "Custom cake, lighter ticket.",
+          "offer": "$[X] off custom cake orders over $[min]",
+          "photo_scene": "Decorator finishing piping detail",
+          "sell_the_outcome_line": "Get the design you imagined without stretching the party budget as far."
+        },
+        {
+          "headline": "Order the cake they'll talk about.",
+          "offer": "$5 off cake + free simple topper (if true)",
+          "photo_scene": "Candle-lit cake moment (permission)",
+          "sell_the_outcome_line": "Own the cheer when everyone leans in for a slice."
+        }
+      ],
+      "compliance_flags": [
+        "End date and cake-type exclusions with the offer.",
+        "Do not show celebrity/stock faces as if they are clients."
+      ],
+      "evidence": [
+        "GOLD-bakery-001/006"
+      ],
+      "evidence_strength": "thin-directional"
+    },
+    {
+      "offer_type": "cupcake_bogo_or_dozen_off",
+      "primary_emotion": "delight / generosity",
+      "why": "Sharing treat; repeated even in n=8 gold.",
+      "headline_offer_patterns": [
+        "'Buy a dozen, get a dozen 50% off'",
+        "'$5 off a dozen'",
+        "'20% off a custom cake + cupcake add-on'"
+      ],
+      "reinforcing_photo": "Dozen cupcakes in an open box",
+      "what_backfires": "50% off second dozen with impossible flavor limits undisclosed",
+      "combos": [
+        {
+          "headline": "Buy a dozen. Share a dozen.",
+          "offer": "Buy a dozen cupcakes, get a second dozen 50% off",
+          "photo_scene": "Colorful cupcake dozen overhead",
+          "sell_the_outcome_line": "Be the hero of the potluck without baking at midnight."
+        },
+        {
+          "headline": "$5 off a dozen.",
+          "offer": "$5 off a dozen full-size cupcakes (ends [date])",
+          "photo_scene": "Cupcakes on a stand at a party table",
+          "sell_the_outcome_line": "Show up with a box that empties happily."
+        },
+        {
+          "headline": "Cupcakes for the crew.",
+          "offer": "20% off a custom cake when you add a dozen cupcakes (if structured that way — print clearly)",
+          "photo_scene": "Cake + cupcake dessert table",
+          "sell_the_outcome_line": "Cover every guest — including the ones who only want a mini."
+        }
+      ],
+      "compliance_flags": [
+        "BOGO: state which dozen is discounted and flavor limits (16 CFR 251/233).",
+        "Dated coupons must match printed expiry."
+      ],
+      "evidence": [
+        "GOLD-bakery-001/005/006"
+      ],
+      "evidence_strength": "thin-directional"
+    },
+    {
+      "offer_type": "complimentary_tasting_wedding",
+      "primary_emotion": "anticipation / love",
+      "why": "High-ticket wedding path in gold uses tasting + early reserve.",
+      "headline_offer_patterns": [
+        "'Complimentary tasting for orders over $200'",
+        "'Tasting event [date]'",
+        "'10% off when reserving six months ahead'"
+      ],
+      "reinforcing_photo": "Tiered wedding cake; tasting flight of slices",
+      "what_backfires": "Tasting 'free' that requires a large nonrefundable deposit undisclosed",
+      "combos": [
+        {
+          "headline": "The centerpiece of your celebration.",
+          "offer": "Complimentary tasting for cake orders over $200",
+          "photo_scene": "White tiered wedding cake",
+          "sell_the_outcome_line": "Choose the cake with your people — before the big day nerves hit."
+        },
+        {
+          "headline": "Your love story, layered in flavor.",
+          "offer": "Book tasting [date]; 10% off when you reserve 6+ months ahead",
+          "photo_scene": "Floral wedding cake detail",
+          "sell_the_outcome_line": "Lock the flavor that tastes like your day."
+        },
+        {
+          "headline": "Taste before you commit.",
+          "offer": "Free tasting appointment for wedding clients (appointment required)",
+          "photo_scene": "Three plated cake samples",
+          "sell_the_outcome_line": "Pick with confidence, not guesswork from a photo alone."
+        }
+      ],
+      "compliance_flags": [
+        "Disclose deposit, cancellation, and minimums tied to 'complimentary' tasting (16 CFR 251).",
+        "Early-reserve % needs a real regular price basis."
+      ],
+      "evidence": [
+        "GOLD-bakery-002/004"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "seasonal_loaf_percent_off",
+      "primary_emotion": "comfort / belonging",
+      "why": "Weekday loaf specials create habit cues; present in thin gold.",
+      "headline_offer_patterns": [
+        "'25% OFF artisan loaves every Thursday this October'",
+        "'UP TO 25% OFF' (avoid unless truly attainable)",
+        "'Fresh breads — weekly special'"
+      ],
+      "reinforcing_photo": "Fresh loaves / baker at oven",
+      "what_backfires": "'Up to 25% off' badge when most items are 5% — prefer a specific loaf %",
+      "combos": [
+        {
+          "headline": "Savor the harvest season.",
+          "offer": "25% OFF all artisan loaves every Thursday this [month]",
+          "photo_scene": "Baker holding sourdough by a wood oven",
+          "sell_the_outcome_line": "Make Thursday the night the house smells like real bread."
+        },
+        {
+          "headline": "Fresh breads this week.",
+          "offer": "[X]% off listed loaves [days]",
+          "photo_scene": "Crust macro + pastry edge",
+          "sell_the_outcome_line": "Still-warm bread without the all-day bake."
+        },
+        {
+          "headline": "Your neighborhood bake.",
+          "offer": "Punch-card: buy 9 loaves, 10th free (if real program)",
+          "photo_scene": "Storefront bakery morning light",
+          "sell_the_outcome_line": "A weekly ritual that rewards showing up."
+        }
+      ],
+      "compliance_flags": [
+        "Prefer specific % over vague 'up to'.",
+        "Gluten-free callouts only if substantiated.",
+        "'Fresh' must be truthful."
+      ],
+      "evidence": [
+        "GOLD-bakery-003/008"
+      ],
+      "evidence_strength": "thin"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "Desire for more offer types vs gold n=8",
+      "resolution": "Leave thin: only four offer types grounded in the gold set; do not invent membership ROI or delivery programs without examples."
+    },
+    {
+      "conflict": "Gluten-free marketing temptation vs FDA/FTC substantiation",
+      "resolution": "Compliance wins — only claim what the bakery can prove."
+    },
+    {
+      "conflict": "PostcardMania order counts vs evidence rules",
+      "resolution": "Agency-only unverified; do not print as proof."
+    }
+  ]
+}

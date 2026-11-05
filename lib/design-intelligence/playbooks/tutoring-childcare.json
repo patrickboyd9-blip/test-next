@@ -1,0 +1,300 @@
+{
+  "schema_version": "1.1",
+  "slug": "tutoring-childcare",
+  "industry": "Tutoring centers, test prep, in-home tutors, daycare, preschool, after-school, and enrichment programs",
+  "last_updated": "2026-11-03",
+  "words_and_claims_to_avoid": [
+    "'Raise SAT/ACT [X]–[Y] points' (GOLD-tutoring-childcare-043) unless the center can substantiate typical results for similar students (FTC Act s.5 / 16 CFR 255)",
+    "'Guaranteed grade improvement' / 'honor roll guaranteed' without conditions and proof",
+    "'Licensed' / 'accredited' / 'universal Pre-K' / 'accepts [subsidy]' unless currently true for that site",
+    "'Free week' that quietly requires nonrefundable fees or long lock-ins without clear disclosure (16 CFR 251; state contract rules)",
+    "Student photos or quotes without parent/guardian written consent; never collect data from children under 13 online without verifiable parental consent (COPPA)",
+    "Implying use of school student records in marketing (FERPA restricts educational agencies/institutions; don't claim improper data use)",
+    "Discriminatory enrollment language; follow applicable civil-rights and state licensing advertising rules (equal opportunity)"
+  ],
+  "compliance_notes": [
+    "FTC Act s.5: score gains, rank improvements, and 'guaranteed results' need substantiation before mailing.",
+    "16 CFR 255: parent/student testimonials imply typical results; disclose material connections; 'results not typical' is not a cure-all.",
+    "16 CFR 251/233: free registration / $X off / 'value' claims need real base prices and conditions beside the offer.",
+    "COPPA: QR landing pages that collect info from under-13s need verifiable parental consent; prefer parent-only forms.",
+    "State child-care licensing: advertising must not misrepresent ratios, ages, hours, or license status; many states require license number on ads—verify locally.",
+    "Lottery/scratch-off 'win free months' (GOLD-tutoring-childcare-047): 39 USC 3001(k) / contest rules; no-purchase-necessary if chance + consideration.",
+    "39 USC 3001: no official school-district/census look-alike mailers.",
+    "Fair Housing Act generally does not govern ordinary childcare enrollment ads; still avoid discriminatory preference language under civil-rights and licensing norms."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic within the law; fear-of-falling-behind is allowed when factual and paired with a real offer.",
+    "Only laws/compliance are hard limits.",
+    "Every angle and combo includes sell_the_outcome_line.",
+    "Never invent score gains, waitlist lengths, or licensing claims."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "free_lesson_or_assessment",
+      "primary_emotion": "hope / relief",
+      "why": "Lowers risk on a high-involvement education buy; converts on rapport and a clear plan.",
+      "headline_offer_patterns": [
+        "'First session free'",
+        "'Free diagnostic assessment'",
+        "'Free trial class'"
+      ],
+      "reinforcing_photo": "One-on-one tutor and student engaged and calm",
+      "what_backfires": "Hard sell during the 'free' session; bait-and-switch package pricing",
+      "combos": [
+        {
+          "headline": "First session is free.",
+          "offer": "Free first tutoring session (new families; expires [date])",
+          "photo_scene": "Tutor pointing to a workbook while student smiles",
+          "sell_the_outcome_line": "See the click moment before you commit."
+        },
+        {
+          "headline": "Struggling with homework? We can help.",
+          "offer": "Free diagnostic assessment + consult",
+          "photo_scene": "Parent and tutor reviewing a simple progress sheet",
+          "sell_the_outcome_line": "A calmer evening routine, starting this week."
+        },
+        {
+          "headline": "Try a free trial class.",
+          "offer": "Free trial literacy/enrichment class",
+          "photo_scene": "Small group of kids reading aloud with a teacher",
+          "sell_the_outcome_line": "Watch confidence show up in the first hour."
+        },
+        {
+          "headline": "Are you happy with their grades?",
+          "offer": "VIP guest pass: free assessment with consultation",
+          "photo_scene": "Student raising a hand, engaged",
+          "sell_the_outcome_line": "Know exactly where they stand, and what to do next."
+        }
+      ],
+      "compliance_flags": [
+        "If free converts to auto-pay packages: clear consent and cancel terms.",
+        "No guaranteed grade outcomes tied to the free session."
+      ],
+      "evidence": [
+        "GOLD-tutoring-childcare-001/028/047/051/061",
+        "SRC-NICKOW-2024"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "free_or_discounted_registration",
+      "primary_emotion": "smart-shopper relief / urgency",
+      "why": "Registration fees are salient frictions on top of tuition; waiving them is a common gold lever.",
+      "headline_offer_patterns": [
+        "'Free registration'",
+        "'50% off registration'",
+        "'$150 off when you enroll by [date]'"
+      ],
+      "reinforcing_photo": "Parents completing paperwork at a welcoming front desk; kids exploring",
+      "what_backfires": "Raising tuition to offset 'free' fees deceptively; fake deadlines",
+      "combos": [
+        {
+          "headline": "Free registration with this card.",
+          "offer": "Registration fee waived for new enrollments through [date]",
+          "photo_scene": "Bright preschool entry with teacher greeting",
+          "sell_the_outcome_line": "Save the fee, and spend it on what your child actually needs."
+        },
+        {
+          "headline": "50% off registration.",
+          "offer": "50% off registration for new enrollments at this location",
+          "photo_scene": "Parent and child holding hands at the door",
+          "sell_the_outcome_line": "Start sooner without the signup sting."
+        },
+        {
+          "headline": "Enroll by [date], save $[X].",
+          "offer": "Early enrollment: $[X] off registration by [date]",
+          "photo_scene": "Calendar circled next to classroom photo",
+          "sell_the_outcome_line": "Lock a spot while seats are open."
+        }
+      ],
+      "compliance_flags": [
+        "16 CFR 251/233 on free/% off; deadlines must be real.",
+        "State contract/fee disclosure rules may apply."
+      ],
+      "evidence": [
+        "GOLD-tutoring-childcare-002/010/044/049/078",
+        "SRC-CCA-2024"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "free_tour_or_open_house",
+      "primary_emotion": "trust / anticipation",
+      "why": "Seeing safety, cleanliness, and teacher warmth is the proof parents need.",
+      "headline_offer_patterns": [
+        "'Come by for a free tour'",
+        "'Open house [date]'",
+        "'Book a private tour'"
+      ],
+      "reinforcing_photo": "Tour in progress; real rooms, real teachers",
+      "what_backfires": "Stock photos that don't match the facility; hiding ratios/ages",
+      "combos": [
+        {
+          "headline": "Come by for a free tour.",
+          "offer": "Tours daily; bring this card",
+          "photo_scene": "Teacher kneeling with toddlers in a tidy room",
+          "sell_the_outcome_line": "Feel the calm and care before you decide."
+        },
+        {
+          "headline": "Fall open house: [date], [time].",
+          "offer": "Open house + RSVP; enrollment info on site",
+          "photo_scene": "Families walking through a hallway of student art",
+          "sell_the_outcome_line": "Picture your child's days here."
+        },
+        {
+          "headline": "Book a private tour.",
+          "offer": "Private tour for ages [X–Y]; now enrolling",
+          "photo_scene": "Director shaking a parent's hand at reception",
+          "sell_the_outcome_line": "Get answers face-to-face, without a sales circus."
+        }
+      ],
+      "compliance_flags": [
+        "Accurate ages, hours, license status; photo releases for any children shown."
+      ],
+      "evidence": [
+        "GOLD-tutoring-childcare-004/016/038/040/057"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "free_week_or_tuition_discount",
+      "primary_emotion": "relief / belonging",
+      "why": "Bigger dollar relief on tuition addresses the core cost pain; common in daycare gold cards.",
+      "headline_offer_patterns": [
+        "'One week free after first paid month'",
+        "'4 weeks free for new families'",
+        "'Up to $500 off first month'",
+        "'30% off first year'"
+      ],
+      "reinforcing_photo": "Happy child being picked up; parent relaxed",
+      "what_backfires": "Complex clawbacks in microtype; '30% off first year' that is not what families actually net",
+      "combos": [
+        {
+          "headline": "New families: 4 weeks free.",
+          "offer": "4 weeks free tuition for new families (terms: [spell out])",
+          "photo_scene": "Preschoolers at a sensory table with a teacher",
+          "sell_the_outcome_line": "Settle in, see the fit, and keep more of your paycheck."
+        },
+        {
+          "headline": "One free week after your first paid month.",
+          "offer": "One week free tuition after one full month paid",
+          "photo_scene": "Child running into a parent's arms at pickup",
+          "sell_the_outcome_line": "Reward sticking with care that works for your family."
+        },
+        {
+          "headline": "Up to $[X] off your first month.",
+          "offer": "New-family first-month credit up to $[X]",
+          "photo_scene": "Infant room with calm lighting and a caregiver",
+          "sell_the_outcome_line": "Breathe easier on month one while you find your rhythm."
+        }
+      ],
+      "compliance_flags": [
+        "Spell eligibility, duration, and any repayment if they leave early.",
+        "Avoid misleading 'up to' unless a meaningful share gets the max (16 CFR 233)."
+      ],
+      "evidence": [
+        "GOLD-tutoring-childcare-007/008/017/019/048/062",
+        "SRC-CCA-2024",
+        "SRC-CARE-2024"
+      ],
+      "evidence_strength": "strong cost context; offer effects untested"
+    },
+    {
+      "offer_type": "summer_program",
+      "primary_emotion": "fear-of-loss / hope",
+      "why": "Seasonal landmark + Cooper summer-loss evidence; gold cards push summer school/camps.",
+      "headline_offer_patterns": [
+        "'Summer school now open'",
+        "'Summer camps: get smarter & have fun'",
+        "'Early bird save $[X]'"
+      ],
+      "reinforcing_photo": "Active summer learning outdoors or STEM tables",
+      "what_backfires": "Printing a fake 'your child will lose X months' local stat; warehouses-as-camps photos",
+      "combos": [
+        {
+          "headline": "Keep skills sharp all summer.",
+          "offer": "Summer program for grades [X–Y]; enroll by [date]",
+          "photo_scene": "Kids doing a hands-on science activity outside",
+          "sell_the_outcome_line": "Start fall ready, not rebuilding."
+        },
+        {
+          "headline": "Summer school: productive days, stronger skills.",
+          "offer": "Weekly summer rate $[X]; ongoing enrollment",
+          "photo_scene": "Small class with a teacher at the whiteboard",
+          "sell_the_outcome_line": "A summer they'll remember for growth, not screens alone."
+        },
+        {
+          "headline": "Early bird: save $[X] on summer review.",
+          "offer": "Save $[X] when you register by [date]",
+          "photo_scene": "Student smiling with a completed workbook page",
+          "sell_the_outcome_line": "Protect last year's progress while seats last."
+        }
+      ],
+      "compliance_flags": [
+        "Cite summer-loss carefully; don't invent local months-lost figures.",
+        "Camp licensing/ratios as required by state."
+      ],
+      "evidence": [
+        "SRC-COOPER-1996",
+        "GOLD-tutoring-childcare-003/023/024/050"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "test_prep_package",
+      "primary_emotion": "anxiety -> confidence",
+      "why": "High-stakes tests create urgency; sell readiness and options, not magic points.",
+      "headline_offer_patterns": [
+        "'SAT & ACT prep from $[X]'",
+        "'Free practice lesson'",
+        "'College advising consult'"
+      ],
+      "reinforcing_photo": "Calm, prepared student; real alumni only with releases",
+      "what_backfires": "Unsubstantiated point-gain banners; paid 'reviews'; fake admission logos",
+      "combos": [
+        {
+          "headline": "Walk into test day ready.",
+          "offer": "Free diagnostic + prep packages from $[X]",
+          "photo_scene": "Student practicing with a timer, posture calm",
+          "sell_the_outcome_line": "More options after senior year, with less dread before the exam."
+        },
+        {
+          "headline": "I got into the school I wanted.",
+          "offer": "SAT/ACT prep starting at $[X]/semester (testimonial with FTC disclosures)",
+          "photo_scene": "Real student (release on file) with acceptance materials",
+          "sell_the_outcome_line": "Open doors that match their ambition."
+        },
+        {
+          "headline": "What's your college plan?",
+          "offer": "Consult for test prep + advising",
+          "photo_scene": "Advisor and family at a table with a planning sheet",
+          "sell_the_outcome_line": "A clear path instead of last-minute panic."
+        }
+      ],
+      "compliance_flags": [
+        "Substantiate any point gains; disclose typical results for testimonials (16 CFR 255).",
+        "No fake university seals."
+      ],
+      "evidence": [
+        "GOLD-tutoring-childcare-006/043/064",
+        "SRC-FTC5",
+        "SRC-NICKOW-2024"
+      ],
+      "evidence_strength": "moderate principle; many gold score claims are noncompliant if used raw"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "GOLD-tutoring-childcare-043 style 'Raise your SAT score by 250–450 points' vs FTC substantiation rules",
+      "resolution": "Compliance wins: do not use point-gain ranges unless the client has competent and reliable evidence of typical results for similar students."
+    },
+    {
+      "conflict": "Scratch-off / prize tutoring passes (GOLD-tutoring-childcare-047) vs mail sweepstakes rules",
+      "resolution": "Compliance wins: chance promotions need proper rules and no-purchase-necessary language where required (39 USC 3001(k))."
+    },
+    {
+      "conflict": "Fear-of-falling-behind headlines vs desire for warm brand tone",
+      "resolution": "Not a legal conflict: emotion-agnostic—client chooses; if fear is used, pair with a real easy action (free assessment/tour) per EPPM logic."
+    }
+  ]
+}

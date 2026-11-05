@@ -36,6 +36,7 @@ import { isRoofingProTemplate } from "@/lib/roofing-pro/ids"
 import { attorneyAdMark } from "@/lib/design-intelligence/attorney-compliance"
 import { isPostcardTemplate, isVerticalPalette } from "@/lib/postcard-layouts/ids"
 import { paletteById } from "@/lib/postcard-layouts/palette"
+import { tradePalette } from "@/lib/postcard-layouts/trade-palettes"
 import { slotPhotoSources } from "@/lib/postcard-layouts/photos"
 import { TEMPLATE_META } from "@/lib/postcard-layouts/templates"
 
@@ -150,6 +151,7 @@ export function PostcardPreview({
         returnAddress: brief?.businessInfo?.address,
         disclaimerText: disclaimer,
         complianceMark,
+        trade: spec.layoutHints?.trade,
       })
     : null
   const studioCard = proCard ?? (isDesignRationale(spec.designRationale)
@@ -167,9 +169,11 @@ export function PostcardPreview({
     ? composeAddressSideFace({
         size: trimSize,
         pairing: "trade",
-        palette: paletteById(
-          isVerticalPalette(spec.layoutHints?.verticalPalette) ? spec.layoutHints.verticalPalette : "general"
-        ),
+        palette: spec.layoutHints?.trade
+          ? tradePalette(spec.layoutHints.trade)
+          : paletteById(
+              isVerticalPalette(spec.layoutHints?.verticalPalette) ? spec.layoutHints.verticalPalette : "general"
+            ),
         spec: sharedSpec,
         businessName: contact.businessName,
         phone: contact.phone,

@@ -43,6 +43,7 @@ export async function renderAiPrintFile(campaign: Campaign): Promise<{
         returnAddress,
         disclaimerText: copy.disclaimer,
         complianceMark: copy.complianceMark,
+        trade: campaign.mailPiece?.spec.layoutHints?.trade,
       })
     : isDesignRationale(rationale)
     ? composeGridCard({

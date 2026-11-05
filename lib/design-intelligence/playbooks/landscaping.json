@@ -1,0 +1,339 @@
+{
+  "schema_version": "1.1",
+  "slug": "landscaping",
+  "industry": "Landscaping, lawn care & hardscape",
+  "last_updated": "2026-10-28",
+  "words_and_claims_to_avoid": [
+    "Government look-alike design, 'official notice', fake checks or invoices (39 USC 3001)",
+    "Unsubstantiated 'best', '#1', 'voted #1', 'guaranteed results', percent-savings claims (FTC Act s.5)",
+    "Invented or composite testimonials, star ratings or review counts (16 CFR 255)",
+    "'Free' unless it truly costs nothing and carries no hidden obligation (16 CFR 251)",
+    "Fake expiration dates or fake scarcity; any deadline printed must be real",
+    "Demographic/age targeting language (e.g., 'seniors', 'retirees') unless the client has evidence it fits their actual buyers",
+    "Any vendor case-study result (calls, ROI, revenue) printed as if it were the client's own result",
+    "'Safe', 'harmless', 'non-toxic', 'nonpoisonous', 'pet-safe', 'kid-safe', 'family-safe', 'safe for the environment' (federal + state pesticide rules)",
+    "'EPA approved', 'EPA registered', 'state approved'",
+    "'Organic', 'all natural', 'green', 'eco-friendly', 'environmentally responsible' for treatments",
+    "'Pest-free guaranteed', 'kills 100%', 'eliminates all' without substantiation and a real guarantee",
+    "'Pet-friendly' or 'kid-friendly' lawn treatments (reads as a safety claim; banned in several states)",
+    "'Adds X% to your home value' unless quoting NAR's exact estimate, source and year",
+    "'Interest-free' or '0% for 24 months' without full Reg Z disclosures"
+  ],
+  "compliance_notes": [
+    "If the sale closes in the home: FTC Cooling-Off Rule (16 CFR 429) applies to $25+ in-home sales; the client's contract must carry the 3-day cancel notice. States can add longer windows.",
+    "Print the client's contractor license number where the state requires it in ads; requirements vary by state, and the client must confirm their own state's rule (we only verified the specific state rules named below).",
+    "Any discount or 'save X%' must be off a real, recently charged price; 'save 40%' with no reference price is not allowed.",
+    "Reg Z, 12 CFR 1026.24 (verified): if a card states a down payment amount or %, the number of payments or repayment period (e.g., 'for 24 months', 'no payments for 12 months'), a payment amount ('$99/mo'), or a finance charge amount, it must also state the down payment, the full repayment terms and the 'annual percentage rate' using that term. Any rate (e.g., '0%') must be stated as an APR. Terms must be ones actually offered. Safe alternative: 'Financing available', which uses no trigger terms. Have the lender review.",
+    "FTC 'Free' Guide, 16 CFR 251 (verified): (1) 'free with purchase' means the paid item is at its regular price (sold openly for about 30 days), with no markup or downgrade to cover the free item; (2) all conditions go right next to the offer, not in an asterisk footnote; (3) if the main job is priced by negotiation or bid, 'free [item] with purchase' is improper; (4) don't run the same 'free' offer more than 6 months in any 12; (5) 'gift' or 'bonus' wording doesn't cure a deceptive 'free'.",
+    "Warranty ads, 16 CFR 239 + 702 (verified): 'lifetime/life' must say whose or what life (239.4); 'satisfaction/money-back guarantee' only if the full price is refunded on request, with conditions disclosed (239.3); advertise a warranty only if it is promptly honored (239.5); ads should say where the full warranty can be seen (239.2).",
+    "Testimonials and star ratings must be real, typical and current; disclose any material connection (16 CFR 255).",
+    "Lawn treatments that use pesticides (weed control, grub control, fertilizer-plus-herbicide) fall under pesticide ad rules: Pesticide safety claims (verified): never say 'safe', 'harmless', 'non-toxic', 'nonpoisonous', 'pet-safe', 'kid-safe', 'eco-safe', with or without 'when used as directed'. Federal label rule 40 CFR 156.10(a)(5)(ix)-(x); explicit ad bans in TX (4 TAC 7.152), NJ (N.J.A.C. 7:30-2.12), CA (16 CCR 1999.5) and CO (C.R.S. 35-9-120). Assume every state is at least this strict until the client confirms.",
+    "No 'EPA approved', 'EPA registered' or anything implying government endorsement (40 CFR 156.10(a)(5)(v); TX 7.152(a)(5); CA 1999.5).",
+    "'Organic', 'natural', 'green', 'environmentally friendly' for pesticide services are banned outright in TX and NJ and need narrow substantiation elsewhere (FTC Green Guides 16 CFR 260).",
+    "Texas (verified): 4 TAC 7.152 applies to structural pest control licensees, and the Texas SPCS program has Lawn & Ornamental and Weed Control categories (4 TAC 7.124). Some for-hire lawn applicators instead hold an agricultural applicator license (3A/5), so the client must confirm which rules apply; the safety-claim ban is the safe default either way.",
+    "California landscape contractors (C-27) fall under B&P 7030.5: license number in all advertising (verified for contractors generally).",
+    "Recurring programs: state the price, frequency and how to cancel next to the offer; a 'free first treatment with program' must be at the program's regular price (16 CFR 251)."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear, disgust, joy, pride, status, relief are all options; the client chooses.",
+    "Only laws/compliance are hard limits.",
+    "Every angle and combo carries a sell-the-outcome line.",
+    "Unverified (agency/vendor-only) results are labeled; never quote them as fact on a card."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "seasonal",
+      "primary_emotion": "anticipation / mild urgency (the season window)",
+      "why": "Lawn work runs on a calendar; Scotts built a ritual around it. GOLD-008 ('expires 4/15/25') and GOLD-012 (spring/fall clean-up) use real seasonal windows.",
+      "headline_offer_patterns": [
+        "'Spring clean-up: book by [date]'",
+        "'Fall aeration season is here'"
+      ],
+      "reinforcing_photo": "Crew doing a spring clean-up on a real property, fresh mulch and blooms.",
+      "what_backfires": "Season deadlines that aren't real; generic 'spring sale' with no date.",
+      "combos": [
+        {
+          "headline": "Spring starts in your yard. Book by [date].",
+          "offer": "$[X] off spring clean-up through [date]",
+          "photo_scene": "Crew edging fresh mulch beds on a sunny spring morning",
+          "sell_the_outcome_line": "The first nice weekend, already done."
+        },
+        {
+          "headline": "Fall aeration: the secret to next spring's lawn.",
+          "offer": "$[X] off aeration through [date]",
+          "photo_scene": "Aerator on a lawn with autumn leaves",
+          "sell_the_outcome_line": "A thicker, greener lawn next spring."
+        },
+        {
+          "headline": "Leaves down? We'll handle it.",
+          "offer": "Fall clean-up from $[X]",
+          "photo_scene": "Crew blowing leaves into neat rows",
+          "sell_the_outcome_line": "A tidy yard without a single rake."
+        },
+        {
+          "headline": "Your summer yard, booked now.",
+          "offer": "15% off spring/fall clean-up (off the real regular price)",
+          "photo_scene": "Lush summer yard with kids playing",
+          "sell_the_outcome_line": "Barbecue-ready all summer."
+        }
+      ],
+      "compliance_flags": [
+        "Real dates only; discount off real regular price."
+      ],
+      "evidence": [
+        "GOLD-landscaping-008, 012",
+        "SRC-SCOTTS"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "free_design_or_estimate",
+      "primary_emotion": "desire / anticipation + reciprocity",
+      "why": "GOLD-002 King's Garden: 'FREE landscape design for Briargrove Park residents' (vendor-reported results, unaudited). C-3PO's Schmechtig contrast: affluent lists respond to complimentary consultation over discounts (vendor-reported).",
+      "headline_offer_patterns": [
+        "'Free landscape design for [neighborhood] homes'",
+        "'Free yard quote in 24 hours' (if true)"
+      ],
+      "reinforcing_photo": "Finished outdoor room at dusk; or designer walking the yard with the owner.",
+      "what_backfires": "Free design that's really a high-pressure sales visit; tiny 'free estimate' line buried in a list.",
+      "combos": [
+        {
+          "headline": "Transform your yard into a retreat.",
+          "offer": "Free landscape design for [neighborhood] homes; mention code [X] by [date]",
+          "photo_scene": "Manicured entry with planters, real client home",
+          "sell_the_outcome_line": "Come home to a yard that feels like a getaway."
+        },
+        {
+          "headline": "See your new backyard before we dig.",
+          "offer": "Free design + 3D plan (if offered)",
+          "photo_scene": "Tablet render next to the current yard",
+          "sell_the_outcome_line": "Know exactly what you're getting."
+        },
+        {
+          "headline": "Your patio, your fire pit, your plan.",
+          "offer": "Free in-yard consultation",
+          "photo_scene": "Owner and designer pointing at a spot in the backyard",
+          "sell_the_outcome_line": "Evenings outside start here."
+        }
+      ],
+      "compliance_flags": [
+        "16 CFR 251: no hidden obligation on 'free'; conditions next to the offer.",
+        "Neighborhood names in the headline only if the list really is that neighborhood."
+      ],
+      "evidence": [
+        "GOLD-landscaping-002",
+        "SRC-CDI-SCHMECHTIG"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "dollar_off_first_service",
+      "primary_emotion": "smart-shopper pride / low-risk trial",
+      "why": "A small dollar or percent off lowers the try-us risk (foot-in-the-door #16). GOLD-001 ($25 off any project), GOLD-007 (50% off first service).",
+      "headline_offer_patterns": [
+        "'$[X] off your first service'",
+        "'50% off your first mow' (off the real price)"
+      ],
+      "reinforcing_photo": "Full-bleed finished garden bed or lawn (GOLD-001 uses full-bleed garden photo).",
+      "what_backfires": "Discount-only cards with no outcome image; stacking many coupons (looks cheap).",
+      "combos": [
+        {
+          "headline": "$[X] off any landscaping project.",
+          "offer": "$[X] off, one-time use, through [date]",
+          "photo_scene": "Full-bleed garden bed with a stone bench",
+          "sell_the_outcome_line": "A yard you'll want to sit in."
+        },
+        {
+          "headline": "Try us for half off.",
+          "offer": "50% off your first lawn service",
+          "photo_scene": "Crew mowing perfect stripes",
+          "sell_the_outcome_line": "A lawn the neighbors notice, for half the first visit."
+        },
+        {
+          "headline": "Don't be embarrassed by your lawn.",
+          "offer": "$[X] off your first treatment",
+          "photo_scene": "Humorous: kid hiding face next to a patchy lawn vs proud kid on a lush lawn",
+          "sell_the_outcome_line": "A lawn you're proud of, fast."
+        }
+      ],
+      "compliance_flags": [
+        "Real regular price; one-time use stated."
+      ],
+      "evidence": [
+        "GOLD-landscaping-001, 007"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "recurring_program_with_bonus",
+      "primary_emotion": "security / control (it's handled)",
+      "why": "Programs lock in a habit (commitment/consistency #7); Watson's repeated pairing fits recurring touches. GOLD-004 and GOLD-008 offer a free aeration/first treatment with a program.",
+      "headline_offer_patterns": [
+        "'First treatment free with a [season] program'",
+        "'Season-long lawn care from $[X]/visit'"
+      ],
+      "reinforcing_photo": "Same lawn shown spring vs summer, thicker each time.",
+      "what_backfires": "Free bonus when the program price was raised to cover it (16 CFR 251); hiding auto-renewal.",
+      "combos": [
+        {
+          "headline": "Your best lawn yet, on autopilot.",
+          "offer": "First treatment free with a season program (program at regular price; conditions printed beside)",
+          "photo_scene": "Lush lawn with a tech applying granules",
+          "sell_the_outcome_line": "Never think about the lawn again."
+        },
+        {
+          "headline": "Improve the beauty and value of your home.",
+          "offer": "Free aeration with Premium program (up to $[X] value, real)",
+          "photo_scene": "Suburban house with thick green lawn",
+          "sell_the_outcome_line": "A yard that looks cared for, every week."
+        },
+        {
+          "headline": "Healthy grass needs healthy soil.",
+          "offer": "Seasonal fertilization from $[X]",
+          "photo_scene": "Soil cross-section next to deep green grass",
+          "sell_the_outcome_line": "Green that lasts all season."
+        }
+      ],
+      "compliance_flags": [
+        "16 CFR 251 'free with purchase' rules.",
+        "Treatments with pesticides: no safety claims (see pesticide notes).",
+        "Payment-plan language ('$X/month') can be a Reg Z trigger if it's credit; if it's a service subscription, state price and cancellation clearly."
+      ],
+      "evidence": [
+        "GOLD-landscaping-004, 008, 010"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "financing_hardscape",
+      "primary_emotion": "relief / possibility",
+      "why": "Big projects ($9k-$17k typical for patios/decks per NAR 2023) feel out of reach; financing makes them doable. GOLD-005 headline 'YOUR DREAM YARD... IT'S INTEREST-FREE!' + '0% APR for 24 months'.",
+      "headline_offer_patterns": [
+        "Outcome headline first; 'Financing available' as the support line",
+        "Rate/term only with full Reg Z disclosure"
+      ],
+      "reinforcing_photo": "Finished paver patio with fire pit and family.",
+      "what_backfires": "Making 'interest-free' the headline without full terms.",
+      "combos": [
+        {
+          "headline": "Your dream yard starts here.",
+          "offer": "Financing available (subject to credit approval)",
+          "photo_scene": "Paver patio with fire pit at dusk",
+          "sell_the_outcome_line": "Backyard nights start this season."
+        },
+        {
+          "headline": "Create a space that fits your life.",
+          "offer": "$[X] off pavers over $[Y]; financing available",
+          "photo_scene": "Planted patio lounge",
+          "sell_the_outcome_line": "Room to relax steps from your door."
+        },
+        {
+          "headline": "Build the patio now. Pay over time.",
+          "offer": "0% APR for [N] months with all Reg Z terms printed (lender-approved only)",
+          "photo_scene": "Family dinner on a new patio",
+          "sell_the_outcome_line": "More summers enjoyed, less waiting."
+        }
+      ],
+      "compliance_flags": [
+        "Reg Z: 'for 24 months' is a repayment-period trigger term; GOLD-005/006 as shown need full disclosures (down payment, terms, APR)."
+      ],
+      "evidence": [
+        "GOLD-landscaping-005, 006",
+        "SRC-REGZ-1026.24"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "new_mover",
+      "primary_emotion": "pride / identity (make it yours)",
+      "why": "Buying a home and wanting to make it your own is the #1 outdoor-project motivation (Houzz 2017).",
+      "headline_offer_patterns": [
+        "'New home? Make the yard yours.'"
+      ],
+      "reinforcing_photo": "Moving boxes on a porch, freshly landscaped front yard.",
+      "what_backfires": "Implying the previous owner's yard is ugly in an insulting way; implying personal knowledge.",
+      "combos": [
+        {
+          "headline": "New home? Make the yard yours.",
+          "offer": "Free design consultation for new homeowners",
+          "photo_scene": "Couple on the porch of a freshly landscaped home",
+          "sell_the_outcome_line": "Love your curb from day one."
+        },
+        {
+          "headline": "Welcome to the neighborhood. Let's get your lawn on track.",
+          "offer": "$[X] off first service",
+          "photo_scene": "Crew mowing while new owners unpack",
+          "sell_the_outcome_line": "One less thing on the move-in list."
+        },
+        {
+          "headline": "Your first spring here, done right.",
+          "offer": "Free lawn health check",
+          "photo_scene": "Tech checking soil in a front yard",
+          "sell_the_outcome_line": "A yard you're proud of from the start."
+        }
+      ],
+      "compliance_flags": [
+        "New-mover lists are purchased data; don't imply personal knowledge."
+      ],
+      "evidence": [
+        "SRC-HOUZZ-LANDSCAPE-2017"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "referral",
+      "primary_emotion": "belonging / liking",
+      "why": "Referral discounts appear in gold templates (GOLD-012: 10% off yearly mowing for referrals). Principle: liking + social proof; no verified landscape-specific test.",
+      "headline_offer_patterns": [
+        "'Refer a neighbor, both get $[X] off'"
+      ],
+      "reinforcing_photo": "Two neighbors chatting over adjoining well-kept lawns.",
+      "what_backfires": "Referral rewards that aren't paid; unclear terms.",
+      "combos": [
+        {
+          "headline": "Share the best lawn on the block.",
+          "offer": "Refer a neighbor: you both get $[X] off",
+          "photo_scene": "Two neighbors talking over matching great lawns",
+          "sell_the_outcome_line": "Better yards for the whole street."
+        },
+        {
+          "headline": "Your neighbor sent you this card.",
+          "offer": "$[X] off first service for referred neighbors",
+          "photo_scene": "Crew working next door",
+          "sell_the_outcome_line": "Join the neighbors who never mow."
+        },
+        {
+          "headline": "Love your lawn? Tell a neighbor.",
+          "offer": "$[X] credit per referral",
+          "photo_scene": "Happy owner waving at a neighbor",
+          "sell_the_outcome_line": "Free service just for sharing."
+        }
+      ],
+      "compliance_flags": [
+        "Real reward terms; any testimonial real and typical."
+      ],
+      "evidence": [
+        "GOLD-landscaping-012"
+      ],
+      "evidence_strength": "thin"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "GOLD-landscaping-005 'IT'S INTEREST-FREE!' + '0% APR for 24 months' vs Reg Z",
+      "resolution": "Compliance wins: '24 months' triggers full disclosure. Keep the outcome headline; put financing as a support line with full terms, or 'Financing available'."
+    },
+    {
+      "conflict": "GOLD-landscaping-002 reports 6,563% ROI (PostcardMania) vs never print unverified results",
+      "resolution": "Vendor-published, unaudited; use only as weak evidence that free-design offers can pull."
+    },
+    {
+      "conflict": "Lawn Doctor 'Don't be embarrassed' (shame) vs 'positive pride' angles",
+      "resolution": "Both allowed (emotion-agnostic). Client chooses; offer both versions."
+    },
+    {
+      "conflict": "Lawn treatment marketing commonly says 'pet-safe' vs pesticide ad rules",
+      "resolution": "Law wins: no safety claims for pesticide treatments. If a product is not a pesticide (e.g., plain fertilizer), the client must still substantiate any safety claim under FTC Act s.5."
+    }
+  ]
+}

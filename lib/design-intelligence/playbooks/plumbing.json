@@ -1,0 +1,227 @@
+{
+  "schema_version": "1.1",
+  "slug": "plumbing",
+  "industry": "Plumbing",
+  "last_updated": "2026-10-27",
+  "words_and_claims_to_avoid": [
+    "Government look-alike design, 'official notice', fake checks or invoices (39 USC 3001)",
+    "Unsubstantiated 'best', '#1', 'guaranteed savings', percent-savings claims (FTC Act s.5)",
+    "Invented or composite testimonials, star ratings or review counts (16 CFR 255)",
+    "'Free' unless it truly costs nothing and carries no hidden obligation",
+    "Fake expiration dates or fake scarcity; any deadline printed must be real",
+    "Demographic/age targeting language (e.g., 'seniors', 'retirees') unless the client has evidence it fits their actual buyers",
+    "'24/7' or 'licensed master plumber' unless true",
+    "Flat-rate/'no hidden fees' unless the pricing actually works that way"
+  ],
+  "compliance_notes": [
+    "If the sale closes in the home: FTC Cooling-Off Rule (16 CFR 429) applies to $25+ in-home sales; the client's contract must carry the 3-day cancel notice. States can add longer windows (e.g., California's 5-day window for buyers 65+ is documented for solar contracts).",
+    "Print the client's contractor license number where the state requires it in ads; requirements vary by state, and the client must confirm their own state's rule (we only verified the specific state rules named below).",
+    "Any discount must be off a real, recently charged price.",
+    "Buyer-initiated emergencies can be excluded from Cooling-Off only with the buyer's signed, handwritten waiver; requested repair visits are excluded but extra goods/services sold during the visit are covered.",
+    "Reg Z, 12 CFR 1026.24 (verified): if a card states a down payment amount or %, the number of payments or repayment period (e.g., 'for 18 months', 'no payments for 12 months'), a payment amount ('$99/mo'), or a finance charge amount, it must also state the down payment, the full repayment terms and the 'annual percentage rate' using that term. Any rate (e.g., '0%') must be stated as an APR. Terms must be ones actually offered. Safe alternative: 'Financing available', which uses no trigger terms. Have the lender review.",
+    "FTC 'Free' Guide, 16 CFR 251 (verified): (1) 'free with purchase' means the paid item is at its regular price (sold openly for about 30 days), with no markup or downgrade to cover the free item; (2) all conditions go right next to the offer, not in an asterisk footnote; (3) if the main job is priced by negotiation or bid (typical for roofs, siding and window packages), 'free [item] with purchase' is improper; (4) don't run the same 'free' offer more than 6 months in any 12; (5) 'gift' or 'bonus' wording doesn't cure a deceptive 'free'.",
+    "Warranty ads, 16 CFR 239 + 702 (verified): 'lifetime/life' must say whose or what life (239.4); 'satisfaction/money-back guarantee' only if the full price is refunded on request, with conditions disclosed (239.3); advertise a warranty only if it is promptly honored (239.5). For consumer products over $15 with a written warranty, the terms must be available before sale; door-to-door sellers must tell buyers before closing that copies are available (702.3); ads should say where the full warranty can be seen (239.2)."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear, joy, pride, relief are all options; the client chooses.",
+    "Only laws/compliance are hard limits.",
+    "Every angle carries a sell-the-outcome line.",
+    "Unverified (agency-only) results are labeled; never quote them as fact on a card."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "emergency",
+      "primary_emotion": "fear of loss, then relief",
+      "why": "Leaks and bursts are vivid losses; the relief promise is the payoff (Roto-Rooter 'Away go troubles'). GOLD-plumbing-006: 'Burst pipe? Clogged drain? Don't wait!'.",
+      "headline_offer_patterns": [
+        "'Drip? Clog? Leak? Solved.'",
+        "Huge phone number; keep-this-card"
+      ],
+      "reinforcing_photo": "Plumber hands-on fixing a pipe; not a staged flood",
+      "what_backfires": "Panic imagery with no clear action; '24/7' that isn't true",
+      "combos": [
+        {
+          "headline": "Drip? Clog? Leak? Solved.",
+          "offer": "$[X] off any repair",
+          "photo_scene": "Plumber under a sink with a wrench",
+          "sell_the_outcome_line": "One call and the water stops."
+        },
+        {
+          "headline": "Keep this card. Your 2 a.m. leak will thank you.",
+          "offer": "24/7 emergency service (only if true)",
+          "photo_scene": "Fridge-magnet style with a tech portrait",
+          "sell_the_outcome_line": "Help is one call away, any hour."
+        },
+        {
+          "headline": "Burst pipe? We're on the way.",
+          "offer": "Same-day service (if true)",
+          "photo_scene": "Van pulling up at night, porch light on",
+          "sell_the_outcome_line": "Dry floors and a calm house by morning."
+        }
+      ],
+      "compliance_flags": [
+        "Cooling-Off: buyer-initiated emergencies are excluded only with the buyer's handwritten, signed waiver."
+      ],
+      "evidence": [
+        "GOLD-plumbing-002, 006",
+        "Roto-Rooter (verified history)"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "fixed_price_service",
+      "primary_emotion": "relief / control (no surprise bill)",
+      "why": "A visible price removes uncertainty. GOLD-plumbing-005, 009 and 012 lead with the price ($75-$89.95 water-heater flush).",
+      "headline_offer_patterns": [
+        "'$[X] water heater flush'",
+        "Question hook: 'Is your water heater more than 10 years old?' (ENERGY STAR advises considering replacement after 10 years). The gold card's '8 to 12 years' line was cut: sources disagree (ENERGY STAR 2009 guide: ~13 yrs average; PNNL: 8-20 yrs; MN Commerce: 10-12)."
+      ],
+      "reinforcing_photo": "Tech flushing a water heater",
+      "what_backfires": "Tiny prices buried in coupon grids",
+      "combos": [
+        {
+          "headline": "$[X] water heater flush.",
+          "offer": "$[X] flat price",
+          "photo_scene": "Tech at a water heater",
+          "sell_the_outcome_line": "Hot water you can count on."
+        },
+        {
+          "headline": "Is your water heater over 10 years old?",
+          "offer": "$[X] flush + inspection",
+          "photo_scene": "Water heater with a visible date tag",
+          "sell_the_outcome_line": "No cold-shower surprises."
+        },
+        {
+          "headline": "Drain cleaning, one price.",
+          "offer": "$[X] drain cleaning",
+          "photo_scene": "Clean, flowing sink",
+          "sell_the_outcome_line": "Drains that just work."
+        }
+      ],
+      "compliance_flags": [
+        "Price must be the real price, with exclusions stated."
+      ],
+      "evidence": [
+        "GOLD-plumbing-005, 009, 012"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "new_mover",
+      "primary_emotion": "belonging / welcome, plus foresight",
+      "why": "GOLD-plumbing-007 ('New to the neighborhood? So are we!') and 011 ('Just moved in? Get the plumbing checked.').",
+      "headline_offer_patterns": [
+        "'Just moved in? Get the plumbing checked.'"
+      ],
+      "reinforcing_photo": "Moving boxes, friendly tech",
+      "what_backfires": "Implying you know private details",
+      "combos": [
+        {
+          "headline": "Just moved in? Get the plumbing checked.",
+          "offer": "Free plumbing check (if truly free)",
+          "photo_scene": "Boxes in a kitchen, tech at the sink",
+          "sell_the_outcome_line": "Settle in knowing your pipes are sound."
+        },
+        {
+          "headline": "Welcome to the neighborhood.",
+          "offer": "$[X] off first service",
+          "photo_scene": "Tech waving at a new homeowner",
+          "sell_the_outcome_line": "A plumber you can trust from day one."
+        },
+        {
+          "headline": "New home, no hidden leaks.",
+          "offer": "Free leak check",
+          "photo_scene": "Tech with a moisture meter",
+          "sell_the_outcome_line": "Peace of mind in your new place."
+        }
+      ],
+      "compliance_flags": [
+        "New-mover lists are usually purchased data; don't imply a personal relationship."
+      ],
+      "evidence": [
+        "GOLD-plumbing-007, 011"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "neighbor_proof",
+      "primary_emotion": "belonging / trust",
+      "why": "GOLD-plumbing-010: 'We just fixed a slab leak on your street.'",
+      "headline_offer_patterns": [
+        "Job-radius headline"
+      ],
+      "reinforcing_photo": "Van on a real local street",
+      "what_backfires": "Fake proximity claims",
+      "combos": [
+        {
+          "headline": "We just fixed a slab leak on your street.",
+          "offer": "$[X] off any repair",
+          "photo_scene": "Van in a neighbor's driveway",
+          "sell_the_outcome_line": "The same fast fix your neighbors got."
+        },
+        {
+          "headline": "Your neighbors call us first.",
+          "offer": "$[X] off",
+          "photo_scene": "Tech with a local homeowner (with permission)",
+          "sell_the_outcome_line": "Trusted help, close by."
+        },
+        {
+          "headline": "Working on [street] this week.",
+          "offer": "Free inspection",
+          "photo_scene": "Crew at a nearby job",
+          "sell_the_outcome_line": "Catch small leaks before they grow."
+        }
+      ],
+      "compliance_flags": [
+        "Only real nearby jobs."
+      ],
+      "evidence": [
+        "GOLD-plumbing-010"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "guarantee",
+      "primary_emotion": "trust / risk reversal",
+      "why": "Benjamin Franklin 'Punctual Plumber': $5 for every minute late, up to $300 (terms vary by franchise).",
+      "headline_offer_patterns": [
+        "Specific punctuality or fix guarantee"
+      ],
+      "reinforcing_photo": "Tech at the door, clock cue",
+      "what_backfires": "Vague guarantees",
+      "combos": [
+        {
+          "headline": "We show up when we say. Or you get paid.",
+          "offer": "Real punctuality guarantee",
+          "photo_scene": "Tech at the door checking a watch",
+          "sell_the_outcome_line": "Your day stays yours."
+        },
+        {
+          "headline": "Fixed right, or we come back at no charge.",
+          "offer": "Written terms",
+          "photo_scene": "Tech at work",
+          "sell_the_outcome_line": "No callbacks, no worries."
+        },
+        {
+          "headline": "Upfront price. No surprises.",
+          "offer": "Flat-rate quote before work",
+          "photo_scene": "Tech showing a homeowner a tablet",
+          "sell_the_outcome_line": "Know the cost before we start."
+        }
+      ],
+      "compliance_flags": [
+        "Guarantee terms disclosed and honored."
+      ],
+      "evidence": [
+        "Benjamin Franklin (verified terms)"
+      ],
+      "evidence_strength": "moderate"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "GOLD-plumbing-001 'Replace cast iron pipes ... for free!' vs FTC s.5",
+      "resolution": "Compliance wins. Only say 'free' if the consumer truly pays nothing; otherwise use 'free evaluation'."
+    }
+  ]
+}

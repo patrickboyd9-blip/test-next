@@ -44,6 +44,7 @@ export function UploadDesign({
   const bothSides = Boolean(design?.front && design?.back)
   const canApprove = bothSides && errors.length === 0 && !readOnly
   const suggestions = design?.review?.suggestions ?? []
+  const complianceWarnings = design?.review?.complianceWarnings ?? []
   const reviewDeclined = Boolean(design?.review?.declined)
   const showReviewPrompt =
     reviewAvailable && bothSides && errors.length === 0 && !readOnly && !reviewDeclined && suggestions.length === 0
@@ -270,6 +271,18 @@ export function UploadDesign({
                 </li>
               ))}
             </ul>
+            {complianceWarnings.length > 0 && (
+              <div className="mt-4 rounded-md border border-amber-300 bg-amber-50 p-3" data-testid="upload-compliance-warnings">
+                <p className="text-sm font-medium">Advertising rules to check before you mail</p>
+                <ul className="mt-2 flex list-disc flex-col gap-2 pl-5">
+                  {complianceWarnings.map((warning) => (
+                    <li key={warning} className="text-sm leading-6">
+                      {warning}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

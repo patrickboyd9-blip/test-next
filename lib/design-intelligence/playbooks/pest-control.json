@@ -1,0 +1,381 @@
+{
+  "schema_version": "1.1",
+  "slug": "pest-control",
+  "industry": "Pest control (general pest, termite, rodent, mosquito)",
+  "last_updated": "2026-10-28",
+  "words_and_claims_to_avoid": [
+    "Government look-alike design, 'official notice', fake checks or invoices (39 USC 3001)",
+    "Unsubstantiated 'best', '#1', 'voted #1', 'guaranteed results', percent-savings claims (FTC Act s.5)",
+    "Invented or composite testimonials, star ratings or review counts (16 CFR 255)",
+    "'Free' unless it truly costs nothing and carries no hidden obligation (16 CFR 251)",
+    "Fake expiration dates or fake scarcity; any deadline printed must be real",
+    "Demographic/age targeting language (e.g., 'seniors', 'retirees') unless the client has evidence it fits their actual buyers",
+    "Any vendor case-study result (calls, ROI, revenue) printed as if it were the client's own result",
+    "'Safe', 'harmless', 'non-toxic', 'nonpoisonous', 'pet-safe', 'kid-safe', 'family-safe', 'safe for the environment' (federal + state pesticide rules)",
+    "'EPA approved', 'EPA registered', 'state approved'",
+    "'Organic', 'all natural', 'green', 'eco-friendly', 'environmentally responsible' for treatments",
+    "'Pest-free guaranteed', 'kills 100%', 'eliminates all' without substantiation and a real guarantee",
+    "'Prevents disease', 'protects your family's health', 'stops Lyme/West Nile' or similar disease claims unless the product label supports them (EPA bars disease/health-protection implications on many labels)",
+    "'Pest-free' as a promise (GOLD-002 'pest-free this summer'); use 'fewer pests' or a re-service guarantee",
+    "Children or pets shown in or near a just-treated area (implied safety; NJ bans misleading pictures)",
+    "Fake 'violation' or 'inspection notice' designs that look like a city/county notice (39 USC 3001; CO also bans impersonating inspectors)"
+  ],
+  "compliance_notes": [
+    "If the sale closes in the home: FTC Cooling-Off Rule (16 CFR 429) applies to $25+ in-home sales; the client's contract must carry the 3-day cancel notice. States can add longer windows.",
+    "Any discount or 'save X%' must be off a real, recently charged price; 'save 40%' with no reference price is not allowed.",
+    "FTC 'Free' Guide, 16 CFR 251 (verified): (1) 'free with purchase' means the paid item is at its regular price (sold openly for about 30 days), with no markup or downgrade to cover the free item; (2) all conditions go right next to the offer, not in an asterisk footnote; (3) if the main job is priced by negotiation or bid, 'free [item] with purchase' is improper; (4) don't run the same 'free' offer more than 6 months in any 12; (5) 'gift' or 'bonus' wording doesn't cure a deceptive 'free'.",
+    "Warranty ads, 16 CFR 239 + 702 (verified): 'lifetime/life' must say whose or what life (239.4); 'satisfaction/money-back guarantee' only if the full price is refunded on request, with conditions disclosed (239.3); advertise a warranty only if it is promptly honored (239.5); ads should say where the full warranty can be seen (239.2).",
+    "Testimonials and star ratings must be real, typical and current; disclose any material connection (16 CFR 255).",
+    "Pesticide safety claims (verified): never say 'safe', 'harmless', 'non-toxic', 'nonpoisonous', 'pet-safe', 'kid-safe', 'eco-safe', with or without 'when used as directed'. Federal label rule 40 CFR 156.10(a)(5)(ix)-(x); explicit ad bans in TX (4 TAC 7.152), NJ (N.J.A.C. 7:30-2.12), CA (16 CCR 1999.5) and CO (C.R.S. 35-9-120). Assume every state is at least this strict until the client confirms.",
+    "No 'EPA approved', 'EPA registered' or anything implying government endorsement (40 CFR 156.10(a)(5)(v); TX 7.152(a)(5); CA 1999.5).",
+    "'Organic', 'natural', 'green', 'environmentally friendly' for pesticide services are banned outright in TX and NJ and need narrow substantiation elsewhere (FTC Green Guides 16 CFR 260).",
+    "Effectiveness claims ('kills 100%', 'pest-free guaranteed', 'eliminates') need substantiation and must match the product label (FIFRA s.12; TX 7.152(a)(11); CA 1999.5(f)(14)). Prefer outcome language with a re-service guarantee.",
+    "Show the licensed business name (TX requires it in every ad); NJ license references must include the word 'pesticide'. Don't advertise services the client isn't licensed for.",
+    "Pictures count: NJ bans misleading pictorial ads, so no children or pets playing in a just-treated area implying safety.",
+    "Florida, Texas and others treat termite work as regulated (inspection reports, contracts); state-specific termite advertising rules beyond the four states above were not verified.",
+    "Insurance fact on a card: cite the source ('Insurance Information Institute') and say 'usually' or 'typically': policies vary.",
+    "If the pest service sells in-home (e.g., termite contract after inspection) for $25+, Cooling-Off applies; buyer-requested emergency visits need a signed handwritten waiver to be excluded."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear, disgust, joy, pride, status, relief are all options; the client chooses.",
+    "Only laws/compliance are hard limits.",
+    "Every angle and combo carries a sell-the-outcome line.",
+    "Unverified (agency/vendor-only) results are labeled; never quote them as fact on a card."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "emergency_or_active_infestation",
+      "primary_emotion": "disgust, then relief",
+      "why": "A seen pest is a disgust trigger (Curtis et al. 2011); the card must deliver an immediate, confident fix. GOLD-005 'They're coming' and GOLD-010 'Seen one this summer?' open the loop.",
+      "headline_offer_patterns": [
+        "'Seen one? Call today.'",
+        "Question hook + same-week service (if true)"
+      ],
+      "reinforcing_photo": "Single isolated pest macro (small) + clean, calm home (large).",
+      "what_backfires": "Swarm/gore imagery with no fix; graphic pests the reader wants to throw away; '24/7' or 'same-day' that isn't true.",
+      "combos": [
+        {
+          "headline": "Seen one this summer?",
+          "offer": "Free roach inspection",
+          "photo_scene": "Single cockroach macro on white, clean kitchen inset",
+          "sell_the_outcome_line": "A kitchen you trust again at midnight."
+        },
+        {
+          "headline": "They're coming. Be ready.",
+          "offer": "$[X] off first service",
+          "photo_scene": "Dramatic illustrated wasp cluster, small, beside a calm backyard",
+          "sell_the_outcome_line": "Enjoy the yard without the buzzing."
+        },
+        {
+          "headline": "Mice in the walls? Hear that scratching?",
+          "offer": "Free rodent inspection",
+          "photo_scene": "Tech sealing an entry point at the foundation",
+          "sell_the_outcome_line": "Quiet nights and a sealed-up home."
+        },
+        {
+          "headline": "Ants marching in? We stop the parade.",
+          "offer": "$[X] off ant service",
+          "photo_scene": "Tech treating the exterior perimeter",
+          "sell_the_outcome_line": "Counters that stay clean."
+        }
+      ],
+      "compliance_flags": [
+        "No 'safe'/'harmless' to calm the reader: use outcome language instead.",
+        "Cooling-Off waiver rule for buyer-requested emergencies."
+      ],
+      "evidence": [
+        "GOLD-pest-control-005, 010",
+        "SRC-CURTIS-2011"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "free_inspection",
+      "primary_emotion": "fear of hidden loss / loss aversion",
+      "why": "Termites and rodents do damage out of sight; termite damage is usually uninsured (III). An inspection costs the reader nothing and resolves uncertainty.",
+      "headline_offer_patterns": [
+        "'Free termite inspection': with the uninsured-damage fact",
+        "'Find it before it finds your wallet'"
+      ],
+      "reinforcing_photo": "Inspector with flashlight in a crawlspace or at a sill plate.",
+      "what_backfires": "Scare copy implying damage you haven't found ('You have termites!'); inspection notices that look official.",
+      "combos": [
+        {
+          "headline": "Termite damage usually isn't covered by home insurance.",
+          "offer": "Free termite inspection",
+          "photo_scene": "Inspector checking a sill plate with a flashlight",
+          "sell_the_outcome_line": "Know your home is solid."
+        },
+        {
+          "headline": "Protect your investment.",
+          "offer": "Free whole-home pest inspection",
+          "photo_scene": "Sunny home exterior with small pest cut-outs",
+          "sell_the_outcome_line": "Your biggest asset, protected."
+        },
+        {
+          "headline": "What's living under your house?",
+          "offer": "Free crawlspace inspection",
+          "photo_scene": "Inspector entering a crawlspace",
+          "sell_the_outcome_line": "Peace of mind from the ground up."
+        }
+      ],
+      "compliance_flags": [
+        "Cite the insurance source; 'usually'.",
+        "No government/insurer look-alike (39 USC 3001).",
+        "Inspection must truly be free; any WDI/real-estate report fee stated."
+      ],
+      "evidence": [
+        "SRC-III-PERILS",
+        "GOLD-pest-control-007"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "seasonal",
+      "primary_emotion": "anticipation / fear of the coming wave",
+      "why": "Pests are seasonal (mosquitoes, ants in spring, rodents in fall). GOLD-002 used a limited-time spring offer; NPMA ranks ants and mosquitoes as most common.",
+      "headline_offer_patterns": [
+        "'Spring ant season is here'",
+        "'Before the mice move in for winter'"
+      ],
+      "reinforcing_photo": "Season-specific scene: summer backyard evening; fall house exterior.",
+      "what_backfires": "Fake 'season ends Friday' deadlines; generic 'summer special' with no date.",
+      "combos": [
+        {
+          "headline": "Keep your summer bug-bite free.",
+          "offer": "$[X] off mosquito service through [date]",
+          "photo_scene": "Family dinner on a backyard patio at dusk",
+          "sell_the_outcome_line": "Backyard evenings without swatting."
+        },
+        {
+          "headline": "Mice are looking for a warm home. Not yours.",
+          "offer": "$[X] off rodent exclusion through [date]",
+          "photo_scene": "Tech sealing a gap around a pipe at the foundation",
+          "sell_the_outcome_line": "A cozy winter for you only."
+        },
+        {
+          "headline": "Spring means ants. We stop them at the door.",
+          "offer": "$[X] off first spring service",
+          "photo_scene": "Tech treating the perimeter in spring",
+          "sell_the_outcome_line": "Clean counters all season."
+        }
+      ],
+      "compliance_flags": [
+        "Mosquito: don't claim disease prevention unless label-supported.",
+        "Real dates."
+      ],
+      "evidence": [
+        "GOLD-pest-control-002",
+        "SRC-NPMA-2021"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "recurring_plan",
+      "primary_emotion": "security / control",
+      "why": "Commitment + repeated pairing (Watson conditioning, mere exposure). GOLD-006 prices plans ('$150 per quarter'); GOLD-008 personalized lapsed-customer reminder (vendor-published results).",
+      "headline_offer_patterns": [
+        "'Quarterly protection from $[X]'",
+        "Lapsed: '[Name], it's been 6 months since your last service'"
+      ],
+      "reinforcing_photo": "Tech at the perimeter; 4-season strip.",
+      "what_backfires": "Hidden auto-renewal; 'guaranteed pest-free' plans.",
+      "combos": [
+        {
+          "headline": "Pests have seasons. You have a plan.",
+          "offer": "Quarterly plan from $[X]/quarter",
+          "photo_scene": "Tech treating exterior on a sunny day",
+          "sell_the_outcome_line": "Bugs become something you never think about."
+        },
+        {
+          "headline": "[Name], it's been 6 months since your last service.",
+          "offer": "$[X] home treatment",
+          "photo_scene": "Clean personalized layout with pest icon row",
+          "sell_the_outcome_line": "Pick up right where your protection left off."
+        },
+        {
+          "headline": "Cover more. Control more. Save more.",
+          "offer": "Plans starting at $[X] per quarter",
+          "photo_scene": "Tech spraying around a home",
+          "sell_the_outcome_line": "Year-round confidence, one simple price."
+        }
+      ],
+      "compliance_flags": [
+        "State price, frequency, cancellation next to the offer.",
+        "Personalized lapsed mail only to real past customers."
+      ],
+      "evidence": [
+        "GOLD-pest-control-006, 008"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "dollar_off_first_service",
+      "primary_emotion": "low-risk trial / smart-shopper pride",
+      "why": "GOLD-001 ($50 ant / $100 termite), GOLD-009 ($50 off first treatment), GOLD-003 (10% off new customers). Specific dollars beat vague percents (#15).",
+      "headline_offer_patterns": [
+        "'$[X] off your first treatment'",
+        "Two-pest badge pair ($[X] ants / $[Y] termites)"
+      ],
+      "reinforcing_photo": "Family + home, or tech at the door.",
+      "what_backfires": "Coupon clutter; percent off with no real regular price.",
+      "combos": [
+        {
+          "headline": "Protect your home and your family from pests.",
+          "offer": "$[X] off ant control / $[Y] off termite control",
+          "photo_scene": "Real family photo + home",
+          "sell_the_outcome_line": "Home feels like yours again."
+        },
+        {
+          "headline": "Pardon our trucks.",
+          "offer": "$[X] off your first treatment",
+          "photo_scene": "Tech spraying a yard",
+          "sell_the_outcome_line": "Join the neighbors who stopped seeing bugs."
+        },
+        {
+          "headline": "Don't let pests bug you.",
+          "offer": "10% off first service for new customers",
+          "photo_scene": "Three crisp pest macros in a top band",
+          "sell_the_outcome_line": "Relax, it's handled."
+        }
+      ],
+      "compliance_flags": [
+        "Real regular price; first-time-customer conditions next to the offer."
+      ],
+      "evidence": [
+        "GOLD-pest-control-001, 003, 009"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "new_mover",
+      "primary_emotion": "foresight / belonging",
+      "why": "GOLD-011 'Welcome to the neighborhood.' + free inspection + $50 off. Rationale: unknown history of a new home (inference).",
+      "headline_offer_patterns": [
+        "'New home? Know what moved in before you did.'"
+      ],
+      "reinforcing_photo": "Couple carrying a moving box into a home.",
+      "what_backfires": "Implying the home is infested; personal-data creepiness.",
+      "combos": [
+        {
+          "headline": "Welcome to the neighborhood.",
+          "offer": "Free inspection + $[X] off",
+          "photo_scene": "Couple carrying moving boxes",
+          "sell_the_outcome_line": "Start fresh in a home that's only yours."
+        },
+        {
+          "headline": "New home? Know what moved in before you did.",
+          "offer": "Free pest inspection",
+          "photo_scene": "Tech inspecting a garage with boxes stacked",
+          "sell_the_outcome_line": "Settle in with nothing to worry about."
+        },
+        {
+          "headline": "First week in? First pest check free.",
+          "offer": "Free inspection for new homeowners",
+          "photo_scene": "Friendly tech at the front door",
+          "sell_the_outcome_line": "One less worry on move-in week."
+        }
+      ],
+      "compliance_flags": [
+        "New-mover lists are purchased data."
+      ],
+      "evidence": [
+        "GOLD-pest-control-011"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "guarantee",
+      "primary_emotion": "trust / risk reversal",
+      "why": "A re-service guarantee lets the card promise an outcome without an unsubstantiated 'pest-free' claim.",
+      "headline_offer_patterns": [
+        "'If they come back, so do we, at no charge'"
+      ],
+      "reinforcing_photo": "Tech returning to a home, friendly handshake.",
+      "what_backfires": "'Guaranteed pest-free' or 'kills 100%' (effectiveness claims needing substantiation).",
+      "combos": [
+        {
+          "headline": "If pests come back, so do we, at no charge.",
+          "offer": "Free re-service between scheduled visits (real terms)",
+          "photo_scene": "Tech shaking hands at the door",
+          "sell_the_outcome_line": "Protection that keeps its word."
+        },
+        {
+          "headline": "Bugs back? We're back.",
+          "offer": "Re-service guarantee",
+          "photo_scene": "Truck pulling into a driveway",
+          "sell_the_outcome_line": "No extra bill, no extra worry."
+        },
+        {
+          "headline": "We stand behind every treatment.",
+          "offer": "Written service guarantee",
+          "photo_scene": "Tech with homeowner reviewing a service report",
+          "sell_the_outcome_line": "Confidence you can see in writing."
+        }
+      ],
+      "compliance_flags": [
+        "16 CFR 239: guarantee terms disclosed, honored; 'satisfaction guarantee' needs full refund."
+      ],
+      "evidence": [
+        "SRC-FTC-WARR-239"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "referral",
+      "primary_emotion": "liking / belonging",
+      "why": "GOLD-003 pairs new-customer and referral discounts. No pest-specific test found.",
+      "headline_offer_patterns": [
+        "'Refer a neighbor: you both save $[X]'"
+      ],
+      "reinforcing_photo": "Two neighbors talking in adjoining yards.",
+      "what_backfires": "Unpaid or unclear rewards.",
+      "combos": [
+        {
+          "headline": "Share the bug-free feeling.",
+          "offer": "Refer a neighbor: you both get $[X] off",
+          "photo_scene": "Neighbors chatting over a fence",
+          "sell_the_outcome_line": "A whole street with fewer pests."
+        },
+        {
+          "headline": "Your neighbor recommended us.",
+          "offer": "$[X] off for referred neighbors",
+          "photo_scene": "Tech next door",
+          "sell_the_outcome_line": "Same trusted service, next door."
+        },
+        {
+          "headline": "Love your service? Tell a friend.",
+          "offer": "10% off when you refer a new customer",
+          "photo_scene": "Happy customer at the door",
+          "sell_the_outcome_line": "Save while you help a friend."
+        }
+      ],
+      "compliance_flags": [
+        "'Bug-free' here is a feeling line, not a claim; avoid 'pest-free guaranteed'.",
+        "Real reward terms."
+      ],
+      "evidence": [
+        "GOLD-pest-control-003"
+      ],
+      "evidence_strength": "thin"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "GOLD-pest-control-002 'Keep your home pest-free this summer' vs effectiveness-substantiation rules (TX 7.152(a)(11), CA 1999.5)",
+      "resolution": "Compliance wins: use 'fewer pests' or pair 'pest-free' with a real re-service guarantee; never promise it outright."
+    },
+    {
+      "conflict": "Common pest marketing 'safe for kids and pets' / 'eco-friendly' vs 40 CFR 156.10 and TX/NJ/CA/CO ad bans",
+      "resolution": "Law wins: banned outright. Sell the outcome (a calm home) instead of safety."
+    },
+    {
+      "conflict": "Disgust/swarm imagery (GOLD-005 'They're coming') vs C-3PO P6 'consequence carefully'",
+      "resolution": "Both allowed. Keep the pest small and crisp, pair with a calm fix image; avoid cheap gore. Client chooses intensity."
+    },
+    {
+      "conflict": "Vendor ROI figures (GOLD-007 964%, GOLD-008 1,204%) vs never print unverified numbers",
+      "resolution": "Unaudited vendor claims; use only as weak evidence that plan and lapsed-customer offers can work."
+    }
+  ]
+}

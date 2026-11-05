@@ -1,0 +1,297 @@
+{
+  "schema_version": "1.1",
+  "slug": "med-spa-chiro",
+  "industry": "Med spas / aesthetics (injectables, laser, facials, body) and chiropractic",
+  "last_updated": "2026-11-02",
+  "words_and_claims_to_avoid": [
+    "'BOTOX' / 'Botox' unless the product is genuine AbbVie/Allergan BOTOX from authorized sources; use 'neuromodulator' or 'wrinkle-relaxing injections' otherwise (FDA warning letters; CDC counterfeit outbreak)",
+    "'FREE units of Botox', 'Buy 2 units get 1 FREE', 'FREE Botox with filler' (GOLD-med-spa-chiro-003/017/038): free/BOGO prescription-drug offers carry FTC Free Guide, state medical-board and (for beneficiaries) inducement risk; have the client's counsel approve",
+    "'FDA-approved' for off-label uses or for the spa itself; 'no risks', 'no downtime' without substantiation",
+    "'Look younger, live longer' (GOLD-med-spa-chiro-005) longevity claims; 'cures', 'fixes', 'corrects' for chiropractic; disease-treatment claims (e.g., headaches, sleep) without competent and reliable scientific evidence",
+    "'#1 Medi-Day Spa' (GOLD-med-spa-chiro-006) without substantiation",
+    "'(a value of $250)' / 'reg. $450' unless that is the actual regular price (16 CFR 233) (GOLD-med-spa-chiro-002/054)",
+    "'Injured in an auto accident?' mail to accident-report lists in Florida within 60 days (FL 817.234); check other states",
+    "Before/after photos without authorization or comparable presentation; 'results not typical' disclaimers",
+    "Treatment-specific personalization on the outside of a postcard ('your last Botox')"
+  ],
+  "compliance_notes": [
+    "FDA/CDC (verified): FDA warning letter to Pure Indulgence Aesthetics (TX, 4/1/2026) found a med spa administered far more 'Botox' than it bought from AbbVie and held an unlabeled botulinum toxin vial (DSCSA violations). CDC/FDA 2024: 22 people in 11 states harmed by counterfeit or mishandled botulinum toxin, mostly given by unlicensed people or in non-healthcare settings. Implication for ads: use brand names only for genuine product; suspiciously low per-unit prices invite scrutiny; never imply a non-medical setting is fine.",
+    "Florida s. 456.062 (verified, 2026): ads for free/discounted services by physicians (ch. 458/459), chiropractors (ch. 460), nurses (ch. 464) and other listed licensees must print the 72-hour right-to-refuse statement in capitals. Non-licensee estheticians may not be covered; the client must confirm.",
+    "Florida s. 817.234 (verified, 2026 statutes): chiropractors (and others) may not solicit motor-vehicle-accident victims by direct mail within 60 days of the accident for tort/PIP claims; advertising to the general public is allowed. Other states have similar rules (not verified).",
+    "Medicare/Medicaid patients (OIG, verified): free exams/X-rays/gifts must fit nominal value ($15/item, $75/yr) or an exception; routine copay waivers and 'no out-of-pocket' ads are suspect.",
+    "HIPAA (verified): reactivation mail about the provider's own services to its own patients is allowed without authorization unless a third party pays for it; HIPAA applies if the practice is a covered entity. Keep treatment details off the outside of postcards either way.",
+    "Before/after and testimonials: 16 CFR 255 (typical-results rule); California BPC 651 (comparable images, named procedure, 'the same before and after results may not occur for all patients').",
+    "Gift cards (Reg E 12 CFR 1005.20, verified): purchased cards must stay valid at least 5 years; promotional/bonus cards are exempt only if they say 'promotional' on the front with expiry and fees.",
+    "Negative option/memberships: ROSCA online; state ARLs (e.g., CA 17602, AB 2863 from 7/1/2025); FTC click-to-cancel amendments vacated July 2025 (ANPRM March 2026).",
+    "State corporate-practice-of-medicine, supervision and delegation rules for injectables vary by state (not verified tonight); the client must confirm who may inject and who must be named in ads."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear, joy, pride, relief are all options; the client chooses.",
+    "Only laws/compliance are hard limits.",
+    "Every angle carries a sell-the-outcome line.",
+    "Unverified (agency-only) results are labeled; never quote them as fact on a card."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "injectable_promo",
+      "primary_emotion": "pride / anticipation",
+      "why": "Neuromodulators are the most common aesthetic procedure (ASPS 2024); buyers compare price, but trust in product authenticity matters after the counterfeit outbreak.",
+      "headline_offer_patterns": [
+        "'$[X] off your first wrinkle-relaxing treatment'",
+        "'New-client injectable special through [date]' with licensed injector named"
+      ],
+      "reinforcing_photo": "Natural portrait with subtle results; injector's real face",
+      "what_backfires": "Rock-bottom per-unit prices, 'free units', brand names for non-brand product, extreme before/afters",
+      "combos": [
+        {
+          "headline": "Look as rested as you feel.",
+          "offer": "$[X] off your first neuromodulator treatment with [licensed injector, credentials]",
+          "photo_scene": "Soft-light portrait, real client (authorized)",
+          "sell_the_outcome_line": "Catch your reflection and smile."
+        },
+        {
+          "headline": "Subtle. Natural. You.",
+          "offer": "Free consultation with [RN/NP/MD name]",
+          "photo_scene": "Injector consulting a client, calm room",
+          "sell_the_outcome_line": "Look refreshed, not 'done'."
+        },
+        {
+          "headline": "Real BOTOX®. Real expertise.",
+          "offer": "$[X] off BOTOX® Cosmetic for new clients (genuine product, authorized sourcing)",
+          "photo_scene": "Close-up of a genuine sealed carton on a clinic tray (no needle)",
+          "sell_the_outcome_line": "Confidence that what goes in your face is the real thing."
+        }
+      ],
+      "compliance_flags": [
+        "Use BOTOX only for genuine AbbVie product; FDA/CDC counterfeit warnings.",
+        "Free/BOGO units of a prescription drug: have counsel approve (FTC Free Guide; state medical-board rules; OIG for beneficiaries).",
+        "FL 456.062 statement for licensee discount ads.",
+        "Name the licensed injector where the state requires; delegation rules vary."
+      ],
+      "evidence": [
+        "SRC-ASPS-2024",
+        "SRC-FDA-WL-723267",
+        "SRC-CDC-COUNTERFEIT-BOTOX",
+        "GOLD-med-spa-chiro-003/017/028/038"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "free_consult_aesthetic",
+      "primary_emotion": "curiosity / hope",
+      "why": "Lowers the first step for higher-ticket treatments (laser, body contouring).",
+      "headline_offer_patterns": [
+        "'Free consultation'",
+        "'Scan for a private offer'"
+      ],
+      "reinforcing_photo": "Calm consult room, client and provider talking",
+      "what_backfires": "Body-shaming before photos; 'without surgery' guarantees",
+      "combos": [
+        {
+          "headline": "Get in shape for the season, without surgery.",
+          "offer": "Free body-contouring consultation",
+          "photo_scene": "Client trying on a favorite outfit, mirror",
+          "sell_the_outcome_line": "Feel great in what you already own."
+        },
+        {
+          "headline": "Ditch the razor for good.",
+          "offer": "Free laser consult + $[X] off first session",
+          "photo_scene": "Smooth legs, beach towel",
+          "sell_the_outcome_line": "Smooth skin, zero morning routine."
+        },
+        {
+          "headline": "Your skin, your plan.",
+          "offer": "Free skin analysis",
+          "photo_scene": "Esthetician with a client under soft light",
+          "sell_the_outcome_line": "Skin you're happy to show bare."
+        }
+      ],
+      "compliance_flags": [
+        "Results claims need substantiation; disclose typical results (16 CFR 255).",
+        "'Free' must be truly free (16 CFR 251)."
+      ],
+      "evidence": [
+        "GOLD-med-spa-chiro-009/015/044"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "reactivation_cycle",
+      "primary_emotion": "anticipation / habit",
+      "why": "Repeat cycles; reminders at the right interval (conditioning; commitment).",
+      "headline_offer_patterns": [
+        "'Your glow is due'",
+        "'We miss you: $[X] off your next visit'"
+      ],
+      "reinforcing_photo": "Relaxed client mid-facial",
+      "what_backfires": "Revealing treatment details on the outside; guilt-heavy copy",
+      "combos": [
+        {
+          "headline": "Your glow is due.",
+          "offer": "$[X] off your next facial by [date]",
+          "photo_scene": "Client relaxing under a warm towel",
+          "sell_the_outcome_line": "Keep the look you love, without the gap."
+        },
+        {
+          "headline": "Welcome back, [Name].",
+          "offer": "Returning-client 3-visit package",
+          "photo_scene": "Real client leaping/joyful (GOLD-med-spa-chiro-014 style)",
+          "sell_the_outcome_line": "Feel like yourself again."
+        },
+        {
+          "headline": "Back to your best skin.",
+          "offer": "Free add-on with your next booking (regular price on the main service)",
+          "photo_scene": "Close-up of glowing skin",
+          "sell_the_outcome_line": "Skin that turns heads again."
+        }
+      ],
+      "compliance_flags": [
+        "HIPAA: own patients OK; no treatment details visible on postcards.",
+        "Free add-on only if the main service is at its regular price (16 CFR 251)."
+      ],
+      "evidence": [
+        "GOLD-med-spa-chiro-011/014",
+        "MMR-021 (vendor-reported)"
+      ],
+      "evidence_strength": "moderate principle; vendor-only card evidence"
+    },
+    {
+      "offer_type": "chiro_new_patient",
+      "primary_emotion": "fear/frustration -> relief",
+      "why": "Pain is common (39% back pain); a low-cost first visit answers cost and uncertainty.",
+      "headline_offer_patterns": [
+        "'$[X] new-patient visit: exam + adjustment'",
+        "'Free consultation'"
+      ],
+      "reinforcing_photo": "Activity regained: lifting a child, golf, gardening",
+      "what_backfires": "Rendered glowing spines; X-ray scare imagery; 'cures'",
+      "combos": [
+        {
+          "headline": "Pick up your kids without wincing.",
+          "offer": "$[X] new-patient exam + adjustment",
+          "photo_scene": "Parent lifting a laughing child",
+          "sell_the_outcome_line": "Back to the moments that matter."
+        },
+        {
+          "headline": "Back pain benched you? Let's get you back in.",
+          "offer": "Free consultation (truly free)",
+          "photo_scene": "Weekend athlete returning to the field",
+          "sell_the_outcome_line": "Play the whole game again."
+        },
+        {
+          "headline": "Your back, your weekend, back.",
+          "offer": "$[X] first visit; HSA/FSA welcome [if accepted]",
+          "photo_scene": "Gardener kneeling in the sun",
+          "sell_the_outcome_line": "Spend Saturday in the garden, not on the couch."
+        }
+      ],
+      "compliance_flags": [
+        "FL 456.062 statement on free/discounted chiro ads.",
+        "X-rays only when clinically indicated; 'free X-rays' to Medicare/Medicaid patients within nominal value.",
+        "No cure/disease claims without competent and reliable scientific evidence."
+      ],
+      "evidence": [
+        "SRC-CDC-NCHS-415",
+        "GOLD-med-spa-chiro-019-024, 045, 047, 049-051",
+        "GOLD-med-spa-chiro-001 (PostcardMania, vendor-reported) - agency-only unverified"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "auto_accident_injury",
+      "primary_emotion": "fear -> relief",
+      "why": "Whiplash and accident injuries; urgency is real but heavily regulated.",
+      "headline_offer_patterns": [
+        "'Injured in a car accident? Get checked.'",
+        "General-public framing, not targeted to accident-report lists"
+      ],
+      "reinforcing_photo": "Calm exam scene; not crash imagery",
+      "what_backfires": "Mailing accident-report lists within restricted windows; 'free' for PIP-billed care; scare crash photos",
+      "combos": [
+        {
+          "headline": "Hurt in a fender bender? Get checked.",
+          "offer": "Exam and consultation; PIP/insurance billing explained",
+          "photo_scene": "Chiropractor examining a neck, calm",
+          "sell_the_outcome_line": "Know you're OK, and get back to normal."
+        },
+        {
+          "headline": "Whiplash can show up days later.",
+          "offer": "Book an evaluation this week",
+          "photo_scene": "Person driving relaxed after recovery",
+          "sell_the_outcome_line": "Drive pain-free again."
+        },
+        {
+          "headline": "After the accident, take care of you.",
+          "offer": "New-patient evaluation $[X]",
+          "photo_scene": "Patient talking with chiropractor",
+          "sell_the_outcome_line": "Peace of mind after a scary day."
+        }
+      ],
+      "compliance_flags": [
+        "FL 817.234: no direct mail to accident victims within 60 days for tort/PIP; general-public ads OK. Other states not verified.",
+        "'Whiplash at 10 MPH' type stats need a real source (GOLD-med-spa-chiro-027 unsourced).",
+        "FL 456.062 on discounted exams."
+      ],
+      "evidence": [
+        "SRC-FL-817.234",
+        "GOLD-med-spa-chiro-025/027",
+        "MMR-041 (vendor)"
+      ],
+      "evidence_strength": "thin + legal constraints"
+    },
+    {
+      "offer_type": "referral_gift_certificate",
+      "primary_emotion": "love / reciprocity",
+      "why": "Happy patients invite family; gift-of-health certificates use the referrer's relationship.",
+      "headline_offer_patterns": [
+        "'Share the relief: give a Gift of Health certificate'",
+        "'$100 gift card for $79' (seasonal)"
+      ],
+      "reinforcing_photo": "Two friends/family together, warm",
+      "what_backfires": "Cash rewards for referrals in health care; non-compliant gift cards",
+      "combos": [
+        {
+          "headline": "Know someone who's hurting?",
+          "offer": "Gift-of-Health certificate for a friend's first visit",
+          "photo_scene": "Two friends walking, one hand on the other's shoulder",
+          "sell_the_outcome_line": "Help someone you love feel better."
+        },
+        {
+          "headline": "Give the glow.",
+          "offer": "$[X] gift card, bonus $[Y] promotional card (terms printed)",
+          "photo_scene": "Gift card on a spa towel",
+          "sell_the_outcome_line": "The gift they'll actually use."
+        },
+        {
+          "headline": "Thank you for trusting us.",
+          "offer": "Patient appreciation event invite",
+          "photo_scene": "Front-desk team waving",
+          "sell_the_outcome_line": "Feel cared for, every visit."
+        }
+      ],
+      "compliance_flags": [
+        "Referral rewards to patients/third parties may be illegal for federal-program patients (AKS) and under state rules; no cash for referrals.",
+        "Reg E gift card rules; promotional cards labeled 'promotional' with expiry."
+      ],
+      "evidence": [
+        "GOLD-med-spa-chiro-048 (PostcardMania, vendor-reported $29,311) - agency-only unverified",
+        "GOLD-med-spa-chiro-061"
+      ],
+      "evidence_strength": "thin"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "Gold set's free/BOGO Botox units (GOLD-med-spa-chiro-003/017/038) and very low per-unit prices vs FDA/CDC counterfeit enforcement and state medical-board rules",
+      "resolution": "Compliance wins. Offer $ off a treatment from a named licensed injector; use the BOTOX brand only for genuine product; free-unit offers only with counsel sign-off."
+    },
+    {
+      "conflict": "MMR-041 chiro accident-list urgency ('LAST chance') vs relational tone and FL 817.234",
+      "resolution": "Law wins on list timing (no FL direct mail within 60 days). Tone is the client's choice; both fear and relational are allowed when legal."
+    },
+    {
+      "conflict": "Pain-photo cliches (rendered spines, people clutching necks) vs sell-the-outcome rule",
+      "resolution": "Offer both: the client may use a pain image, but each combo includes an outcome photo option (activity regained). No votes yet to settle it."
+    }
+  ]
+}

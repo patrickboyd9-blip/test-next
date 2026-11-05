@@ -1,0 +1,329 @@
+{
+  "schema_version": "1.1",
+  "slug": "home-security",
+  "industry": "Home security and alarm monitoring (incl. video doorbells, smart home)",
+  "last_updated": "2026-10-29",
+  "words_and_claims_to_avoid": [
+    "'80% of home robberies go unsolved' (GOLD-006): mislabels robbery vs burglary and lacks a source. Use FBI burglary clearance with year and source.",
+    "'Every home should have...' as an implied requirement; 'required by law/insurance' unless true.",
+    "'Free system' / 'free security system' without the monitoring contract, term, and fees right next to it (16 CFR 251).",
+    "'About $1 a day' unless that's the real all-in monthly price including required fees.",
+    "Implying police or government affiliation (badges, seals, 'official notice') or that a crime happened nearby unless true.",
+    "Claiming to be the customer's current provider, an 'upgrade', or that a competitor is going out of business (ADT v. Vivint pattern).",
+    "'Guaranteed protection' / 'burglar-proof' / 'police respond faster' without substantiation; insurance discount claims unless the insurer offers them.",
+    "Unsubstantiated '#1' / 'most trusted' claims."
+  ],
+  "compliance_notes": [
+    "State alarm licensing: many states require the company license number in ads. California: alarm company operators must show name and BSIS license number in advertising (BPC 7599.44). Texas: name, address and license number in ads (Occ. Code 1702; 37 TAC 35.9). Client must confirm their state.",
+    "In-home sales of $25+: FTC Cooling-Off Rule 3-day cancellation notice (16 CFR 429). Many states add home-solicitation and door-to-door rules.",
+    "'Free equipment with monitoring': 16 CFR 251 - disclose the contract term, monthly fee, early termination fee, activation fees next to the offer.",
+    "Credit checks for financing: FCRA permissible purpose; FTC v. Vivint (2021) cost $20M for sales reps misusing credit reports.",
+    "Auto-renewal: the FTC 'click-to-cancel' rule was vacated by the 8th Circuit in July 2025, but state auto-renewal laws (e.g., CA BPC 17600 et seq.) still require clear renewal terms and easy cancellation.",
+    "Deceptive door-to-door impersonation of a competitor: Lanham Act / state UDAP exposure (ADT v. Vivint $10M settlement, 2018).",
+    "Statistics: cite source and year; 'robbery' and 'burglary' are different crimes in FBI data.",
+    "TCPA applies to follow-up calls/texts from QR or call-me forms; get consent."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear, joy, pride, status, relief, nostalgia are all options; the client chooses.",
+    "Only laws/compliance are hard limits.",
+    "Every angle and combo carries a sell-the-outcome line.",
+    "Unverified (agency/vendor-only) results are labeled; never quote them as fact on a card.",
+    "No age/demographic angle unless a cited source supports it for this industry; even then, check Fair Housing / ECOA before using it in housing or credit."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "free_equipment_or_install_with_monitoring",
+      "primary_emotion": "fear -> relief",
+      "why": "Upfront cost is a barrier; 'free install / $0 activation' (GOLD-001, 002, 004) removes it while the monthly contract is the real price. Works when paired with a clear threat-to-safety story.",
+      "headline_offer_patterns": [
+        "'Free installation + $0 activation with monitoring'",
+        "'[N] free devices with professional monitoring'"
+      ],
+      "reinforcing_photo": "Tech installing a keypad / doorbell cam at a real front door.",
+      "what_backfires": "Hiding contract length/fees (FTC 'free' rules); masked-burglar clip art (GOLD-005) looks cheap.",
+      "combos": [
+        {
+          "headline": "Protected by Friday. Installed free.",
+          "offer": "Free pro install + $0 activation with [N]-mo monitoring at $[X]/mo",
+          "photo_scene": "Tech mounting a doorbell camera",
+          "sell_the_outcome_line": "Sleep easy starting this week."
+        },
+        {
+          "headline": "Lock up. Turn off the lights. Sleep.",
+          "offer": "3 free devices with monitoring (terms below)",
+          "photo_scene": "Night house with porch light and yard sign",
+          "sell_the_outcome_line": "A home that watches itself so you can rest."
+        },
+        {
+          "headline": "Your system, set up right, at no upfront cost.",
+          "offer": "Free equipment with [N]-mo monitoring agreement",
+          "photo_scene": "Tech walking homeowner through the app",
+          "sell_the_outcome_line": "Protection that works from day one."
+        }
+      ],
+      "compliance_flags": [
+        "16 CFR 251: term, monthly fee, ETF next to 'free'.",
+        "State license number (CA BPC 7599.44; TX 37 TAC 35.9).",
+        "Cooling-Off Rule notice at in-home signing."
+      ],
+      "evidence": [
+        "GOLD-home-security-001, 002, 004",
+        "SRC-FTC-FREE-251",
+        "SRC-PARKS-2025"
+      ],
+      "evidence_strength": "thin (vendor)"
+    },
+    {
+      "offer_type": "price_per_day_framing",
+      "primary_emotion": "smart-shopper relief",
+      "why": "Reframing $30-$54/month as 'about $1 a day' (GOLD-002) shrinks perceived cost (pennies-a-day framing; no independent test found for security).",
+      "headline_offer_patterns": [
+        "'Protection for about $[X] a day'",
+        "'Less than your streaming bill'"
+      ],
+      "reinforcing_photo": "Coffee cup next to a phone with the security app.",
+      "what_backfires": "Daily figure that excludes required fees; gimmicks like the George Washington dollar (GOLD-002) bury the outcome.",
+      "combos": [
+        {
+          "headline": "About $[X] a day to protect everything in it.",
+          "offer": "Monitoring from $[Y]/mo, [N]-mo term",
+          "photo_scene": "Family dinner seen through a window, camera on porch",
+          "sell_the_outcome_line": "Everything you love, watched over for less than a coffee."
+        },
+        {
+          "headline": "Peace of mind costs less than you think.",
+          "offer": "$[Y]/mo monitoring + free install",
+          "photo_scene": "Couple relaxing on a couch, keypad on wall",
+          "sell_the_outcome_line": "Feel safe at home without a big bill."
+        },
+        {
+          "headline": "Cheaper than replacing your TV.",
+          "offer": "$[Y]/mo, no equipment cost upfront",
+          "photo_scene": "Living room at night, motion sensor glowing",
+          "sell_the_outcome_line": "Keep what you worked for."
+        }
+      ],
+      "compliance_flags": [
+        "Per-day number must equal the real all-in monthly price / 30 (FTC s.5).",
+        "Show term and total contract cost where required by state law."
+      ],
+      "evidence": [
+        "GOLD-home-security-002"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "dollar_or_percent_off_equipment",
+      "primary_emotion": "smart-shopper",
+      "why": "Concrete price cut on hardware (doorbell 50% off, GOLD-003; $200 off, GOLD-009) for the self-motivated buyer.",
+      "headline_offer_patterns": [
+        "'Video doorbell [50]% off with install'",
+        "'$[X] off any system ($[Y] value)'"
+      ],
+      "reinforcing_photo": "Doorbell camera close-up at a real door, delivery person visible on phone screen.",
+      "what_backfires": "'Value' anchors with no real regular price.",
+      "combos": [
+        {
+          "headline": "See who's at the door from anywhere.",
+          "offer": "Video doorbell [50]% off with install through [date]",
+          "photo_scene": "Phone showing a package delivery on the doorbell feed",
+          "sell_the_outcome_line": "Never miss a visitor or a package again."
+        },
+        {
+          "headline": "Kids home from school? You'll know.",
+          "offer": "$[X] off camera + doorbell bundle",
+          "photo_scene": "Parent at work smiling at the phone feed",
+          "sell_the_outcome_line": "Know everyone's home safe."
+        },
+        {
+          "headline": "Upgrade your front door.",
+          "offer": "$[X] off smart lock + doorbell",
+          "photo_scene": "Hand unlocking via phone",
+          "sell_the_outcome_line": "Let in who you want, when you want."
+        }
+      ],
+      "compliance_flags": [
+        "Former price must be real (16 CFR 233).",
+        "Expiry date real."
+      ],
+      "evidence": [
+        "GOLD-home-security-003, 009"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "free_security_assessment",
+      "primary_emotion": "prudence / control",
+      "why": "Low-commitment first step; 83% of burglars check for alarms (Blevins 2012) so 'see your home like a burglar does' is grounded.",
+      "headline_offer_patterns": [
+        "'Free home security review'",
+        "'See your home the way a burglar does'"
+      ],
+      "reinforcing_photo": "Tech and homeowner walking the yard pointing at a dark side door.",
+      "what_backfires": "Pressure tactics in-home; implying the review is from police.",
+      "combos": [
+        {
+          "headline": "See your home the way a burglar does.",
+          "offer": "Free 20-minute security walk-through",
+          "photo_scene": "Tech pointing out a dark side window to a homeowner",
+          "sell_the_outcome_line": "Know exactly where you're exposed, and fix it."
+        },
+        {
+          "headline": "Find the weak spots before someone else does.",
+          "offer": "Free review + written plan, no obligation",
+          "photo_scene": "Clipboard checklist on a porch rail",
+          "sell_the_outcome_line": "A plan for your home, not a sales pitch."
+        },
+        {
+          "headline": "Meet [Name]. He'll walk your property with you.",
+          "offer": "Free assessment by a licensed tech",
+          "photo_scene": "Uniformed tech with badge at the door",
+          "sell_the_outcome_line": "Protection from people you've actually met."
+        }
+      ],
+      "compliance_flags": [
+        "No police/government look-alike design (39 USC 3001(h)).",
+        "Cooling-Off Rule for in-home sales."
+      ],
+      "evidence": [
+        "SRC-BLEVINS-2012",
+        "GOLD-home-security-007"
+      ],
+      "evidence_strength": "moderate (study) / thin (creative)"
+    },
+    {
+      "offer_type": "new_homeowner",
+      "primary_emotion": "anticipation + prudence",
+      "why": "New homeowners face unknown keys/codes and are setting up services; gold GOLD-009 and MMR-157 target the moment.",
+      "headline_offer_patterns": [
+        "'Welcome home: $[X] off your first system'",
+        "'Change the codes, not just the locks'"
+      ],
+      "reinforcing_photo": "Moving boxes in an entry, tech installing keypad.",
+      "what_backfires": "Implying the previous owner's system is unsafe without basis.",
+      "combos": [
+        {
+          "headline": "Welcome home. Make it yours, down to the locks.",
+          "offer": "New-homeowner $[X] off with monitoring",
+          "photo_scene": "Couple carrying boxes, tech at keypad",
+          "sell_the_outcome_line": "Move in knowing only your family has the keys."
+        },
+        {
+          "headline": "New house. New codes.",
+          "offer": "Free install for new homeowners through [date]",
+          "photo_scene": "Hand entering a new code on a keypad",
+          "sell_the_outcome_line": "Start fresh, safe from night one."
+        },
+        {
+          "headline": "Protect the biggest thing you've ever bought.",
+          "offer": "$[X] off a starter system",
+          "photo_scene": "Front of the new house at dusk, lit",
+          "sell_the_outcome_line": "Your investment, watched over."
+        }
+      ],
+      "compliance_flags": [
+        "Use public deed/new-mover data only; don't state private facts.",
+        "License number in ad."
+      ],
+      "evidence": [
+        "GOLD-home-security-009",
+        "MMR-157"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "limited_time_or_urgency",
+      "primary_emotion": "fear of missing out",
+      "why": "Gold GOLD-003/004 use '10 days' expiries. Real deadlines give a reason to act now.",
+      "headline_offer_patterns": [
+        "'Free install ends [date]'"
+      ],
+      "reinforcing_photo": "Calendar + front-door camera.",
+      "what_backfires": "Fake 'crime alert in your area' urgency; rolling deadlines.",
+      "combos": [
+        {
+          "headline": "Free install ends [date].",
+          "offer": "Free install + $0 activation through [date]",
+          "photo_scene": "Tech at a door, calendar date in corner",
+          "sell_the_outcome_line": "Get protected before the holidays."
+        },
+        {
+          "headline": "Traveling this season? Get protected first.",
+          "offer": "$[X] off if installed before [date]",
+          "photo_scene": "Packed suitcase by the door, camera on porch",
+          "sell_the_outcome_line": "Enjoy the trip without worrying about home."
+        },
+        {
+          "headline": "Darker nights are here.",
+          "offer": "Free outdoor camera through [date]",
+          "photo_scene": "Porch at 5pm in fall, light on",
+          "sell_the_outcome_line": "Walk up to a lit, watched front door."
+        }
+      ],
+      "compliance_flags": [
+        "Deadline real; no implied local crime unless verified."
+      ],
+      "evidence": [
+        "GOLD-home-security-003, 004"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "warranty_or_guarantee",
+      "primary_emotion": "security / trust",
+      "why": "Contract fear (long terms, ETFs) is the barrier; a real warranty or satisfaction guarantee answers it (GOLD-007: 3-yr warranty).",
+      "headline_offer_patterns": [
+        "'[N]-year equipment warranty'",
+        "'Love it in [30] days or cancel free'"
+      ],
+      "reinforcing_photo": "Tech shaking hands with homeowner by a finished keypad.",
+      "what_backfires": "'Guarantee' with buried conditions.",
+      "combos": [
+        {
+          "headline": "Covered for [N] years. No fine print surprises.",
+          "offer": "[N]-year equipment warranty (terms on back)",
+          "photo_scene": "Tech handshake by keypad",
+          "sell_the_outcome_line": "A system that keeps working, and a company that keeps answering."
+        },
+        {
+          "headline": "Try it for 30 days.",
+          "offer": "Cancel within 30 days, no fee",
+          "photo_scene": "Family in kitchen, app on fridge tablet",
+          "sell_the_outcome_line": "Feel the difference before you commit."
+        },
+        {
+          "headline": "No long contract.",
+          "offer": "Month-to-month monitoring at $[X]",
+          "photo_scene": "Phone app showing 'armed'",
+          "sell_the_outcome_line": "Stay because it works, not because you're locked in."
+        }
+      ],
+      "compliance_flags": [
+        "Magnuson-Moss / FTC warranty disclosure rules if 'warranty' used; terms available.",
+        "State auto-renewal laws for month-to-month plans."
+      ],
+      "evidence": [
+        "GOLD-home-security-007"
+      ],
+      "evidence_strength": "thin"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "GOLD-006 '80% of home robberies go unsolved' vs FBI data",
+      "resolution": "Law/accuracy wins: robbery and burglary differ; use 'about 86% of burglaries were not cleared (FBI, 2019)' with source line, or a newer FBI figure."
+    },
+    {
+      "conflict": "Blevins 2012 burglar stats vs funding source",
+      "resolution": "Usable but label 'industry-funded survey' internally; on cards cite as 'UNC Charlotte study' with year, no exaggeration (e.g., 'about 6 in 10 said an alarm would make them move on')."
+    },
+    {
+      "conflict": "Gold 'free system' cards (GOLD-001, 004) vs FTC Free Guide",
+      "resolution": "Law wins: keep 'free' only with term, fee and ETF disclosed next to the offer."
+    },
+    {
+      "conflict": "Fear-led gold samples (GOLD-005 masked burglar) vs C-3PO craft rubric",
+      "resolution": "Emotion stays allowed (Patrick's rule); the craft fix is a real night-house scene instead of clip art."
+    }
+  ]
+}

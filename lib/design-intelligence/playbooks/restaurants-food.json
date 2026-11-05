@@ -1,0 +1,281 @@
+{
+  "schema_version": "1.1",
+  "slug": "restaurants-food",
+  "industry": "Restaurants, QSR, pizza, cafes, catering, food trucks",
+  "last_updated": "2026-11-02",
+  "words_and_claims_to_avoid": [
+    "'THE BEST pizza in town' (GOLD-restaurants-food-009/043) is usually puffery and allowed; specific objective claims ('#1 rated', 'award-winning', 'voted best') need a real source cited",
+    "'Free' items that require buying something at an inflated price (16 CFR 251); state the purchase requirement clearly",
+    "'Was $X now $Y' unless $X was the real regular price (16 CFR 233)",
+    "Health/nutrition claims ('healthy', 'low fat', 'gluten-free') without meeting FDA definitions",
+    "'Taco Tuesday' is free to use (Taco John's abandoned its mark in 2023); other slogans may be trademarked: check",
+    "Alcohol promos ('free drink', 'unlimited', 'two-for-one', drink coupons) without checking state liquor rules",
+    "Gift-card bonus offers without Reg E promotional labeling"
+  ],
+  "compliance_notes": [
+    "FTC Free Guide (16 CFR 251): 'free with purchase' requires the purchased item at its regular price and conditions stated clearly up front.",
+    "Alcohol promotions are state-regulated (verified examples): Texas TABC rules restrict coupons/rebates on alcohol; North Carolina bans free drinks and limits happy-hour pricing; New York SLA prohibits free drinks and unlimited-drink specials; Indiana ATC restricts two-for-one drinks; California ABC regulates bar promotions. Check every state before putting a drink offer on a mailer.",
+    "FDA menu labeling (21 CFR 101.11) applies to chains with 20+ locations: take-out menus that customers can order from must show calories and the 2,000-calorie statement; FDA guidance says coupons and advertising flyers that aren't used to order generally aren't menus. A mailer that doubles as a full order menu may count.",
+    "Gift cards (Reg E 12 CFR 1005.20, verified): purchased cards valid at least 5 years; bonus/promotional cards exempt only if labeled 'promotional' on the front with expiry and fees.",
+    "Sweepstakes/prize promos by mail (39 USC 3001(k)): 'no purchase necessary' and 'a purchase will not improve your chances' clearly and conspicuously, plus rules, odds and prize values.",
+    "Comparative claims vs named competitors must be truthful (FTC s.5; Lanham Act).",
+    "Food photos should show the real dish as served (FTC s.5 deception); styled shots are fine, substitutions are not."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear, joy, pride, relief are all options; the client chooses.",
+    "Only laws/compliance are hard limits.",
+    "Every angle carries a sell-the-outcome line.",
+    "Unverified (agency-only) results are labeled; never quote them as fact on a card."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "bogo_or_free_item",
+      "primary_emotion": "desire / smart-shopper delight",
+      "why": "Most common gold-set restaurant offer; craving plus a 'deal win'.",
+      "headline_offer_patterns": [
+        "'Buy one entree, get one free'",
+        "'Free [dessert] with any entree'"
+      ],
+      "reinforcing_photo": "Two of the signature dish side by side, steam/cheese pull",
+      "what_backfires": "Clip-art coupons; stock food; burying the real dish",
+      "combos": [
+        {
+          "headline": "Two is better than one.",
+          "offer": "BOGO entrees Mon-Thu through [date]",
+          "photo_scene": "Two plates of the signature dish, shared across a table",
+          "sell_the_outcome_line": "Dinner for two, and a night out that feels like a treat."
+        },
+        {
+          "headline": "Save room for dessert.",
+          "offer": "Free dessert with any entree",
+          "photo_scene": "Spoon breaking a molten cake",
+          "sell_the_outcome_line": "End the night on a sweet note."
+        },
+        {
+          "headline": "Your new favorite is on us.",
+          "offer": "Free [signature app] with any order of $[X]+",
+          "photo_scene": "Sizzling app close-up",
+          "sell_the_outcome_line": "Find the dish you'll crave every week."
+        }
+      ],
+      "compliance_flags": [
+        "16 CFR 251: entree at regular price; conditions stated with the offer.",
+        "No alcohol in BOGO without state check."
+      ],
+      "evidence": [
+        "SRC-VANDERLAAN-2011",
+        "GOLD-restaurants-food-018/025/042/046"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "grand_opening",
+      "primary_emotion": "curiosity / excitement",
+      "why": "Novelty and first-mover pride; scarcity when the limit is real.",
+      "headline_offer_patterns": [
+        "'Now open: first [N] guests get [item] free'",
+        "'Opening week BOGO'"
+      ],
+      "reinforcing_photo": "Packed room or owner with the dish",
+      "what_backfires": "Fake 'limited' claims; opening-day promises the kitchen can't keep",
+      "combos": [
+        {
+          "headline": "Now open on [street]. Come hungry.",
+          "offer": "First [N] guests on [date] get a free [item]",
+          "photo_scene": "Line out the door, smiling",
+          "sell_the_outcome_line": "Be the first to find the new favorite."
+        },
+        {
+          "headline": "Something new is cooking.",
+          "offer": "Grand opening week: $[X] off any order",
+          "photo_scene": "Chef plating the signature dish",
+          "sell_the_outcome_line": "Your next go-to, right around the corner."
+        },
+        {
+          "headline": "Doors open [date].",
+          "offer": "Free [drink/non-alcoholic] with any meal opening week",
+          "photo_scene": "Staff waving from the entry",
+          "sell_the_outcome_line": "A new spot to celebrate with friends."
+        }
+      ],
+      "compliance_flags": [
+        "Limits must be real (FTC s.5); state alcohol rules for drink freebies."
+      ],
+      "evidence": [
+        "SRC-WORCHEL-1975",
+        "GOLD-restaurants-food-010/013/018/040/051",
+        "MMR-646 (vendor)"
+      ],
+      "evidence_strength": "moderate principle"
+    },
+    {
+      "offer_type": "weekly_deal_night",
+      "primary_emotion": "anticipation / habit",
+      "why": "Conditioning a weekday ritual (Watson).",
+      "headline_offer_patterns": [
+        "'Taco Tuesday: $[X] tacos'",
+        "'Family night: kids eat free [day]'"
+      ],
+      "reinforcing_photo": "Friends/family around the table",
+      "what_backfires": "Rotating, confusing daily deal grids",
+      "combos": [
+        {
+          "headline": "Tuesdays taste better here.",
+          "offer": "$[X] tacos every Tuesday",
+          "photo_scene": "Friends grabbing tacos from a shared tray",
+          "sell_the_outcome_line": "The weeknight everyone looks forward to."
+        },
+        {
+          "headline": "Kids eat free on Wednesdays.",
+          "offer": "One free kids' meal per paid adult entree",
+          "photo_scene": "Kids laughing with pizza slices",
+          "sell_the_outcome_line": "A night off from cooking that doesn't break the bank."
+        },
+        {
+          "headline": "Make Friday pizza night.",
+          "offer": "Large 1-topping $[X] every Friday",
+          "photo_scene": "Family on the couch with the box open",
+          "sell_the_outcome_line": "Friday nights the whole family looks forward to."
+        }
+      ],
+      "compliance_flags": [
+        "'Taco Tuesday' free to use since 2023; check other slogans.",
+        "'Kids eat free' conditions stated (16 CFR 251)."
+      ],
+      "evidence": [
+        "SRC-TACOTUESDAY-2023",
+        "SRC-WATSON-NY1928",
+        "GOLD-restaurants-food-017"
+      ],
+      "evidence_strength": "moderate principle"
+    },
+    {
+      "offer_type": "birthday_or_loyalty",
+      "primary_emotion": "love / delight",
+      "why": "Personal occasions plus reciprocity.",
+      "headline_offer_patterns": [
+        "'Birthday dessert on us'",
+        "'Join the club, get $[X] off'"
+      ],
+      "reinforcing_photo": "Candle in the signature dessert, friends cheering",
+      "what_backfires": "Requiring an expensive purchase hidden in fine print",
+      "combos": [
+        {
+          "headline": "It's your birthday. Dessert's on us.",
+          "offer": "Free birthday dessert with any entree",
+          "photo_scene": "Candle in the dessert, friends cheering",
+          "sell_the_outcome_line": "A birthday dinner that feels like a party."
+        },
+        {
+          "headline": "Join the club, eat for less.",
+          "offer": "$[X] off when you join our rewards",
+          "photo_scene": "Phone with app at the table",
+          "sell_the_outcome_line": "Every visit gets you a little closer to a treat."
+        },
+        {
+          "headline": "Celebrate here.",
+          "offer": "Free appetizer for parties of 6+ on special occasions",
+          "photo_scene": "Big table toasting (non-alcoholic visible if state-restricted)",
+          "sell_the_outcome_line": "Celebrations without the planning."
+        }
+      ],
+      "compliance_flags": [
+        "Data capture via QR: privacy policy; COPPA if kids' clubs."
+      ],
+      "evidence": [
+        "GOLD-restaurants-food-038"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "catering",
+      "primary_emotion": "pride / relief",
+      "why": "Organizer wants the event to go well and to look good.",
+      "headline_offer_patterns": [
+        "'$[X] off your first catering order'",
+        "'Per-person pricing from $[X]'"
+      ],
+      "reinforcing_photo": "Trays on a conference table, hands reaching",
+      "what_backfires": "Tiny photos; long menus",
+      "combos": [
+        {
+          "headline": "Be the hero of the office lunch.",
+          "offer": "$[X] off first catering order of [N]+",
+          "photo_scene": "Hands reaching for trays",
+          "sell_the_outcome_line": "Everyone fed, happy and asking who ordered."
+        },
+        {
+          "headline": "Feeding a crowd? We've got it.",
+          "offer": "Free delivery on orders over $[X]",
+          "photo_scene": "Party spread on a backyard table",
+          "sell_the_outcome_line": "Enjoy your own party."
+        },
+        {
+          "headline": "Your next meeting, catered.",
+          "offer": "Per-person packages from $[X]",
+          "photo_scene": "Boxed lunches lined up",
+          "sell_the_outcome_line": "One less thing to worry about."
+        }
+      ],
+      "compliance_flags": [
+        "Delivery claims accurate; per-person price shows what's included."
+      ],
+      "evidence": [
+        "GOLD-restaurants-food-020/033/035"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "gift_card_bonus",
+      "primary_emotion": "generosity / smart-shopper",
+      "why": "Holiday gifting with a bonus card for the buyer.",
+      "headline_offer_patterns": [
+        "'Buy $50, get a $10 bonus card'"
+      ],
+      "reinforcing_photo": "Gift card on a festive table",
+      "what_backfires": "Bonus cards without promotional labeling/expiry",
+      "combos": [
+        {
+          "headline": "The gift everyone actually wants.",
+          "offer": "Buy $[X] in gift cards, get a $[Y] bonus card (promotional, expires [date])",
+          "photo_scene": "Card tucked in a holiday stocking",
+          "sell_the_outcome_line": "Give a great night out."
+        },
+        {
+          "headline": "Treat yourself while you treat them.",
+          "offer": "$[Y] bonus card for you",
+          "photo_scene": "Two cards on a table",
+          "sell_the_outcome_line": "A dinner for them and a lunch for you."
+        },
+        {
+          "headline": "Dinner, wrapped.",
+          "offer": "Gift cards in any amount",
+          "photo_scene": "Card in a bow",
+          "sell_the_outcome_line": "A gift they'll remember tasting."
+        }
+      ],
+      "compliance_flags": [
+        "Reg E: purchased cards 5+ years; bonus card front must say 'promotional' with expiry and fees."
+      ],
+      "evidence": [
+        "SRC-REGE-1005.20",
+        "GOLD-restaurants-food-039"
+      ],
+      "evidence_strength": "moderate (law clear; card evidence thin)"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "Multi-coupon walls (many gold cards) justified by 'more choice' vs the choice-overload ('jam study') claim that more options hurt",
+      "resolution": "Neither wins on evidence: the Scheibehenne 2010 meta-analysis found an average choice-overload effect near zero. Default to one hero offer (roofing votes, cross-vertical) and test multi-coupon backs."
+    },
+    {
+      "conflict": "Vendor case rates (MMR-187 8.64%, MMR-403 19.42%) vs no verified benchmarks",
+      "resolution": "Treat as agency-only unverified; never quote to clients as expected results."
+    },
+    {
+      "conflict": "Drink offers in gold examples vs state alcohol rules",
+      "resolution": "Law wins: food-only offers by default; drink offers only after a state check."
+    }
+  ]
+}

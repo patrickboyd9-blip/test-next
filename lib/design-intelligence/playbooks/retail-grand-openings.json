@@ -1,0 +1,244 @@
+{
+  "schema_version": "1.1",
+  "slug": "retail-grand-openings",
+  "industry": "Retail stores and grand openings (general retail, furniture, pharmacy, liquor, grocery, specialty)",
+  "last_updated": "2026-11-02",
+  "words_and_claims_to_avoid": [
+    "'Was $X' / 'compare at' / '% off' without a real former price offered in good faith for a reasonable period (16 CFR 233.1; state rules like CA B&P 17501)",
+    "'Up to X% off' if few items get X%",
+    "'While supplies last' without reasonable stock; 'first [N]' when the number isn't honored",
+    "'Same as cash', '0% interest', '$X/month' without Reg Z disclosures (12 CFR 1026.24 trigger terms) (GOLD-retail-grand-openings-049/063/064)",
+    "Raffles/drawings that require a purchase (illegal lottery risk); missing 'no purchase necessary' on mailed sweepstakes (39 USC 3001(k)) (GOLD-retail-grand-openings-034/053)",
+    "Prescription-transfer incentives (gift cards, coupons) for pharmacy grand openings without checking state pharmacy law and federal program rules (GOLD-retail-grand-openings-059)",
+    "Alcohol price/coupon promotions without state liquor rules (GOLD-retail-grand-openings-047)",
+    "Gift cards/'$X free card' without Reg E promotional labeling"
+  ],
+  "compliance_notes": [
+    "Former price comparisons (16 CFR 233, verified): the former price must be the actual price at which the item was openly and actively offered for a reasonable time in the recent past; 'compare at' must reflect real prices in the trade area.",
+    "Sweepstakes by mail (39 USC 3001(k), verified): must clearly and conspicuously state 'no purchase is necessary' and that 'a purchase will not improve an individual's chances of winning', in the mailing, in the rules and on the entry form, more conspicuously than other text; plus official rules, odds, prize values and sponsor. Purchase-required drawings can be illegal lotteries under state law.",
+    "Credit ads (Reg Z 12 CFR 1026.24): trigger terms (down payment, number of payments, payment amount, finance charge) require full disclosures; 'deferred interest' needs specific wording. Use 'Financing available' if terms aren't ready.",
+    "Gift cards (Reg E 12 CFR 1005.20, verified): 5-year minimum; promotional cards must say 'promotional' on the front and show expiry and fees.",
+    "Pharmacy openings: inducements to Medicare/Medicaid beneficiaries are limited (OIG nominal value $15/item, $75/yr; no cash equivalents); many states restrict prescription-transfer incentives (not verified per state).",
+    "Alcohol retail promos: state rules vary (coupons, free items, price advertising); check each state.",
+    "'Limited quantities' must be honest; advertised items must be available in reasonable quantities or limits disclosed (FTC s.5; many state UDAP rules; not verified per state)."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear, joy, pride, relief are all options; the client chooses.",
+    "Only laws/compliance are hard limits.",
+    "Every angle carries a sell-the-outcome line.",
+    "Unverified (agency-only) results are labeled; never quote them as fact on a card."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "grand_opening_event",
+      "primary_emotion": "excitement / curiosity / belonging",
+      "why": "A dated event creates a social reason to visit; freebies trigger reciprocity.",
+      "headline_offer_patterns": [
+        "'You're invited: Grand Opening [date]'",
+        "'Free [gift] for the first [N] guests'"
+      ],
+      "reinforcing_photo": "Real ribbon cutting, real staff, real storefront",
+      "what_backfires": "Generic confetti stock; no date/time/address prominence",
+      "combos": [
+        {
+          "headline": "You're invited. Grand Opening Saturday.",
+          "offer": "Free [gift] for the first [N] guests + door prizes (no purchase necessary)",
+          "photo_scene": "Ribbon cutting with owner and staff",
+          "sell_the_outcome_line": "A fun Saturday and a new favorite store nearby."
+        },
+        {
+          "headline": "Something new is open on [street].",
+          "offer": "Opening week: $[X] off $[Y]+",
+          "photo_scene": "Bright storefront at dusk, lights on",
+          "sell_the_outcome_line": "Your new go-to, 5 minutes away."
+        },
+        {
+          "headline": "Meet your neighbors. Meet your store.",
+          "offer": "Free [coffee/eggs/samples] all day [date]",
+          "photo_scene": "Crowd chatting inside the store",
+          "sell_the_outcome_line": "Feel at home in your own neighborhood."
+        }
+      ],
+      "compliance_flags": [
+        "Door prizes: no purchase necessary + rules (39 USC 3001(k), state lottery laws).",
+        "Pharmacy events: beneficiary inducement limits.",
+        "Freebie limits must be honored."
+      ],
+      "evidence": [
+        "GOLD-retail-grand-openings-037/038/039 (vendor-reported attendance)"
+      ],
+      "evidence_strength": "moderate principle; vendor-only evidence"
+    },
+    {
+      "offer_type": "doorbuster_limited_quantity",
+      "primary_emotion": "scarcity / excitement",
+      "why": "Real scarcity raises value (Worchel 1975).",
+      "headline_offer_patterns": [
+        "'First [N] shoppers'",
+        "'[Quantity] available at this price'"
+      ],
+      "reinforcing_photo": "Featured product in hand; early-morning line",
+      "what_backfires": "Fake scarcity; not disclosing limits",
+      "combos": [
+        {
+          "headline": "First 50 shoppers get [item] free.",
+          "offer": "Free [item] to first 50 shoppers, [date] [time]",
+          "photo_scene": "Line forming at sunrise",
+          "sell_the_outcome_line": "Start your weekend with a win."
+        },
+        {
+          "headline": "Only [N] at this price.",
+          "offer": "[Item] $[X], [N] in stock",
+          "photo_scene": "Product hero shot",
+          "sell_the_outcome_line": "The deal everyone wishes they got."
+        },
+        {
+          "headline": "Early birds win.",
+          "offer": "Doors open 7am: extra [X]% off until 10am",
+          "photo_scene": "Coffee and shopping bags",
+          "sell_the_outcome_line": "Best picks before anyone else."
+        }
+      ],
+      "compliance_flags": [
+        "Quantities must be real and disclosed (FTC s.5, state UDAP).",
+        "Former-price rules if 'was/now' used."
+      ],
+      "evidence": [
+        "SRC-WORCHEL-1975",
+        "GOLD-retail-grand-openings-021"
+      ],
+      "evidence_strength": "moderate principle"
+    },
+    {
+      "offer_type": "percent_off_sale",
+      "primary_emotion": "smart-shopper pride / urgency",
+      "why": "Clear savings with a real deadline.",
+      "headline_offer_patterns": [
+        "'[X]% off storewide through [date]'",
+        "'Save $[X] on [category]'"
+      ],
+      "reinforcing_photo": "Product in a real home setting",
+      "what_backfires": "Fake 'was' prices; 'up to' abuse",
+      "combos": [
+        {
+          "headline": "Our biggest sale of the year ends [date].",
+          "offer": "[X]% off storewide",
+          "photo_scene": "Sofa in a sunlit living room",
+          "sell_the_outcome_line": "Get what you've wanted, for less."
+        },
+        {
+          "headline": "Save $[X] on [category].",
+          "offer": "$[X] off [category] through [date]",
+          "photo_scene": "Hands unwrapping a new purchase",
+          "sell_the_outcome_line": "Feel smart every time you use it."
+        },
+        {
+          "headline": "Final days.",
+          "offer": "Extra [X]% off clearance",
+          "photo_scene": "Shopping bag at the door",
+          "sell_the_outcome_line": "The best price you'll see all year."
+        }
+      ],
+      "compliance_flags": [
+        "16 CFR 233 former price; 'up to' only if a meaningful share of items get the max."
+      ],
+      "evidence": [
+        "SRC-FTC-233",
+        "GOLD-retail-grand-openings-001/002"
+      ],
+      "evidence_strength": "moderate (law clear)"
+    },
+    {
+      "offer_type": "financing_big_ticket",
+      "primary_emotion": "relief / anticipation",
+      "why": "Decoupling the payment from enjoyment.",
+      "headline_offer_patterns": [
+        "'Financing available'",
+        "'Take it home today'"
+      ],
+      "reinforcing_photo": "Family enjoying the product at home",
+      "what_backfires": "Trigger terms without disclosures",
+      "combos": [
+        {
+          "headline": "Your new sofa. This weekend.",
+          "offer": "Financing available, see store for terms",
+          "photo_scene": "Family movie night",
+          "sell_the_outcome_line": "Movie night on a couch you love."
+        },
+        {
+          "headline": "Sleep better starting tonight.",
+          "offer": "Same-day delivery [if true] + financing available",
+          "photo_scene": "Person waking refreshed",
+          "sell_the_outcome_line": "Wake up rested, every morning."
+        },
+        {
+          "headline": "Upgrade your kitchen without the wait.",
+          "offer": "Special financing (full Reg Z terms printed)",
+          "photo_scene": "Family cooking together",
+          "sell_the_outcome_line": "Dinners that feel like an occasion."
+        }
+      ],
+      "compliance_flags": [
+        "Reg Z trigger terms; 'same as cash'/'deferred interest' need full disclosures."
+      ],
+      "evidence": [
+        "SRC-REGZ-1026.24",
+        "GOLD-retail-grand-openings-049/063/064"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "new_mover_welcome",
+      "primary_emotion": "belonging / convenience",
+      "why": "Moving breaks habits; act within the first months.",
+      "headline_offer_patterns": [
+        "'Welcome to [town]'",
+        "'New-neighbor $[X] off'"
+      ],
+      "reinforcing_photo": "Staff at the real storefront",
+      "what_backfires": "Generic moving boxes stock",
+      "combos": [
+        {
+          "headline": "New to [town]? Meet your neighborhood [store].",
+          "offer": "$[X] off your first purchase of $[Y]+",
+          "photo_scene": "Staff waving from the door",
+          "sell_the_outcome_line": "Everything you need, close to your new home."
+        },
+        {
+          "headline": "Welcome home. Here's $[X].",
+          "offer": "New-neighbor coupon, valid 60 days",
+          "photo_scene": "Keys on a kitchen counter with a store bag",
+          "sell_the_outcome_line": "Settling in just got easier."
+        },
+        {
+          "headline": "Your new shortcut for [category].",
+          "offer": "Free [small gift] with first visit",
+          "photo_scene": "Store aisle, friendly associate",
+          "sell_the_outcome_line": "One less errand to figure out."
+        }
+      ],
+      "compliance_flags": [
+        "Coupon terms clear; gift card rules if cards are used."
+      ],
+      "evidence": [
+        "SRC-VERPLANKEN-WOOD-2006",
+        "SRC-VERPLANKEN-ROY-2016"
+      ],
+      "evidence_strength": "moderate principle"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "Gold-set raffles and drawings tied to purchase (GOLD-retail-grand-openings-034/053) vs 39 USC 3001(k) and state lottery law",
+      "resolution": "Law wins: no-purchase-necessary entry with full disclosures, or drop the drawing."
+    },
+    {
+      "conflict": "Pharmacy prescription-transfer gift cards (GOLD-retail-grand-openings-059) vs OIG inducement rules and state pharmacy rules",
+      "resolution": "Law wins: no transfer incentives to beneficiaries beyond nominal value; flag for counsel."
+    },
+    {
+      "conflict": "Discount-heavy retail encoding vs premium restraint (C-3PO)",
+      "resolution": "Not a legal conflict; match positioning. Discount encoding is a valid default in mass retail."
+    }
+  ]
+}
