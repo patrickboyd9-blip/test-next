@@ -1,3 +1,6 @@
+import { polishTradeCopy } from "./trade-subline"
+import { withRequiredDisclosures } from "@/lib/research-library/auto-disclosures"
+import { tradeHeadlineFallback } from "./persuasion"
 import type { GenerateDirectionsResult } from "@/lib/campaign-creator/creative-engine"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import type { CampaignBrief, CreativeDirection, CreativeSpec } from "@/lib/campaign-creator/types"
@@ -341,8 +344,14 @@ async function scoreFamily(input: {
     restated &&
     restated.toLowerCase() === verbatimOffer.replace(/[.!?]+$/, "").trim().toLowerCase()
   ) {
-    spec = { ...spec, subheadline: "Call today." }
+    spec = { ...spec, subheadline: "" }
   }
+  spec = polishTradeCopy({
+    brief: input.brief,
+    spec,
+    seed: input.directionIndex,
+    fallbackHeadline: () => tradeHeadlineFallback(input.brief, spec.offer ?? input.brief.offer ?? ""),
+  })
   // A blueprint rewrite that only fell back to a stock option never replaces
   // this direction's own distinct headline.
   if (persuasionVertical(input.brief, rationale.vertical) === "roofing" && input.spec.headline) {
@@ -429,14 +438,20 @@ async function scoreFamily(input: {
     evidenceTrace = steered.trace
   }
   const facts = clientFactText(input.brief, spec.offer)
-  const complianceMark = attorneyAdMark(facts)
   spec = withBriefContact(spec, input.brief)
+  const legal = withRequiredDisclosures({
+    brief: input.brief,
+    printedText: [spec.headline, spec.subheadline, spec.body, spec.offer, input.brief.businessInfo?.name].filter(Boolean).join(" "),
+    disclaimer: isMedicareAgentBrief(input.brief) ? MEDICARE_AGENT_DISCLAIMER : null,
+    complianceMark: attorneyAdMark(facts),
+  })
+  const complianceMark = legal.complianceMark
   const card = composeGridCard({
     rationale,
     spec,
     businessName: input.brief.businessInfo?.name,
-    disclaimer: isMedicareAgentBrief(input.brief) ? MEDICARE_AGENT_DISCLAIMER : null,
-    complianceMark,
+    disclaimer: legal.disclaimer ?? null,
+    complianceMark: complianceMark ?? null,
   })
   const copy = [spec.headline, spec.offer, spec.body, spec.phone, input.brief.businessInfo?.name, complianceMark]
     .filter(Boolean)

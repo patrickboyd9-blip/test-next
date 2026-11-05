@@ -1,4 +1,5 @@
 import type { CampaignBrief, CreativeDirection, ResearchQuality } from "@/lib/campaign-creator/types"
+import { withRequiredDisclosures } from "@/lib/research-library/auto-disclosures"
 import type { GenerateDirectionsResult } from "@/lib/campaign-creator/creative-engine"
 import { MEDICARE_AGENT_DISCLAIMER, isMedicareAgentBrief } from "@/lib/campaign-creator/medicare-compliance"
 import { withBriefContact } from "@/lib/campaign-creator/studio-contact"
@@ -20,7 +21,10 @@ import { citationsForDirection, selectReferences, type DirectionCitation } from 
 import { checkSimilarity, type SimilarityResult } from "./similarity"
 import { requestModelRationale, requestVisionCritique, type ModelUsage } from "./model"
 import { attorneyAdMark } from "./attorney-compliance"
-import { compliantSpec } from "@/lib/research-library/compliance"
+import { compliantSpec, compliantSpecForIndustry, hasBlockedClaim } from "@/lib/research-library/compliance"
+import { industryForBrief } from "@/lib/research-library/industry"
+import { polishTradeCopy } from "./trade-subline"
+import { tradeHeadlineFallback } from "./persuasion"
 import { alignStormHeadlines } from "./persuasion"
 import { normalizeQuestion } from "@/lib/research-library/compliance"
 import { applyOutcomeHeadline, clientFactText, distinctRoofingHeadlines, persuasionVertical } from "./persuasion"
@@ -138,6 +142,16 @@ export function repairCard(input: {
     }
   }
   spec = compliantSpec(spec, `${input.brief.offer ?? ""} ${input.brief.goal ?? ""}`)
+  {
+    // Playbook compliance: drop blocked claims for this trade; replace a blocked headline or a filler subline.
+    const trade = industryForBrief(input.brief)
+    const headlineBlocked = hasBlockedClaim(spec.headline ?? "", trade)
+    spec = compliantSpecForIndustry(spec, trade)
+    if (headlineBlocked) {
+      spec = { ...spec, headline: tradeHeadlineFallback(input.brief, spec.offer ?? input.brief.offer ?? "") }
+    }
+    spec = polishTradeCopy({ brief: input.brief, spec, fallbackHeadline: () => tradeHeadlineFallback(input.brief, spec.offer ?? input.brief.offer ?? "") })
+  }
   const edits: string[] = []
   let best: DirectedCard | null = null
   const rounds = Math.max(1, cap)
@@ -148,8 +162,12 @@ export function repairCard(input: {
       rationale,
       spec,
       businessName: input.businessName,
-      disclaimer: isMedicareAgentBrief(input.brief) ? MEDICARE_AGENT_DISCLAIMER : null,
-      complianceMark: attorneyAdMark(facts),
+      ...withRequiredDisclosures({
+        brief: input.brief,
+        printedText: [spec.headline, spec.subheadline, spec.body, spec.offer, input.businessName].filter(Boolean).join(" "),
+        disclaimer: isMedicareAgentBrief(input.brief) ? MEDICARE_AGENT_DISCLAIMER : null,
+        complianceMark: attorneyAdMark(facts),
+      }),
     })
     const copy = cardCopy(spec, input.businessName, attorneyAdMark(facts))
     const critique = critiqueCard(card, rationale, copy, undefined, clientFactText(input.brief, spec.offer), input.gold)

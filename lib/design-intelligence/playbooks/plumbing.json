@@ -1,0 +1,428 @@
+{
+  "schema_version": "1.1",
+  "slug": "plumbing",
+  "industry": "Residential plumbing: emergency repair, drains/sewer camera & jetting, water heaters, leak/repipe, maintenance tune-ups, and related service (some septic/water-treatment adjacent cards in gold)",
+  "last_updated": "2026-11-05",
+  "words_and_claims_to_avoid": [
+    "Government look-alike design, 'official notice', 'city inspector requires', fake checks or invoices (39 USC 3001)",
+    "Unsubstantiated 'best', '#1', 'guaranteed savings', percent-savings claims (FTC Act s.5)",
+    "Invented or composite testimonials, star ratings or review counts (16 CFR 255)",
+    "'Free' unless it truly costs nothing or conditions sit next to the claim (16 CFR 251) — GOLD-001-style 'replace pipes for free' is a red flag unless literally free",
+    "Fake expiration dates or fake scarcity; any deadline printed must be real",
+    "Demographic/age targeting language (e.g., 'seniors') unless the client has evidence and a real discount (GOLD-023 shows senior/military % exists as an offer type — not a default buyer claim)",
+    "'24/7', 'same-day', 'licensed', 'bonded/insured', 'master plumber' unless currently true in the service state",
+    "Flat-rate/'no hidden fees' / 'no emergency fee' unless pricing actually works that way — disclose trip/diagnostic/after-hours fees",
+    "Sludge/'toxin'/scare chemistry claims about drains or water without competent substantiation (FTC s.5)",
+    "Camera upsell that implies every line needs dig/liner when the video shows a simple clean",
+    "APR-free '0% financing' without required credit disclosures when rate/payment/term is stated"
+  ],
+  "compliance_notes": [
+    "State plumbing/contractor license advertising (examples verified): California — every CSLB licensee must include the license number in all forms of advertising (Cal. Bus. & Prof. Code §7030.5); plumbing work is typically C-36. Texas — plumbing-company advertisements designed to solicit business must state the Responsible Master Plumber (RMP) of record's license number (22 Tex. Admin. Code §367.10(c)), with listed media exceptions. Client must confirm their own state's rule before printing 'licensed'/'master plumber'.",
+    "'Master plumber' / RMP titles only if the named person holds that credential where claimed.",
+    "Emergency fee transparency: if after-hours, trip, or diagnostic fees apply, do not advertise 'no surprises' or '$0 service call' without stating the conditions.",
+    "FTC Cooling-Off Rule (16 CFR 429) for $25+ in-home sales; buyer-initiated emergencies need the signed handwritten waiver to exclude; repair visits exclude the requested repair but not upsold goods/services.",
+    "Reg Z / 12 CFR 1026.24: if down payment, payment amount, number of payments, or finance charge is stated, include required APR and term disclosures — or stick to 'financing available'.",
+    "FTC 'Free' Guide (16 CFR 251) and Deceptive Pricing (16 CFR 233) for free inspections and $/% off.",
+    "Warranty ads (16 CFR 239 + 702): lifetime/satisfaction claims need the required qualifiers; written warranties available pre-sale when Mag-Moss applies.",
+    "Drain/camera honesty: sell the diagnostic truthfully; do not invent 'collapsed sewer' urgency from a routine clean.",
+    "39 USC 3001: no fake inspector/official mail.",
+    "Financing APR honesty when rates are quoted; lead with the plumbing outcome (roofing-round5 directional)."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear, relief, trust, comfort, belonging are fine when they fit and stay legal.",
+    "Only laws/compliance are hard limits.",
+    "Every angle and emotion_by_offer combo carries sell_the_outcome_line.",
+    "Vendor ROI labeled agency-only unverified; never print as client proof.",
+    "Prefer one clear offer + one real work/outcome photo + one QR (roofing-round5 directional) unless the client insists on a coupon strip.",
+    "No age/senior default unless the client has a real discount and evidence supports targeting.",
+    "Print license numbers where the service state requires them in ads."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "emergency_same_day",
+      "primary_emotion": "anxiety → relief",
+      "why": "Burst/clog/leak headlines plus same-day/24-7 CTAs are a core gold pattern; keep-this-card supports mere exposure.",
+      "headline_offer_patterns": [
+        "'Burst pipe? Clogged drain? Don't wait!'",
+        "'Drip? Clog? Leak? Solved.'",
+        "'Call us when you're backed up'"
+      ],
+      "reinforcing_photo": "Plumber under sink or van arriving; not fake flood theater",
+      "what_backfires": "'24/7' that isn't true; panic imagery with no phone path; hidden after-hours fees",
+      "combos": [
+        {
+          "headline": "Drip? Clog? Leak? Solved.",
+          "offer": "$[X] off any repair (ends [date])",
+          "photo_scene": "Plumber under a sink with a wrench",
+          "sell_the_outcome_line": "One call and the water stops."
+        },
+        {
+          "headline": "Burst pipe? We're on the way.",
+          "offer": "Same-day emergency service (hours truthful)",
+          "photo_scene": "Van pulling up at night, porch light on",
+          "sell_the_outcome_line": "Dry floors and a calm house by morning."
+        },
+        {
+          "headline": "Keep this card. Your 2 a.m. leak will thank you.",
+          "offer": "24/7 emergency line (only if true) + $[X] off first emergency call",
+          "photo_scene": "Fridge-magnet style with tech portrait + huge phone",
+          "sell_the_outcome_line": "Help is one call away when the ceiling starts to drip."
+        },
+        {
+          "headline": "Got a plumbing problem?",
+          "offer": "$[50] off emergency service (back coupon OK if teased)",
+          "photo_scene": "Hands fixing a faucet under sink",
+          "sell_the_outcome_line": "Stop the drip — get your night back."
+        }
+      ],
+      "compliance_flags": [
+        "Cooling-Off: buyer-initiated emergencies excluded only with signed handwritten waiver.",
+        "Disclose after-hours/trip fees if advertising no-surprise pricing.",
+        "License number in ads where state requires (e.g., CA §7030.5; TX RMP #)."
+      ],
+      "evidence": [
+        "GOLD-plumbing-002/006/016/029/035/044/046/047/056",
+        "SRC-ROTOROOTER"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "free_estimate_or_inspection",
+      "primary_emotion": "relief / confidence",
+      "why": "Free estimate, free plumbing check, free camera/sewer scope, and free water test appear across gold as low-risk door openers.",
+      "headline_offer_patterns": [
+        "'Scan to schedule your free estimate'",
+        "'Just moved in? Get the plumbing checked.'",
+        "'FREE sewer line scope — a $200 value'",
+        "'FREE in-home water test'"
+      ],
+      "reinforcing_photo": "Tech with camera/moisture meter or friendly estimate visit",
+      "what_backfires": "'Free' that requires buying a liner; bait inspection that always invents dig work; implying personal knowledge from purchased mover lists",
+      "combos": [
+        {
+          "headline": "Just moved in? Get the plumbing checked.",
+          "offer": "Free plumbing check (if truly free; conditions next to claim)",
+          "photo_scene": "Boxes in a kitchen, tech at the sink",
+          "sell_the_outcome_line": "Settle in knowing your pipes got a real look."
+        },
+        {
+          "headline": "Protect your home with a clear picture of the line.",
+          "offer": "FREE sewer line scope — $[200] value (if value is bona fide)",
+          "photo_scene": "Tech running a drain camera",
+          "sell_the_outcome_line": "Know what's in the line before anyone digs."
+        },
+        {
+          "headline": "New to the neighborhood? So are we.",
+          "offer": "Scan to schedule your free estimate",
+          "photo_scene": "Friendly tech with tool bag at the door",
+          "sell_the_outcome_line": "A plumber you can call from day one."
+        },
+        {
+          "headline": "Know what's in your water.",
+          "offer": "FREE in-home water test",
+          "photo_scene": "Glass filling at a clean tap",
+          "sell_the_outcome_line": "Clarity on your water — before you buy a system."
+        }
+      ],
+      "compliance_flags": [
+        "16 CFR 251 for 'free' and claimed dollar values.",
+        "Do not imply a personal relationship from purchased new-mover data.",
+        "Water-treatment upsells need truthful need — no invented contamination."
+      ],
+      "evidence": [
+        "GOLD-plumbing-007/011/013/016/028/040/050/055"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "dollar_or_percent_off_service",
+      "primary_emotion": "relief / smart-shopper control",
+      "why": "Concrete $25–$100 off and 10–20% off first/next service are the most common gold coupons.",
+      "headline_offer_patterns": [
+        "'$75 off any repair'",
+        "'20% OFF your first service'",
+        "'15% OFF all services'",
+        "'$50 off your first service'"
+      ],
+      "reinforcing_photo": "Real work photo + one big coupon (avoid six tiny boxes when possible)",
+      "what_backfires": "Coupon grids that bury the phone; % off with no base price honesty; gendered humor that alienates (GOLD-021 flag)",
+      "combos": [
+        {
+          "headline": "We just fixed a slab leak on your street.",
+          "offer": "$75 off any repair",
+          "photo_scene": "Real slab-leak/pipe close-up or van nearby",
+          "sell_the_outcome_line": "The same fast fix your neighbors got — for less this week."
+        },
+        {
+          "headline": "Get the plumbing done right the first time.",
+          "offer": "20% OFF your first service (new customers)",
+          "photo_scene": "Plumber with tools, confident job-site shot",
+          "sell_the_outcome_line": "One visit that actually ends the callback cycle."
+        },
+        {
+          "headline": "Expert plumbing for the protection of your home.",
+          "offer": "15% OFF all services",
+          "photo_scene": "Plumber working under sink (split layout OK if scene is full)",
+          "sell_the_outcome_line": "Protect the house — and keep more of the repair budget."
+        },
+        {
+          "headline": "Experienced plumbers now servicing your area.",
+          "offer": "$50 off your first service",
+          "photo_scene": "Hands with wrench on sink trap",
+          "sell_the_outcome_line": "Meet the local crew — with a first-visit reason to call."
+        }
+      ],
+      "compliance_flags": [
+        "Savings off a bona fide recent price (16 CFR 233).",
+        "License claims only if true; print number where required."
+      ],
+      "evidence": [
+        "GOLD-plumbing-003/010/014/015/019/021/027/033/049/056"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "water_heater_flush_tuneup_or_install",
+      "primary_emotion": "comfort / prudence",
+      "why": "Price-as-headline flush/tune-up ($75–$89.95) and $100–$300 off replacement are strong, repeated gold offers; annual cue fits Watson habit pairing.",
+      "headline_offer_patterns": [
+        "'$79 water heater flush'",
+        "'It's water heater tune-up time!'",
+        "'Is your water heater over 10 years old?'",
+        "'$300 OFF water heater / tankless / softener replacement'"
+      ],
+      "reinforcing_photo": "Tech at water heater with price tag OR steamy shower outcome for replacement",
+      "what_backfires": "Scare 'toxins in your tank' without substantiation; age claims that invent a single universal lifespan (sources disagree; ENERGY STAR ~10-year consider-replace is safer guidance context)",
+      "combos": [
+        {
+          "headline": "$[79] water heater flush.",
+          "offer": "$[79] flush and drain/valve inspection",
+          "photo_scene": "Wall-mounted pipe/valve or tech at heater; price dominant",
+          "sell_the_outcome_line": "Hot water you can count on — tank cleaned and checked."
+        },
+        {
+          "headline": "Is your water heater over 10 years old?",
+          "offer": "$[75] flush + inspection",
+          "photo_scene": "Water heater with a visible date tag",
+          "sell_the_outcome_line": "No cold-shower surprises this winter."
+        },
+        {
+          "headline": "Don't let plumbing issues disrupt your comfort.",
+          "offer": "$300 OFF water heater / tankless / softener replacement",
+          "photo_scene": "Family comfort lifestyle OR new heater install",
+          "sell_the_outcome_line": "Endless hot showers — without waiting for a total failure."
+        },
+        {
+          "headline": "It's water heater tune-up time!",
+          "offer": "$89 tune-up (front); $[25] off repair / $[100] off new heater (back)",
+          "photo_scene": "Friendly heater visual + clear price tag",
+          "sell_the_outcome_line": "A quiet tank and hot water on tap for another season."
+        }
+      ],
+      "compliance_flags": [
+        "Age/lifespan lines should track a named guidance source or stay qualitative.",
+        "Install discounts: model exclusions and license requirements.",
+        "Financing for heaters: Reg Z if trigger terms used."
+      ],
+      "evidence": [
+        "GOLD-plumbing-005/009/012/024/036/045/052",
+        "SRC-ESTAR-WH"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "drain_camera_jetting_special",
+      "primary_emotion": "disgust/anxiety → relief",
+      "why": "Fixed-price unclog/hydrojet and % off camera/jetting are concrete, keepable offers in gold.",
+      "headline_offer_patterns": [
+        "'$49 unclog any drain / $99 hydrojet'",
+        "'50% off camera inspection; 25% off jetting'",
+        "'We keep it moving — drain jetting + camera'",
+        "'Tired of clogged drains?'"
+      ],
+      "reinforcing_photo": "Jetter/camera equipment or clean flowing fixture after service",
+      "what_backfires": "Gross-out humor that overshadows the fix; camera upsell that invents dig work; 'any drain' if exclusions are huge",
+      "combos": [
+        {
+          "headline": "Tired of clogged drains?",
+          "offer": "$49 unclog any drain / $99 hydrojet special (scope listed)",
+          "photo_scene": "Drain machine + technician job-site photos",
+          "sell_the_outcome_line": "Drains that clear — and stay clear."
+        },
+        {
+          "headline": "We keep it moving! Drain jetting + camera.",
+          "offer": "50% off camera inspection; 25% off jetting",
+          "photo_scene": "Service photos of camera/jetter in use",
+          "sell_the_outcome_line": "See the clog, blast it clean, get the line flowing."
+        },
+        {
+          "headline": "Struggling with faulty drains, sewer backups, or odors?",
+          "offer": "FREE video inspection; trenchless options if truly needed",
+          "photo_scene": "Before/after liner or cleanout — honest labels",
+          "sell_the_outcome_line": "Fix the backup without turning the yard into a trench — when video says you can."
+        },
+        {
+          "headline": "We're working in the area — save on video sewer inspection.",
+          "offer": "Camera service 50% off; jetting 25% off",
+          "photo_scene": "Equipment strip + neighborhood van",
+          "sell_the_outcome_line": "While the crew is close — clear the line with proof on screen."
+        }
+      ],
+      "compliance_flags": [
+        "'Any drain' must match real scope or use 'starting at' with exclusions.",
+        "No fake 'collapsed sewer' from a routine soft clog.",
+        "Before/after: typical results + authorization (16 CFR 255)."
+      ],
+      "evidence": [
+        "GOLD-plumbing-018/025/026/041/052/072"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "maintenance_tuneup_or_membership",
+      "primary_emotion": "prudence / relief",
+      "why": "Seasonal tune-up and reminder cards are evidenced; true paid 'membership plans' are thinner — treat membership as optional client product, not gold-dominant.",
+      "headline_offer_patterns": [
+        "'It's water heater tune-up time!'",
+        "'Is your plumbing ready for the kids to be home all summer?'",
+        "'Annual flush + inspection $[X]'"
+      ],
+      "reinforcing_photo": "Tech with checklist at heater or main shutoff",
+      "what_backfires": "Invented membership ROI; scare 'sludge toxins' without proof",
+      "combos": [
+        {
+          "headline": "It's water heater tune-up time!",
+          "offer": "$[89.95] water heater tune-up",
+          "photo_scene": "Tech flushing/inspecting heater",
+          "sell_the_outcome_line": "A quieter tank and fewer surprise cold showers."
+        },
+        {
+          "headline": "Is your plumbing ready for summer at home?",
+          "offer": "$[X] seasonal check + $[Y] off any repair found",
+          "photo_scene": "Home lifestyle + tech at under-sink",
+          "sell_the_outcome_line": "Busy house, working pipes — before the backups start."
+        },
+        {
+          "headline": "Stop small leaks before they grow.",
+          "offer": "Annual maintenance visit $[X] (checklist printed)",
+          "photo_scene": "Clipboard checklist beside main shutoff",
+          "sell_the_outcome_line": "Catch drips early — keep the ceiling dry."
+        }
+      ],
+      "compliance_flags": [
+        "If membership auto-renews, disclose like any continuity offer.",
+        "Checklist must match delivered services."
+      ],
+      "evidence": [
+        "GOLD-plumbing-009/012/039/045"
+      ],
+      "evidence_strength": "thin-moderate (tune-ups stronger than memberships)"
+    },
+    {
+      "offer_type": "senior_or_military_discount",
+      "primary_emotion": "belonging / fairness",
+      "why": "GOLD-plumbing-023 lists military/first-responder 10% and senior 10%. Include as an offer type only when the client truly offers it — not as a default audience angle (roofing-round5).",
+      "headline_offer_patterns": [
+        "'Military & first responder discount 10%'",
+        "'Senior discount 10%'",
+        "Trust checklist + large phone"
+      ],
+      "reinforcing_photo": "Clean trust/work photo — not age stereotypes",
+      "what_backfires": "Unwarranted senior targeting with no discount; ageist creative; implying all buyers are retirees",
+      "combos": [
+        {
+          "headline": "Trusted local plumbing — community discounts.",
+          "offer": "10% senior discount / 10% military & first responder (ID required; cannot combine if true)",
+          "photo_scene": "Hand tightening pipe; huge phone number",
+          "sell_the_outcome_line": "Fair pricing for the neighbors who served — and the neighbors who built this town."
+        },
+        {
+          "headline": "Need a plumber you can trust?",
+          "offer": "Ask about our senior & military 10% off service",
+          "photo_scene": "Uniformed tech at a clean job site",
+          "sell_the_outcome_line": "Reliable help — with a discount you've earned, if you qualify."
+        },
+        {
+          "headline": "Dependability you can trust.",
+          "offer": "Community discount [10%] for seniors / military (terms)",
+          "photo_scene": "Plumber under sink, calm professional",
+          "sell_the_outcome_line": "Pipes fixed right — budget respected."
+        }
+      ],
+      "compliance_flags": [
+        "Only if the discount is real and ID rules are clear.",
+        "Do not invent a senior-only market without list evidence.",
+        "Equal Credit / state discounting rules may apply for financed jobs — keep simple service % safer."
+      ],
+      "evidence": [
+        "GOLD-plumbing-023",
+        "roofing-round5 (audience caution)"
+      ],
+      "evidence_strength": "thin (one clear gold card; no lift proof)"
+    },
+    {
+      "offer_type": "financing_support",
+      "primary_emotion": "relief / aspiration",
+      "why": "Financing appears as a support on larger liner/repipe/heater jobs in some gold/case creative; must stay outcome-led per Patrick directional feedback.",
+      "headline_offer_patterns": [
+        "'$[250] off Nu Flow liner — financing available'",
+        "'Repipe estimate in 24 hours — ask about payments'",
+        "'New water heater — financing available'"
+      ],
+      "reinforcing_photo": "Outcome (dry yard / new heater / hot shower); finance as small support bar",
+      "what_backfires": "Financing-first headline that makes plumbing feel like debt (roofing-round5 hated pattern)",
+      "combos": [
+        {
+          "headline": "Plumbing solutions without tearing up your yard.",
+          "offer": "$[250] off cured-in-place liner + financing available (on approved credit)",
+          "photo_scene": "Before/after yard with honest liner story",
+          "sell_the_outcome_line": "Fix the line — keep the lawn — choose how to pay."
+        },
+        {
+          "headline": "Never run out of hot water again.",
+          "offer": "$[100] off install — ask about monthly payments",
+          "photo_scene": "Steamy shower outcome; finance badge small",
+          "sell_the_outcome_line": "Hot water this month — without waiting for a cash pile."
+        },
+        {
+          "headline": "The fix first. The plan second.",
+          "offer": "Free estimate — we'll review cash and financed options",
+          "photo_scene": "Tech showing homeowner a tablet quote",
+          "sell_the_outcome_line": "Know the repair; then choose the payment path."
+        }
+      ],
+      "compliance_flags": [
+        "Reg Z trigger terms require APR and repayment disclosures.",
+        "'On approved credit'; lender identity when required.",
+        "Cooling-Off may still apply to in-home financed sales."
+      ],
+      "evidence": [
+        "GOLD-plumbing-025/028",
+        "roofing-round5"
+      ],
+      "evidence_strength": "thin for response; moderate for creative direction"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "GOLD-plumbing-001 'Replace cast iron pipes ... for free!' vs FTC free/pricing rules",
+      "resolution": "Compliance wins. Only say free if the consumer truly pays nothing or conditions sit beside a free evaluation — not a free full repipe lure."
+    },
+    {
+      "conflict": "Senior discount offer (GOLD-023) vs roofing-round5 unwarranted senior audience flag",
+      "resolution": "Offer type OK when real; do not default creative to seniors without list evidence."
+    },
+    {
+      "conflict": "Financing support vs financing-first creative",
+      "resolution": "Patrick directional: lead with dry floors / hot water / clear drains; financing supports. APR rules still apply when rates are quoted."
+    },
+    {
+      "conflict": "Vendor ROI cases vs evidence rules",
+      "resolution": "Agency-only unverified; do not print as client proof."
+    },
+    {
+      "conflict": "Scare 'toxin'/sludge/inspector-urgency templates vs substantiation and 39 USC 3001",
+      "resolution": "Law/compliance wins: no fake official notices; chemistry/health scare claims need proof."
+    }
+  ]
+}

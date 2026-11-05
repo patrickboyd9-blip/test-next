@@ -1,0 +1,387 @@
+{
+  "schema_version": "1.1",
+  "slug": "mortgage-financial",
+  "industry": "Mortgage lenders, brokers and loan officers (purchase, refinance, VA/FHA, HELOC/cash-out, reverse); brief notes on adjacent financial mail",
+  "last_updated": "2026-10-29",
+  "words_and_claims_to_avoid": [
+    "Any rate without the APR equally prominent (Reg Z 1026.24(c)); 'as low as' rates without the APR and terms.",
+    "Trigger terms (down payment %, number of payments/term, payment amount, finance charge) without the required down payment, terms and APR disclosures (1026.24(d)).",
+    "'Fixed' for a loan that isn't fixed for its full term; comparisons to the consumer's current payment that aren't apples-to-apples (1026.24(i)).",
+    "Government look: eagles, seals, 'VA/FHA/HUD approved', 'government program', 'official notice', or naming the consumer's current lender without a clear non-affiliation statement (1026.24(i); Reg N; 39 USC 3001(h)).",
+    "'Pre-approved', 'approved instantly', 'poor credit OK', 'guaranteed approval' unless true; prescreened mail must make a firm offer of credit with FCRA notices (GOLD-013, 018).",
+    "'Could save you tens of thousands', '$35,000 average' (GOLD-001, 003) without substantiation from the lender's own data.",
+    "'Counselor' for a commercial lender (1026.24(i)(5)); 'tax-free money' / 'never lose your home' for reverse mortgages.",
+    "'Easy / push-button mortgage' framing that minimizes a major debt (Rocket 2016 backlash; style caution, not law).",
+    "Images or words that suggest a protected group would be denied or get worse terms (Reg B 1002.4(b), amended 2026)."
+  ],
+  "compliance_notes": [
+    "TILA/Reg Z 1026.24 (closed-end) and 1026.16 (HELOC): APR with any rate; trigger-term disclosures; payment amounts must say taxes/insurance not included if so (1026.24(f)); prohibited misleading terms (1026.24(i)).",
+    "Reg N (MAP Rule, 12 CFR 1014.3): bans misrepresenting rates, fees, payments, government affiliation, preapproval/likelihood of approval, the consumer's ability to get a loan, or that the ad is from the consumer's current lender.",
+    "CFPB 2020 consent orders against six VA-focused lenders (Sovereign, Prime Choice, Go Direct, PHLoans.com, Hypotec, Service 1st) for deceptive mail: misleading rates, implied VA/government affiliation, missing disclosures; penalties $50k-$645k.",
+    "Reverse mortgages: CFPB 2015 found ads created false impressions of a government benefit, 'no risk', and staying in the home for life. Don't use FHA/HUD logos or imply endorsement; disclose it's a loan that must be repaid and that taxes, insurance and upkeep are required. Some states add rules (e.g., NY restrictions on 'government insured' claims; confirm).",
+    "FCRA prescreened offers: firm offer of credit, prescreen opt-out notice (short and long form). Homebuyers Privacy Protection Act (P.L. 119-36, effective Mar 5 2026) restricts trigger-lead reports unless there's consent or an existing relationship and a firm offer.",
+    "ECOA/Reg B 1002.4(b) as amended (91 FR 21668, eff. July 21 2026): no oral/written statements or visual images that would lead a reasonable person to think credit would be denied or worse on a prohibited basis (race, sex, age, etc.); encouraging a group (e.g., veterans) isn't by itself discouragement of others. Fair Housing Act 3605 also covers mortgage lending.",
+    "SAFE Act / state rules: show company and individual NMLS IDs on ads; many states require license numbers and an Equal Housing Lender/Opportunity statement or logo.",
+    "RESPA Section 8: co-marketing with agents/builders at fair market value; no referral kickbacks.",
+    "Adjacent financial mail in the gold set (debt relief, tax prep, advisors, bank account bonuses) has its own rules (TSR for debt relief, SEC Marketing Rule/FINRA 2210 for advisors, Reg DD for deposit bonuses). Not researched this run - flag for a separate playbook."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear, joy, pride, status, relief, nostalgia are all options; the client chooses.",
+    "Only laws/compliance are hard limits.",
+    "Every angle and combo carries a sell-the-outcome line.",
+    "Unverified (agency/vendor-only) results are labeled; never quote them as fact on a card.",
+    "No age/demographic angle unless a cited source supports it for this industry; even then, check Fair Housing / ECOA before using it in housing or credit."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "rate_or_apr_offer",
+      "primary_emotion": "smart-shopper / greed",
+      "why": "Price-sensitive refi and purchase shoppers; but rates trigger the heaviest disclosure load.",
+      "headline_offer_patterns": [
+        "'[X]% rate ([Y]% APR)' with full terms",
+        "'Rates moved. Has your mortgage?'"
+      ],
+      "reinforcing_photo": "Kitchen-table review with two printed sheets.",
+      "what_backfires": "Teaser rates without APR; 'locked'/'reserved for you' fake personalization; government styling.",
+      "combos": [
+        {
+          "headline": "Rates moved. Has your mortgage?",
+          "offer": "Today's [X]% rate / [Y]% APR on a [term] fixed (example, terms below)",
+          "photo_scene": "Homeowner comparing two printouts",
+          "sell_the_outcome_line": "Keep more of your paycheck every month."
+        },
+        {
+          "headline": "See today's rate for your home.",
+          "offer": "Personalized quote within 24 hours (no obligation)",
+          "photo_scene": "Phone with a simple quote screen",
+          "sell_the_outcome_line": "Know your options in a day, not a month."
+        },
+        {
+          "headline": "One example. Plain numbers.",
+          "offer": "Single worked example: loan amount, rate, APR, payment (Reg Z complete)",
+          "photo_scene": "Clean graphic of one example loan",
+          "sell_the_outcome_line": "A payment you understand before you sign."
+        }
+      ],
+      "compliance_flags": [
+        "APR as prominent as the rate (1026.24(c)).",
+        "Trigger terms need full disclosures (1026.24(d)); payment excludes taxes/insurance statement (1026.24(f)).",
+        "NMLS IDs; Equal Housing Lender."
+      ],
+      "evidence": [
+        "SRC-REGZ-1026-24",
+        "SRC-BERTRAND-2010"
+      ],
+      "evidence_strength": "strong (law); thin (creative)"
+    },
+    {
+      "offer_type": "free_rate_quote_or_loan_estimate",
+      "primary_emotion": "empowerment",
+      "why": "47% don't shop (CFPB); one more quote ~$1,500 (Freddie). The most honest high-value offer.",
+      "headline_offer_patterns": [
+        "'Get a second quote before you sign'",
+        "'Free Loan Estimate, no obligation'"
+      ],
+      "reinforcing_photo": "Two Loan Estimates side by side.",
+      "what_backfires": "Calling it 'pre-approval'; pressure.",
+      "combos": [
+        {
+          "headline": "One more quote could save you about $1,500.",
+          "offer": "Free written Loan Estimate",
+          "photo_scene": "Two Loan Estimates on a table, pen",
+          "sell_the_outcome_line": "Walk into closing knowing you got a good deal."
+        },
+        {
+          "headline": "Already have a lender? Check them.",
+          "offer": "Free second-opinion quote in 24 hours",
+          "photo_scene": "Person on a phone with a printed quote",
+          "sell_the_outcome_line": "Make lenders compete for you."
+        },
+        {
+          "headline": "Nearly half of buyers never compare. Don't be half.",
+          "offer": "Free quote comparison",
+          "photo_scene": "Bar showing two prices",
+          "sell_the_outcome_line": "Buy your home and keep the savings."
+        }
+      ],
+      "compliance_flags": [
+        "Source line for stats (CFPB 2015; Freddie Mac 2018).",
+        "Avoid implying the stat is a personal guarantee."
+      ],
+      "evidence": [
+        "SRC-CFPB-SHOP-2015",
+        "SRC-FREDDIE-2018",
+        "SRC-FREDDIE-2023"
+      ],
+      "evidence_strength": "strong"
+    },
+    {
+      "offer_type": "refinance_savings",
+      "primary_emotion": "loss aversion / regret",
+      "why": "Refi inertia is documented (Keys et al.).",
+      "headline_offer_patterns": [
+        "'Is your mortgage costing you more than it should?'",
+        "'Lower your payment by $[X]' (only with full disclosures and real example)"
+      ],
+      "reinforcing_photo": "Monthly bill pile shrinking; family dinner.",
+      "what_backfires": "Payment comparisons that stretch the term without saying so (1026.24(i)); 'tens of thousands' with no basis.",
+      "combos": [
+        {
+          "headline": "Is your mortgage costing you more than it should?",
+          "offer": "Free refi check: current loan vs today's options",
+          "photo_scene": "Kitchen table with two statements",
+          "sell_the_outcome_line": "Keep more of your paycheck every month."
+        },
+        {
+          "headline": "1 in 5 homeowners who should refinance don't.",
+          "offer": "Free 10-minute savings check",
+          "photo_scene": "Calculator, coffee, statement",
+          "sell_the_outcome_line": "Stop paying for yesterday's rate."
+        },
+        {
+          "headline": "Cut years, not corners.",
+          "offer": "Shorter-term refi example (full Reg Z terms)",
+          "photo_scene": "Family in backyard, kids older",
+          "sell_the_outcome_line": "Own your home free and clear sooner."
+        }
+      ],
+      "compliance_flags": [
+        "Fair comparisons only (1026.24(i)(2)).",
+        "Don't name the current lender without non-affiliation disclaimer (1026.24(i)(3))."
+      ],
+      "evidence": [
+        "SRC-KEYS-2016",
+        "SRC-REGZ-1026-24"
+      ],
+      "evidence_strength": "strong (behavior)"
+    },
+    {
+      "offer_type": "va_or_government_backed_program",
+      "primary_emotion": "pride / gratitude",
+      "why": "Earned-benefit identity is real; CFPB VA sweep shows the legal line.",
+      "headline_offer_patterns": [
+        "'Your VA home loan benefit, explained plainly'",
+        "'FHA options with [X]% down' (with full disclosures)"
+      ],
+      "reinforcing_photo": "Veteran family on their porch; no seals/eagles/flags styled as official.",
+      "what_backfires": "Iwo Jima silhouettes, flags and 'official' styling (GOLD-002), 'could save tens of thousands' (GOLD-001).",
+      "combos": [
+        {
+          "headline": "You earned this benefit. Use it well.",
+          "offer": "Free VA eligibility and options review",
+          "photo_scene": "Veteran family on porch",
+          "sell_the_outcome_line": "Put the benefit you earned to work for your family's home."
+        },
+        {
+          "headline": "VA loan questions? Straight answers.",
+          "offer": "15-minute call with [LO], NMLS #[X]",
+          "photo_scene": "LO at a desk on a video call",
+          "sell_the_outcome_line": "Know exactly what your benefit can do."
+        },
+        {
+          "headline": "First home with a smaller down payment.",
+          "offer": "FHA options review (terms if % shown)",
+          "photo_scene": "Couple with keys on a front step",
+          "sell_the_outcome_line": "Get into your own home sooner."
+        }
+      ],
+      "compliance_flags": [
+        "Not affiliated with VA/HUD/FHA statement; no government imagery (Reg N; 1026.24(i)(4); 39 USC 3001(h)).",
+        "CFPB 2020 VA orders.",
+        "Trigger-term disclosures for '% down'."
+      ],
+      "evidence": [
+        "SRC-CFPB-VA-2020",
+        "SRC-REGN",
+        "GOLD-mortgage-financial-001, 002, 014"
+      ],
+      "evidence_strength": "strong (law) / thin (creative)"
+    },
+    {
+      "offer_type": "cash_out_or_heloc",
+      "primary_emotion": "anticipation / control",
+      "why": "Equity funds goals (renovation, tuition, debt). Outcome framing fits.",
+      "headline_offer_patterns": [
+        "'Your next project is already in your walls'",
+        "'Consolidate with one payment' (with risks disclosed)"
+      ],
+      "reinforcing_photo": "Finished renovated kitchen; family using it.",
+      "what_backfires": "'Free money', hiding that the home secures the loan.",
+      "combos": [
+        {
+          "headline": "The kitchen you've been planning is already in your walls.",
+          "offer": "Free equity review",
+          "photo_scene": "Family cooking in a new kitchen",
+          "sell_the_outcome_line": "Do the project now, with a plan to pay for it."
+        },
+        {
+          "headline": "Tuition time? Your equity can help.",
+          "offer": "HELOC options review (1026.16 disclosures if rate shown)",
+          "photo_scene": "Student unpacking at a dorm, parent smiling",
+          "sell_the_outcome_line": "Invest in what matters most."
+        },
+        {
+          "headline": "Five bills into one plan.",
+          "offer": "Debt-consolidation refi review",
+          "photo_scene": "Neat desk, one bill",
+          "sell_the_outcome_line": "One payment, one plan, less stress."
+        }
+      ],
+      "compliance_flags": [
+        "HELOC ads: 1026.16 (APR, fees, variable-rate statement).",
+        "State the home secures the loan when relevant; no 'free money'."
+      ],
+      "evidence": [
+        "SRC-REGZ-1026-24",
+        "MMR-637"
+      ],
+      "evidence_strength": "thin (creative)"
+    },
+    {
+      "offer_type": "first_time_buyer_own_vs_rent",
+      "primary_emotion": "anticipation / pride",
+      "why": "Purchase is about the home; gold GOLD-012 'own for less than rent'.",
+      "headline_offer_patterns": [
+        "'From renting to your own front door'",
+        "'Own for $[X]/mo' only with full trigger-term disclosures"
+      ],
+      "reinforcing_photo": "Person opening own front door with box.",
+      "what_backfires": "'Less than rent' with no basis; payments excluding taxes/insurance without saying so.",
+      "combos": [
+        {
+          "headline": "From renting to your own front door.",
+          "offer": "Free pre-qualification review (not a loan commitment)",
+          "photo_scene": "Person opening a front door, box under arm",
+          "sell_the_outcome_line": "Paint the walls any color you want."
+        },
+        {
+          "headline": "What could you afford? Find out free.",
+          "offer": "Free affordability session",
+          "photo_scene": "Couple at a laptop, sticky notes on a wall",
+          "sell_the_outcome_line": "A clear budget before you fall in love with a house."
+        },
+        {
+          "headline": "Down payment worries? Let's look at options.",
+          "offer": "Down-payment assistance review (program-accurate)",
+          "photo_scene": "Keys on a kitchen counter",
+          "sell_the_outcome_line": "Get into your own home without guessing."
+        }
+      ],
+      "compliance_flags": [
+        "Payment = trigger term; disclose taxes/insurance (1026.24(d), (f)).",
+        "'Pre-qualified' not 'pre-approved' unless true (Reg N).",
+        "Fair Housing/Reg B imagery."
+      ],
+      "evidence": [
+        "GOLD-mortgage-financial-012",
+        "SRC-REGZ-1026-24",
+        "SRC-REGN"
+      ],
+      "evidence_strength": "moderate (law) / thin (creative)"
+    },
+    {
+      "offer_type": "reverse_mortgage",
+      "primary_emotion": "security / relief",
+      "why": "Eligible homeowners (62+, by product rule) want to stay and fund retirement; CFPB 2015 shows ads misled.",
+      "headline_offer_patterns": [
+        "'Learn how a reverse mortgage works, plainly'",
+        "'Questions about a HECM? Free explainer'"
+      ],
+      "reinforcing_photo": "Homeowner gardening at their own home; plain, not 'government'.",
+      "what_backfires": "'Government program', 'tax-free money', 'never lose your home', '$35,000 average' (GOLD-003), personalized 'MORE MONEY' hype.",
+      "combos": [
+        {
+          "headline": "Stay in the home you love. Understand your options first.",
+          "offer": "Free plain-English reverse-mortgage guide",
+          "photo_scene": "Homeowner in their garden",
+          "sell_the_outcome_line": "Make your next decade's plan with eyes open."
+        },
+        {
+          "headline": "A reverse mortgage is a loan. Here's how it really works.",
+          "offer": "Free 20-minute explainer; HUD counseling required before applying",
+          "photo_scene": "Kitchen table with a printed guide",
+          "sell_the_outcome_line": "Know the costs, the rules and the benefits before you decide."
+        },
+        {
+          "headline": "Questions your kids will ask. Answered.",
+          "offer": "Family Q&A session",
+          "photo_scene": "Two generations at a table",
+          "sell_the_outcome_line": "A plan the whole family understands."
+        }
+      ],
+      "compliance_flags": [
+        "No FHA/HUD logos or implied endorsement; it's a loan, must be repaid; taxes/insurance/upkeep required (CFPB 2015).",
+        "Reg Z/Reg N; state reverse-mortgage ad rules.",
+        "Age is a product-eligibility fact here; Reg B still bars discouraging imagery."
+      ],
+      "evidence": [
+        "SRC-CFPB-REVERSE-2015",
+        "GOLD-mortgage-financial-003, 021"
+      ],
+      "evidence_strength": "strong (law/risk) / thin (creative)"
+    },
+    {
+      "offer_type": "preapproval_or_prescreened_firm_offer",
+      "primary_emotion": "anticipation / certainty",
+      "why": "Speed and certainty in competitive purchases; prescreened mail is legal with FCRA terms.",
+      "headline_offer_patterns": [
+        "'You've been prescreened for...' (firm offer + opt-out notice)",
+        "'Get pre-approved before you house-hunt'"
+      ],
+      "reinforcing_photo": "Buyer holding a pre-approval letter at an open house.",
+      "what_backfires": "'Approved instantly', 'poor credit OK' (GOLD-013, 018) without basis; trigger-lead mail without consent (HPPA).",
+      "combos": [
+        {
+          "headline": "Shop for homes like a cash buyer.",
+          "offer": "Fast pre-approval review (underwriter-reviewed)",
+          "photo_scene": "Buyer handing a letter to an agent at an open house",
+          "sell_the_outcome_line": "Make offers sellers take seriously."
+        },
+        {
+          "headline": "Know your budget before you fall in love.",
+          "offer": "Free pre-approval consultation",
+          "photo_scene": "Couple at an open house, smiling",
+          "sell_the_outcome_line": "Tour homes you can actually buy."
+        },
+        {
+          "headline": "You've been prescreened for a home loan offer.",
+          "offer": "Firm offer of credit (FCRA notices on back)",
+          "photo_scene": "Clean letter-style layout with lender branding",
+          "sell_the_outcome_line": "Start your search with a real offer in hand."
+        }
+      ],
+      "compliance_flags": [
+        "FCRA prescreen firm offer + opt-out notice; HPPA trigger-lead limits (eff. Mar 5 2026).",
+        "Reg N: no misrepresenting preapproval or likelihood of approval."
+      ],
+      "evidence": [
+        "SRC-HPPA-2025",
+        "SRC-REGN",
+        "GOLD-mortgage-financial-013, 018"
+      ],
+      "evidence_strength": "strong (law)"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "Gold VA cards with flags/Iwo Jima and 'could save tens of thousands' (GOLD-001, 002) vs Reg N/Reg Z and CFPB 2020 VA orders",
+      "resolution": "Law wins: drop government-styled imagery, add non-affiliation statement, substantiate or remove savings claims."
+    },
+    {
+      "conflict": "Gold 'poor credit OK / approved instantly / pre-approved in 5 minutes' (GOLD-013, 018) vs Reg N and FCRA",
+      "resolution": "Law wins: only true, specific preapproval language; firm-offer rules for prescreened mail."
+    },
+    {
+      "conflict": "Gold reverse-mortgage '$35,000 average' / 'MORE MONEY' (GOLD-003) vs CFPB 2015 findings",
+      "resolution": "Law and verified study win: explain, don't hype; substantiate any average with own data."
+    },
+    {
+      "conflict": "Bertrand et al. (photo of a woman raised take-up) vs Reg B 2026 imagery standard",
+      "resolution": "Law wins: people imagery is fine but must not imply who gets credit; use the study's stronger, safer lesson (one example loan > four)."
+    },
+    {
+      "conflict": "Rocket 'easy' framing vs LendingTree empowerment",
+      "resolution": "No hard rule; empowerment preferred for big debts (style caution, backlash documented)."
+    }
+  ]
+}

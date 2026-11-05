@@ -1,7 +1,9 @@
+import { offerPhotoSubject } from "./offer-photo-subject"
 import { cutoutSubjectLine, cutoutSubjectRequested } from "@/lib/design-intelligence/cutout"
 import { photoFits } from "@/lib/research-library/steer"
 
 import { buildCampaignLookBlock } from "./campaign-look"
+import { ROOF_DAMAGE_REFUSE, roofDamageInHeadline, roofDamagePhotoMismatch, roofDamageScene } from "./roof-damage-photo"
 import { roofSlotForTemplate, ROOF_SLOT_BRIEFS, ROOF_SLOT_NEGATIVE_SPACE } from "./roof-photo-slots"
 import {
   buildPhotographyArtDirection,
@@ -76,6 +78,14 @@ export interface ImageBrief {
    * Not part of the cache identity. Not shown to the customer.
    */
   correction?: string
+  /** Damage the headline names; the photograph must show it. */
+  damage?: import("./roof-damage-photo").RoofDamageKind
+}
+
+/** Null when the brief's photo matches its headline; otherwise the problem. */
+export function imageBriefDamageMismatch(spec: Pick<CreativeSpec, "headline">, brief: ImageBrief | null): string | null {
+  if (!brief || brief.artDirection.trade !== "roofing") return null
+  return roofDamagePhotoMismatch(spec.headline, `${brief.artDirection.subject} ${brief.visualDirection}`)
 }
 
 function isImageBriefRole(
@@ -147,7 +157,8 @@ export function toImageBrief(
     brief.tone = spec.tone
   }
 
-  const roofSlot = roofSlotForTemplate(spec.layoutHints?.templateId, context.photoSlot)
+  // Roof slot briefs are for roofing only. A dental or pest card on a fade template keeps its own trade photo.
+  const roofSlot = brief.artDirection.trade === "roofing" ? roofSlotForTemplate(spec.layoutHints?.templateId, context.photoSlot) : null
   if (roofSlot) {
     const slot = ROOF_SLOT_BRIEFS[roofSlot]
     brief.artDirection = {
@@ -162,6 +173,41 @@ export function toImageBrief(
     if (roofSlot === "before") {
       brief.doNotInvent = brief.doNotInvent.filter((item) => item !== "invented property damage")
     }
+  }
+
+  // A roofing headline that names damage gets a photo of that damage being fixed.
+  // The before/after "after" frame stays a finished roof.
+  const damage = brief.artDirection.trade === "roofing" && roofSlot !== "after" ? roofDamageInHeadline(spec.headline) : null
+  if (damage) {
+    const subject = roofDamageScene(damage)
+    brief.artDirection = {
+      ...brief.artDirection,
+      subject,
+      refuse: `${brief.artDirection.refuse} ${ROOF_DAMAGE_REFUSE}`,
+    }
+    brief.visualDirection = subject
+    brief.doNotInvent = brief.doNotInvent.filter((item) => item !== "invented property damage")
+    brief.damage = damage
+  }
+
+  // A metal-roof offer must show a metal roof. Shingle photos under "$750 off a new metal roof" sank every
+  // Cascade Ridge card in Round 7. Damage shots keep the worn old roof but show the metal going on.
+  const material = `${spec.offer ?? ""} ${spec.headline ?? ""} ${context.campaign?.offer ?? ""}`
+  if (brief.artDirection.trade === "roofing" && /\bmetal\b|standing[- ]seam/i.test(material)) {
+    const metal = brief.damage
+      ? `${brief.artDirection.subject} New standing-seam metal panels are stacked by the ladder and the first metal panels are already fastened along the upper roof; the roofer is installing them.`
+      : `${brief.artDirection.subject.replace(/(?:dark charcoal )?(?:architectural )?shingle roof/gi, "standing-seam metal roof").replace(/\bnew roof\b/gi, "new standing-seam metal roof")} The roof is standing-seam metal (long vertical charcoal metal panels with raised seams), not asphalt shingles. One roofer on the roof fastening a metal panel, face visible.`
+    brief.artDirection = { ...brief.artDirection, subject: metal, refuse: `${brief.artDirection.refuse} No asphalt shingle roof on the finished house.` }
+    brief.visualDirection = metal
+  }
+
+  // The offer decides the subject outside roofing (water heater, house exterior, operatory, ...).
+  const offerSubject = brief.artDirection.trade !== "roofing" ? offerPhotoSubject(brief.artDirection.trade, material) : null
+  if (offerSubject) {
+    const nobody = /\bno people\b/i.test(offerSubject) ? " No people, no hands, no workers, no tools, no ladders, no drills in frame." : ""
+    brief.artDirection = { ...brief.artDirection, subject: offerSubject, refuse: `${brief.artDirection.refuse}${nobody}` }
+    brief.visualDirection = offerSubject
+    if (nobody && typeof brief.lookBlock === "string") brief.lookBlock = brief.lookBlock.replace(/\s*Wardrobe:[^.]*\./, " No people in frame.")
   }
 
   const researchNote = context.researchPhotoNote?.trim()

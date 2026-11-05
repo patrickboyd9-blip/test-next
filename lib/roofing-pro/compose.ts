@@ -1,3 +1,4 @@
+import { roofDamageInHeadline } from "@/lib/campaign-creator/roof-damage-photo"
 import { compliantLine } from "@/lib/research-library/compliance"
 import { composeAddressSideFace } from "@/lib/campaign-creator/address-side-layout"
 import { qrScanLabel } from "@/components/campaign-creator/studio/design-rules"
@@ -5,6 +6,7 @@ import type { CreativeSpec } from "@/lib/campaign-creator/types"
 import type { LockupPlan, PhotoSlotPlan, PostcardFacePlan, ShapePlan, TrustChipPlan } from "@/lib/postcard-layouts/compose"
 import type { PostcardSizeId } from "@/lib/postcard-layouts/ids"
 import { contrastRatio, paletteById, type VerticalPalette } from "@/lib/postcard-layouts/palette"
+import { tradePalette } from "@/lib/postcard-layouts/trade-palettes"
 import { scaleRect, trimInches } from "@/lib/postcard-layouts/templates"
 import { fitText, type FittedText, type InchRect, type TextRole } from "@/lib/postcard-layouts/typefit"
 import { addressSideContentRect } from "@/lib/print-spec/address-side-content"
@@ -41,9 +43,15 @@ export interface RoofingProInput {
   complianceMark?: string | null
   /** Return lines for the message column. The mailing panel stays blank. */
   returnAddress?: string | null
+  /** Gold industry slug. Non-roofing trades get their own palette. */
+  trade?: string | null
 }
 
-const DARK_TYPE = new Set<RoofingProTemplateId>(["roof_full_bleed", "roof_fade_offer", "roof_storm", "roof_seasonal"])
+/** Inches the fade starts lower on a damage-headline front (5x8 layout units). */
+const DAMAGE_SCRIM_DROP = 0.3
+
+/** Type sits on a dark trade field or fade. These fronts also get the soft-fade back, never a cream one. */
+export const DARK_TYPE = new Set<RoofingProTemplateId>(["roof_full_bleed", "roof_fade_offer", "roof_storm", "roof_seasonal", "roof_coupon", "roof_neighborhood"])
 
 export function composeRoofingProCard(input: RoofingProInput): RoofingProCard {
   const front = composeRoofingProFace({ ...input, face: "front" })
@@ -76,7 +84,7 @@ export function composeRoofingProFace(input: RoofingProInput): PostcardFacePlan 
   const size = input.size ?? "5x8"
   const face = input.face ?? "front"
   const meta = ROOFING_PRO_META[input.templateId]
-  const palette = paletteFor(input.templateId)
+  const palette = paletteFor(input.templateId, input.trade)
   if (face === "back") return composeBack(input, size, meta.pairing, palette)
   return composeFront(input, size, meta.pairing, palette, meta.offerLed)
 }
@@ -89,10 +97,13 @@ function composeFront(
   offerLed: boolean
 ): PostcardFacePlan {
   const trim = trimInches(size)
-  const regions = proFrontRegions(input.templateId).map((region) => ({
-    ...region,
-    ...scaleRect(region, size),
-  }))
+  // A damage headline's photo keeps the damaged roof in the upper part of the frame.
+  // Start the fade a little lower there so it does not sit over the damage.
+  const damageLed = Boolean(roofDamageInHeadline(input.spec.headline))
+  const regions = proFrontRegions(input.templateId).map((region) => {
+    const lowered = damageLed && region.role === "solid-scrim" ? { ...region, y: region.y + DAMAGE_SCRIM_DROP, h: region.h - DAMAGE_SCRIM_DROP } : region
+    return { ...lowered, ...scaleRect(lowered, size) }
+  })
   const copy = resolveCopy(input, offerLed)
   const onDark = DARK_TYPE.has(input.templateId)
   const texts: FittedText[] = []
@@ -169,8 +180,12 @@ function composeBackRaw(
   pairing: PostcardFacePlan["pairing"],
   palette: VerticalPalette
 ): PostcardFacePlan {
-  if (input.spec.addressSide) {
+  const fade = DARK_TYPE.has(input.templateId)
+  if (input.spec.addressSide || fade) {
     return composeAddressSideFace({
+      style: fade ? "soft-fade" : "plain",
+      proof: fade ? resolveCopy(input, ROOFING_PRO_META[input.templateId].offerLed).body || undefined : undefined,
+      expiry: resolveCopy(input, ROOFING_PRO_META[input.templateId].offerLed).expiry || undefined,
       size,
       pairing,
       palette,
@@ -635,7 +650,8 @@ function fitBounded(input: {
   return last
 }
 
-function paletteFor(id: RoofingProTemplateId): VerticalPalette {
+function paletteFor(id: RoofingProTemplateId, trade?: string | null): VerticalPalette {
+  if (trade && trade !== "roofing") return tradePalette(trade)
   const base = paletteById("roofing")
   if (id === "roof_seasonal") {
     return {

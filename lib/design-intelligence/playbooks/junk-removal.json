@@ -1,0 +1,285 @@
+{
+  "schema_version": "1.1",
+  "slug": "junk-removal",
+  "industry": "Junk removal and cleanouts",
+  "last_updated": "2026-10-28",
+  "words_and_claims_to_avoid": [
+    "Government look-alike design, 'official notice', fake checks or invoices (39 USC 3001)",
+    "Unsubstantiated 'best', '#1', 'voted #1', 'guaranteed results', percent-savings claims (FTC Act s.5)",
+    "Invented or composite testimonials, star ratings or review counts (16 CFR 255)",
+    "'Free' unless it truly costs nothing and carries no hidden obligation (16 CFR 251)",
+    "Fake expiration dates or fake scarcity; any deadline printed must be real",
+    "Demographic/age targeting language (e.g., 'seniors', 'retirees') unless the client has evidence it fits their actual buyers",
+    "Any vendor case-study result (calls, ROI, revenue) printed as if it were the client's own result",
+    "'The BEST junk removal' (GOLD-002) without substantiation",
+    "'SAVE 40%' (GOLD-005) without a real reference price",
+    "'Eco-friendly', 'green', 'we recycle everything', '[X]% diverted from landfill' unless specific and documented (16 CFR 260)",
+    "'Donated to charity' unless items are actually donated; don't imply a tax deduction",
+    "'Same-day' or 'we take anything' unless true (hazardous waste, paint, chemicals usually excluded)",
+    "Pressure or guilt about a deceased relative's things in estate copy"
+  ],
+  "compliance_notes": [
+    "Any discount or 'save X%' must be off a real, recently charged price; 'save 40%' with no reference price is not allowed.",
+    "FTC 'Free' Guide, 16 CFR 251 (verified): (1) 'free with purchase' means the paid item is at its regular price (sold openly for about 30 days), with no markup or downgrade to cover the free item; (2) all conditions go right next to the offer, not in an asterisk footnote; (3) if the main job is priced by negotiation or bid, 'free [item] with purchase' is improper; (4) don't run the same 'free' offer more than 6 months in any 12; (5) 'gift' or 'bonus' wording doesn't cure a deceptive 'free'.",
+    "Testimonials and star ratings must be real, typical and current; disclose any material connection (16 CFR 255).",
+    "FTC Green Guides, 16 CFR 260 (verified; they cover claims about services too): unqualified 'eco-friendly', 'green' or 'environmentally safe' claims are deceptive (260.4); qualify to a specific, provable benefit (e.g., 'We donate usable furniture to [named charity]'). 'Recyclable', 'biodegradable' and similar claims have their own tests (260.8, 260.12).",
+    "Load-based pricing ('$45 per cubic yard', '1/2 load'): define what a load is and what's excluded; exclusions (e.g., 'excludes jobs $99 and under') belong next to the offer.",
+    "Hazardous items (paint, chemicals, some electronics) are regulated by state/local disposal rules; list exclusions rather than 'we take anything'. State rules not verified here.",
+    "Hauler licensing/permits are local and vary; not verified: client must confirm.",
+    "If the job is sold at the home for $25+ and isn't buyer-initiated emergency work, the Cooling-Off Rule (16 CFR 429) may apply."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear, disgust, joy, pride, status, relief are all options; the client chooses.",
+    "Only laws/compliance are hard limits.",
+    "Every angle and combo carries a sell-the-outcome line.",
+    "Unverified (agency/vendor-only) results are labeled; never quote them as fact on a card."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "load_based_dollar_off",
+      "primary_emotion": "relief / smart-shopper",
+      "why": "GOLD-001 ($35 off 1/2 load / $50 off full load) uses tiers that let the reader self-size the job; GOLD-003/004 use $30 off with exclusions.",
+      "headline_offer_patterns": [
+        "'$[X] off a 1/2 load or $[Y] off a full load'"
+      ],
+      "reinforcing_photo": "Before/after garage or crew loading truck.",
+      "what_backfires": "Coupon-only layouts with no outcome; 'SAVE 40%' with no basis.",
+      "combos": [
+        {
+          "headline": "Park in your garage again.",
+          "offer": "$[X] off 1/2 load / $[Y] off full load",
+          "photo_scene": "Before/after garage",
+          "sell_the_outcome_line": "A room you can actually use."
+        },
+        {
+          "headline": "That pile isn't going anywhere. Unless we take it.",
+          "offer": "$[X] off any full load",
+          "photo_scene": "Junk pile by a curb, crew lifting",
+          "sell_the_outcome_line": "Clear curb, clear head."
+        },
+        {
+          "headline": "Your junk problem ends here.",
+          "offer": "$[X] off (jobs over $[Y])",
+          "photo_scene": "Crew loading a clean truck",
+          "sell_the_outcome_line": "Gone in one visit."
+        }
+      ],
+      "compliance_flags": [
+        "Exclusions next to the offer; define load size."
+      ],
+      "evidence": [
+        "GOLD-junk-removal-001, 003, 007"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "free_upfront_quote",
+      "primary_emotion": "trust / certainty",
+      "why": "Price uncertainty is a friction point; GOLD-007 'scan for a free quote'. Junk-blog survey (unverified) says price and convenience drive choice.",
+      "headline_offer_patterns": [
+        "'Free, upfront quote: no surprises'",
+        "'Text a photo, get a price'"
+      ],
+      "reinforcing_photo": "Crew member showing a price on a tablet to a homeowner.",
+      "what_backfires": "'Free quote' that requires a paid trip fee.",
+      "combos": [
+        {
+          "headline": "Know the price before we lift a thing.",
+          "offer": "Free upfront quote",
+          "photo_scene": "Crew showing a quote on a tablet",
+          "sell_the_outcome_line": "No surprises, just space."
+        },
+        {
+          "headline": "Text a photo. Get a price.",
+          "offer": "Free quote by text",
+          "photo_scene": "Phone photo of a cluttered garage",
+          "sell_the_outcome_line": "Clutter gone without the guesswork."
+        },
+        {
+          "headline": "One call, one price, one clean garage.",
+          "offer": "Free on-site quote",
+          "photo_scene": "Clean garage after removal",
+          "sell_the_outcome_line": "Done in an afternoon."
+        }
+      ],
+      "compliance_flags": [
+        "Truly free (16 CFR 251)."
+      ],
+      "evidence": [
+        "GOLD-junk-removal-007",
+        "SRC-JRM-SURVEY",
+        "SRC-FTC-FREE-251"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "neighborhood_day",
+      "primary_emotion": "belonging / convenience",
+      "why": "GOLD-004/005 'Neighborhood junk removal day' / 'Curbside day' batch routes; local norm (#3).",
+      "headline_offer_patterns": [
+        "'Neighborhood Junk Day: [date]'",
+        "'Put it on the curb, we'll do the rest'"
+      ],
+      "reinforcing_photo": "Street of homes with small curb piles, truck rolling in.",
+      "what_backfires": "'SAVE 40%' without a reference price; fake dates.",
+      "combos": [
+        {
+          "headline": "Neighborhood Junk Day is [date].",
+          "offer": "$[X] off, all labor included",
+          "photo_scene": "Truck on a residential street",
+          "sell_the_outcome_line": "A cleaner street, the easy way."
+        },
+        {
+          "headline": "Your neighbors are clearing out [date].",
+          "offer": "Curbside pickup from $[X]/cubic yard",
+          "photo_scene": "Curb piles and crew",
+          "sell_the_outcome_line": "Join the neighbors and get your space back."
+        },
+        {
+          "headline": "We're on your street [date].",
+          "offer": "Route discount $[X]",
+          "photo_scene": "Branded truck at the curb",
+          "sell_the_outcome_line": "One easy morning, one clear garage."
+        }
+      ],
+      "compliance_flags": [
+        "Real date and real per-yard price; no unsupported % savings."
+      ],
+      "evidence": [
+        "GOLD-junk-removal-004, 005",
+        "SRC-GOLDSTEIN-2008"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "moving_or_new_mover",
+      "primary_emotion": "hope / fresh start",
+      "why": "Moving and downsizing are top cleanout triggers (vendor survey); GOLD-006 targets new movers.",
+      "headline_offer_patterns": [
+        "'Moving? Don't pack it. Toss it.'",
+        "'Welcome home: start fresh'"
+      ],
+      "reinforcing_photo": "Bright new room, a few boxes.",
+      "what_backfires": "Personal-data creepiness about the move.",
+      "combos": [
+        {
+          "headline": "Moving? Don't pack what you don't want.",
+          "offer": "$[X] off pre-move pickup",
+          "photo_scene": "Couple sorting boxes into keep/haul",
+          "sell_the_outcome_line": "Move lighter, start fresher."
+        },
+        {
+          "headline": "Welcome to the neighborhood!",
+          "offer": "$[X] off your first pickup",
+          "photo_scene": "Empty bright living room",
+          "sell_the_outcome_line": "Unpack into open space."
+        },
+        {
+          "headline": "Downsizing? We'll haul the rest.",
+          "offer": "Free quote",
+          "photo_scene": "Crew carrying furniture to truck",
+          "sell_the_outcome_line": "Keep the best, lose the stress."
+        }
+      ],
+      "compliance_flags": [
+        "New-mover lists are purchased data."
+      ],
+      "evidence": [
+        "GOLD-junk-removal-006",
+        "SRC-GOTJUNK-2026"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "estate_cleanout",
+      "primary_emotion": "compassion / relief",
+      "why": "Vendor survey: 54% said belongings made grieving harder; about a quarter of the vendor's bookings tied to loss/estates (proprietary).",
+      "headline_offer_patterns": [
+        "'Gentle help clearing a loved one's home'",
+        "'Keep, donate, haul: you decide'"
+      ],
+      "reinforcing_photo": "Crew carefully wrapping keepsakes; family member present.",
+      "what_backfires": "Discount-shouting; urgency or guilt; implying the client handles probate/legal matters.",
+      "combos": [
+        {
+          "headline": "Clearing a loved one's home? We'll help, gently.",
+          "offer": "Free walk-through",
+          "photo_scene": "Crew wrapping a framed photo",
+          "sell_the_outcome_line": "Keep what matters. We'll handle the rest."
+        },
+        {
+          "headline": "You choose what stays. We handle what goes.",
+          "offer": "Free quote; donation drop-offs included (if true)",
+          "photo_scene": "Sorting table with keep/donate labels",
+          "sell_the_outcome_line": "Honor the memories without the heavy lifting."
+        },
+        {
+          "headline": "One call for the whole house.",
+          "offer": "Full cleanout quote",
+          "photo_scene": "Calm empty room with light",
+          "sell_the_outcome_line": "Space to breathe again."
+        }
+      ],
+      "compliance_flags": [
+        "Donation claims must be true; no tax-deduction implication."
+      ],
+      "evidence": [
+        "SRC-GOTJUNK-2026"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "eco_disposal",
+      "primary_emotion": "pride / responsibility",
+      "why": "Agency blog (unverified) says ~41% care about eco disposal. Green Guides control the wording.",
+      "headline_offer_patterns": [
+        "'We donate and recycle what we can'",
+        "Specific: '[Named charity] partner'"
+      ],
+      "reinforcing_photo": "Crew dropping items at a donation center.",
+      "what_backfires": "Unqualified 'eco-friendly' or invented diversion percentages.",
+      "combos": [
+        {
+          "headline": "Your old stuff, a second life.",
+          "offer": "$[X] off; usable items donated to [charity]",
+          "photo_scene": "Crew dropping furniture at a donation center",
+          "sell_the_outcome_line": "Clear space and do some good."
+        },
+        {
+          "headline": "Not everything belongs in a landfill.",
+          "offer": "Free quote",
+          "photo_scene": "Sorting recycling at the truck",
+          "sell_the_outcome_line": "Feel good about letting go."
+        },
+        {
+          "headline": "Gone, and given forward.",
+          "offer": "$[X] off any load",
+          "photo_scene": "Donation receipt + clean garage",
+          "sell_the_outcome_line": "Lighter home, lighter conscience."
+        }
+      ],
+      "compliance_flags": [
+        "16 CFR 260: specific and documented; name real partners only."
+      ],
+      "evidence": [
+        "SRC-JRM-SURVEY",
+        "SRC-FTC-GREEN-260"
+      ],
+      "evidence_strength": "thin"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "GOLD-002 'WE PROVIDE THE BEST JUNK REMOVAL SERVICES' vs FTC substantiation",
+      "resolution": "Law wins: drop 'best'; sell the outcome ('Park in your garage again')."
+    },
+    {
+      "conflict": "GOLD-005 'SAVE 40%' vs real-reference-price rule",
+      "resolution": "Law wins: state the actual per-yard price; only show a saving off a real regular price."
+    },
+    {
+      "conflict": "Vendor survey framing of grief vs aggressive offer cards",
+      "resolution": "Both allowed; for estate cleanouts the data suggests a calm tone. Client chooses."
+    }
+  ]
+}

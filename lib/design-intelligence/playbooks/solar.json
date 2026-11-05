@@ -1,0 +1,203 @@
+{
+  "schema_version": "1.1",
+  "slug": "solar",
+  "industry": "Residential solar",
+  "last_updated": "2026-10-27",
+  "words_and_claims_to_avoid": [
+    "Government look-alike design, 'official notice', fake checks or invoices (39 USC 3001)",
+    "Unsubstantiated 'best', '#1', 'guaranteed savings', percent-savings claims (FTC Act s.5)",
+    "Invented or composite testimonials, star ratings or review counts (16 CFR 255)",
+    "'Free' unless it truly costs nothing and carries no hidden obligation",
+    "Fake expiration dates or fake scarcity; any deadline printed must be real",
+    "Demographic/age targeting language (e.g., 'seniors', 'retirees') unless the client has evidence it fits their actual buyers",
+    "ANY federal tax-credit claim ('30% tax credit', 'get money back from the IRS'): the 25D Residential Clean Energy Credit ended for expenditures made after Dec 31, 2025 (installation completed date counts)",
+    "'Free solar', 'no-cost solar', 'government solar program' (FTC/DOE call these scams)",
+    "'Utility partner'/'your utility has enrolled you'",
+    "'Rates will skyrocket' fear claims without substantiation (Treasury lists this as a scam tactic)",
+    "Low teaser payments without total cost"
+  ],
+  "compliance_notes": [
+    "If the sale closes in the home: FTC Cooling-Off Rule (16 CFR 429) applies to $25+ in-home sales; the client's contract must carry the 3-day cancel notice. States can add longer windows (e.g., California's 5-day window for buyers 65+ is documented for solar contracts).",
+    "Print the client's contractor license number where the state requires it in ads; requirements vary by state, and the client must confirm their own state's rule (we only verified the specific state rules named below).",
+    "Any discount must be off a real, recently charged price.",
+    "IRS: 25D not allowed for expenditures after 12/31/2025 (OBBB). Older pages (e.g., IRS Taxpayer Advocate 2024 'credit remains until 2032') are outdated - do not reuse. Lease/PPA providers' business credits are separate; do not reference them on cards without current counsel review.",
+    "FTC consumer guidance: 'free' or 'no cost' solar offers are scams; leases/PPAs don't give the homeowner tax credits.",
+    "California B&P 7169: the CSLB Solar Energy System Disclosure Document (16-pt bold, total cost incl. financing, complaint info, cancel right) must be on the contract cover; contract language must match the language of the sales pitch or marketing material - so a Spanish postcard implies Spanish contract docs. CA cancellation period is 3 days, or 5 days for buyers 65+ (CPUC).",
+    "Savings estimates must be substantiated and state assumptions (FTC s.5; CA requires assumptions in disclosure).",
+    "Reg Z, 12 CFR 1026.24 (verified): if a card states a down payment amount or %, the number of payments or repayment period (e.g., 'for 18 months', 'no payments for 12 months'), a payment amount ('$99/mo'), or a finance charge amount, it must also state the down payment, the full repayment terms and the 'annual percentage rate' using that term. Any rate (e.g., '0%') must be stated as an APR. Terms must be ones actually offered. Safe alternative: 'Financing available', which uses no trigger terms. Have the lender review.",
+    "FTC 'Free' Guide, 16 CFR 251 (verified): (1) 'free with purchase' means the paid item is at its regular price (sold openly for about 30 days), with no markup or downgrade to cover the free item; (2) all conditions go right next to the offer, not in an asterisk footnote; (3) if the main job is priced by negotiation or bid (typical for roofs, siding and window packages), 'free [item] with purchase' is improper; (4) don't run the same 'free' offer more than 6 months in any 12; (5) 'gift' or 'bonus' wording doesn't cure a deceptive 'free'.",
+    "Warranty ads, 16 CFR 239 + 702 (verified): 'lifetime/life' must say whose or what life (239.4); 'satisfaction/money-back guarantee' only if the full price is refunded on request, with conditions disclosed (239.3); advertise a warranty only if it is promptly honored (239.5). For consumer products over $15 with a written warranty, the terms must be available before sale; door-to-door sellers must tell buyers before closing that copies are available (702.3); ads should say where the full warranty can be seen (239.2)."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear, joy, pride, relief are all options; the client chooses.",
+    "Only laws/compliance are hard limits.",
+    "Every angle carries a sell-the-outcome line.",
+    "Unverified (agency-only) results are labeled; never quote them as fact on a card."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "free_estimate_personalized",
+      "primary_emotion": "curiosity, then control",
+      "why": "Personalization of the reader's own roof is the strongest documented solar mechanic (Origin 'Rate My Roof', Cannes Bronze).",
+      "headline_offer_patterns": [
+        "'Your roof could produce ~[real estimate]'",
+        "'See your roof's estimate'"
+      ],
+      "reinforcing_photo": "Aerial of a real local roof, or a clean local install",
+      "what_backfires": "Fake 'chosen/prime candidate' notices (GOLD-solar-003)",
+      "combos": [
+        {
+          "headline": "Your roof could be paying you back.",
+          "offer": "Free personalized estimate with assumptions shown",
+          "photo_scene": "Clean local install in sun",
+          "sell_the_outcome_line": "Power your home on your own terms."
+        },
+        {
+          "headline": "What could your roof make?",
+          "offer": "Free design + production estimate",
+          "photo_scene": "Aerial of a roof with a panel overlay (clearly illustrative)",
+          "sell_the_outcome_line": "Know your numbers before you decide."
+        },
+        {
+          "headline": "See your home's solar estimate in 2 minutes.",
+          "offer": "Free estimate via QR",
+          "photo_scene": "Homeowner scanning the card on the porch",
+          "sell_the_outcome_line": "A clear answer, no pressure."
+        }
+      ],
+      "compliance_flags": [
+        "CA B&P 7169: savings estimates need stated assumptions in the disclosure.",
+        "Don't collect data 'to see if you qualify' as a lead trap (FTC alert)."
+      ],
+      "evidence": [
+        "Origin 'Rate My Roof' (verified award)",
+        "SRC-FTC-SOLAR"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "referral",
+      "primary_emotion": "belonging / reciprocity plus small gain",
+      "why": "GOLD-solar-004 ('Share the sun. Earn $500!') and 005 (tiered $500/$1K/$2K) target existing customers.",
+      "headline_offer_patterns": [
+        "'Share the sun. Earn $[X].'"
+      ],
+      "reinforcing_photo": "Happy customer with neighbors, panels visible",
+      "what_backfires": "Pyramid-style escalating claims without terms",
+      "combos": [
+        {
+          "headline": "Share the sun. Earn $[X].",
+          "offer": "$[X] per installed referral (terms)",
+          "photo_scene": "Two neighbors chatting over a fence, panels visible",
+          "sell_the_outcome_line": "Help a friend cut their bill, and get rewarded."
+        },
+        {
+          "headline": "Love your solar? Pass it on.",
+          "offer": "$[X] referral reward",
+          "photo_scene": "Customer family under panels",
+          "sell_the_outcome_line": "Your neighbors get what you have."
+        },
+        {
+          "headline": "Your neighbors are asking.",
+          "offer": "Tiered rewards with terms",
+          "photo_scene": "Street with several solar homes",
+          "sell_the_outcome_line": "Be the reason your street goes solar."
+        }
+      ],
+      "compliance_flags": [
+        "State terms; referral rewards may be taxable to the recipient (have the client confirm with their CPA)."
+      ],
+      "evidence": [
+        "GOLD-solar-004, 005 (Sungevity)"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "financing_zero_down",
+      "primary_emotion": "relief (affordability), with full cost visible",
+      "why": "Common in gold (GOLD-solar-001, 002 'zero payments for 12 months'), but Treasury lists teaser payments that hide later bills as a scam tactic.",
+      "headline_offer_patterns": [
+        "Outcome headline + 'financing available, see total cost'"
+      ],
+      "reinforcing_photo": "Installed system",
+      "what_backfires": "'$0 down' without total cost; 'no cost solar program'",
+      "combos": [
+        {
+          "headline": "Run on sunshine.",
+          "offer": "Financing available; total cost on the back",
+          "photo_scene": "Family in a bright home",
+          "sell_the_outcome_line": "Own your power without a big upfront check."
+        },
+        {
+          "headline": "Make your roof work for you.",
+          "offer": "Loan options; full terms disclosed",
+          "photo_scene": "Clean install",
+          "sell_the_outcome_line": "Your bill turns into an investment."
+        },
+        {
+          "headline": "Solar that fits your budget.",
+          "offer": "Payments from $[X]/mo, with down payment, repayment terms and APR stated next to it",
+          "photo_scene": "Homeowner on the porch at dusk, lights on",
+          "sell_the_outcome_line": "Lower your bill, keep your savings."
+        }
+      ],
+      "compliance_flags": [
+        "Reg Z, 12 CFR 1026.24 (verified): if a card states a down payment amount or %, the number of payments or repayment period (e.g., 'for 18 months', 'no payments for 12 months'), a payment amount ('$99/mo'), or a finance charge amount, it must also state the down payment, the full repayment terms and the 'annual percentage rate' using that term. Any rate (e.g., '0%') must be stated as an APR. Terms must be ones actually offered. Safe alternative: 'Financing available', which uses no trigger terms. Have the lender review.",
+        "Treasury/FTC: no teaser payments that mask higher later bills.",
+        "CA: total cost including financing goes on the disclosure cover page."
+      ],
+      "evidence": [
+        "GOLD-solar-001, 002",
+        "SRC-TREASURY-SOLAR"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "status_identity",
+      "primary_emotion": "pride / smart decision",
+      "why": "Sunrun 'Brilliant' insight (agency-only): solar as progress and the smart move.",
+      "headline_offer_patterns": [
+        "'The smart move on your street.'"
+      ],
+      "reinforcing_photo": "Local solar homes",
+      "what_backfires": "Unsubstantiated local counts",
+      "combos": [
+        {
+          "headline": "[N] homes in [town] already went solar.",
+          "offer": "Free consult",
+          "photo_scene": "Street with real solar homes",
+          "sell_the_outcome_line": "Be the home that makes its own power."
+        },
+        {
+          "headline": "The smart move on your street.",
+          "offer": "Free design",
+          "photo_scene": "Golden-hour install",
+          "sell_the_outcome_line": "Smart today, smarter every month."
+        },
+        {
+          "headline": "Brilliant, right on your roof.",
+          "offer": "Free estimate",
+          "photo_scene": "Bright, joyful home",
+          "sell_the_outcome_line": "A home that runs on sunshine."
+        }
+      ],
+      "compliance_flags": [
+        "Counts must be real."
+      ],
+      "evidence": [
+        "Sunrun 'Brilliant' (agency-only)"
+      ],
+      "evidence_strength": "thin"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "Gold set GOLD-solar-001/002/003 use 'no cost solar program', 'up to a $10,000 tax credit', 'chosen as a prime candidate'",
+      "resolution": "Compliance wins outright. 25D ended for expenditures after 12/31/2025 (IRS), the FTC calls 'free/no cost' solar a scam, and 'chosen' implies a program that doesn't exist. Use these pieces only as layout references, never as copy."
+    },
+    {
+      "conflict": "Fear-of-rising-rates angle vs Treasury listing 'energy costs will skyrocket' as a scam tactic",
+      "resolution": "Allowed only with a substantiated, sourced local rate history. Otherwise use the control/ownership framing."
+    }
+  ]
+}

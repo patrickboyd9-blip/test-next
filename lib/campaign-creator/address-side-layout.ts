@@ -23,12 +23,35 @@ export interface AddressSideLayoutInput {
   phone?: string
   website?: string
   proof?: string
+  /** Stated offer expiry ("Valid through May 30"). Printed under the offer. */
+  expiry?: string
   license?: string
   returnAddress?: string
   qrDestination?: string
   disclaimer?: string | null
   complianceMark?: string | null
   templateId?: PostcardTemplateId
+  /**
+   * "soft-fade" matches a fade front: the campaign photo fills the message
+   * column and the copy sits in white on a navy fade over it. The mailing
+   * panel, postage, and barcode zone stay unpainted either way.
+   */
+  style?: "plain" | "soft-fade"
+}
+
+/** Photo slot id for the soft-fade back. Renderers fill it with the front photo. */
+export const SOFT_FADE_BACK_PHOTO_ID = "back-fade-photo"
+/** Share of the message column kept as photo above the copy. */
+const FADE_PHOTO_SHARE = 0.42
+/** Bigger type on the fade so it reads like the front. */
+const FADE_BOOST: Partial<Record<FittedText["role"], number>> = { offer: 11, contact: 8, body: 1, proof: 2 }
+/** Inches of the fade photo pushed above the top trim, so the back shows more house and roof, less sky. */
+const FADE_SKY_CROP = 0.9
+/** Owner votes: the fade back needs fewer words. Longer proof lines stay off it. */
+const FADE_PROOF_MAX = 70
+
+export function isSoftFadeBack(plan: { photos: Array<{ id: string }> } | null | undefined): boolean {
+  return Boolean(plan?.photos.some((slot) => slot.id === SOFT_FADE_BACK_PHOTO_ID))
 }
 
 /**
@@ -47,17 +70,29 @@ export function composeAddressSideFace(input: AddressSideLayoutInput): PostcardF
     returnAddress: input.returnAddress,
     qrDestination: input.qrDestination,
   }
-  const resolved = resolveAddressSide(input.spec, fallbacks)
+  // A soft-fade back shows the photo, the offer, and the license unless the customer turned them off.
+  const fadeDefaults = input.style === "soft-fade" ? { photo: true, offer: true, license: true } : {}
+  const edit = input.spec.addressSide
+  const resolved = resolveAddressSide(
+    input.style === "soft-fade" ? { ...input.spec, addressSide: { ...edit, sections: { ...fadeDefaults, ...edit?.sections } } } : input.spec,
+    fallbacks
+  )
   const trim = input.size === "6x9" ? { w: 9, h: 6 } : { w: 8, h: 5 }
+  const fade = input.style === "soft-fade" && resolved.photo !== "none"
+  const ink = fade ? input.palette.fieldInk : input.ink ?? input.palette.ink
+  // On the fade the offer sits on a yellow tile like the front bar, in the tile ink.
+  const offerInk = fade ? input.palette.offerInk : ink
+  const lineInput = { ...input, ink }
   const texts: FittedText[] = []
   const contentBottom = content.y + content.h
+  const textTop = fade ? round2(content.y + content.h * FADE_PHOTO_SHARE) : content.y
   let floor = contentBottom
 
   const disclaimer = (input.disclaimer ?? "").replace(/\s+/g, " ").trim()
   if (disclaimer && content.h > 2.2) {
     const height = Math.min(0.62, content.h * 0.16)
     const rect = { x: content.x, y: round2(contentBottom - height), w: content.w, h: height }
-    texts.push(fitLine(disclaimer, rect, "label", input, 7, 8))
+    texts.push(fitLine(disclaimer, rect, "label", lineInput, 7, 8))
     floor = rect.y - 0.05
   }
 
@@ -66,12 +101,14 @@ export function composeAddressSideFace(input: AddressSideLayoutInput): PostcardF
   if (mark) lines.push({ text: mark, role: "label", min: 7, max: 8 })
   if (resolved.businessName) lines.push({ text: resolved.businessName, role: "proof", min: 8, max: 13 })
   if (resolved.sections.offer && resolved.offer) lines.push({ text: resolved.offer, role: "offer", min: 11, max: 15 })
-  if (resolved.sections.benefits) {
+  const expiry = (input.expiry ?? "").trim()
+  if (expiry && !resolved.offer?.includes(expiry)) lines.push({ text: expiry, role: "label", min: 8, max: 10 })
+  if (resolved.sections.benefits && !fade) {
     for (const benefit of resolved.benefits) {
       lines.push({ text: `• ${benefit}`, role: "body", min: 9, max: 12 })
     }
   }
-  if (resolved.sections.proof && resolved.proof) lines.push({ text: resolved.proof, role: "body", min: 9, max: 12 })
+  if (resolved.sections.proof && resolved.proof && (!fade || resolved.proof.length <= FADE_PROOF_MAX)) lines.push({ text: resolved.proof, role: "body", min: 9, max: 12 })
   if (resolved.sections.license && resolved.license) lines.push({ text: resolved.license, role: "label", min: 8, max: 11 })
   if (resolved.sections.contact && resolved.phone) lines.push({ text: resolved.phone, role: "contact", min: 10, max: 14 })
   if (resolved.sections.contact && resolved.website) lines.push({ text: resolved.website, role: "label", min: 9, max: 11 })
@@ -81,23 +118,34 @@ export function composeAddressSideFace(input: AddressSideLayoutInput): PostcardF
     }
   }
 
-  const wantPhoto = resolved.photo !== "none"
+  // On the soft-fade back the photo is the whole column, not a thumbnail.
+  const wantPhoto = resolved.photo !== "none" && !fade
   const wantQr = Boolean(resolved.sections.qr && resolved.qrDestination)
   const textNeed = lines.length * 0.24
-  const bandRoom = floor - content.y - textNeed
+  const bandRoom = floor - textTop - textNeed
   const band = wantPhoto || wantQr ? Math.max(0.72, Math.min(1.15, bandRoom - 0.08)) : 0
-  const bandFits = band >= 0.72 && floor - band - content.y >= textNeed * 0.85
+  const bandFits = band >= 0.72 && floor - band - textTop >= textNeed * 0.85
   if (bandFits) floor = round2(floor - band - 0.06)
 
-  const roomEach = lines.length > 0 ? Math.max(0.2, (floor - content.y - 0.04 * lines.length) / lines.length) : 0
-  let cursor = content.y
+  const messageStart = texts.length
+  const roomEach = lines.length > 0 ? Math.max(0.2, (floor - textTop - 0.04 * lines.length) / lines.length) : 0
+  let cursor = textTop
   for (const line of lines) {
     if (cursor >= floor - 0.16) break
     const rect = { x: content.x, y: cursor, w: content.w, h: Math.min(roomEach, floor - cursor) }
-    const fitted = fitLine(line.text, rect, line.role, input, line.min, line.max)
+    const boost = fade ? FADE_BOOST[line.role] ?? 0 : 0
+    const tile = fade && line.role === "offer" ? 0.12 : 0
+    if (tile) rect.x = round2(rect.x + tile), rect.w = round2(rect.w - tile * 2), rect.y = round2(rect.y + 0.06)
+    const fitted = fitLine(line.text, rect, line.role, { ...lineInput, ink: line.role === "offer" ? offerInk : ink }, line.min, line.max + boost)
     const inkH = Math.max(0.18, Math.min(rect.h, fitted.lines.length * (fitted.fontPt / 72) * 1.15))
     texts.push({ ...fitted, rect: { ...fitted.rect, h: round2(inkH) } })
-    cursor = round2(cursor + inkH + 0.04)
+    cursor = round2(cursor + inkH + (fade ? 0.07 : 0.04) + tile)
+  }
+  // On the fade the copy sits low on the dark field, like the front, leaving the photo above.
+  if (fade && texts.length > 0) {
+    const messageTexts = texts.slice(messageStart)
+    const drop = round2(Math.max(0, floor - cursor))
+    for (const text of messageTexts) text.rect = { ...text.rect, y: round2(text.rect.y + drop) }
   }
 
   const photos: PhotoSlotPlan[] = []
@@ -127,6 +175,43 @@ export function composeAddressSideFace(input: AddressSideLayoutInput): PostcardF
   const shapes: ShapePlan[] = [
     { id: "paper", role: "paper", rect: { x: 0, y: 0, w: trim.w, h: trim.h }, fill: input.palette.paper },
   ]
+  if (fade) {
+    // Bleeds off the left, top, and bottom edges. Stops at the content edge,
+    // so the address, postage, and barcode zone keep plain paper.
+    const right = round2(content.x + content.w)
+    photos.unshift({
+      id: SOFT_FADE_BACK_PHOTO_ID,
+      role: "photo",
+      rect: { x: 0, y: -FADE_SKY_CROP, w: right, h: round2(trim.h + FADE_SKY_CROP) },
+      bleed: true,
+      treatment: "cover",
+      focal: { x: 0.5, y: 0.5 },
+    })
+    const copyTop = texts[messageStart]?.rect.y ?? textTop
+    const fadeTop = round2(Math.max(0, copyTop - content.h * 0.3))
+    shapes.push({ id: "back-fade", role: "solid-scrim", rect: { x: 0, y: fadeTop, w: right, h: round2(trim.h - fadeTop) }, fill: input.palette.scrim })
+    // The free strip above the mailing panel carries the front headline on the trade field,
+    // so the back is not a big empty paper block. It never reaches the panel or the barcode strip.
+    const panel = geometry.keepOuts.find((item) => item.id === "mailing_panel")
+    const headline = (input.spec.headline ?? "").replace(/\s+/g, " ").trim()
+    if (panel) {
+      const bandBottom = round2(panel.trim.yInches - 0.12)
+      if (bandBottom > 0.9) {
+        shapes.push({ id: "back-headline-band", role: "solid-scrim", rect: { x: right, y: 0, w: round2(trim.w - right), h: bandBottom }, fill: input.palette.field })
+        if (headline) {
+          const inset = 0.3
+          const rect = { x: round2(right + 0.22), y: inset, w: round2(trim.w - right - 0.22 - inset), h: round2(bandBottom - inset - 0.14) }
+          const fitted = fitLine(headline, rect, "headline", { ...lineInput, ink: input.palette.fieldInk }, 13, 24)
+          if (fitted.lines.length > 0) texts.push(fitted)
+        }
+      }
+    }
+    const offerText = texts.slice(messageStart).find((text) => text.role === "offer")
+    if (offerText) {
+      const r = offerText.rect
+      shapes.push({ id: "back-offer-tile", role: "offer-tile", rect: { x: round2(r.x - 0.12), y: round2(r.y - 0.08), w: round2(Math.min(r.w + 0.24, right - r.x)), h: round2(r.h + 0.16) }, fill: input.palette.offerTile })
+    }
+  }
   return {
     templateId: input.templateId ?? "medicare_calm",
     size: input.size,

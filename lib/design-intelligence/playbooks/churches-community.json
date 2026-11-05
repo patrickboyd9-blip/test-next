@@ -1,0 +1,298 @@
+{
+  "schema_version": "1.1",
+  "slug": "churches-community",
+  "industry": "Churches, faith communities, and community centers (invite mailers, holiday services, VBS/kids, small groups, outreach events)",
+  "last_updated": "2026-11-03",
+  "words_and_claims_to_avoid": [
+    "Miracle/healing/attendance 'results' presented as typical outcomes ('we healed X people', 'explosive growth guaranteed') without truthful substantiation—usually avoid entirely on acquisition mailers",
+    "Government look-alike framing ('official community survey', faux census, fake invoice for 'tithe due') — 39 USC 3001",
+    "Deceptive urgency ('last chance for salvation this Sunday only') that implies a false scarcity of grace or a fake deadline",
+    "Political candidate endorsements or campaign fundraising on 501(c)(3) church mail (IRS ban on political campaign intervention)",
+    "Prize drawings / tablet giveaways without contest rules and no-purchase-necessary where chance + consideration apply (GOLD-churches-community-015/018 patterns)",
+    "Implying kids programs are licensed childcare if they are not; overstating background-check practices",
+    "'All are welcome' while listing exclusions in microtype that contradict the headline (truth-in-advertising)"
+  ],
+  "compliance_notes": [
+    "39 USC 3001: nonmailable matter includes solicitations that look like government documents, fake bills/invoices, and certain sweepstakes without required disclosures. Church invites must look like church invites—not official surveys or invoices.",
+    "FTC Act s.5 still reaches deceptive commercial practices; if promoting paid tickets, camps with fees, or merchandise, keep claims truthful.",
+    "IRS: 501(c)(3) churches may not intervene in political campaigns for/against candidates (IRS Pub 1828 / IRS guidance). Nonpartisan voter education has limits; candidate fundraising is forbidden. Ordinary worship/event invites are fine.",
+    "Fundraising honesty: if asking for donations by mail, identify the organization and purpose; follow state charitable solicitation registration where applicable.",
+    "Children's images require parent/guardian consent; youth events should avoid collecting under-13 data online without COPPA-compliant parental consent.",
+    "16 CFR 251: 'FREE brunch/VBS/event' must not hide required purchases or donations as conditions in microtype.",
+    "Respectful tone is a brand choice; fear/hope/belonging are all allowed when truthful—do not invent afterlife threats as 'research-backed conversion tactics.'"
+  ],
+  "standing_rules": [
+    "Emotion-agnostic and respectful: belonging, hope, peace, joy, even sober urgency are fine when truthful; no fabricated miracles.",
+    "Only laws/compliance are hard limits.",
+    "Every angle and combo includes sell_the_outcome_line (experience of community/peace/family joy—not doctrinal features alone).",
+    "Never invent revival statistics or healing rates."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "sunday_invite_plan_your_visit",
+      "primary_emotion": "belonging / peace",
+      "why": "Core gold pattern: soft invitation with times and a plan-your-visit path removes social uncertainty.",
+      "headline_offer_patterns": [
+        "'You are invited'",
+        "'Join us this Sunday'",
+        "'Your seat is waiting'",
+        "'Come as you are'"
+      ],
+      "reinforcing_photo": "Greeters and real congregation; doors open",
+      "what_backfires": "Stock clasped-hands clichés with no people; guilt-heavy threats; tiny unreadable service times",
+      "combos": [
+        {
+          "headline": "Your seat is waiting this Sunday.",
+          "offer": "Sundays at [time]; plan-your-visit QR; first-time welcome packet if real",
+          "photo_scene": "Greeter smiling at an open sanctuary door",
+          "sell_the_outcome_line": "Feel known here—starting with one simple Sunday."
+        },
+        {
+          "headline": "Come as you are.",
+          "offer": "Worship [time]; kids program noted",
+          "photo_scene": "Casual-dressed families entering together",
+          "sell_the_outcome_line": "Show up imperfect, leave a little more whole."
+        },
+        {
+          "headline": "Find peace with us this Sunday.",
+          "offer": "Plan your visit; service at [time]",
+          "photo_scene": "Soft-lit sanctuary with people standing to sing",
+          "sell_the_outcome_line": "An hour of calm and connection in a loud week."
+        },
+        {
+          "headline": "You are invited.",
+          "offer": "Community, worship, and neighbors next door—[times]",
+          "photo_scene": "Outdoor gathering after service with coffee",
+          "sell_the_outcome_line": "Walk out with new friends, not just a program."
+        }
+      ],
+      "compliance_flags": [
+        "No government look-alike design (39 USC 3001).",
+        "If collecting visitor info online, privacy/COPPA as applicable."
+      ],
+      "evidence": [
+        "SRC-BAUMEISTER-LEARY-1995",
+        "SRC-PEW-RLS-ATTEND-2025",
+        "GOLD-churches-community-001/009/011/040/063"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "holiday_service_easter_christmas",
+      "primary_emotion": "hope / joy / nostalgia",
+      "why": "Cultural landmarks pull infrequent attenders; clear times + kids elements help families say yes.",
+      "headline_offer_patterns": [
+        "'Celebrate Easter with us'",
+        "'Christmas Eve services at…'",
+        "'Love never fails—celebrate Easter'"
+      ],
+      "reinforcing_photo": "Seasonal worship or family celebration scenes that match the actual service style",
+      "what_backfires": "Wrong dates; promising 'free gifts for all' that are limited without saying so",
+      "combos": [
+        {
+          "headline": "Celebrate Easter with us.",
+          "offer": "Services [times]; kids egg hunt details",
+          "photo_scene": "Sunrise cross with spring flowers; families arriving",
+          "sell_the_outcome_line": "Hope, music, and a morning your family will remember."
+        },
+        {
+          "headline": "Christmas Eve—come candlelight with us.",
+          "offer": "Christmas Eve services at [times]; QR to plan visit",
+          "photo_scene": "Candlelight congregation (real, with releases)",
+          "sell_the_outcome_line": "End the year wrapped in peace and song."
+        },
+        {
+          "headline": "Easter brunch and egg hunt—free.",
+          "offer": "Free brunch + egg hunt after service (ages/times stated)",
+          "photo_scene": "Kids hunting eggs on a lawn with parents",
+          "sell_the_outcome_line": "Joy for the kids, and a welcome for you."
+        }
+      ],
+      "compliance_flags": [
+        "16 CFR 251 if advertising FREE food/events.",
+        "Accurate times/locations; rain plans if outdoor."
+      ],
+      "evidence": [
+        "GOLD-churches-community-012/021/027/031/050/069"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "vbs_or_kids_program",
+      "primary_emotion": "love / safety / fun",
+      "why": "Parents enter through kids; free VBS weeks are a major gold pattern.",
+      "headline_offer_patterns": [
+        "'VBS: adventure awaits'",
+        "'Nursery through preteens—safe check-in'",
+        "'Youth night Wednesdays'"
+      ],
+      "reinforcing_photo": "Supervised kids activities; check-in desk if real",
+      "what_backfires": "Overpromising childcare licensing; unsupervised-looking photos; collecting kids' data via QR",
+      "combos": [
+        {
+          "headline": "Vacation Bible School—adventure awaits!",
+          "offer": "Free VBS [dates], evenings [times]; music, crafts, food",
+          "photo_scene": "Kids at craft tables with screened volunteers",
+          "sell_the_outcome_line": "A week of friends and stories—and parents who get an evening break."
+        },
+        {
+          "headline": "New in town? Kids programs ready for you.",
+          "offer": "Nursery through preteens; safe check-in; Sundays at [time]",
+          "photo_scene": "Parent checking a child in with a smiling volunteer",
+          "sell_the_outcome_line": "Worship with peace of mind while they make friends."
+        },
+        {
+          "headline": "This is your moment—youth night.",
+          "offer": "Wednesdays [time]; QR for details",
+          "photo_scene": "Teens laughing in a gym or lounge with leaders present",
+          "sell_the_outcome_line": "A place they want to be, with people who know their name."
+        }
+      ],
+      "compliance_flags": [
+        "Parent consent for photos; COPPA for under-13 online forms.",
+        "Don't claim licensed daycare unless true.",
+        "Real capacity limits only."
+      ],
+      "evidence": [
+        "GOLD-churches-community-026/071/072"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "grand_opening_or_new_campus",
+      "primary_emotion": "anticipation / belonging",
+      "why": "New campus launches create legitimate news; gold cards emphasize date/time/map and hospitality.",
+      "headline_offer_patterns": [
+        "'Grand opening [date]'",
+        "'A new church in an old location'",
+        "'Join us September [date]'"
+      ],
+      "reinforcing_photo": "Real building/school campus; ribbon or greeters; label renderings if not finished",
+      "what_backfires": "Renderings presented as finished space; fake 'only 50 seats' without a real limit",
+      "combos": [
+        {
+          "headline": "Grand opening—[date].",
+          "offer": "Services at [times]; [address]; free donuts/kids activities if real",
+          "photo_scene": "Crowd arriving at the new address with balloons",
+          "sell_the_outcome_line": "Be part of day one, and help shape a home for this neighborhood."
+        },
+        {
+          "headline": "A new church near you.",
+          "offer": "Launch Sunday [date/time]; plan-your-visit QR",
+          "photo_scene": "Exterior of school/church with greeters",
+          "sell_the_outcome_line": "Find community without a long drive."
+        },
+        {
+          "headline": "We're new in the neighborhood too.",
+          "offer": "Welcome nights [dates]; map + times",
+          "photo_scene": "Pastors/leaders on the sidewalk waving",
+          "sell_the_outcome_line": "Meet leaders who already live where you live."
+        }
+      ],
+      "compliance_flags": [
+        "Truthful facility depictions; real event details.",
+        "No deceptive 'official city opening' styling (39 USC 3001)."
+      ],
+      "evidence": [
+        "GOLD-churches-community-002/017/019/022/067/068"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "community_festival_or_outreach",
+      "primary_emotion": "joy / generosity / belonging",
+      "why": "Free festivals and service days let neighbors experience hospitality before a worship ask.",
+      "headline_offer_patterns": [
+        "'Fall festival—free food & fun'",
+        "'Faith in action community day'",
+        "'Neighborhood block party'"
+      ],
+      "reinforcing_photo": "Food lines, games, mixed-age neighbors",
+      "what_backfires": "Required donations contradicting FREE; raffles without rules; bait-and-switch altar calls presented as the only exit",
+      "combos": [
+        {
+          "headline": "Fall festival—free food, fun, fellowship.",
+          "offer": "Free event [date/time]; games and food listed",
+          "photo_scene": "Bounce house and BBQ with volunteers serving",
+          "sell_the_outcome_line": "Meet neighbors, feed the kids, feel the welcome."
+        },
+        {
+          "headline": "Community day: free lunch and a clothing drive.",
+          "offer": "[Date/time] at [park]; free lunch; kids zone",
+          "photo_scene": "Volunteers packing clothes and serving plates",
+          "sell_the_outcome_line": "Do good together—and leave fuller than you arrived."
+        },
+        {
+          "headline": "Neighborhood block party—you're invited.",
+          "offer": "Saturday [date], free BBQ, live music, kids zone",
+          "photo_scene": "Street closed with tables and live music",
+          "sell_the_outcome_line": "Belong on your own block, starting this weekend."
+        }
+      ],
+      "compliance_flags": [
+        "FREE means free (16 CFR 251).",
+        "Raffles/prizes need proper rules (39 USC 3001(k) when applicable).",
+        "If fundraising, identify the org and purpose."
+      ],
+      "evidence": [
+        "GOLD-churches-community-015/028/038/039"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "sermon_series_or_special_night",
+      "primary_emotion": "curiosity / hope / belonging",
+      "why": "Series launches and SEEK nights give a reason to come 'this week' without fake apocalyptic urgency.",
+      "headline_offer_patterns": [
+        "'New series starts [date]'",
+        "'Skeptics welcome'",
+        "'SEEK nights [dates]'"
+      ],
+      "reinforcing_photo": "Speaker/stage that matches actual style; discussion cafe for skeptics series",
+      "what_backfires": "Clickbait theology claims; promising debate opponents who won't appear",
+      "combos": [
+        {
+          "headline": "Skeptics welcome—new series starts [date].",
+          "offer": "Series Sundays at [time]; plan-your-visit QR",
+          "photo_scene": "Casual seating / cafe-style conversation circle",
+          "sell_the_outcome_line": "Bring your questions; leave with clearer conversations."
+        },
+        {
+          "headline": "SEEK nights—[dates], [times].",
+          "offer": "Summer nights series; new-to-area welcome",
+          "photo_scene": "Evening outdoor gathering with string lights",
+          "sell_the_outcome_line": "A midweek reset with people glad you came."
+        },
+        {
+          "headline": "A new season of teaching starts [date].",
+          "offer": "Worship [times]; series title named accurately",
+          "photo_scene": "Congregation listening intently",
+          "sell_the_outcome_line": "Grow with a community that's learning out loud."
+        }
+      ],
+      "compliance_flags": [
+        "No political campaign content on 501(c)(3) series mail.",
+        "Accurate dates; don't imply celebrity guests who aren't confirmed."
+      ],
+      "evidence": [
+        "GOLD-churches-community-008/013/049/065",
+        "SRC-IRS-501C3-POLITICAL"
+      ],
+      "evidence_strength": "directional"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "Prize/gift-card/tablet giveaways on outreach cards (GOLD-churches-community-015/018) vs mail sweepstakes/disclosure rules",
+      "resolution": "Compliance wins: if chance + consideration, follow 39 USC 3001(k) and publish rules; prefer free hospitality without a lottery."
+    },
+    {
+      "conflict": "Hard fear/urgency salvation framing vs respectful brand preference",
+      "resolution": "Not a legal ban: emotion-agnostic per Patrick—allowed if truthful and non-deceptive; default creative is belonging/hope unless the client chooses otherwise. Fabricated miracle stats remain forbidden."
+    },
+    {
+      "conflict": "Political 'faith voter' mail vs IRS 501(c)(3) campaign intervention ban",
+      "resolution": "Law wins: no candidate endorsements or campaign fundraising on church acquisition mailers."
+    }
+  ]
+}

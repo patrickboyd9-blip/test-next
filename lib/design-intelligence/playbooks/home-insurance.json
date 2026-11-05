@@ -1,0 +1,337 @@
+{
+  "schema_version": "1.1",
+  "slug": "home-insurance",
+  "industry": "Homeowners, condo and renters insurance (agents, agencies, carriers; flood/earthquake add-ons)",
+  "last_updated": "2026-10-30",
+  "words_and_claims_to_avoid": [
+    "'Covers everything' / 'full protection' / 'are you sure you're covered for everything?' styled as a promise (policies cover named or covered perils; carriers' own guides ban implying everything is covered).",
+    "'Save up to X%' or recipient-specific savings estimates (gold 016's '$1,027' street-view estimate) unless calculated from real data and substantiated.",
+    "'ATTENTION: your homeowner's policy is about to renew!' (gold 005) or variable-data 'your policy will renew on [date]' (gold 013) unless you actually have that data lawfully; otherwise it implies a notice from their insurer.",
+    "House-on-fire or disaster imagery used without a clear protective step (EPPM backfire), or real disaster victims' homes without permission.",
+    "'Guaranteed low rates' (gold 019) - not substantiable.",
+    "'Flood covered' or 'earthquake covered' unless the specific policy covers it.",
+    "Unsourced statistics; FEMA/NFIP or government logos implying affiliation (39 USC 3001(h); state unfair trade practices).",
+    "Unaudited vendor results quoted as fact."
+  ],
+  "compliance_notes": [
+    "State unfair trade practices acts (NAIC Model 880) bar misrepresenting policy benefits/terms and false advertising; inducements follow the 2020 anti-rebating amendment as adopted by each state.",
+    "Producer licensing disclosure: CA Ins. Code 1725.5 license number on print ads in CA (size rules) plus the word 'Insurance'.",
+    "Savings claims require substantiation (FTC Sec. 5); describe as averages among customers who saved, with basis.",
+    "NFIP flood policies generally take effect after 30 days (exceptions for mortgage-related purchases and certain map changes) - state the wait accurately if used as urgency.",
+    "Rebuild-cost reviews: don't promise a specific replacement-cost outcome; some states (e.g., CA, CO) have specific replacement-cost estimate/offer rules - check before claiming.",
+    "Realtor co-branded cards (gold 018) can trigger RESPA Section 8 issues if referral fees/things of value flow between agent and insurer in a mortgage transaction (noted in NAIC 880 drafting note; not researched further).",
+    "Testimonials real and typical (16 CFR 255); claim stories need the customer's permission."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear, joy, pride, status, relief, nostalgia are all options; the client chooses.",
+    "Only laws/compliance are hard limits.",
+    "Every angle and combo carries a sell-the-outcome line.",
+    "Unverified (agency/vendor-only) results are labeled; never quote them as fact on a card.",
+    "No age/demographic angle unless a cited source supports it for this industry; even then, check Fair Housing / ECOA before using it in housing or credit."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "rebuild_cost_review",
+      "primary_emotion": "fear -> protection",
+      "why": "Underinsurance is common and unknown to owners (Klein; UP survey); a review is one easy step.",
+      "headline_offer_patterns": [
+        "'If your home burned tonight, could you rebuild it?'",
+        "'Building costs went up. Did your coverage?'"
+      ],
+      "reinforcing_photo": "Family on porch at dusk, lights on.",
+      "what_backfires": "Fire imagery with no action; implying the reader is definitely underinsured; specific % shortfall claims about their home.",
+      "combos": [
+        {
+          "headline": "If your home burned tonight, could you rebuild it?",
+          "offer": "Free 15-minute rebuild-cost check",
+          "photo_scene": "Family on the porch at dusk",
+          "sell_the_outcome_line": "If the worst happens, you rebuild the home you love, not a smaller one."
+        },
+        {
+          "headline": "Building costs went up. Did your coverage?",
+          "offer": "Free dwelling-limit review against today's local costs",
+          "photo_scene": "Agent and owner walking the yard with a tablet",
+          "sell_the_outcome_line": "Sleep well knowing the numbers add up."
+        },
+        {
+          "headline": "Most destroyed homes in a 74,070-claim study were underinsured.",
+          "offer": "Check yours, free",
+          "photo_scene": "Owner reviewing a policy on the kitchen counter",
+          "sell_the_outcome_line": "Be the family that's covered, not the one that's short."
+        }
+      ],
+      "compliance_flags": [
+        "Cite the study plainly (Klein, California fire claims 2018-2023) if the stat is used; don't generalize beyond it.",
+        "No promise of a specific replacement-cost result."
+      ],
+      "evidence": [
+        "SRC-KLEIN-UNDERINS",
+        "SRC-UP-LA-2026",
+        "SRC-WITTE-1992",
+        "SRC-TANNENBAUM-2015"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "renewal_comparison",
+      "primary_emotion": "indignation -> control",
+      "why": "FIO documents rising premiums; FCA OP12 shows old-vs-new premium salience raised switching for home.",
+      "headline_offer_patterns": [
+        "'Put last year's premium next to this year's.'",
+        "'Renewal went up? Bring it in.'"
+      ],
+      "reinforcing_photo": "Homeowner holding a renewal letter at the kitchen table.",
+      "what_backfires": "Fake renewal-notice formats; invented premium numbers.",
+      "combos": [
+        {
+          "headline": "Put last year's premium next to this year's. Then call us.",
+          "offer": "Free renewal comparison and coverage check",
+          "photo_scene": "Kitchen table, renewal letter, phone on speaker",
+          "sell_the_outcome_line": "Pay for coverage, not for surprises."
+        },
+        {
+          "headline": "Renewal went up? Bring it in.",
+          "offer": "We shop it with [N] carriers we represent",
+          "photo_scene": "Agent at a desk with a customer's renewal letter",
+          "sell_the_outcome_line": "Keep the coverage, lose the sticker shock."
+        },
+        {
+          "headline": "You don't have to wait for your renewal date.",
+          "offer": "Mid-term quote any time",
+          "photo_scene": "Agent on the phone, calendar on the wall",
+          "sell_the_outcome_line": "Fix it now and stop thinking about it."
+        }
+      ],
+      "compliance_flags": [
+        "'[N] carriers' must be true and current.",
+        "Not styled as a carrier notice."
+      ],
+      "evidence": [
+        "SRC-FCA-OP12",
+        "SRC-FIO-2025",
+        "SRC-GOLD-HOMEINS"
+      ],
+      "evidence_strength": "strong (UK RCT) / thin (US)"
+    },
+    {
+      "offer_type": "flood_or_gap_coverage_seasonal",
+      "primary_emotion": "vigilance / urgency (real deadline)",
+      "why": "Flood exclusion and 30-day NFIP wait are verified facts; storm/hurricane season gives real timing. Repo MMR-006 storm-season review (vendor); MMR-347 CEA earthquake +15,000 policyholders (agency).",
+      "headline_offer_patterns": [
+        "'Flood coverage takes 30 days to start. Storm season doesn't wait.'",
+        "'Is your home protected for storm season?' (gold 002)"
+      ],
+      "reinforcing_photo": "Porch view of heavy rain.",
+      "what_backfires": "Fake countdowns; implying NFIP/FEMA affiliation; disaster imagery of real victims.",
+      "combos": [
+        {
+          "headline": "Most home policies don't cover flood. Flood coverage takes 30 days to start.",
+          "offer": "Free flood quote before [season]",
+          "photo_scene": "Homeowner on a porch watching heavy rain",
+          "sell_the_outcome_line": "When the rain comes, you're watching it from a dry living room."
+        },
+        {
+          "headline": "Storm season starts [date]. Your check takes 10 minutes.",
+          "offer": "Free storm-season coverage review",
+          "photo_scene": "Agent and owner checking a gutter line together",
+          "sell_the_outcome_line": "Ride out the season without the 'what ifs'."
+        },
+        {
+          "headline": "Earthquake isn't in most home policies either.",
+          "offer": "Free earthquake quote (where offered)",
+          "photo_scene": "Family dinner table, ordinary night",
+          "sell_the_outcome_line": "Keep the home, keep the plans, whatever shakes."
+        }
+      ],
+      "compliance_flags": [
+        "State the NFIP waiting period accurately and its exceptions.",
+        "No FEMA/NFIP logos or government styling (39 USC 3001(h)).",
+        "Earthquake/flood availability by state."
+      ],
+      "evidence": [
+        "SRC-FEMA-FLOOD",
+        "SRC-MMR-HOMEINS",
+        "SRC-ROGERS-1975"
+      ],
+      "evidence_strength": "moderate (facts) / thin (creative)"
+    },
+    {
+      "offer_type": "bundle_home_auto",
+      "primary_emotion": "relief / simplicity",
+      "why": "J.D. Power bundle interest/retention; gold 007/016 bundle cards (vendor).",
+      "headline_offer_patterns": [
+        "'Home and auto. One agent.'",
+        "'Bundlers who saved with us saved $[X] on average.'"
+      ],
+      "reinforcing_photo": "Groceries from car to house.",
+      "what_backfires": "'SAVE UP TO 30%' templates without basis; stacked offers.",
+      "combos": [
+        {
+          "headline": "Your home and car, one agent who answers.",
+          "offer": "Free bundle quote",
+          "photo_scene": "Couple carrying groceries from car to front door",
+          "sell_the_outcome_line": "One call when something goes wrong, not three."
+        },
+        {
+          "headline": "Two policies. One relationship.",
+          "offer": "Bundle review in one appointment",
+          "photo_scene": "Agent at the client's kitchen table",
+          "sell_the_outcome_line": "Less paperwork, more weekend."
+        },
+        {
+          "headline": "Bundlers who saved with us saved $[X] on average.",
+          "offer": "See if you could - free quote",
+          "photo_scene": "Handshake at the agency door",
+          "sell_the_outcome_line": "Keep more for the house you actually live in."
+        }
+      ],
+      "compliance_flags": [
+        "Substantiated average with basis and period; no 'you will save'."
+      ],
+      "evidence": [
+        "SRC-JDP-2025",
+        "SRC-PROG-CLAIMS",
+        "SRC-GOLD-HOMEINS"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "new_homeowner_or_mover",
+      "primary_emotion": "pride / readiness",
+      "why": "Purchase triggers a policy decision; gold 019 'Just Moved In?'.",
+      "headline_offer_patterns": [
+        "'Welcome to [neighborhood].'",
+        "'New home? Let's check it's insured for what it costs to rebuild.'"
+      ],
+      "reinforcing_photo": "First box through the door.",
+      "what_backfires": "'Just a nice house' with no people (roofing vote lesson); fake congratulations from a lender look.",
+      "combos": [
+        {
+          "headline": "Welcome to [neighborhood]. Let's protect what you just bought.",
+          "offer": "Free new-homeowner review",
+          "photo_scene": "New owners carrying the first box in",
+          "sell_the_outcome_line": "Enjoy the new place knowing it's protected the right way."
+        },
+        {
+          "headline": "New home, first winter. Are you ready?",
+          "offer": "Free coverage + flood check",
+          "photo_scene": "Owner hanging a wreath on a new door",
+          "sell_the_outcome_line": "Make memories, not claims."
+        },
+        {
+          "headline": "Renting your first place? Your stuff deserves coverage.",
+          "offer": "Renters quote in 10 minutes",
+          "photo_scene": "Renter unpacking a bike and plants",
+          "sell_the_outcome_line": "Replace what matters if something happens."
+        }
+      ],
+      "compliance_flags": [
+        "Mover/purchase data must be lawfully sourced; don't imply lender affiliation."
+      ],
+      "evidence": [
+        "SRC-GOLD-HOMEINS",
+        "SRC-CDI-INS",
+        "SRC-FB-ROOF5"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "local_trust_heritage",
+      "primary_emotion": "trust / belonging",
+      "why": "Gold 010 M.E. Wilson 'since 1920' (12-14 clients, vendor); repo MMR-532 Pinnacle 'since 1942'. Heritage signals stability in a category where non-renewals are rising.",
+      "headline_offer_patterns": [
+        "'Protecting [town] homes since [year].'",
+        "'We're still here when the storm passes.'"
+      ],
+      "reinforcing_photo": "Agency storefront with long-time staff.",
+      "what_backfires": "Sepia nostalgia that reads dated; ratings claims without the rating agency and scope.",
+      "combos": [
+        {
+          "headline": "Protecting [town] homes since [year].",
+          "offer": "Free coverage review",
+          "photo_scene": "Agency storefront with staff",
+          "sell_the_outcome_line": "When you need us, we're down the street."
+        },
+        {
+          "headline": "After the storm, we answer the phone.",
+          "offer": "Local claims help + free review",
+          "photo_scene": "Agent on a neighbor's porch with a clipboard after rain",
+          "sell_the_outcome_line": "A real person on your side when it counts."
+        },
+        {
+          "headline": "[N] families in [town] trust us with their homes.",
+          "offer": "Free quote",
+          "photo_scene": "Agent waving from the office door",
+          "sell_the_outcome_line": "Join neighbors who stopped worrying about it."
+        }
+      ],
+      "compliance_flags": [
+        "'[N] families' must be accurate; insurer financial ratings need rating agency and scope (NAIC ad models)."
+      ],
+      "evidence": [
+        "SRC-GOLD-HOMEINS",
+        "SRC-MMR-HOMEINS",
+        "SRC-GOLDSTEIN-2008",
+        "SRC-ZAJONC-1968"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "gift_for_quote",
+      "primary_emotion": "reciprocity",
+      "why": "Gold 017 'FREE $10 gift card with quote'. Small thank-you lowers the effort barrier (#2).",
+      "headline_offer_patterns": [
+        "'Get a quote, get a thank-you.'"
+      ],
+      "reinforcing_photo": "Coffee on the agent's desk.",
+      "what_backfires": "Gift contingent on purchase; gift cards where the state treats them as cash rebates; value over state cap.",
+      "combos": [
+        {
+          "headline": "Ten minutes, one quote, coffee's on us.",
+          "offer": "[Non-cash gift within state limit] for any quote, no purchase needed",
+          "photo_scene": "Coffee cup next to a policy on a desk",
+          "sell_the_outcome_line": "A straight answer on your home coverage, and a coffee."
+        },
+        {
+          "headline": "Your home deserves a second opinion.",
+          "offer": "Free review + small thank-you gift",
+          "photo_scene": "Agent handing a branded mug across the table",
+          "sell_the_outcome_line": "Worth it even if you stay put."
+        },
+        {
+          "headline": "Quote this month, enter to win [prize].",
+          "offer": "No-purchase drawing with official rules",
+          "photo_scene": "Prize in a local setting",
+          "sell_the_outcome_line": "Know your options; maybe win something nice."
+        }
+      ],
+      "compliance_flags": [
+        "State anti-rebating rules (NAIC 880 2020: non-cash, commissioner-set cap, no purchase required).",
+        "Sweepstakes law for drawings."
+      ],
+      "evidence": [
+        "SRC-NAIC-880",
+        "SRC-GOLD-HOMEINS"
+      ],
+      "evidence_strength": "thin / clear law"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "Gold house-on-fire 'Are you sure your insurance covers everything?' (003) vs misrepresentation rules and EPPM",
+      "resolution": "Law and verified studies win: keep the fear, drop 'everything', add one doable step (rebuild check). Fire imagery is allowed but warm-home imagery with a sourced line is preferred."
+    },
+    {
+      "conflict": "Gold variable-data 'your policy will renew on January 1st' (013) / 'about to renew' (005) vs state unfair trade practices",
+      "resolution": "Law wins: use only real, lawfully held renewal data; otherwise 'Renewal coming up?'."
+    },
+    {
+      "conflict": "Gold 001 targeted 'younger homeowners' vs standing rule on age angles",
+      "resolution": "Standing rule wins: no age message; life-event timing (new purchase) instead. Age as a list filter is a client decision, but avoid it in housing-adjacent contexts without legal review."
+    },
+    {
+      "conflict": "Progressive guide avoids fear imagery for home vs Patrick's emotion-agnostic rule",
+      "resolution": "Patrick's rule wins (brand choice, not law); fear OK when true and paired with an action."
+    }
+  ]
+}

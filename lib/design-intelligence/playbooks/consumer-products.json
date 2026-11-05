@@ -1,0 +1,406 @@
+{
+  "schema_version": "1.1",
+  "slug": "consumer-products",
+  "industry": "DTC / catalog / retail consumer products (apparel, footwear, jewelry, bags, home goods, and adjacent product mailers — catch-all, not one trade)",
+  "last_updated": "2026-11-05",
+  "words_and_claims_to_avoid": [
+    "Fake 'limited time' / fake stock scarcity when inventory and end dates are not real",
+    "Inflated 'was/now' or 'compare at' prices that were not bona fide (16 CFR 233)",
+    "Bait offers of a product you will not sell in order to switch the buyer (16 CFR 238)",
+    "'Free shipping' / 'free gift' that requires undisclosed markups, fees, or hard-to-find conditions (16 CFR 251) — put conditions next to the claim",
+    "Invented review counts, star ratings, or testimonials; undisclosed material connections (16 CFR 255)",
+    "Unqualified 'Made in USA' unless final assembly/processing and all or virtually all content are U.S. (16 CFR 323)",
+    "Vague 'eco-friendly' / 'green' / 'sustainable' without a specific, substantiated benefit (Green Guides, 16 CFR 260)",
+    "Continuity/auto-ship claims that hide recurring charges or make cancel hard (ROSCA)",
+    "Disease-cure or unsubstantiated health/supplement claims if the SKU goes there (FTC health-products guidance; DSHEA does not soften FTC ad rules)",
+    "Government or invoice look-alike mail (39 USC 3001)",
+    "A single invented demographic ('all moms 35–44', 'seniors') without list evidence"
+  ],
+  "compliance_notes": [
+    "FTC Act s.5 + Guides Against Deceptive Pricing (16 CFR 233): former/regular prices must reflect genuine recent selling prices; no fictitious list prices.",
+    "Guides Against Bait Advertising (16 CFR 238): do not advertise a deal you will not sell as a lure to upsell something else.",
+    "Guide Concerning Use of the Word 'Free' (16 CFR 251): free with purchase means the paid item stays at its regular price (~30 days open selling); disclose all conditions next to the offer.",
+    "Endorsement Guides (16 CFR 255): real typical results; disclose material connections; no fake social proof.",
+    "Made in USA Labeling Rule (16 CFR 323) and Green Guides (16 CFR 260) if origin or environmental claims appear.",
+    "ROSCA (15 USC 8401–8405) and FTC negative-option policy: clear recurring terms, express consent, easy cancel for continuity/subscribe-and-save. Note: the FTC's expanded 2024 Negative Option Rule was vacated in 2025; ROSCA and FTC Act enforcement still apply.",
+    "Product safety / performance claims need substantiation before mail drops.",
+    "If a card is health/supplement-adjacent (thin in this gold set; beauty and nursing-pump lifestyle appear): structure/function or disease claims need FTC-level competent and reliable scientific evidence — a DSHEA label disclaimer does not cure a deceptive ad.",
+    "39 USC 3001: no official-looking notices or fake invoices as 'offers'."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: curiosity, delight, belonging, status, FOMO, relief are all fine when they fit and stay legal.",
+    "Only laws/compliance are hard limits.",
+    "Every angle and emotion_by_offer combo carries sell_the_outcome_line.",
+    "Vendor ROI labeled agency-only unverified; never print as client proof.",
+    "Prefer one clear offer + one real product photo + one QR (roofing-round5 directional) unless the client insists on a multi-code grid.",
+    "No age/senior/demographic default unless the client's list and offer evidence support it.",
+    "Say buyers vary by SKU — do not force one persona."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "percent_or_dollar_off_first_purchase",
+      "primary_emotion": "belonging / anticipation",
+      "why": "Dominant gold pattern: 15–30% or $25 off first order lowers trial risk while lifestyle photo sells identity.",
+      "headline_offer_patterns": [
+        "'Welcome — 20% off your first purchase'",
+        "'$25 off your first order'",
+        "'30% off first purchase + free shipping'"
+      ],
+      "reinforcing_photo": "Lifestyle product-on-person or boutique product hero",
+      "what_backfires": "Deep discount with no product shown; exclusions that gut the welcome",
+      "combos": [
+        {
+          "headline": "Welcome to the family.",
+          "offer": "Save 20% on your first purchase with code [CODE] (ends [date])",
+          "photo_scene": "Moody full-bleed portrait wearing the product",
+          "sell_the_outcome_line": "Feel at home in the brand from order one."
+        },
+        {
+          "headline": "Shop our online boutique.",
+          "offer": "30% off first purchase + free shipping",
+          "photo_scene": "Joyful product cut-outs + one lifestyle beat",
+          "sell_the_outcome_line": "Try the favorites — without paying full freight to find out."
+        },
+        {
+          "headline": "15% off your first purchase.",
+          "offer": "15% off first purchase (see back for details)",
+          "photo_scene": "Editorial portrait; quiet offer line",
+          "sell_the_outcome_line": "Start with a piece you'll actually wear again."
+        },
+        {
+          "headline": "Elevate your personal style.",
+          "offer": "20% off your first purchase (badge)",
+          "photo_scene": "Jewelry lifestyle + detail close-ups",
+          "sell_the_outcome_line": "Put on something that feels handmade for you."
+        }
+      ],
+      "compliance_flags": [
+        "Print exclusions and end date.",
+        "Regular price must be bona fide if showing savings (16 CFR 233)."
+      ],
+      "evidence": [
+        "GOLD-consumer-products-003/006/007/012/024/030"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "free_shipping",
+      "primary_emotion": "relief",
+      "why": "Removes the last checkout objection; often paired with returns language or a threshold ($30 / $99+).",
+      "headline_offer_patterns": [
+        "'FREE SHIPPING — code SHIPFREE'",
+        "'Free shipping on $99+'",
+        "'Storewide savings + free shipping over $30'"
+      ],
+      "reinforcing_photo": "Product hero or unboxing/lifestyle; code box clear",
+      "what_backfires": "Hidden handling fees; threshold buried in asterisks; 'free' that marks up the product",
+      "combos": [
+        {
+          "headline": "Your cart is ready.",
+          "offer": "Free shipping; 45-day returns & exchanges",
+          "photo_scene": "Shoes on real feet close-up",
+          "sell_the_outcome_line": "Finish the order knowing shipping (and returns) won't sting."
+        },
+        {
+          "headline": "Did you forget something?",
+          "offer": "FREE SHIPPING with code SHIPFREE",
+          "photo_scene": "Premium beauty or product close-up",
+          "sell_the_outcome_line": "Get it to your door without the shipping tax."
+        },
+        {
+          "headline": "Men's shoe sale.",
+          "offer": "Storewide savings + free shipping over $30 — code SHIP30",
+          "photo_scene": "Leather shoes on wood, one hero",
+          "sell_the_outcome_line": "New shoes on the porch — shipping handled."
+        }
+      ],
+      "compliance_flags": [
+        "Disclose thresholds and exclusions next to 'free' (16 CFR 251).",
+        "Do not raise prices to cover 'free' shipping."
+      ],
+      "evidence": [
+        "GOLD-consumer-products-002/014/018/040/049"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "abandoned_cart_or_winback",
+      "primary_emotion": "FOMO → relief",
+      "why": "Watson cue: unfinished browse + small reward. Gold cart headlines are among the clearest patterns.",
+      "headline_offer_patterns": [
+        "'Did you forget something in your cart?'",
+        "'Your feet are waiting...'",
+        "'The easiest shoes you'll ever put on' + saved-cart reminder"
+      ],
+      "reinforcing_photo": "The abandoned product category on body/foot",
+      "what_backfires": "Creepy over-personalization that implies surveillance; spammy multi-offer clutter",
+      "combos": [
+        {
+          "headline": "Did you forget something in your cart?",
+          "offer": "Order now & save 20% — code SUPERSAVINGS",
+          "photo_scene": "Cozy lifestyle flat lay matching the category",
+          "sell_the_outcome_line": "One scan — and the thing you already chose is on the way."
+        },
+        {
+          "headline": "Your feet are waiting...",
+          "offer": "Claim your socks: 10% off + free shipping",
+          "photo_scene": "Athlete in toe socks on an overlook",
+          "sell_the_outcome_line": "Finish the hike gear you already started."
+        },
+        {
+          "headline": "The easiest shoes you'll ever put on.",
+          "offer": "15% off with code (cart still saved)",
+          "photo_scene": "Single sneaker product hero",
+          "sell_the_outcome_line": "Slip them on tomorrow — cart's still warm."
+        },
+        {
+          "headline": "We missed you.",
+          "offer": "20% off your next order (code on back)",
+          "photo_scene": "Pure brand image front; offer on back",
+          "sell_the_outcome_line": "Come back to the fit you already loved."
+        }
+      ],
+      "compliance_flags": [
+        "List/source honesty; don't imply you watched them in-store if you didn't.",
+        "Codes and deadlines must work as printed."
+      ],
+      "evidence": [
+        "GOLD-consumer-products-002/014/015/024/025/032/048/049"
+      ],
+      "evidence_strength": "directional; vendor ROI agency-only"
+    },
+    {
+      "offer_type": "seasonal_or_deadline_sale",
+      "primary_emotion": "FOMO / urgency",
+      "why": "Weekend-only, holiday, and 'final chance' cards in gold make one percentage and a date do the work.",
+      "headline_offer_patterns": [
+        "'Up to 60% off — only this weekend'",
+        "'BLACK FRIDAY SALE'",
+        "'FINAL CHANCE! 25% OFF NOW'",
+        "'Father's Day sale up to 40% off'"
+      ],
+      "reinforcing_photo": "Seasonal lifestyle or category rack/product tiles; type-first OK if product still clear on back or tiles",
+      "what_backfires": "Fake deadlines; 'up to' that only applies to clearance nobody wants; abstract type with no product",
+      "combos": [
+        {
+          "headline": "Up to 60% off — only this weekend.",
+          "offer": "Up to 60% off women's apparel, footwear, accessories (weekend only)",
+          "photo_scene": "Bold type-first with category blocks",
+          "sell_the_outcome_line": "Refresh the closet this weekend — not at January prices."
+        },
+        {
+          "headline": "Black Friday sale.",
+          "offer": "Store-wide up to 50% off (category breakdown on back)",
+          "photo_scene": "Clothing rack / category photos",
+          "sell_the_outcome_line": "Grab the pieces you'll wear all year while the sale is real."
+        },
+        {
+          "headline": "Final chance — grab 25% off now.",
+          "offer": "25% off sitewide with code (ends [date])",
+          "photo_scene": "Cheerful cut-out model on brand color",
+          "sell_the_outcome_line": "Last window — then full price returns."
+        },
+        {
+          "headline": "Order by December [12] for Christmas.",
+          "offer": "Save 25% with code LASTCHANCE + ship-by panel",
+          "photo_scene": "Shoppable product tiles with price bubbles",
+          "sell_the_outcome_line": "Gifts under the tree — not stuck in transit."
+        }
+      ],
+      "compliance_flags": [
+        "End dates must be real.",
+        "'Up to' savings must not hide that most goods are far less.",
+        "16 CFR 233 on comparative prices."
+      ],
+      "evidence": [
+        "GOLD-consumer-products-009/016/020/022/038/039/041/043"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "free_gift_or_event_perk",
+      "primary_emotion": "delight / belonging",
+      "why": "Gold shows free gift-with-purchase, free event glass/refreshments, and early-access invites more than classic BOGO.",
+      "headline_offer_patterns": [
+        "'Free gift with purchase $75+'",
+        "'You're invited: anniversary store event — 20% off apparel'",
+        "'You're invited to shop first'"
+      ],
+      "reinforcing_photo": "Event lifestyle couple/storefront or styled home/gift still-life",
+      "what_backfires": "'Free gift' that forces an unwanted add-on; RSVP event with no real capacity; BOGO invented when stock isn't there",
+      "combos": [
+        {
+          "headline": "Breathe new life into your home.",
+          "offer": "20% off home decor; free gift with purchase $75+; new spring collections",
+          "photo_scene": "Styled plant/candles/throw still-life",
+          "sell_the_outcome_line": "Walk into a room that feels refreshed — gift included."
+        },
+        {
+          "headline": "You're invited: anniversary store event.",
+          "offer": "20% off Orvis apparel during the event; free tartan rocks glass; free refreshments",
+          "photo_scene": "Couple outdoors in brand apparel",
+          "sell_the_outcome_line": "Celebrate with us — and leave with something you'll use."
+        },
+        {
+          "headline": "You're invited to shop first.",
+          "offer": "Early-access spring capsule — sip, style, shop (RSVP)",
+          "photo_scene": "Lookbook model on white",
+          "sell_the_outcome_line": "See the new capsule before the crowd does."
+        }
+      ],
+      "compliance_flags": [
+        "16 CFR 251 for free gift with purchase.",
+        "Event dates/locations truthful; no fake exclusivity."
+      ],
+      "evidence": [
+        "GOLD-consumer-products-031/033/034"
+      ],
+      "evidence_strength": "thin-moderate (fewer cards than % off)"
+    },
+    {
+      "offer_type": "loyalty_membership_or_referral",
+      "primary_emotion": "belonging / delight",
+      "why": "Style Club, VIP birthday, and thank-you loyalty cards reward past buyers without always racing to deepest discount.",
+      "headline_offer_patterns": [
+        "'Welcome to the Style Club'",
+        "'It's your birthday — we got you a gift'",
+        "'Thanks for shopping small — join & save'"
+      ],
+      "reinforcing_photo": "Soft flat-lay, celebration balloons, or boutique membership feel",
+      "what_backfires": "Points math nobody understands; membership that is just a disguised continuity plan without ROSCA disclosures",
+      "combos": [
+        {
+          "headline": "Welcome to the Style Club.",
+          "offer": "Save 10% with offer code; Style Club membership",
+          "photo_scene": "Close crop of outfit + jewelry",
+          "sell_the_outcome_line": "Members get the welcome — and the wardrobe edge."
+        },
+        {
+          "headline": "It's your birthday (!) we got you a gift.",
+          "offer": "$5 off birthday gift for VIP members (back) + QR",
+          "photo_scene": "Woman laughing among gold balloons",
+          "sell_the_outcome_line": "Celebrate with a treat that was waiting for your day."
+        },
+        {
+          "headline": "Thanks for shopping small.",
+          "offer": "Earn points, member-only pop-ups, surprise gifts — QR join & save",
+          "photo_scene": "Flat-lay notebook, candle, twine",
+          "sell_the_outcome_line": "Keep the local favorite — and get rewarded for coming back."
+        }
+      ],
+      "compliance_flags": [
+        "If membership auto-renews or bills recurring, follow ROSCA.",
+        "Birthday/VIP perks must be deliverable as stated."
+      ],
+      "evidence": [
+        "GOLD-consumer-products-017/042/044"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "new_product_launch_or_collection",
+      "primary_emotion": "curiosity / status / delight",
+      "why": "Launch and lookbook cards in gold often sell without a front-facing discount — product desire first.",
+      "headline_offer_patterns": [
+        "'Brand. New. Tee.'",
+        "'Back & better than ever — skinny jeans'",
+        "'Let's talk about your baggage.'",
+        "'Goods inspired by parks, designed to give back.'"
+      ],
+      "reinforcing_photo": "Editorial / destination / named-fit collage; product craft details",
+      "what_backfires": "Launch card that is only a coupon; influencer collage without 16 CFR 255 disclosures when required",
+      "combos": [
+        {
+          "headline": "Brand. New. Tee. 100% Pima Cotton.",
+          "offer": "No discount on front — social proof (customers/rating) if real",
+          "photo_scene": "Studio portrait in the tee + color swatches",
+          "sell_the_outcome_line": "Pull on the tee that already feels broken-in."
+        },
+        {
+          "headline": "Let's talk about your baggage.",
+          "offer": "Brand/URL drive (details on reverse)",
+          "photo_scene": "Matching luggage sets with cropped models",
+          "sell_the_outcome_line": "Travel looking put-together — bags included."
+        },
+        {
+          "headline": "Back & better than ever — skinny jeans.",
+          "offer": "Style launch / named fits (no $ off on face)",
+          "photo_scene": "Influencer collage of jean fits",
+          "sell_the_outcome_line": "Find the fit that actually matches how you live."
+        },
+        {
+          "headline": "Fewer better. Every day.",
+          "offer": "Free shipping on $99+ (back)",
+          "photo_scene": "Editorial model with leather tote",
+          "sell_the_outcome_line": "Own less — love what you carry."
+        }
+      ],
+      "compliance_flags": [
+        "Material connection disclosures for influencers/endorsers (16 CFR 255).",
+        "Fabric/origin claims (e.g., Made in USA, organic) need substantiation."
+      ],
+      "evidence": [
+        "GOLD-consumer-products-004/018/026/046/052/053"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "threshold_dollar_off",
+      "primary_emotion": "anticipation / smart-shopper pride",
+      "why": "$ off at a spend threshold ($20 off $100+, $50 off $200+, $25 off $75+) is a repeated gold pattern.",
+      "headline_offer_patterns": [
+        "'$20 OFF orders $100+'",
+        "'$50 off any in-store purchase over $200'",
+        "'$25 off $75+ with code'"
+      ],
+      "reinforcing_photo": "Category hero; threshold badge impossible to miss",
+      "what_backfires": "Threshold set so high the deal is illusory; struck-through prices that aren't bona fide",
+      "combos": [
+        {
+          "headline": "Sending sunshine your way.",
+          "offer": "$20 OFF orders $100+ with code",
+          "photo_scene": "Model in printed dress at the beach",
+          "sell_the_outcome_line": "Treat yourself — and clear the threshold without feeling nickel-and-dimed."
+        },
+        {
+          "headline": "Smarter living starts here.",
+          "offer": "$50 off any in-store purchase over $200 through Sunday",
+          "photo_scene": "Person using smart-home tablet at home",
+          "sell_the_outcome_line": "Upgrade the house this weekend with a real dollar cut."
+        },
+        {
+          "headline": "Celebrate your special occasion with us.",
+          "offer": "$1,250 → $750 selected jewelry (show real former price)",
+          "photo_scene": "Model in statement jewelry; gold price circle",
+          "sell_the_outcome_line": "Mark the day with jewelry that looks the part — at a clear savings."
+        }
+      ],
+      "compliance_flags": [
+        "Former prices must be bona fide (16 CFR 233).",
+        "Threshold and end date next to the offer."
+      ],
+      "evidence": [
+        "GOLD-consumer-products-019/023/045/047/054"
+      ],
+      "evidence_strength": "directional"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "Deep % off / urgency templates vs brand-first launch cards with no discount",
+      "resolution": "Client brand position wins: premium launches can keep offer soft; sale brands can lead with %. Compliance still requires honest prices either way."
+    },
+    {
+      "conflict": "Vendor ROI anecdotes (PostPilot / Share Local / PostcardMania) vs evidence rules",
+      "resolution": "Agency-only unverified; do not print as client proof or 'typical results'."
+    },
+    {
+      "conflict": "Cart-recovery personalization vs privacy creep",
+      "resolution": "Name the unfinished cart/category; do not imply surveillance or private data the client does not lawfully have."
+    },
+    {
+      "conflict": "Invented BOGO/bundle as 'standard DTC' vs thin gold support",
+      "resolution": "Do not treat BOGO/bundle as dominant; use %/$, free shipping, gift-with-purchase, and launches that gold actually shows."
+    }
+  ]
+}

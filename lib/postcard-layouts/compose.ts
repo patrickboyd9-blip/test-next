@@ -114,6 +114,7 @@ export function composePostcardFace(input: ComposeInput): PostcardFacePlan {
       license: input.license,
       disclaimerText: input.disclaimerText,
       complianceMark: input.complianceMark,
+      trade: (input.spec as { layoutHints?: { trade?: string } }).layoutHints?.trade,
     })
   }
   const size = input.size ?? "5x8"

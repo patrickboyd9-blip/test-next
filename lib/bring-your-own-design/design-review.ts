@@ -1,6 +1,25 @@
 import type { UploadedDesign, UploadedDesignFile, UploadedDesignReview } from "@/lib/campaign-creator/types"
 
+import type { CampaignBrief } from "@/lib/campaign-creator/types"
+import { complianceWarnings } from "@/lib/research-library/compliance"
+import { industryForBrief, NONE_INDUSTRY } from "@/lib/research-library/industry"
+
 import { preflightBlocksApproval } from "./preflight"
+
+/**
+ * Plain-language advertising-rule warnings for the words printed on an uploaded card.
+ * Advice only: they never block approval.
+ */
+export function uploadComplianceWarnings(printedText: string, brief?: CampaignBrief | null): string[] {
+  if (!printedText?.trim()) return []
+  const industry = brief ? industryForBrief(brief, printedText) : NONE_INDUSTRY
+  const location = [brief?.businessInfo?.address, brief?.businessInfo?.city, (brief?.businessInfo as { state?: string } | undefined)?.state]
+    .filter(Boolean).join(" ")
+  const seen = new Set<string>()
+  return complianceWarnings(printedText, { industry, location, offer: brief?.offer })
+    .filter((w) => (seen.has(w.message) ? false : (seen.add(w.message), true)))
+    .map((w) => (w.match ? `${w.message} (We saw "${w.match}".)` : w.message))
+}
 
 /**
  * What the reviewer is asked to judge on the uploaded front and back.
