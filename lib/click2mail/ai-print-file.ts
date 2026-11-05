@@ -1,4 +1,5 @@
 import { postcardImageFromDataUrl, resolveAddressSideSections } from "@/lib/campaign-creator/address-side"
+import { withRequiredDisclosures } from "@/lib/research-library/auto-disclosures"
 import { attorneyAdMark } from "@/lib/design-intelligence/attorney-compliance"
 import { medicareDisclaimerFor } from "@/lib/campaign-creator/medicare-compliance"
 import { displayWebsite, postcardIdentityFromBrief, resolveStudioContact } from "@/lib/campaign-creator/studio-contact"
@@ -88,6 +89,20 @@ function printCopy(campaign: Campaign): PostcardPrintCopy {
   const identity = postcardIdentityFromBrief(campaign.brief)
   const contact = resolveStudioContact(spec, identity)
   const address = campaign.brief.businessInfo?.address?.trim()
+  const legal = withRequiredDisclosures({
+    brief: campaign.brief,
+    printedText: [spec.headline, spec.subheadline, spec.body, spec.offer, spec.callToAction, contact.businessName].filter(Boolean).join(" "),
+    disclaimer: medicareDisclaimerFor(campaign.brief),
+    complianceMark: attorneyAdMark([
+      campaign.brief.goal,
+      campaign.brief.offer,
+      campaign.brief.audience?.description,
+      campaign.brief.businessInfo?.name,
+      spec.headline,
+      spec.body,
+      spec.offer,
+    ].filter(Boolean).join(" ")),
+  })
   return {
     headline: spec.headline,
     body: spec.body,
@@ -99,18 +114,10 @@ function printCopy(campaign: Campaign): PostcardPrintCopy {
     qrPayload: contact.qrPayload ?? undefined,
     returnLines: addressReturnLines(spec, address),
     subheadline: spec.subheadline,
-    disclaimer: medicareDisclaimerFor(campaign.brief) ?? undefined,
+    disclaimer: legal.disclaimer,
     license: spec.addressSide?.license || campaign.brief.businessInfo?.license,
     addressSide: spec.addressSide,
-    complianceMark: attorneyAdMark([
-      campaign.brief.goal,
-      campaign.brief.offer,
-      campaign.brief.audience?.description,
-      campaign.brief.businessInfo?.name,
-      spec.headline,
-      spec.body,
-      spec.offer,
-    ].filter(Boolean).join(" ")) ?? undefined,
+    complianceMark: legal.complianceMark,
   }
 }
 

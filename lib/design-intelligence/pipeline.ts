@@ -1,4 +1,5 @@
 import type { CampaignBrief, CreativeDirection, ResearchQuality } from "@/lib/campaign-creator/types"
+import { withRequiredDisclosures } from "@/lib/research-library/auto-disclosures"
 import type { GenerateDirectionsResult } from "@/lib/campaign-creator/creative-engine"
 import { MEDICARE_AGENT_DISCLAIMER, isMedicareAgentBrief } from "@/lib/campaign-creator/medicare-compliance"
 import { withBriefContact } from "@/lib/campaign-creator/studio-contact"
@@ -22,7 +23,7 @@ import { requestModelRationale, requestVisionCritique, type ModelUsage } from ".
 import { attorneyAdMark } from "./attorney-compliance"
 import { compliantSpec, compliantSpecForIndustry, hasBlockedClaim } from "@/lib/research-library/compliance"
 import { industryForBrief } from "@/lib/research-library/industry"
-import { isFillerSubline, offerSubline } from "./trade-subline"
+import { polishTradeCopy } from "./trade-subline"
 import { tradeHeadlineFallback } from "./persuasion"
 import { alignStormHeadlines } from "./persuasion"
 import { normalizeQuestion } from "@/lib/research-library/compliance"
@@ -149,9 +150,7 @@ export function repairCard(input: {
     if (headlineBlocked) {
       spec = { ...spec, headline: tradeHeadlineFallback(input.brief, spec.offer ?? input.brief.offer ?? "") }
     }
-    if (isFillerSubline(spec.subheadline)) {
-      spec = { ...spec, subheadline: offerSubline({ brief: input.brief, offer: spec.offer, headline: spec.headline }) }
-    }
+    spec = polishTradeCopy({ brief: input.brief, spec, fallbackHeadline: () => tradeHeadlineFallback(input.brief, spec.offer ?? input.brief.offer ?? "") })
   }
   const edits: string[] = []
   let best: DirectedCard | null = null
@@ -163,8 +162,12 @@ export function repairCard(input: {
       rationale,
       spec,
       businessName: input.businessName,
-      disclaimer: isMedicareAgentBrief(input.brief) ? MEDICARE_AGENT_DISCLAIMER : null,
-      complianceMark: attorneyAdMark(facts),
+      ...withRequiredDisclosures({
+        brief: input.brief,
+        printedText: [spec.headline, spec.subheadline, spec.body, spec.offer, input.businessName].filter(Boolean).join(" "),
+        disclaimer: isMedicareAgentBrief(input.brief) ? MEDICARE_AGENT_DISCLAIMER : null,
+        complianceMark: attorneyAdMark(facts),
+      }),
     })
     const copy = cardCopy(spec, input.businessName, attorneyAdMark(facts))
     const critique = critiqueCard(card, rationale, copy, undefined, clientFactText(input.brief, spec.offer), input.gold)

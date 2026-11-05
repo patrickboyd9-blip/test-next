@@ -300,6 +300,7 @@ export const COMPLIANCE_FLAGS: readonly ComplianceFlag[] = [
     industries: ["dental"],
     severity: "warn",
     when: (text) => /\bfree\b|\$\s?\d|\d+\s?%\s*off|\bdiscount/i.test(text),
+    required: /\bright to refuse to pay\b/i,
     message: "Dental fee ads have state rules. Florida, for example, requires a printed patient-rights notice in capital letters for free or discounted services and the procedure codes. Check your state board before mailing.",
   },
   {

@@ -50,7 +50,8 @@ export interface RoofingProInput {
 /** Inches the fade starts lower on a damage-headline front (5x8 layout units). */
 const DAMAGE_SCRIM_DROP = 0.3
 
-export const DARK_TYPE = new Set<RoofingProTemplateId>(["roof_full_bleed", "roof_fade_offer", "roof_storm", "roof_seasonal"])
+/** Type sits on a dark trade field or fade. These fronts also get the soft-fade back, never a cream one. */
+export const DARK_TYPE = new Set<RoofingProTemplateId>(["roof_full_bleed", "roof_fade_offer", "roof_storm", "roof_seasonal", "roof_coupon", "roof_neighborhood"])
 
 export function composeRoofingProCard(input: RoofingProInput): RoofingProCard {
   const front = composeRoofingProFace({ ...input, face: "front" })
@@ -184,6 +185,7 @@ function composeBackRaw(
     return composeAddressSideFace({
       style: fade ? "soft-fade" : "plain",
       proof: fade ? resolveCopy(input, ROOFING_PRO_META[input.templateId].offerLed).body || undefined : undefined,
+      expiry: resolveCopy(input, ROOFING_PRO_META[input.templateId].offerLed).expiry || undefined,
       size,
       pairing,
       palette,

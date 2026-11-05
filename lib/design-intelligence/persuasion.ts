@@ -566,7 +566,7 @@ export function tradeHeadlineVariants(kind: string, offer: string, city?: string
   }
   if (kind === "pest") {
     if (/termite/.test(o)) return pick(["Termites work quietly. Find them first", "Mud tubes on the foundation? Call today", "Find termite damage before it spreads", `A termite inspection${at}, on us`, "Wood-frame home? Get it inspected"])
-    return pick(["Ants in the kitchen? Not for long", "Roaches after dark mean call now", "Stop seeing bugs on the baseboards", `Pest service${at}, every quarter`, "Keep the bugs outside where they belong"])
+    return pick(["Ants in the kitchen? Not for long", "Roaches after dark? We end that", "Stop seeing bugs on the baseboards", `Pest service${at}, every quarter`, "Keep the bugs outside where they belong"])
   }
   return []
 }

@@ -23,6 +23,8 @@ export interface AddressSideLayoutInput {
   phone?: string
   website?: string
   proof?: string
+  /** Stated offer expiry ("Valid through May 30"). Printed under the offer. */
+  expiry?: string
   license?: string
   returnAddress?: string
   qrDestination?: string
@@ -99,6 +101,8 @@ export function composeAddressSideFace(input: AddressSideLayoutInput): PostcardF
   if (mark) lines.push({ text: mark, role: "label", min: 7, max: 8 })
   if (resolved.businessName) lines.push({ text: resolved.businessName, role: "proof", min: 8, max: 13 })
   if (resolved.sections.offer && resolved.offer) lines.push({ text: resolved.offer, role: "offer", min: 11, max: 15 })
+  const expiry = (input.expiry ?? "").trim()
+  if (expiry && !resolved.offer?.includes(expiry)) lines.push({ text: expiry, role: "label", min: 8, max: 10 })
   if (resolved.sections.benefits && !fade) {
     for (const benefit of resolved.benefits) {
       lines.push({ text: `• ${benefit}`, role: "body", min: 9, max: 12 })
@@ -186,6 +190,22 @@ export function composeAddressSideFace(input: AddressSideLayoutInput): PostcardF
     const copyTop = texts[messageStart]?.rect.y ?? textTop
     const fadeTop = round2(Math.max(0, copyTop - content.h * 0.3))
     shapes.push({ id: "back-fade", role: "solid-scrim", rect: { x: 0, y: fadeTop, w: right, h: round2(trim.h - fadeTop) }, fill: input.palette.scrim })
+    // The free strip above the mailing panel carries the front headline on the trade field,
+    // so the back is not a big empty paper block. It never reaches the panel or the barcode strip.
+    const panel = geometry.keepOuts.find((item) => item.id === "mailing_panel")
+    const headline = (input.spec.headline ?? "").replace(/\s+/g, " ").trim()
+    if (panel) {
+      const bandBottom = round2(panel.trim.yInches - 0.12)
+      if (bandBottom > 0.9) {
+        shapes.push({ id: "back-headline-band", role: "solid-scrim", rect: { x: right, y: 0, w: round2(trim.w - right), h: bandBottom }, fill: input.palette.field })
+        if (headline) {
+          const inset = 0.3
+          const rect = { x: round2(right + 0.22), y: inset, w: round2(trim.w - right - 0.22 - inset), h: round2(bandBottom - inset - 0.14) }
+          const fitted = fitLine(headline, rect, "headline", { ...lineInput, ink: input.palette.fieldInk }, 13, 24)
+          if (fitted.lines.length > 0) texts.push(fitted)
+        }
+      }
+    }
     const offerText = texts.slice(messageStart).find((text) => text.role === "offer")
     if (offerText) {
       const r = offerText.rect

@@ -23,6 +23,8 @@ export interface ModelRationaleResult {
 
 const MODEL = "claude-sonnet-5"
 
+export const ART_DIRECTOR_MAX_TOKENS = 8000
+
 export async function requestModelRationale(input: {
   brief: CampaignBrief
   selection: ReferenceSelection
@@ -39,7 +41,9 @@ export async function requestModelRationale(input: {
     const images = await imageBlocks(input.selection, input.env)
     const response = await client.messages.create({
       model: input.env.DESIGN_MODEL?.trim() || MODEL,
-      max_tokens: 3500,
+      // The full rationale runs past 3,500 tokens; a cut-off reply is not valid JSON
+      // and was silently dropped for the rules fallback on every call.
+      max_tokens: ART_DIRECTOR_MAX_TOKENS,
       system: directorSystem(),
       messages: [
         {
@@ -58,8 +62,14 @@ export async function requestModelRationale(input: {
       .filter((block) => block.type === "text")
       .map((block) => block.text)
       .join("\n")
+    const rationale = parseJson(text)
+    if (!rationale || response.stop_reason === "max_tokens") {
+      console.info(
+        `[design-intelligence] ${JSON.stringify({ step: "art-director", error: response.stop_reason === "max_tokens" ? "reply cut off at max_tokens" : "reply was not JSON", outputTokens: response.usage?.output_tokens ?? 0 })}`
+      )
+    }
     return {
-      rationale: parseJson(text),
+      rationale,
       usage: {
         model: response.model,
         inputTokens: response.usage?.input_tokens ?? 0,
