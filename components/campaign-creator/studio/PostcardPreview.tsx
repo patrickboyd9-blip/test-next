@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 import type { CreativeCanvas } from "@/lib/campaign-creator/creative-canvas"
 import { repairHeadlineCopy } from "@/lib/campaign-creator/headline-repair"
 import type { GeneratedAsset } from "@/lib/campaign-creator/image-generation"
+import { CUSTOMER_LOGO_BOX, uploadedLogo } from "@/lib/campaign-creator/customer-logo"
 import { medicareDisclaimerFor } from "@/lib/campaign-creator/medicare-compliance"
 import { resolveCreativeImage } from "@/lib/campaign-creator/resolve-creative-image"
 import {
@@ -291,6 +292,9 @@ export function PostcardPreview({
         {...hoverProps}
       >
         {face}
+        {!isAddressSide && uploadedLogo(brief)?.fileUrl ? (
+          <CustomerLogoMark size={trimSize} src={uploadedLogo(brief)!.fileUrl!} />
+        ) : null}
         {isAddressSide ? <AddressSideLocks size={trimSize} /> : null}
         {!isAddressSide && (
           <>
@@ -299,6 +303,27 @@ export function PostcardPreview({
           </>
         )}
       </motion.div>
+    </div>
+  )
+}
+
+function CustomerLogoMark({ size, src }: { size: "5x8" | "6x9"; src: string }) {
+  const trim = size === "6x9" ? { w: 9, h: 6 } : { w: 8, h: 5 }
+  const box = CUSTOMER_LOGO_BOX
+  return (
+    <div
+      className="pointer-events-none absolute z-30"
+      data-customer-logo="true"
+      style={{
+        left: `${(box.x / trim.w) * 100}%`,
+        top: `${(box.y / trim.h) * 100}%`,
+        width: `${(box.w / trim.w) * 100}%`,
+        height: `${(box.h / trim.h) * 100}%`,
+      }}
+    >
+      {/* Contain, with padding, so the file's shape and transparency stay intact. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} alt="" className="h-full w-full object-contain p-[8%]" />
     </div>
   )
 }

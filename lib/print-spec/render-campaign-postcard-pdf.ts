@@ -19,6 +19,7 @@ import {
 
 export { addressSideContentRect, rectsOverlap }
 import { encodeSolidPng, effectiveDpi, readRasterSize } from "./raster"
+import { paintCustomerLogo } from "./customer-logo-paint"
 import { upscaleToPrintCanvas } from "./upscale-print-image"
 
 export const MIN_EFFECTIVE_DPI = 300
@@ -256,6 +257,7 @@ export async function renderPostcardPrintPdf(input: {
   copy: PostcardPrintCopy
   image?: PostcardPrintImage
   backImage?: PostcardPrintImage
+  logo?: PostcardPrintImage
   plateColor?: readonly [number, number, number]
 }): Promise<RenderedPostcardPdf> {
   const spec = buildPostcard5x8PrintSpec()
@@ -281,6 +283,7 @@ export async function renderPostcardPrintPdf(input: {
   const semibold = await doc.embedFont(readFont("SourceSans3-Semibold.ttf"), { subset: true })
   const embedded = measured.kind === "jpeg" ? await doc.embedJpg(image.bytes) : await doc.embedPng(image.bytes)
   const backEmbedded = await embedBackImage(doc, input.backImage)
+  const logoEmbedded = input.logo ? await doc.embedPng(input.logo.bytes) : null
 
   const width = spec.pdfPagePoints.widthPoints
   const height = spec.pdfPagePoints.heightPoints
@@ -290,6 +293,7 @@ export async function renderPostcardPrintPdf(input: {
   markBoxes(back, spec)
 
   front.drawImage(embedded, { x: 0, y: 0, width, height })
+  paintCustomerLogo(front, spec, logoEmbedded)
   drawFrontCaption(front, spec, copy, regular, semibold)
   drawBack(back, spec, backContent, copy, regular, semibold, backEmbedded)
 

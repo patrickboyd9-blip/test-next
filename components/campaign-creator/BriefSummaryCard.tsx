@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
+import { mergeBrandAssets } from "@/lib/campaign-creator/customer-logo"
 import type { CampaignBrief, CampaignStatus } from "@/lib/campaign-creator/types"
 import type { MailPieceFormatRecommendationView } from "@/lib/campaign-creator/actions"
 import {
@@ -34,7 +35,10 @@ interface BriefSummaryCardProps {
 }
 
 function assetsToText(assets: CampaignBrief["brandAssets"]) {
-  return (assets ?? []).map((asset) => asset.description).join("\n")
+  return (assets ?? [])
+    .filter((asset) => !(asset.type === "logo" && asset.fileUrl))
+    .map((asset) => asset.description)
+    .join("\n")
 }
 
 function textToAssets(text: string): CampaignBrief["brandAssets"] {
@@ -414,7 +418,7 @@ export function BriefSummaryCard({
             readOnly={readOnly}
             multiline
             placeholder="One per line — logo, photos, coupon, etc."
-            onCommit={(value) => onFieldChange({ brandAssets: textToAssets(value) })}
+            onCommit={(value) => onFieldChange({ brandAssets: mergeBrandAssets(brief.brandAssets, textToAssets(value)) })}
           />
           <Field
             key={`otherRequirements:${brief.otherRequirements ?? ""}`}
