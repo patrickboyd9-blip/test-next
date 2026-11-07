@@ -8,6 +8,7 @@ import type {
   ConversationTurnResult,
 } from "./conversation-engine-types"
 
+import { mergeBrandAssets } from "./customer-logo"
 import type {
   CampaignBrief,
   PrimarySuccessMetricType,
@@ -225,6 +226,10 @@ function mergeBriefPatch(
 
   if (incoming.businessInfo) {
     patch.businessInfo = { ...current.businessInfo, ...incoming.businessInfo }
+  }
+
+  if (incoming.brandAssets) {
+    patch.brandAssets = mergeBrandAssets(current.brandAssets, incoming.brandAssets)
   }
 
   return patch

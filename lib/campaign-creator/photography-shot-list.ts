@@ -69,6 +69,9 @@ export function buildOpenAIImagePrompt(brief: ImageBrief): string {
     ]
       .filter((line): line is string => Boolean(line))
       .join(" "),
+    brief.customerLogo
+      ? "Customer logo: a real logo file is placed on the card after this photograph, upper-left, with clear space. Do not draw a logo, wordmark, badge, or sign."
+      : null,
     art.trade === "roofing" ? `Light: ${art.lighting}` : `Light: ${brief.lookBlock}`,
     `Camera and lens: ${cameraLine(brief)}`,
     "Imperfections: Ordinary wear only: a wrinkle, a scuff, dust in the light, uneven paint or a tired edge. Skin is not retouched. The place looks used.",
@@ -86,7 +89,9 @@ export function buildOpenAIImagePrompt(brief: ImageBrief): string {
     ]
       .filter((line): line is string => Boolean(line))
       .join(" "),
-  ].join("\n")
+  ]
+    .filter((line): line is string => Boolean(line))
+    .join("\n")
 }
 
 const SERVICE_CLEAR =
