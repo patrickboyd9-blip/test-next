@@ -21,6 +21,13 @@ export function briefShowsPerson(brief: { mode?: string; subject?: string } | nu
   return /\b(?:person|people|face|faces|portrait|roofer|crew|technician|advisor|plumber|worker|head)\b/i.test(brief.subject ?? "")
 }
 
+/**
+ * Imagen's wide postcard frame. A 4:3 default crops heads off short offer
+ * bands and off the tall back column. Generation asks for 16:9; crop checks
+ * use the same ratio.
+ */
+export const MAILER_PHOTO_ASPECT = 16 / 9
+
 export function personFocal(): FocalPoint {
   return { x: 0.5, y: 0.16 }
 }
@@ -63,6 +70,43 @@ export function headIsClipped(
     head.x + head.w - margin > window.x + window.w + 0.001 ||
     head.y + head.h - margin > window.y + window.h + 0.001
   )
+}
+
+/** Where the assumed head lands on the card after the cover crop. */
+export function headCardRect(slot: PhotoSlotPlan, sourceAspect = MAILER_PHOTO_ASPECT): { x: number; y: number; w: number; h: number } {
+  const focal = slot.focal ?? personFocal()
+  const window = coverWindow(slot.rect, focal, sourceAspect)
+  const head = PERSON_HEAD_BOX
+  return {
+    x: slot.rect.x + ((head.x - window.x) / window.w) * slot.rect.w,
+    y: slot.rect.y + ((head.y - window.y) / window.h) * slot.rect.h,
+    w: (head.w / window.w) * slot.rect.w,
+    h: (head.h / window.h) * slot.rect.h,
+  }
+}
+
+/**
+ * Focal that keeps the head box inside a cover crop of a wide service photo.
+ * Tries the person focal first, then nearby points. Falls back to the person
+ * focal when the slot is too short for any of them.
+ */
+export function focalKeepingHead(
+  slot: { w: number; h: number },
+  sourceAspect = MAILER_PHOTO_ASPECT
+): FocalPoint {
+  const candidates: FocalPoint[] = []
+  for (const y of [0.16, 0.12, 0.2, 0.24, 0.08, 0.32]) {
+    for (const x of [0.5, 0.42, 0.58]) candidates.push({ x, y })
+  }
+  const probe = (focal: FocalPoint): PhotoSlotPlan => ({
+    id: "probe",
+    role: "photo",
+    rect: { x: 0, y: 0, w: slot.w, h: slot.h },
+    bleed: false,
+    treatment: "cover",
+    focal,
+  })
+  return candidates.find((focal) => !headIsClipped(probe(focal), sourceAspect)) ?? personFocal()
 }
 
 /** Minimum slot height so a portrait head survives a cover crop. */

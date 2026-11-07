@@ -47,14 +47,32 @@ test("fade roofing fronts get a soft-fade back that stays out of the address zon
   assert.ok(card.back.texts.some((text) => text.role === "contact"))
 })
 
-test("coupon fronts get the soft-fade back too (no cream backs)", () => {
-  const card = composeRoofingProCard({
+test("coupon and neighborhood fronts get a text-led back, fade fronts keep the photo", () => {
+  const spec = { headline: "Real savings.", subheadline: "We replace the whole roof and haul the old one away.", offer: "$500 off", phone: "(512) 555-0190", website: "example.com" }
+  const coupon = composeRoofingProCard({
     templateId: "roof_coupon",
     size: "5x8",
-    spec: { headline: "Real savings.", offer: "$500 off", phone: "(512) 555-0190", website: "example.com" },
+    spec,
     businessName: "Hernandez Roofing",
   })
-  assert.equal(isSoftFadeBack(card.back), true)
+  assert.equal(isSoftFadeBack(coupon.back), false)
+  assert.equal(coupon.back.photos.length, 0)
+  const spoken = coupon.back.texts.map((line) => line.text).join(" ")
+  assert.match(spoken, /Real savings/)
+  assert.match(spoken, /haul the old one/)
+  assert.match(spoken, /\$500 off/)
+  assert.match(spoken, /512/)
+  const headline = coupon.back.texts.find((line) => line.role === "headline")
+  const body = coupon.back.texts.find((line) => line.role === "body")
+  assert.ok(headline && body && headline.fontPt > body.fontPt)
+  assert.ok(coupon.back.shapes.some((shape) => shape.role === "offer-tile"))
+  const fade = composeRoofingProCard({
+    templateId: "roof_fade_offer",
+    size: "5x8",
+    spec,
+    businessName: "Hernandez Roofing",
+  })
+  assert.equal(isSoftFadeBack(fade.back), true)
 })
 
 test("damage front starts the fade lower; voted-out headline never returns; editor defaults follow soft-fade", async () => {

@@ -31,7 +31,7 @@ interface DamageRule {
 }
 
 const ROOFER =
-  "One roofer in a work shirt and safety harness kneels on the roof working on that section, face visible and not cropped."
+  "One roofer in a work shirt and safety harness kneels on the roof working on that section. The entire head, hair, and chin are inside the frame with open sky above the hair, not touching the top edge. The roofer and the damaged section sit in the central half of the frame."
 
 const RULES: readonly DamageRule[] = [
   {
@@ -115,7 +115,7 @@ export function roofDamageInHeadline(...texts: Array<string | undefined | null>)
 /** The photograph subject for a damage headline: the damage, plus a roofer fixing it. */
 export function roofDamageScene(kind: RoofDamageKind): string {
   const rule = RULES.find((item) => item.kind === kind)!
-  return `${rule.scene} ${ROOFER} Low camera from the lawn looking up at the front slope: the damaged section and the roofer sit in the upper half of the frame, between 10% and 45% from the top, large and sharp. The lower half of the frame is the house wall, windows, and lawn, with no damage there, because postcard text covers it. Illustrative example of this kind of damage, not a specific customer's house.`
+  return `${rule.scene} ${ROOFER} Low camera from the lawn looking up at the front slope: the damaged section and the roofer sit in the upper half of the frame, between 18% and 42% from the top, large and sharp, with sky above the head. The lower half of the frame is the house wall, windows, and lawn, with no damage there, because postcard text covers it. Illustrative example of this kind of damage, not a specific customer's house.`
 }
 
 export const ROOF_DAMAGE_REFUSE =
