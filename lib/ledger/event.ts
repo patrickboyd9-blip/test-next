@@ -8,7 +8,16 @@ export interface LedgerEvent {
   id: string
   ownerId: string
   campaignId: string
-  type: "guidance_saved" | "job_frame_saved" | "list_reviewed" | "checkout_opened" | "checkout_blocked" | "payment_recorded" | "mail_refused"
+  type:
+    | "guidance_saved"
+    | "job_frame_saved"
+    | "list_reviewed"
+    | "checkout_opened"
+    | "checkout_blocked"
+    | "payment_recorded"
+    | "mail_refused"
+    | "proposal_previewed"
+    | "proposal_approved"
   outcome: LedgerOutcome
   occurredAt: string
   versionKey: string
