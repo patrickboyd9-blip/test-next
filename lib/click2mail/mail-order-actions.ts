@@ -1,19 +1,14 @@
 "use server"
 
 import { requireOwnedCampaign } from "@/lib/auth/campaign-access"
-import { isAtOrPastStatus } from "@/lib/campaign-creator/campaign-status"
+import { PRINT_TEST_REFUSAL } from "@/lib/mail-journey/mail-gate"
 import { getCampaignRepository } from "@/lib/campaign-creator/repository"
 import type { Campaign } from "@/lib/campaign-creator/types"
-import { loadApprovedUploadPdf } from "@/lib/bring-your-own-design/print-source"
 
-import { renderAiPrintFile } from "./ai-print-file"
 import { assertClick2MailCallable, loadClick2MailConfig } from "./config"
 import { createClick2MailClient } from "./client"
-import { placeClick2MailOrder, refreshClick2MailOrder } from "./order"
+import { refreshClick2MailOrder } from "./order"
 import type { MailOrderRecord } from "./order-record"
-import { normalizeRecipient, parseRecipientCsv, type Recipient } from "./recipients"
-import { returnAddressFromBusiness } from "./return-address"
-import type { ReturnAddress } from "./types"
 
 const repository = getCampaignRepository()
 
@@ -24,7 +19,7 @@ export interface PrintMailActionResult {
 
 export async function submitPrintMailTest(
   campaignId: string,
-  input:
+  _input:
     | { kind: "csv"; csvText: string }
     | {
         kind: "self"
@@ -38,29 +33,12 @@ export async function submitPrintMailTest(
       }
 ): Promise<PrintMailActionResult> {
   const campaign = await requireOwnedCampaign(campaignId)
-
-  const blocked = guard(campaign)
-  if (blocked) return { campaign, issues: [blocked] }
-
-  const parsed =
-    input.kind === "csv"
-      ? parseRecipientCsv(input.csvText)
-      : oneRecipient(input)
-  if (parsed.errors.length > 0 || parsed.recipients.length === 0) {
-    return { campaign, issues: parsed.errors.length > 0 ? parsed.errors : ["Add at least one address."] }
-  }
-
-  return runOrder(campaign, parsed.recipients, undefined)
+  return { campaign, issues: [PRINT_TEST_REFUSAL] }
 }
 
 export async function continuePrintMailTest(campaignId: string): Promise<PrintMailActionResult> {
   const campaign = await requireOwnedCampaign(campaignId)
-  const blocked = guard(campaign)
-  if (blocked) return { campaign, issues: [blocked] }
-  if (!campaign.mailOrder?.addressListId && !campaign.mailOrder?.documentId) {
-    return { campaign, issues: ["There is no staging order to continue."] }
-  }
-  return runOrder(campaign, [], campaign.mailOrder)
+  return { campaign, issues: [PRINT_TEST_REFUSAL] }
 }
 
 export async function refreshPrintMailStatus(campaignId: string): Promise<PrintMailActionResult> {
@@ -93,87 +71,10 @@ export async function refreshPrintMailStatus(campaignId: string): Promise<PrintM
   }
 }
 
-function guard(campaign: Campaign): string | null {
-  if (!isAtOrPastStatus(campaign.status, "creative_approved") || !campaign.mailPiece) {
-    return "Approve the postcard before sending a print test."
-  }
-  try {
-    assertClick2MailCallable(loadClick2MailConfig())
-  } catch (error) {
-    return error instanceof Error ? error.message : "Click2Mail is not available."
-  }
-  return null
-}
-
 function clientFromEnv() {
   const config = loadClick2MailConfig()
   assertClick2MailCallable(config)
   return { config, client: createClick2MailClient({ config }) }
 }
 
-async function runOrder(
-  campaign: Campaign,
-  recipients: readonly Recipient[],
-  existing: MailOrderRecord | undefined
-): Promise<PrintMailActionResult> {
-  const { config, client } = clientFromEnv()
-  let artwork: MailOrderRecord["artwork"] = existing?.artwork ?? "type-plate"
-  let pdf: Uint8Array<ArrayBufferLike> = new Uint8Array()
-
-  if (!existing?.documentId) {
-    try {
-      const uploaded = await loadApprovedUploadPdf(campaign)
-      if (uploaded) {
-        pdf = uploaded
-        artwork = "uploaded-design"
-      } else {
-        const rendered = await renderAiPrintFile(campaign)
-        pdf = rendered.bytes
-        artwork = rendered.artwork
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "The print file could not be built."
-      return { campaign, issues: [message] }
-    }
-  }
-
-  const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+Z$/, "Z")
-  const order = await placeClick2MailOrder({
-    client,
-    config,
-    pdf,
-    recipients,
-    postcardSize: campaign.mailPiece?.spec.designRationale?.format?.trim === "6x9" ? "6x9" : "5x8",
-    documentName: `mm-${campaign.id.slice(0, 8)}-${stamp}`,
-    addressListName: `mm-${campaign.id.slice(0, 8)}-${stamp}`,
-    returnAddress: returnAddressFor(campaign),
-    artwork,
-    submit: true,
-    proof: true,
-    existing,
-    pollTimeoutMs: 20_000,
-  })
-  const saved = await repository.saveMailOrder(campaign.id, order)
-  return { campaign: saved, issues: order.error ? [order.error] : [] }
-}
-
-function oneRecipient(input: {
-  first: string
-  last: string
-  address1: string
-  address2?: string
-  city: string
-  state: string
-  zip: string
-}): { recipients: Recipient[]; errors: string[] } {
-  const parsed = normalizeRecipient(input, 1)
-  return {
-    recipients: parsed.recipient ? [parsed.recipient] : [],
-    errors: parsed.errors,
-  }
-}
-
-function returnAddressFor(campaign: Campaign): ReturnAddress {
-  return returnAddressFromBusiness(campaign.brief.businessInfo)
-}
 
