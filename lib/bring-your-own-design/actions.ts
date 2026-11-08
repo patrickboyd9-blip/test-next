@@ -2,7 +2,7 @@
 
 import { reviewUploadedArtwork } from "@/lib/campaign-creator/creative-engine-provider"
 import { getCampaignRepository } from "@/lib/campaign-creator/repository"
-import type { Campaign, DesignSource } from "@/lib/campaign-creator/types"
+import type { Campaign, DesignSource, UploadedDesignFile } from "@/lib/campaign-creator/types"
 import { buildPostcard5x8PrintSpec } from "@/lib/print-spec/postcard-5x8-print-spec"
 
 import { normalizeDesignReview, uploadComplianceWarnings } from "./design-review"
@@ -48,8 +48,8 @@ export async function requestUploadedDesignReview(campaignId: string): Promise<C
     throw new Error("Fix the file problems before asking for a review.")
   }
 
-  const front = await openUploadedDesign(campaign.id, design.front.key)
-  const back = await openUploadedDesign(campaign.id, design.back.key)
+  const front = await openPreparedFace(campaign.id, design.front)
+  const back = await openPreparedFace(campaign.id, design.back)
   if (!front || !back) {
     throw new Error("The uploaded files could not be read. Upload them again.")
   }
@@ -58,8 +58,8 @@ export async function requestUploadedDesignReview(campaignId: string): Promise<C
   let complianceWarnings: string[] = []
   try {
     const result = await reviewUploadedArtwork({
-      front: { bytes: front.bytes, mediaType: design.front.mediaType },
-      back: { bytes: back.bytes, mediaType: design.back.mediaType },
+      front: { bytes: front.bytes, mediaType: front.mediaType },
+      back: { bytes: back.bytes, mediaType: back.mediaType },
     })
     suggestions = normalizeDesignReview({ suggestions: result.suggestions })
     complianceWarnings = uploadComplianceWarnings(result.printedText, campaign.brief)
@@ -75,7 +75,10 @@ export async function requestUploadedDesignReview(campaignId: string): Promise<C
   })
 }
 
-export async function approveUploadedDesign(campaignId: string): Promise<Campaign> {
+export async function approveUploadedDesign(
+  campaignId: string,
+  options?: { acceptAddressCover?: boolean }
+): Promise<Campaign> {
   const campaign = await repository.getCampaign(campaignId)
   if (!campaign) throw new Error(`Campaign ${campaignId} not found`)
   const design = campaign.uploadedDesign
@@ -86,18 +89,37 @@ export async function approveUploadedDesign(campaignId: string): Promise<Campaig
     throw new Error("Fix the file problems before approving.")
   }
 
-  const front = await openUploadedDesign(campaign.id, design.front.key)
-  const back = await openUploadedDesign(campaign.id, design.back.key)
+  if (design.issues.some((item) => item.code === "keep_out") && !options?.acceptAddressCover) {
+    throw new Error("The address will cover part of the back. Confirm that before approving.")
+  }
+
+  const front = await openPreparedFace(campaign.id, design.front)
+  const back = await openPreparedFace(campaign.id, design.back)
   if (!front || !back) {
     throw new Error("The uploaded files could not be read. Upload them again.")
   }
 
   const pdf = await renderUploadedPostcardPdf({
     geometry: buildPostcard5x8PrintSpec(),
-    front: { bytes: front.bytes, mediaType: design.front.mediaType },
-    back: { bytes: back.bytes, mediaType: design.back.mediaType },
+    front,
+    back,
   })
   const key = uploadedDesignKey("print", "application/pdf")
   await resolveUploadedDesignStore().put(campaign.id, key, Buffer.from(pdf), "application/pdf")
   return repository.approveUploadedDesign(campaign.id, key)
+}
+
+async function openPreparedFace(
+  campaignId: string,
+  file: UploadedDesignFile
+): Promise<{ bytes: Uint8Array; mediaType: "application/pdf" | "image/png" | "image/jpeg" } | null> {
+  if (file.preparedKey) {
+    const prepared = await openUploadedDesign(campaignId, file.preparedKey)
+    if (prepared) {
+      return { bytes: prepared.bytes, mediaType: file.preparedMediaType ?? "image/png" }
+    }
+  }
+  const original = await openUploadedDesign(campaignId, file.key)
+  if (!original) return null
+  return { bytes: original.bytes, mediaType: file.mediaType }
 }

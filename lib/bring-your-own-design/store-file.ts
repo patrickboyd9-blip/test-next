@@ -4,7 +4,7 @@ import path from "path"
 import type { UploadedDesignStore } from "./store"
 
 const SAFE_CAMPAIGN_ID = /^[A-Za-z0-9_-]{1,80}$/
-const SAFE_KEY = /^(front|back|print)\.(pdf|png|jpe?g)$/
+const SAFE_KEY = /^(front|back|print)(-prepared)?\.(pdf|png|jpe?g)$/
 
 /** Test helper. Production reads and writes go through store.ts and a fixed directory. */
 export function createFileUploadedDesignStore(directory: string): UploadedDesignStore {
