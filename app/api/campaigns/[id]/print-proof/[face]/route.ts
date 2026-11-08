@@ -1,3 +1,4 @@
+import { denyUnlessCampaignOwner } from "@/lib/auth/campaign-access"
 import { getCampaignRepository } from "@/lib/campaign-creator/repository"
 import { renderAiPrintFile } from "@/lib/click2mail/ai-print-file"
 import { printFileKeepOutIssues, printFilePage } from "@/lib/print-spec/print-proof"
@@ -18,6 +19,8 @@ export async function GET(
 ): Promise<Response> {
   const { id, face } = await context.params
   if (face !== "front" && face !== "back" && face !== "check") return new Response("Not found", { status: 404 })
+  const denied = await denyUnlessCampaignOwner(id)
+  if (denied) return denied
   const campaign = await repository.getCampaign(id)
   if (!campaign?.mailPiece) return new Response("Not found", { status: 404 })
   let file

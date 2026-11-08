@@ -188,5 +188,6 @@ function parseRequest(value: unknown): DesignRequest | null {
     size: record.size,
     uploads: record.uploads ?? [],
     createdAt: record.createdAt ?? new Date(0).toISOString(),
+    ...(typeof record.ownerId === "string" && record.ownerId.trim() ? { ownerId: record.ownerId } : {}),
   }
 }
