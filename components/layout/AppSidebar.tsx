@@ -13,7 +13,6 @@ import {
   Users,
 } from "lucide-react"
 
-import { mockCurrentUser } from "@/lib/auth/mock-user"
 import {
   Sidebar,
   SidebarContent,
@@ -46,7 +45,11 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Settings", href: "/app/settings", icon: Settings, soon: true },
 ]
 
-export function AppSidebar() {
+export function AppSidebar({
+  account,
+}: {
+  account: { name: string; detail: string; initials: string } | null
+}) {
   const pathname = usePathname()
 
   return (
@@ -106,14 +109,14 @@ export function AppSidebar() {
       <SidebarFooter>
         <div className="flex items-center gap-2 rounded-md p-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0">
           <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-sidebar-accent text-xs font-medium text-sidebar-accent-foreground">
-            {mockCurrentUser.initials}
+            {account?.initials ?? "?"}
           </span>
           <div className="flex min-w-0 flex-col group-data-[collapsible=icon]:hidden">
             <span className="truncate text-sm font-medium text-sidebar-foreground">
-              {mockCurrentUser.name}
+              {account?.name ?? "Signed out"}
             </span>
             <span className="truncate text-xs text-sidebar-foreground/70">
-              {mockCurrentUser.businessName}
+              {account?.detail ?? "No account"}
             </span>
           </div>
         </div>

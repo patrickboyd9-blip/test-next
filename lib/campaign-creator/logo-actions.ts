@@ -2,6 +2,7 @@
 
 import { randomUUID } from "node:crypto"
 
+import { requireOwnedCampaign } from "@/lib/auth/campaign-access"
 import { getCampaignRepository } from "@/lib/campaign-creator/repository"
 import { studioImagePublicPath } from "@/lib/campaign-creator/studio-image-paths"
 import { resolveStudioImageStore } from "@/lib/campaign-creator/studio-image-store"
@@ -16,12 +17,17 @@ export type LogoActionResult =
 /**
  * Stores the customer's logo beside this campaign's other studio files and
  * records it on the brief. The photograph generator is not given the pixels.
- * There is still no account check on campaign id; this does not add one.
+ * The campaign must belong to the signed-in account.
  */
 export async function saveCampaignLogo(campaignId: string, formData: FormData): Promise<LogoActionResult> {
   const repository = getCampaignRepository()
-  const campaign = await repository.getCampaign(campaignId)
-  if (!campaign) return { ok: false, error: "That campaign could not be found." }
+  let campaign
+  try {
+    campaign = await requireOwnedCampaign(campaignId)
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "That campaign could not be found."
+    return { ok: false, error: message }
+  }
 
   const value = formData.get("logo")
   if (!value || typeof value === "string" || typeof value.arrayBuffer !== "function") {
@@ -46,8 +52,13 @@ export async function saveCampaignLogo(campaignId: string, formData: FormData): 
 
 export async function removeCampaignLogo(campaignId: string): Promise<LogoActionResult> {
   const repository = getCampaignRepository()
-  const campaign = await repository.getCampaign(campaignId)
-  if (!campaign) return { ok: false, error: "That campaign could not be found." }
+  let campaign
+  try {
+    campaign = await requireOwnedCampaign(campaignId)
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "That campaign could not be found."
+    return { ok: false, error: message }
+  }
   const saved = await repository.updateBrief(campaignId, {
     brandAssets: removeLogoAsset(campaign.brief.brandAssets),
   })

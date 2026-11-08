@@ -1,5 +1,6 @@
 "use server"
 
+import { requireOwnedCampaign } from "@/lib/auth/campaign-access"
 import { isAtOrPastStatus } from "@/lib/campaign-creator/campaign-status"
 import { getCampaignRepository } from "@/lib/campaign-creator/repository"
 import type { Campaign } from "@/lib/campaign-creator/types"
@@ -36,8 +37,7 @@ export async function submitPrintMailTest(
         zip: string
       }
 ): Promise<PrintMailActionResult> {
-  const campaign = await repository.getCampaign(campaignId)
-  if (!campaign) return missing(campaignId)
+  const campaign = await requireOwnedCampaign(campaignId)
 
   const blocked = guard(campaign)
   if (blocked) return { campaign, issues: [blocked] }
@@ -54,8 +54,7 @@ export async function submitPrintMailTest(
 }
 
 export async function continuePrintMailTest(campaignId: string): Promise<PrintMailActionResult> {
-  const campaign = await repository.getCampaign(campaignId)
-  if (!campaign) return missing(campaignId)
+  const campaign = await requireOwnedCampaign(campaignId)
   const blocked = guard(campaign)
   if (blocked) return { campaign, issues: [blocked] }
   if (!campaign.mailOrder?.addressListId && !campaign.mailOrder?.documentId) {
@@ -65,8 +64,7 @@ export async function continuePrintMailTest(campaignId: string): Promise<PrintMa
 }
 
 export async function refreshPrintMailStatus(campaignId: string): Promise<PrintMailActionResult> {
-  const campaign = await repository.getCampaign(campaignId)
-  if (!campaign) return missing(campaignId)
+  const campaign = await requireOwnedCampaign(campaignId)
   const order = campaign.mailOrder
   if (!order) return { campaign, issues: [] }
 
@@ -93,10 +91,6 @@ export async function refreshPrintMailStatus(campaignId: string): Promise<PrintM
     const message = error instanceof Error ? error.message : "Status check failed."
     return { campaign, issues: [message] }
   }
-}
-
-function missing(campaignId: string): PrintMailActionResult {
-  throw new Error(`Campaign ${campaignId} not found`)
 }
 
 function guard(campaign: Campaign): string | null {

@@ -3,7 +3,8 @@
 import { randomUUID } from "crypto"
 import { after } from "next/server"
 
-import { mockCurrentUser } from "@/lib/auth/mock-user"
+import { CampaignAccessError, requireOwnedCampaign } from "@/lib/auth/campaign-access"
+import { getSession } from "@/lib/auth/session"
 
 import {
   getActiveSpec,
@@ -39,6 +40,10 @@ import { reviseFromNote } from "@/lib/design-intelligence/refine-note"
 
 const repository = getCampaignRepository()
 
+async function owned(campaignId: string): Promise<Campaign> {
+  return requireOwnedCampaign(campaignId)
+}
+
 /** Drop the private research score before a campaign reaches the browser. */
 function forCustomer(campaign: Campaign): Campaign {
   return campaignForCustomer(campaign)
@@ -63,7 +68,9 @@ function requireCreativeCanvas(
 }
 
 export async function createDraftCampaign(): Promise<Campaign> {
-  return forCustomer(await repository.createCampaign(mockCurrentUser.email))
+  const session = await getSession()
+  if (!session) throw new CampaignAccessError(401, "Sign in required.")
+  return forCustomer(await repository.createCampaign(session.userId))
 }
 
 /** Opens a catalog mailer in Studio on this draft. */
@@ -71,12 +78,17 @@ export async function beginFromTemplate(
   campaignId: string,
   templateId: string
 ): Promise<Campaign> {
+  await owned(campaignId)
   return forCustomer(await repository.beginTemplatePath(campaignId, templateId))
 }
 
 export async function getCampaign(campaignId: string): Promise<Campaign | null> {
-  const campaign = await repository.getCampaign(campaignId)
-  return campaign ? forCustomer(campaign) : null
+  try {
+    return forCustomer(await owned(campaignId))
+  } catch (error) {
+    if (error instanceof CampaignAccessError) return null
+    throw error
+  }
 }
 
 export interface MailPieceFormatRecommendationView {
@@ -110,6 +122,7 @@ export async function sendCampaignMessage(
 ): Promise<Campaign> {
   const trimmed = message.trim()
   if (!trimmed) throw new Error("Message cannot be empty")
+  await owned(campaignId)
 
   await repository.appendMessage(campaignId, {
     id: randomUUID(),
@@ -118,7 +131,7 @@ export async function sendCampaignMessage(
     createdAt: new Date().toISOString(),
   })
 
-  const campaign = await repository.getCampaign(campaignId)
+  const campaign = await owned(campaignId)
   if (!campaign) throw new Error(`Campaign ${campaignId} not found`)
 
   try {
@@ -167,10 +180,12 @@ export async function updateCampaignBrief(
   campaignId: string,
   patch: Partial<CampaignBrief>
 ): Promise<Campaign> {
+  await owned(campaignId)
   return forCustomer(await repository.updateBrief(campaignId, patch))
 }
 
 export async function confirmCampaignStrategy(campaignId: string): Promise<Campaign> {
+  await owned(campaignId)
   return forCustomer(await repository.confirmStrategy(campaignId))
 }
 
@@ -180,32 +195,36 @@ export async function confirmCampaignBrief(campaignId: string): Promise<Campaign
 }
 
 export async function confirmCampaignAudience(campaignId: string): Promise<Campaign> {
+  await owned(campaignId)
   return forCustomer(await repository.confirmAudience(campaignId))
 }
 
 export async function confirmCampaignQuantity(campaignId: string): Promise<Campaign> {
+  await owned(campaignId)
   return forCustomer(await repository.confirmQuantity(campaignId))
 }
 
 export async function launchCampaign(campaignId: string): Promise<Campaign> {
+  await owned(campaignId)
   return forCustomer(await repository.launch(campaignId))
 }
 
 const generationLocks = new Map<string, Promise<Campaign>>()
 
 export async function generateStudioCreative(campaignId: string): Promise<Campaign> {
+  await owned(campaignId)
   const inFlight = generationLocks.get(campaignId)
   if (inFlight) return forCustomer(await inFlight)
 
   const work = (async () => {
-    const campaign = await repository.getCampaign(campaignId)
+    const campaign = await owned(campaignId)
     if (!campaign) throw new Error(`Campaign ${campaignId} not found`)
     if (campaign.creative.directions.length > 0) return campaign
     requireCreativeCanvas(campaign.mailPieceSpec, campaignId)
 
     await repository.markGeneratingCreative(campaignId)
 
-    const latest = await repository.getCampaign(campaignId)
+    const latest = await owned(campaignId)
     if (!latest) throw new Error(`Campaign ${campaignId} not found`)
 
     const canvas = requireCreativeCanvas(latest.mailPieceSpec, campaignId)
@@ -247,7 +266,7 @@ export async function initializeStudioCreative(campaignId: string): Promise<Camp
 export async function loadStudioDirectionImages(
   campaignId: string
 ): Promise<StudioImageLoad> {
-  const campaign = await repository.getCampaign(campaignId)
+  const campaign = await owned(campaignId)
   if (!campaign) throw new Error(`Campaign ${campaignId} not found`)
 
   return syncStudioDirectionImages({
@@ -265,7 +284,7 @@ export async function generateLeadDirectionImage(
   campaignId: string,
   directionId: string
 ): Promise<{ directionId: string; generated: GeneratedAsset | null }> {
-  const campaign = await repository.getCampaign(campaignId)
+  const campaign = await owned(campaignId)
   if (!campaign) throw new Error(`Campaign ${campaignId} not found`)
 
   return runGenerateLeadDirectionImage(
@@ -279,6 +298,7 @@ export async function selectCreativeDirection(
   campaignId: string,
   directionId: string
 ): Promise<Campaign> {
+  await owned(campaignId)
   return forCustomer(await repository.selectDirection(campaignId, directionId))
 }
 
@@ -290,7 +310,7 @@ export async function applyRefinement(
   if (!trimmed) throw new Error("Prompt cannot be empty")
   const personalization = personalizationFromPrompt(trimmed)
 
-  const campaign = await repository.getCampaign(campaignId)
+  const campaign = await owned(campaignId)
   if (!campaign) throw new Error(`Campaign ${campaignId} not found`)
 
   const directionId = campaign.creative.selectedDirectionId
@@ -370,7 +390,7 @@ export async function restoreRevision(
   campaignId: string,
   revisionId: string
 ): Promise<Campaign> {
-  const campaign = await repository.getCampaign(campaignId)
+  const campaign = await owned(campaignId)
   if (!campaign) throw new Error(`Campaign ${campaignId} not found`)
 
   const source = campaign.creative.revisions.find((r) => r.id === revisionId)
@@ -404,7 +424,7 @@ export async function restoreRevision(
 }
 
 export async function updateAddressSide(campaignId: string, edit: AddressSideEdit): Promise<Campaign> {
-  const campaign = await repository.getCampaign(campaignId)
+  const campaign = await owned(campaignId)
   if (!campaign) throw new Error(`Campaign ${campaignId} not found`)
   const directionId = campaign.creative.selectedDirectionId
   if (!directionId) throw new Error("No direction selected")
@@ -412,16 +432,19 @@ export async function updateAddressSide(campaignId: string, edit: AddressSideEdi
 }
 
 export async function approveCreative(campaignId: string): Promise<Campaign> {
+  await owned(campaignId)
   return forCustomer(await repository.approveCreative(campaignId))
 }
 
 export async function unapproveCreative(campaignId: string): Promise<Campaign> {
+  await owned(campaignId)
   return forCustomer(await repository.unapproveCreative(campaignId))
 }
 
 export async function recoverMissingMailPiece(
   campaignId: string
 ): Promise<Campaign> {
+  await owned(campaignId)
   return forCustomer(await repository.recoverMissingMailPiece(campaignId))
 }
 
@@ -433,7 +456,7 @@ export interface ConceptFeedbackView {
 
 /** Thumbs for the concepts in one campaign. The owner is taken from the campaign, not from the browser. */
 export async function loadConceptFeedback(campaignId: string): Promise<ConceptFeedbackView[]> {
-  const campaign = await repository.getCampaign(campaignId)
+  const campaign = await owned(campaignId)
   if (!campaign) return []
   const votes = await listCampaignVotes(campaignId)
   return votes
@@ -450,7 +473,7 @@ export async function saveConceptFeedback(input: {
   if (input.vote !== "up" && input.vote !== "down") {
     throw new Error("Vote must be up or down.")
   }
-  const campaign = await repository.getCampaign(input.campaignId)
+  const campaign = await owned(input.campaignId)
   if (!campaign) throw new Error(`Campaign ${input.campaignId} not found`)
   const direction = campaign.creative.directions.find((item) => item.id === input.directionId)
   if (!direction) throw new Error("That concept is not on this campaign.")
@@ -485,7 +508,7 @@ export async function browseBlueprints(input: {
   offerType?: string
   copyPattern?: string
 }): Promise<BlueprintBrowseCard[]> {
-  const campaign = await repository.getCampaign(input.campaignId)
+  const campaign = await owned(input.campaignId)
   if (!campaign) return []
   const { blueprintCard, isInternalOwner, normalizeToneTag, normalizeVerticalTag, selectBlueprints } = await import("@/lib/design-intelligence/blueprint")
   const { normalizeCopyPattern, normalizeOfferType } = await import("@/lib/design-intelligence/blueprint-tags")
@@ -530,7 +553,7 @@ export async function browseBlueprints(input: {
 export async function chooseRoofingProTemplate(campaignId: string, templateId: string): Promise<Campaign> {
   const { isRoofingProTemplate } = await import("@/lib/roofing-pro/ids")
   if (!isRoofingProTemplate(templateId)) throw new Error("That layout is not a roofing pro template.")
-  const campaign = await repository.getCampaign(campaignId)
+  const campaign = await owned(campaignId)
   if (!campaign) throw new Error(`Campaign ${campaignId} not found`)
   const directionId = campaign.creative.selectedDirectionId
   if (!directionId) throw new Error("No direction selected")
@@ -552,7 +575,7 @@ export async function chooseRoofingProTemplate(campaignId: string, templateId: s
 
 /** Rebuilds the selected concept from one blueprint, with this campaign's words and colors. */
 export async function applyCampaignBlueprint(campaignId: string, blueprintId: string): Promise<Campaign> {
-  const campaign = await repository.getCampaign(campaignId)
+  const campaign = await owned(campaignId)
   if (!campaign) throw new Error(`Campaign ${campaignId} not found`)
   const directionId = campaign.creative.selectedDirectionId
   if (!directionId) throw new Error("No direction selected")

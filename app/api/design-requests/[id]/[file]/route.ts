@@ -1,3 +1,4 @@
+import { denyUnlessDesignRequestOwner } from "@/lib/design-requests/access"
 import { readDesignRequestImage } from "@/lib/design-requests/read"
 
 export const runtime = "nodejs"
@@ -13,6 +14,8 @@ export async function GET(
   context: { params: Promise<{ id: string; file: string }> }
 ): Promise<Response> {
   const { id, file } = await context.params
+  const denied = await denyUnlessDesignRequestOwner(id)
+  if (denied) return denied
   const opened = await readDesignRequestImage(id, file)
   if (!opened) return new Response("Not found", { status: 404 })
 

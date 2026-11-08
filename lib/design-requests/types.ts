@@ -37,6 +37,11 @@ export interface DesignRequest {
   size?: DesignRequestSize
   uploads: DesignRequestUpload[]
   createdAt: string
+  /**
+   * Account that submitted the request. Missing on records saved before
+   * accounts existed. Those records are not listed and are not assigned here.
+   */
+  ownerId?: string
 }
 
 export interface DesignRequestInput {
