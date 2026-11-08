@@ -7,8 +7,8 @@
 
 import { headlinePasses, sameHeadline } from "@/lib/research-library/guard"
 import type { CampaignBrief } from "@/lib/campaign-creator/types"
-import { hasBlockedClaim } from "@/lib/research-library/compliance"
 import { industryForBrief } from "@/lib/research-library/industry"
+import { hasBlockedClaim } from "@/lib/research-library/compliance"
 
 import { headlineCopiesCampaign, lessonFor, textHasAgencyResult, type DirectionRole } from "./ad-psych/lessons-data"
 import { attorneyWarnings, isAttorneyMatter } from "./attorney-compliance"
@@ -86,6 +86,7 @@ const OUTCOME: Record<string, string> = {
   real_estate: "The right house, clearly.",
   medicare: "Confidence in the choice.",
   food: "A night worth remembering.",
+  pizza: "A warm slice, close to home.",
   retail: "The good buy, kept.",
   dental: "A smile you trust.",
   pest: "A house that feels settled.",
@@ -200,6 +201,11 @@ const ROLE_COPY: Record<string, Record<DirectionRole, readonly [string, string]>
     outcome: ["A weeknight can feel special", "Tuesday can feel like an outing"],
     threat: ["Call before the weeknight is gone", "Save the table before Tuesday goes"],
     trust: ["This kitchen saves you a table", "A local table is waiting"],
+  },
+  pizza: {
+    outcome: ["A warm slice, close to home", "Tonight can be pizza"],
+    threat: ["Call before the night gets away", "Order before the evening goes"],
+    trust: ["This shop makes the pizza", "A local oven, a real pizza"],
   },
   retail: {
     outcome: ["The good buy, kept close", "The visit is the good part"],
@@ -344,7 +350,9 @@ function namedTrustLine(kind: string, businessName: string | undefined, generic:
       ? `${name} takes the call`
       : kind === "food"
         ? `${name} holds a table`
-        : kind === "roofing"
+        : kind === "pizza"
+          ? `${name} takes the order`
+          : kind === "roofing"
           ? `${name} checks this roof`
           : generic
   return line.split(/\s+/).length <= 8 ? line : generic
@@ -737,6 +745,7 @@ export function persuasionVertical(brief: CampaignBrief, vertical?: DesignVertic
   if (isNonMedicareInsurance(text)) return "insurance"
   if (vertical === "medicare_insurance" || /\bmedicare\b|\bmedicaid\b|\bsupplement\b/i.test(text)) return "medicare"
   if (/\bwe buy\b|\brather sell\b|\bsell (?:the|your) house\b/i.test(text)) return "we_buy"
+  if (/\bpizza\b/i.test(text)) return "pizza"
   if (/\brestaurant\b|\bsupper\b|\bmenu\b|\bdining\b|\bfood\b/i.test(text)) return "food"
   if (/\bcoupon\b|\bretail\b/i.test(text)) return "retail"
   if (/\bsolar\b/i.test(text)) return "solar"
@@ -747,7 +756,40 @@ export function persuasionVertical(brief: CampaignBrief, vertical?: DesignVertic
   if (/\bdental|dentist\b/i.test(text)) return "dental"
   if (/\bpest\b|\bants\b|\btermites?\b|\broach(?:es)?\b/i.test(text)) return "pest"
   if (/\blandscap|yard\b/i.test(text)) return "landscaping"
-  return "general"
+  return KIND_BY_INDUSTRY[industryForBrief(brief)] ?? "general"
+}
+
+/**
+ * Industries the short word list above does not name still have a trade.
+ * Otherwise a pizza shop, a bakery, or a salon falls through to the
+ * home-service lines ("a local crew", "before it spreads").
+ */
+const KIND_BY_INDUSTRY: Record<string, string> = {
+  "restaurants-food": "food",
+  bakery: "food",
+  roofing: "roofing",
+  plumbing: "plumbing",
+  hvac: "hvac",
+  dental: "dental",
+  "pest-control": "pest",
+  landscaping: "landscaping",
+  solar: "solar",
+  "real-estate-agents": "real_estate",
+  medicare: "medicare",
+  "home-buying": "we_buy",
+  "hair-salon": "retail",
+  "retail-grand-openings": "retail",
+  laundromat: "retail",
+  "gyms-fitness": "retail",
+  "consumer-products": "retail",
+  "auto-insurance": "insurance",
+  "home-insurance": "insurance",
+  "life-insurance": "insurance",
+}
+
+/** The customer asked not to print a QR code. */
+export function customerDeclinedQr(text: string): boolean {
+  return /\bno qr\b|\bwithout (?:a |the )?qr\b|\bdon'?t (?:use|include|put|add) (?:a |the )?qr\b/i.test(text)
 }
 
 /** A description of the result, with no benefit and no reason to call. */

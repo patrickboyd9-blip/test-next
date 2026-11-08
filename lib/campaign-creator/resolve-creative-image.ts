@@ -33,6 +33,8 @@ function availableAssetForRole(
       "match"
   )
   if (matched) return matched
+  // A known trade has an accept list. An unlabeled house or crew photo is not that trade.
+  if (expectation.accept.length > 0 && !HOME_SHELF.has(expectation.industry)) return undefined
   const neutral = eligible.find(
     (asset) =>
       matchPhotoTags({ tags: asset.tags, describedSubject: asset.tags?.join(" ") }, expectation) ===
@@ -40,6 +42,18 @@ function availableAssetForRole(
   )
   return neutral
 }
+
+const HOME_SHELF = new Set([
+  "roofing",
+  "hvac",
+  "plumbing",
+  "electrical",
+  "pest",
+  "landscaping",
+  "exterior_cleaning",
+  "local-service",
+  "construction",
+])
 
 function fromLibrary(role: ImageryRole, campaign?: CampaignBrief): ResolvedImage {
   const src = availableAssetForRole(role, campaign)?.previewSrc ?? null
