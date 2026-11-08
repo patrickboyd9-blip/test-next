@@ -21,6 +21,7 @@ import {
 import { applyAiGenerationStart, applyAiStart } from "./start-path"
 import { writeAddressSide } from "./address-side"
 import { cloneSpec } from "./spec-diff"
+import { keepSavedOffer, type StrategyGuidance } from "@/lib/strategy/advise"
 import type {
   AddressSideEdit,
   Campaign,
@@ -135,6 +136,7 @@ export interface CampaignRepository {
   approveUploadedDesign(id: string, printFileKey: string): Promise<Campaign>
   saveMailOrder(id: string, order: MailOrderRecord): Promise<Campaign>
   saveJobCreative(id: string, creative: JobCreative): Promise<Campaign>
+  saveStrategyGuidance(id: string, guidance: StrategyGuidance, options?: { explicit?: boolean }): Promise<Campaign>
 }
 
 function backfillDirectionRevisions(
@@ -525,6 +527,23 @@ class StoredCampaignRepository implements CampaignRepository {
     const campaign = await this.require(id)
     campaign.jobCreative = creative
     campaign.updatedAt = new Date().toISOString()
+    return this.write(campaign)
+  }
+
+  async saveStrategyGuidance(
+    id: string,
+    guidance: StrategyGuidance,
+    options?: { explicit?: boolean }
+  ): Promise<Campaign> {
+    const campaign = await this.require(id)
+    const previous = campaign.strategyGuidance
+    const stamp = new Date().toISOString()
+    if (previous && !options?.explicit && previous.sourceVersion !== guidance.sourceVersion) {
+      campaign.strategyGuidance = keepSavedOffer(previous, guidance)
+    } else {
+      campaign.strategyGuidance = { ...guidance, savedAt: stamp, sourcesChanged: false }
+    }
+    campaign.updatedAt = stamp
     return this.write(campaign)
   }
 }
