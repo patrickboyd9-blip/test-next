@@ -397,7 +397,23 @@ const BANKS: Record<string, SceneBank> = {
   landscaping: LANDSCAPING,
   exterior_cleaning: LANDSCAPING,
   restaurant: RESTAURANT,
-  pizza_qsr: RESTAURANT,
+  pizza_qsr: {
+    consequence: [
+      "A single slice of pizza on a plain plate, cheese and crust visible, warm light, no readable type, no logo, and no people.",
+      "One slice of pizza on a white plate, the crust and the cheese both visible, warm kitchen light, no sign and no logo.",
+      "A slice of pizza seen from above on a plain plate, no box, no menu, and no people.",
+    ],
+    crew: [
+      "Hands setting one slice of pizza on a plain plate, only the hands and the slice, warm light, no logo and no readable type.",
+      "Two hands sliding a single slice of pizza onto a plate, the slice is the subject, no logo.",
+      "A hand holding one slice of pizza above a plain plate, warm light, no uniform logo and no readable type.",
+    ],
+    neighborhood: [
+      "A single slice of pizza on a plain plate, cheese and crust visible, warm light, no readable type, no logo, and no people.",
+      "One slice of pizza on a plate at a small table, warm light from a window, no readable sign and no logo.",
+      "A slice of pizza on a plain plate, close and appetizing, no storefront type and no people.",
+    ],
+  },
   dental: DENTAL,
   med_spa: DENTAL,
   auto_insurance: AUTO_INSURANCE,
