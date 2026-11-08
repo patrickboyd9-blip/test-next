@@ -94,7 +94,7 @@ const OUTCOME: Record<string, string> = {
   solar: "Power that stays quiet.",
   legal: "A clear next step.",
   insurance: "A quote you can read.",
-  general: "The result you wanted.",
+  general: "Your offer, in your words.",
 }
 
 export function selectPersuasion(input: PersuasionContext): PersuasionPlan {
@@ -243,9 +243,9 @@ const ROLE_COPY: Record<string, Record<DirectionRole, readonly [string, string]>
     trust: ["A local agent explains the quote", "This agent explains the quote"],
   },
   general: {
-    outcome: ["The result you wanted", "This can be handled"],
-    threat: ["Call before a small problem grows", "Book a look before it grows"],
-    trust: ["A local crew takes the next step", "This crew takes the next step"],
+    outcome: ["Your offer, in your words", "The offer you asked for"],
+    threat: ["Call while this offer is open", "One clear way to respond"],
+    trust: ["The business name is the proof", "Your name on the card"],
   },
 }
 

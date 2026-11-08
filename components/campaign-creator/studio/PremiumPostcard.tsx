@@ -298,7 +298,7 @@ function Fitted({ plan, text }: { plan: PostcardFacePlan; text: PostcardFacePlan
         fontFamily: family,
         fontWeight: text.font === "display" ? 800 : 600,
         fontSize: pointsToCqw(text.fontPt, plan.size),
-        lineHeight: text.role === "offer" ? 0.8 : lineHeightFor(text.font),
+        lineHeight: lineHeightFor(text.font),
         letterSpacing: text.font === "display" ? "-0.03em" : "0",
         textAlign: text.align,
         textShadow: plan.shapes.some((shape) => shape.role === "local-scrim")
