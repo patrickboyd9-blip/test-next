@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { notFound } from "next/navigation"
 
 import { CampaignCreatorView } from "@/components/campaign-creator/CampaignCreatorView"
@@ -52,6 +53,9 @@ export default async function CampaignPage({
         <span className="text-sm font-medium text-muted-foreground">
           Campaign Creator
         </span>
+        <Link href={`/app/campaigns/${id}/order`} className="text-sm text-muted-foreground underline">
+          Review list and checkout
+        </Link>
       </header>
       <CampaignCreatorView
         initialCampaign={campaign}
