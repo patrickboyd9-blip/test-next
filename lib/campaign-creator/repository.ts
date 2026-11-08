@@ -32,6 +32,7 @@ import type {
   CreativeRevision,
   CreativeSpec,
   DesignSource,
+  JobCreative,
   UploadedDesign,
   UploadedDesignReview,
 } from "./types"
@@ -133,6 +134,7 @@ export interface CampaignRepository {
   saveUploadedDesignReview(id: string, review: UploadedDesignReview): Promise<Campaign>
   approveUploadedDesign(id: string, printFileKey: string): Promise<Campaign>
   saveMailOrder(id: string, order: MailOrderRecord): Promise<Campaign>
+  saveJobCreative(id: string, creative: JobCreative): Promise<Campaign>
 }
 
 function backfillDirectionRevisions(
@@ -516,6 +518,13 @@ class StoredCampaignRepository implements CampaignRepository {
     }
     campaign.mailOrder = order
     campaign.updatedAt = order.updatedAt
+    return this.write(campaign)
+  }
+
+  async saveJobCreative(id: string, creative: JobCreative): Promise<Campaign> {
+    const campaign = await this.require(id)
+    campaign.jobCreative = creative
+    campaign.updatedAt = new Date().toISOString()
     return this.write(campaign)
   }
 }
