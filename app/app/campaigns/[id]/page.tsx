@@ -53,6 +53,9 @@ export default async function CampaignPage({
         <span className="text-sm font-medium text-muted-foreground">
           Campaign Creator
         </span>
+        <Link href={`/app/campaigns/${id}/job-photos`} className="text-sm text-muted-foreground underline">
+          Job photos
+        </Link>
         <Link href={`/app/campaigns/${id}/order`} className="text-sm text-muted-foreground underline">
           Review list and checkout
         </Link>
