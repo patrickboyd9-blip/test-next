@@ -18,6 +18,7 @@ export const ROOFING_PRO_TEMPLATE_IDS = [
   "roof_minimal",
   "roof_premium",
   "roof_fade_offer",
+  "roof_bold",
 ] as const
 
 export type RoofingProTemplateId = (typeof ROOFING_PRO_TEMPLATE_IDS)[number]
@@ -139,6 +140,14 @@ export const ROOFING_PRO_META: Record<RoofingProTemplateId, RoofingProMeta> = {
     name: "Quiet luxury",
     summary: "A wide roof across the top and a quiet paper field for a short headline.",
     pairing: "letter",
+    photoSlots: 1,
+    offerLed: false,
+  },
+  roof_bold: {
+    id: "roof_bold",
+    name: "Bold column",
+    summary: "A large two-color headline on a dark column, the job photo beside it, and a full-width offer bar. The dollar is bigger than the rest of the offer.",
+    pairing: "signal",
     photoSlots: 1,
     offerLed: false,
   },

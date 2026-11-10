@@ -51,6 +51,7 @@ export const TEMPLATE_META: Record<PostcardTemplateId, TemplateMeta> = {
   roof_seasonal: { id: "roof_seasonal", pairing: "signal", photoSlots: 1, label: ROOFING_PRO_META.roof_seasonal.name },
   roof_minimal: { id: "roof_minimal", pairing: "trade", photoSlots: 1, label: ROOFING_PRO_META.roof_minimal.name },
   roof_premium: { id: "roof_premium", pairing: "letter", photoSlots: 1, label: ROOFING_PRO_META.roof_premium.name },
+  roof_bold: { id: "roof_bold", pairing: "signal", photoSlots: 1, label: ROOFING_PRO_META.roof_bold.name },
 }
 
 /**
