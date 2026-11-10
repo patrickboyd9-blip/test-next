@@ -44,6 +44,7 @@ import {
   type RenderedPostcardPdf,
 } from "@/lib/print-spec/render-campaign-postcard-pdf"
 import { canvasRectToPdf, type PostcardGeometry } from "@/lib/print-spec/postcard-5x8-print-spec"
+import { paintBarcodeClearZone } from "@/lib/print-spec/barcode-clear-zone"
 import { paintCustomerLogo } from "@/lib/print-spec/customer-logo-paint"
 import { upscaleToPrintCanvas } from "@/lib/print-spec/upscale-print-image"
 
@@ -224,6 +225,7 @@ function drawPlanBack(
   for (const shape of plan.shapes.filter((item) => !under(item.role))) drawShape(page, spec, plan, shape)
   for (const line of plan.texts) drawFitted(page, spec, line, display, text)
   if (plan.lockup) drawFrontLockup(page, spec, plan, qrPayload, display, strong, text)
+  paintBarcodeClearZone(page, spec)
 }
 
 function drawFront(
@@ -336,6 +338,7 @@ function drawBack(
       cursor -= 3
     }
   }
+  paintBarcodeClearZone(page, spec)
 }
 
 function drawPhoto(

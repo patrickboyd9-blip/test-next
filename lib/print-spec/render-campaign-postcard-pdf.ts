@@ -10,6 +10,7 @@ import { buildQrMatrix, QR_QUIET_MODULES } from "../campaign-creator/studio-qr"
 import type { AddressSideEdit } from "../campaign-creator/types"
 
 import { addressSideContentRect, rectsOverlap } from "./address-side-content"
+import { paintBarcodeClearZone } from "./barcode-clear-zone"
 import type { InchesRect } from "./postcard-5x8-print-spec"
 import {
   buildPostcard5x8PrintSpec,
@@ -640,6 +641,7 @@ function drawBack(
       })
     }
   }
+  paintBarcodeClearZone(page, spec)
 }
 
 function fitTypeSize(text: string, font: PDFFont, start: number, width: number): number {
