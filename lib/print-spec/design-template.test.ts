@@ -1,6 +1,7 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
 
+import { CLICK2MAIL_RESERVED_POINTS } from "./click2mail-keep-outs"
 import { decodeRaster } from "../bring-your-own-design/decode-raster"
 import { designTemplate } from "./design-templates"
 import { buildPostcard5x8PrintSpec } from "./postcard-5x8-print-spec"
@@ -24,12 +25,13 @@ test("6x9 template geometry is the full bleed page and the measured keep-out", (
   const strip = spec.keepOuts.find((item) => item.id === "barcode_strip")
   assert.ok(panel)
   assert.ok(strip)
-  assert.equal(panel.trim.widthInches, 3.656)
-  assert.equal(panel.trim.heightInches, 2.948)
-  assert.ok(Math.abs(panel.trim.xInches - (9 - 3.656)) < 1e-9)
-  assert.ok(Math.abs(panel.trim.yInches - (6 - 2.948)) < 1e-9)
-  assert.equal(strip.trim.widthInches, 6)
-  assert.equal(strip.trim.heightInches, 0.625)
+  const want = CLICK2MAIL_RESERVED_POINTS["6x9"]
+  assert.equal(panel.pdf.widthPoints, want.mailingPanel.widthPoints)
+  assert.equal(panel.pdf.heightPoints, want.mailingPanel.heightPoints)
+  assert.ok(Math.abs(panel.trim.xInches - (9 - want.mailingPanel.widthPoints / 72)) < 1e-9)
+  assert.ok(Math.abs(panel.trim.yInches - (6 - want.mailingPanel.heightPoints / 72)) < 1e-9)
+  assert.equal(strip.pdf.widthPoints, want.barcodeClearZone.widthPoints)
+  assert.equal(strip.pdf.heightPoints, want.barcodeClearZone.heightPoints)
   assert.equal(panel.canvas.xInches, panel.trim.xInches + 0.25)
   assert.equal(spec.pixelSize.widthPx, 2850)
   assert.equal(spec.pixelSize.heightPx, 1950)

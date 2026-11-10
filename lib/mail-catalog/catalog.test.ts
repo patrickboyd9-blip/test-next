@@ -1,6 +1,8 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
 
+import { click2MailKeepOuts, CLICK2MAIL_RESERVED_POINTS } from "@/lib/print-spec/click2mail-keep-outs"
+
 import { getMailPiece, MAIL_PIECE_CATALOG } from "./catalog"
 import { POSTCARD_5X8_V1 } from "./pieces/postcard-5x8"
 
@@ -51,27 +53,17 @@ test("postcard_5x8 v1 keep-out is trim-origin double-sided address-face geometry
   assert.equal(entry.creativeCanvas.addressFace, "back")
   assert.equal(entry.creativeCanvas.recommendedSafeTextInsetInches, 0.25)
   assert.equal(keepOut.origin, "trim_top_left")
-  assert.deepEqual(keepOut.rectangles, [
-    {
-      id: "mailing_panel",
-      xInches: 4.3125,
-      yInches: 2.125,
-      widthInches: 3.6875,
-      heightInches: 2.875,
-    },
-    {
-      id: "barcode_strip",
-      xInches: 2.0,
-      yInches: 4.375,
-      widthInches: 6.0,
-      heightInches: 0.625,
-    },
-  ])
+  assert.deepEqual(keepOut.rectangles, click2MailKeepOuts("5x8", 8, 5))
 
   const mailingPanel = keepOut.rectangles.find((rect) => rect.id === "mailing_panel")
   const barcodeStrip = keepOut.rectangles.find((rect) => rect.id === "barcode_strip")
   assert.ok(mailingPanel)
   assert.ok(barcodeStrip)
+  const want = CLICK2MAIL_RESERVED_POINTS["5x8"]
+  assert.equal(mailingPanel.widthInches * 72, want.mailingPanel.widthPoints)
+  assert.equal(mailingPanel.heightInches * 72, want.mailingPanel.heightPoints)
+  assert.equal(barcodeStrip.widthInches * 72, want.barcodeClearZone.widthPoints)
+  assert.equal(barcodeStrip.heightInches * 72, want.barcodeClearZone.heightPoints)
   assert.equal(mailingPanel.xInches + mailingPanel.widthInches, 8)
   assert.equal(mailingPanel.yInches + mailingPanel.heightInches, 5)
   assert.equal(barcodeStrip.xInches + barcodeStrip.widthInches, 8)
