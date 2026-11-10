@@ -189,3 +189,89 @@ test("a refinement keeps the chosen pro template", () => {
   })
   assert.equal(switched.layoutHints?.templateId, "roof_coupon")
 })
+
+test("the bold column keeps a long name and a long headline without clipping", () => {
+  for (const size of SIZES) {
+    const card = composeRoofingProCard({
+      templateId: "roof_bold",
+      size,
+      spec: {
+        headline: "Your roof may already be letting the weather into the rooms you use every night",
+        offer: "$750 off a new metal roof",
+        phone: "(253) 555-0139",
+        website: "https://cascaderidgeroofing.example",
+      },
+      businessName: "Cascade Ridge Premium Residential Roofing Specialists",
+      photoSubject: "person",
+    })
+    assert.equal(card.front.overflows, false, size)
+    assert.equal(card.back.overflows, false, `${size} back`)
+    const spoken = [...card.front.texts, ...card.back.texts].map((text) => text.text).join(" ")
+    assert.match(spoken, /Cascade Ridge Premium Residential Roofing Specialists/)
+    assert.match(spoken, /letting the weather into the rooms you use every night/)
+    assert.match(spoken, /\$750/)
+    assert.match(spoken, /off a new metal roof/)
+    const figure = card.front.texts.find((text) => text.role === "offer")
+    const rest = card.front.texts.filter((text) => text.role === "offer")[1]
+    const headline = card.front.texts.find((text) => text.role === "headline")
+    assert.ok(figure && rest && headline)
+    assert.ok(figure.fontPt > rest.fontPt, `${size} dollar is larger than the offer rest`)
+    assert.ok(headline.fontPt > figure.fontPt, `${size} headline stays above the dollar`)
+    assert.equal(card.front.lockup?.qrInches, 0)
+    assert.equal(card.front.lockup?.qrLabel, "")
+    assert.equal(card.front.photos.length, 1)
+    const slot = card.front.photos[0]!
+    if (slot.focal && slot.focal.y < 0.3) assert.equal(headIsClipped(slot), false)
+  }
+})
+
+test("bold cards do not invent a QR, a license, or another trade's words", () => {
+  const pizza = composeRoofingProCard({
+    templateId: "roof_bold",
+    trade: "restaurants-food",
+    spec: {
+      headline: "A warm slice, close to home.",
+      offer: "Free drink with physical redemption of the mailer",
+      phone: "111-222-3344",
+    },
+    businessName: "JP's Pizza",
+    photoSubject: "scene",
+  })
+  const pizzaText = [...pizza.front.texts, ...pizza.back.texts, pizza.front.lockup?.phone, pizza.front.lockup?.website]
+    .map((text) => text?.text ?? "")
+    .join(" ")
+  assert.equal(pizza.front.overflows, false)
+  assert.equal(pizza.front.lockup?.qrInches, 0)
+  assert.match(pizzaText, /Free drink|FREE/)
+  assert.match(pizzaText, /physical redemption of the mailer/)
+  assert.match(pizzaText, /111-222-3344/)
+  assert.doesNotMatch(pizzaText, /shingle|roof|inspection|crew|CSLB/i)
+  assert.equal(pizza.front.palette.id, "roofing")
+  assert.notEqual(pizza.front.palette.field, composeRoofingProCard({
+    templateId: "roof_bold",
+    spec: { headline: "A roof that stays dry", offer: "$400 off", phone: "(619) 555-0148" },
+    businessName: "Northline Roofing",
+  }).front.palette.field)
+
+  const dental = composeRoofingProCard({
+    templateId: "roof_bold",
+    trade: "dental",
+    spec: {
+      headline: "Book the checkup you keep putting off.",
+      offer: "$99 new patient exam, cleaning and x-rays",
+      phone: "(919) 555-0163",
+      website: "https://brightsidedental.example",
+    },
+    businessName: "Brightside Family Dental",
+    photoSubject: "person",
+  })
+  const dentalText = [...dental.front.texts, ...dental.back.texts].map((text) => text.text).join(" ")
+  assert.equal(dental.front.overflows, false)
+  assert.equal(dental.back.overflows, false)
+  assert.match(dentalText, /Book the checkup you keep putting off/)
+  assert.match(dentalText, /\$99/)
+  assert.match(dentalText, /cleaning and x-rays/)
+  assert.doesNotMatch(dentalText, /shingle|roof replacement|Licensed|CSLB/i)
+  assert.equal(dental.front.lockup?.qrInches, 0)
+  assert.equal(dental.front.palette.field, "#0e4f5c")
+})
