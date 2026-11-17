@@ -178,6 +178,7 @@
   height: 80vh;
 }
 
+/* Classic comet streak. Kept so COMET_STYLE=classic can restore it unchanged. */
 .mm-comet {
   position: absolute;
   left: -8%;
@@ -198,6 +199,14 @@
   top: 12.6rem;
   width: min(54vw, 520px);
   animation: mm-comet-arrive 2.6s cubic-bezier(0.16, 0.7, 0.2, 1) both;
+}
+
+.mm-comet-realistic {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
 .mm-flash {

@@ -1,9 +1,11 @@
 /**
  * Cinematic night sky. Stars are CSS. The limb is a dark planet with a soft atmosphere.
- * The comet is a thin light streak, not an illustrated object.
+ * The comet is chosen in comet.tsx. The classic streak stays available.
  */
 
 import Image from "next/image"
+
+import { SkyComet } from "./comet"
 
 const FAR = [
   [4, 8], [9, 18], [15, 6], [21, 22], [28, 11], [34, 4], [40, 16], [47, 9],
@@ -47,7 +49,7 @@ export function SpaceSky({
         <div className="mm-limb-air" />
         <div className="mm-limb-sun" />
       </div>
-      {hero || arrival ? <div className={arrival ? "mm-comet mm-comet-arrive" : "mm-comet"} /> : null}
+      {hero || arrival ? <SkyComet arrival={arrival} /> : null}
       {arrival ? <div className="mm-flash" /> : null}
       {box ? <Postbox scale={box} /> : null}
     </div>
