@@ -1,11 +1,14 @@
 "use server"
 
+import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 
 import { CampaignAccessError, requireOwnedCampaign } from "@/lib/auth/campaign-access"
 import { getSession } from "@/lib/auth/session"
 
 import { noteForSession } from "@/lib/ledger/note"
+
+import { finishMailAction, startApprovedCheckout } from "@/lib/ops/mail-flow"
 
 import { approvalCovers, createApproval } from "./approval"
 import { getJourneyStore, jobFromApproval } from "./job"
@@ -105,5 +108,42 @@ export async function startCheckoutAction(formData: FormData): Promise<void> {
     amountCents: quote.quote.totalCents,
     note: "Checkout recorded. Nothing was charged and nothing was mailed.",
   })
+  await finishMailAction({
+    actorId: session.userId,
+    action: "approve",
+    subjectId: campaignId,
+    before: null,
+    after: { approved: true, postageOnly: false, amountCents: quote.quote.totalCents },
+  })
   redirect(`/app/campaigns/${campaignId}/order`)
+}
+
+export async function payFullPriceAction(formData: FormData): Promise<void> {
+  const session = await getSession()
+  if (!session) throw new CampaignAccessError(401, "Sign in required.")
+  const campaignId = String(formData.get("campaignId") ?? "")
+  const jobId = String(formData.get("jobId") ?? "")
+  await requireOwnedCampaign(campaignId)
+  const job = await getJourneyStore().getJob(jobId)
+  if (!job || job.ownerId !== session.userId || job.campaignId !== campaignId || job.state !== "awaiting_payment") {
+    redirect(`/app/campaigns/${campaignId}/order?checkout=closed`)
+  }
+  const headerList = await headers()
+  const origin = headerList.get("origin") ?? ""
+  if (!origin) redirect(`/app/campaigns/${campaignId}/order?checkout=closed`)
+  let url = ""
+  try {
+    const checkout = await startApprovedCheckout({
+      actorId: session.userId,
+      subjectId: campaignId,
+      jobId: job.id,
+      pieceCount: job.listCount,
+      amountCents: job.amountCents,
+      origin,
+    })
+    url = checkout.url
+  } catch {
+    redirect(`/app/campaigns/${campaignId}/order?checkout=closed`)
+  }
+  redirect(url)
 }

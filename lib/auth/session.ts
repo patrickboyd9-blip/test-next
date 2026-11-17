@@ -51,9 +51,29 @@ export async function getSession(): Promise<AccountSession | null> {
   const scoped = storage.getStore()
   if (scoped !== undefined) return scoped
   if (previewDemoAllowed()) return previewDemoSession()
-  if (process.env.NODE_ENV === "production") return readCookieSession()
-  if (process.env.AUTH_MODE === "dev-fixture") return devFixture()
+  if (process.env.NODE_ENV !== "production" && process.env.AUTH_MODE === "dev-fixture") return devFixture()
+  const signedIn = await readProviderSession()
+  if (signedIn) return signedIn
   return readCookieSession()
+}
+
+async function readProviderSession(): Promise<AccountSession | null> {
+  if (!process.env.AUTH_SECRET) return null
+  try {
+    const { auth } = await import("@/auth")
+    const session = await auth()
+    const user = session?.user
+    if (!user?.id || !user.email) return null
+    return {
+      userId: user.id,
+      email: user.email,
+      name: user.name ?? "",
+      businessName: user.businessName ?? "",
+      fixture: false,
+    }
+  } catch {
+    return null
+  }
 }
 
 export function signSessionToken(session: AccountSession, secret: string, now = Date.now()): string {
