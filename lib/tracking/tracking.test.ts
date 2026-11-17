@@ -74,3 +74,20 @@ test("each recipient gets a distinct redirect, and a holdout code does not scan"
   const live = assigned[0]?.url.split("/r/")[1] ?? ""
   assert.equal(recordScan(live)?.destination, "https://shop.example/book")
 })
+
+test("another account does not see this campaign's scans", () => {
+  resetTracking()
+  issueRecipientCode({
+    campaignId: "camp-owned",
+    recipientId: "r-1",
+    destination: "https://shop.example/book",
+    ownerId: "ada@example.com",
+    code: "owned01",
+  })
+  recordScan("owned01", "2026-11-17T12:00:00.000Z")
+  noteResults("camp-owned", { calls: 1, ownerId: "ada@example.com" })
+  assert.equal(resultsFor("camp-owned", "ada@example.com").scans, 1)
+  assert.equal(resultsFor("camp-owned", "ada@example.com").calls, 1)
+  assert.equal(resultsFor("camp-owned", "bob@example.com").scans, null)
+  assert.equal(resultsFor("camp-owned", "bob@example.com").calls, null)
+})

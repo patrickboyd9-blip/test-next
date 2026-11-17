@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 
+import { AccountNotice } from "@/components/auth/AccountNotice";
 import { AskComet } from "@/components/assistant/AskComet";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -27,6 +28,9 @@ export default async function AppLayout({
     <SidebarProvider>
       <AppSidebar account={account} />
       <SidebarInset>
+        <Suspense fallback={null}>
+          <AccountNotice />
+        </Suspense>
         {children}
         <Suspense fallback={null}>
           <AskComet />

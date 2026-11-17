@@ -12,6 +12,8 @@ export interface RecipientCode {
   controlGroup: boolean
   /** Design-only. No phone provider is called. */
   trackingPhone: string | null
+  /** Account that issued the code. Empty on older rows. */
+  ownerId?: string
 }
 
 export interface ScanEvent {
@@ -71,6 +73,7 @@ export function issueRecipientCode(input: {
   controlGroup?: boolean
   trackingPhone?: string | null
   code?: string
+  ownerId?: string
 }): RecipientCode {
   const code = input.code ?? mintCode()
   const record: RecipientCode = {
@@ -80,6 +83,7 @@ export function issueRecipientCode(input: {
     destination: input.destination,
     controlGroup: input.controlGroup === true,
     trackingPhone: input.trackingPhone ?? null,
+    ownerId: input.ownerId,
   }
   codes.set(code, record)
   return record
@@ -99,15 +103,30 @@ export function recordScan(code: string, at = new Date().toISOString()): { desti
 
 export function noteResults(
   campaignId: string,
-  entry: { calls?: number; bookings?: number; revenue?: number; piecesMailed?: number }
+  entry: { calls?: number; bookings?: number; revenue?: number; piecesMailed?: number; ownerId?: string }
 ): void {
-  manual.set(campaignId, { ...manual.get(campaignId), ...entry })
+  const key = entry.ownerId ? `${entry.ownerId}:${campaignId}` : campaignId
+  const rest = {
+    calls: entry.calls,
+    bookings: entry.bookings,
+    revenue: entry.revenue,
+    piecesMailed: entry.piecesMailed,
+  }
+  manual.set(key, { ...manual.get(key), ...rest })
 }
 
-export function resultsFor(campaignId: string): ResultsLedger {
-  const rows = scans.filter((scan) => scan.campaignId === campaignId)
+function scanVisible(scan: ScanEvent, ownerId?: string): boolean {
+  if (scan.campaignId === "") return false
+  const record = codes.get(scan.code)
+  if (!record || record.campaignId !== scan.campaignId) return false
+  if (ownerId && record.ownerId && record.ownerId !== ownerId) return false
+  return true
+}
+
+export function resultsFor(campaignId: string, ownerId?: string): ResultsLedger {
+  const rows = scans.filter((scan) => scan.campaignId === campaignId && scanVisible(scan, ownerId))
   const unique = new Set(rows.map((scan) => scan.recipientId))
-  const noted = manual.get(campaignId)
+  const noted = manual.get(ownerId ? `${ownerId}:${campaignId}` : campaignId) ?? (ownerId ? undefined : manual.get(campaignId))
   const pieces = noted?.piecesMailed
   const scanCount = rows.length
   return {
@@ -126,8 +145,8 @@ export function redirectUrl(origin: string, code: string): string {
   return `${origin.replace(/\/$/, "")}/r/${code}`
 }
 
-export function codesForCampaign(campaignId: string): readonly RecipientCode[] {
-  return [...codes.values()].filter((record) => record.campaignId === campaignId)
+export function codesForCampaign(campaignId: string, ownerId?: string): readonly RecipientCode[] {
+  return [...codes.values()].filter((record) => record.campaignId === campaignId && (!ownerId || !record.ownerId || record.ownerId === ownerId))
 }
 
 /** One redirect per recipient. A holdout is stored and is not scannable. No call is placed. */
@@ -137,6 +156,7 @@ export function assignRecipientCodes(input: {
   destination: string
   recipients: { id: string; controlGroup?: boolean }[]
   trackingPhone?: string | null
+  ownerId?: string
 }): { recipientId: string; url: string; controlGroup: boolean }[] {
   return input.recipients.map((recipient, index) => {
     const record = issueRecipientCode({
@@ -145,6 +165,7 @@ export function assignRecipientCodes(input: {
       destination: input.destination,
       controlGroup: recipient.controlGroup,
       trackingPhone: input.trackingPhone,
+      ownerId: input.ownerId,
       code: freshCode(seedFor(input.campaignId, index)),
     })
     return {

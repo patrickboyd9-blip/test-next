@@ -2,6 +2,7 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { getSession } from "@/lib/auth/session"
 import { getCampaign } from "@/lib/campaign-creator/actions"
 import { codesForCampaign, resultsFor } from "@/lib/tracking/ledger"
 import { NOT_RECORDED, presentResults } from "@/lib/tracking/present"
@@ -13,8 +14,9 @@ export default async function ResultsPage({ params }: { params: Promise<{ id: st
   const { id } = await params
   const campaign = await getCampaign(id)
   if (!campaign) notFound()
-  const rows = presentResults(resultsFor(id))
-  const codes = codesForCampaign(id)
+  const session = await getSession()
+  const rows = presentResults(resultsFor(id, session?.userId))
+  const codes = codesForCampaign(id, session?.userId)
   const phone = codes.find((code) => code.trackingPhone)?.trackingPhone ?? null
 
   return (

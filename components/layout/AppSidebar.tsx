@@ -1,6 +1,8 @@
 "use client"
 
 import Link from "next/link"
+
+import { signOutAction } from "@/lib/auth/actions"
 import { usePathname } from "next/navigation"
 import { LayoutDashboard, LayoutTemplate, Megaphone, PenLine, Sparkles } from "lucide-react"
 
@@ -131,6 +133,17 @@ export function AppSidebar({
             <span className="truncate text-xs text-sidebar-foreground/70">
               {account?.detail ?? "No account"}
             </span>
+            {account ? (
+              <form action={signOutAction}>
+                <button type="submit" className="text-left text-xs text-[#7ee7ff] underline">
+                  Sign out
+                </button>
+              </form>
+            ) : (
+              <Link href="/sign-in" className="text-xs text-[#7ee7ff] underline">
+                Sign in
+              </Link>
+            )}
           </div>
         </div>
       </SidebarFooter>

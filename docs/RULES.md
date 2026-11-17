@@ -10,7 +10,7 @@ Each rule has a test that CI runs. A failure means the rule was broken.
 | Address boxes stay 265.5×208 pt on 5×8 and 263×213 pt on 6×9. Barcode zones stay 433×46 pt and 432×47 pt, anchored from the bottom-right of the trim. | `lib/ops/rules.test.ts`, `lib/print-spec/barcode-clear-zone.test.ts` |
 | Research photographs are not committed. | `lib/ops/rules.test.ts` |
 | Private keys and live payment secrets are not committed. | `lib/ops/rules.test.ts` |
-| One account cannot read or write another account's campaign. | `lib/auth/account-boundary.test.ts` |
+| One account cannot read or write another account's campaign. Sign-in and sign-up slow down after a short burst. A Google sign-in links only a verified email. Password reset and verification do not crash when email is not configured. | `lib/auth/account-boundary.test.ts`, `lib/auth/accounts.test.ts` |
 | AI and mail actions slow down after a short burst. | `lib/ops/rules.test.ts` |
 | Create, proof, price, approve, send, charge, and a scan are recorded in an append-only log. | `lib/ops/audit.ts`, `lib/ops/mail-flow.ts`, `lib/ops/rules.test.ts` |
 | A mailer QR sits outside the address panel and the barcode clear zone. A scan stores time, campaign, and recipient id, then forwards. Empty results stay empty. | `lib/tracking/tracking.test.ts` |
