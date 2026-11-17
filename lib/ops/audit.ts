@@ -8,7 +8,7 @@ import { randomUUID } from "node:crypto"
 
 import { createNeonExecutor, postgresUrl, type SqlExecutor } from "@/lib/storage/document-store"
 
-export const AUDIT_ACTIONS = ["create", "proof", "price", "approve", "send", "charge"] as const
+export const AUDIT_ACTIONS = ["create", "proof", "price", "approve", "send", "charge", "scan"] as const
 export type AuditAction = (typeof AUDIT_ACTIONS)[number]
 
 export interface AuditEvent {
