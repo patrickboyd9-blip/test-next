@@ -8,14 +8,16 @@ export function CockpitFrame({
   children,
   className,
   hero = false,
+  arrival = false,
 }: {
   children: ReactNode
   className?: string
   hero?: boolean
+  arrival?: boolean
 }) {
   return (
     <div className={cn("relative min-h-svh overflow-hidden bg-[#05080f] text-[#e7f2fb]", className)}>
-      <SpaceSky hero={hero} />
+      <SpaceSky hero={hero} arrival={arrival} />
       <div className="relative pb-16">{children}</div>
     </div>
   )

@@ -41,7 +41,6 @@ import { ProofTray } from "./ProofCard"
 import { CometMark } from "@/components/assistant/CometMark"
 import { ASSISTANT_NAME } from "@/lib/assistant/comet"
 
-import { Horizon } from "./sky"
 import { CockpitFrame, Eyebrow, fieldClass, Panel } from "./ui"
 
 const STEP_LABEL: Record<ComposeStep, string> = {
@@ -243,12 +242,7 @@ export function ComposeMailer({
         ) : null}
 
         {step === "what" && path === null ? (
-          <div className="relative min-h-[220px] space-y-2 sm:min-h-[280px]">
-            <Horizon mode="hero" />
-            <div className="relative z-10">
-              <StartChoices onChoose={setPath} />
-            </div>
-          </div>
+          <StartChoices onChoose={setPath} />
         ) : null}
 
         {step === "what" && path === "team" ? (

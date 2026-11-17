@@ -4,14 +4,16 @@
  */
 
 const FAR = [
-  [8, 12], [18, 28], [31, 8], [44, 22], [57, 6], [69, 18], [82, 9], [91, 24],
-  [14, 46], [27, 38], [48, 44], [63, 36], [77, 48], [88, 40],
+  [4, 8], [9, 18], [15, 6], [21, 22], [28, 11], [34, 4], [40, 16], [47, 9],
+  [53, 20], [60, 7], [66, 15], [73, 5], [79, 19], [86, 10], [93, 17], [97, 6],
+  [7, 32], [18, 38], [30, 30], [42, 36], [55, 28], [68, 34], [81, 29], [94, 37],
 ]
 const MID = [
-  [12, 16], [36, 11], [52, 27], [71, 14], [86, 32], [22, 58], [46, 52], [64, 62], [90, 56],
+  [6, 14], [17, 8], [29, 18], [41, 12], [54, 22], [66, 10], [78, 16], [90, 8],
+  [12, 44], [33, 40], [58, 46], [76, 38], [95, 42],
 ]
 const NEAR = [
-  [16, 20], [41, 34], [58, 18], [74, 42], [28, 70], [84, 68],
+  [11, 12], [24, 26], [39, 10], [52, 24], [67, 14], [81, 22], [93, 12], [20, 52], [48, 50], [72, 48],
 ]
 
 function starLayer(points: number[][], size: number, alpha: number) {
@@ -20,26 +22,17 @@ function starLayer(points: number[][], size: number, alpha: number) {
     .join(",")
 }
 
-export function SpaceSky({ hero = false }: { hero?: boolean }) {
+export function SpaceSky({ hero = false, arrival = false }: { hero?: boolean; arrival?: boolean }) {
+  const tone = arrival ? "mm-sky mm-sky-hero mm-sky-arrival" : hero ? "mm-sky mm-sky-hero" : "mm-sky"
   return (
-    <div aria-hidden className={hero ? "mm-sky mm-sky-hero" : "mm-sky"}>
+    <div aria-hidden className={tone}>
       <div className="mm-sky-wash" />
-      <div className="mm-stars mm-stars-far" style={{ backgroundImage: starLayer(FAR, 1, 0.45) }} />
-      <div className="mm-stars mm-stars-mid" style={{ backgroundImage: starLayer(MID, 1.4, 0.55) }} />
-      <div className="mm-stars mm-stars-near" style={{ backgroundImage: starLayer(NEAR, 1.8, 0.7) }} />
+      <div className="mm-stars mm-stars-far" style={{ backgroundImage: starLayer(FAR, 1.1, 0.5) }} />
+      <div className="mm-stars mm-stars-mid" style={{ backgroundImage: starLayer(MID, 1.5, 0.62) }} />
+      <div className="mm-stars mm-stars-near" style={{ backgroundImage: starLayer(NEAR, 2, 0.78) }} />
       <div className="mm-limb" />
-      {hero ? <div className="mm-comet" /> : null}
-    </div>
-  )
-}
-
-/** Stronger horizon for the home and start heroes, and the send confirmation. */
-export function Horizon({ mode }: { mode: "hero" | "arrive" }) {
-  return (
-    <div aria-hidden className={mode === "arrive" ? "mm-horizon mm-horizon-arrive" : "mm-horizon"}>
-      <div className="mm-limb" />
-      <div className={mode === "arrive" ? "mm-comet mm-comet-arrive" : "mm-comet"} />
-      {mode === "arrive" ? <div className="mm-flash" /> : null}
+      {hero || arrival ? <div className={arrival ? "mm-comet mm-comet-arrive" : "mm-comet"} /> : null}
+      {arrival ? <div className="mm-flash" /> : null}
     </div>
   )
 }

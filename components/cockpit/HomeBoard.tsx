@@ -4,7 +4,6 @@ import { CometMark } from "@/components/assistant/CometMark"
 import { cometHomeNote } from "@/lib/assistant/home-note"
 import { SAMPLE_MAILERS, STATUS_LABEL, statusNeedsYou } from "@/lib/mailer-compose/flow"
 
-import { Horizon } from "./sky"
 import { Eyebrow, Panel } from "./ui"
 
 export function HomeBoard({ shop, sample = true }: { shop: string; sample?: boolean }) {
@@ -12,8 +11,7 @@ export function HomeBoard({ shop, sample = true }: { shop: string; sample?: bool
   const comet = cometHomeNote(SAMPLE_MAILERS, sample)
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-8 sm:px-6 sm:py-12">
-        <div className="relative min-h-[340px] space-y-5 sm:min-h-[460px]">
-          <Horizon mode="hero" />
+        <div className="relative space-y-5">
           <div className="relative z-10">
             <Eyebrow>How&apos;s my mail doing?</Eyebrow>
           </div>

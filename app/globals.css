@@ -83,8 +83,8 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 50% 42% at 100% 0%, rgba(70, 140, 160, 0.14), transparent 62%),
-    linear-gradient(180deg, #070c16 0%, #05080f 48%, #03060c 100%);
+    radial-gradient(ellipse 42% 36% at 92% 8%, rgba(46, 120, 140, 0.2), transparent 68%),
+    linear-gradient(180deg, #070c16 0%, #05080f 46%, #03060c 100%);
 }
 
 .mm-stars {
@@ -99,71 +99,66 @@
 
 .mm-limb {
   position: absolute;
-  left: -20%;
-  right: -20%;
-  bottom: -46%;
-  height: 58%;
+  left: 50%;
+  width: 180%;
+  height: 64vh;
+  bottom: -46vh;
+  transform: translateX(-50%);
   border-radius: 50%;
-  background: radial-gradient(ellipse at 50% 0%, rgba(18, 48, 62, 0.55) 0%, rgba(5, 10, 18, 0.2) 36%, transparent 58%);
+  background: radial-gradient(ellipse at 50% 0%, rgba(8, 22, 32, 0.2) 0%, rgba(4, 10, 16, 0.85) 28%, #03060c 62%);
   box-shadow:
-    0 -1px 0 rgba(190, 245, 255, 0.35),
-    0 -18px 70px rgba(72, 196, 210, 0.16);
+    inset 0 1px 0 rgba(210, 248, 255, 0.28),
+    0 -22px 70px rgba(56, 170, 190, 0.14);
 }
 
 .mm-sky-hero .mm-limb {
-  bottom: -34%;
-  height: 70%;
+  top: 46vh;
+  bottom: auto;
+  width: 190%;
+  height: 92vh;
+  background: linear-gradient(180deg, #123242 0%, #0a1c28 16%, #071018 34%, #03060c 58%);
   box-shadow:
-    0 -1px 0 rgba(210, 250, 255, 0.5),
-    0 -28px 110px rgba(72, 196, 210, 0.28);
+    inset 0 2px 0 rgba(232, 253, 255, 0.8),
+    inset 0 16px 36px rgba(80, 200, 220, 0.28),
+    0 -26px 80px rgba(72, 196, 210, 0.32);
 }
 
-.mm-horizon {
-  position: absolute;
-  inset: 0;
-  height: auto;
-}
-
-.mm-horizon .mm-limb {
-  bottom: -48%;
-  height: 72%;
-  background: radial-gradient(ellipse at 50% 0%, rgba(10, 36, 48, 0.85) 0%, rgba(6, 16, 26, 0.35) 30%, transparent 52%);
-  box-shadow:
-    0 -2px 0 rgba(214, 248, 255, 0.55),
-    0 -36px 90px rgba(64, 190, 206, 0.22);
-}
-
-.mm-horizon-arrive {
-  height: 200px;
+.mm-sky-arrival .mm-limb {
+  top: 14rem;
+  height: 80vh;
 }
 
 .mm-comet {
   position: absolute;
-  left: 0;
-  bottom: 28%;
-  width: 180px;
-  height: 2px;
+  left: -8%;
+  top: 38vh;
+  width: min(46vw, 420px);
+  height: 3px;
   border-radius: 999px;
-  background: linear-gradient(90deg, transparent, rgba(120, 230, 240, 0.2) 35%, #f4fdff 90%);
-  box-shadow: 0 0 14px rgba(110, 230, 240, 0.7), 0 0 36px rgba(70, 190, 210, 0.28);
+  background: linear-gradient(90deg, transparent 0%, rgba(120, 220, 235, 0.15) 28%, rgba(190, 250, 255, 0.85) 78%, #ffffff 100%);
+  box-shadow:
+    0 0 10px rgba(190, 250, 255, 0.9),
+    0 0 28px rgba(80, 210, 225, 0.55),
+    8px 0 18px rgba(230, 255, 255, 0.45);
   opacity: 0;
-  animation: mm-comet 20s ease-in-out infinite;
+  animation: mm-comet 12s linear infinite;
 }
 
 .mm-comet-arrive {
-  width: 220px;
-  animation: mm-comet-arrive 2.6s cubic-bezier(0.2, 0.6, 0.2, 1) both;
+  top: 12.6rem;
+  width: min(54vw, 520px);
+  animation: mm-comet-arrive 2.6s cubic-bezier(0.16, 0.7, 0.2, 1) both;
 }
 
 .mm-flash {
   position: absolute;
   left: 50%;
-  bottom: 18%;
-  width: 140px;
-  height: 28px;
+  top: 13.6rem;
+  width: min(36vw, 280px);
+  height: 36px;
   transform: translateX(-50%);
   border-radius: 999px;
-  background: radial-gradient(ellipse at center, rgba(230, 255, 255, 0.85), rgba(90, 210, 220, 0.15) 55%, transparent 72%);
+  background: radial-gradient(ellipse at center, rgba(240, 255, 255, 0.9), rgba(90, 210, 220, 0.2) 48%, transparent 72%);
   opacity: 0;
   animation: mm-flash 2.6s ease-out both;
 }
@@ -174,9 +169,10 @@
 }
 
 @keyframes mm-comet {
-  0%, 42% { transform: translate3d(-20%, 0, 0) rotate(-18deg); opacity: 0; }
-  50% { opacity: 0.95; }
-  100% { transform: translate3d(420%, 30%, 0) rotate(-6deg); opacity: 0; }
+  0% { transform: translate3d(0, 8px, 0) rotate(-8deg); opacity: 0; }
+  3% { opacity: 1; }
+  22% { transform: translate3d(78vw, -6px, 0) rotate(-3deg); opacity: 0; }
+  100% { transform: translate3d(78vw, -6px, 0) rotate(-3deg); opacity: 0; }
 }
 
 @keyframes mm-comet-arrive {
@@ -215,7 +211,10 @@
 }
 
 @media (max-width: 640px) {
-  .mm-comet { width: 120px; }
+  .mm-sky-hero .mm-limb { top: 64vh; }
+  .mm-comet { top: 54vh; width: 62vw; }
+  .mm-sky-arrival .mm-limb { top: 16rem; }
+  .mm-comet-arrive, .mm-sky-arrival .mm-flash { top: 14.5rem; }
 }
 
 :root {
