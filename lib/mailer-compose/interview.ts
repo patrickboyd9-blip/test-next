@@ -1,16 +1,17 @@
 /**
- * Fixture stand-in for the Campaign Creator conversation.
- * The questions are the ones documented in docs/CAMPAIGN_CREATOR.md.
- * No model is called.
+ * Preview stand-in for the Campaign Creator conversation.
+ * It uses the same industry list as the editor. No model is called.
+ * Every reply says Sample so it is not mistaken for a live answer.
  */
 import type { CampaignBrief } from "@/lib/campaign-creator/types"
+import { industryForBrief } from "@/lib/research-library/industry"
 import { EXAMPLE_PROMPTS } from "@/components/campaign-creator/OpeningPrompt"
 
 export { EXAMPLE_PROMPTS }
 
 export const ACCOMPLISH_QUESTION = "What would you like to accomplish?"
 
-export const ACTION_QUESTION = "Got it. What would you like the people who receive it to do?"
+export const ACTION_QUESTION = "What should the people who receive it do?"
 
 export const ACTION_CHOICES = [
   "Book an appointment",
@@ -20,7 +21,7 @@ export const ACTION_CHOICES = [
   "Something else",
 ] as const
 
-export const AUDIENCE_QUESTION = "Got it. Who would you like to target?"
+export const AUDIENCE_QUESTION = "Who should receive it?"
 
 /** Examples named in the campaign-creator conversation, not a new goal list. */
 export const AUDIENCE_CHOICES = [
@@ -41,6 +42,9 @@ export interface ProposedMailer {
   shop: string
   line: string
   why: string
+  audience: string
+  /** How many refinement passes have changed this card. */
+  revision: number
 }
 
 export function interviewReply(customerText: string, known: Partial<CampaignBrief> = {}): InterviewReply {
@@ -58,43 +62,55 @@ export function interviewReply(customerText: string, known: Partial<CampaignBrie
     return { reply: ACCOMPLISH_QUESTION, choices: EXAMPLE_PROMPTS, ready: false, brief }
   }
   if (!brief.desiredRecipientAction) {
-    return { reply: ACTION_QUESTION, choices: ACTION_CHOICES, ready: false, brief }
+    const trade = tradeLabel(brief)
+    return {
+      reply: `Sample. ${trade}. ${ACTION_QUESTION}`,
+      choices: ACTION_CHOICES,
+      ready: false,
+      brief,
+    }
   }
   if (!brief.audience?.description) {
-    return { reply: AUDIENCE_QUESTION, choices: AUDIENCE_CHOICES, ready: false, brief }
+    return {
+      reply: `Sample. They should ${actionPhrase(brief.desiredRecipientAction)}. ${AUDIENCE_QUESTION}`,
+      choices: AUDIENCE_CHOICES,
+      ready: false,
+      brief,
+    }
   }
+  const card = proposalFor(brief)
   return {
-    reply: proposalFor(brief).why,
+    reply: `${card.why}\n\n${card.line}`,
     choices: ["Make it more fun", "Different photo", "Bigger offer"],
     ready: true,
     brief,
   }
 }
 
-/** The interview decides the line. It does not ask the customer to write the card. */
+/** The interview decides the line from the words the customer used. */
 export function proposalFor(brief: Partial<CampaignBrief>): ProposedMailer {
-  const shop = brief.businessInfo?.name?.trim() || "Your business"
-  const goal = (brief.goal ?? "").toLowerCase()
-  const action = (brief.desiredRecipientAction ?? "").toLowerCase()
-  const pizza = /pizza|restaurant|brick oven|tony/i.test(`${shop} ${goal}`)
+  const named = brief.businessInfo?.name?.trim()
+  const trade = tradeLabel(brief)
+  const audience = brief.audience?.description?.trim() || "the people you named"
+  const action = actionPhrase(brief.desiredRecipientAction ?? "")
+  const pizza = /pizza|brick oven|tony/i.test(`${named ?? ""} ${brief.goal ?? ""}`)
   if (pizza) {
     return {
-      shop: /tony/i.test(shop) ? shop : "Tony's Brick Oven Pizza",
+      shop: /tony/i.test(named ?? "") ? named! : "Tony's Brick Oven Pizza",
       line: "Tuesday 2-for-1 large pizzas",
-      why: "Slow nights are the gap, so the card leads with one easy weeknight offer and asks them to call.",
+      audience,
+      revision: 0,
+      why: "Sample. Slow nights are the gap, so the card leads with one easy weeknight offer and asks them to call.",
     }
   }
-  const line = action.includes("call")
-    ? `${shop}: call this month`
-    : action.includes("website")
-      ? `${shop}: visit the page`
-      : action.includes("quote")
-        ? `${shop}: ask for a quote`
-        : `${shop}: book a time`
+  const shop = named && !/your business/i.test(named) ? named : trade
+  const line = `${capitalize(action)} — ${trade.toLowerCase()} — ${audience}`
   return {
     shop,
     line,
-    why: "The card uses the goal you named, one action, and the people you want it to reach.",
+    audience,
+    revision: 0,
+    why: `Sample. Business: ${trade.toLowerCase()}. Goal: ${action}. Audience: ${audience}.`,
   }
 }
 
@@ -106,16 +122,81 @@ export interface ChatTurn {
 
 /** Labeled sample. Same questions, a pizza parlor's answers. */
 export function reactToProposal(proposal: ProposedMailer, reaction: string): ProposedMailer {
+  const revision = proposal.revision + 1
+  const trade = proposal.shop
+  const audience = proposal.audience
   if (/fun/i.test(reaction)) {
-    return { ...proposal, line: proposal.line.replace(/\.$/, ""), why: "Same offer, a lighter line." }
+    const lines = [
+      `${trade}: an easy time to book`,
+      `${trade}: save the date, bring the neighbors`,
+    ]
+    const line = lines[(revision - 1) % lines.length]!
+    return {
+      ...proposal,
+      revision,
+      line,
+      why: `Sample. Made the ${trade.toLowerCase()} line lighter (pass ${revision}). The appointment and ${audience} stay.`,
+    }
   }
   if (/photo/i.test(reaction)) {
-    return { ...proposal, why: "Same words. The picture can change when you add one. No new photo is generated here." }
+    const pictures = [
+      "A roof in late daylight, no people and no logo.",
+      "A close view of shingles after a storm, no people and no logo.",
+    ]
+    return {
+      ...proposal,
+      revision,
+      line: `${proposal.line.split(" — ")[0]} — ${pictures[(revision - 1) % pictures.length]}`,
+      why: `Sample. Changed the picture to pass ${revision}. ${trade} still asks them to book, for ${audience}. No new photo file is generated.`,
+    }
   }
   if (/bigger|offer/i.test(reaction)) {
-    return { ...proposal, line: proposal.line, why: "The offer stays the one already on the card. A bigger deal needs you to name it." }
+    const offers = [
+      `${trade}: book this month, inspection included`,
+      `${trade}: book this week, the inspection is on the house`,
+    ]
+    return {
+      ...proposal,
+      revision,
+      line: offers[(revision - 1) % offers.length]!,
+      why: `Sample. Made the offer larger (pass ${revision}). Still ${trade.toLowerCase()}, still for ${audience}.`,
+    }
   }
-  return proposal
+  return { ...proposal, revision, why: `Sample. Kept the ${trade.toLowerCase()} card. I did not treat “${reaction}” as a new offer.` }
+}
+
+const TRADE_LABEL: Record<string, string> = {
+  roofing: "Roofing",
+  hvac: "HVAC",
+  plumbing: "Plumbing",
+  dental: "Dental",
+  landscaping: "Landscaping",
+  "restaurants-food": "Restaurant",
+  "real-estate-agents": "Real estate",
+  "auto-insurance": "Auto insurance",
+  "home-insurance": "Home insurance",
+  cleaning: "Cleaning",
+  "private-chef": "Private chef",
+}
+
+function tradeLabel(brief: Partial<CampaignBrief>): string {
+  const industry = industryForBrief(brief as CampaignBrief)
+  if (TRADE_LABEL[industry]) return TRADE_LABEL[industry]
+  if (industry && industry !== "none") return industry.replace(/-/g, " ")
+  return "Your mailer"
+}
+
+function actionPhrase(action: string): string {
+  const text = action.toLowerCase()
+  if (/book|appointment/.test(text)) return "book an appointment"
+  if (/call/.test(text)) return "call"
+  if (/quote/.test(text)) return "request a quote"
+  if (/website|visit/.test(text)) return "visit the website"
+  return action.replace(/\s+/g, " ").trim() || "take the next step"
+}
+
+function capitalize(value: string): string {
+  return value ? value.charAt(0).toUpperCase() + value.slice(1) : value
 }
 
 export function tonySample(beat: number): { turns: ChatTurn[]; proposal: ProposedMailer | null } {

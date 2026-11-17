@@ -351,12 +351,26 @@ export function ComposeMailer({
               ))}
             </ul>
             {proposal ? (
-              <div className="flex flex-wrap gap-2">
-                {["Make it more fun", "Different photo", "Bigger offer"].map((choice) => (
-                  <button key={choice} type="button" onClick={() => tweak(choice)} className="min-h-11 rounded-full border border-[#245068] px-3 text-sm">
-                    {choice}
-                  </button>
-                ))}
+              <div className="space-y-3">
+                <ProofTray
+                  proof={{
+                    shop: proposal.shop,
+                    line: proposal.line,
+                    to: proposal.audience,
+                    people: 0,
+                    phone: "",
+                    website: "",
+                    logoName: null,
+                    qr: null,
+                  }}
+                />
+                <div className="flex flex-wrap gap-2">
+                  {["Make it more fun", "Different photo", "Bigger offer"].map((choice) => (
+                    <button key={choice} type="button" onClick={() => tweak(choice)} className="min-h-11 rounded-full border border-[#245068] px-3 text-sm">
+                      {choice}
+                    </button>
+                  ))}
+                </div>
               </div>
             ) : null}
             <form

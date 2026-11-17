@@ -25,7 +25,7 @@ export function ProofTray({ proof }: { proof: MailerProof }) {
             <p className="text-xs leading-relaxed text-[#5c564c]">
               Mailing address stays blank here.
               <br />
-              {proof.people} {proof.people === 1 ? "person" : "people"} · {proof.to}
+              {proof.people > 0 ? `${proof.people} ${proof.people === 1 ? "person" : "people"} · ` : ""}{proof.to}
             </p>
             {proof.qr ? (
               <div className="grid size-16 shrink-0 place-items-center rounded-md border border-[#1a1c1f] bg-white text-[10px] font-medium">

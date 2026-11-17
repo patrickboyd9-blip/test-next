@@ -10,7 +10,7 @@ Preview campaigns use the id `preview-demo`, so a cold server can still open the
 | Campaign list | Home, Mailers in progress | Works | Proof ready, printing, in the mail, and delivered. Each opens a status page. |
 | New mailer | New mailer | Works | Chat with Comet, upload, template, and team design. |
 | Comet introduction | Home `?intro=1` in demo | Works | The first-login card, with Let's go and Look around first. |
-| Chat with Comet | New mailer, Chat with Comet | Works | Comet asks follow-ups and does not call a paid model in demo. |
+| Chat with Comet | New mailer, Chat with Comet | Works | A roofing goal, “book an appointment,” and homeowners in specific ZIP codes are named back. Sample is on every reply because preview does not call a model. Make it more fun changes the line, and a second click changes it again. |
 | Ask Comet | Button on every app page | Works | Slide-over help. On a proof it sits on the left so it does not cover the address. It does not mail, approve, or charge. |
 | Comet confidentiality | Ask Comet, "Which printer do you use?" | Works | Sample answer. Trusted commercial partners. No vendor, prompt, or cost. |
 | Upload PNG, JPG, or PDF | New mailer, Upload my own design | Works | Front and back show immediately and again on the proof. |
