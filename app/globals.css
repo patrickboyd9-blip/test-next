@@ -262,10 +262,10 @@
 
 .mm-postbox {
   position: absolute;
-  right: 4.5%;
-  top: calc(44vh - 220px);
-  width: 300px;
-  height: 280px;
+  right: 1.5%;
+  top: calc(44vh - 246px);
+  width: 280px;
+  height: 270px;
   pointer-events: none;
   animation: mm-box-drift 16s ease-in-out infinite alternate;
 }
@@ -297,9 +297,42 @@
 }
 
 .mm-post-photo {
+  z-index: 1;
   object-fit: contain;
   object-position: center bottom;
-  filter: drop-shadow(0 18px 28px rgba(4, 16, 28, 0.55)) drop-shadow(-8px 0 18px rgba(70, 180, 255, 0.18));
+  filter: drop-shadow(0 10px 16px rgba(4, 16, 28, 0.35)) drop-shadow(-6px 0 14px rgba(70, 180, 255, 0.16));
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 86%, rgba(0, 0, 0, 0.4) 94%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 86%, rgba(0, 0, 0, 0.4) 94%, transparent 100%);
+}
+
+.mm-outcrop {
+  position: absolute;
+  z-index: 2;
+  left: -30%;
+  right: -10%;
+  bottom: -8%;
+  height: 48%;
+  overflow: visible;
+  filter: drop-shadow(0 -8px 12px rgba(120, 200, 230, 0.22));
+  -webkit-mask-image:
+    linear-gradient(90deg, transparent 0%, #000 8%, #000 88%, transparent 100%),
+    linear-gradient(180deg, transparent 0%, #000 16%, #000 48%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(90deg, transparent 0%, #000 8%, #000 88%, transparent 100%),
+    linear-gradient(180deg, transparent 0%, #000 16%, #000 48%, transparent 100%);
+  mask-composite: intersect;
+}
+
+.mm-post-spill {
+  position: absolute;
+  z-index: 3;
+  left: 28%;
+  bottom: 6%;
+  width: 42%;
+  height: 18%;
+  background: radial-gradient(ellipse at center, rgba(90, 196, 255, 0.55), rgba(40, 120, 180, 0.14) 48%, transparent 74%);
+  filter: blur(8px);
 }
 
 .mm-mailer {
@@ -358,9 +391,9 @@
   .mm-comet { top: 54vh; width: 62vw; }
   .mm-sky-arrival .mm-limb { top: 16rem; }
   .mm-comet-arrive, .mm-sky-arrival .mm-flash { top: 14.5rem; }
-  .mm-postbox { width: 132px; height: 124px; right: -46px; top: 168px; }
-  .mm-postbox-start { width: 128px; height: 118px; right: -24px; top: 220px; }
-  .mm-postbox-arrive { top: 8.5rem; right: -8px; width: 160px; height: 150px; }
+  .mm-postbox { width: 148px; height: 138px; right: -28px; top: calc(64vh - 96px); }
+  .mm-postbox-start { width: 120px; height: 112px; right: -32px; top: calc(64vh - 92px); }
+  .mm-postbox-arrive { top: calc(16rem - 118px); right: -12px; width: 156px; height: 146px; }
 }
 
 :root {
