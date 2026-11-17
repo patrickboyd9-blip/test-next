@@ -14,14 +14,9 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import {
-  continuePrintMailTest,
-  refreshPrintMailStatus,
-  submitPrintMailTest,
-} from "@/lib/click2mail/mail-order-actions"
 import { postageEstimate } from "@/lib/click2mail/cost"
 import { mailingCutoffWarning } from "@/lib/click2mail/cutoff"
-import { isTerminalJobStatus, jobStatusLabel } from "@/lib/click2mail/job-status"
+import { jobStatusLabel } from "@/lib/click2mail/job-status"
 import type { PrintMailMode } from "@/lib/click2mail/mode"
 import { parseRecipientCsv, normalizeRecipient } from "@/lib/click2mail/recipients"
 import type { Campaign } from "@/lib/campaign-creator/types"
@@ -42,12 +37,10 @@ const EMPTY_SELF = {
   zip: "",
 }
 
-export function PrintMailTestStage({ campaign, mode, onCampaign }: PrintMailTestStageProps) {
+export function PrintMailTestStage({ campaign, mode }: PrintMailTestStageProps) {
   const [source, setSource] = useState<"self" | "csv">("self")
   const [selfAddress, setSelfAddress] = useState(EMPTY_SELF)
   const [csvText, setCsvText] = useState("")
-  const [issues, setIssues] = useState<string[]>([])
-  const [busy, setBusy] = useState(false)
   const [now, setNow] = useState(() => new Date())
 
   const recipients = useMemo(() => {
@@ -59,7 +52,6 @@ export function PrintMailTestStage({ campaign, mode, onCampaign }: PrintMailTest
   const order = campaign.mailOrder
   const pieceCount = recipients.length
   const productionLocked = mode.environment === "prod" && !mode.productionEnabled
-  const canSend = mode.credentialsConfigured && !productionLocked && pieceCount > 0 && !busy
   const testMode = !mode.productionEnabled
   const cutoffWarning = order?.submitted ? null : mailingCutoffWarning(now)
   const postage = postageEstimate(pieceCount, mode.postage)
@@ -68,51 +60,6 @@ export function PrintMailTestStage({ campaign, mode, onCampaign }: PrintMailTest
     const timer = window.setInterval(() => setNow(new Date()), 60_000)
     return () => window.clearInterval(timer)
   }, [])
-
-  useEffect(() => {
-    if (!mode.credentialsConfigured || !order?.jobId || isTerminalJobStatus(order.jobStatus)) return
-    let cancelled = false
-    const tick = () => {
-      void refreshPrintMailStatus(campaign.id).then((result) => {
-        if (cancelled) return
-        onCampaign(result.campaign)
-        if (result.issues.length > 0) setIssues(result.issues)
-      })
-    }
-    tick()
-    const timer = window.setInterval(tick, 15_000)
-    return () => {
-      cancelled = true
-      window.clearInterval(timer)
-    }
-  }, [campaign.id, mode.credentialsConfigured, order?.jobId, order?.jobStatus, onCampaign])
-
-  async function handleSubmit() {
-    setBusy(true)
-    setIssues([])
-    try {
-      const result =
-        source === "csv"
-          ? await submitPrintMailTest(campaign.id, { kind: "csv", csvText })
-          : await submitPrintMailTest(campaign.id, { kind: "self", ...selfAddress })
-      onCampaign(result.campaign)
-      setIssues(result.issues)
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  async function handleContinue() {
-    setBusy(true)
-    setIssues([])
-    try {
-      const result = await continuePrintMailTest(campaign.id)
-      onCampaign(result.campaign)
-      setIssues(result.issues)
-    } finally {
-      setBusy(false)
-    }
-  }
 
   return (
     <Card>
@@ -124,9 +71,8 @@ export function PrintMailTestStage({ campaign, mode, onCampaign }: PrintMailTest
           </Badge>
         </div>
         <CardDescription>
-          {testMode
-            ? "This sends the approved postcard to Click2Mail staging. It does not mail real customers, and production stays off."
-            : "Production is on. This can print real pieces and spend real credit."}
+          Mail is not sent from this step. Review the proof and the list, then pay from the order
+          page after a price is configured. Nothing is sent from here.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
@@ -152,6 +98,7 @@ export function PrintMailTestStage({ campaign, mode, onCampaign }: PrintMailTest
             <p className="text-sm text-muted-foreground">Estimated postage</p>
             <p className="text-lg font-medium">{postage.amountLabel}</p>
             <p className="text-sm text-muted-foreground">{postage.detail}</p>
+            <p className="text-sm text-muted-foreground">This postage note is not a checkout total.</p>
           </div>
         </div>
 
@@ -217,22 +164,18 @@ export function PrintMailTestStage({ campaign, mode, onCampaign }: PrintMailTest
 
         {order && <OrderStatus order={order} />}
 
-        {issues.length > 0 && (
-          <ul className="text-sm text-destructive">
-            {issues.map((issue) => (
-              <li key={issue}>{issue}</li>
-            ))}
-          </ul>
-        )}
+        <p className="text-sm">
+          Mail is not sent from this step. Nothing was sent.
+        </p>
       </CardContent>
       <CardFooter className="justify-end gap-2">
         {order && !order.jobId && (order.documentId || order.addressListId) && (
-          <Button type="button" variant="outline" onClick={() => void handleContinue()} disabled={busy || productionLocked}>
-            {busy ? "Checking…" : testMode ? "Continue staging test" : "Continue mailing"}
+          <Button type="button" variant="outline" disabled>
+            Continue is closed
           </Button>
         )}
-        <Button type="button" onClick={() => void handleSubmit()} disabled={!canSend}>
-          {busy ? "Sending…" : testMode ? "Send staging test" : "Send production mailing"}
+        <Button type="button" disabled>
+          Sending is closed
         </Button>
       </CardFooter>
     </Card>
