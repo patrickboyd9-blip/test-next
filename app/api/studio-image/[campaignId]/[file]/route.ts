@@ -1,3 +1,4 @@
+import { denyUnlessCampaignOwner } from "@/lib/auth/campaign-access"
 import { openStudioImage } from "@/lib/campaign-creator/studio-image-store"
 
 export const runtime = "nodejs"
@@ -13,13 +14,15 @@ export async function GET(
   context: { params: Promise<{ campaignId: string; file: string }> }
 ): Promise<Response> {
   const { campaignId, file } = await context.params
+  const denied = await denyUnlessCampaignOwner(campaignId)
+  if (denied) return denied
   const image = await openStudioImage(campaignId, file)
   if (!image) return new Response("Not found", { status: 404 })
 
   return new Response(new Uint8Array(image.bytes), {
     headers: {
       "Content-Type": "image/png",
-      "Cache-Control": "public, max-age=31536000, immutable",
+      "Cache-Control": "private, no-store",
     },
   })
 }

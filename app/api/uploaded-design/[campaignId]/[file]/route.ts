@@ -1,3 +1,4 @@
+import { denyUnlessCampaignOwner } from "@/lib/auth/campaign-access"
 import { mediaTypeForKey, openUploadedDesign } from "@/lib/bring-your-own-design/store"
 
 export const runtime = "nodejs"
@@ -13,6 +14,8 @@ export async function GET(
   context: { params: Promise<{ campaignId: string; file: string }> }
 ): Promise<Response> {
   const { campaignId, file } = await context.params
+  const denied = await denyUnlessCampaignOwner(campaignId)
+  if (denied) return denied
   const opened = await openUploadedDesign(campaignId, file)
   if (!opened) return new Response("Not found", { status: 404 })
 

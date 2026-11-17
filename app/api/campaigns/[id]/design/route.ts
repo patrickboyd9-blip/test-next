@@ -1,3 +1,4 @@
+import { denyUnlessCampaignOwner } from "@/lib/auth/campaign-access"
 import { getCampaignRepository } from "@/lib/campaign-creator/repository"
 import { saveDesignFace } from "@/lib/bring-your-own-design/save-face"
 
@@ -12,6 +13,8 @@ export async function POST(
   context: { params: Promise<{ id: string }> }
 ): Promise<Response> {
   const { id } = await context.params
+  const denied = await denyUnlessCampaignOwner(id)
+  if (denied) return denied
   const campaign = await repository.getCampaign(id)
   if (!campaign) return json({ error: "Campaign not found." }, 404)
   if (campaign.designSource !== "upload") {

@@ -26,7 +26,7 @@ export type SaveDesignRequestResult =
 export async function saveDesignRequest(
   input: DesignRequestInput,
   files: DesignRequestFiles = {},
-  options?: { requests?: DesignRequestStore; uploads?: DesignRequestUploadStore }
+  options?: { requests?: DesignRequestStore; uploads?: DesignRequestUploadStore; ownerId?: string }
 ): Promise<SaveDesignRequestResult> {
   const parsed = parseDesignRequest(input)
   if (!parsed.ok) return parsed
@@ -64,11 +64,13 @@ export async function saveDesignRequest(
     stored.push(uploadRecord(image, "image", key, randomUUID()))
   }
 
+  const ownerId = options?.ownerId?.trim() ?? ""
   const request: DesignRequest = {
     id,
     ...parsed.value,
     uploads: stored,
     createdAt,
+    ...(ownerId ? { ownerId } : {}),
   }
   const requests = options?.requests ?? getDesignRequestStore()
   await requests.put(request)

@@ -1,5 +1,6 @@
 "use server"
 
+import { requireOwnedCampaign } from "@/lib/auth/campaign-access"
 import { reviewUploadedArtwork } from "@/lib/campaign-creator/creative-engine-provider"
 import { getCampaignRepository } from "@/lib/campaign-creator/repository"
 import type { Campaign, DesignSource, UploadedDesignFile } from "@/lib/campaign-creator/types"
@@ -13,10 +14,15 @@ import type { UploadPathBasics } from "./upload-path"
 
 const repository = getCampaignRepository()
 
+async function owned(campaignId: string) {
+  return requireOwnedCampaign(campaignId)
+}
+
 export async function chooseDesignPath(
   campaignId: string,
   source: DesignSource
 ): Promise<Campaign> {
+  await owned(campaignId)
   return repository.setDesignSource(campaignId, source)
 }
 
@@ -24,21 +30,23 @@ export async function beginUploadedDesignPath(
   campaignId: string,
   basics: UploadPathBasics
 ): Promise<Campaign> {
+  await owned(campaignId)
   return repository.beginUploadPath(campaignId, basics)
 }
 
 export async function leaveUploadedDesignPath(campaignId: string): Promise<Campaign> {
+  await owned(campaignId)
   return repository.leaveUploadPath(campaignId)
 }
 
 export async function declineUploadedDesignReview(campaignId: string): Promise<Campaign> {
-  const campaign = await repository.getCampaign(campaignId)
+  const campaign = await owned(campaignId)
   if (!campaign?.uploadedDesign) throw new Error(`Campaign ${campaignId} not found`)
   return repository.saveUploadedDesignReview(campaignId, { declined: true })
 }
 
 export async function requestUploadedDesignReview(campaignId: string): Promise<Campaign> {
-  const campaign = await repository.getCampaign(campaignId)
+  const campaign = await owned(campaignId)
   if (!campaign) throw new Error(`Campaign ${campaignId} not found`)
   const design = campaign.uploadedDesign
   if (campaign.designSource !== "upload" || !design?.front || !design.back) {
@@ -79,7 +87,7 @@ export async function approveUploadedDesign(
   campaignId: string,
   options?: { acceptAddressCover?: boolean }
 ): Promise<Campaign> {
-  const campaign = await repository.getCampaign(campaignId)
+  const campaign = await owned(campaignId)
   if (!campaign) throw new Error(`Campaign ${campaignId} not found`)
   const design = campaign.uploadedDesign
   if (campaign.designSource !== "upload" || !design?.front || !design.back) {

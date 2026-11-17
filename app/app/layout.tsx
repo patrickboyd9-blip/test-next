@@ -1,5 +1,6 @@
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { getSession, sessionInitials } from "@/lib/auth/session";
 
 export const runtime = "nodejs";
 /**
@@ -8,12 +9,20 @@ export const runtime = "nodejs";
  */
 export const maxDuration = 60;
 
-export default function AppLayout({
+export default async function AppLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const session = await getSession();
+  const account = session
+    ? {
+        name: session.name,
+        detail: session.fixture ? "Local fixture. Not a signed-in account." : session.businessName,
+        initials: sessionInitials(session.name),
+      }
+    : null;
   return (
     <SidebarProvider>
-      <AppSidebar />
+      <AppSidebar account={account} />
       <SidebarInset>{children}</SidebarInset>
     </SidebarProvider>
   );

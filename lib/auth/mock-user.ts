@@ -1,17 +1,5 @@
-export interface MockUser {
-  name: string
-  email: string
-  businessName: string
-  initials: string
-}
-
 /**
- * Placeholder for the authenticated user until real auth exists.
- * Swap for the real session/user record — consumers only depend on this shape.
+ * The app no longer treats a hard-coded person as signed in.
+ * The session lives in ./session.ts and fails closed until a provider is configured.
+ * AUTH_MODE=dev-fixture is a local-only stand-in and does not run in production.
  */
-export const mockCurrentUser: MockUser = {
-  name: "Jordan Alvarez",
-  email: "jordan@jordansplumbing.com",
-  businessName: "Jordan's Plumbing",
-  initials: "JA",
-}

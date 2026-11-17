@@ -1,12 +1,17 @@
 "use server"
 
+import { getSession } from "@/lib/auth/session"
+
 import { designRequestInputFromForm, imageTypeFor } from "./parse"
 import { saveDesignRequest, type SaveDesignRequestResult } from "./save"
 import type { IncomingImage } from "./types"
 import { getDesignRequestStore } from "./store"
 import type { DesignRequest } from "./types"
+import { designRequestsForAccount } from "./visibility"
 
 export async function submitDesignRequest(formData: FormData): Promise<SaveDesignRequestResult> {
+  const session = await getSession()
+  if (!session) return { ok: false, error: "Sign in required." }
   const logo = await readImage(formData.get("logo"))
   if (isImageError(logo)) return { ok: false, error: logo.error }
   const images: IncomingImage[] = []
@@ -15,11 +20,13 @@ export async function submitDesignRequest(formData: FormData): Promise<SaveDesig
     if (isImageError(image)) return { ok: false, error: image.error }
     if (image) images.push(image)
   }
-  return saveDesignRequest(designRequestInputFromForm(formData), { logo, images })
+  return saveDesignRequest(designRequestInputFromForm(formData), { logo, images }, { ownerId: session.userId })
 }
 
 export async function listDesignRequests(): Promise<DesignRequest[]> {
-  return getDesignRequestStore().list()
+  const session = await getSession()
+  const requests = await getDesignRequestStore().list()
+  return designRequestsForAccount(requests, session)
 }
 
 async function readImage(
