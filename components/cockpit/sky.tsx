@@ -56,6 +56,15 @@ export function SpaceSky({
   )
 }
 
+/** In-flow copy of the home mailbox, shown only on small screens. */
+export function HomeMailbox() {
+  return (
+    <div className="mm-postbox-slot">
+      <Postbox scale="home" />
+    </div>
+  )
+}
+
 function Postbox({ scale }: { scale: "home" | "start" | "arrive" }) {
   const tone = scale === "arrive" ? "mm-postbox mm-postbox-arrive" : scale === "start" ? "mm-postbox mm-postbox-start" : "mm-postbox"
   return (

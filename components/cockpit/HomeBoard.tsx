@@ -4,6 +4,7 @@ import { CometMark } from "@/components/assistant/CometMark"
 import { cometHomeNote } from "@/lib/assistant/home-note"
 import { SAMPLE_MAILERS, STATUS_LABEL, statusNeedsYou } from "@/lib/mailer-compose/flow"
 
+import { HomeMailbox } from "./sky"
 import { Eyebrow, Panel } from "./ui"
 
 export function HomeBoard({ shop, sample = true }: { shop: string; sample?: boolean }) {
@@ -28,6 +29,8 @@ export function HomeBoard({ shop, sample = true }: { shop: string; sample?: bool
             New mailer
           </Link>
         </div>
+
+        <HomeMailbox />
 
         <Panel className="p-4 sm:p-5">
           <div className="mb-2 flex items-center justify-between gap-3">

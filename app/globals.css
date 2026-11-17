@@ -387,12 +387,34 @@
   .mm-mailer { opacity: 0; }
 }
 
+@media (max-width: 1023px) {
+  .mm-sky-hero:not(.mm-sky-arrival) .mm-postbox:not(.mm-postbox-start) { display: none; }
+}
+
+.mm-postbox-slot {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.25rem;
+  padding-bottom: 4.25rem;
+}
+
+@media (min-width: 1024px) {
+  .mm-postbox-slot { display: none; }
+}
+
+.mm-postbox-slot .mm-postbox {
+  position: relative;
+  right: auto;
+  top: auto;
+  width: 188px;
+  height: 164px;
+}
+
 @media (max-width: 640px) {
   .mm-sky-hero .mm-limb { top: 64vh; }
   .mm-comet { top: 54vh; width: 62vw; }
   .mm-sky-arrival .mm-limb { top: 16rem; }
   .mm-comet-arrive, .mm-sky-arrival .mm-flash { top: 14.5rem; }
-  .mm-postbox { width: 168px; height: 156px; right: -6px; top: calc(64vh - 108px); }
   .mm-postbox-start { width: 120px; height: 112px; right: -32px; top: calc(64vh - 92px); }
   .mm-postbox-arrive { top: calc(16rem - 118px); right: -12px; width: 156px; height: 146px; }
 }
