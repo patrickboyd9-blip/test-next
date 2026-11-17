@@ -11,8 +11,8 @@ import { useEffect, useRef } from "react"
 const COMET_STYLE: "classic" | "realistic" =
   process.env.NEXT_PUBLIC_COMET_STYLE === "classic" ? "classic" : "realistic"
 
-const PASS_MIN_MS = 1200
-const PASS_MAX_MS = 2000
+const PASS_MIN_MS = 3000
+const PASS_MAX_MS = 4000
 const FIRST_PASS_MS = 400
 const GAP_MIN_MS = 8000
 const GAP_MAX_MS = 14000
@@ -254,7 +254,7 @@ function CometRealistic({ arrival }: { arrival: boolean }) {
 
     function pass() {
       const started = performance.now()
-      const duration = arrival ? 1600 : PASS_MIN_MS + Math.random() * (PASS_MAX_MS - PASS_MIN_MS)
+      const duration = arrival ? 3400 : PASS_MIN_MS + Math.random() * (PASS_MAX_MS - PASS_MIN_MS)
       const tick = (now: number) => {
         if (stopped) return
         if (document.hidden) {
