@@ -4,6 +4,7 @@ import { useMemo, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
+import { DesignRequestForm } from "@/components/campaign-creator/design-request/DesignRequestForm"
 import {
   approvePreview,
   canApprove,
@@ -22,6 +23,19 @@ import {
   type ComposeDraft,
   type ComposeStep,
 } from "@/lib/mailer-compose/flow"
+import {
+  ACCOMPLISH_QUESTION,
+  EXAMPLE_PROMPTS,
+  interviewReply,
+  proposalFor,
+  reactToProposal,
+  tonySample,
+  type ProposedMailer,
+} from "@/lib/mailer-compose/interview"
+import { listMailTemplates, getMailTemplate } from "@/lib/mail-templates/query"
+import { TEMPLATE_INDUSTRIES, TEMPLATE_INDUSTRY_LABELS, type TemplateIndustry } from "@/lib/mail-templates/types"
+
+import { StartChoices, type StartPath } from "./StartChoices"
 
 import { ProofTray } from "./ProofCard"
 import { CockpitFrame, Eyebrow, fieldClass, Panel } from "./ui"
@@ -36,21 +50,50 @@ export function ComposeMailer({
   shop,
   initialStep = composeSteps(LIST_BEFORE_PROOF)[0] ?? "what",
   initialDraft,
+  initialPath = null,
+  initialQuick = false,
+  sampleBeat = null,
 }: {
   shop: string
   initialStep?: ComposeStep
   initialDraft?: ComposeDraft
+  initialPath?: StartPath | null
+  initialQuick?: boolean
+  sampleBeat?: number | null
 }) {
   const router = useRouter()
   const [step, setStep] = useState<ComposeStep>(initialStep)
   const [draft, setDraft] = useState<ComposeDraft>(initialDraft ?? emptyDraft())
+  const [path, setPath] = useState<StartPath | null>(initialPath)
+  const [quick, setQuick] = useState(initialQuick)
+  const tony = sampleBeat == null ? null : tonySample(sampleBeat)
+  const [chat, setChat] = useState(tony?.turns ?? [{ role: "assistant" as const, text: ACCOMPLISH_QUESTION, choices: EXAMPLE_PROMPTS }])
+  const [known, setKnown] = useState<Parameters<typeof interviewReply>[1]>({})
+  const [proposal, setProposal] = useState<ProposedMailer | null>(tony?.proposal ?? null)
+  const [frontName, setFrontName] = useState<string | null>(null)
+  const [backName, setBackName] = useState<string | null>(null)
+  const [industry, setIndustry] = useState<TemplateIndustry | "all">("all")
+  const [templateId, setTemplateId] = useState<string | null>(null)
   const [advanced, setAdvanced] = useState(false)
   const [listError, setListError] = useState("")
   const steps = composeSteps(LIST_BEFORE_PROOF)
-  const proof = useMemo(() => proofFromDraft(draft, shop), [draft, shop])
+  const proof = useMemo(
+    () => proofFromDraft(draft, proposal?.shop || shop),
+    [draft, proposal?.shop, shop]
+  )
   const people = selectedPeople(draft)
-  const ready = canContinue(step, draft)
+  const stepOneReady =
+    path === "upload"
+      ? Boolean(frontName && backName)
+      : path === "template"
+        ? Boolean(templateId)
+        : path === "ai" && !quick
+          ? Boolean(proposal)
+          : canContinue("what", draft)
+  const ready = step === "what" ? stepOneReady : canContinue(step, draft)
   const lastStep = steps[steps.length - 1] === step
+  const showTracker = path !== null && path !== "team"
+  const firstLabel = path === "upload" ? "Upload" : path === "template" ? "Template" : "What"
 
   function patch(partial: Partial<ComposeDraft>) {
     setDraft((current) => ({ ...current, ...partial }))
@@ -64,8 +107,37 @@ export function ComposeMailer({
     patch({ uploadedName: file.name, uploadedPeople: count, listId: null })
   }
 
+  function answer(text: string) {
+    const next = interviewReply(text, known)
+    setKnown(next.brief)
+    setChat((current) => [
+      ...current,
+      { role: "customer", text },
+      { role: "assistant", text: next.ready ? `${proposalFor(next.brief).why}\n\n${proposalFor(next.brief).line}` : next.reply, choices: next.choices },
+    ])
+    if (next.ready) {
+      const card = proposalFor(next.brief)
+      setProposal(card)
+      patch({ brief: card.line })
+    }
+  }
+
+  function tweak(reaction: string) {
+    if (!proposal) return
+    const next = reactToProposal(proposal, reaction)
+    setProposal(next)
+    patch({ brief: next.line })
+    setChat((current) => [...current, { role: "customer", text: reaction }, { role: "assistant", text: next.why }])
+  }
+
   function continueStep() {
     if (!ready) return
+    if (step === "what" && proposal) patch({ brief: proposal.line })
+    if (step === "what" && path === "upload") patch({ brief: "Your uploaded front and back, fitted to the postcard." })
+    if (step === "what" && path === "template" && templateId) {
+      const chosen = getMailTemplate(templateId)
+      if (chosen && !draft.brief) patch({ brief: chosen.spec.offer || chosen.summary })
+    }
     const following = nextStep(step, LIST_BEFORE_PROOF)
     if (following) setStep(following)
   }
@@ -100,7 +172,7 @@ export function ComposeMailer({
           </Link>
           <Eyebrow>New mailer</Eyebrow>
         </div>
-        <ol className="grid grid-cols-3 gap-2">
+        {showTracker ? <ol className="grid grid-cols-3 gap-2">
           {steps.map((item, index) => (
             <li key={item}>
               <button
@@ -116,11 +188,11 @@ export function ComposeMailer({
                 }`}
               >
                 <span className="block font-mono text-[10px] uppercase tracking-[0.18em]">Step {index + 1}</span>
-                {STEP_LABEL[item]}
+                {item === "what" ? firstLabel : STEP_LABEL[item]}
               </button>
             </li>
           ))}
-        </ol>
+        </ol> : null}
 
         {step === "to" ? (
           <Panel className="space-y-4 p-4 sm:p-6">
@@ -166,7 +238,81 @@ export function ComposeMailer({
           </Panel>
         ) : null}
 
-        {step === "what" ? (
+        {step === "what" && path === null ? <StartChoices onChoose={setPath} /> : null}
+
+        {step === "what" && path === "team" ? (
+          <Panel className="bg-white p-4 text-neutral-900 sm:p-6">
+            <DesignRequestForm onBack={() => setPath(null)} />
+          </Panel>
+        ) : null}
+
+        {step === "what" && path === "ai" && !quick ? (
+          <Panel className="space-y-4 p-4 sm:p-6">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <Eyebrow>Chat</Eyebrow>
+                <h1 className="mt-2 text-2xl font-semibold">What would you like to accomplish?</h1>
+              </div>
+              <label className="inline-flex min-h-11 cursor-pointer items-center text-sm text-[#8ecfff]">
+                <span className="sr-only">Add a logo</span>
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg"
+                  className="max-w-28 text-xs"
+                  onChange={(event) => patch({ logoName: event.target.files?.[0]?.name ?? null })}
+                />
+              </label>
+            </div>
+            <ul className="space-y-3">
+              {chat.map((turn, index) => (
+                <li key={`${turn.role}-${index}`} className={turn.role === "customer" ? "text-right" : "text-left"}>
+                  <p className={`inline-block max-w-[90%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-left text-sm leading-6 ${turn.role === "customer" ? "bg-[#5ce1ff] text-[#041018]" : "bg-[#071018] text-[#e7f2fb]"}`}>
+                    {turn.text}
+                  </p>
+                  {turn.choices && index === chat.length - 1 && !proposal ? (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {turn.choices.map((choice) => (
+                        <button key={choice} type="button" onClick={() => answer(choice)} className="min-h-11 rounded-full border border-[#245068] px-3 text-left text-sm">
+                          {choice}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+            {proposal ? (
+              <div className="flex flex-wrap gap-2">
+                {["Make it more fun", "Different photo", "Bigger offer"].map((choice) => (
+                  <button key={choice} type="button" onClick={() => tweak(choice)} className="min-h-11 rounded-full border border-[#245068] px-3 text-sm">
+                    {choice}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+            <form
+              className="flex gap-2"
+              onSubmit={(event) => {
+                event.preventDefault()
+                const field = event.currentTarget.elements.namedItem("say") as HTMLInputElement
+                const value = field.value.trim()
+                if (!value) return
+                if (proposal) tweak(value)
+                else answer(value)
+                field.value = ""
+              }}
+            >
+              <input name="say" placeholder="Or type your own answer" className={fieldClass()} />
+              <button type="submit" className="min-h-12 rounded-xl bg-[#123044] px-4 text-sm">Send</button>
+            </form>
+            <button type="button" onClick={() => setQuick(true)} className="min-h-11 text-sm text-[#8ecfff]">
+              I already know what I want
+            </button>
+            <p className="text-xs text-[#8aa0b4]">Sample conversation. No live model is called.</p>
+          </Panel>
+        ) : null}
+
+        {step === "what" && path === "ai" && quick ? (
           <Panel className="space-y-4 p-4 sm:p-6">
             <div>
               <Eyebrow>What</Eyebrow>
@@ -180,16 +326,65 @@ export function ComposeMailer({
               placeholder="$50 off a tune-up if they call this month."
               className={fieldClass()}
             />
-            <label className="block">
-              <span className="mb-2 block text-sm text-[#b7c9d8]">Logo, if you have one</span>
-              <input
-                type="file"
-                accept="image/png,image/jpeg"
-                className="block min-h-12 w-full text-sm file:mr-3 file:min-h-10 file:rounded-lg file:border-0 file:bg-[#123044] file:px-3 file:text-[#e7f2fb]"
-                onChange={(event) => patch({ logoName: event.target.files?.[0]?.name ?? null })}
-              />
+            <button type="button" onClick={() => setQuick(false)} className="min-h-11 text-sm text-[#8ecfff]">
+              Back to the chat
+            </button>
+          </Panel>
+        ) : null}
+
+        {step === "what" && path === "upload" ? (
+          <Panel className="space-y-4 p-4 sm:p-6">
+            <div>
+              <Eyebrow>Upload</Eyebrow>
+              <h1 className="mt-2 text-2xl font-semibold">Upload the front and the back</h1>
+              <p className="mt-1 text-sm text-[#8aa0b4]">We fit each file onto the postcard, then show the proof. This preview does not send the files anywhere.</p>
+            </div>
+            <label className="block text-sm">Front
+              <input type="file" accept="image/png,image/jpeg,application/pdf" className="mt-1 block min-h-12 w-full text-sm" onChange={(event) => setFrontName(event.target.files?.[0]?.name ?? null)} />
             </label>
-            {draft.logoName ? <p className="text-sm">Using {draft.logoName}. No icon is invented if you skip this.</p> : null}
+            <label className="block text-sm">Back
+              <input type="file" accept="image/png,image/jpeg,application/pdf" className="mt-1 block min-h-12 w-full text-sm" onChange={(event) => setBackName(event.target.files?.[0]?.name ?? null)} />
+            </label>
+            {frontName && backName ? <p className="text-sm">Ready to fit {frontName} and {backName}.</p> : null}
+          </Panel>
+        ) : null}
+
+        {step === "what" && path === "template" ? (
+          <Panel className="space-y-4 p-4 sm:p-6">
+            <div>
+              <Eyebrow>Template</Eyebrow>
+              <h1 className="mt-2 text-2xl font-semibold">Start from a template</h1>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" onClick={() => setIndustry("all")} className="min-h-11 rounded-full border border-[#245068] px-3 text-sm">All</button>
+              {TEMPLATE_INDUSTRIES.map((item) => (
+                <button key={item} type="button" onClick={() => setIndustry(item)} className={`min-h-11 rounded-full border px-3 text-sm ${industry === item ? "border-[#5ce1ff]" : "border-[#245068]"}`}>
+                  {TEMPLATE_INDUSTRY_LABELS[item]}
+                </button>
+              ))}
+            </div>
+            <ul className="space-y-2">
+              {listMailTemplates(industry === "all" ? undefined : industry).slice(0, 6).map((item) => (
+                <li key={item.id}>
+                  <button type="button" onClick={() => { setTemplateId(item.id); patch({ brief: item.spec.offer || item.summary }) }} className={`min-h-14 w-full rounded-xl border px-4 text-left ${templateId === item.id ? "border-[#5ce1ff]" : "border-[#245068]"}`}>
+                    <span className="block font-medium">{item.name}</span>
+                    <span className="text-sm text-[#8aa0b4]">{item.summary}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+            {templateId ? (
+              <div className="space-y-3">
+                <p className="text-sm text-[#b7c9d8]">Add your details. Sample text stays if you skip one.</p>
+                <input value={draft.phone} onChange={(event) => patch({ phone: event.target.value })} placeholder="Phone" className={fieldClass()} />
+                <input value={draft.brief} onChange={(event) => patch({ brief: event.target.value })} placeholder="Offer" className={fieldClass()} />
+                <div className="flex flex-wrap gap-2">
+                  {["Make it more fun", "Different photo", "Bigger offer"].map((choice) => (
+                    <button key={choice} type="button" onClick={() => patch({ brief: `${draft.brief} (${choice})` })} className="min-h-11 rounded-full border border-[#245068] px-3 text-sm">{choice}</button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </Panel>
         ) : null}
 
@@ -222,7 +417,7 @@ export function ComposeMailer({
           </Panel>
         ) : null}
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        {path && path !== "team" ? <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <button
             type="button"
             onClick={() => {
@@ -234,7 +429,7 @@ export function ComposeMailer({
           >
             Back
           </button>
-          {!lastStep ? (
+          {path && path !== "team" && !lastStep ? (
             <button
               type="button"
               onClick={continueStep}
@@ -244,7 +439,7 @@ export function ComposeMailer({
               Continue
             </button>
           ) : null}
-        </div>
+        </div> : null}
 
         <Panel className="p-4">
           <button

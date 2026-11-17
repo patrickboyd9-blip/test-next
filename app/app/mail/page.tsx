@@ -1,12 +1,15 @@
 import { ComposeMailer } from "@/components/cockpit/ComposeMailer"
+import type { StartPath } from "@/components/cockpit/StartChoices"
 import { composeSteps, emptyDraft, LIST_BEFORE_PROOF, SAMPLE_SHOP, type ComposeStep } from "@/lib/mailer-compose/flow"
 
 export const dynamic = "force-dynamic"
 
+const PATHS = new Set<StartPath>(["ai", "upload", "template", "team"])
+
 export default async function NewMailerPage({
   searchParams,
 }: {
-  searchParams: Promise<{ step?: string; brief?: string; list?: string }>
+  searchParams: Promise<{ step?: string; brief?: string; list?: string; path?: string; quick?: string; beat?: string }>
 }) {
   const params = await searchParams
   const allowed = new Set<ComposeStep>(composeSteps(LIST_BEFORE_PROOF))
@@ -15,5 +18,16 @@ export default async function NewMailerPage({
   const draft = emptyDraft()
   if (params.list === "nearby-homes" || params.list === "last-year") draft.listId = params.list
   if (typeof params.brief === "string") draft.brief = params.brief
-  return <ComposeMailer shop={SAMPLE_SHOP} initialStep={step} initialDraft={draft} />
+  const path = PATHS.has(params.path as StartPath) ? (params.path as StartPath) : step === "what" ? null : "ai"
+  const beat = params.beat ? Number(params.beat) : null
+  return (
+    <ComposeMailer
+      shop={SAMPLE_SHOP}
+      initialStep={step}
+      initialDraft={draft}
+      initialPath={path}
+      initialQuick={params.quick === "1"}
+      sampleBeat={Number.isFinite(beat) ? beat : null}
+    />
+  )
 }

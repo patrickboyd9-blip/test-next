@@ -1,6 +1,7 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
 
+import { ACCOMPLISH_QUESTION, ACTION_CHOICES, ACTION_QUESTION, AUDIENCE_QUESTION, interviewReply, proposalFor } from "./interview"
 import {
   approvePreview,
   canApprove,
@@ -65,6 +66,22 @@ test("approve is a preview and does not mail or charge", () => {
   assert.equal(result.mailed, false)
   assert.equal(result.charged, false)
   assert.equal(result.externalCalls, 0)
+})
+
+test("the chat asks the documented goal questions, then writes the card", () => {
+  const goal = interviewReply("We're opening a restaurant and want to promote our grand opening.")
+  assert.equal(goal.ready, false)
+  assert.equal(goal.reply, ACTION_QUESTION)
+  assert.ok(goal.choices.includes("Call you"))
+  assert.deepEqual([...goal.choices], [...ACTION_CHOICES])
+  const action = interviewReply("Call you", goal.brief)
+  assert.equal(action.reply, AUDIENCE_QUESTION)
+  const audience = interviewReply("Homeowners in specific ZIP codes", action.brief)
+  assert.equal(audience.ready, true)
+  const card = proposalFor({ ...audience.brief, businessInfo: { name: "Tony's Brick Oven Pizza" }, goal: "Fill slow weeknights" })
+  assert.equal(card.line, "Tuesday 2-for-1 large pizzas")
+  assert.match(card.why, /weeknight/)
+  assert.equal(ACCOMPLISH_QUESTION, "What would you like to accomplish?")
 })
 
 test("sample mailers use plain statuses and amber only when a proof is waiting", () => {

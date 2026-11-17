@@ -2,7 +2,7 @@ import { ChevronLeft } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 
-const EXAMPLE_PROMPTS = [
+export const EXAMPLE_PROMPTS = [
   "I want to get more appointments from homeowners nearby.",
   "I want to send 1,000 postcards to this neighborhood.",
   "We're opening a restaurant and want to promote our grand opening.",
