@@ -21,6 +21,8 @@ test("the gallery plans one photo for each of the 24 templates", () => {
     assert.equal(job.publicPath, `/gallery/${job.templateId}.png`)
     assert.match(job.prompt, /Do not crop a face/)
     assert.match(job.prompt, /No logos and no lettering/)
+    assert.match(job.prompt, /\bno people\b/i)
+    assert.match(job.prompt, /single photograph, one scene, not a collage, no split screen/i)
     assert.doesNotMatch(job.prompt, /Sample\./)
     assert.equal(galleryPhotoSrc(job.templateId), job.publicPath)
   }

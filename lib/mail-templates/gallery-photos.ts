@@ -41,15 +41,69 @@ export interface GallerySpendLog {
   entries: GallerySpendEntry[]
 }
 
+const SCENE_LOCK = "Single photograph, one scene, not a collage, no split screen."
+
 const TRADE_SCENE: Record<string, string> = {
-  roofing: "A residential asphalt-shingle roof in late daylight, with flashing and a gutter. No people.",
-  hvac: "An outdoor air-conditioner condenser beside a house wall. No people.",
-  restaurant: "A pizza on a wooden table in a small dining room. No people and no readable menu.",
-  dental: "A bright dental treatment room with a chair and a window. No people and no readable charts.",
-  real_estate: "The front of a lived-in house, a walkway, and a tree. No sign and no people.",
-  landscaping: "A mowed front lawn and a trimmed hedge beside a house. No people.",
-  auto_repair: "A brake rotor on a lift in a clean service bay. No logo, no face, and no text.",
-  cleaning: "A sunlit living room with a wood floor and a sofa after cleaning. No people and no labeled bottles.",
+  roofing: "A residential asphalt-shingle roof in late daylight, with metal flashing and a copper gutter, the roof empty, no people.",
+  hvac: "An outdoor air-conditioner condenser sitting alone on its pad beside a house wall, no people.",
+  restaurant: "A freshly baked pizza on a wooden table in a small empty restaurant dining room, no people and no readable menu.",
+  dental: "A bright modern dental exam room with a dental chair, an overhead examination light, and a window, the room empty, no people and no readable charts.",
+  real_estate: "The front of a well-kept lived-in house, a walkway, a front porch, and a shade tree, no sign and no people.",
+  landscaping: "A freshly mowed front lawn and a neatly trimmed green hedge beside a well-kept house, no people.",
+  auto_repair: "A brake rotor on a car raised on a lift in a clean empty service bay, the bay unoccupied, no people and no logos.",
+  cleaning: "A sunlit living room with a clean wood floor and a sofa after cleaning, no people and no labeled bottles.",
+}
+
+/** Subject-first empty scenes for each gallery photograph. */
+const TEMPLATE_SCENE: Record<string, string> = {
+  "roofing-free-inspection":
+    "A quiet residential street of asphalt-shingle rooftops after rain, wet dark shingles and gutters gleaming, the street empty, no people.",
+  "roofing-after-the-storm":
+    "A single residential asphalt-shingle roof after a rainstorm, wet shingles, a soaked blue tarp over one damaged patch, and a clear sky, the roof empty, no people.",
+  "roofing-book-a-check":
+    "A residential asphalt-shingle roof in late daylight, with metal flashing, a copper gutter, and a small stack of new shingles, the roof empty, no people.",
+  "hvac-same-day-cooling":
+    "An outdoor air-conditioner condenser sitting idle beside a shaded house wall in late afternoon, service valves capped, the yard empty, no people.",
+  "hvac-before-the-heat":
+    "An outdoor air-conditioner condenser in the shade beside a house in late spring light, the equipment pad unoccupied, no people.",
+  "hvac-quiet-fix":
+    "A close view of a residential outdoor air-conditioner condenser beside a vinyl house wall, the unit alone on its concrete pad, no people.",
+  "restaurant-grand-opening":
+    "A warmly lit small restaurant dining room with wooden tables set for dinner, plates and glasses ready, the room empty, no people.",
+  "restaurant-weeknight":
+    "A small restaurant dining room with a wooden table set for two in evening window light, plates and glasses, the room empty, no people.",
+  "restaurant-catering":
+    "A freshly baked pizza on a wooden table in a small empty restaurant dining room, no people and no readable menu.",
+  "dental-first-visit":
+    "A bright modern dental exam room with a dental chair and overhead examination light, a window, the room empty, no people.",
+  "dental-whitening":
+    "A sunlit dental office waiting room with a single upholstered chair and a potted plant by the window, the room empty, no people.",
+  "dental-call-the-office":
+    "A bright modern dental exam room with a dental chair, an instrument tray, and a window, the room empty, no people and no readable charts.",
+  "realestate-home-value":
+    "The finished front porch and tidy concrete walkway of a well-kept lived-in house in late afternoon light, a shade tree on a mowed lawn, the property complete and empty, no construction materials, no bags, no lettering, no signs, and no people.",
+  "realestate-just-listed":
+    "A well-kept single-family house on a quiet residential street in warm late light, a walkway and a tree, no for-sale sign, no people.",
+  "realestate-thinking-of-selling":
+    "The front of a well-kept lived-in house, a walkway, a front porch, and a shade tree, no sign and no people.",
+  "landscaping-spring-cleanup":
+    "A tidy front yard with a mowed lawn, fresh dark mulch beds, and a wheelbarrow of mulch at rest in morning light, no people.",
+  "landscaping-lawn-plan":
+    "A freshly cut green front lawn along a concrete sidewalk in late-day sun, ordinary houses in the background, no people.",
+  "landscaping-backyard-light":
+    "A freshly mowed front lawn and a neatly trimmed green hedge beside a well-kept house, gardening tools at rest on the grass, no people.",
+  "auto-repair-brake-check":
+    "A close view of a rusty brake rotor and caliper on a car raised on a two-post lift in a clean empty service bay, no people and no logos.",
+  "auto-repair-oil-service":
+    "A car with its hood open in a bright empty auto service bay, an oil drain pan and tools on the floor, no people and no badges.",
+  "auto-repair-inspection":
+    "A close view of a brake rotor and caliper on a car raised on a two-post lift in a clean empty auto service bay, an impact wrench resting unused on the floor, the bay unoccupied, no people, no hands, no arms, and no logos.",
+  "cleaning-first-visit":
+    "A sunlit kitchen with a spotless tile counter and a clean empty sink after a finished cleaning, no people and no labeled bottles.",
+  "cleaning-move-out":
+    "An empty sunlit room with freshly cleaned wood floors and a yellow mop bucket at the edge, no people.",
+  "cleaning-weekly":
+    "A sunlit living room with a clean wood floor and a sofa after cleaning, a coffee table with books, no people and no labeled bottles.",
 }
 
 export function emptyGallerySpendLog(): GallerySpendLog {
@@ -111,18 +165,22 @@ export function planGalleryPhotos(templates: readonly MailTemplate[] = galleryV1
   })
 }
 
+function galleryScene(template: MailTemplate): string {
+  return (
+    TEMPLATE_SCENE[template.id] ??
+    TRADE_SCENE[template.industry] ??
+    `${template.industry.replace(/_/g, " ")} work on an ordinary empty property. No people.`
+  )
+}
+
 function galleryPhotoBrief(template: MailTemplate): ImageBrief {
   const role = template.spec.imageryRole
   const photographic = role === "consequence" || role === "neighborhood" || role === "crew"
-  const scene = TRADE_SCENE[template.industry] ?? `${template.industry.replace(/_/g, " ")} work on an ordinary property. No people.`
-  const spec: CreativeSpec = photographic
-    ? template.spec
-    : {
-        ...template.spec,
-        imageryRole: "neighborhood",
-        layoutVariant: "image_grounded",
-        visualDirection: scene,
-      }
+  const scene = galleryScene(template)
+  const spec: CreativeSpec = {
+    ...(photographic ? template.spec : { ...template.spec, imageryRole: "neighborhood", layoutVariant: "image_grounded" }),
+    visualDirection: scene,
+  }
   const brief = toImageBrief(spec, { variationKey: template.id })
   if (!brief) {
     throw new Error(`No photograph brief for ${template.id}.`)
@@ -131,7 +189,7 @@ function galleryPhotoBrief(template: MailTemplate): ImageBrief {
     ...brief,
     artDirection: {
       ...brief.artDirection,
-      refuse: `${brief.artDirection.refuse} Do not crop a face. No logos and no lettering.`,
+      refuse: `${brief.artDirection.refuse} Do not crop a face. No logos and no lettering. ${SCENE_LOCK} The scene is empty: no workers, no hands, no arms, no faces.`,
     },
   }
 }
