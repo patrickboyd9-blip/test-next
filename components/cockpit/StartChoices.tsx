@@ -1,4 +1,7 @@
-import { LayoutTemplate, PenLine, Sparkles, Upload } from "lucide-react"
+import { LayoutTemplate, PenLine, Upload } from "lucide-react"
+
+import { CometMark } from "@/components/assistant/CometMark"
+import { ASSISTANT_NAME } from "@/lib/assistant/comet"
 
 import { Eyebrow, Panel } from "./ui"
 
@@ -8,33 +11,33 @@ const CHOICES: Array<{
   id: StartPath
   title: string
   description: string
-  icon: typeof Sparkles
+  icon: "comet" | "upload" | "template" | "team"
   featured?: boolean
 }> = [
   {
     id: "ai",
-    title: "Chat with AI",
-    description: "Tell us your goal. We ask a few follow-ups and design the postcard.",
-    icon: Sparkles,
+    title: `Chat with ${ASSISTANT_NAME}`,
+    description: `Tell ${ASSISTANT_NAME} your goal. ${ASSISTANT_NAME} asks a few follow-ups and designs the postcard.`,
+    icon: "comet",
     featured: true,
   },
   {
     id: "upload",
     title: "Upload my own design",
     description: "Upload a front and a back. We fit them to the postcard and show a proof.",
-    icon: Upload,
+    icon: "upload",
   },
   {
     id: "template",
     title: "Start from a template",
     description: "Pick a mailer for your kind of business, then add your name and offer.",
-    icon: LayoutTemplate,
+    icon: "template",
   },
   {
     id: "team",
     title: "Have our team design it",
     description: "Share your logo, offer, and style. A person builds the postcard.",
-    icon: PenLine,
+    icon: "team",
   },
 ]
 
@@ -47,7 +50,6 @@ export function StartChoices({ onChoose }: { onChoose: (path: StartPath) => void
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         {CHOICES.map((choice) => {
-          const Icon = choice.icon
           return (
             <button
               key={choice.id}
@@ -61,7 +63,7 @@ export function StartChoices({ onChoose }: { onChoose: (path: StartPath) => void
               }`}
             >
               <span className="flex size-10 items-center justify-center rounded-xl bg-[#071018] text-[#7ee7ff]">
-                <Icon className="size-5" aria-hidden />
+                {choice.icon === "comet" ? <CometMark className="size-6" /> : choice.icon === "upload" ? <Upload className="size-5" aria-hidden /> : choice.icon === "template" ? <LayoutTemplate className="size-5" aria-hidden /> : <PenLine className="size-5" aria-hidden />}
               </span>
               <span className="text-lg font-semibold">{choice.title}</span>
               <span className="text-sm leading-6 text-[#b7c9d8]">{choice.description}</span>

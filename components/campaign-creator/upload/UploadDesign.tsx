@@ -288,7 +288,7 @@ export function UploadDesign({
       {suggestions.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>A few thoughts on your design</CardTitle>
+            <CardTitle>Comet on your design</CardTitle>
             <CardDescription>
               Suggestions only. Your files stay as you uploaded them, and you can approve whenever the proof looks right.
             </CardDescription>

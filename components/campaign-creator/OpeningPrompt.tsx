@@ -28,7 +28,7 @@ export function OpeningPrompt({ onSelectExample, onBack }: OpeningPromptProps) {
       <div className="flex flex-col items-center gap-4 text-center">
         <h1 className="text-xl font-semibold">What would you like to accomplish?</h1>
         <p className="max-w-md text-sm text-muted-foreground">
-          Describe what you want in your own words — Modern Mail will ask what it needs
+          Describe what you want in your own words — Comet will ask what it needs
           to know next.
         </p>
         <div className="flex flex-wrap justify-center gap-2">

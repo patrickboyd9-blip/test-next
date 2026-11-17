@@ -1,32 +1,51 @@
 import Link from "next/link"
 
+import { CometMark } from "@/components/assistant/CometMark"
+import { cometHomeNote } from "@/lib/assistant/home-note"
 import { SAMPLE_MAILERS, STATUS_LABEL, statusNeedsYou } from "@/lib/mailer-compose/flow"
 
-import { MailFlight } from "./sky"
+import { Horizon } from "./sky"
 import { Eyebrow, Panel } from "./ui"
 
-export function HomeBoard({ shop }: { shop: string }) {
+export function HomeBoard({ shop, sample = true }: { shop: string; sample?: boolean }) {
   const waiting = SAMPLE_MAILERS.filter((item) => statusNeedsYou(item.status)).length
+  const comet = cometHomeNote(SAMPLE_MAILERS, sample)
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-8 sm:px-6 sm:py-12">
-        <div className="space-y-5">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div className="relative min-h-[340px] space-y-5 sm:min-h-[460px]">
+          <Horizon mode="hero" />
+          <div className="relative z-10">
             <Eyebrow>How&apos;s my mail doing?</Eyebrow>
-            <MailFlight mode="drift" />
           </div>
-          <h1 className="max-w-xl text-3xl font-semibold tracking-tight sm:text-5xl">
+          <h1 className="relative z-10 max-w-xl text-3xl font-semibold tracking-tight sm:text-5xl">
             {waiting > 0 ? "One sample mailer is waiting on you." : "Nothing is waiting on you."}
           </h1>
-          <p className="max-w-xl text-base text-[#b7c9d8]">
+          <p className="relative z-10 max-w-xl text-base text-[#b7c9d8]">
             {shop}. This list is a sample so you can see the shape of the page. It is not a report, and nothing here was mailed.
           </p>
           <Link
             href="/app/mail"
-            className="inline-flex min-h-14 w-full items-center justify-center rounded-2xl bg-[#5ce1ff] px-6 text-lg font-semibold text-[#041018] sm:w-auto"
+            className="relative z-10 inline-flex min-h-14 w-full items-center justify-center rounded-2xl bg-[#5ce1ff] px-6 text-lg font-semibold text-[#041018] sm:w-auto"
           >
             New mailer
           </Link>
         </div>
+
+        <Panel className="p-4 sm:p-5">
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <h2 className="flex items-center gap-2 text-lg font-medium">
+              <CometMark />
+              {comet.name}
+            </h2>
+            {comet.sample ? <p className="text-sm text-[#8aa0b4]">Sample</p> : null}
+          </div>
+          <p className="text-sm leading-6 text-[#d5e6f2]">{comet.snapshot}</p>
+          <ul className="mt-3 space-y-2">
+            {comet.recommendations.map((line) => (
+              <li key={line} className="text-sm leading-6 text-[#b7c9d8]">{line}</li>
+            ))}
+          </ul>
+        </Panel>
 
         <Panel className="p-4 sm:p-5">
           <div className="mb-3 flex items-baseline justify-between gap-3">

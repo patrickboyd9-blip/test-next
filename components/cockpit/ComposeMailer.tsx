@@ -38,7 +38,10 @@ import { TEMPLATE_INDUSTRIES, TEMPLATE_INDUSTRY_LABELS, type TemplateIndustry } 
 import { StartChoices, type StartPath } from "./StartChoices"
 
 import { ProofTray } from "./ProofCard"
-import { MailFlight } from "./sky"
+import { CometMark } from "@/components/assistant/CometMark"
+import { ASSISTANT_NAME } from "@/lib/assistant/comet"
+
+import { Horizon } from "./sky"
 import { CockpitFrame, Eyebrow, fieldClass, Panel } from "./ui"
 
 const STEP_LABEL: Record<ComposeStep, string> = {
@@ -165,7 +168,7 @@ export function ComposeMailer({
   }
 
   return (
-    <CockpitFrame>
+    <CockpitFrame hero={path === null && step === "what"}>
       <div className="mx-auto flex max-w-3xl flex-col gap-5 px-4 py-6 sm:px-6 sm:py-8">
         <div className="flex items-center justify-between gap-3">
           <Link href="/app" className="text-sm text-[#8ecfff]">
@@ -240,9 +243,11 @@ export function ComposeMailer({
         ) : null}
 
         {step === "what" && path === null ? (
-          <div className="space-y-2">
-            <MailFlight mode="drift" />
-            <StartChoices onChoose={setPath} />
+          <div className="relative min-h-[220px] space-y-2 sm:min-h-[280px]">
+            <Horizon mode="hero" />
+            <div className="relative z-10">
+              <StartChoices onChoose={setPath} />
+            </div>
           </div>
         ) : null}
 
@@ -273,6 +278,12 @@ export function ComposeMailer({
               {chat.map((turn, index) => (
                 <li key={`${turn.role}-${index}`} className={turn.role === "customer" ? "text-right" : "text-left"}>
                   <p className={`inline-block max-w-[90%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-left text-sm leading-6 ${turn.role === "customer" ? "bg-[#5ce1ff] text-[#041018]" : "bg-[#071018] text-[#e7f2fb]"}`}>
+                    {turn.role === "assistant" ? (
+                      <span className="mb-1 flex items-center gap-1 text-xs text-[#7ee7ff]">
+                        <CometMark className="size-3.5" />
+                        {ASSISTANT_NAME}
+                      </span>
+                    ) : null}
                     {turn.text}
                   </p>
                   {turn.choices && index === chat.length - 1 && !proposal ? (

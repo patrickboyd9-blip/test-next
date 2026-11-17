@@ -13,7 +13,7 @@ import {
 } from "@/lib/mailer-compose/flow"
 
 import { ProofTray } from "./ProofCard"
-import { MailFlight } from "./sky"
+import { Horizon } from "./sky"
 import { CockpitFrame, Eyebrow, Panel } from "./ui"
 
 export function MailerStatus({
@@ -125,9 +125,9 @@ export function PreviewStatus({ id }: { id: string }) {
   return (
     <CockpitFrame>
       <div className="mx-auto flex max-w-3xl flex-col gap-5 px-4 py-6 sm:px-6 sm:py-8">
-        <div className="space-y-3 text-center">
-          <MailFlight mode="arrive" />
-          <h1 className="mm-caption text-3xl font-semibold tracking-tight">Your mail is on its way</h1>
+        <div className="relative min-h-[220px] space-y-3 text-center">
+          <Horizon mode="arrive" />
+          <h1 className="relative z-10 mm-caption text-3xl font-semibold tracking-tight">Your mail is on its way</h1>
           <p className="text-sm text-[#b7c9d8]">Preview only. Nothing was mailed and nothing was charged.</p>
         </div>
         <MailerStatus mailer={mailer} proof={proof} framed={false} />

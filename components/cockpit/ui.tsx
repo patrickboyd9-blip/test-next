@@ -4,11 +4,19 @@ import { cn } from "@/lib/utils"
 
 import { SpaceSky } from "./sky"
 
-export function CockpitFrame({ children, className }: { children: ReactNode; className?: string }) {
+export function CockpitFrame({
+  children,
+  className,
+  hero = false,
+}: {
+  children: ReactNode
+  className?: string
+  hero?: boolean
+}) {
   return (
     <div className={cn("relative min-h-svh overflow-hidden bg-[#05080f] text-[#e7f2fb]", className)}>
-      <SpaceSky />
-      <div className="relative">{children}</div>
+      <SpaceSky hero={hero} />
+      <div className="relative pb-16">{children}</div>
     </div>
   )
 }
@@ -23,7 +31,7 @@ export function Panel({ children, className }: { children: ReactNode; className?
   return (
     <section
       className={cn(
-        "rounded-2xl border border-[#1c3d52] bg-[#0c1424]/90 shadow-[0_0_40px_rgba(92,225,255,0.05)]",
+        "rounded-2xl border border-[#1c3d52] bg-[#0c1424]/95 shadow-[0_0_40px_rgba(8,16,28,0.45)] backdrop-blur-md",
         className
       )}
     >

@@ -1,3 +1,6 @@
+import { ASSISTANT_THINKING } from "@/lib/assistant/comet"
+import { CometMark } from "@/components/assistant/CometMark"
+
 import { MessageBubble } from "./MessageBubble"
 import type { ConversationMessage } from "@/lib/campaign-creator/types"
 
@@ -15,7 +18,8 @@ export function ConversationThread({ messages, isThinking }: ConversationThreadP
       {isThinking && (
         <div className="flex justify-start">
           <div className="rounded-xl bg-card px-3.5 py-2 text-sm text-muted-foreground ring-1 ring-foreground/10">
-            Modern Mail is thinking…
+            <CometMark className="mr-2 inline size-4" />
+            {ASSISTANT_THINKING}
           </div>
         </div>
       )}

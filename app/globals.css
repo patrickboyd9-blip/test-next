@@ -70,29 +70,125 @@
   animation: float 4s ease-in-out infinite;
 }
 
-/* Cockpit sky flight. Transform and opacity only. Reduced motion shows the still. */
-@keyframes mm-drift {
-  0% { transform: translate(12px, 86px) rotate(-14deg); opacity: 0; }
-  12% { opacity: 0.95; }
-  40% { transform: translate(118px, 28px) rotate(-6deg); opacity: 0.95; }
-  74% { transform: translate(214px, 50px) rotate(3deg); opacity: 0.95; }
-  100% { transform: translate(286px, 76px) rotate(6deg); opacity: 0; }
+/* Cinematic sky. Transform and opacity only. Reduced motion is a still horizon. */
+.mm-sky,
+.mm-horizon {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 
-@keyframes mm-arrive {
-  0% { transform: translate(-6px, 18px) scale(0.5) rotate(-18deg); opacity: 0; }
-  18% { opacity: 1; }
-  100% { transform: translate(286px, 76px) scale(1) rotate(4deg); opacity: 1; }
+.mm-sky-wash {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 50% 42% at 100% 0%, rgba(70, 140, 160, 0.14), transparent 62%),
+    linear-gradient(180deg, #070c16 0%, #05080f 48%, #03060c 100%);
 }
 
-@keyframes mm-flag {
-  from { transform: rotate(70deg); }
-  to { transform: rotate(0deg); }
+.mm-stars {
+  position: absolute;
+  inset: -8%;
+  background-repeat: no-repeat;
 }
 
-@keyframes mm-trail {
-  from { stroke-dashoffset: 90; }
-  to { stroke-dashoffset: 0; }
+.mm-stars-far { animation: mm-parallax 90s linear infinite; }
+.mm-stars-mid { animation: mm-parallax 60s linear infinite reverse; }
+.mm-stars-near { animation: mm-parallax 40s linear infinite; }
+
+.mm-limb {
+  position: absolute;
+  left: -20%;
+  right: -20%;
+  bottom: -46%;
+  height: 58%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 0%, rgba(18, 48, 62, 0.55) 0%, rgba(5, 10, 18, 0.2) 36%, transparent 58%);
+  box-shadow:
+    0 -1px 0 rgba(190, 245, 255, 0.35),
+    0 -18px 70px rgba(72, 196, 210, 0.16);
+}
+
+.mm-sky-hero .mm-limb {
+  bottom: -34%;
+  height: 70%;
+  box-shadow:
+    0 -1px 0 rgba(210, 250, 255, 0.5),
+    0 -28px 110px rgba(72, 196, 210, 0.28);
+}
+
+.mm-horizon {
+  position: absolute;
+  inset: 0;
+  height: auto;
+}
+
+.mm-horizon .mm-limb {
+  bottom: -48%;
+  height: 72%;
+  background: radial-gradient(ellipse at 50% 0%, rgba(10, 36, 48, 0.85) 0%, rgba(6, 16, 26, 0.35) 30%, transparent 52%);
+  box-shadow:
+    0 -2px 0 rgba(214, 248, 255, 0.55),
+    0 -36px 90px rgba(64, 190, 206, 0.22);
+}
+
+.mm-horizon-arrive {
+  height: 200px;
+}
+
+.mm-comet {
+  position: absolute;
+  left: 0;
+  bottom: 28%;
+  width: 180px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(120, 230, 240, 0.2) 35%, #f4fdff 90%);
+  box-shadow: 0 0 14px rgba(110, 230, 240, 0.7), 0 0 36px rgba(70, 190, 210, 0.28);
+  opacity: 0;
+  animation: mm-comet 20s ease-in-out infinite;
+}
+
+.mm-comet-arrive {
+  width: 220px;
+  animation: mm-comet-arrive 2.6s cubic-bezier(0.2, 0.6, 0.2, 1) both;
+}
+
+.mm-flash {
+  position: absolute;
+  left: 50%;
+  bottom: 18%;
+  width: 140px;
+  height: 28px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: radial-gradient(ellipse at center, rgba(230, 255, 255, 0.85), rgba(90, 210, 220, 0.15) 55%, transparent 72%);
+  opacity: 0;
+  animation: mm-flash 2.6s ease-out both;
+}
+
+@keyframes mm-parallax {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-2%, 1%, 0); }
+}
+
+@keyframes mm-comet {
+  0%, 42% { transform: translate3d(-20%, 0, 0) rotate(-18deg); opacity: 0; }
+  50% { opacity: 0.95; }
+  100% { transform: translate3d(420%, 30%, 0) rotate(-6deg); opacity: 0; }
+}
+
+@keyframes mm-comet-arrive {
+  0% { transform: translate3d(-30%, -20%, 0) rotate(-22deg); opacity: 0; }
+  16% { opacity: 1; }
+  100% { transform: translate3d(280%, 220%, 0) rotate(-6deg); opacity: 0; }
+}
+
+@keyframes mm-flash {
+  0%, 68% { opacity: 0; }
+  82% { opacity: 0.9; }
+  100% { opacity: 0.28; }
 }
 
 @keyframes mm-caption {
@@ -100,35 +196,26 @@
   to { opacity: 1; transform: none; }
 }
 
-.mm-flag {
-  transform-box: view-box;
-  transform-origin: 332px 78px;
-}
-
-.mm-flight-drift .mm-flag { transform: rotate(70deg); }
-.mm-flight-drift .mm-card-move { animation: mm-drift 16s ease-in-out infinite; }
-.mm-flight-drift .mm-trail { animation: mm-trail 16s linear infinite; }
-
-.mm-flight-arrive .mm-card-move { animation: mm-arrive 2.8s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
-.mm-flight-arrive .mm-flag { animation: mm-flag 0.45s ease-out 2s both; }
-.mm-flight-arrive .mm-trail { animation: mm-trail 2.8s linear both; }
-.mm-caption { animation: mm-caption 0.55s ease-out 2.15s both; }
-
-.mm-card-move { opacity: 0; }
-.mm-card-rest { opacity: 0; }
+.mm-caption { animation: mm-caption 0.55s ease-out 2.2s both; }
+.mm-intro { animation: mm-caption 0.45s ease-out both; }
 
 @media (prefers-reduced-motion: reduce) {
-  .mm-card-move,
-  .mm-flag,
-  .mm-trail,
-  .mm-caption {
+  .mm-stars-far,
+  .mm-stars-mid,
+  .mm-stars-near,
+  .mm-comet,
+  .mm-flash,
+  .mm-caption,
+  .mm-intro {
     animation: none !important;
   }
-  .mm-flight-drift .mm-flag { transform: rotate(70deg); }
-  .mm-flight-arrive .mm-flag { transform: none; }
-  .mm-card-move { opacity: 0 !important; }
-  .mm-card-rest { opacity: 1; }
-  .mm-caption { opacity: 1; transform: none; }
+  .mm-comet { opacity: 0; }
+  .mm-flash { opacity: 0.35; }
+  .mm-caption, .mm-intro { opacity: 1; transform: none; }
+}
+
+@media (max-width: 640px) {
+  .mm-comet { width: 120px; }
 }
 
 :root {
