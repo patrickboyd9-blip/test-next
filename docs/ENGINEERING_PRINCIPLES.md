@@ -1,5 +1,7 @@
 # Engineering Principles
 
+Standing requirement: [Perpetual Adaptability](PERPETUAL_ADAPTABILITY.md). Open at the edges, proprietary at the core.
+
 ## 1. Quality First
 
 Working software is more important than quickly written software.
