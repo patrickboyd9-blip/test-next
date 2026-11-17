@@ -33,6 +33,7 @@ import {
   type ProposedMailer,
 } from "@/lib/mailer-compose/interview"
 import type { CampaignBrief } from "@/lib/campaign-creator/types"
+import { galleryPhotoSrc } from "@/lib/mail-templates/gallery-photo-src"
 import { listMailTemplates, getMailTemplate } from "@/lib/mail-templates/query"
 import { TEMPLATE_INDUSTRIES, TEMPLATE_INDUSTRY_LABELS, type TemplateIndustry } from "@/lib/mail-templates/types"
 
@@ -497,7 +498,11 @@ export function ComposeMailer({
               ).map((item) => (
                 <li key={item.id}>
                   <button type="button" onClick={() => { setTemplateId(item.id); patch({ brief: item.spec.offer || item.summary }) }} className={`flex min-h-14 w-full items-center gap-3 rounded-xl border px-4 text-left ${templateId === item.id ? "border-[#5ce1ff]" : "border-[#245068]"}`}>
-                    <span aria-hidden className="h-10 w-4 shrink-0 rounded-full" style={{ background: item.spec.palette?.[0] ?? "#245068" }} />
+                    {galleryPhotoSrc(item.id) ? (
+                      <img src={galleryPhotoSrc(item.id) ?? ""} alt="" className="h-14 w-20 shrink-0 rounded-md object-cover" />
+                    ) : (
+                      <span aria-hidden className="h-10 w-4 shrink-0 rounded-full" style={{ background: item.spec.palette?.[0] ?? "#245068" }} />
+                    )}
                     <span>
                       <span className="block font-medium">{item.name}</span>
                       <span className="text-sm text-[#8aa0b4]">{item.layoutRecipe ? item.layoutRecipe.replace("-", " ") : item.summary}</span>

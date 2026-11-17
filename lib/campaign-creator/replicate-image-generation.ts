@@ -6,6 +6,7 @@ import { buildOpenAIImagePrompt } from "./openai-image-generation"
 import { trimPhotoFrame } from "./trim-photo-frame"
 
 /** Patrick's blind photo test (Oct 27 2026): Imagen 4 won 5 of 10 scenes. About $0.04 per image on Replicate. */
+export const IMAGEN_ESTIMATED_USD = 0.04
 export const IMAGEN_IMAGE_PROVIDER = "replicate"
 export const IMAGEN_IMAGE_MODEL = "google/imagen-4"
 export const IMAGEN_ASPECT_RATIO = "4:3"
@@ -59,7 +60,7 @@ export class ImagenImageGenerationAdapter implements ImageGenerationAdapter {
     const img = await this.#fetch(url)
     if (!img.ok) throw new Error(`Imagen download failed with status ${img.status}.`)
     const b64 = (await trimPhotoFrame(Buffer.from(await img.arrayBuffer()))).toString("base64")
-    console.log("[image-generation]", JSON.stringify({ provider: IMAGEN_IMAGE_PROVIDER, model: IMAGEN_IMAGE_MODEL, prediction: pred.id, estimatedUsd: 0.04 }))
+    console.log("[image-generation]", JSON.stringify({ provider: IMAGEN_IMAGE_PROVIDER, model: IMAGEN_IMAGE_MODEL, prediction: pred.id, estimatedUsd: IMAGEN_ESTIMATED_USD }))
     return { id: randomUUID(), src: `data:image/png;base64,${b64}`, sourceClass: GENERATED_ASSET_SOURCE_CLASS, provider: IMAGEN_IMAGE_PROVIDER, model: IMAGEN_IMAGE_MODEL, generatedAt: new Date().toISOString() }
   }
 }
