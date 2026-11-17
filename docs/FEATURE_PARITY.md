@@ -1,25 +1,35 @@
 # Feature parity
 
-Checked against the production app at `e7832ef` and the PR60 preview in demo mode. Each row was opened in the browser. Advanced is a fine place for a tool, as long as the click reaches it.
+Checked against production `e7832ef` and the cockpit preview in demo mode. Each row was opened in the browser. A status is only Works, Broken, or Missing. Advanced is a fine place for a tool when the click reaches it.
 
-Preview campaigns live in the server process under the id `preview-demo`, so a cold start can still open the editor. Uploaded postcard files are also kept in the browser, so a missing disk or Blob store does not leave a blank proof.
+Preview campaigns use the id `preview-demo`, so a cold server can still open the editor. An uploaded postcard stays in the browser, so a missing disk or Blob store does not leave a blank proof.
 
-| Feature | Where you click | Status |
-| --- | --- | --- |
-| Home and sample mailers | Home | Works. The sample account and four sample mailers are on the page. |
-| New mailer, four start paths | New mailer | Works. Chat with Comet, upload, template, and team design are all there. |
-| Upload a PNG, JPG, or PDF and see the proof | New mailer, Upload my own design | Works. The front and the back show on the upload step and again on the proof. A bad file shows an error instead of a blank card. |
-| Fit the file on the postcard | Same proof | Works. The file sits inside the postcard frame, with the trim line and the address area drawn on the back. |
-| Logo on the card | Chat with Comet, Add a logo, and the full editor | Works. A PNG or JPG shows on the proof. The full editor still has the saved logo control. |
-| Start from a template | New mailer | Works. Industry filters and the offer fields are on the step. |
-| Ask the team to design it | New mailer, and Advanced, Design requests | Works. The form is on the start path. The list page opens and says nothing is emailed. |
-| Full editor | Advanced, Full editor | Works. Preview opens campaign `preview-demo` with Strategy, Creative, Audience, Quantity, and Launch. |
-| Design templates for 5×8 and 6×9 | Advanced, Templates | Works. Both sizes offer a download, with bleed called out. |
-| Proof and full price before mailing | New mailer, through Proof and To | Works. The placeholder full price is shown, and Approve & mail only saves a preview. |
-| Address list | New mailer, To | Works. Two sample lists and a CSV upload that counts people. |
-| Evidence guidance | Full editor, Guidance | Works. Comet shows the limited-guidance note and does not invent an offer. |
-| Job photos, keep-in-frame, words-only back | Full editor, Job photos | Works. The page lets you drag what must stay in the card, and offers “Words only” for the back. |
-| Follow-up proposal | Full editor, Follow-up | Works. The unsold-estimate proposal is on the page and says sending is off. |
-| Campaign history | Full editor, History | Works. The page lists only finished steps and shows no fake results. |
-| List review and checkout | Full editor, Review list and checkout | Works. Checkout stays closed until a proof, a list, and a price exist. It says it does not charge or mail. |
-| Ask Comet | Button on every page | Works. The help button is on the pages above. |
+| Feature | Where you click | Status | What you get |
+| --- | --- | --- | --- |
+| Home and sample mailers | Home | Works | Sample account, Jordan's Plumbing, and four sample mailers. No invented reply rate. |
+| Campaign list | Home, Mailers in progress | Works | Proof ready, printing, in the mail, and delivered. Each opens a status page. |
+| New mailer | New mailer | Works | Chat with Comet, upload, template, and team design. |
+| Comet introduction | Home `?intro=1` in demo | Works | The first-login card, with Let's go and Look around first. |
+| Chat with Comet | New mailer, Chat with Comet | Works | Comet asks follow-ups and does not call a paid model in demo. |
+| Ask Comet | Button on every app page | Works | Slide-over help. On a proof it sits on the left so it does not cover the address. It does not mail, approve, or charge. |
+| Comet confidentiality | Ask Comet, "Which printer do you use?" | Works | Sample answer. Trusted commercial partners. No vendor, prompt, or cost. |
+| Upload PNG, JPG, or PDF | New mailer, Upload my own design | Works | Front and back show immediately and again on the proof. |
+| Fit on the postcard | Same proof | Works | The file sits in the frame. The back shows the address, postage, and barcode area. |
+| Bad upload | Same step, empty or wrong file | Works | A clear error. The proof is not left blank. |
+| Logo | Chat with Comet, Add a logo, and the full editor | Works | A PNG or JPG shows on the proof. The editor still saves a logo. |
+| Start from a template | New mailer, then an industry | Works | Industry filters and offer fields. |
+| Team design | New mailer, Have our team design it | Works | The request form. Nothing is emailed. |
+| Design request list | Advanced, Design requests | Works | Empty state says nothing is emailed. |
+| Full editor | Advanced, Full editor | Works | Opens `preview-demo` with Strategy, Creative, Audience, Quantity, and Launch. |
+| Design templates, 5×8 and 6×9 | Advanced, Templates | Works | Both sizes, bleed called out, PDF and overlay downloads. |
+| Proof | New mailer, Proof | Works | The card, or the uploaded files, before any price. |
+| Full price | New mailer, To | Works | Placeholder full price. Not postage by itself. Nothing is charged. |
+| Address list | New mailer, To | Works | Two sample lists and a CSV count. |
+| Evidence guidance | Full editor, Guidance | Works | Comet states when guidance is limited and does not invent an offer. |
+| Job photos | Full editor, Job photos | Works | Up to five photos. |
+| Keep in frame | Job photos, drag the box | Works | The box is what must stay on the card. |
+| Words-only back | Job photos, Back of the card | Works | Words only. The front photo stays. |
+| Follow-up proposal | Full editor, Follow-up | Works | Unsold-estimate proposal. Sending is off. |
+| Campaign history | Full editor, History | Works | Finished steps only. No fake response rate. |
+| List review and checkout | Full editor, Review list and checkout | Works | Checkout stays closed until a proof, a list, and a price exist. No charge and no mail. |
+| Approve and mail | New mailer, Approve & mail | Works | Saves a preview only. Nothing is mailed or charged. |
