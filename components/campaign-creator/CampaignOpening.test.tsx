@@ -68,7 +68,7 @@ test("choosing Design it with AI shows the prompt, examples, and chat input", ()
   assert.match(html, /grand opening/)
   assert.match(html, /birthday cards/)
   assert.match(html, /<textarea/)
-  assert.match(html, /Tell Modern Mail what you want to accomplish/)
+  assert.match(html, /Tell Comet what you want to accomplish/)
   assert.match(html, />Back</)
   assert.doesNotMatch(html, /Design it with AI/)
   assert.doesNotMatch(html, /I already have a design/)
@@ -125,7 +125,7 @@ test("choosing Have our team design it opens the request form", () => {
   assert.match(html, /Send to the design team/)
   assert.match(html, />Back</)
   assert.doesNotMatch(html, /data-slot="start-choice"/)
-  assert.doesNotMatch(html, /<textarea[^>]*Tell Modern Mail/)
+  assert.doesNotMatch(html, /<textarea[^>]*Tell Comet/)
 })
 
 function render(initialStep: OpeningStep): string {

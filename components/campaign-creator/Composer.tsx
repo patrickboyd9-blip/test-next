@@ -36,7 +36,7 @@ export function Composer({ value, onValueChange, onSend, disabled }: ComposerPro
         onKeyDown={handleKeyDown}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        placeholder="Tell Modern Mail what you want to accomplish…"
+        placeholder="Tell Comet what you want to accomplish…"
         disabled={disabled}
         className="min-h-10 flex-1 resize-none border-0 bg-transparent p-1 shadow-none focus-visible:ring-0"
         rows={1}

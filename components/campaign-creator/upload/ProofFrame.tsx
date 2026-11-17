@@ -10,13 +10,14 @@ interface ProofFrameProps {
   label: string
   /** Defaults to 5×8, the upload flow's size. */
   size?: PostcardSizeId
+  onError?: () => void
 }
 
 /**
  * The uploaded face, with the trim line and the address keep-out drawn on top.
  * Guides use the 5×8 print spec, the same geometry as the template.
  */
-export function ProofFrame({ src, mediaType, face, label, size = "5x8" }: ProofFrameProps) {
+export function ProofFrame({ src, mediaType, face, label, size = "5x8", onError }: ProofFrameProps) {
   const spec = geometryFor(size)
   const width = spec.artworkCanvasInches.widthInches
   const height = spec.artworkCanvasInches.heightInches
@@ -34,11 +35,12 @@ export function ProofFrame({ src, mediaType, face, label, size = "5x8" }: ProofF
             title={label}
             src={`${src}#toolbar=0&navpanes=0&view=FitH`}
             className="absolute inset-0 h-full w-full border-0 bg-white"
+            onError={onError}
           />
         ) : (
           // The proof is the customer's file. Leave the bytes alone.
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={src} alt={label} className="absolute inset-0 h-full w-full object-contain bg-white" />
+          <img src={src} alt={label} className="absolute inset-0 h-full w-full object-contain bg-white" onError={onError} />
         )}
         <svg
           viewBox={`0 0 ${width} ${height}`}

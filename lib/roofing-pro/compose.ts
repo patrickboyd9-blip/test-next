@@ -16,6 +16,7 @@ import { focalKeepingHead, sceneFocal } from "@/lib/design-intelligence/subject-
 import { inferPhotoSubject } from "@/lib/campaign-creator/photo-subject"
 import { displayWebsite } from "@/lib/campaign-creator/studio-contact"
 
+import { composeBoldFace } from "./bold"
 import { limitChars, ROOFING_COPY_LIMITS, statedExpiryLine, statedLicense } from "./copy"
 import { ROOFING_PRO_META, type RoofingProTemplateId } from "./ids"
 import { proFrontRegions, type ProRegion } from "./layouts"
@@ -68,7 +69,7 @@ export const DARK_TYPE = new Set<RoofingProTemplateId>(["roof_full_bleed", "roof
  * one Patrick preferred: a real headline, a support line, the offer, and the
  * phone, not a second crop of the front photo. Fade fronts keep the photo back.
  */
-export const TEXT_LED_BACK = new Set<RoofingProTemplateId>(["roof_coupon", "roof_neighborhood"])
+export const TEXT_LED_BACK = new Set<RoofingProTemplateId>(["roof_coupon", "roof_neighborhood", "roof_bold"])
 
 export function templateUsesSoftFadeBack(templateId: RoofingProTemplateId): boolean {
   return DARK_TYPE.has(templateId) && !TEXT_LED_BACK.has(templateId)
@@ -106,6 +107,7 @@ export function composeRoofingProFace(input: RoofingProInput): PostcardFacePlan 
   const face = input.face ?? "front"
   const meta = ROOFING_PRO_META[input.templateId]
   const palette = paletteFor(input.templateId, input.trade)
+  if (input.templateId === "roof_bold") return composeBoldFace(input, size, face, meta.pairing, palette)
   if (face === "back") return composeBack(input, size, meta.pairing, palette)
   return composeFront(input, size, meta.pairing, palette, meta.offerLed)
 }
