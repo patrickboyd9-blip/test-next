@@ -497,8 +497,11 @@ export interface UploadedDesignFile {
   fileName: string
   mediaType: "application/pdf" | "image/png" | "image/jpeg"
   byteLength: number
-  /** Storage key, such as `front.png`. Not a public URL. */
+  /** Storage key of the original upload, such as `front.png`. Not a public URL. */
   key: string
+  /** Print-sized file built from the original. The proof and the export use this. */
+  preparedKey?: string
+  preparedMediaType?: "image/png" | "application/pdf"
 }
 
 export interface UploadedDesignIssue {

@@ -1,9 +1,12 @@
 import type { Campaign, UploadedDesign, UploadedDesignFile } from "@/lib/campaign-creator/types"
+import { buildPostcard5x8PrintSpec } from "@/lib/print-spec/postcard-5x8-print-spec"
 
 import { sniffDesignMedia } from "./decode-raster"
+import { prepareDesignFace } from "./prepare-face"
 import { preflightDesignFile, type DesignFace, type DesignPreflightIssue } from "./preflight"
 import {
   openUploadedDesign,
+  preparedDesignKey,
   resolveUploadedDesignStore,
   uploadedDesignKey,
   type UploadedDesignStore,
@@ -38,7 +41,7 @@ export async function saveDesignFace(input: {
     key,
   }
   const next = mergeDesign(input.campaign.uploadedDesign, input.face, file, [])
-  next.issues = await issuesForStoredDesign(input.campaign.id, next, store)
+  next.issues = await prepareStoredDesign(input.campaign.id, next, store)
   next.checkedAt = new Date().toISOString()
   next.approvedAt = undefined
   next.printFileKey = undefined
@@ -63,11 +66,12 @@ function mergeDesign(
   return next
 }
 
-async function issuesForStoredDesign(
+async function prepareStoredDesign(
   campaignId: string,
   design: UploadedDesign,
   store: UploadedDesignStore
 ): Promise<DesignPreflightIssue[]> {
+  const geometry = buildPostcard5x8PrintSpec()
   const issues: DesignPreflightIssue[] = []
   for (const face of ["front", "back"] as const) {
     const file = design[face]
@@ -83,12 +87,41 @@ async function issuesForStoredDesign(
       })
       continue
     }
+    const checked = await preflightDesignFile({
+      bytes: opened.bytes,
+      declaredType: file.mediaType,
+      face,
+    })
+    const fatal = checked.some(
+      (item) =>
+        item.severity === "error" &&
+        (item.code === "unreadable" || item.code === "page_count" || item.code === "file_type" || item.code === "file_size")
+    )
+    if (fatal) {
+      issues.push(...checked.filter((item) => item.code !== "page_size" && item.code !== "resolution"))
+      continue
+    }
+    const prepared = await prepareDesignFace({
+      bytes: opened.bytes,
+      declaredType: file.mediaType,
+      face,
+      geometry,
+    })
+    if (!prepared.ok) {
+      issues.push({ face, severity: "error", code: "unreadable", message: prepared.error })
+      continue
+    }
+    const preparedKey = preparedDesignKey(face, prepared.prepared.mediaType)
+    await store.put(campaignId, preparedKey, prepared.prepared.bytes, prepared.prepared.mediaType)
+    file.preparedKey = preparedKey
+    file.preparedMediaType = prepared.prepared.mediaType
     issues.push(
-      ...(await preflightDesignFile({
-        bytes: opened.bytes,
-        declaredType: file.mediaType,
-        face,
-      }))
+      ...checked.filter((item) => {
+        if (item.code === "page_size" || item.code === "resolution") return false
+        if (item.code === "keep_out" && prepared.prepared.address !== "unknown") return false
+        return true
+      }),
+      ...prepared.prepared.issues
     )
   }
   return issues

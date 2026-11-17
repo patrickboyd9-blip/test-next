@@ -8,7 +8,7 @@ import {
 } from "@/lib/storage/blob-store"
 
 const SAFE_CAMPAIGN_ID = /^[A-Za-z0-9_-]{1,80}$/
-const SAFE_KEY = /^(front|back|print)\.(pdf|png|jpe?g)$/
+const SAFE_KEY = /^(front|back|print)(-prepared)?\.(pdf|png|jpe?g)$/
 
 export interface UploadedDesignStore {
   put(campaignId: string, key: string, bytes: Buffer, contentType: string): Promise<void>
@@ -23,6 +23,11 @@ export function uploadedDesignKey(role: "front" | "back" | "print", mediaType: s
   if (role === "print" || mediaType === "application/pdf") return `${role}.pdf`
   if (mediaType === "image/jpeg") return `${role}.jpg`
   return `${role}.png`
+}
+
+/** Print-sized copy. The original key is left untouched. */
+export function preparedDesignKey(role: "front" | "back", mediaType: "image/png" | "application/pdf"): string {
+  return mediaType === "application/pdf" ? `${role}-prepared.pdf` : `${role}-prepared.png`
 }
 
 export function mediaTypeForKey(key: string): string {

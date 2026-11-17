@@ -11,7 +11,7 @@ import {
   requestUploadedDesignReview,
 } from "@/lib/bring-your-own-design/actions"
 import { DESIGN_REVIEW_QUESTION } from "@/lib/bring-your-own-design/design-review"
-import type { Campaign, DesignFaceName, UploadedDesignIssue } from "@/lib/campaign-creator/types"
+import type { Campaign, DesignFaceName } from "@/lib/campaign-creator/types"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
@@ -52,6 +52,7 @@ export function UploadDesign({
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [approving, setApproving] = useState(false)
   const [confirmed, setConfirmed] = useState(false)
+  const [addressCoverOk, setAddressCoverOk] = useState(false)
   const [switching, setSwitching] = useState(false)
   const [editingBasics, setEditingBasics] = useState(false)
   const [reviewing, setReviewing] = useState(false)
@@ -84,7 +85,9 @@ export function UploadDesign({
     setApproving(true)
     setUploadError(null)
     try {
-      const updated = await approveUploadedDesign(campaign.id)
+      const updated = await approveUploadedDesign(campaign.id, {
+        acceptAddressCover: addressCoverOk,
+      })
       onCampaign(updated)
     } catch (error) {
       setUploadError(error instanceof Error ? error.message : "The proof could not be approved.")
@@ -129,7 +132,7 @@ export function UploadDesign({
       setUploadError(
         error instanceof Error
           ? error.message
-          : "We couldn't finish that review. You can still approve the proof."
+          : "We could not finish that review. You can still approve the proof."
       )
     } finally {
       setReviewing(false)
@@ -182,10 +185,10 @@ export function UploadDesign({
       <div className="flex flex-col gap-2">
         <h2 className="text-lg font-medium">{readOnly ? "Approved design" : "Upload your design"}</h2>
         <p className="text-sm leading-6 text-muted-foreground">
-          This campaign prints a 5×8 postcard. Each file should be one page, 8.5 × 5.5 inches,
-          which includes a quarter inch of bleed.{" "}
+          Upload a picture or a one-page PDF for each side. We fit it to this 5×8 postcard,
+          including the quarter inch the printer trims. You do not have to resize it.{" "}
           <a href="/app/templates" className="underline-offset-4 hover:underline">
-            Download the template and the short instructions.
+            A blank template is here if you want one.
           </a>
         </p>
       </div>
@@ -213,43 +216,70 @@ export function UploadDesign({
         </p>
       )}
 
-      {issues.length > 0 && (
+      {errors.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>{errors.length > 0 ? "This file needs a change" : "Look at this before you approve"}</CardTitle>
-            <CardDescription>
-              {errors.length > 0
-                ? "Fix the items below. Then upload the file again."
-                : "You can still approve the proof. Read these first."}
-            </CardDescription>
+            <CardTitle>This file needs a change</CardTitle>
+            <CardDescription>The notes below are the only things we could not fix for you.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
-            {issues.map((item) => (
+            {errors.map((item) => (
               <IssueLine key={`${item.face}-${item.code}-${item.message}`} issue={item} />
             ))}
           </CardContent>
         </Card>
       )}
 
+      {warnings.some((item) => item.code === "keep_out") && (
+        <Card>
+          <CardHeader>
+            <CardTitle>The address will cover part of the back</CardTitle>
+            <CardDescription>
+              We could not move that artwork out of the address area without cutting it. Nothing was erased.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-3">
+            {warnings
+              .filter((item) => item.code === "keep_out")
+              .map((item) => (
+                <IssueLine key={`${item.face}-${item.code}-${item.message}`} issue={item} />
+              ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {warnings.some((item) => item.code === "prepared" || item.code === "resolution") && (
+        <ul className="flex flex-col gap-2" data-slot="prepared-notes">
+          {warnings
+            .filter((item) => item.code === "prepared" || item.code === "resolution")
+            .map((item) => (
+              <li key={`${item.face}-${item.code}-${item.message}`} className="text-sm leading-6 text-muted-foreground">
+                {item.face === "back" ? "Back: " : "Front: "}
+                {item.message}
+              </li>
+            ))}
+        </ul>
+      )}
+
       {bothSides && design?.front && design.back && (
         <div className="flex flex-col gap-4">
-          <h3 className="text-base font-medium">Proof</h3>
+          <h3 className="text-base font-medium">Finished proof</h3>
           <p className="text-sm leading-6 text-muted-foreground">
-            The black line is where the card is cut. On the back, the shaded box is the address,
-            postage, and barcode. Anything in that box will not show.
+            This is the card we will print. The black line is where it is cut. On the back, the shaded
+            box is the address, postage, and barcode.
           </p>
           <div className="grid gap-6">
             <ProofFrame
               label="Front"
               face="front"
-              mediaType={design.front.mediaType}
-              src={`/api/uploaded-design/${campaign.id}/${design.front.key}`}
+              mediaType={design.front.preparedMediaType ?? design.front.mediaType}
+              src={`/api/uploaded-design/${campaign.id}/${design.front.preparedKey ?? design.front.key}`}
             />
             <ProofFrame
               label="Back"
               face="back"
-              mediaType={design.back.mediaType}
-              src={`/api/uploaded-design/${campaign.id}/${design.back.key}`}
+              mediaType={design.back.preparedMediaType ?? design.back.mediaType}
+              src={`/api/uploaded-design/${campaign.id}/${design.back.preparedKey ?? design.back.key}`}
             />
           </div>
         </div>
@@ -308,10 +338,21 @@ export function UploadDesign({
 
       {!readOnly && canApprove && (
         <div className="flex flex-col gap-3">
-          {warnings.length > 0 && (
+          {warnings.some((item) => item.code !== "prepared") && (
             <p className="text-sm text-muted-foreground">
-              There is a warning above. Approve only if the proof looks right.
+              Read the note above, then approve if the proof looks right.
             </p>
+          )}
+          {warnings.some((item) => item.code === "keep_out") && (
+            <label className="flex items-start gap-2 text-sm leading-6">
+              <input
+                type="checkbox"
+                className="mt-1"
+                checked={addressCoverOk}
+                onChange={(event) => setAddressCoverOk(event.target.checked)}
+              />
+              <span>Print the back this way. I understand the address will cover part of it.</span>
+            </label>
           )}
           <label className="flex items-start gap-2 text-sm leading-6">
             <input
@@ -322,7 +363,10 @@ export function UploadDesign({
             />
             <span>I have looked at both sides, including the address area, and I approve this proof.</span>
           </label>
-          <Button onClick={() => void approve()} disabled={!confirmed || approving}>
+          <Button
+            onClick={() => void approve()}
+            disabled={!confirmed || approving || (warnings.some((item) => item.code === "keep_out") && !addressCoverOk)}
+          >
             {approving ? "Approving…" : "Approve this proof"}
           </Button>
         </div>
@@ -370,7 +414,7 @@ function FacePicker({
   return (
     <label className="flex cursor-pointer flex-col gap-2 rounded-xl border border-dashed p-4 text-sm hover:bg-muted/40">
       <span className="font-medium">{label}</span>
-      <span className="text-muted-foreground">{busy ? "Checking the file…" : fileName ?? "PDF, PNG, or JPG"}</span>
+      <span className="text-muted-foreground">{busy ? "Preparing the postcard…" : fileName ?? "PDF, PNG, or JPG"}</span>
       <input
         type="file"
         accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg"

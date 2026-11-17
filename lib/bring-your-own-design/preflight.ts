@@ -18,6 +18,7 @@ export type DesignIssueCode =
   | "resolution"
   | "font"
   | "keep_out"
+  | "prepared"
 
 export interface DesignPreflightIssue {
   severity: "error" | "warning"

@@ -1,4 +1,4 @@
-import { PDFDocument } from "pdf-lib"
+import { PDFDocument, rgb } from "pdf-lib"
 
 import type { PostcardGeometry } from "@/lib/print-spec/postcard-5x8-print-spec"
 
@@ -11,8 +11,8 @@ export interface UploadedFaceBytes {
 
 /**
  * Two-page print file at the artwork canvas size.
- * The customer's front and back are placed full-bleed. The address area is
- * left as they approved it. This is the file the staging mail path uploads.
+ * Each face is the prepared file when one exists, placed without stretching.
+ * The address area is left as the customer approved it.
  */
 export async function renderUploadedPostcardPdf(input: {
   geometry: PostcardGeometry
@@ -29,6 +29,7 @@ export async function renderUploadedPostcardPdf(input: {
     page.setMediaBox(0, 0, width, height)
     page.setBleedBox(0, 0, width, height)
     page.setTrimBox(trim[0], trim[1], trim[2] - trim[0], trim[3] - trim[1])
+    page.drawRectangle({ x: 0, y: 0, width, height, color: rgb(1, 1, 1) })
     await paintFace(doc, page, face, width, height)
   }
 
@@ -49,10 +50,26 @@ async function paintFace(
   if (media === "application/pdf") {
     const source = await PDFDocument.load(face.bytes, { ignoreEncryption: true })
     const [embedded] = await doc.embedPages([source.getPage(0)])
-    page.drawPage(embedded, { x: 0, y: 0, width, height })
+    const scale = Math.min(width / embedded.width, height / embedded.height)
+    const drawW = embedded.width * scale
+    const drawH = embedded.height * scale
+    page.drawPage(embedded, {
+      x: (width - drawW) / 2,
+      y: (height - drawH) / 2,
+      width: drawW,
+      height: drawH,
+    })
     return
   }
   const image =
     media === "image/jpeg" ? await doc.embedJpg(face.bytes) : await doc.embedPng(face.bytes)
-  page.drawImage(image, { x: 0, y: 0, width, height })
+  const scale = Math.min(width / image.width, height / image.height)
+  const drawW = image.width * scale
+  const drawH = image.height * scale
+  page.drawImage(image, {
+    x: (width - drawW) / 2,
+    y: (height - drawH) / 2,
+    width: drawW,
+    height: drawH,
+  })
 }
