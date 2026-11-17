@@ -181,7 +181,7 @@ function parseDocument(value: unknown): unknown {
   return value
 }
 
-function isBenignCreateRace(error: unknown): boolean {
+export function isBenignCreateRace(error: unknown): boolean {
   const code = (error as { code?: string }).code
   const message = error instanceof Error ? error.message : String(error)
   return (

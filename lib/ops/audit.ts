@@ -8,6 +8,8 @@ import { randomUUID } from "node:crypto"
 
 import { createNeonExecutor, postgresUrl, type SqlExecutor } from "@/lib/storage/document-store"
 
+import { ensureOpsTables } from "./schema"
+
 export const AUDIT_ACTIONS = ["create", "proof", "price", "approve", "send", "charge", "scan"] as const
 export type AuditAction = (typeof AUDIT_ACTIONS)[number]
 
@@ -20,16 +22,6 @@ export interface AuditEvent {
   before: unknown
   after: unknown
 }
-
-const DDL = `CREATE TABLE IF NOT EXISTS audit_events (
-  id text PRIMARY KEY,
-  at timestamptz NOT NULL,
-  actor_id text NOT NULL,
-  action text NOT NULL,
-  subject_id text NOT NULL,
-  before jsonb,
-  after jsonb
-)`
 
 const memory: AuditEvent[] = []
 const ready = new WeakMap<SqlExecutor, Promise<void>>()
@@ -96,7 +88,7 @@ function neon(): SqlExecutor {
 function ensure(sql: SqlExecutor): Promise<void> {
   let pending = ready.get(sql)
   if (!pending) {
-    pending = sql.query(DDL).then(() => undefined)
+    pending = ensureOpsTables(sql)
     ready.set(sql, pending)
   }
   return pending
