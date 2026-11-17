@@ -6,6 +6,8 @@ import { CampaignAccessError, requireOwnedCampaign } from "@/lib/auth/campaign-a
 import { getSession } from "@/lib/auth/session"
 import { getCampaignRepository } from "@/lib/campaign-creator/repository"
 
+import { noteForSession } from "@/lib/ledger/note"
+
 import { advise, customerFacts } from "./advise"
 import { readLibraryFiles } from "./library"
 
@@ -24,6 +26,17 @@ export async function saveGuidanceAction(campaignId: string): Promise<void> {
     goal: campaign.brief.goal,
     files: readLibraryFiles(),
   })
-  await getCampaignRepository().saveStrategyGuidance(campaignId, guidance, { explicit: true })
+  const saved = await getCampaignRepository().saveStrategyGuidance(campaignId, guidance, { explicit: true })
+  await noteForSession({
+    campaignId,
+    type: "guidance_saved",
+    outcome: "completed",
+    versionKey: `${saved.strategyGuidance?.sourceVersion ?? guidance.sourceVersion}:${saved.strategyGuidance?.facts.offer ?? ""}`,
+    creativeVersion: saved.strategyGuidance?.sourceVersion ?? null,
+    listHash: null,
+    listCount: null,
+    amountCents: null,
+    note: "Guidance saved. No replies were measured.",
+  })
   redirect(`/app/campaigns/${campaignId}/guidance`)
 }

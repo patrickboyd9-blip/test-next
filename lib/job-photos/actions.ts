@@ -9,6 +9,8 @@ import { getCampaignRepository } from "@/lib/campaign-creator/repository"
 import { resolveStudioImageStore } from "@/lib/campaign-creator/studio-image-store"
 import type { JobCreative, JobKeepBox, JobPhotoRecord, JobProtect } from "@/lib/campaign-creator/types"
 
+import { noteForSession } from "@/lib/ledger/note"
+
 import { prepareJobPhoto } from "./prepare"
 
 export type JobActionResult = { ok: true; creative: JobCreative } | { ok: false; error: string }
@@ -42,6 +44,17 @@ export async function addJobPhotoAction(campaignId: string, formData: FormData):
     frontPhotoId: creative.frontPhotoId ?? photo.id,
   }
   await getCampaignRepository().saveJobCreative(campaignId, next)
+  await noteForSession({
+    campaignId,
+    type: "job_frame_saved",
+    outcome: "completed",
+    versionKey: `photo:${photo.id}`,
+    creativeVersion: photo.id,
+    listHash: null,
+    listCount: null,
+    amountCents: null,
+    note: "A job photo was saved. No new photograph was generated.",
+  })
   revalidatePath(back)
   redirect(back)
 }
@@ -53,6 +66,18 @@ export async function saveJobLayoutAction(campaignId: string, input: JobCreative
   const cleaned = sanitizeLayout(current, input)
   if ("error" in cleaned) return { ok: false, error: cleaned.error }
   const saved = await getCampaignRepository().saveJobCreative(campaignId, cleaned)
+  const versionKey = cleaned.photos.map((photo) => `${photo.id}:${photo.keep.x}:${photo.keep.y}:${photo.keep.w}:${photo.keep.h}:${cleaned.back.treatment}`).join("|")
+  await noteForSession({
+    campaignId,
+    type: "job_frame_saved",
+    outcome: "completed",
+    versionKey,
+    creativeVersion: cleaned.frontPhotoId,
+    listHash: null,
+    listCount: null,
+    amountCents: null,
+    note: `Front ${cleaned.frontPhotoId ?? "unset"}, back ${cleaned.back.treatment}.`,
+  })
   revalidatePath(`/app/campaigns/${campaignId}/job-photos`)
   return { ok: true, creative: saved.jobCreative ?? cleaned }
 }
