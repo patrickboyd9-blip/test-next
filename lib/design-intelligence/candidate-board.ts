@@ -417,15 +417,15 @@ async function scoreFamily(input: {
       mode: presentation.photoMode,
       subject: presentation.subject,
       crop: presentation.crop,
-      placement: presentation.mode === "panel" ? "panel_bleed_two_edges" : "full_bleed",
+      placement: kind === "general" ? "none" : presentation.mode === "panel" ? "panel_bleed_two_edges" : "full_bleed",
     },
   }
   spec = {
     ...spec,
     visualDirection: presentation.visualDirection,
-    imageryRole: presentation.imageryRole,
+    imageryRole: kind === "general" ? "none" : presentation.imageryRole,
     leadJob: presentation.leadJob,
-    layoutVariant: "image_grounded",
+    layoutVariant: kind === "general" ? "type_primary_split" : "image_grounded",
     imagePresence: "field",
   }
   let evidenceTrace: EvidenceTrace | undefined
@@ -750,6 +750,11 @@ function pizzaPhoto<T extends { subject: string; visualDirection: string }>(kind
 }
 
 export function strategyName(role: DirectionRole, kind = ""): string {
+  if (kind === "general") {
+    if (role === "threat") return "A next step"
+    if (role === "trust") return "Your name"
+    return "The offer"
+  }
   if (kind === "pizza" || kind === "food") {
     if (role === "threat") return "Before the night goes"
     if (role === "trust") return "The shop"
@@ -761,6 +766,11 @@ export function strategyName(role: DirectionRole, kind = ""): string {
 }
 
 export function customerWhyLine(role: DirectionRole, kind = ""): string {
+  if (kind === "general") {
+    if (role === "threat") return "One way to respond. No invented deadline."
+    if (role === "trust") return "The business name is the proof. No workers are invented."
+    return "The offer stays in the customer's words. The trade is not assumed."
+  }
   if (kind === "pizza" || kind === "food") {
     if (role === "threat") return "One honest reason to call. No deadline and no made-up number."
     if (role === "trust") return "The shop name carries the proof."

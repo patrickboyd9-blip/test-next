@@ -44,6 +44,30 @@ export const JP_PIZZA_BRIEF: CampaignBrief = {
   },
 }
 
+test("an unknown trade does not become a home-service crew or a house photo", async () => {
+  const brief: CampaignBrief = {
+    goal: "Send a note to nearby offices",
+    offer: "A thank-you for stopping by",
+    businessInfo: { name: "Northwind" },
+  }
+  assert.equal(persuasionVertical(brief), "general")
+  const engine = new MockCreativeEngine()
+  const result = await engine.generateDirections({
+    brief,
+    canvas: toCreativeCanvas(POSTCARD_5X8_V1),
+  })
+  for (const direction of result.directions) {
+    const text = `${direction.name} ${direction.spec.headline}`
+    assert.doesNotMatch(text, /crew|homeowner|leak|before it spreads|result you wanted/i)
+    assert.equal(direction.spec.imageryRole, "none")
+    const image = resolveCreativeImage(direction.spec.imagery, direction.spec.imageryRole, null, {
+      libraryFallback: true,
+      campaign: brief,
+    })
+    assert.equal(image.src, null)
+  }
+})
+
 test("the pizza brief is not routed as a home-service crew, and a bakery is not either", () => {
   assert.equal(persuasionVertical(JP_PIZZA_BRIEF), "pizza")
   assert.equal(customerDeclinedQr(JP_PIZZA_BRIEF.goal ?? ""), true)
@@ -100,6 +124,9 @@ test("JP's Pizza cards keep the drink offer, the phone, the slice, and no QR or 
     assert.match(offer, /drink/i)
     assert.match(offer, /redemption/i)
     assert.notEqual(offer.trim(), "FREE")
+    const offerLine = card.front.texts.find((text) => text.role === "offer")
+    assert.ok(offerLine && offerLine.fontPt >= 14, `offer is ${offerLine?.fontPt}pt`)
+    assert.equal(offerLine?.lines.some((line) => /^(?:with|physical|of|the)$/i.test(line)), false)
     assert.equal(card.front.lockup?.qrLabel ?? "", "")
     const contact = resolveStudioContact(spec, postcardIdentityFromBrief(JP_PIZZA_BRIEF))
     assert.equal(contact.qrPayload, null)

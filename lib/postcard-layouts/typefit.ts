@@ -73,11 +73,13 @@ export function fitText(input: {
   }
   if (!text || input.rect.w <= 0 || input.rect.h <= 0) return empty
 
+  const phrase = input.role === "offer" && text.split(/\s+/).length >= 6
   for (let pt = maxPt; pt >= minPt; pt -= 0.5) {
     const lines = wrapLines(text, pt, input.rect.w, em)
-    if (blockHeight(lines.length, pt, lineHeight) <= input.rect.h + 0.01 && widest(lines, pt, em) <= input.rect.w + 0.01) {
-      return { ...empty, lines, fontPt: pt, overflows: false }
-    }
+    const fits = blockHeight(lines.length, pt, lineHeight) <= input.rect.h + 0.01 && widest(lines, pt, em) <= input.rect.w + 0.01
+    if (!fits) continue
+    if (phrase && pt > 14 && sparseOffer(lines)) continue
+    return { ...empty, lines, fontPt: pt, overflows: false }
   }
 
   const lines = wrapLines(text, minPt, input.rect.w, em)
@@ -92,6 +94,12 @@ export function lineHeightFor(font: "display" | "text"): number {
 }
 
 const ORPHAN_WORD = /^(?:a|an|the|of|to|and|or|for|in|on|at|by|as|if|is|be)$/i
+
+/** A long offer should not stack as one word per line when a smaller size can group them. */
+function sparseOffer(lines: string[]): boolean {
+  if (lines.length < 3) return false
+  return lines.filter((line) => line.split(/\s+/).length === 1).length >= 1
+}
 
 function wrapLines(text: string, fontPt: number, widthIn: number, em: number): string[] {
   const words = text.split(/\s+/).filter(Boolean)

@@ -14,7 +14,7 @@ import {
 import { buildPostcard6x9PrintSpec } from "@/lib/print-spec/postcard-6x9-print-spec"
 
 import type { CompositionMode } from "./art-director"
-import { resolveFrontCopy } from "./offer-copy"
+import { offerPhraseStaysTogether, resolveFrontCopy } from "./offer-copy"
 import { contrastRatio, inkForBackground, isLight, relativeLuminance } from "./contrast"
 import type { DesignRationale, DesignVertical, TrimSize, TypeSeat } from "./rationale"
 import {
@@ -243,7 +243,8 @@ function composeIntegrated(
   const phone = clean(input.spec.phone) || ""
   const website = displayHost(input.spec.website || input.spec.qrDestination || "")
   const name = clean(input.businessName) || "Local crew"
-  const photoX = geometry.photo.x
+  const phraseOffer = offerPhraseStaysTogether(clean(input.spec.offer) || [spoken.numeral, spoken.rest].filter(Boolean).join(" "))
+  const photoX = phraseOffer ? round2(Math.max(geometry.photo.x, trim.w * 0.4)) : geometry.photo.x
   const calmWidth = round2(Math.max(1.7, photoX - SAFE_IN - 0.1))
   const typeColumn: InchRect = { x: SAFE_IN, y: SAFE_IN, w: calmWidth, h: round2(trim.h - SAFE_IN * 2) }
   const sizes = typeSizes(input.rationale, typeColumn.h * 0.72, offerIsHero ? "offer" : "headline")
@@ -314,11 +315,15 @@ function composeIntegrated(
     heightCap,
     offerIsHero ? 64 : paintedHeadline * 0.85,
   )))
-  const offerMin = roundPt(Math.min(
-    offerMax,
-    joinedOffer ? 16 : offerIsHero ? Math.max(bodyPt * 1.5, paintedHeadline * (keepOfferRest ? 1.15 : 1.6)) : Math.max(bodyPt * 1.5, paintedHeadline * 0.68),
-  ))
-  const offerMaxUsed = joinedOffer ? roundPt(Math.min(offerMax, 28)) : Math.max(offerMin, offerMax)
+  const offerMin = phraseOffer
+    ? 14
+    : roundPt(Math.min(
+      offerMax,
+      joinedOffer ? 16 : offerIsHero ? Math.max(bodyPt * 1.5, paintedHeadline * (keepOfferRest ? 1.15 : 1.6)) : Math.max(bodyPt * 1.5, paintedHeadline * 0.68),
+    ))
+  const offerMaxUsed = phraseOffer
+    ? roundPt(Math.min(offerMax, 18))
+    : joinedOffer ? roundPt(Math.min(offerMax, 28)) : Math.max(offerMin, offerMax)
   const offerLine = shrinkToInk(fitText({
     text: joinedOffer || offerParts.numeral,
     rect: { x: typeColumn.x, y: offerTop, w: offerWidth, h: offerRoom },
@@ -1341,8 +1346,8 @@ function faceOverflows(texts: FittedText[], extra: FittedText[]): boolean {
 }
 
 /** The line height the postcard painter actually uses. */
-export function paintedLineFactor(text: Pick<FittedText, "role" | "font">): number {
-  if (text.role === "offer") return 0.8
+export function paintedLineFactor(text: Pick<FittedText, "role" | "font" | "lines">): number {
+  if (text.role === "offer" && (text.lines?.length ?? 1) <= 1) return 0.8
   return text.font === "display" ? 1.02 : 1.18
 }
 
