@@ -35,7 +35,7 @@ test("6x9 does not inherit a 5x8 or letter document class from the environment",
     C2M_ENVELOPE: "#10 Double Window",
     C2M_MAIL_CLASS: "First Class",
     C2M_COLOR: "Full Color",
-  } as NodeJS.ProcessEnv).product
+  } as unknown as NodeJS.ProcessEnv).product
   const product = resolvePostcardProduct("6x9", configured)
   assert.equal(product.documentClass, "Postcard 6 x 9")
   assert.equal(product.layout, "Double Sided Postcard")
@@ -45,7 +45,7 @@ test("6x9 does not inherit a 5x8 or letter document class from the environment",
 })
 
 test("an explicit postcard override still has to be a postcard", () => {
-  const configured = loadClick2MailConfig({} as NodeJS.ProcessEnv).product
+  const configured = loadClick2MailConfig({} as unknown as NodeJS.ProcessEnv).product
   const product = resolvePostcardProduct("5x8", configured, {
     paperType: "White 80# Gloss with UV Coating",
   })

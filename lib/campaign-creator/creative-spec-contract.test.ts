@@ -916,9 +916,9 @@ test("prompt and tool schema expose optional typeRole and imagePresence", () => 
   assert.match(CONCEPTION_BEFORE_SPEC_RULES, /typeRole, imagePresence/)
   assert.match(DIRECTION_SET_REASONING_RULES, /not a set-uniqueness requirement/)
 
-  assert.equal(GENERATED_SPEC_TOOL_REQUIRED.includes("typeRole"), false)
-  assert.equal(GENERATED_SPEC_TOOL_REQUIRED.includes("imagePresence"), false)
-  assert.equal(GENERATED_SPEC_TOOL_REQUIRED.includes("callToAction"), false)
+  assert.equal((GENERATED_SPEC_TOOL_REQUIRED as readonly string[]).includes("typeRole"), false)
+  assert.equal((GENERATED_SPEC_TOOL_REQUIRED as readonly string[]).includes("imagePresence"), false)
+  assert.equal((GENERATED_SPEC_TOOL_REQUIRED as readonly string[]).includes("callToAction"), false)
   assert.equal(GENERATED_SPEC_TOOL_REQUIRED.includes("leadJob"), true)
   assert.equal(GENERATED_SPEC_TOOL_REQUIRED.includes("imageryRole"), true)
 

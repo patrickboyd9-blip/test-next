@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useSyncExternalStore } from "react"
 import Link from "next/link"
 
 import {
@@ -14,6 +14,25 @@ import {
 
 import { ProofTray } from "./ProofCard"
 import { CockpitFrame, Eyebrow, Panel } from "./ui"
+
+function parsePreview(raw: string | null): {
+  name: string
+  listName: string
+  people: number
+  status: MailerStatusName
+  detail: string
+  line: string
+  shop: string
+  phone: string
+  qr: string | null
+} | null {
+  if (!raw) return null
+  try {
+    return JSON.parse(raw) as ReturnType<typeof parsePreview>
+  } catch {
+    return null
+  }
+}
 
 export function MailerStatus({
   mailer,
@@ -61,52 +80,38 @@ export function MailerStatus({
 }
 
 export function PreviewStatus({ id }: { id: string }) {
-  const [mailer, setMailer] = useState<InFlightMailer | null>(null)
-  const [proof, setProof] = useState<MailerProof | null>(null)
-  const [missing, setMissing] = useState(false)
-
-  useEffect(() => {
-    const raw = sessionStorage.getItem(`mailer-preview:${id}`)
-    if (!raw) {
-      setMissing(true)
-      return
-    }
-    let saved: {
-      name: string
-      listName: string
-      people: number
-      status: MailerStatusName
-      detail: string
-      line: string
-      shop: string
-      phone: string
-      qr: string | null
-    }
-    try {
-      saved = JSON.parse(raw) as typeof saved
-    } catch {
-      setMissing(true)
-      return
-    }
-    setMailer({
-      id,
-      name: saved.name || "New mailer",
-      listName: saved.listName,
-      people: saved.people,
-      status: saved.status,
-      detail: saved.detail,
-    })
-    setProof({
-      shop: saved.shop,
-      line: saved.line,
-      to: saved.listName,
-      people: saved.people,
-      phone: saved.phone,
-      website: saved.qr ?? "",
-      logoName: null,
-      qr: saved.qr,
-    })
-  }, [id])
+  const raw = useSyncExternalStore(
+    (onChange) => {
+      window.addEventListener("storage", onChange)
+      return () => window.removeEventListener("storage", onChange)
+    },
+    () => sessionStorage.getItem(`mailer-preview:${id}`),
+    () => null,
+  )
+  const saved = parsePreview(raw)
+  const missing = raw !== null && !saved
+  const mailer: InFlightMailer | null = saved
+    ? {
+        id,
+        name: saved.name || "New mailer",
+        listName: saved.listName,
+        people: saved.people,
+        status: saved.status,
+        detail: saved.detail,
+      }
+    : null
+  const proof: MailerProof | null = saved
+    ? {
+        shop: saved.shop,
+        line: saved.line,
+        to: saved.listName,
+        people: saved.people,
+        phone: saved.phone,
+        website: saved.qr ?? "",
+        logoName: null,
+        qr: saved.qr,
+      }
+    : null
 
   if (missing) {
     return (
@@ -120,7 +125,7 @@ export function PreviewStatus({ id }: { id: string }) {
       </CockpitFrame>
     )
   }
-  if (!mailer) return <CockpitFrame><p className="px-6 py-10 text-[#b7c9d8]">Loading the preview…</p></CockpitFrame>
+  if (!mailer) return <CockpitFrame><p className="px-6 py-10 text-[#b7c9d8]">That mailer isn’t on this screen.</p></CockpitFrame>
   return (
     <CockpitFrame arrival>
       <div className="mx-auto flex max-w-3xl flex-col gap-5 px-4 py-6 sm:px-6 sm:py-8">

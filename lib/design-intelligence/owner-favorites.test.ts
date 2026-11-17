@@ -9,15 +9,15 @@ import { referencePicksForCritique } from "./vision-critic"
 import { tasteFromSeed, type VisionTaste } from "./vision-taste"
 
 test("the owner favorite list includes Wondercide and can be configured", () => {
-  assert.deepEqual(ownerFavoriteIds({} as NodeJS.ProcessEnv), [...DEFAULT_OWNER_FAVORITE_IDS])
-  assert.equal(ownerFavoriteIds({} as NodeJS.ProcessEnv).includes("PM-056"), true)
-  assert.equal(ownerFavoriteIds({} as NodeJS.ProcessEnv).includes("PM-057"), true)
-  assert.deepEqual(ownerFavoriteIds({ DESIGN_OWNER_FAVORITES: "PM-047, PM-056" } as NodeJS.ProcessEnv), ["PM-047", "PM-056"])
-  assert.match(calibrationSentence({} as NodeJS.ProcessEnv), /PM-056/)
-  assert.match(calibrationSentence({} as NodeJS.ProcessEnv), /PM-057/)
-  assert.match(calibrationSentence({} as NodeJS.ProcessEnv), /three-color palette/)
-  assert.match(calibrationSentence({} as NodeJS.ProcessEnv), /offer strip/)
-  assert.match(calibrationSentence({} as NodeJS.ProcessEnv), /Do not copy/)
+  assert.deepEqual(ownerFavoriteIds({} as unknown as NodeJS.ProcessEnv), [...DEFAULT_OWNER_FAVORITE_IDS])
+  assert.equal(ownerFavoriteIds({} as unknown as NodeJS.ProcessEnv).includes("PM-056"), true)
+  assert.equal(ownerFavoriteIds({} as unknown as NodeJS.ProcessEnv).includes("PM-057"), true)
+  assert.deepEqual(ownerFavoriteIds({ DESIGN_OWNER_FAVORITES: "PM-047, PM-056" } as unknown as NodeJS.ProcessEnv), ["PM-047", "PM-056"])
+  assert.match(calibrationSentence({} as unknown as NodeJS.ProcessEnv), /PM-056/)
+  assert.match(calibrationSentence({} as unknown as NodeJS.ProcessEnv), /PM-057/)
+  assert.match(calibrationSentence({} as unknown as NodeJS.ProcessEnv), /three-color palette/)
+  assert.match(calibrationSentence({} as unknown as NodeJS.ProcessEnv), /offer strip/)
+  assert.match(calibrationSentence({} as unknown as NodeJS.ProcessEnv), /Do not copy/)
 })
 
 test("retrieval keeps an owner favorite near the top even when the industry differs", () => {
@@ -30,7 +30,7 @@ test("retrieval keeps an owner favorite near the top even when the industry diff
     ],
     brief,
     limit: 2,
-    favorites: ownerFavoriteIds({} as NodeJS.ProcessEnv),
+    favorites: ownerFavoriteIds({} as unknown as NodeJS.ProcessEnv),
   })
   assert.deepEqual(picks.map((pick) => pick.id), ["MMR-200", "PM-056"])
 
@@ -43,7 +43,7 @@ test("retrieval keeps an owner favorite near the top even when the industry diff
     grade: analysis.grade,
     needsAnalysis: false,
   }))
-  const anchors = selectReferences(records, brief, {} as NodeJS.ProcessEnv)
+  const anchors = selectReferences(records, brief, {} as unknown as NodeJS.ProcessEnv)
   assert.deepEqual(anchors.anchors.map((item) => item.id), ["PM-047", "PM-054", "PM-022", "PM-056", "PM-057"])
   assert.equal(anchors.peers.some((item) => item.id === "PM-056"), false)
   assert.equal(anchors.peers.some((item) => item.id === "PM-057"), false)

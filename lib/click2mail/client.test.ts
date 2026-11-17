@@ -37,11 +37,11 @@ function stageConfig(password = "super-secret-password") {
     C2M_USERNAME: "stage-user",
     C2M_PASSWORD: password,
     C2M_PAPER_TYPE: "White 80# Gloss with UV Coating",
-  } as NodeJS.ProcessEnv)
+  } as unknown as NodeJS.ProcessEnv)
 }
 
 test("config defaults to staging and keeps product strings overridable", () => {
-  const config = loadClick2MailConfig({} as NodeJS.ProcessEnv)
+  const config = loadClick2MailConfig({} as unknown as NodeJS.ProcessEnv)
   assert.equal(config.environment, "stage")
   assert.equal(config.baseUrl, STAGE_BASE_URL)
   assert.equal(config.allowProduction, false)
@@ -58,7 +58,7 @@ test("config defaults to staging and keeps product strings overridable", () => {
     C2M_DOCUMENT_CLASS: "Postcard custom",
     C2M_ENVELOPE: "#10 Double Window",
     C2M_ADDRESS_LIST_READY_MIN: "5",
-  } as NodeJS.ProcessEnv)
+  } as unknown as NodeJS.ProcessEnv)
   assert.equal(custom.environment, "prod")
   assert.equal(custom.baseUrl, PROD_BASE_URL)
   assert.equal(custom.allowProduction, true)
@@ -73,10 +73,10 @@ test("production calls stay locked unless the flag is exactly true", () => {
     C2M_USERNAME: "user",
     C2M_PASSWORD: "secret",
     C2M_ALLOW_PRODUCTION: "yes",
-  } as NodeJS.ProcessEnv)
+  } as unknown as NodeJS.ProcessEnv)
   assert.throws(() => assertClick2MailCallable(locked), /locked/)
   assert.throws(
-    () => createClick2MailClientFromEnv({ C2M_ENV: "prod", C2M_USERNAME: "user", C2M_PASSWORD: "secret" } as NodeJS.ProcessEnv),
+    () => createClick2MailClientFromEnv({ C2M_ENV: "prod", C2M_USERNAME: "user", C2M_PASSWORD: "secret" } as unknown as NodeJS.ProcessEnv),
     /locked/
   )
 })

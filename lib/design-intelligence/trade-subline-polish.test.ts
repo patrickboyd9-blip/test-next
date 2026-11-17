@@ -3,7 +3,7 @@ import test from "node:test"
 
 import { offerSubline, polishTradeCopy, stripFillerSentences, sublineMismatchesOffer } from "./trade-subline"
 
-const plumber: any = { goal: "Book plumbing jobs", offer: "$75 off any drain cleaning", businessInfo: { name: "Flow Plumbing", city: "Austin", state: "TX" } }
+const plumber = { goal: "Book plumbing jobs", offer: "$75 off any drain cleaning", businessInfo: { name: "Flow Plumbing", city: "Austin", state: "TX" } }
 
 test("a drain offer never gets a water-heater subline", () => {
   assert.equal(sublineMismatchesOffer("Hot water you can count on.", "$75 off any drain cleaning"), true)
@@ -26,7 +26,7 @@ test("Call today filler leaves headlines and sublines", () => {
 })
 
 test("the generic listing-consultation line is replaced", () => {
-  const agent: any = { goal: "Get listing appointments", offer: "Free home value report", businessInfo: { name: "Lane Realty" } }
+  const agent = { goal: "Get listing appointments", offer: "Free home value report", businessInfo: { name: "Lane Realty" } }
   const out = polishTradeCopy({ brief: agent, spec: { headline: "What is your home worth?", subheadline: "Schedule your free listing consultation today.", offer: agent.offer }, fallbackHeadline: () => "x" })
   assert.doesNotMatch(out.subheadline ?? "", /schedule|today/i)
 })

@@ -5,6 +5,7 @@ import { after } from "next/server"
 
 import { CampaignAccessError, requireOwnedCampaign } from "@/lib/auth/campaign-access"
 import { getSession, previewDemoAllowed } from "@/lib/auth/session"
+import { beginMailAction, finishMailAction } from "@/lib/ops/mail-flow"
 
 import {
   getActiveSpec,
@@ -75,7 +76,16 @@ export async function createDraftCampaign(): Promise<Campaign> {
     if (!demo) throw new Error("The preview campaign could not be opened.")
     return forCustomer(demo)
   }
-  return forCustomer(await repository.createCampaign(session.userId))
+  beginMailAction(session.userId, "create")
+  const created = await repository.createCampaign(session.userId)
+  finishMailAction({
+    actorId: session.userId,
+    action: "create",
+    subjectId: created.id,
+    before: null,
+    after: { id: created.id, status: created.status },
+  })
+  return forCustomer(created)
 }
 
 /** Opens a catalog mailer in Studio on this draft. */
@@ -210,13 +220,25 @@ export async function confirmCampaignQuantity(campaignId: string): Promise<Campa
 }
 
 export async function launchCampaign(campaignId: string): Promise<Campaign> {
-  await owned(campaignId)
-  return forCustomer(await repository.launch(campaignId))
+  const before = await owned(campaignId)
+  const session = await getSession()
+  beginMailAction(session?.userId ?? "unknown", "send")
+  const launched = await repository.launch(campaignId)
+  finishMailAction({
+    actorId: session?.userId ?? "unknown",
+    action: "send",
+    subjectId: campaignId,
+    before: { status: before.status },
+    after: { status: launched.status, mailed: false },
+  })
+  return forCustomer(launched)
 }
 
 const generationLocks = new Map<string, Promise<Campaign>>()
 
 export async function generateStudioCreative(campaignId: string): Promise<Campaign> {
+  const session = await getSession()
+  beginMailAction(session?.userId ?? "unknown", "ai")
   await owned(campaignId)
   const inFlight = generationLocks.get(campaignId)
   if (inFlight) return forCustomer(await inFlight)
@@ -437,8 +459,18 @@ export async function updateAddressSide(campaignId: string, edit: AddressSideEdi
 }
 
 export async function approveCreative(campaignId: string): Promise<Campaign> {
-  await owned(campaignId)
-  return forCustomer(await repository.approveCreative(campaignId))
+  const before = await owned(campaignId)
+  const session = await getSession()
+  beginMailAction(session?.userId ?? "unknown", "approve")
+  const approved = await repository.approveCreative(campaignId)
+  finishMailAction({
+    actorId: session?.userId ?? "unknown",
+    action: "approve",
+    subjectId: campaignId,
+    before: { status: before.status },
+    after: { status: approved.status },
+  })
+  return forCustomer(approved)
 }
 
 export async function unapproveCreative(campaignId: string): Promise<Campaign> {

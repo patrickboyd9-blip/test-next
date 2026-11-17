@@ -30,7 +30,7 @@ import {
   type VisionTaste,
 } from "./vision-taste"
 
-const rulesEnv = { DESIGN_DIRECTOR: "rules", DESIGN_CRITIC: "machine", DESIGN_CANDIDATE_RENDERS: "off" } as NodeJS.ProcessEnv
+const rulesEnv = { DESIGN_DIRECTOR: "rules", DESIGN_CRITIC: "machine", DESIGN_CANDIDATE_RENDERS: "off" } as unknown as NodeJS.ProcessEnv
 
 test("a vision reading keeps the structure and drops phone numbers", () => {
   const taste = parseVisionTastePayload({
