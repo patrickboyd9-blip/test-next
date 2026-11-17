@@ -38,7 +38,7 @@ test("two callers share one rate window", async () => {
 })
 
 test("audit and rate app code only inserts and reads", () => {
-  const text = ["lib/ops/audit.ts", "lib/ops/rate-limit.ts", "lib/ops/mail-flow.ts"]
+  const text = ["lib/ops/audit.ts", "lib/ops/rate-limit.ts", "lib/ops/mail-flow.ts", "lib/ops/schema.ts"]
     .map((file) => readFileSync(file, "utf8"))
     .join("\n")
   assert.doesNotMatch(text, /\bUPDATE\b|\bDELETE\b/)

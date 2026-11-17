@@ -1,13 +1,9 @@
 import { createNeonExecutor, postgresUrl, type SqlExecutor } from "@/lib/storage/document-store"
 
+import { ensureOpsTables } from "./schema"
+
 const hits = new Map<string, number[]>()
 const ready = new WeakMap<SqlExecutor, Promise<void>>()
-
-const DDL = `CREATE TABLE IF NOT EXISTS rate_events (
-  id bigserial PRIMARY KEY,
-  key text NOT NULL,
-  at_ms bigint NOT NULL
-)`
 
 export class RateLimitError extends Error {
   constructor() {
@@ -65,7 +61,7 @@ function neon(): SqlExecutor {
 function ensure(sql: SqlExecutor): Promise<void> {
   let pending = ready.get(sql)
   if (!pending) {
-    pending = sql.query(DDL).then(() => undefined)
+    pending = ensureOpsTables(sql)
     ready.set(sql, pending)
   }
   return pending
