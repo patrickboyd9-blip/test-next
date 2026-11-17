@@ -1,7 +1,7 @@
 import { getActiveSpec } from "./creative-state"
 import { toImageBrief } from "./image-brief"
 import { imageBriefContextFor } from "./studio-image-fingerprint"
-import type { GeneratedAsset, ImageGenerationAdapter } from "./image-generation"
+import { POSTCARD_SLOT_ASPECT, type GeneratedAsset, type ImageGenerationAdapter } from "./image-generation"
 import type { Campaign } from "./types"
 
 /**
@@ -28,6 +28,6 @@ export async function generateLeadDirectionImage(
     return { directionId, generated: null }
   }
 
-  const generated = await createAdapter().generate(brief)
+  const generated = await createAdapter().generate(brief, { slotAspect: POSTCARD_SLOT_ASPECT })
   return { directionId, generated }
 }

@@ -310,11 +310,11 @@ const LOCAL_SERVICE: SceneBank = {
     "A detail of wear that a homeowner would recognize, intact surroundings, soft daylight. Not this recipient's property.",
     "One honest consequence, framed tight, the rest of the room left alone.",
   ],
-  crew: [
-    "Hands and tools at the work itself. The person is secondary. Documentary daylight, no logo, not a handshake, not a posed portrait.",
-    "A figure at the job, seen from a little distance, sky or a wall left quiet for type later.",
-    "Materials of the trade in use, only the work in frame, no text on clothing.",
-  ],
+    crew: [
+      "The trade's own tool and the thing being worked on are both large in the frame, mid-task. If a person is present, the entire head is inside the frame with space above the hair. Documentary daylight, no logo, not a handshake, not a stock pose, not generic handiwork.",
+      "A worker mid-task, the action unmistakable as this trade, face fully in frame with space above the hair, sky or a wall left quiet above them.",
+      "Materials of the trade in use, only the work in frame, no text on clothing.",
+    ],
   neighborhood: [
     "An ordinary residential street that could be this kind of town, photographed with care. Not one mailbox treated as the recipient's address.",
     "Houses and a sidewalk in open light, no readable signs and no landmark.",
@@ -330,9 +330,9 @@ function tradeScene(subject: string): SceneBank {
       `${subject} The job as a customer would recognize it, not a stock pose and not a grey cut-out.`,
     ],
     crew: [
-      `${subject} Hands at the work, the person secondary, no logo on clothing.`,
-      `${subject} A worker seen from a little distance, with room left for type.`,
-      `${subject} Only the tools of this trade, no unrelated equipment.`,
+      `${subject} The trade's own tool and the thing being worked on are both large in the frame. If a person is present, the entire head, hair, and chin are inside the frame with space above the hair. Not a stock pose and not generic handiwork.`,
+      `${subject} A worker mid-task, the action unmistakable, face fully in frame with space above the hair.`,
+      `${subject} Only the tools and materials of this trade, no unrelated equipment.`,
     ],
     neighborhood: [
       `${subject} A normal home or shop in daylight, no readable signs.`,

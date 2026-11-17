@@ -1,4 +1,4 @@
-import { DARK_TYPE } from "@/lib/roofing-pro/compose"
+import { templateUsesSoftFadeBack } from "@/lib/roofing-pro/compose"
 import { isRoofingProTemplate } from "@/lib/roofing-pro/ids"
 import { composeGridCard } from "@/lib/design-intelligence/grid-composer"
 import { isDesignRationale } from "@/lib/design-intelligence/rationale"
@@ -8,7 +8,7 @@ import type { AddressSideSections, CreativeSpec } from "@/lib/campaign-creator/t
 /** True when this spec's back renders as the soft-fade back (it follows a fade front). */
 export function specUsesSoftFadeBack(spec: CreativeSpec): boolean {
   const templateId = spec.layoutHints?.templateId
-  if (isRoofingProTemplate(templateId)) return DARK_TYPE.has(templateId)
+  if (isRoofingProTemplate(templateId)) return templateUsesSoftFadeBack(templateId)
   if (!isDesignRationale(spec.designRationale)) return false
   try {
     return isSoftFadeBack(composeGridCard({ rationale: spec.designRationale, spec }).back)

@@ -53,6 +53,7 @@ export function buildOpenAIImagePrompt(brief: ImageBrief): string {
 
   return [
     shotLine(brief),
+    serviceFrame(brief),
     [
       `Subject and action: ${subject}`,
       art.craft ? `Craft to imitate, not a picture to copy: ${art.craft}` : null,
@@ -86,6 +87,25 @@ export function buildOpenAIImagePrompt(brief: ImageBrief): string {
       .filter((line): line is string => Boolean(line))
       .join(" "),
   ].join("\n")
+}
+
+const SERVICE_CLEAR =
+  "What this business does must be unmistakable at postcard size, not generic handiwork and not a stock pose."
+const HEAD_CLEAR =
+  "If a person is in the frame, their entire head, hair, and chin sit fully inside the picture with open space above the hair. The face does not touch the top, side, or bottom edge. The person and the work sit in the central half of the frame so a wide strip or a tall column still keeps the head and the action."
+
+/** Lines the image prompt must carry so a crop cannot invent a service or cut a face. */
+export function servicePhotoPromptFailures(prompt: string): string[] {
+  const failures: string[] = []
+  if (!/unmistakable at postcard size/i.test(prompt)) failures.push("missing unmistakable-service requirement")
+  if (!/not a stock pose/i.test(prompt)) failures.push("missing stock-pose refusal")
+  if (!/\bno people\b/i.test(prompt) && !/entire head/i.test(prompt)) failures.push("missing headroom requirement")
+  return failures
+}
+
+function serviceFrame(brief: ImageBrief): string {
+  if (/\bno people\b/i.test(brief.artDirection.subject)) return `${SERVICE_CLEAR} No people in the frame.`
+  return `${SERVICE_CLEAR} ${HEAD_CLEAR}`
 }
 
 function shotLine(brief: ImageBrief): string {

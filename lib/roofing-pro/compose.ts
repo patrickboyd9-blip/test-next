@@ -12,7 +12,8 @@ import { fitText, type FittedText, type InchRect, type TextRole } from "@/lib/po
 import { addressSideContentRect } from "@/lib/print-spec/address-side-content"
 import { buildPostcard5x8PrintSpec } from "@/lib/print-spec/postcard-5x8-print-spec"
 import { buildPostcard6x9PrintSpec } from "@/lib/print-spec/postcard-6x9-print-spec"
-import { personFocal, sceneFocal } from "@/lib/design-intelligence/subject-crop"
+import { focalKeepingHead, sceneFocal } from "@/lib/design-intelligence/subject-crop"
+import { inferPhotoSubject } from "@/lib/campaign-creator/photo-subject"
 import { displayWebsite } from "@/lib/campaign-creator/studio-contact"
 
 import { limitChars, ROOFING_COPY_LIMITS, statedExpiryLine, statedLicense } from "./copy"
@@ -45,13 +46,33 @@ export interface RoofingProInput {
   returnAddress?: string | null
   /** Gold industry slug. Non-roofing trades get their own palette. */
   trade?: string | null
+  /**
+   * "text-led" is the type hierarchy back (headline, support, offer, phone)
+   * and does not reuse the front photo. "soft-fade" reuses it. Omit to
+   * follow the template: fade fronts keep the photo back, coupon and
+   * neighborhood fronts get the text back.
+   */
+  backStyle?: "soft-fade" | "text-led"
+  /** Overrides the inferred person/scene crop. A person must keep their head. */
+  photoSubject?: "person" | "scene"
 }
 
 /** Inches the fade starts lower on a damage-headline front (5x8 layout units). */
 const DAMAGE_SCRIM_DROP = 0.3
 
-/** Type sits on a dark trade field or fade. These fronts also get the soft-fade back, never a cream one. */
+/** Type sits on a dark trade field or fade. Front ink is light on these. */
 export const DARK_TYPE = new Set<RoofingProTemplateId>(["roof_full_bleed", "roof_fade_offer", "roof_storm", "roof_seasonal", "roof_coupon", "roof_neighborhood"])
+
+/**
+ * Banded fronts already show the offer in a bar. Their back is the text-led
+ * one Patrick preferred: a real headline, a support line, the offer, and the
+ * phone, not a second crop of the front photo. Fade fronts keep the photo back.
+ */
+export const TEXT_LED_BACK = new Set<RoofingProTemplateId>(["roof_coupon", "roof_neighborhood"])
+
+export function templateUsesSoftFadeBack(templateId: RoofingProTemplateId): boolean {
+  return DARK_TYPE.has(templateId) && !TEXT_LED_BACK.has(templateId)
+}
 
 export function composeRoofingProCard(input: RoofingProInput): RoofingProCard {
   const front = composeRoofingProFace({ ...input, face: "front" })
@@ -119,13 +140,15 @@ function composeFront(
 
   for (const region of regions) {
     if (region.kind === "photo") {
+      const rect = rectOf(region)
+      const mode = photoMode(input, region.subject)
       photos.push({
         id: region.id,
         role: region.role,
-        rect: rectOf(region),
+        rect,
         bleed: Boolean(region.bleed),
         treatment: "cover",
-        focal: region.subject === "person" ? personFocal() : sceneFocal(),
+        focal: mode === "person" ? focalKeepingHead(rect) : sceneFocal(),
       })
       continue
     }
@@ -174,16 +197,33 @@ function composeFront(
   }
 }
 
+function wantsSoftFade(input: RoofingProInput): boolean {
+  if (input.backStyle === "text-led") return false
+  if (input.backStyle === "soft-fade") return true
+  return templateUsesSoftFadeBack(input.templateId)
+}
+
+function photoMode(input: RoofingProInput, regionSubject?: "scene" | "person"): "person" | "scene" {
+  if (input.photoSubject) return input.photoSubject
+  if (regionSubject === "person") return "person"
+  return inferPhotoSubject({ trade: input.trade, headline: input.spec.headline, offer: input.spec.offer })
+}
+
+function round2(value: number): number {
+  return Math.round(value * 100) / 100
+}
+
 function composeBackRaw(
   input: RoofingProInput,
   size: PostcardSizeId,
   pairing: PostcardFacePlan["pairing"],
   palette: VerticalPalette
 ): PostcardFacePlan {
-  const fade = DARK_TYPE.has(input.templateId)
+  const fade = wantsSoftFade(input)
   if (input.spec.addressSide || fade) {
     return composeAddressSideFace({
       style: fade ? "soft-fade" : "plain",
+      photoSubject: input.photoSubject ?? inferPhotoSubject({ trade: input.trade, headline: input.spec.headline, offer: input.spec.offer }),
       proof: fade ? resolveCopy(input, ROOFING_PRO_META[input.templateId].offerLed).body || undefined : undefined,
       expiry: resolveCopy(input, ROOFING_PRO_META[input.templateId].offerLed).expiry || undefined,
       size,
@@ -250,14 +290,16 @@ function composeBackRaw(
 
   const benefits =
     input.templateId === "roof_seasonal" ? clauses(copy.body) : []
+  const sub = clean(input.spec.subheadline)
+  const support = copy.body || (sub && !same(sub, copy.headline) && !same(sub, copy.offer) ? limitChars(sub, ROOFING_COPY_LIMITS.body) : "")
   const rows: Array<{ role: TextRole; text: string; weight: number; maxPt: number; minPt: number; maxChars: number }> = [
-    { role: "eyebrow", text: copy.business, weight: 0.7, maxPt: 12, minPt: 9, maxChars: ROOFING_COPY_LIMITS.business },
-    { role: "headline", text: copy.headline, weight: 1.3, maxPt: 20, minPt: 13, maxChars: ROOFING_COPY_LIMITS.headline },
+    { role: "eyebrow", text: copy.business, weight: 0.55, maxPt: 12, minPt: 9, maxChars: ROOFING_COPY_LIMITS.business },
+    { role: "headline", text: copy.headline, weight: 1.7, maxPt: 22, minPt: 14, maxChars: ROOFING_COPY_LIMITS.headline },
   ]
   if (benefits.length >= 2) {
     rows.push({ role: "body", text: "", weight: 1.6, maxPt: 11, minPt: 9, maxChars: 48 })
-  } else if (copy.body) {
-    rows.push({ role: "body", text: copy.body, weight: 1.5, maxPt: 12, minPt: 10, maxChars: ROOFING_COPY_LIMITS.body })
+  } else if (support) {
+    rows.push({ role: "body", text: support, weight: 1.35, maxPt: 13, minPt: 10, maxChars: ROOFING_COPY_LIMITS.body })
   }
   if (copy.offer) rows.push({ role: "offer", text: copy.offer, weight: 0.9, maxPt: 16, minPt: 12, maxChars: ROOFING_COPY_LIMITS.offer })
   if (copy.expiry) rows.push({ role: "label", text: copy.expiry, weight: 0.55, maxPt: 11, minPt: 8, maxChars: 48 })
@@ -284,7 +326,7 @@ function composeBackRaw(
       rect,
       role: row.role,
       pairing,
-      color: row.role === "offer" ? palette.accent : palette.ink,
+      color: row.role === "offer" ? palette.offerInk : palette.ink,
       maxChars: row.maxChars,
       minPt: row.minPt,
       maxPt: row.maxPt,
@@ -292,7 +334,16 @@ function composeBackRaw(
     if (fitted.lines.length > 0) texts.push(fitted)
   }
   const offer = texts.find((text) => text.role === "offer")
-  if (offer && contrastRatio(palette.accent, palette.paper) < 4.5) offer.color = palette.ink
+  if (offer) {
+    const tile = {
+      x: round2(Math.max(inner.x, offer.rect.x - 0.1)),
+      y: round2(Math.max(inner.y, offer.rect.y - 0.06)),
+      w: round2(Math.min(offer.rect.w + 0.2, inner.x + inner.w - Math.max(inner.x, offer.rect.x - 0.1))),
+      h: round2(offer.rect.h + 0.12),
+    }
+    shapes.push({ id: "back-offer-tile", role: "offer-tile", rect: tile, fill: palette.offerTile })
+    offer.color = contrastRatio(palette.offerInk, palette.offerTile) >= 4.5 ? palette.offerInk : palette.ink
+  }
 
   return {
     templateId: input.templateId,

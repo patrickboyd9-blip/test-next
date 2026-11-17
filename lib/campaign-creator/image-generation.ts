@@ -2,12 +2,18 @@ import type { TypeSeat } from "@/lib/design-intelligence/rationale"
 
 import type { ImageBrief } from "./image-brief"
 
+/** Wide frame Imagen can actually return. Postcard slots are landscape. */
+export const POSTCARD_SLOT_ASPECT = 16 / 9
+
 export interface ImageGenerationOptions {
   tier?: "preview" | "final"
   candidateCount?: number
   campaignId?: string
   directionId?: string
-  /** Width / height of the photo slot, so providers can request the closest aspect ratio. */
+  /**
+   * Width / height the photograph should fill. Postcard jobs pass 16/9 so a
+   * later cover crop does not have to throw away the top of a 4:3 frame.
+   */
   slotAspect?: number
 }
 

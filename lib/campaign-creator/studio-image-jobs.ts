@@ -8,10 +8,11 @@ import { isDesignRationale } from "@/lib/design-intelligence/rationale"
 import { getActiveSpec, getApprovedSpec } from "./creative-state"
 import { isBeforeAfterTemplate } from "./roof-photo-slots"
 import { toImageBrief, type ImageBrief } from "./image-brief"
-import type {
-  GeneratedAsset,
-  ImageGenerationAdapter,
-  ImageGenerationOptions,
+import {
+  POSTCARD_SLOT_ASPECT,
+  type GeneratedAsset,
+  type ImageGenerationAdapter,
+  type ImageGenerationOptions,
 } from "./image-generation"
 import {
   OpenAIImageGenerationNotConfiguredError,
@@ -385,6 +386,7 @@ async function executeStudioImageJob(input: {
       tier: slot.item.tier,
       campaignId: input.campaignId,
       directionId: slot.item.directionId,
+      slotAspect: POSTCARD_SLOT_ASPECT,
     }), slot.item.tier === "preview" ? PREVIEW_TIMEOUT_MS : FINAL_TIMEOUT_MS)
     const check = input.photoCheck ?? defaultPhotoCheck
     const candidates = [generated.asset, ...generated.alternates]
@@ -404,11 +406,12 @@ async function executeStudioImageJob(input: {
       if (firstReading && (firstReading.cluttered || firstReading.stocky)) {
         const retake = await withTimeout(generateImage(adapter, {
           ...promptBrief,
-          correction: "The previous frame was cluttered behind the type, or it looked like a stock portrait. Leave one third of the frame as calm sky or a plain wall. Put the person, the face, and any ladder on the other side. Off-axis, a real lived-in house, ordinary daylight.",
+          correction: "The previous frame was cluttered behind the type, or it looked like a stock portrait. Leave calm sky above the subject. Keep the person's entire head, hair, and chin inside the frame with space above the hair, near the center, not touching any edge. The trade action must stay obvious. Off-axis, a real lived-in place, ordinary daylight. Not a stock pose.",
         }, {
           tier: slot.item.tier,
           campaignId: input.campaignId,
           directionId: slot.item.directionId,
+          slotAspect: POSTCARD_SLOT_ASPECT,
         }), slot.item.tier === "preview" ? PREVIEW_TIMEOUT_MS : FINAL_TIMEOUT_MS)
         const retakeMatches = await check({
           src: retake.asset.src,

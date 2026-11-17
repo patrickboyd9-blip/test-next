@@ -1,4 +1,6 @@
 import type { CreativeSpec } from "@/lib/campaign-creator/types"
+import { headCardRect, focalKeepingHead, MAILER_PHOTO_ASPECT } from "@/lib/design-intelligence/subject-crop"
+import { photoVeilHex } from "@/lib/roofing-pro/scrim"
 import type { LockupPlan, PhotoSlotPlan, PostcardFacePlan, ShapePlan } from "@/lib/postcard-layouts/compose"
 import type { FontPairingId, PostcardSizeId, PostcardTemplateId } from "@/lib/postcard-layouts/ids"
 import type { VerticalPalette } from "@/lib/postcard-layouts/palette"
@@ -33,10 +35,15 @@ export interface AddressSideLayoutInput {
   templateId?: PostcardTemplateId
   /**
    * "soft-fade" matches a fade front: the campaign photo fills the message
-   * column and the copy sits in white on a navy fade over it. The mailing
+   * column and the copy sits in white on a dark fade over it. The mailing
    * panel, postage, and barcode zone stay unpainted either way.
    */
   style?: "plain" | "soft-fade"
+  /**
+   * A person photograph must not be shifted off the top of the card.
+   * Scene photographs (a house, no face) may still drop the sky.
+   */
+  photoSubject?: "person" | "scene"
 }
 
 /** Photo slot id for the soft-fade back. Renderers fill it with the front photo. */
@@ -80,7 +87,7 @@ export function composeAddressSideFace(input: AddressSideLayoutInput): PostcardF
   const trim = input.size === "6x9" ? { w: 9, h: 6 } : { w: 8, h: 5 }
   const fade = input.style === "soft-fade" && resolved.photo !== "none"
   const ink = fade ? input.palette.fieldInk : input.ink ?? input.palette.ink
-  // On the fade the offer sits on a yellow tile like the front bar, in the tile ink.
+  // On the fade the offer sits on the trade's offer tile, in the tile ink.
   const offerInk = fade ? input.palette.offerInk : ink
   const lineInput = { ...input, ink }
   const texts: FittedText[] = []
@@ -178,18 +185,32 @@ export function composeAddressSideFace(input: AddressSideLayoutInput): PostcardF
   if (fade) {
     // Bleeds off the left, top, and bottom edges. Stops at the content edge,
     // so the address, postage, and barcode zone keep plain paper.
+    // A fixed sky crop shoves the top of the photo off the card. That is how
+    // backs were cutting off heads. Only a scene with no face may drop sky.
+    const person = input.photoSubject === "person"
+    const sky = person ? 0 : FADE_SKY_CROP
     const right = round2(content.x + content.w)
+    const photoRect = { x: 0, y: -sky, w: right, h: round2(trim.h + sky) }
+    const focal = person ? focalKeepingHead(photoRect, MAILER_PHOTO_ASPECT) : { x: 0.5, y: 0.5 }
     photos.unshift({
       id: SOFT_FADE_BACK_PHOTO_ID,
       role: "photo",
-      rect: { x: 0, y: -FADE_SKY_CROP, w: right, h: round2(trim.h + FADE_SKY_CROP) },
+      rect: photoRect,
       bleed: true,
       treatment: "cover",
-      focal: { x: 0.5, y: 0.5 },
+      focal,
     })
     const copyTop = texts[messageStart]?.rect.y ?? textTop
-    const fadeTop = round2(Math.max(0, copyTop - content.h * 0.3))
-    shapes.push({ id: "back-fade", role: "solid-scrim", rect: { x: 0, y: fadeTop, w: right, h: round2(trim.h - fadeTop) }, fill: input.palette.scrim })
+    let fadeTop = round2(Math.max(0, copyTop - content.h * 0.3))
+    if (person) {
+      const head = headCardRect(photos[0]!, MAILER_PHOTO_ASPECT)
+      const belowHead = round2(head.y + head.h + 0.08)
+      if (belowHead > fadeTop && belowHead < trim.h - 1.4) fadeTop = belowHead
+    }
+    // Veil is a neutral dark, not the saturated trade scrim. Teal or green
+    // blended over skin is the yellow cast on the back. The headline band
+    // below keeps the real trade field.
+    shapes.push({ id: "back-fade", role: "solid-scrim", rect: { x: 0, y: fadeTop, w: right, h: round2(trim.h - fadeTop) }, fill: photoVeilHex(input.palette.scrim) })
     // The free strip above the mailing panel carries the front headline on the trade field,
     // so the back is not a big empty paper block. It never reaches the panel or the barcode strip.
     const panel = geometry.keepOuts.find((item) => item.id === "mailing_panel")
@@ -197,7 +218,7 @@ export function composeAddressSideFace(input: AddressSideLayoutInput): PostcardF
     if (panel) {
       const bandBottom = round2(panel.trim.yInches - 0.12)
       if (bandBottom > 0.9) {
-        shapes.push({ id: "back-headline-band", role: "solid-scrim", rect: { x: right, y: 0, w: round2(trim.w - right), h: bandBottom }, fill: input.palette.field })
+        shapes.push({ id: "back-headline-band", role: "field", rect: { x: right, y: 0, w: round2(trim.w - right), h: bandBottom }, fill: input.palette.field })
         if (headline) {
           const inset = 0.3
           const rect = { x: round2(right + 0.22), y: inset, w: round2(trim.w - right - 0.22 - inset), h: round2(bandBottom - inset - 0.14) }

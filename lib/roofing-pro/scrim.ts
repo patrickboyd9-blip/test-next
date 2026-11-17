@@ -17,6 +17,24 @@ export function steepScrimCss(hex: string): string {
   return `linear-gradient(to bottom, ${clear} 0%, ${mid} 22%, ${solid} 100%)`
 }
 
+/**
+ * Darkness for a translucent veil over a photograph.
+ * A saturated trade scrim (dental teal, pest green) blended over skin
+ * prints as a yellow-green cast. This keeps the scrim's darkness and only
+ * a trace of its hue. Solid fields and offer tiles keep the full trade color.
+ */
+export function photoVeilHex(hex: string): string {
+  const raw = hex.replace("#", "")
+  const r = Number.parseInt(raw.slice(0, 2), 16)
+  const g = Number.parseInt(raw.slice(2, 4), 16)
+  const b = Number.parseInt(raw.slice(4, 6), 16)
+  const y = 0.2126 * r + 0.7152 * g + 0.0722 * b
+  const keep = 0.18
+  const dark = 0.55
+  const channel = (n: number) => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, "0")
+  return `#${channel((y + (r - y) * keep) * dark)}${channel((y + (g - y) * keep) * dark)}${channel((y + (b - y) * keep) * dark)}`
+}
+
 function withAlpha(hex: string, alpha: number): string {
   const value = hex.replace("#", "")
   const r = Number.parseInt(value.slice(0, 2), 16)

@@ -372,7 +372,10 @@ function drawShape(page: PDFPage, spec: PostcardGeometry, plan: PostcardFacePlan
       : shape.rect
   const pdf = canvasRectToPdf(canvasRect(expanded, spec.bleedInchesPerSide), spec.artworkCanvasInches.heightInches)
   if (shape.role === "scrim" || shape.role === "solid-scrim") {
-    drawScrim(page, pdf, plan.palette.scrim, shape.role === "solid-scrim")
+    // Front fades keep the palette scrim (navy on roofing). The back photo
+    // veil passes its own neutral dark so a trade color does not tint the picture.
+    const veil = shape.id === "back-fade" && /^#[0-9a-fA-F]{6}$/.test(shape.fill) ? shape.fill : plan.palette.scrim
+    drawScrim(page, pdf, veil, shape.role === "solid-scrim")
     return
   }
   if (shape.role === "starburst") {
