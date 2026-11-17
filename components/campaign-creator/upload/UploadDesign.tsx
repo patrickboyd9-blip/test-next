@@ -80,7 +80,7 @@ export function UploadDesign({
       setUploading(null)
       return
     }
-    const url = URL.createObjectURL(new Blob([bytes], { type: classified.mediaType }))
+    const url = URL.createObjectURL(file.slice(0, file.size, classified.mediaType))
     setLocalPreview((current) => {
       const previous = current[face]
       if (previous) URL.revokeObjectURL(previous.url)
@@ -89,7 +89,7 @@ export function UploadDesign({
     try {
       const body = new FormData()
       body.set("face", face)
-      body.set("file", new File([bytes], file.name, { type: classified.mediaType }))
+      body.set("file", file)
       const response = await fetch(`/api/campaigns/${campaign.id}/design`, { method: "POST", body })
       const payload = (await response.json().catch(() => null)) as { campaign?: Campaign; error?: string } | null
       if (!response.ok || !payload?.campaign) {

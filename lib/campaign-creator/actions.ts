@@ -72,7 +72,7 @@ export async function createDraftCampaign(): Promise<Campaign> {
   if (!session) throw new CampaignAccessError(401, "Sign in required.")
   if (previewDemoAllowed()) {
     const demo = await repository.getCampaign("preview-demo")
-    if (!demo) throw new CampaignAccessError(500, "The preview campaign could not be opened.")
+    if (!demo) throw new Error("The preview campaign could not be opened.")
     return forCustomer(demo)
   }
   return forCustomer(await repository.createCampaign(session.userId))

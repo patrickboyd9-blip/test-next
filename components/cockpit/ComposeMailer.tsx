@@ -127,7 +127,7 @@ export function ComposeMailer({
       return
     }
     if (logoUrl) URL.revokeObjectURL(logoUrl)
-    setLogoUrl(URL.createObjectURL(new Blob([bytes], { type: classified.mediaType })))
+    setLogoUrl(URL.createObjectURL(file.slice(0, file.size, classified.mediaType)))
     patch({ logoName: file.name })
     setDesignError("")
   }
@@ -153,7 +153,7 @@ export function ComposeMailer({
       setDesignError(classified.error)
       return
     }
-    const url = URL.createObjectURL(new Blob([bytes], { type: classified.mediaType }))
+    const url = URL.createObjectURL(file.slice(0, file.size, classified.mediaType))
     replace((current) => {
       if (current) URL.revokeObjectURL(current.url)
       return { name: file.name, url, mediaType: classified.mediaType }
