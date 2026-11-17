@@ -38,6 +38,8 @@ import { TEMPLATE_INDUSTRIES, TEMPLATE_INDUSTRY_LABELS, type TemplateIndustry } 
 import { StartChoices, type StartPath } from "./StartChoices"
 
 import { ProofTray } from "./ProofCard"
+import { ProofFrame } from "@/components/campaign-creator/upload/ProofFrame"
+import { classifyDesignUpload, type DesignPreviewMedia } from "@/lib/mailer-compose/design-preview"
 import { CometMark } from "@/components/assistant/CometMark"
 import { ASSISTANT_NAME } from "@/lib/assistant/comet"
 
@@ -47,6 +49,12 @@ const STEP_LABEL: Record<ComposeStep, string> = {
   to: "To",
   what: "What",
   proof: "Proof",
+}
+
+interface HeldDesign {
+  name: string
+  url: string
+  mediaType: DesignPreviewMedia
 }
 
 export function ComposeMailer({
@@ -73,8 +81,10 @@ export function ComposeMailer({
   const [chat, setChat] = useState(tony?.turns ?? [{ role: "assistant" as const, text: ACCOMPLISH_QUESTION, choices: EXAMPLE_PROMPTS }])
   const [known, setKnown] = useState<Parameters<typeof interviewReply>[1]>({})
   const [proposal, setProposal] = useState<ProposedMailer | null>(tony?.proposal ?? null)
-  const [frontName, setFrontName] = useState<string | null>(null)
-  const [backName, setBackName] = useState<string | null>(null)
+  const [frontFile, setFrontFile] = useState<HeldDesign | null>(null)
+  const [backFile, setBackFile] = useState<HeldDesign | null>(null)
+  const [designError, setDesignError] = useState("")
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const [industry, setIndustry] = useState<TemplateIndustry | "all">("all")
   const [templateId, setTemplateId] = useState<string | null>(null)
   const [advanced, setAdvanced] = useState(false)
@@ -87,7 +97,7 @@ export function ComposeMailer({
   const people = selectedPeople(draft)
   const stepOneReady =
     path === "upload"
-      ? Boolean(frontName && backName)
+      ? Boolean(frontFile && backFile)
       : path === "template"
         ? Boolean(templateId)
         : path === "ai" && !quick
@@ -100,6 +110,54 @@ export function ComposeMailer({
 
   function patch(partial: Partial<ComposeDraft>) {
     setDraft((current) => ({ ...current, ...partial }))
+  }
+
+  async function onLogo(file: File | null) {
+    if (!file) return
+    let bytes: Uint8Array
+    try {
+      bytes = new Uint8Array(await file.arrayBuffer())
+    } catch {
+      setDesignError("That logo could not be read. Try a PNG or JPG.")
+      return
+    }
+    const classified = classifyDesignUpload(bytes)
+    if (!classified.ok || classified.mediaType === "application/pdf") {
+      setDesignError(classified.ok ? "Use a PNG or JPG for the logo." : classified.error)
+      return
+    }
+    if (logoUrl) URL.revokeObjectURL(logoUrl)
+    setLogoUrl(URL.createObjectURL(new Blob([bytes], { type: classified.mediaType })))
+    patch({ logoName: file.name })
+    setDesignError("")
+  }
+
+  async function onDesign(face: "front" | "back", file: File | null) {
+    const replace = face === "front" ? setFrontFile : setBackFile
+    if (!file) {
+      replace(null)
+      return
+    }
+    setDesignError("")
+    let bytes: Uint8Array
+    try {
+      bytes = new Uint8Array(await file.arrayBuffer())
+    } catch {
+      replace(null)
+      setDesignError("That file could not be read. Try it again.")
+      return
+    }
+    const classified = classifyDesignUpload(bytes)
+    if (!classified.ok) {
+      replace(null)
+      setDesignError(classified.error)
+      return
+    }
+    const url = URL.createObjectURL(new Blob([bytes], { type: classified.mediaType }))
+    replace((current) => {
+      if (current) URL.revokeObjectURL(current.url)
+      return { name: file.name, url, mediaType: classified.mediaType }
+    })
   }
 
   async function onFile(file: File | null) {
@@ -264,7 +322,7 @@ export function ComposeMailer({
                   type="file"
                   accept="image/png,image/jpeg"
                   className="max-w-28 text-xs"
-                  onChange={(event) => patch({ logoName: event.target.files?.[0]?.name ?? null })}
+                  onChange={(event) => void onLogo(event.target.files?.[0] ?? null)}
                 />
               </label>
             </div>
@@ -348,15 +406,18 @@ export function ComposeMailer({
             <div>
               <Eyebrow>Upload</Eyebrow>
               <h1 className="mt-2 text-2xl font-semibold">Upload the front and the back</h1>
-              <p className="mt-1 text-sm text-[#8aa0b4]">We fit each file onto the postcard, then show the proof. This preview does not send the files anywhere.</p>
+              <p className="mt-1 text-sm text-[#8aa0b4]">PNG, JPG, or PDF. Each file stays in this browser and is fitted on the proof. Nothing is uploaded or mailed.</p>
             </div>
             <label className="block text-sm">Front
-              <input type="file" accept="image/png,image/jpeg,application/pdf" className="mt-1 block min-h-12 w-full text-sm" onChange={(event) => setFrontName(event.target.files?.[0]?.name ?? null)} />
+              <input type="file" accept="image/png,image/jpeg,application/pdf,.png,.jpg,.jpeg,.pdf" className="mt-1 block min-h-12 w-full text-sm" onChange={(event) => void onDesign("front", event.target.files?.[0] ?? null)} />
             </label>
+            {frontFile ? <ProofFrame src={frontFile.url} mediaType={frontFile.mediaType} face="front" label={`Front · ${frontFile.name}`} size={draft.size} /> : null}
             <label className="block text-sm">Back
-              <input type="file" accept="image/png,image/jpeg,application/pdf" className="mt-1 block min-h-12 w-full text-sm" onChange={(event) => setBackName(event.target.files?.[0]?.name ?? null)} />
+              <input type="file" accept="image/png,image/jpeg,application/pdf,.png,.jpg,.jpeg,.pdf" className="mt-1 block min-h-12 w-full text-sm" onChange={(event) => void onDesign("back", event.target.files?.[0] ?? null)} />
             </label>
-            {frontName && backName ? <p className="text-sm">Ready to fit {frontName} and {backName}.</p> : null}
+            {backFile ? <ProofFrame src={backFile.url} mediaType={backFile.mediaType} face="back" label={`Back · ${backFile.name}`} size={draft.size} /> : null}
+            {designError ? <p role="alert" className="rounded-xl bg-[#3a1418] px-3 py-3 text-sm text-[#ffb4b4]">{designError}</p> : null}
+            {frontFile && backFile ? <p className="text-sm">Both sides are ready. Continue to the proof.</p> : null}
           </Panel>
         ) : null}
 
@@ -399,11 +460,35 @@ export function ComposeMailer({
           </Panel>
         ) : null}
 
-        {step === "proof" ? (
+        {step === "proof" && path === "upload" && (!frontFile || !backFile) ? (
+          <Panel className="space-y-3 p-4 sm:p-6">
+            <h1 className="text-2xl font-semibold">The proof needs both files</h1>
+            <p role="alert" className="text-sm text-[#ffb4b4]">Upload a PNG, JPG, or PDF for the front and the back. A refresh clears them, because this preview keeps the files in the browser.</p>
+          </Panel>
+        ) : null}
+
+        {step === "proof" && path === "upload" && frontFile && backFile ? (
+          <div className="space-y-4">
+            <Panel className="space-y-4 p-4 sm:p-6">
+              <Eyebrow>Proof</Eyebrow>
+              <h1 className="text-2xl font-semibold">Does this look right?</h1>
+              <p className="text-sm text-[#b7c9d8]">Your files, fitted inside the postcard. They stay in this browser. Nothing was stored or mailed.</p>
+              <ProofFrame src={frontFile.url} mediaType={frontFile.mediaType} face="front" label={`Front · ${frontFile.name}`} size={draft.size} />
+              <ProofFrame src={backFile.url} mediaType={backFile.mediaType} face="back" label={`Back · ${backFile.name}`} size={draft.size} />
+            </Panel>
+          </div>
+        ) : null}
+
+        {step === "proof" && path !== "upload" ? (
           <div className="space-y-4">
             <Panel className="space-y-3 p-4 sm:p-6">
               <Eyebrow>Proof</Eyebrow>
               <h1 className="text-2xl font-semibold">Does this look right?</h1>
+              {logoUrl ? (
+                // The mark is the customer's file. Keep its proportions.
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={logoUrl} alt={proof.logoName ?? "Logo"} className="h-14 w-24 rounded-md bg-white object-contain p-1" />
+              ) : null}
               <ProofTray proof={proof} />
             </Panel>
           </div>

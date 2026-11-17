@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "fs/promises"
 import path from "path"
 
+import { previewDemoAllowed } from "@/lib/auth/session"
 import {
   blobReadWriteToken,
   createVercelBlobObjectStore,
@@ -44,6 +45,26 @@ function safePair(campaignId: string, key: string): boolean {
 function localPath(campaignId: string, key: string): string | null {
   if (!safePair(campaignId, key)) return null
   return path.join(process.cwd(), ".data", "uploaded-designs", campaignId, key)
+}
+
+const demoFiles = new Map<string, Buffer>()
+
+function demoFileId(campaignId: string, key: string): string {
+  return `${campaignId}/${key}`
+}
+
+/** Preview demo keeps the bytes in this process when disk and Blob are absent. */
+function createDemoUploadedDesignStore(): UploadedDesignStore {
+  return {
+    async put(campaignId, key, bytes) {
+      if (!safePair(campaignId, key)) throw new Error("Invalid uploaded design path")
+      demoFiles.set(demoFileId(campaignId, key), Buffer.from(bytes))
+    },
+    async get(campaignId, key) {
+      const found = demoFiles.get(demoFileId(campaignId, key))
+      return found ? { bytes: found } : null
+    },
+  }
 }
 
 function createLocalUploadedDesignStore(): UploadedDesignStore {
@@ -90,6 +111,7 @@ export function resolveUploadedDesignStore(options?: {
     if (options.blobs) return createBlobUploadedDesignStore(options.blobs)
     return createLocalUploadedDesignStore()
   }
+  if (previewDemoAllowed()) return createDemoUploadedDesignStore()
   const token = blobReadWriteToken()
   if (token) return createBlobUploadedDesignStore(createVercelBlobObjectStore(token))
   return createLocalUploadedDesignStore()
@@ -104,6 +126,11 @@ export async function openUploadedDesign(
   key: string,
   options?: { blobs?: BlobObjectStore | null }
 ): Promise<{ bytes: Buffer } | null> {
+  if (!safePair(campaignId, key)) return null
+  if (previewDemoAllowed()) {
+    const found = demoFiles.get(demoFileId(campaignId, key))
+    if (found) return { bytes: found }
+  }
   const filePath = localPath(campaignId, key)
   if (!filePath) return null
   try {

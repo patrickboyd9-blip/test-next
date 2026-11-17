@@ -123,6 +123,19 @@ export function defaultDocumentDirectory(collection: DocumentCollection): string
   return path.join(process.cwd(), ".data", "reference-corpus")
 }
 
+/** Process memory. Used for the preview demo so a missing disk or database still works. */
+export function createMemoryDocumentStore(): DocumentStore {
+  const docs = new Map<string, unknown>()
+  return {
+    async get(id) {
+      return docs.has(id) ? docs.get(id) ?? null : null
+    },
+    async put(id, document) {
+      docs.set(id, document)
+    },
+  }
+}
+
 export function createFileDocumentStore(directory: string): DocumentStore {
   return {
     async get(id) {

@@ -11,6 +11,7 @@ import {
   requestUploadedDesignReview,
 } from "@/lib/bring-your-own-design/actions"
 import { DESIGN_REVIEW_QUESTION } from "@/lib/bring-your-own-design/design-review"
+import { classifyDesignUpload } from "@/lib/mailer-compose/design-preview"
 import type { Campaign, DesignFaceName } from "@/lib/campaign-creator/types"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -57,25 +58,47 @@ export function UploadDesign({
   const [editingBasics, setEditingBasics] = useState(false)
   const [reviewing, setReviewing] = useState(false)
   const [declining, setDeclining] = useState(false)
+  const [localPreview, setLocalPreview] = useState<Partial<Record<DesignFaceName, { url: string; mediaType: string; name: string }>>>({})
+  const [serverPreviewFailed, setServerPreviewFailed] = useState<Partial<Record<DesignFaceName, boolean>>>({})
 
   async function onFile(face: DesignFaceName, file: File | undefined) {
     if (!file) return
     setUploadError(null)
     setConfirmed(false)
     setUploading(face)
+    let bytes: Uint8Array
+    try {
+      bytes = new Uint8Array(await file.arrayBuffer())
+    } catch {
+      setUploadError("That file could not be read. Try it again.")
+      setUploading(null)
+      return
+    }
+    const classified = classifyDesignUpload(bytes)
+    if (!classified.ok) {
+      setUploadError(classified.error)
+      setUploading(null)
+      return
+    }
+    const url = URL.createObjectURL(new Blob([bytes], { type: classified.mediaType }))
+    setLocalPreview((current) => {
+      const previous = current[face]
+      if (previous) URL.revokeObjectURL(previous.url)
+      return { ...current, [face]: { url, mediaType: classified.mediaType, name: file.name } }
+    })
     try {
       const body = new FormData()
       body.set("face", face)
-      body.set("file", file)
+      body.set("file", new File([bytes], file.name, { type: classified.mediaType }))
       const response = await fetch(`/api/campaigns/${campaign.id}/design`, { method: "POST", body })
-      const payload = (await response.json()) as { campaign?: Campaign; error?: string }
-      if (!response.ok || !payload.campaign) {
-        setUploadError(payload.error ?? "The file could not be uploaded.")
+      const payload = (await response.json().catch(() => null)) as { campaign?: Campaign; error?: string } | null
+      if (!response.ok || !payload?.campaign) {
+        setUploadError(payload?.error ?? "The file could not be saved. The preview below is still on this screen.")
         return
       }
       onCampaign(payload.campaign)
     } catch {
-      setUploadError("The file could not be uploaded. Try again.")
+      setUploadError("The file could not be saved. The preview below is still on this screen.")
     } finally {
       setUploading(null)
     }
@@ -261,26 +284,41 @@ export function UploadDesign({
         </ul>
       )}
 
-      {bothSides && design?.front && design.back && (
+      {(bothSides || localPreview.front || localPreview.back) && (
         <div className="flex flex-col gap-4">
-          <h3 className="text-base font-medium">Finished proof</h3>
+          <h3 className="text-base font-medium">{bothSides ? "Finished proof" : "Preview"}</h3>
           <p className="text-sm leading-6 text-muted-foreground">
-            This is the card we will print. The black line is where it is cut. On the back, the shaded
-            box is the address, postage, and barcode.
+            {bothSides
+              ? "This is the card we will print. The black line is where it is cut. On the back, the shaded box is the address, postage, and barcode."
+              : "This preview stays on this screen. It is shown even if the file cannot be stored."}
           </p>
           <div className="grid gap-6">
-            <ProofFrame
-              label="Front"
-              face="front"
-              mediaType={design.front.preparedMediaType ?? design.front.mediaType}
-              src={`/api/uploaded-design/${campaign.id}/${design.front.preparedKey ?? design.front.key}`}
-            />
-            <ProofFrame
-              label="Back"
-              face="back"
-              mediaType={design.back.preparedMediaType ?? design.back.mediaType}
-              src={`/api/uploaded-design/${campaign.id}/${design.back.preparedKey ?? design.back.key}`}
-            />
+            {(design?.front || localPreview.front) && (
+              <ProofFrame
+                label="Front"
+                face="front"
+                mediaType={
+                  serverPreviewFailed.front
+                    ? (localPreview.front?.mediaType ?? design?.front?.mediaType ?? "image/png")
+                    : (design?.front?.preparedMediaType ?? localPreview.front?.mediaType ?? design?.front?.mediaType ?? "image/png")
+                }
+                src={facePreviewSrc(campaign.id, design?.front, localPreview.front, serverPreviewFailed.front)}
+                onError={() => setServerPreviewFailed((current) => ({ ...current, front: true }))}
+              />
+            )}
+            {(design?.back || localPreview.back) && (
+              <ProofFrame
+                label="Back"
+                face="back"
+                mediaType={
+                  serverPreviewFailed.back
+                    ? (localPreview.back?.mediaType ?? design?.back?.mediaType ?? "image/png")
+                    : (design?.back?.preparedMediaType ?? localPreview.back?.mediaType ?? design?.back?.mediaType ?? "image/png")
+                }
+                src={facePreviewSrc(campaign.id, design?.back, localPreview.back, serverPreviewFailed.back)}
+                onError={() => setServerPreviewFailed((current) => ({ ...current, back: true }))}
+              />
+            )}
           </div>
         </div>
       )}
@@ -398,6 +436,16 @@ export function UploadDesign({
       )}
     </div>
   )
+}
+
+function facePreviewSrc(
+  campaignId: string,
+  stored: { key: string; preparedKey?: string } | undefined,
+  local: { url: string } | undefined,
+  failed: boolean | undefined
+): string {
+  if (stored && !failed) return `/api/uploaded-design/${campaignId}/${stored.preparedKey ?? stored.key}`
+  return local?.url ?? ""
 }
 
 function FacePicker({
