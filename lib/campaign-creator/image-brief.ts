@@ -1,3 +1,4 @@
+import { uploadedLogo } from "./customer-logo"
 import { offerPhotoSubject } from "./offer-photo-subject"
 import { cutoutSubjectLine, cutoutSubjectRequested } from "@/lib/design-intelligence/cutout"
 import { photoFits } from "@/lib/research-library/steer"
@@ -80,6 +81,11 @@ export interface ImageBrief {
   correction?: string
   /** Damage the headline names; the photograph must show it. */
   damage?: import("./roof-damage-photo").RoofDamageKind
+  /**
+   * The customer uploaded a logo file. The photograph must not draw one.
+   * Omitted from the photo cache key so attaching the file does not regenerate the picture.
+   */
+  customerLogo?: boolean
 }
 
 /** Null when the brief's photo matches its headline; otherwise the problem. */
@@ -217,6 +223,10 @@ export function toImageBrief(
       subject: `${brief.artDirection.subject} Photograph direction from researched mailers, as a description only: ${researchNote}`,
     }
   }
+
+  // The flag is not part of the photograph cache key. The prompt reads it
+  // when a new picture is made. Attaching a logo does not redraw an existing one.
+  if (uploadedLogo(context.campaign)) brief.customerLogo = true
 
   if (cutoutSubjectRequested(spec)) {
     brief.artDirection = {

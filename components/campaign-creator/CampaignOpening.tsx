@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, type ReactNode } from "react"
 
 import type { UploadPathBasics } from "@/lib/bring-your-own-design/upload-path"
 
@@ -23,6 +23,7 @@ interface CampaignOpeningProps {
   onSelectExample: (prompt: string) => void
   onSubmitUpload: (basics: UploadPathBasics) => Promise<void>
   onSelectTemplate: (templateId: string) => Promise<void>
+  logo?: ReactNode
 }
 
 export function CampaignOpening({
@@ -34,6 +35,7 @@ export function CampaignOpening({
   onSelectExample,
   onSubmitUpload,
   onSelectTemplate,
+  logo,
 }: CampaignOpeningProps) {
   const [step, setStep] = useState<OpeningStep>(initialStep)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -68,6 +70,7 @@ export function CampaignOpening({
       {step === "ai" && (
         <>
           <OpeningPrompt onSelectExample={onSelectExample} onBack={() => setStep("choose")} />
+          {logo}
           <Composer
             value={composerValue}
             onValueChange={onComposerChange}

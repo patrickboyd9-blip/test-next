@@ -44,6 +44,7 @@ import {
   type RenderedPostcardPdf,
 } from "@/lib/print-spec/render-campaign-postcard-pdf"
 import { canvasRectToPdf, type PostcardGeometry } from "@/lib/print-spec/postcard-5x8-print-spec"
+import { paintCustomerLogo } from "@/lib/print-spec/customer-logo-paint"
 import { upscaleToPrintCanvas } from "@/lib/print-spec/upscale-print-image"
 
 const FONT_DIR = path.join(process.cwd(), "lib/print-spec/fonts")
@@ -62,6 +63,7 @@ export async function renderTemplatedPostcardPdf(input: {
   image?: PostcardPrintImage
   alternateImage?: PostcardPrintImage
   backImage?: PostcardPrintImage
+  logo?: PostcardPrintImage
 }): Promise<RenderedPostcardPdf> {
   const size = input.size ?? "5x8"
   const spec = geometryFor(size)
@@ -95,6 +97,7 @@ export async function renderTemplatedPostcardPdf(input: {
   const strong = await doc.embedFont(readFileSync(path.join(FONT_DIR, "SourceSans3-Semibold.ttf")), { subset: true })
   const images = await embedImages(doc, input.image, input.alternateImage, spec)
   const backPhoto = await embedLoose(doc, input.backImage)
+  const logo = await embedLoose(doc, input.logo)
 
   const pageSize: [number, number] = [spec.pdfPagePoints.widthPoints, spec.pdfPagePoints.heightPoints]
   const frontPage = doc.addPage(pageSize)
@@ -102,7 +105,7 @@ export async function renderTemplatedPostcardPdf(input: {
   markBoxes(frontPage, spec)
   markBoxes(backPage, spec)
 
-  drawFront(frontPage, spec, front, images, input.copy.qrPayload, display, strong, text)
+  drawFront(frontPage, spec, front, images, input.copy.qrPayload, display, strong, text, logo)
   if (isRoofingProTemplate(input.templateId) || input.copy.addressSide) {
     drawPlanBack(backPage, spec, back, display, strong, text, backPhoto, addressSideQrPayload(input.copy, input.copy.qrPayload))
   } else {
@@ -156,6 +159,7 @@ export async function renderStudioDesignPdf(input: {
   image?: PostcardPrintImage
   alternateImage?: PostcardPrintImage
   backImage?: PostcardPrintImage
+  logo?: PostcardPrintImage
 }): Promise<RenderedPostcardPdf & { design: GridCard }> {
   const spec = geometryFor(input.card.front.size)
   const doc = await PDFDocument.create()
@@ -165,12 +169,13 @@ export async function renderStudioDesignPdf(input: {
   const strong = await doc.embedFont(readFileSync(path.join(FONT_DIR, "SourceSans3-Semibold.ttf")), { subset: true })
   const images = await embedImages(doc, input.image, input.alternateImage, spec)
   const backPhoto = await embedLoose(doc, input.backImage)
+  const logo = await embedLoose(doc, input.logo)
   const pageSize: [number, number] = [spec.pdfPagePoints.widthPoints, spec.pdfPagePoints.heightPoints]
   const frontPage = doc.addPage(pageSize)
   const backPage = doc.addPage(pageSize)
   markBoxes(frontPage, spec)
   markBoxes(backPage, spec)
-  drawFront(frontPage, spec, input.card.front, images, input.copy.qrPayload, display, strong, text)
+  drawFront(frontPage, spec, input.card.front, images, input.copy.qrPayload, display, strong, text, logo)
   drawPlanBack(
     backPage,
     spec,
@@ -229,7 +234,8 @@ function drawFront(
   qrPayload: string | undefined,
   display: PDFFont,
   strong: PDFFont,
-  text: PDFFont
+  text: PDFFont,
+  logo: PDFImage | null = null
 ) {
   page.drawRectangle({
     x: 0,
@@ -251,6 +257,7 @@ function drawFront(
   drawTrust(page, spec, plan, strong)
   for (const line of plan.texts) drawFitted(page, spec, line, display, text)
   drawFrontLockup(page, spec, plan, qrPayload, display, strong, text)
+  paintCustomerLogo(page, spec, logo)
 }
 
 function drawBack(

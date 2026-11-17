@@ -1,4 +1,7 @@
+import { decodeRaster } from "@/lib/bring-your-own-design/decode-raster"
 import { postcardImageFromDataUrl, resolveAddressSideSections } from "@/lib/campaign-creator/address-side"
+import { logoFileName, uploadedLogo } from "@/lib/campaign-creator/customer-logo"
+import { openStudioImage } from "@/lib/campaign-creator/studio-image-store"
 import { withRequiredDisclosures } from "@/lib/research-library/auto-disclosures"
 import { attorneyAdMark } from "@/lib/design-intelligence/attorney-compliance"
 import { medicareDisclaimerFor } from "@/lib/campaign-creator/medicare-compliance"
@@ -26,6 +29,7 @@ export async function renderAiPrintFile(campaign: Campaign): Promise<{
   size: "5x8" | "6x9"
 }> {
   const photo = await loadFinalPostcardPhoto(campaign)
+  const logo = await loadCustomerLogo(campaign)
   const templateId = campaign.mailPiece?.spec.layoutHints?.templateId
   const paletteId = campaign.mailPiece?.spec.layoutHints?.verticalPalette
   const copy = printCopy(campaign)
@@ -65,6 +69,7 @@ export async function renderAiPrintFile(campaign: Campaign): Promise<{
         copy,
         image: photo ?? undefined,
         backImage: backPhoto,
+        logo,
       })
     : isPostcardTemplate(templateId)
     ? await renderTemplatedPostcardPdf({
@@ -73,11 +78,13 @@ export async function renderAiPrintFile(campaign: Campaign): Promise<{
         paletteId: isVerticalPalette(paletteId) ? paletteId : undefined,
         image: photo ?? undefined,
         backImage,
+        logo,
       })
     : await renderPostcardPrintPdf({
         copy,
         image: photo ?? undefined,
         backImage,
+        logo,
         plateColor: plateFromSpec(campaign.mailPiece?.spec),
       })
 
@@ -127,6 +134,18 @@ function addressReturnLines(spec: CreativeSpec, briefAddress: string | undefined
   if (!sections.returnAddress) return []
   const text = (spec.addressSide.returnAddress ?? briefAddress ?? "").trim()
   return text.split("\n").map((line) => line.trim()).filter(Boolean).slice(0, 3)
+}
+
+async function loadCustomerLogo(campaign: Campaign): Promise<PostcardPrintImage | undefined> {
+  const asset = uploadedLogo(campaign.brief)
+  if (!asset?.fileUrl) return undefined
+  const fileName = logoFileName(asset.fileUrl, campaign.id)
+  if (!fileName) return undefined
+  const opened = await openStudioImage(campaign.id, fileName)
+  if (!opened) return undefined
+  const decoded = decodeRaster(opened.bytes, "png")
+  if (!decoded) return undefined
+  return { bytes: new Uint8Array(opened.bytes), width: decoded.width, height: decoded.height }
 }
 
 function backPrintImage(

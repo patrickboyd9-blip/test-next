@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/card"
 
 import { AudienceStage } from "./AudienceStage"
+import { LogoUpload } from "./LogoUpload"
 import { BriefSummaryCard } from "./BriefSummaryCard"
 import { CampaignCreatorLayout } from "./CampaignCreatorLayout"
 import { CampaignOpening } from "./CampaignOpening"
@@ -276,6 +277,15 @@ export function CampaignCreatorView({
         )
       : null
 
+  const logoControl = surface !== "upload" ? (
+    <LogoUpload
+      campaignId={campaign.id}
+      brief={campaign.brief}
+      promptText={[composerValue, ...campaign.transcript.map((message) => message.content)].join("\n")}
+      onCampaign={setCampaign}
+    />
+  ) : null
+
   const interviewContent = (
     <>
       {awaitingFirstMessage ? (
@@ -293,11 +303,13 @@ export function CampaignCreatorView({
             const updated = await beginFromTemplate(campaign.id, templateId)
             setCampaign(updated)
           }}
+          logo={logoControl}
         />
       ) : (
         <ConversationThread messages={displayMessages} isThinking={isSending} />
       )}
 
+      {showComposer && logoControl}
       {showComposer && (
         <Composer
           value={composerValue}
@@ -324,6 +336,7 @@ export function CampaignCreatorView({
 
   const studioContent = (
     <>
+      {logoControl}
       <CollapsedConversation messages={campaign.transcript} />
 
       {isCreativeApproved && Boolean(campaign.mailPiece) && approvedDirection && approvedSpec && (
