@@ -24,9 +24,33 @@ export function runAs<T>(session: AccountSession | null, fn: () => T): T {
   return storage.run(session, fn)
 }
 
+/**
+ * Preview deployments and an explicit DEMO_MODE flag use a sample account.
+ * Production never does, even if DEMO_MODE is set there.
+ * Vercel preview runs with NODE_ENV=production, so the check is VERCEL_ENV.
+ */
+export function previewDemoAllowed(env: NodeJS.ProcessEnv = process.env): boolean {
+  if (env.VERCEL_ENV === "production") return false
+  if (env.VERCEL_ENV === "preview") return true
+  if (env.NODE_ENV === "production") return false
+  const flag = env.DEMO_MODE?.trim().toLowerCase()
+  return flag === "1" || flag === "true"
+}
+
+export function previewDemoSession(): AccountSession {
+  return {
+    userId: "preview-demo@example.com",
+    email: "preview-demo@example.com",
+    name: "Preview demo",
+    businessName: "Jordan's Plumbing",
+    fixture: true,
+  }
+}
+
 export async function getSession(): Promise<AccountSession | null> {
   const scoped = storage.getStore()
   if (scoped !== undefined) return scoped
+  if (previewDemoAllowed()) return previewDemoSession()
   if (process.env.NODE_ENV === "production") return readCookieSession()
   if (process.env.AUTH_MODE === "dev-fixture") return devFixture()
   return readCookieSession()

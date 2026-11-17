@@ -93,9 +93,9 @@ function direction(index: number, layout: CreativeSpec["layoutVariant"]): Creati
   }
 }
 
-test("the catalog is 14 original compositions plus 11 roofing pro templates", () => {
-  assert.equal(POSTCARD_TEMPLATE_IDS.length, 25)
-  assert.equal(new Set(POSTCARD_TEMPLATE_IDS).size, 25)
+test("the catalog is 14 original compositions plus 12 roofing pro templates", () => {
+  assert.equal(POSTCARD_TEMPLATE_IDS.length, 26)
+  assert.equal(new Set(POSTCARD_TEMPLATE_IDS).size, 26)
   for (const id of POSTCARD_TEMPLATE_IDS) {
     assert.equal(TEMPLATE_META[id].id, id)
   }

@@ -1,3 +1,6 @@
+import { Suspense } from "react";
+
+import { AskComet } from "@/components/assistant/AskComet";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { getSession, sessionInitials } from "@/lib/auth/session";
@@ -16,14 +19,19 @@ export default async function AppLayout({
   const account = session
     ? {
         name: session.name,
-        detail: session.fixture ? "Local fixture. Not a signed-in account." : session.businessName,
+        detail: session.fixture ? "Sample account. Nothing is mailed or charged." : session.businessName,
         initials: sessionInitials(session.name),
       }
     : null;
   return (
     <SidebarProvider>
       <AppSidebar account={account} />
-      <SidebarInset>{children}</SidebarInset>
+      <SidebarInset>
+        {children}
+        <Suspense fallback={null}>
+          <AskComet />
+        </Suspense>
+      </SidebarInset>
     </SidebarProvider>
   );
 }

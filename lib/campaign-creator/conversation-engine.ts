@@ -1,3 +1,5 @@
+import { previewDemoAllowed } from "@/lib/auth/session"
+
 import type { ConversationEngine } from "./conversation-engine-types"
 
 
@@ -39,7 +41,7 @@ async function loadAnthropicConversationEngine() {
  */
 export async function getConversationEngine(): Promise<ConversationEngine> {
   const apiKey = process.env.ANTHROPIC_API_KEY
-  if (!apiKey) {
+  if (previewDemoAllowed() || !apiKey) {
     throw new ConversationEngineNotConfiguredError()
   }
 

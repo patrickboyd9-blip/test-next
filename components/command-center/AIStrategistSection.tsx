@@ -1,4 +1,5 @@
-import { Sparkles } from "lucide-react"
+import { CometMark } from "@/components/assistant/CometMark"
+import { ASSISTANT_NAME } from "@/lib/assistant/comet"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { RecommendationCard } from "./RecommendationCard"
 import type { Recommendation } from "@/lib/command-center/types"
@@ -12,8 +13,8 @@ export function AIStrategistSection({ recommendations }: AIStrategistSectionProp
     <Card className="h-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Sparkles className="size-4 text-primary" />
-          AI Strategist
+          <CometMark className="size-4" />
+          {ASSISTANT_NAME}
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">

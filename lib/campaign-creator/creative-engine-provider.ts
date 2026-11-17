@@ -3,12 +3,15 @@ import {
   type UploadedArtworkFace,
 } from "@/lib/bring-your-own-design/design-review"
 
+import { previewDemoAllowed } from "@/lib/auth/session"
+
 import type { CreativeEngine } from "./creative-engine"
 import { MockCreativeEngine } from "./mock-creative-engine"
 
 let cached: { kind: "anthropic" | "mock"; engine: CreativeEngine } | null = null
 
 function resolveKind(): "anthropic" | "mock" {
+  if (previewDemoAllowed()) return "mock"
   if (process.env.CREATIVE_ENGINE === "mock") return "mock"
   if (process.env.ANTHROPIC_API_KEY) return "anthropic"
   return "mock"
@@ -55,7 +58,7 @@ export async function reviewUploadedArtwork(input: {
   back: UploadedArtworkFace
 }): Promise<{ suggestions: string[]; printedText: string }> {
   const apiKey = process.env.ANTHROPIC_API_KEY?.trim()
-  if (!isDesignReviewAvailable() || !apiKey) {
+  if (previewDemoAllowed() || !isDesignReviewAvailable() || !apiKey) {
     throw new Error("Review is not available right now. You can still approve the proof.")
   }
   const { reviewUploadedArtworkWithAnthropic } = await import("./anthropic-creative-engine")

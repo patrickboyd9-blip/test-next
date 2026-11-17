@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto"
 
-import { createAppDocumentStore, type DocumentStore } from "@/lib/storage/document-store"
+import { previewDemoAllowed } from "@/lib/auth/session"
+import { createAppDocumentStore, createMemoryDocumentStore, type DocumentStore } from "@/lib/storage/document-store"
 
 import type { MailOrderRecord } from "@/lib/click2mail/order-record"
 
@@ -269,7 +270,10 @@ class StoredCampaignRepository implements CampaignRepository {
   }
 
   async getCampaign(id: string): Promise<Campaign | null> {
-    return this.read(id)
+    const found = await this.read(id)
+    if (found) return found
+    if (previewDemoAllowed() && id === "preview-demo") return this.write(demoCampaign())
+    return null
   }
 
   async appendMessage(id: string, message: ConversationMessage): Promise<Campaign> {
@@ -548,13 +552,35 @@ class StoredCampaignRepository implements CampaignRepository {
   }
 }
 
+function demoCampaign(): Campaign {
+  const now = new Date().toISOString()
+  return {
+    id: "preview-demo",
+    ownerId: "preview-demo@example.com",
+    status: "draft",
+    brief: {},
+    creative: createEmptyCampaignCreative(),
+    transcript: [],
+    readyForBriefReview: false,
+    createdAt: now,
+    updatedAt: now,
+  }
+}
+
 let repository: CampaignRepository | null = null
+let demoRepository: CampaignRepository | null = null
 
 export function createCampaignRepository(store: DocumentStore): CampaignRepository {
   return new StoredCampaignRepository(store)
 }
 
 export function getCampaignRepository(): CampaignRepository {
+  if (previewDemoAllowed()) {
+    if (!demoRepository) {
+      demoRepository = createCampaignRepository(createMemoryDocumentStore())
+    }
+    return demoRepository
+  }
   if (!repository) {
     repository = createCampaignRepository(createAppDocumentStore("campaigns"))
   }

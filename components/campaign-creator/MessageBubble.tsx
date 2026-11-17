@@ -1,3 +1,5 @@
+import { CometMark } from "@/components/assistant/CometMark"
+import { ASSISTANT_NAME } from "@/lib/assistant/comet"
 import { cn } from "@/lib/utils"
 import type { ConversationMessage } from "@/lib/campaign-creator/types"
 
@@ -26,6 +28,12 @@ export function MessageBubble({ message }: MessageBubbleProps) {
             : "bg-card text-card-foreground ring-1 ring-foreground/10"
         )}
       >
+        {isCustomer ? null : (
+          <span className="mb-1 flex items-center gap-1 text-xs text-muted-foreground">
+            <CometMark className="size-3.5" />
+            {ASSISTANT_NAME}
+          </span>
+        )}
         {message.content}
       </div>
     </div>

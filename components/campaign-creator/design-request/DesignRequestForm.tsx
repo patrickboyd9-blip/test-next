@@ -69,8 +69,9 @@ export function DesignRequestForm({ onBack }: DesignRequestFormProps) {
       <div className="flex flex-col gap-4 py-6" role="status" data-slot="design-request-confirmation">
         <h1 className="text-xl font-semibold tracking-tight">We have your request</h1>
         <p className="text-sm leading-6 text-muted-foreground">
-          A designer will build a custom postcard for {saved.companyName} from the logo, offer,
-          and style you shared. Nothing was emailed.
+          {saved.id === "preview-demo"
+            ? `Preview only. Nothing was saved, mailed, or charged. ${saved.companyName} stays on this screen.`
+            : `A designer will build a custom postcard for ${saved.companyName} from the logo, offer, and style you shared. Nothing was emailed.`}
         </p>
         <Button type="button" variant="outline" className="w-fit" onClick={onBack}>
           Back to choices

@@ -1,84 +1,52 @@
-import { getSession } from "@/lib/auth/session"
-import { getCommandCenterSnapshot, honestCustomerSnapshot } from "@/lib/command-center/data"
-import type { CommandCenterUserState } from "@/lib/command-center/types"
-import { WelcomeSection } from "@/components/command-center/WelcomeSection"
-import { EmptyState } from "@/components/command-center/EmptyState"
-import { CampaignConfidenceSection } from "@/components/command-center/CampaignConfidenceSection"
-import { MailStatusSection } from "@/components/command-center/MailStatusSection"
-import { AIStrategistSection } from "@/components/command-center/AIStrategistSection"
-import { MetricsStrip } from "@/components/command-center/MetricsStrip"
-import { OpportunitiesSection } from "@/components/command-center/OpportunitiesSection"
-import { StateSwitcher } from "@/components/command-center/StateSwitcher"
-import { Reveal } from "@/components/command-center/Reveal"
+import Link from "next/link"
+
+import { CometIntro } from "@/components/assistant/CometIntro"
+import { cometIntroSeen } from "@/lib/assistant/intro-action"
+import { getSession, previewDemoAllowed } from "@/lib/auth/session"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { HomeBoard } from "@/components/cockpit/HomeBoard"
+import { CockpitFrame } from "@/components/cockpit/ui"
+import { SAMPLE_SHOP } from "@/lib/mailer-compose/flow"
 
-const VALID_STATES: CommandCenterUserState[] = ["new", "active", "power"]
-
-interface CommandCenterPageProps {
-  searchParams: Promise<{ state?: string }>
-}
-
-export default async function CommandCenterPage({ searchParams }: CommandCenterPageProps) {
-  const session = await getSession()
-  if (!session) {
-    return (
-      <div className="flex flex-1 flex-col gap-6 p-6 lg:p-8">
-        <SidebarTrigger />
-        <h1 className="text-2xl font-semibold tracking-tight">Sign in required</h1>
-        <p className="max-w-xl text-sm text-muted-foreground">
-          This workspace does not show campaign results until an account is signed in. Sample
-          results are not shown here.
-        </p>
-      </div>
-    )
-  }
-
+export default async function CommandCenterPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ intro?: string }>
+}) {
   const params = await searchParams
-  const fixture = session.fixture && process.env.NODE_ENV !== "production"
-  const requested = params.state as CommandCenterUserState
-  const state: CommandCenterUserState = fixture && VALID_STATES.includes(requested) ? requested : "new"
-  const snapshot = state === "new" ? honestCustomerSnapshot(session) : await getCommandCenterSnapshot(state)
+  const session = await getSession()
+  const shop = session?.businessName || SAMPLE_SHOP
+  const replay = params.intro === "1" && (previewDemoAllowed() || process.env.NODE_ENV !== "production")
+  const seen = session ? await cometIntroSeen(session.userId) : false
+  const showIntro = replay || Boolean(session && !seen)
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-6 lg:p-8">
-      <div className="flex items-center justify-between gap-4">
-        <SidebarTrigger />
-        {fixture ? <StateSwitcher current={state} /> : null}
+    <CockpitFrame hero>
+      <div className="flex items-center gap-4 px-4 pt-4">
+        <SidebarTrigger className="text-[#e7f2fb]" />
+        {session?.fixture ? (
+          <p className="text-sm text-[#8aa0b4]">Preview demo. Sample account. Nothing is mailed or charged.</p>
+        ) : !session ? (
+          <p className="text-sm text-[#8aa0b4]">Not signed in. The list below is a sample, not an account.</p>
+        ) : null}
       </div>
-      {fixture && state !== "new" ? (
-        <p className="text-sm text-muted-foreground">Sample data. Not this account&apos;s mail.</p>
-      ) : null}
-
-      <Reveal>
-        <WelcomeSection snapshot={snapshot} />
-      </Reveal>
-
-      {snapshot.state === "new" ? (
-        <Reveal delay={0.1}>
-          <EmptyState />
-        </Reveal>
-      ) : (
-        <>
-          {snapshot.confidence && (
-            <Reveal delay={0.1}>
-              <CampaignConfidenceSection confidence={snapshot.confidence} />
-            </Reveal>
-          )}
-
-          <Reveal delay={0.2} className="grid gap-4 lg:grid-cols-2">
-            {snapshot.mailStatus && <MailStatusSection mailStatus={snapshot.mailStatus} />}
-            <AIStrategistSection recommendations={snapshot.recommendations} />
-          </Reveal>
-
-          <Reveal delay={0.3}>
-            <MetricsStrip metrics={snapshot.metrics} />
-          </Reveal>
-
-          <Reveal delay={0.4}>
-            <OpportunitiesSection opportunities={snapshot.opportunities} />
-          </Reveal>
-        </>
-      )}
-    </div>
+      <HomeBoard shop={shop} sample={!session || session.fixture} />
+      <CometIntro open={showIntro} />
+      <div className="mx-auto mb-10 flex w-full max-w-3xl flex-col gap-2 px-4 text-sm sm:px-6">
+        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#7ee7ff]">Advanced</p>
+        <p className="text-[#8aa0b4]">The older editor is still here. This page does not show result numbers.</p>
+        <div className="flex flex-wrap gap-4">
+          <Link href="/app/campaigns/new" className="min-h-11 text-[#8ecfff]">
+            Full editor
+          </Link>
+          <Link href="/app/templates" className="min-h-11 text-[#8ecfff]">
+            Templates
+          </Link>
+          <Link href="/app/design-requests" className="min-h-11 text-[#8ecfff]">
+            Design requests
+          </Link>
+        </div>
+      </div>
+    </CockpitFrame>
   )
 }
