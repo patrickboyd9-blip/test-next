@@ -69,6 +69,37 @@ export interface BusinessInfo {
  * `fileUrl`/`fileId` can be added here once upload/storage exists — callers
  * already treat this as a list of asset records, not a list of strings.
  */
+export interface JobKeepBox {
+  x: number
+  y: number
+  w: number
+  h: number
+}
+
+export type JobProtect = "face" | "service-object" | "both" | "unspecified"
+
+/** A picture from the work. Not a logo and not a finished postcard. */
+export interface JobPhotoRecord {
+  id: string
+  role: "job-photo"
+  fileName: string
+  width: number
+  height: number
+  keep: JobKeepBox
+  protect: JobProtect
+  detail: "ok" | "low"
+  createdAt: string
+}
+
+export interface JobCreative {
+  rightsConfirmedAt: string | null
+  trade: string
+  serviceAction: string
+  photos: JobPhotoRecord[]
+  frontPhotoId: string | null
+  back: { treatment: "photo" | "text"; photoId: string | null }
+}
+
 export interface BrandAsset {
   id: string
   type: "logo" | "photo" | "graphic" | "coupon" | "other"
@@ -587,6 +618,11 @@ export interface Campaign {
    */
   mailOrder?: MailOrderRecord
   mailOrderHistory?: MailOrderRecord[]
+  /**
+   * Customer job photos and the crop they asked to keep.
+   * Separate from the logo and from a finished-art upload.
+   */
+  jobCreative?: JobCreative
   /** Internal signal only — never surfaced to the customer as a score. */
   readyForBriefReview: boolean
   createdAt: string
