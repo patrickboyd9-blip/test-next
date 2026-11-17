@@ -71,7 +71,7 @@ test("approve is a preview and does not mail or charge", () => {
 test("the chat asks the documented goal questions, then writes the card", () => {
   const goal = interviewReply("We're opening a restaurant and want to promote our grand opening.")
   assert.equal(goal.ready, false)
-  assert.match(goal.reply, /Sample/)
+  assert.doesNotMatch(goal.reply, /Sample\./)
   assert.match(goal.reply, new RegExp(ACTION_QUESTION))
   assert.ok(goal.choices.includes("Call you"))
   assert.deepEqual([...goal.choices], [...ACTION_CHOICES])
