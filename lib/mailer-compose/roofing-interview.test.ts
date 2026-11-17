@@ -6,7 +6,7 @@ import { interviewReply, reactToProposal, proposalFor } from "./interview"
 test("the roofing interview names the trade, the appointment, and the ZIP audience", () => {
   const goal = interviewReply("I want to send mailers for my roofing company")
   assert.equal(goal.ready, false)
-  assert.match(goal.reply, /Sample/)
+  assert.doesNotMatch(goal.reply, /Sample\./)
   assert.match(goal.reply, /Roofing/)
   assert.doesNotMatch(goal.reply, /Got it/)
 
@@ -31,5 +31,6 @@ test("the roofing interview names the trade, the appointment, and the ZIP audien
   assert.notEqual(again.line, lighter.line)
   assert.notEqual(again.why, lighter.why)
   assert.match(lighter.why, /lighter/)
-  assert.match(again.why, /pass 2/)
+  assert.match(again.why, /again/)
+  assert.doesNotMatch(`${lighter.why} ${again.why}`, /pass \d/)
 })
