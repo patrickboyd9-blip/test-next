@@ -51,30 +51,41 @@ function Postbox({ scale }: { scale: "home" | "start" | "arrive" }) {
   const tone = scale === "arrive" ? "mm-postbox mm-postbox-arrive" : scale === "start" ? "mm-postbox mm-postbox-start" : "mm-postbox"
   return (
     <div className={tone} aria-hidden>
-      <svg viewBox="0 0 72 128" className="h-full w-full overflow-visible">
+      <svg viewBox="0 0 140 200" className="h-full w-full overflow-visible">
         <defs>
-          <filter id="mm-card-glow" x="-90%" y="-90%" width="280%" height="280%">
-            <feGaussianBlur stdDeviation="1.6" result="blur" />
+          <linearGradient id="mm-metal" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#1a2836" />
+            <stop offset="0.45" stopColor="#0c141c" />
+            <stop offset="1" stopColor="#070b12" />
+          </linearGradient>
+          <linearGradient id="mm-rim" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#bff6ff" stopOpacity="0.85" />
+            <stop offset="1" stopColor="#7ee7ff" stopOpacity="0" />
+          </linearGradient>
+          <filter id="mm-haze" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="3.2" />
+          </filter>
+          <filter id="mm-slot-glow" x="-80%" y="-200%" width="260%" height="500%">
+            <feGaussianBlur stdDeviation="1.8" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
-          <filter id="mm-post-rim" x="-35%" y="-35%" width="170%" height="170%">
-            <feDropShadow dx="-0.6" dy="-1.2" stdDeviation="1.1" floodColor="#8ef0ff" floodOpacity="0.65" />
-          </filter>
         </defs>
-        <g className="mm-post-card" filter="url(#mm-card-glow)">
-          <rect x="27" y="48" width="16" height="10" rx="1.2" fill="#e7fbff" />
+        <ellipse className="mm-post-haze" cx="70" cy="168" rx="48" ry="10" fill="#7ee7ff" filter="url(#mm-haze)" />
+        <g className="mm-post-card">
+          <path className="mm-post-trail" d="M8 78 C28 86 46 96 62 104" fill="none" stroke="#d8fbff" strokeWidth="1.4" strokeLinecap="round" />
+          <rect x="58" y="98" width="22" height="8" rx="1.4" fill="#e9fbff" />
         </g>
-        <g filter="url(#mm-post-rim)">
-          <path
-            fill="#071018"
-            fillRule="evenodd"
-            d="M24 108 V74 C24 48 48 48 48 74 V108 Z M29 78 H43 V81 H29 Z M33 108 H39 V124 H33 Z"
-          />
+        <path d="M36 158 H104 L112 174 H28 Z" fill="#080d14" />
+        <path d="M52 156 L58 52 Q70 34 82 52 L88 156 Z" fill="url(#mm-metal)" />
+        <path d="M58 54 Q70 38 82 54" fill="none" stroke="url(#mm-rim)" strokeWidth="1.8" />
+        <rect x="80" y="58" width="2.5" height="92" fill="#1b2836" />
+        <g filter="url(#mm-slot-glow)">
+          <rect x="58" y="100" width="28" height="2.6" rx="1" fill="#e7fdff" />
         </g>
-        <ellipse className="mm-post-pulse" cx="36" cy="84" rx="11" ry="3.5" fill="#7ee7ff" />
+        <ellipse className="mm-post-pulse" cx="72" cy="106" rx="20" ry="5" fill="#7ee7ff" />
       </svg>
     </div>
   )

@@ -212,81 +212,98 @@
 
 .mm-postbox {
   position: absolute;
-  right: 6%;
-  top: calc(46vh - 58px);
-  width: 64px;
-  height: 112px;
+  right: 3.5%;
+  top: calc(46vh - 118px);
+  width: 132px;
+  height: 188px;
   pointer-events: none;
 }
 
 .mm-postbox-start {
-  width: 44px;
-  height: 76px;
-  right: 5%;
-  top: calc(46vh - 18px);
+  width: 78px;
+  height: 112px;
+  right: 4%;
+  top: calc(46vh - 72px);
 }
 
 .mm-postbox-arrive {
-  width: 92px;
-  height: 160px;
-  right: 11%;
-  top: 5.6rem;
+  width: 150px;
+  height: 214px;
+  right: 8%;
+  top: 6.5rem;
 }
+
+.mm-post-haze { opacity: 0.22; }
 
 .mm-post-card {
   transform-box: fill-box;
-  transform-origin: center;
+  transform-origin: 68px 102px;
   opacity: 0;
-  animation: mm-slip 12s ease-in-out infinite;
+  animation: mm-slip 20s ease-in-out infinite;
+}
+
+.mm-post-trail {
+  stroke-dasharray: 70;
+  stroke-dashoffset: 70;
+  animation: mm-trail 20s ease-in-out infinite;
+}
+
+@keyframes mm-trail {
+  0%, 58% { stroke-dashoffset: 70; opacity: 0; }
+  68% { stroke-dashoffset: 12; opacity: 0.75; }
+  78% { stroke-dashoffset: 0; opacity: 0.3; }
+  86%, 100% { opacity: 0; }
 }
 
 .mm-post-pulse {
   opacity: 0;
-  animation: mm-box-pulse 12s ease-out infinite;
+  animation: mm-box-pulse 20s ease-out infinite;
 }
 
 .mm-postbox-arrive .mm-post-card {
-  animation: mm-slip-once 3.2s ease-in-out 0.4s both;
+  animation: mm-slip-once 4.2s ease-in-out 0.6s both;
 }
 
 .mm-postbox-arrive .mm-post-pulse {
-  animation: mm-box-pulse-once 3.2s ease-out 0.4s both;
+  animation: mm-box-pulse-once 4.2s ease-out 0.6s both;
 }
 
 @keyframes mm-slip {
-  0%, 18% { opacity: 0; transform: translate(-36px, -28px) rotate(-12deg); }
-  26% { opacity: 1; }
-  40% { opacity: 1; transform: translate(0, -4px) rotate(-1deg); }
-  48% { opacity: 0; transform: translate(0, 6px) rotate(0deg); }
-  100% { opacity: 0; transform: translate(0, 6px) rotate(0deg); }
+  0%, 58% { opacity: 0; transform: translate(-54px, -36px) rotate(-8deg); }
+  66% { opacity: 1; }
+  76% { opacity: 1; transform: translate(0, 2px) rotate(0deg); }
+  84% { opacity: 0; transform: translate(2px, 8px) rotate(0deg); }
+  100% { opacity: 0; transform: translate(2px, 8px) rotate(0deg); }
 }
 
 @keyframes mm-box-pulse {
-  0%, 40% { opacity: 0; }
-  50% { opacity: 0.55; }
-  62%, 100% { opacity: 0; }
+  0%, 74% { opacity: 0; }
+  82% { opacity: 0.45; }
+  92%, 100% { opacity: 0; }
 }
 
 @keyframes mm-slip-once {
-  0% { opacity: 0; transform: translate(22px, -70px) rotate(-16deg); }
-  35% { opacity: 1; }
-  78% { opacity: 1; transform: translate(0, -4px) rotate(0deg); }
-  100% { opacity: 1; transform: translate(0, 5px) rotate(0deg); }
+  0% { opacity: 0; transform: translate(-48px, -42px) rotate(-10deg); }
+  28% { opacity: 1; }
+  70% { opacity: 1; transform: translate(0, 0) rotate(0deg); }
+  100% { opacity: 1; transform: translate(0, 6px) rotate(0deg); }
 }
 
 @keyframes mm-box-pulse-once {
-  0%, 60% { opacity: 0; }
-  78% { opacity: 0.7; }
-  100% { opacity: 0.28; }
+  0%, 62% { opacity: 0; }
+  78% { opacity: 0.55; }
+  100% { opacity: 0.22; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .mm-post-card,
-  .mm-post-pulse {
+  .mm-post-pulse,
+  .mm-post-trail {
     animation: none !important;
   }
-  .mm-post-card { opacity: 1; transform: translate(0, 4px); }
-  .mm-post-pulse { opacity: 0.28; }
+  .mm-post-card { opacity: 1; transform: translate(0, 6px); }
+  .mm-post-pulse { opacity: 0.22; }
+  .mm-post-trail { opacity: 0; }
 }
 
 @media (max-width: 640px) {
@@ -294,8 +311,8 @@
   .mm-comet { top: 54vh; width: 62vw; }
   .mm-sky-arrival .mm-limb { top: 16rem; }
   .mm-comet-arrive, .mm-sky-arrival .mm-flash { top: 14.5rem; }
-  .mm-postbox { z-index: 2; width: 34px; height: 60px; right: 0; top: calc(64vh - 8px); }
-  .mm-postbox-arrive { top: 8.5rem; right: 6%; width: 72px; height: 126px; }
+  .mm-postbox { width: 72px; height: 104px; right: 2px; top: calc(64vh - 36px); }
+  .mm-postbox-arrive { top: 9rem; right: 4%; width: 96px; height: 138px; }
 }
 
 :root {
