@@ -7,7 +7,7 @@ import { createImagenImageGenerationAdapter } from "./replicate-image-generation
 
 /**
  * Default photo model. IMAGE_PROVIDER=openai forces OpenAI.
- * Otherwise Imagen 4 (Replicate) runs first; OpenAI is the fallback when the
+ * Otherwise google/nano-banana-pro on Replicate runs first; OpenAI is the fallback when the
  * token is missing or a generation fails.
  */
 export function createDefaultImageGenerationAdapter(env: NodeJS.ProcessEnv = process.env): ImageGenerationAdapter {

@@ -1,0 +1,100 @@
+{
+  "photos": [
+    {
+      "id": "auto-repair-brake-check",
+      "src": "/gallery/auto-repair-brake-check.png"
+    },
+    {
+      "id": "auto-repair-inspection",
+      "src": "/gallery/auto-repair-inspection.png"
+    },
+    {
+      "id": "auto-repair-oil-service",
+      "src": "/gallery/auto-repair-oil-service.png"
+    },
+    {
+      "id": "cleaning-first-visit",
+      "src": "/gallery/cleaning-first-visit.png"
+    },
+    {
+      "id": "cleaning-move-out",
+      "src": "/gallery/cleaning-move-out.png"
+    },
+    {
+      "id": "cleaning-weekly",
+      "src": "/gallery/cleaning-weekly.png"
+    },
+    {
+      "id": "dental-call-the-office",
+      "src": "/gallery/dental-call-the-office.png"
+    },
+    {
+      "id": "dental-first-visit",
+      "src": "/gallery/dental-first-visit.png"
+    },
+    {
+      "id": "dental-whitening",
+      "src": "/gallery/dental-whitening.png"
+    },
+    {
+      "id": "hvac-before-the-heat",
+      "src": "/gallery/hvac-before-the-heat.png"
+    },
+    {
+      "id": "hvac-quiet-fix",
+      "src": "/gallery/hvac-quiet-fix.png"
+    },
+    {
+      "id": "hvac-same-day-cooling",
+      "src": "/gallery/hvac-same-day-cooling.png"
+    },
+    {
+      "id": "landscaping-backyard-light",
+      "src": "/gallery/landscaping-backyard-light.png"
+    },
+    {
+      "id": "landscaping-lawn-plan",
+      "src": "/gallery/landscaping-lawn-plan.png"
+    },
+    {
+      "id": "landscaping-spring-cleanup",
+      "src": "/gallery/landscaping-spring-cleanup.png"
+    },
+    {
+      "id": "realestate-home-value",
+      "src": "/gallery/realestate-home-value.png"
+    },
+    {
+      "id": "realestate-just-listed",
+      "src": "/gallery/realestate-just-listed.png"
+    },
+    {
+      "id": "realestate-thinking-of-selling",
+      "src": "/gallery/realestate-thinking-of-selling.png"
+    },
+    {
+      "id": "restaurant-catering",
+      "src": "/gallery/restaurant-catering.png"
+    },
+    {
+      "id": "restaurant-grand-opening",
+      "src": "/gallery/restaurant-grand-opening.png"
+    },
+    {
+      "id": "restaurant-weeknight",
+      "src": "/gallery/restaurant-weeknight.png"
+    },
+    {
+      "id": "roofing-after-the-storm",
+      "src": "/gallery/roofing-after-the-storm.png"
+    },
+    {
+      "id": "roofing-book-a-check",
+      "src": "/gallery/roofing-book-a-check.png"
+    },
+    {
+      "id": "roofing-free-inspection",
+      "src": "/gallery/roofing-free-inspection.png"
+    }
+  ]
+}

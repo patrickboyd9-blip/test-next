@@ -5,12 +5,28 @@ import type { ImageBrief } from "./image-brief"
 import { buildOpenAIImagePrompt } from "./openai-image-generation"
 import { trimPhotoFrame } from "./trim-photo-frame"
 
-/** Patrick's blind photo test (Oct 27 2026): Imagen 4 won 5 of 10 scenes. About $0.04 per image on Replicate. */
+/**
+ * google/nano-banana-pro on Replicate. 1K and 2K are $0.15 per image. 4K is $0.30.
+ * This client asks for 2K and does not enable the fallback model.
+ */
+export const IMAGEN_ESTIMATED_USD = 0.15
 export const IMAGEN_IMAGE_PROVIDER = "replicate"
-export const IMAGEN_IMAGE_MODEL = "google/imagen-4"
+export const IMAGEN_IMAGE_MODEL = "google/nano-banana-pro"
+export const NANO_BANANA_RESOLUTION = "2K"
 export const IMAGEN_ASPECT_RATIO = "4:3"
-/** Ratios google/imagen-4 accepts (it has no 3:2). */
-export const IMAGEN_ASPECT_RATIOS = { "1:1": 1, "4:3": 4 / 3, "16:9": 16 / 9, "3:4": 3 / 4, "9:16": 9 / 16 } as const
+/** Ratios google/nano-banana-pro accepts. match_input_image is omitted because we send no reference image. */
+export const IMAGEN_ASPECT_RATIOS = {
+  "1:1": 1,
+  "2:3": 2 / 3,
+  "3:2": 3 / 2,
+  "3:4": 3 / 4,
+  "4:3": 4 / 3,
+  "4:5": 4 / 5,
+  "5:4": 5 / 4,
+  "9:16": 9 / 16,
+  "16:9": 16 / 9,
+  "21:9": 21 / 9,
+} as const
 
 /** The supported ratio closest to the photo slot (width / height), compared in log space. */
 export function imagenAspectFor(slotAspect?: number): string {
@@ -19,6 +35,23 @@ export function imagenAspectFor(slotAspect?: number): string {
 }
 
 const FULL_BLEED_NOTE = " Full-bleed photograph that fills the entire frame edge to edge. No border, no frame, no mat, no white or gray margin, not a printed photo."
+
+export function imageModelHttpError(status: number, model: string): Error {
+  if (status === 410) {
+    return new Error(`The image model ${model} is retired. Replicate returned 410, so no photograph was saved.`)
+  }
+  return new Error(`Image generation failed with status ${status}. No photograph was saved.`)
+}
+
+export function nanoBananaInput(prompt: string, aspectRatio: string) {
+  return {
+    prompt,
+    aspect_ratio: aspectRatio,
+    resolution: NANO_BANANA_RESOLUTION,
+    output_format: "png" as const,
+    safety_filter_level: "block_only_high" as const,
+  }
+}
 
 export class ImagenNotConfiguredError extends Error {
   constructor() {
@@ -46,20 +79,22 @@ export class ImagenImageGenerationAdapter implements ImageGenerationAdapter {
     const res = await this.#fetch(`https://api.replicate.com/v1/models/${IMAGEN_IMAGE_MODEL}/predictions`, {
       method: "POST",
       headers,
-      body: JSON.stringify({ input: { prompt: buildOpenAIImagePrompt(brief) + FULL_BLEED_NOTE, aspect_ratio: imagenAspectFor(options?.slotAspect), output_format: "png", safety_filter_level: "block_only_high" } }),
+      body: JSON.stringify({
+        input: nanoBananaInput(buildOpenAIImagePrompt(brief) + FULL_BLEED_NOTE, imagenAspectFor(options?.slotAspect)),
+      }),
     })
-    if (!res.ok) throw new Error(`Imagen generation failed with status ${res.status}.`)
+    if (!res.ok) throw imageModelHttpError(res.status, IMAGEN_IMAGE_MODEL)
     let pred = (await res.json()) as { id: string; status: string; output?: string | string[]; urls?: { get?: string } }
     for (let i = 0; i < 60 && !["succeeded", "failed", "canceled"].includes(pred.status); i++) {
       await new Promise((r) => setTimeout(r, 2000))
       pred = (await (await this.#fetch(pred.urls!.get!, { headers: { Authorization: headers.Authorization } })).json()) as typeof pred
     }
     const url = Array.isArray(pred.output) ? pred.output[0] : pred.output
-    if (pred.status !== "succeeded" || !url) throw new Error(`Imagen generation ${pred.status}.`)
+    if (pred.status !== "succeeded" || !url) throw new Error(`Image generation ${pred.status}. No photograph was saved.`)
     const img = await this.#fetch(url)
-    if (!img.ok) throw new Error(`Imagen download failed with status ${img.status}.`)
+    if (!img.ok) throw new Error(`Image download failed with status ${img.status}. No photograph was saved.`)
     const b64 = (await trimPhotoFrame(Buffer.from(await img.arrayBuffer()))).toString("base64")
-    console.log("[image-generation]", JSON.stringify({ provider: IMAGEN_IMAGE_PROVIDER, model: IMAGEN_IMAGE_MODEL, prediction: pred.id, estimatedUsd: 0.04 }))
+    console.log("[image-generation]", JSON.stringify({ provider: IMAGEN_IMAGE_PROVIDER, model: IMAGEN_IMAGE_MODEL, prediction: pred.id, estimatedUsd: IMAGEN_ESTIMATED_USD }))
     return { id: randomUUID(), src: `data:image/png;base64,${b64}`, sourceClass: GENERATED_ASSET_SOURCE_CLASS, provider: IMAGEN_IMAGE_PROVIDER, model: IMAGEN_IMAGE_MODEL, generatedAt: new Date().toISOString() }
   }
 }
