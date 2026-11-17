@@ -8,6 +8,7 @@ import {
   type MailerAnalysis,
 } from "./library"
 import { ownerFavoriteIds } from "./owner-favorites"
+import { patrickGoldForBrief } from "./patrick-gold"
 import { industriesAdjacent, industryForBrief, normalizeIndustry, resolveIndustry } from "@/lib/research-library/industry"
 import type { DesignVertical } from "./rationale"
 import { verticalForBrief } from "./vertical"
@@ -72,6 +73,16 @@ export function selectReferences(
     .slice(0, PEER_LIMIT)
     .map((item) => toPick(item.record, "peer"))
 
+  const gold = patrickGoldForBrief(brief).map((card) => ({
+    id: card.id,
+    role: "anchor" as const,
+    grade: "A",
+    vertical: card.industries[0],
+    mailbox: true,
+    principle: card.reasoning,
+    doNotCopy: "Do not copy the mark, the amounts, the phone, the photos, or the wording.",
+  }))
+
   const imageIds: string[] = []
   for (const pick of [...anchors, ...peers]) {
     const record = byId.get(pick.id)
@@ -80,7 +91,7 @@ export function selectReferences(
     imageIds.push(pick.id)
   }
 
-  return { vertical, anchors, peers, donts, imageIds }
+  return { vertical, anchors: [...gold, ...anchors], peers, donts, imageIds }
 }
 
 /**
