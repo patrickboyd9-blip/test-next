@@ -11,15 +11,29 @@ import { useEffect, useRef } from "react"
 const COMET_STYLE: "classic" | "realistic" =
   process.env.NEXT_PUBLIC_COMET_STYLE === "classic" ? "classic" : "realistic"
 
-const PASS_MS = 11000
-const FIRST_PASS_MS = 700
-const GAP_MIN_MS = 20000
-const GAP_MAX_MS = 40000
+const PASS_MIN_MS = 1200
+const PASS_MAX_MS = 2000
+const FIRST_PASS_MS = 400
+const GAP_MIN_MS = 8000
+const GAP_MAX_MS = 14000
 
 type Point = { x: number; y: number }
 
-function ease(t: number) {
-  return t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2
+/** Ease-in rush across the path, then a short coast while the light dies. */
+function burstPlace(time: number) {
+  if (time < 0.68) return (time / 0.68) ** 1.7 * 0.8
+  return 0.8 + ((time - 0.68) / 0.32) * 0.12
+}
+
+function burstSpeed(time: number) {
+  const dt = 0.025
+  return (burstPlace(Math.min(1, time + dt)) - burstPlace(Math.max(0, time - dt))) / (2 * dt)
+}
+
+function burstGlow(time: number) {
+  const rise = Math.min(1, time / 0.08)
+  const fall = time < 0.5 ? 1 : Math.max(0, 1 - (time - 0.5) / 0.28)
+  return rise * fall
 }
 
 function clamp01(t: number) {
@@ -72,10 +86,6 @@ function limbFade(y: number, viewH: number) {
   return 1 - k * k * 0.92
 }
 
-function envelope(t: number) {
-  return Math.min(1, t / 0.08) * Math.min(1, (1 - t) / 0.24)
-}
-
 function rotate(v: Point, degrees: number): Point {
   const a = (degrees * Math.PI) / 180
   const c = Math.cos(a)
@@ -124,19 +134,23 @@ function paintComet(
   dive: boolean,
   seed: number,
 ) {
-  const t = ease(clamp01(travel))
-  const alpha = strength * envelope(travel)
-  if (alpha <= 0.01 || w < 2 || h < 2) return
+  const time = clamp01(travel)
+  const t = burstPlace(time)
+  const glow = strength * burstGlow(time) * (0.82 + 0.18 * Math.sin(time * 46 + seed * 2.4))
+  if (glow <= 0.01 || w < 2 || h < 2) return
   const head = place(w, viewH, t, dive)
-  const fade = alpha * limbFade(head.y, viewH)
+  const fade = glow * limbFade(head.y, viewH)
   if (fade <= 0.01) return
   const scale = Math.min(1.05, Math.max(0.72, viewH / 900))
+  const speed = Math.min(1, burstSpeed(time) / 1.85)
   const vel = velocity(w, viewH, t, dive)
   const away = { x: -vel.x, y: -vel.y }
   const dustDir = rotate(away, 6 + (seed % 3))
   const ionDir = rotate(away, -8)
-  const dustLen = 128 * scale
-  const ionLen = 168 * scale
+  const stretch = 0.5 + 1.05 * speed
+  const dustLen = 128 * scale * stretch
+  const ionLen = 168 * scale * stretch
+  const tail = fade * (0.4 + 0.75 * speed)
   const dust: Point[] = []
   const dustPerp: Point[] = []
   const ion: Point[] = []
@@ -161,21 +175,21 @@ function paintComet(
   ctx.globalCompositeOperation = "screen"
   ctx.filter = `blur(${9 * scale}px)`
   ribbon(ctx, dust, dustPerp, (s) => (2 + s * dustLen * 0.17) * scale, [
-    [0, `rgba(255, 255, 255, ${0.95 * fade})`],
-    [0.35, `rgba(236, 250, 255, ${0.72 * fade})`],
-    [0.75, `rgba(210, 238, 255, ${0.38 * fade})`],
+    [0, `rgba(255, 255, 255, ${0.95 * tail})`],
+    [0.35, `rgba(236, 250, 255, ${0.72 * tail})`],
+    [0.75, `rgba(210, 238, 255, ${0.38 * tail})`],
     [1, "rgba(190, 225, 255, 0)"],
   ])
   ctx.filter = `blur(${4.5 * scale}px)`
   ribbon(ctx, ion, ionPerp, (s) => (1.4 + s * ionLen * 0.04) * scale, [
-    [0, `rgba(110, 155, 255, ${0.48 * fade})`],
-    [0.45, `rgba(45, 95, 220, ${0.24 * fade})`],
+    [0, `rgba(110, 155, 255, ${0.48 * tail})`],
+    [0.45, `rgba(45, 95, 220, ${0.24 * tail})`],
     [1, "rgba(25, 60, 180, 0)"],
   ])
   ctx.filter = "none"
-
+  const flash = time < 0.16 ? Math.sin((time / 0.16) * Math.PI) : 0
   const blooms: Array<[number, string, string]> = [
-    [22 * scale, `rgba(186, 226, 255, ${0.3 * fade})`, "rgba(186, 226, 255, 0)"],
+    [(22 + flash * 18) * scale, `rgba(186, 226, 255, ${0.3 * fade * (1 + flash)})`, "rgba(186, 226, 255, 0)"],
     [9 * scale, `rgba(240, 252, 255, ${0.75 * fade})`, "rgba(210, 240, 255, 0)"],
     [3.2 * scale, `rgba(255, 255, 255, ${fade})`, "rgba(230, 248, 255, 0)"],
   ]
@@ -240,7 +254,7 @@ function CometRealistic({ arrival }: { arrival: boolean }) {
 
     function pass() {
       const started = performance.now()
-      const duration = arrival ? 8000 : PASS_MS
+      const duration = arrival ? 1600 : PASS_MIN_MS + Math.random() * (PASS_MAX_MS - PASS_MIN_MS)
       const tick = (now: number) => {
         if (stopped) return
         if (document.hidden) {
