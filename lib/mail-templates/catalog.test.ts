@@ -39,12 +39,12 @@ test("the v1 gallery covers eight industries with a traceable layout", async () 
   for (const row of rows) {
     assert.ok(row.sourcePatternId?.startsWith("gold/"))
     assert.ok(row.layoutRecipe)
-    assert.match(row.spec.phone, /555/)
+    assert.match(row.spec.phone ?? "", /555/)
     assert.equal(row.spec.backLayout, "standard_address")
-    assert.doesNotMatch(row.spec.headline, /PostPilot|Design\.com/i)
+    assert.doesNotMatch(row.spec.headline ?? "", /PostPilot|Design\.com/i)
   }
   const added = rows.filter((row) => row.industry === "auto_repair" || row.industry === "cleaning")
-  for (const row of added) assert.match(row.spec.website, /\.example\//)
+  for (const row of added) assert.match(row.spec.website ?? "", /\.example\//)
   const primaries = new Map<string, string>()
   for (const row of rows) {
     if (!primaries.has(row.industry)) primaries.set(row.industry, row.spec.palette?.[0] ?? "")

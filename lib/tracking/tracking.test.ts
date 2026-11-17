@@ -3,7 +3,8 @@ import { test } from "node:test"
 
 import { CLICK2MAIL_RESERVED_POINTS } from "@/lib/print-spec/click2mail-keep-outs"
 
-import { issueRecipientCode, noteResults, recordScan, redirectUrl, resetTracking, resultsFor } from "./ledger"
+import { assignRecipientCodes, issueRecipientCode, noteResults, recordScan, redirectUrl, resetTracking, resultsFor } from "./ledger"
+import { NOT_RECORDED, presentResults } from "./present"
 import { pointsFromBottomRight, qrOverlapsReserved, qrSafeZone } from "./qr-zone"
 
 test("the QR sits outside the address panel and the barcode zone", () => {
@@ -51,4 +52,25 @@ test("a scan logs time, campaign, and recipient, then forwards, and a holdout do
   assert.equal(ledger.calls, 2)
   assert.equal(ledger.bookings, null)
   assert.equal(ledger.revenue, null)
+  const shown = presentResults(empty)
+  assert.equal(shown.every((row) => row.value === NOT_RECORDED), true)
+  assert.equal(shown.some((row) => row.value === "0"), false)
+})
+
+test("each recipient gets a distinct redirect, and a holdout code does not scan", () => {
+  resetTracking()
+  const assigned = assignRecipientCodes({
+    campaignId: "camp-2",
+    origin: "https://mail.example",
+    destination: "https://shop.example/book",
+    trackingPhone: "555-0100",
+    recipients: [{ id: "a" }, { id: "b", controlGroup: true }],
+  })
+  assert.equal(assigned.length, 2)
+  assert.notEqual(assigned[0]?.url, assigned[1]?.url)
+  assert.match(assigned[0]?.url ?? "", /\/r\//)
+  const holdout = assigned[1]?.url.split("/r/")[1] ?? ""
+  assert.equal(recordScan(holdout), null)
+  const live = assigned[0]?.url.split("/r/")[1] ?? ""
+  assert.equal(recordScan(live)?.destination, "https://shop.example/book")
 })

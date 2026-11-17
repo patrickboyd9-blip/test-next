@@ -38,6 +38,22 @@ const manual = new Map<string, { calls?: number; bookings?: number; revenue?: nu
 
 const ALPHABET = "abcdefghjkmnpqrstuvwxyz23456789"
 
+function seedFor(campaignId: string, index: number): number {
+  let hash = index + 1
+  for (const char of campaignId) hash = (hash * 33 + char.charCodeAt(0)) % 1_000_000_000
+  return hash / 1_000_000_000 || 0.1
+}
+
+function freshCode(seed: number): string {
+  let n = seed
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const code = mintCode(n)
+    if (!codes.has(code)) return code
+    n = (n + 0.17) % 1 || 0.13
+  }
+  return mintCode()
+}
+
 export function mintCode(seed = Math.random()): string {
   let value = Math.floor(seed * 1_000_000_000)
   let out = ""
@@ -108,6 +124,35 @@ export function resultsFor(campaignId: string): ResultsLedger {
 
 export function redirectUrl(origin: string, code: string): string {
   return `${origin.replace(/\/$/, "")}/r/${code}`
+}
+
+export function codesForCampaign(campaignId: string): readonly RecipientCode[] {
+  return [...codes.values()].filter((record) => record.campaignId === campaignId)
+}
+
+/** One redirect per recipient. A holdout is stored and is not scannable. No call is placed. */
+export function assignRecipientCodes(input: {
+  campaignId: string
+  origin: string
+  destination: string
+  recipients: { id: string; controlGroup?: boolean }[]
+  trackingPhone?: string | null
+}): { recipientId: string; url: string; controlGroup: boolean }[] {
+  return input.recipients.map((recipient, index) => {
+    const record = issueRecipientCode({
+      campaignId: input.campaignId,
+      recipientId: recipient.id,
+      destination: input.destination,
+      controlGroup: recipient.controlGroup,
+      trackingPhone: input.trackingPhone,
+      code: freshCode(seedFor(input.campaignId, index)),
+    })
+    return {
+      recipientId: recipient.id,
+      url: redirectUrl(input.origin, record.code),
+      controlGroup: record.controlGroup,
+    }
+  })
 }
 
 /** Test helper. */
