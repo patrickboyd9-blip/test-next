@@ -83,9 +83,9 @@ const TEMPLATE_SCENE: Record<string, string> = {
   "realestate-home-value":
     "The finished front porch and tidy concrete walkway of a well-kept lived-in house in late afternoon light, a shade tree on a mowed lawn, the property complete and empty, no construction materials, no bags, no lettering, no signs, and no people.",
   "realestate-just-listed":
-    "A well-kept single-family house on a quiet residential street in warm late light, a walkway and a tree, no for-sale sign, no people.",
+    "An attractive finished move-in-ready single-family house exterior on a quiet residential street in warm late afternoon light, a tidy front walkway, a freshly mowed lawn, and a shade tree, the property complete and ready to show, no ladders, no construction, no tools, no drop cloths, no building materials, no roof work, no signs, no lettering, and no people. Single photograph, one scene, not a collage.",
   "realestate-thinking-of-selling":
-    "The front of a well-kept lived-in house, a walkway, a front porch, and a shade tree, no sign and no people.",
+    "The finished front of an attractive move-in-ready lived-in house with a front porch, a tidy walkway, and a shade tree on a mowed lawn in late-day sun, the property complete and ready to show, no ladders, no roof work, no construction, no tools, no stacked shingles, no drop cloths, no signs, no lettering, and no people. Single photograph, one scene, not a collage.",
   "landscaping-spring-cleanup":
     "A tidy front yard with a mowed lawn, fresh dark mulch beds, and a wheelbarrow of mulch at rest in morning light, no people.",
   "landscaping-lawn-plan":
@@ -95,7 +95,7 @@ const TEMPLATE_SCENE: Record<string, string> = {
   "auto-repair-brake-check":
     "A close view of a rusty brake rotor and caliper on a car raised on a two-post lift in a clean empty service bay, no people and no logos.",
   "auto-repair-oil-service":
-    "A car with its hood open in a bright empty auto service bay, an oil drain pan and tools on the floor, no people and no badges.",
+    "A close side view looking into an open engine compartment during an oil change in a bright empty auto service bay, an oil drain pan on the concrete floor under the engine, only the engine, the underside of the open hood, and nearby concrete visible, the front bumper, grille, headlights, and any manufacturer emblem or badge kept completely out of the frame, no license plate, no brand logos, no readable bottle labels, no lettering, the bay unoccupied, no people. Single photograph, one scene, not a collage.",
   "auto-repair-inspection":
     "A close view of a brake rotor and caliper on a car raised on a two-post lift in a clean empty auto service bay, an impact wrench resting unused on the floor, the bay unoccupied, no people, no hands, no arms, and no logos.",
   "cleaning-first-visit":
