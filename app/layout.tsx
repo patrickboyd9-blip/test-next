@@ -1,46 +1,36 @@
 import type { Metadata } from "next";
-import { Archivo, Barlow_Condensed, Fraunces, Geist, Geist_Mono, Source_Sans_3 } from "next/font/google";
+import localFont from "next/font/local";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
-const geistSans = Geist({
+const geistSans = localFont({
+  src: "../lib/print-spec/fonts/SourceSans3-Regular.ttf",
   variable: "--font-geist-sans",
-  subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
+const geistMono = localFont({
+  src: "../lib/print-spec/fonts/SourceSans3-Semibold.ttf",
   variable: "--font-geist-mono",
-  subsets: ["latin"],
 });
 
-const display = Archivo({
+const display = localFont({
+  src: "../lib/print-spec/fonts/Archivo-ExtraBold.ttf",
   variable: "--font-display-family",
-  subsets: ["latin"],
-  weight: ["600", "700", "800"],
-  display: "swap",
-  adjustFontFallback: true,
 });
 
-const studio = Source_Sans_3({
+const studio = localFont({
+  src: "../lib/print-spec/fonts/SourceSans3-Regular.ttf",
   variable: "--font-studio-family",
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
-  display: "swap",
-  adjustFontFallback: true,
 });
 
-const signal = Barlow_Condensed({
+const signal = localFont({
+  src: "../lib/print-spec/fonts/BarlowCondensed-Bold.ttf",
   variable: "--font-signal-family",
-  subsets: ["latin"],
-  weight: ["600", "700"],
-  display: "swap",
 });
 
-const letter = Fraunces({
+const letter = localFont({
+  src: "../lib/print-spec/fonts/Fraunces-Semibold.ttf",
   variable: "--font-letter-family",
-  subsets: ["latin"],
-  weight: ["600", "700"],
-  display: "swap",
 });
 
 export const metadata: Metadata = {

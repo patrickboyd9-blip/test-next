@@ -54,7 +54,7 @@ test("mock client places a staging order and polls status", async () => {
     C2M_USERNAME: "user",
     C2M_PASSWORD: "secret",
     C2M_LAYOUT: "Double Sided Postcard",
-  } as NodeJS.ProcessEnv)
+  } as unknown as NodeJS.ProcessEnv)
 
   const order = await placeClick2MailOrder({
     client: mock,
@@ -117,7 +117,7 @@ test("a list that stays pending is saved without a job", async () => {
     C2M_ENV: "stage",
     C2M_USERNAME: "user",
     C2M_PASSWORD: "secret",
-  } as NodeJS.ProcessEnv)
+  } as unknown as NodeJS.ProcessEnv)
   const order = await placeClick2MailOrder({
     client: mock,
     config,
@@ -147,7 +147,7 @@ test("a 6x9 postcard is submitted as a postcard, not a letter", async () => {
     C2M_LAYOUT: "Address on Separate Page",
     C2M_ENVELOPE: "#10 Double Window",
     C2M_PAPER_TYPE: "White 24#",
-  } as NodeJS.ProcessEnv)
+  } as unknown as NodeJS.ProcessEnv)
   const order = await placeClick2MailOrder({
     client: mock,
     config,
@@ -179,7 +179,7 @@ test("a 5x8 job refuses a letter paper override before it uploads", async () => 
     C2M_ENV: "stage",
     C2M_USERNAME: "user",
     C2M_PASSWORD: "secret",
-  } as NodeJS.ProcessEnv)
+  } as unknown as NodeJS.ProcessEnv)
   const order = await placeClick2MailOrder({
     client: mock,
     config,

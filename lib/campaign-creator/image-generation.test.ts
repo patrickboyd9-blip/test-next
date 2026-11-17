@@ -116,7 +116,7 @@ test("GeneratedAsset is provider-neutral and is not a second brief or spec", asy
   assert.equal("previewSrc" in asset, false)
 })
 
-test("provider-specific request fields do not leak into ImageBrief", () => {
+test("provider-specific request fields do not leak into ImageBrief", async () => {
   const brief = toImageBrief(spec())
   assert.ok(brief)
   assert.deepEqual(keysOf(brief), [...IMAGE_BRIEF_KEYS])
@@ -141,7 +141,7 @@ test("provider-specific request fields do not leak into ImageBrief", () => {
     },
   }
 
-  return adapter.generate(brief)
+  await adapter.generate(brief)
 })
 
 test("GeneratedAsset.src is the later resolveCreativeImage display field", async () => {

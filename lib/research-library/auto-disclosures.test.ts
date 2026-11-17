@@ -5,7 +5,7 @@ import { complianceWarnings } from "./compliance"
 import { DENTAL_FEE_DISCLAIMER, EQUAL_HOUSING_MARK, withRequiredDisclosures } from "./auto-disclosures"
 import { industryForBrief } from "./industry"
 
-const check = (brief: any, printed: string) => {
+const check = (brief: Parameters<typeof withRequiredDisclosures>[0]["brief"], printed: string) => {
   const legal = withRequiredDisclosures({ brief, printedText: printed })
   const text = [printed, legal.complianceMark, legal.disclaimer].filter(Boolean).join(" ")
   return { legal, warnings: complianceWarnings(text, { industry: industryForBrief(brief, printed), offer: brief.offer }) }
@@ -35,7 +35,7 @@ test("lenders get Equal Housing and their NMLS ID only when the brief has one", 
 })
 
 test("trades without required lines get nothing added", () => {
-  const legal = withRequiredDisclosures({ brief: { goal: "Roof repair leads", offer: "$500 off a new roof" } as any, printedText: "$500 off a new roof" })
+  const legal = withRequiredDisclosures({ brief: { goal: "Roof repair leads", offer: "$500 off a new roof" }, printedText: "$500 off a new roof" })
   assert.equal(legal.disclaimer, undefined)
   assert.equal(legal.complianceMark, undefined)
 })

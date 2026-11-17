@@ -36,7 +36,9 @@ const complete: DesignRequestInput = {
 
 test("a request requires the company, address, vibe, offer, and a response method", () => {
   assert.equal(parseDesignRequest({}).ok, false)
-  assert.match(parseDesignRequest({ companyName: "Harbor" }).error ?? "", /address/)
+  const missingAddress = parseDesignRequest({ companyName: "Harbor" })
+  assert.equal(missingAddress.ok, false)
+  if (!missingAddress.ok) assert.match(missingAddress.error, /address/)
   const missingMethod = parseDesignRequest({
     companyName: "Harbor Roofing",
     address: "100 Main St",

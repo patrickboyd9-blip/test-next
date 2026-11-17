@@ -68,7 +68,7 @@ test("a customer CSV keeps the apartment, drops duplicates, and does not claim p
 
 test("a quote exists only from an explicit approved schedule", () => {
   const now = "2026-11-08T00:00:00.000Z"
-  assert.equal(readApprovedSchedule({} as NodeJS.ProcessEnv), null)
+  assert.equal(readApprovedSchedule({} as unknown as NodeJS.ProcessEnv), null)
   const blocked = buildQuote(null, 2, now)
   assert.equal(blocked.ok, false)
   if (!blocked.ok) assert.match(blocked.message, /no approved price/)
