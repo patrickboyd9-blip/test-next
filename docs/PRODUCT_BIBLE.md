@@ -1,5 +1,7 @@
 # Modern Mail
 
+Standing requirement: [Perpetual Adaptability](PERPETUAL_ADAPTABILITY.md). Open at the edges, proprietary at the core.
+
 ## Mission
 
 Modern Mail exists to remove the complexity of physical outreach.
