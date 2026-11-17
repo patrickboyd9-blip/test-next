@@ -15,7 +15,7 @@ import {
 } from "@/lib/mail-templates/gallery-photos"
 
 /**
- * One Imagen 4 photo per gallery template.
+ * One google/nano-banana-pro photo per gallery template. About $0.15 each.
  * Reads REPLICATE_API_TOKEN from the environment. Does not read or print the value.
  *
  *   npx tsx scripts/generate-gallery-photos.ts --dry-run

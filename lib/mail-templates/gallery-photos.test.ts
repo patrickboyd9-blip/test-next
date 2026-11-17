@@ -29,7 +29,7 @@ test("the gallery plans one photo for each of the 24 templates", () => {
 test("the spend cap stops at $6.50 and will not start a photo past $7", () => {
   assert.equal(GALLERY_PHOTO_STOP_CENTS, 650)
   assert.equal(GALLERY_PHOTO_HARD_CAP_CENTS, 700)
-  assert.equal(GALLERY_PHOTO_ESTIMATE_CENTS, 4)
+  assert.equal(GALLERY_PHOTO_ESTIMATE_CENTS, 15)
   assert.equal(gallerySpendDecision(0, 4), "ok")
   assert.equal(gallerySpendDecision(648, 4), "stop")
   assert.equal(gallerySpendDecision(650, 4), "stop")

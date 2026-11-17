@@ -1,7 +1,7 @@
 import sharp from "sharp"
 
 /**
- * Some generators (Imagen 4 especially) return the photo as a framed print on a
+ * Some generators return the photo as a framed print on a
  * flat gray or white mat. Remove that mat so photo slots fill edge to edge.
  * Only trims when all four edges are one flat, low-saturation color, so a real
  * sky or lawn at the edge is never cut.
