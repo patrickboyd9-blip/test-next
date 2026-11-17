@@ -1,0 +1,341 @@
+{
+  "schema_version": "1.1",
+  "slug": "home-remodeling",
+  "industry": "Home Remodeling (kitchen, bath, basement, whole-home, interior)",
+  "last_updated": "2026-10-28",
+  "words_and_claims_to_avoid": [
+    "Government look-alike design, 'official notice', fake checks or invoices (39 USC 3001)",
+    "Unsubstantiated 'best', '#1', 'voted #1', 'guaranteed results', percent-savings claims (FTC Act s.5)",
+    "Invented or composite testimonials, star ratings or review counts (16 CFR 255)",
+    "'Free' unless it truly costs nothing and carries no hidden obligation (16 CFR 251)",
+    "Fake expiration dates or fake scarcity; any deadline printed must be real",
+    "Demographic/age targeting language (e.g., 'seniors', 'retirees') unless the client has evidence it fits their actual buyers",
+    "Any vendor case-study result (calls, ROI, revenue) printed as if it were the client's own result",
+    "'Lead-safe', 'EPA certified' or the Lead-Safe Certified Firm logo unless the firm is actually RRP-certified",
+    "'Licensed', 'bonded', 'insured' unless true for the scope advertised",
+    "'Increase your home value by X%' or ROI claims unless citing the exact source and year; most remodels do not recoup cost",
+    "'Free cabinets/sink with remodel' when the remodel is bid-priced (16 CFR 251)",
+    "'0% financing' without stating it as an APR; payment or term figures without full Reg Z disclosures"
+  ],
+  "compliance_notes": [
+    "If the sale closes in the home: FTC Cooling-Off Rule (16 CFR 429) applies to $25+ in-home sales; the client's contract must carry the 3-day cancel notice. States can add longer windows.",
+    "Print the client's contractor license number where the state requires it in ads; requirements vary by state, and the client must confirm their own state's rule (we only verified the specific state rules named below).",
+    "Any discount or 'save X%' must be off a real, recently charged price; 'save 40%' with no reference price is not allowed.",
+    "Reg Z, 12 CFR 1026.24 (verified): if a card states a down payment amount or %, the number of payments or repayment period (e.g., 'for 24 months', 'no payments for 12 months'), a payment amount ('$99/mo'), or a finance charge amount, it must also state the down payment, the full repayment terms and the 'annual percentage rate' using that term. Any rate (e.g., '0%') must be stated as an APR. Terms must be ones actually offered. Safe alternative: 'Financing available', which uses no trigger terms. Have the lender review.",
+    "FTC 'Free' Guide, 16 CFR 251 (verified): (1) 'free with purchase' means the paid item is at its regular price (sold openly for about 30 days), with no markup or downgrade to cover the free item; (2) all conditions go right next to the offer, not in an asterisk footnote; (3) if the main job is priced by negotiation or bid, 'free [item] with purchase' is improper; (4) don't run the same 'free' offer more than 6 months in any 12; (5) 'gift' or 'bonus' wording doesn't cure a deceptive 'free'.",
+    "Warranty ads, 16 CFR 239 + 702 (verified): 'lifetime/life' must say whose or what life (239.4); 'satisfaction/money-back guarantee' only if the full price is refunded on request, with conditions disclosed (239.3); advertise a warranty only if it is promptly honored (239.5); ads should say where the full warranty can be seen (239.2).",
+    "Testimonials and star ratings must be real, typical and current; disclose any material connection (16 CFR 255).",
+    "California B&P 7030.5 (verified): license number must appear in all advertising, including postcards; ads must stay within the license classification.",
+    "EPA RRP Rule (40 CFR 745, verified): firms paid to disturb paint in pre-1978 homes must be certified; only certified firms may claim certification or use the Lead-Safe logo. If the client is not certified, don't imply lead-safe practice.",
+    "Home-improvement contractor registration/ad rules exist in many states (e.g., HIC registration numbers); not verified state by state here. Client must confirm.",
+    "Resale-value and 'joy' figures: cite source and year if printed (e.g., 'NAR 2025 Remodeling Impact Report'); never generalize them into a promise."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear, disgust, joy, pride, status, relief are all options; the client chooses.",
+    "Only laws/compliance are hard limits.",
+    "Every angle and combo carries a sell-the-outcome line.",
+    "Unverified (agency/vendor-only) results are labeled; never quote them as fact on a card."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "free_estimate_or_design_consultation",
+      "primary_emotion": "relief / control (and reciprocity)",
+      "why": "The #1 blocker is finding the right pro (33%). A no-obligation visit lowers risk; a free design session gives something first (reciprocity, #2). GOLD-remodeling-008/009/010 lead with a free evaluation/consultation/quote.",
+      "headline_offer_patterns": [
+        "'Free in-home design consultation'",
+        "'Free basement evaluation: see what your space could be'",
+        "Pair with a written, itemized quote promise"
+      ],
+      "reinforcing_photo": "Designer and homeowner at a kitchen table with sketches/samples; or the finished room the consult leads to.",
+      "what_backfires": "'Free' that turns into a high-pressure sales sit-down; vague 'free estimate' buried in a service list.",
+      "combos": [
+        {
+          "headline": "Picture the kitchen first. We'll design it free.",
+          "offer": "Free in-home design consultation, no obligation",
+          "photo_scene": "Designer laying out cabinet samples on a homeowner's table",
+          "sell_the_outcome_line": "See your new kitchen before you spend a dime."
+        },
+        {
+          "headline": "Turn the room you forgot into the room you need.",
+          "offer": "Free basement evaluation",
+          "photo_scene": "Finished basement lounge from a real job",
+          "sell_the_outcome_line": "Space for movie nights, guests and quiet."
+        },
+        {
+          "headline": "A written price before any work starts.",
+          "offer": "Free on-site estimate with itemized quote",
+          "photo_scene": "PM walking a homeowner through a printed quote",
+          "sell_the_outcome_line": "No surprises, start to finish."
+        },
+        {
+          "headline": "What would your bathroom look like done right?",
+          "offer": "Free design visit + 3D layout (only if offered)",
+          "photo_scene": "Tablet showing a 3D bath render next to the old bath",
+          "sell_the_outcome_line": "Walk into a bathroom you love every morning."
+        }
+      ],
+      "compliance_flags": [
+        "16 CFR 251: 'free' only if truly free; state any condition next to the offer.",
+        "If the visit ends in an in-home sale of $25+, the Cooling-Off notice is required."
+      ],
+      "evidence": [
+        "SRC-HOUZZ-HH-2025",
+        "GOLD-home-remodeling-008, 009, 010"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "financing",
+      "primary_emotion": "relief / possibility ('finally have the means')",
+      "why": "'Finally have the financial means' is the #2 trigger (35%); funding was a challenge for 13%. Financing turns the dream into a doable decision. Per roofing round 5 and the 2026-10-27 conflict rule, financing works best as the secondary line, not the headline.",
+      "headline_offer_patterns": [
+        "Lead with the finished room; 'Financing available' as the support line",
+        "Only state a rate/term with full Reg Z disclosures"
+      ],
+      "reinforcing_photo": "Finished kitchen with family gathered; calm, not salesy.",
+      "what_backfires": "Financing-first headlines that make the card read like a loan ad; '0% for 24 months' with no APR/terms (Reg Z violation).",
+      "combos": [
+        {
+          "headline": "The kitchen you've waited for. Now's the time.",
+          "offer": "Financing available (subject to credit approval)",
+          "photo_scene": "Family cooking together in a finished kitchen",
+          "sell_the_outcome_line": "Stop waiting; start cooking in it this season."
+        },
+        {
+          "headline": "Your dream bath, on a plan that fits.",
+          "offer": "Financing available",
+          "photo_scene": "Spa-like finished shower with natural light",
+          "sell_the_outcome_line": "A daily retreat without draining savings."
+        },
+        {
+          "headline": "Finish the basement. Keep your savings.",
+          "offer": "0% APR for [N] months, with full Reg Z terms printed beside it (only if lender-approved)",
+          "photo_scene": "Finished basement with kids playing",
+          "sell_the_outcome_line": "Room to grow without the big upfront bill."
+        }
+      ],
+      "compliance_flags": [
+        "Reg Z 12 CFR 1026.24: '0%' must be stated as an APR; any term/payment/down-payment figure triggers full disclosures.",
+        "Lender must review the ad."
+      ],
+      "evidence": [
+        "SRC-HOUZZ-HH-2025",
+        "SRC-REGZ-1026.24",
+        "GOLD-home-remodeling-012 ('0% financing available')"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "dollar_off_or_fixed_package_price",
+      "primary_emotion": "smart-shopper pride / certainty",
+      "why": "A specific dollar figure is easy to value (#15). GOLD-remodeling-004 (King of Kitchens: '$1,499 10x10 cabinets & granite') sells a packaged price; GOLD-003 uses '20% off'. Packaged prices remove budget fear (26% cite budget).",
+      "headline_offer_patterns": [
+        "'$[X] off a full kitchen or bath remodel'",
+        "Package price: '[size] kitchen package from $[X]' with what's included"
+      ],
+      "reinforcing_photo": "Finished room that matches the package being priced.",
+      "what_backfires": "Percent-off with no regular price; package photos showing upgrades not included in the price.",
+      "combos": [
+        {
+          "headline": "$[X] off a full bathroom remodel.",
+          "offer": "$[X] off (real regular price, dates printed)",
+          "photo_scene": "Bright finished bathroom from the client's portfolio",
+          "sell_the_outcome_line": "A bathroom you're proud to show guests."
+        },
+        {
+          "headline": "New cabinets and counters from $[X].",
+          "offer": "Package price with inclusions listed on the front",
+          "photo_scene": "The exact package installed in a real kitchen",
+          "sell_the_outcome_line": "A fresh kitchen without a budget surprise."
+        },
+        {
+          "headline": "Save $[X] on your basement finish.",
+          "offer": "$[X] off projects over $[Y]",
+          "photo_scene": "Finished basement game room",
+          "sell_the_outcome_line": "Your family's favorite room, for less."
+        }
+      ],
+      "compliance_flags": [
+        "Discount off a real recent price; package must match the photo.",
+        "'Free sink with countertop' only if the countertop is sold at a regular, non-negotiated price (GOLD-007 'free undermount sink' needs that check)."
+      ],
+      "evidence": [
+        "GOLD-home-remodeling-003, 004, 007"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "neighbor_proof",
+      "primary_emotion": "belonging / trust",
+      "why": "GOLD-remodeling-005 (Clear Choice Bath): 'We Just Remodeled Your Neighbor's Bathroom!' Local descriptive norms move behavior (Goldstein et al. 2008).",
+      "headline_offer_patterns": [
+        "'We just remodeled a kitchen on [street]'",
+        "'[N] projects in [neighborhood] this year' (only if true)"
+      ],
+      "reinforcing_photo": "Real finished project in that neighborhood (permission), similar architecture.",
+      "what_backfires": "Fake proximity claims; photos from another region or a stock image.",
+      "combos": [
+        {
+          "headline": "We just remodeled your neighbor's bathroom.",
+          "offer": "Neighborhood special: $[X] off through [date]",
+          "photo_scene": "Finished bath from a nearby home",
+          "sell_the_outcome_line": "Get the bathroom your neighbors are talking about."
+        },
+        {
+          "headline": "Your neighbors on [street] trusted us with their kitchen.",
+          "offer": "Free design consultation",
+          "photo_scene": "Homeowner (with permission) in their finished kitchen",
+          "sell_the_outcome_line": "The same easy experience, next door."
+        },
+        {
+          "headline": "Working on [street] this month.",
+          "offer": "$[X] off while our crew is nearby",
+          "photo_scene": "Crew carrying materials into a nearby home",
+          "sell_the_outcome_line": "Less hassle, faster start."
+        }
+      ],
+      "compliance_flags": [
+        "Only real nearby jobs; get written photo/name consent.",
+        "Testimonials real and typical (16 CFR 255)."
+      ],
+      "evidence": [
+        "GOLD-home-remodeling-005",
+        "SRC-GOLDSTEIN-2008"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "seasonal_or_limited_time",
+      "primary_emotion": "anticipation / fear of missing a real date",
+      "why": "Real deadlines create urgency (#10). Remodel-specific seasonal hooks ('done before the holidays') are an inference from the long project timelines, not tested.",
+      "headline_offer_patterns": [
+        "'Book by [date] to be done before [holiday]' (only if the schedule really allows)",
+        "'Spring booking special through [date]'"
+      ],
+      "reinforcing_photo": "Finished dining/kitchen set for a gathering.",
+      "what_backfires": "Deadlines that roll over every month; 'before the holidays' promises the crew can't meet.",
+      "combos": [
+        {
+          "headline": "Host the holidays in a brand-new kitchen.",
+          "offer": "Book by [real date]; $[X] off",
+          "photo_scene": "Holiday table in a finished kitchen",
+          "sell_the_outcome_line": "Gather everyone in the kitchen you're proud of."
+        },
+        {
+          "headline": "Spring projects book fast. Get on the calendar.",
+          "offer": "Free consultation + $[X] off through [date]",
+          "photo_scene": "Sunny finished sunroom or kitchen",
+          "sell_the_outcome_line": "Enjoy the new room all summer."
+        },
+        {
+          "headline": "This month only: $[X] off your bath.",
+          "offer": "$[X] off through [date]",
+          "photo_scene": "Finished bath",
+          "sell_the_outcome_line": "A better start to every day, sooner."
+        }
+      ],
+      "compliance_flags": [
+        "Deadline must be real; don't promise completion dates you can't keep (FTC Act s.5)."
+      ],
+      "evidence": [
+        "postcard-principles.md #10"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "new_mover",
+      "primary_emotion": "pride / identity",
+      "why": "21% of renovators are customizing a recently purchased home (28% for kitchens) (Houzz 2025).",
+      "headline_offer_patterns": [
+        "'New house? Make it yours.'"
+      ],
+      "reinforcing_photo": "Boxes in a half-finished room transforming into a styled room.",
+      "what_backfires": "Implying you know personal purchase details; condescending 'your house is ugly'.",
+      "combos": [
+        {
+          "headline": "New house? Make it feel like yours.",
+          "offer": "Free design consultation for new homeowners",
+          "photo_scene": "Couple with moving boxes in a bright, newly remodeled kitchen",
+          "sell_the_outcome_line": "Love coming home from day one."
+        },
+        {
+          "headline": "Welcome home. Let's make it yours.",
+          "offer": "$[X] off your first project",
+          "photo_scene": "Freshly painted, updated living room with a few boxes",
+          "sell_the_outcome_line": "A home that fits your life, not the last owner's."
+        },
+        {
+          "headline": "The previous owner's taste doesn't have to stay.",
+          "offer": "Free estimate",
+          "photo_scene": "Before/after of a dated vs updated kitchen",
+          "sell_the_outcome_line": "Your style, your kitchen."
+        }
+      ],
+      "compliance_flags": [
+        "New-mover lists are purchased data; don't imply a personal relationship."
+      ],
+      "evidence": [
+        "SRC-HOUZZ-HH-2025",
+        "SRC-HOUZZ-KITCHEN-2025"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "guarantee",
+      "primary_emotion": "trust / risk reversal",
+      "why": "Budget (26%) and schedule (19%) are named challenges; a written commitment answers them. Must be real and honored.",
+      "headline_offer_patterns": [
+        "'Written schedule. Written price.'",
+        "Workmanship warranty with stated length and where to read terms"
+      ],
+      "reinforcing_photo": "PM handing over a printed schedule/warranty.",
+      "what_backfires": "Vague 'satisfaction guaranteed' (requires full refund under 16 CFR 239.3); 'lifetime' without whose life.",
+      "combos": [
+        {
+          "headline": "Done when we say, at the price we quote.",
+          "offer": "Written schedule + fixed quote (only if the client does this)",
+          "photo_scene": "PM with a homeowner reviewing a printed timeline",
+          "sell_the_outcome_line": "Your project, on time and on budget."
+        },
+        {
+          "headline": "[N]-year workmanship warranty, in writing.",
+          "offer": "Warranty terms on the back",
+          "photo_scene": "Craftsman finishing tile",
+          "sell_the_outcome_line": "Peace of mind long after we leave."
+        },
+        {
+          "headline": "No surprise change orders without your OK.",
+          "offer": "Written change-order policy",
+          "photo_scene": "Homeowner signing off on a tablet",
+          "sell_the_outcome_line": "You stay in control of the cost."
+        }
+      ],
+      "compliance_flags": [
+        "16 CFR 239: state warranty length, whose 'lifetime', where full terms are; honor promptly."
+      ],
+      "evidence": [
+        "SRC-HOUZZ-HH-2025",
+        "SRC-FTC-WARR-239"
+      ],
+      "evidence_strength": "moderate"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "GOLD-home-remodeling-001 'Voted #1 Home Improvement Business in the Area' vs FTC Act s.5",
+      "resolution": "Compliance wins. Only print a ranking if it names the real source and year and is substantiated."
+    },
+    {
+      "conflict": "GOLD-home-remodeling-012 '0% financing available' vs Reg Z",
+      "resolution": "Compliance wins. State it as '0% APR' with terms, or use 'Financing available'."
+    },
+    {
+      "conflict": "Gold/vendor ROI figures (e.g., GOLD-010 '340%-516% ROI', GOLD-008 '391%') vs never print unverified numbers",
+      "resolution": "These are vendor-published and unaudited; use them only as weak evidence that the format can work, never on a card."
+    },
+    {
+      "conflict": "Gold cards often lead with a service list (GOLD-006, 011) vs C-3PO HS-04/HS-05 and Patrick's sell-the-outcome rule",
+      "resolution": "Patrick's rule + C-3PO's evidence win: outcome headline and finished-room photo on the front; service list on the back."
+    }
+  ]
+}

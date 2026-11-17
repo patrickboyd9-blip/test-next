@@ -214,7 +214,9 @@ test("back message stays out of the address keep-outs", () => {
       }
       for (const text of back.texts) {
         const bound = isRoofingProTemplate(id) ? content : message
-        assert.equal(rectContains(bound, text.rect, 0.04), true, `${id} ${text.role}`)
+        // A fade back's headline band uses the free strip above the mailing panel; keep-outs are checked below.
+        const band = isRoofingProTemplate(id) && text.role === "headline" && text.rect.x >= content.x + content.w - 0.01
+        if (!band) assert.equal(rectContains(bound, text.rect, 0.04), true, `${id} ${text.role}`)
         for (const keepOut of keepOuts) {
           assert.equal(rectsOverlap(text.rect, keepOut), false, `${id} ${text.role} ${keepOut.id}`)
         }

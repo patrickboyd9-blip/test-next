@@ -1,0 +1,307 @@
+{
+  "schema_version": "1.1",
+  "slug": "auto-insurance",
+  "industry": "Auto insurance (local agents, captive and independent agencies, carriers)",
+  "last_updated": "2026-10-30",
+  "words_and_claims_to_avoid": [
+    "'You'll save $X' or 'Save up to X%' without substantiation; savings averages must be described as averages among customers who switched and saved, with a disclaimer (FTC Sec. 5; carrier practice, SRC-PROG-CLAIMS).",
+    "'Best', 'cheapest', 'lowest rates' superlatives (unsubstantiable; carriers' own guides ban them).",
+    "'Is your auto insurance about to expire?' when you don't know the recipient's dates: it implies knowledge of their policy and can read as a notice from their insurer. Use 'Renewal coming up?' instead, or real renewal data with permission.",
+    "Look-alike 'renewal notice', 'policy notice', 'ATTENTION' formats styled like a carrier or DMV document (state unfair trade practices / misrepresentation; 39 USC 3001(h) if it implies government).",
+    "'Full coverage' as a promise (not a defined coverage; implies everything is covered).",
+    "Gift card or prize for getting a quote without checking the state's anti-rebating rule (NAIC Model 880 2020 amendment; caps vary by state).",
+    "Unsourced statistics; carrier names/logos you are not appointed with.",
+    "Unaudited vendor results (e.g., '7,604% ROI', '$360k LTV') printed as proof."
+  ],
+  "compliance_notes": [
+    "State insurance unfair trade practices acts (based on NAIC Model 880) prohibit misrepresenting policy terms, benefits or the advantages of a policy, and false or misleading advertising.",
+    "Producer licensing: name the licensed agent/agency. California requires the license number on print ads distributed in CA, at least as large as any phone number or 12-pt, plus the word 'Insurance' (Ins. Code 1725.5). Check other states.",
+    "Carrier appointment/brand rules: captive agents (State Farm, Allstate, Farmers) usually must use carrier-approved templates and compliance review; independent agents may name only carriers they're appointed with.",
+    "Inducements: NAIC Model 880 (Dec 2020) allows non-cash gifts and raffles up to a commissioner-set reasonable amount, not unfairly discriminatory, with no purchase required. The drafting note suggests the lesser of 5% of premium or $250; states vary and some treat gift cards as cash.",
+    "Savings claims need substantiation before mailing (FTC Sec. 5) and state insurance ad rules; disclose basis (who saved, period, average).",
+    "Testimonials must be real customers with typical experience; material connections disclosed (16 CFR 255).",
+    "Telemarketing follow-up to mail responders falls under TSR/TCPA and state rules (not researched in depth here)."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear, joy, pride, status, relief, nostalgia are all options; the client chooses.",
+    "Only laws/compliance are hard limits.",
+    "Every angle and combo carries a sell-the-outcome line.",
+    "Unverified (agency/vendor-only) results are labeled; never quote them as fact on a card.",
+    "No age/demographic angle unless a cited source supports it for this industry; even then, check Fair Housing / ECOA before using it in housing or credit."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "free_quote_comparison",
+      "primary_emotion": "smart-shopper / control",
+      "why": "Most customers shopped after rate increases (J.D. Power 2025); a free, easy comparison is the core offer in the gold set (002, 006-011).",
+      "headline_offer_patterns": [
+        "'Renewal coming up? Get a second price first.'",
+        "'Bring your declarations page - we'll match it line for line.'"
+      ],
+      "reinforcing_photo": "Agent and customer reviewing a dec page at a desk.",
+      "what_backfires": "'Save money' with no reason or proof (C-3PO AP-005 sameness); implying you know their expiration date.",
+      "combos": [
+        {
+          "headline": "Renewal coming up? Get a second price first.",
+          "offer": "Free side-by-side quote, same coverage line by line",
+          "photo_scene": "Agent pointing at a printed dec page with a customer",
+          "sell_the_outcome_line": "Renew knowing you're not overpaying."
+        },
+        {
+          "headline": "Same coverage. Is there a better price?",
+          "offer": "10-minute quote by phone or QR",
+          "photo_scene": "Customer on phone in kitchen, dec page on counter",
+          "sell_the_outcome_line": "Ten minutes now, peace of mind all year."
+        },
+        {
+          "headline": "When did someone last read your policy?",
+          "offer": "Free coverage + price review",
+          "photo_scene": "Agent with reading glasses marking up a policy, friendly",
+          "sell_the_outcome_line": "Know exactly what you're paying for."
+        }
+      ],
+      "compliance_flags": [
+        "No 'you'll save'; any savings figure substantiated with basis disclosed.",
+        "Agent/agency name + license # (CA 1725.5 sizing).",
+        "Don't imitate a carrier renewal notice."
+      ],
+      "evidence": [
+        "SRC-JDP-2025",
+        "SRC-FCA-OP12",
+        "SRC-GOLD-AUTOINS",
+        "SRC-PROG-CLAIMS"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "bundle_home_auto",
+      "primary_emotion": "relief / simplicity",
+      "why": "One-third of shoppers want a bundle; bundlers stay longer (J.D. Power 2025). Repo MMR-531 bundle card: 66 inquiries, 30 policies (vendor).",
+      "headline_offer_patterns": [
+        "'Home and auto. One agent. One bill.'",
+        "'Bundle and see what changes.'"
+      ],
+      "reinforcing_photo": "Family in their own driveway with house + car in frame.",
+      "what_backfires": "Template 'SAVE UP TO 30%!' with no basis (home gold 007 even has a copy error); crowded multi-offer collage (AP-006).",
+      "combos": [
+        {
+          "headline": "Home and auto. One agent. One bill.",
+          "offer": "Free bundle quote for both policies",
+          "photo_scene": "Family loading the car in the driveway",
+          "sell_the_outcome_line": "One call when something happens, not three."
+        },
+        {
+          "headline": "Your house and your car, finally on speaking terms.",
+          "offer": "Bundle review; see the price both ways",
+          "photo_scene": "Car parked in front of a lived-in home at golden hour",
+          "sell_the_outcome_line": "Simpler bills, fewer surprises."
+        },
+        {
+          "headline": "Bundlers who saved with us saved an average of $[X].",
+          "offer": "See if you could too - free quote",
+          "photo_scene": "Agent shaking hands with a couple at the office door",
+          "sell_the_outcome_line": "More left over for the things you actually enjoy."
+        }
+      ],
+      "compliance_flags": [
+        "'$[X] average' only from the client's substantiated data, phrased as average among bundlers who saved, with period and source.",
+        "Name the carrier(s) actually offered."
+      ],
+      "evidence": [
+        "SRC-JDP-2025",
+        "SRC-PROG-CLAIMS",
+        "SRC-MMR-AUTOINS"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "coverage_check_protection",
+      "primary_emotion": "fear -> protection",
+      "why": "Uninsured drivers are a sourced risk (IRC 15.4%, 2023). Fear is legitimate here when paired with a single, easy action (EPPM).",
+      "headline_offer_patterns": [
+        "'About 1 in 7 drivers has no insurance. Are you covered if one hits you?'",
+        "'What happens if the other driver can't pay?'"
+      ],
+      "reinforcing_photo": "Parent buckling a child into a car seat; calm daylight.",
+      "what_backfires": "Graphic crash photos with no clear action (EPPM denial); unsourced or stale statistics; implying the current policy is inadequate without knowing it.",
+      "combos": [
+        {
+          "headline": "About 1 in 7 drivers has no insurance. Are you covered if one hits you?",
+          "offer": "Free plain-English coverage check",
+          "photo_scene": "Parent buckling a toddler into a car seat",
+          "sell_the_outcome_line": "If someone else's mistake hits you, your family isn't the one who pays."
+        },
+        {
+          "headline": "What happens if the other driver can't pay?",
+          "offer": "We'll read your policy and tell you in 10 minutes",
+          "photo_scene": "Commuter at a red light, ordinary morning",
+          "sell_the_outcome_line": "Drive like normal. We've checked the 'what ifs'."
+        },
+        {
+          "headline": "Two numbers on your policy matter most. Do you know yours?",
+          "offer": "Free liability + UM/UIM check",
+          "photo_scene": "Agent circling two lines on a dec page",
+          "sell_the_outcome_line": "Know you're protected before you need to be."
+        }
+      ],
+      "compliance_flags": [
+        "Cite the stat source on the card (Insurance Research Council, 2023 estimate).",
+        "Don't state the recipient is underinsured; offer a check.",
+        "Coverage availability and limits vary by state."
+      ],
+      "evidence": [
+        "SRC-IRC-2023",
+        "SRC-ROGERS-1975",
+        "SRC-WITTE-1992",
+        "SRC-TANNENBAUM-2015",
+        "SRC-WATSON"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "gift_or_drawing_for_quote",
+      "primary_emotion": "reciprocity / anticipation",
+      "why": "Gold cards use a $25 gift-card drawing (004: 15 converted, vendor), iPad drawing (008), a free sandwich for bringing a dec page (012). A small, real thank-you lowers the effort barrier (reciprocity #2).",
+      "headline_offer_patterns": [
+        "'Bring your dec page, lunch is on us.'",
+        "'Get a quote, get entered to win [prize].'"
+      ],
+      "reinforcing_photo": "The actual gift (coffee, sandwich) on the agent's desk next to a dec page.",
+      "what_backfires": "Gift tied to buying; cash or gift cards where the state treats them as rebates; prize values over the state cap.",
+      "combos": [
+        {
+          "headline": "Bring your dec page. Lunch is on us.",
+          "offer": "Free sandwich with any quote, no purchase needed",
+          "photo_scene": "Sandwich and coffee next to a dec page on the agent's desk",
+          "sell_the_outcome_line": "A free lunch and a straight answer on your rate."
+        },
+        {
+          "headline": "Get a quote. Get a thank-you.",
+          "offer": "[Non-cash gift up to state limit] for completing a quote, no purchase required",
+          "photo_scene": "Agent handing a small branded gift across the desk",
+          "sell_the_outcome_line": "Worth a few minutes even if you stay put."
+        },
+        {
+          "headline": "Quote this month, you're entered to win [prize].",
+          "offer": "Drawing, no purchase necessary, open to the public (official rules)",
+          "photo_scene": "Prize in a real local setting",
+          "sell_the_outcome_line": "You might win, and you'll definitely know your options."
+        }
+      ],
+      "compliance_flags": [
+        "State anti-rebating law governs (NAIC 880 2020: non-cash, reasonable value set by the commissioner, no purchase required, not unfairly discriminatory). Some states treat gift cards as cash.",
+        "Drawings: 'no purchase necessary', official rules, state sweepstakes law.",
+        "Carrier may prohibit agent inducements."
+      ],
+      "evidence": [
+        "SRC-NAIC-880",
+        "SRC-GOLD-AUTOINS",
+        "SRC-FTC-FREE-251"
+      ],
+      "evidence_strength": "thin (vendor examples) / clear law"
+    },
+    {
+      "offer_type": "new_driver_or_new_vehicle",
+      "primary_emotion": "pride / readiness",
+      "why": "Life events create the decision moment (new license, new car). One audience moment per piece (TP-12).",
+      "headline_offer_patterns": [
+        "'New driver in the house?'",
+        "'New car? Let's get it covered right.'"
+      ],
+      "reinforcing_photo": "Keys handoff in the driveway.",
+      "what_backfires": "AI-looking stock teens (gold 005 uses AI imagery; C-3PO AP-007); scare framing about teen crashes with no action.",
+      "combos": [
+        {
+          "headline": "New driver in the house? Let's get them covered right.",
+          "offer": "Free family-policy review + discount check",
+          "photo_scene": "Parent handing keys to a new driver",
+          "sell_the_outcome_line": "Hand over the keys with one less worry."
+        },
+        {
+          "headline": "New car. Same old policy?",
+          "offer": "Quote your new car before you drive it home",
+          "photo_scene": "Owner standing proudly beside a just-bought car at the curb",
+          "sell_the_outcome_line": "Enjoy the new-car feeling without a surprise bill."
+        },
+        {
+          "headline": "Just moved to [town]? Your rate may have moved too.",
+          "offer": "Free re-quote for your new address",
+          "photo_scene": "Car with moving boxes in the back, new driveway",
+          "sell_the_outcome_line": "Settle in knowing the car's sorted."
+        }
+      ],
+      "compliance_flags": [
+        "Discounts named only if the carrier actually offers them in that state.",
+        "Data sources for triggers (new movers, registrations) must be lawfully obtained; DPPA: DMV records for marketing need the person's express opt-in consent (18 USC 2721(b)(12))."
+      ],
+      "evidence": [
+        "SRC-GOLD-AUTOINS",
+        "SRC-CDI-INS",
+        "SRC-DPPA"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "retention_renewal_review",
+      "primary_emotion": "reassurance / loyalty",
+      "why": "Gold 014 (Horace Mann) is a type-led retention card warning of policy changes at renewal. Repo MMR-289: Branch retention mail +25% (vendor). Existing customers facing increases are the shoppers J.D. Power counts.",
+      "headline_offer_patterns": [
+        "'Your renewal is coming. Let's review it together first.'",
+        "'Rates went up everywhere. Let's see what we can do.'"
+      ],
+      "reinforcing_photo": "Agent on the phone with a long-time client, warm office.",
+      "what_backfires": "Hiding a rate increase; generic 'thank you' with no action.",
+      "combos": [
+        {
+          "headline": "Your renewal is coming. Let's review it together first.",
+          "offer": "Free renewal review: discounts, deductibles, coverage fit",
+          "photo_scene": "Agent and client at a desk, client smiling",
+          "sell_the_outcome_line": "Stay with someone you trust and pay what's fair."
+        },
+        {
+          "headline": "Prices rose across the industry. Here's what we can check.",
+          "offer": "Deductible and discount review before renewal",
+          "photo_scene": "Agent with a checklist",
+          "sell_the_outcome_line": "No surprises at renewal."
+        },
+        {
+          "headline": "Thanks for [X] years. Let's make sure it still fits.",
+          "offer": "Annual coverage check",
+          "photo_scene": "Client's family car in front of the agency",
+          "sell_the_outcome_line": "Coverage that grows with your life."
+        }
+      ],
+      "compliance_flags": [
+        "Must not misrepresent renewal terms; follow carrier non-renewal/rate-change notice rules (separate legal notices, not marketing)."
+      ],
+      "evidence": [
+        "SRC-MMR-AUTOINS",
+        "SRC-GOLD-AUTOINS",
+        "SRC-JDP-2025"
+      ],
+      "evidence_strength": "thin (vendor)"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "Gold 'Is your auto insurance about to expire?' (State Farm Billy Upton; 15,000 cards, 30 clients, vendor) vs misrepresentation rules",
+      "resolution": "Law wins: keep the timing idea but phrase it as a question that doesn't imply knowledge of the recipient's policy ('Renewal coming up?'), or use real permissioned renewal data."
+    },
+    {
+      "conflict": "Gold 'Save up to 30%' / '7,604% ROI' templates vs FTC Sec. 5 substantiation and carrier savings-claim practice",
+      "resolution": "Law wins: savings only as substantiated averages among customers who saved, with basis; vendor ROI never printed."
+    },
+    {
+      "conflict": "Gift-card drawings in gold (004, 008) vs state anti-rebating limits (NAIC 880)",
+      "resolution": "Law wins: non-cash or state-capped value, no purchase required, open to the public; verify state."
+    },
+    {
+      "conflict": "Progressive's brand guide avoids fear imagery for home coverage vs Patrick's emotion-agnostic rule",
+      "resolution": "Patrick's rule wins: the carrier guide is a brand choice, not law. Fear is allowed if the threat is true, sourced and paired with an easy action (EPPM)."
+    },
+    {
+      "conflict": "FCA OP12 (verified RCT) found no motor effect from showing last year's premium vs vendor claims that renewal-timed mail works",
+      "resolution": "Verified study wins on that mechanism: don't rely on 'compare your old price' alone for auto; add a concrete done-for-you comparison offer. Timing remains reasonable but unproven."
+    }
+  ]
+}

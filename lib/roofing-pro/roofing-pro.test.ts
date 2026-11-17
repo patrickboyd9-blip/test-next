@@ -81,7 +81,9 @@ test("every roofing pro template keeps type and the QR in the safe zone", () => 
         }
         const content = contentTrimRect(size)
         for (const text of card.back.texts) {
-          assert.equal(rectContains(content, text.rect, 0.04), true, `${id} back ${text.role}`)
+          // The fade back's headline band sits above the mailing panel, inside the safe zone.
+          const inBand = text.role === "headline" && text.rect.x >= content.x + content.w - 0.01
+          assert.equal(inBand ? rectContains(safeTrimRect(size), text.rect, 0.01) : rectContains(content, text.rect, 0.04), true, `${id} back ${text.role}`)
           for (const keepOut of trimKeepOuts(size)) {
             assert.equal(rectsOverlap(text.rect, keepOut), false, `${id} ${text.text} ${keepOut.id}`)
           }

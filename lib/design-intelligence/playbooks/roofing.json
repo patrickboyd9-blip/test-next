@@ -1,0 +1,373 @@
+{
+  "schema_version": "1.1",
+  "slug": "roofing",
+  "industry": "Roofing",
+  "last_updated": "2026-11-02",
+  "words_and_claims_to_avoid": [
+    "Government look-alike design, 'official notice', fake checks or invoices (39 USC 3001)",
+    "Unsubstantiated 'best', '#1', 'guaranteed savings', percent-savings claims (FTC Act s.5)",
+    "Invented or composite testimonials, star ratings or review counts (16 CFR 255)",
+    "'Free' unless it truly costs nothing and carries no hidden obligation",
+    "Fake expiration dates or fake scarcity; any deadline printed must be real",
+    "Demographic/age targeting language (e.g., 'seniors', 'retirees') unless the client has evidence it fits their actual buyers",
+    "Offering or advertising to pay, waive or rebate an insurance deductible (illegal in Texas without insurer consent; Florida bans incentives for inspections/claims)",
+    "'We'll handle your insurance claim / we work with your adjuster' style claims-advice (Florida: only licensed public adjusters may adjust claims)",
+    "'Storm reported in your area' unless a storm really hit that area",
+    "Lifetime/50-year durability claims unless backed by the manufacturer warranty terms (card 30 lesson)",
+    "'Do you qualify for a free new roof?', 'Your neighborhood has confirmed damage', 'Your neighbor reported storm damage' (eligibility/assertion framing; GOLD-roofing-021/022/056)",
+    "'Paid by your insurance' / 'Your insurance company may pay for a new roof' (GOLD-roofing-021/054) in FL/TX-style regimes; insurer decides coverage",
+    "Federal tax-credit claims on roofing products (e.g., '30% federal tax credit' on solar attic fans, GOLD-roofing-050): 25D ended for expenditures after 12/31/2025",
+    "'Value $X, savings Y%' unless $X is a real former price actually charged (GOLD-roofing-042; 16 CFR 233)"
+  ],
+  "compliance_notes": [
+    "If the sale closes in the home: FTC Cooling-Off Rule (16 CFR 429) applies to $25+ in-home sales; the client's contract must carry the 3-day cancel notice. States can add longer windows (e.g., California's 5-day window for buyers 65+ is documented for solar contracts).",
+    "Print the client's contractor license number where the state requires it in ads; requirements vary by state, and the client must confirm their own state's rule (we only verified the specific state rules named below).",
+    "Any discount must be off a real, recently charged price.",
+    "Texas Bus. & Com. Code 27.02: a seller commits a Class B misdemeanor by advertising or promising to pay, waive, absorb or rebate an insured's deductible without insurer consent; contracts of $1,000+ expected to be paid from insurance must carry a statutory 12-pt bold notice.",
+    "Florida Stat. 489.147: roofing contractors may not offer rebates, gifts, cash, coupons, deductible waivers or anything of value in exchange for a roof inspection or an insurance claim; written ads encouraging claims need specified warnings; violations carry fines up to $10,000 each. Practical effect: in Florida, do NOT pair 'free inspection' with a gift/discount framed around a claim. Client should confirm with counsel.",
+    "Storm/hail cards must not mimic government or insurer notices (39 USC 3001).",
+    "Reg Z, 12 CFR 1026.24 (verified): if a card states a down payment amount or %, the number of payments or repayment period (e.g., 'for 18 months', 'no payments for 12 months'), a payment amount ('$99/mo'), or a finance charge amount, it must also state the down payment, the full repayment terms and the 'annual percentage rate' using that term. Any rate (e.g., '0%') must be stated as an APR. Terms must be ones actually offered. Safe alternative: 'Financing available', which uses no trigger terms. Have the lender review.",
+    "FTC 'Free' Guide, 16 CFR 251 (verified): (1) 'free with purchase' means the paid item is at its regular price (sold openly for about 30 days), with no markup or downgrade to cover the free item; (2) all conditions go right next to the offer, not in an asterisk footnote; (3) if the main job is priced by negotiation or bid (typical for roofs, siding and window packages), 'free [item] with purchase' is improper; (4) don't run the same 'free' offer more than 6 months in any 12; (5) 'gift' or 'bonus' wording doesn't cure a deceptive 'free'.",
+    "Warranty ads, 16 CFR 239 + 702 (verified): 'lifetime/life' must say whose or what life (239.4); 'satisfaction/money-back guarantee' only if the full price is refunded on request, with conditions disclosed (239.3); advertise a warranty only if it is promptly honored (239.5). For consumer products over $15 with a written warranty, the terms must be available before sale; door-to-door sellers must tell buyers before closing that copies are available (702.3); ads should say where the full warranty can be seen (239.2).",
+    "2026-11-02 re-verification: FL 489.147 text unchanged in the 2026 Florida Statutes (last amended by ch. 2025-40). A 'prohibited advertisement' that encourages a roof-damage insurance claim must state, in 12-pt+ type at least half the size of the largest font: owner pays the deductible; deductible rebates/waivers are 3rd-degree-felony insurance fraud; filing a false claim is insurance fraud. No gift/discount/rebate in exchange for an inspection or for making a claim; no referral rewards; up to $10,000 fine per violation.",
+    "IRS (verified 2026-11-02): 25D residential clean energy credit is not allowed for expenditures made after 12/31/2025 (installation-completed date controls); 25C not allowed for property placed in service after 12/31/2025. Even before that, only the electricity-generating panel of a solar attic fan qualified (IRS Notice 2013-70 Q&A-29). Never print a federal tax-credit claim on 2026+ roofing cards.",
+    "Former-price/value claims (16 CFR 233.1): a 'value $9,000' or 'save 28%' comparison needs a real former price openly and actively charged for a reasonably substantial period. Roofs are bid-priced, so most 'value' anchors fail; use a flat '$[X] off' instead.",
+    "Named-storm specials (GOLD-roofing-046) are fine only if the storm actually hit the mailed area and the price is real; never imply official/FEMA affiliation."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear, joy, pride, relief are all options; the client chooses.",
+    "Only laws/compliance are hard limits.",
+    "Every angle carries a sell-the-outcome line.",
+    "Unverified (agency-only) results are labeled; never quote them as fact on a card."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "dollar_off",
+      "primary_emotion": "anticipation / smart-shopper pride (gain framed as money kept)",
+      "why": "Concrete numbers are easy to process and anchor value (specificity, anchoring). The three round-5 cards Patrick loved all led with '$500 off'; GOLD-roofing-004/007 also use a single dollar figure.",
+      "headline_offer_patterns": [
+        "'$[X] off a full roof replacement' in a single accent bar",
+        "Headline frames keeping money: 'Replace the roof, keep the savings.'"
+      ],
+      "reinforcing_photo": "Full-bleed real job, roofer on a ladder at the roofline, blue sky",
+      "what_backfires": "Several stacked discounts (dilutes the anchor); a dollar figure on a weak, roof-less photo (card 30)",
+      "combos": [
+        {
+          "headline": "Replace the roof, keep the savings.",
+          "offer": "$[X] off a full roof replacement",
+          "photo_scene": "Roofer on a ladder at the roofline, full bleed",
+          "sell_the_outcome_line": "A brand-new roof, and $[X] that stays in your pocket."
+        },
+        {
+          "headline": "Real savings on a new roof.",
+          "offer": "$[X] off a full replacement, real expiry date",
+          "photo_scene": "Same scene with a dark gradient band for the headline",
+          "sell_the_outcome_line": "Peace of mind over your family for decades, for less."
+        },
+        {
+          "headline": "Your new roof in [town], for less.",
+          "offer": "$[X] off + free estimate",
+          "photo_scene": "Crew finishing a roof on a recognizable local street",
+          "sell_the_outcome_line": "Pull into the driveway and love what you see."
+        }
+      ],
+      "compliance_flags": [
+        "Discount must be off a real, recently charged price (FTC s.5).",
+        "Texas/Florida: never frame a discount as offsetting an insurance deductible or as a reward for an inspection or claim."
+      ],
+      "evidence": [
+        "Patrick round 5 votes (feedback/roofing-round5.md; one voter, directional): loved 8/9/10",
+        "GOLD-roofing-004, GOLD-roofing-007 (vendor templates; response UNKNOWN)",
+        "postcard-principles.md specificity/anchoring",
+        "GOLD-roofing-033/035/036 (PostcardMania, vendor-reported ROI 629-5,845%; agency-only unverified; ROI% is low-trust per contradictions.md)"
+      ],
+      "evidence_strength": "directional + strong principle"
+    },
+    {
+      "offer_type": "free_inspection",
+      "primary_emotion": "relief, via fear plus efficacy (find out before it gets worse)",
+      "why": "EPPM (Witte 1992): a threat works when paired with an easy, free step. Mando's roofing synthesis shows a free first step on 14 of 15 roofing pieces (MMR-574-588).",
+      "headline_offer_patterns": [
+        "'Hail damage hides. We find it.'",
+        "'See what your roof is hiding.'",
+        "Free step in its own tile"
+      ],
+      "reinforcing_photo": "An inspector on the roof, or a close-up of real granule loss or a hail bruise",
+      "what_backfires": "A threat headline over an undamaged sunny house (card 11, 'just a nice house'); 'You qualify for a FREE roof inspection!' (GOLD-roofing-002) reads as a fake eligibility notice",
+      "combos": [
+        {
+          "headline": "Hail damage hides. We find it.",
+          "offer": "Free, no-obligation roof inspection",
+          "photo_scene": "Inspector with a tablet beside bruised shingles",
+          "sell_the_outcome_line": "Know exactly where your roof stands before the next storm."
+        },
+        {
+          "headline": "See what your roof is hiding.",
+          "offer": "Free inspection with photo report",
+          "photo_scene": "Roofer on the roof photographing shingles",
+          "sell_the_outcome_line": "A dry, safe home, with no surprises."
+        },
+        {
+          "headline": "A free look, no pressure, no pitch.",
+          "offer": "Free inspection",
+          "photo_scene": "Friendly tech at the door with a ladder on the truck",
+          "sell_the_outcome_line": "Peace of mind in 30 minutes."
+        }
+      ],
+      "compliance_flags": [
+        "Florida 489.147: no gift, discount or other value tied to the inspection or a claim; written claim-encouraging ads need statutory warnings.",
+        "'Free' must carry no hidden obligation."
+      ],
+      "evidence": [
+        "MMR-574..588 (14/15 free-step tile)",
+        "Patrick round 5 votes (feedback/roofing-round5.md; one voter, directional): cards 3, 4, 25, 26 liked",
+        "Witte 1992; Tannenbaum et al. 2015"
+      ],
+      "evidence_strength": "strong principle"
+    },
+    {
+      "offer_type": "storm_emergency",
+      "primary_emotion": "fear of loss and urgency, then relief",
+      "why": "Storm events are real triggers (JCHS: disaster repairs ~$23B/yr). Mando found 3 of 15 roofing pieces localize a storm (MMR-576/585/586).",
+      "headline_offer_patterns": [
+        "'Hail hit [town] on [real date]'",
+        "'Know your roof before the next storm.'"
+      ],
+      "reinforcing_photo": "Real storm damage or an inspector at work. The image must show the threat the headline names.",
+      "what_backfires": "Storm headline with a pristine-house image (card 11); 'STORM DAMAGE ALERT' styling that looks official (GOLD-roofing-012); 'You have hail damage!' (GOLD-roofing-007) asserts damage you haven't seen",
+      "combos": [
+        {
+          "headline": "Know your roof before the next storm.",
+          "offer": "Free storm-season inspection",
+          "photo_scene": "Tech on a ladder, dark sky in the background",
+          "sell_the_outcome_line": "Ride out storm season knowing your home is protected."
+        },
+        {
+          "headline": "Hail hit [neighborhood] on [date]. Did it hit your roof?",
+          "offer": "Free hail inspection",
+          "photo_scene": "Close-up of hail-bruised shingles in a gloved hand",
+          "sell_the_outcome_line": "Get it fixed right, before a small hit becomes a leak."
+        },
+        {
+          "headline": "Find storm damage before the next storm.",
+          "offer": "Free inspection, real expiry date",
+          "photo_scene": "Full-bleed roofline with a worker, storm clouds clearing",
+          "sell_the_outcome_line": "Sleep through the next storm."
+        }
+      ],
+      "compliance_flags": [
+        "Only name storms and dates that really happened in that area.",
+        "No government, insurer or 'alert' look-alike design (39 USC 3001).",
+        "Don't assert damage ('You have hail damage!'); ask instead.",
+        "TX 27.02 and FL 489.147 deductible and claim rules.",
+        "FL 489.147 (re-verified 2026-11-02): claim-encouraging cards need the 3-part deductible/fraud notice at 12 pt+ and half the largest font; no 'paid by insurance' promises.",
+        "Avoid alert/official styling ('Hail Damage Alert!', GOLD-roofing-049/060): 39 USC 3001 + FTC s.5."
+      ],
+      "evidence": [
+        "MMR-576, 585, 586",
+        "JCHS disaster blog",
+        "Patrick round 5 votes (feedback/roofing-round5.md; one voter, directional): card 11 hated-type ('just a nice house')",
+        "GOLD-roofing-017/018 (MinuteMarketing, vendor-published unaudited: 63 and 55 booked jobs; paired with paid social/search) - agency-only unverified",
+        "GOLD-roofing-026/028 (PostcardMania, vendor-reported) - agency-only unverified"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "financing",
+      "primary_emotion": "relief (affordability), never as the lead message",
+      "why": "Ticket shock is the main roofing objection (Mando, INFERRED), but Patrick hated the financing-first headlines (37: 'Fix the roof now. Pay later.'; 18: 'Don't wait on a roof you can finance.'). Card 16, with a problem-first headline and 0% in the offer bar, was liked.",
+      "headline_offer_patterns": [
+        "Problem- or outcome-led headline; financing as the offer bar or a secondary line",
+        "'As low as $[X]/mo' only with full terms"
+      ],
+      "reinforcing_photo": "Inspector or finished roof, not a calculator or a smiling banker",
+      "what_backfires": "Headline leads with debt; a muted cream/black palette (card 18)",
+      "combos": [
+        {
+          "headline": "Aging roof, [region] weather.",
+          "offer": "0% APR for [N] months, with full Reg Z terms (down payment, repayment terms, APR) + free estimate",
+          "photo_scene": "Inspector with a clipboard walking up to a home",
+          "sell_the_outcome_line": "A safe roof now, on a budget that works."
+        },
+        {
+          "headline": "Protect your home this season.",
+          "offer": "Free inspection; financing available, ask for terms",
+          "photo_scene": "Roofer at the roofline, full bleed",
+          "sell_the_outcome_line": "Get the roof you need without draining savings."
+        },
+        {
+          "headline": "A new roof shouldn't wait for a perfect month.",
+          "offer": "Payments from $[X]/mo with terms on the back",
+          "photo_scene": "Finished roof at golden hour",
+          "sell_the_outcome_line": "Your home protected today; payments that fit your life."
+        }
+      ],
+      "compliance_flags": [
+        "Reg Z, 12 CFR 1026.24 (verified): if a card states a down payment amount or %, the number of payments or repayment period (e.g., 'for 18 months', 'no payments for 12 months'), a payment amount ('$99/mo'), or a finance charge amount, it must also state the down payment, the full repayment terms and the 'annual percentage rate' using that term. Any rate (e.g., '0%') must be stated as an APR. Terms must be ones actually offered. Safe alternative: 'Financing available', which uses no trigger terms. Have the lender review.",
+        "Don't say 'no credit check' unless it's true."
+      ],
+      "evidence": [
+        "Patrick round 5 votes (feedback/roofing-round5.md; one voter, directional): 37 and 18 hated, 16 liked",
+        "GOLD-roofing-011 ($99/mo; vendor)",
+        "MMR-578, 584, 587 (financing-led; vendor)"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "neighbor_social_proof",
+      "primary_emotion": "belonging (do what neighbors do) and trust",
+      "why": "Descriptive norms (#3). People really do compare roofs on their street (Owens Corning insight, agency-only).",
+      "headline_offer_patterns": [
+        "'We just finished a roof on [street].'",
+        "'[N] neighbors in [subdivision] chose us' (if true)"
+      ],
+      "reinforcing_photo": "Real nearby job with the crew visible",
+      "what_backfires": "Fake counts; stock neighborhoods",
+      "combos": [
+        {
+          "headline": "We just finished a roof on [street]. Yours next?",
+          "offer": "Neighbor discount $[X] (real deadline)",
+          "photo_scene": "Crew on a real nearby job",
+          "sell_the_outcome_line": "The same worry-free roof your neighbors have."
+        },
+        {
+          "headline": "Your neighbors trust us with their roofs.",
+          "offer": "Free inspection",
+          "photo_scene": "Owner with crew in front of a local job",
+          "sell_the_outcome_line": "One less thing to worry about on your street."
+        },
+        {
+          "headline": "Proud [town] homes deserve great roofs.",
+          "offer": "$[X] off",
+          "photo_scene": "Recognizable local streetscape, finished roof",
+          "sell_the_outcome_line": "The best-looking roof on the block."
+        },
+        {
+          "headline": "See your neighbor's new roof on [street].",
+          "offer": "Neighbor pricing $[X] off while our crew is nearby (real deadline)",
+          "photo_scene": "Real before/after pair of the SAME nearby roof (GOLD-roofing-059 pattern), crew visible in the after",
+          "sell_the_outcome_line": "The same worry-free roof your neighbor just got, without the search."
+        }
+      ],
+      "compliance_flags": [
+        "Counts and reviews must be real (16 CFR 255).",
+        "Only name a street/neighbor job that actually happened; don't assert the recipient's roof is damaged because a neighbor's was (GOLD-roofing-022 pattern)."
+      ],
+      "evidence": [
+        "campaign-library-mando-verticals.md neighbor pattern",
+        "MMR-580, 587",
+        "GOLD-roofing-059 (vendor sample, response UNKNOWN): before/after of the same roof + 'neighbor's new roof' headline"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "guarantee_warranty",
+      "primary_emotion": "trust / risk reversal",
+      "why": "A specific promise answers the trust objection; Benjamin Franklin Plumbing does this for punctuality. Several roofing gold pieces show a 10-year warranty badge (GOLD-roofing-009, 012).",
+      "headline_offer_patterns": [
+        "'[N]-year workmanship warranty' badge near the CTA"
+      ],
+      "reinforcing_photo": "Owner or crew portrait plus a real job",
+      "what_backfires": "Vague 'lifetime' with no terms; 50-year claims without manufacturer backing (card 30)",
+      "combos": [
+        {
+          "headline": "Done right, or we make it right.",
+          "offer": "[N]-year workmanship warranty + free estimate",
+          "photo_scene": "Owner on site shaking a homeowner's hand",
+          "sell_the_outcome_line": "Never worry about this roof again."
+        },
+        {
+          "headline": "A roof you won't think about for years.",
+          "offer": "Real warranty terms on the back",
+          "photo_scene": "Finished roof, crew packing up",
+          "sell_the_outcome_line": "Decades of dry, quiet nights."
+        },
+        {
+          "headline": "Licensed. Insured. Guaranteed.",
+          "offer": "Free inspection",
+          "photo_scene": "Crew in uniform with a truck",
+          "sell_the_outcome_line": "Hire once, relax for years."
+        }
+      ],
+      "compliance_flags": [
+        "Warranty ads, 16 CFR 239 + 702 (verified): 'lifetime/life' must say whose or what life (239.4); 'satisfaction/money-back guarantee' only if the full price is refunded on request, with conditions disclosed (239.3); advertise a warranty only if it is promptly honored (239.5). For consumer products over $15 with a written warranty, the terms must be available before sale; door-to-door sellers must tell buyers before closing that copies are available (702.3); ads should say where the full warranty can be seen (239.2).",
+        "'Guaranteed for Life'/'lifetime warranty' (GOLD-roofing-025/033): must state whose or what life (16 CFR 239.4)."
+      ],
+      "evidence": [
+        "GOLD-roofing-009, 012",
+        "Benjamin Franklin guarantee"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "community_cross_promo",
+      "primary_emotion": "belonging / local pride",
+      "why": "Ties the roofer to the town's identity and other local businesses (liking, in-group). One vendor-reported case only, so directional.",
+      "headline_offer_patterns": [
+        "'10% off when you buy local': discount with a receipt from another [town] business",
+        "'[Town] roofs, [town] crews'"
+      ],
+      "reinforcing_photo": "Aerial or street shot of a recognizable local home with a new roof; local landmark context",
+      "what_backfires": "Generic 'shop local' without a real local tie; a percentage discount on a bid-priced roof with no clear base",
+      "combos": [
+        {
+          "headline": "Buy local, roof local.",
+          "offer": "$[X] off a full replacement with any [town] business receipt from this month",
+          "photo_scene": "Drone shot of a [town] home with a fresh roof, hills/landmark behind",
+          "sell_the_outcome_line": "A roof built by neighbors, and money kept in [town]."
+        },
+        {
+          "headline": "[Town] crews. [Town] roofs.",
+          "offer": "Free inspection + $[X] off for [town] residents",
+          "photo_scene": "Crew in branded shirts on a local street",
+          "sell_the_outcome_line": "Someone local who'll still answer the phone in ten years."
+        },
+        {
+          "headline": "Your roof, done by people you'll see at the game Friday.",
+          "offer": "$[X] off, real expiry",
+          "photo_scene": "Owner + crew in front of a finished local job",
+          "sell_the_outcome_line": "Peace of mind from a name you know."
+        }
+      ],
+      "compliance_flags": [
+        "Prefer a dollar amount over '% off' on bid-priced jobs (16 CFR 233 base price problem).",
+        "Don't tie the discount to an inspection or insurance claim in FL/TX."
+      ],
+      "evidence": [
+        "GOLD-roofing-034 (PostcardMania, vendor-reported ROI 1,374% on second campaign; agency-only unverified)",
+        "Liking/in-group principles (postcard-principles.md)"
+      ],
+      "evidence_strength": "thin (one vendor case) + moderate principle"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "Gold set and vendor pieces lead with financing (GOLD-roofing-011, MMR-578) vs Patrick hating financing-first cards 18 and 37",
+      "resolution": "Patrick's votes win for headline placement because they are direct feedback on our output. The gold pieces show financing as a common offer, not that it works as a headline. Keep financing as a secondary offer under a problem or outcome headline. Re-test if votes change."
+    },
+    {
+      "conflict": "GOLD-roofing-002 'You qualify for a FREE roof inspection... may qualify for free insurance replacement' vs FL 489.147 and TX 27.02",
+      "resolution": "Compliance wins. Don't use eligibility or 'free replacement through insurance' framing."
+    },
+    {
+      "conflict": "GOLD-roofing-007 'You have hail damage!' and 012 'STORM DAMAGE ALERT' vs FTC s.5 and 39 USC 3001",
+      "resolution": "Compliance wins. Ask ('Did it hit your roof?') instead of asserting damage, and avoid official-alert styling."
+    },
+    {
+      "conflict": "Gold set and PostcardMania pieces show many pristine-house photos vs Patrick's 'just a nice house' feedback",
+      "resolution": "Patrick wins for image choice. Show work or damage that matches the headline."
+    },
+    {
+      "conflict": "GOLD-roofing-021/022/054/056 eligibility and 'neighbor reported damage / paid by insurance' framing (common in new vendor samples) vs FL 489.147, TX 27.02, FTC s.5",
+      "resolution": "Compliance wins. Ask a question ('Did last week's hail reach your roof?'), never assert damage, eligibility or insurer payment."
+    },
+    {
+      "conflict": "GOLD-roofing-050 '30% federal tax credit' (solar attic fan) vs IRS: 25D ended for expenditures after 12/31/2025",
+      "resolution": "Law wins. No federal credit claims; at most 'ask about current state/utility programs' if the client verifies one exists."
+    },
+    {
+      "conflict": "Vendor ROI claims (GOLD-roofing-025-036, 017/018, 040) look strong vs no independent replication",
+      "resolution": "Treat as agency-only unverified; use them to show which offers exist, not as proof. Patrick's votes and verified studies outrank them."
+    }
+  ]
+}

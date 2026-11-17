@@ -210,10 +210,13 @@ function drawPlanBack(
     height: spec.pdfPagePoints.heightPoints,
     color: paint(paper),
   })
-  for (const shape of plan.shapes) drawShape(page, spec, plan, shape)
+  // Same layering as the front: paper, photo, then the fade and any other shape over it.
+  const under = (role: string) => role === "paper" || role === "field"
+  for (const shape of plan.shapes.filter((item) => under(item.role))) drawShape(page, spec, plan, shape)
   for (const slot of plan.photos) {
     drawPhoto(page, spec, plan, slot, backPhoto, plan.palette.field)
   }
+  for (const shape of plan.shapes.filter((item) => !under(item.role))) drawShape(page, spec, plan, shape)
   for (const line of plan.texts) drawFitted(page, spec, line, display, text)
   if (plan.lockup) drawFrontLockup(page, spec, plan, qrPayload, display, strong, text)
 }

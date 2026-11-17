@@ -1,0 +1,301 @@
+{
+  "schema_version": "1.1",
+  "slug": "precious-metals",
+  "industry": "Precious metals (cash-for-gold/scrap buyers, pawn, coin & bullion dealers, precious-metals IRA / physical metals sellers)",
+  "last_updated": "2026-11-03",
+  "words_and_claims_to_avoid": [
+    "'Guaranteed returns', 'can't lose', 'safer than the bank', or 'government-backed' metals investments (FINRA/CFTC Lies vs Facts; FTC Act s.5)",
+    "'Highest price guaranteed' / 'top dollar' (GOLD-precious-metals-001/002/005) without a clear, testable comparison basis — and never if you will not honor it (16 CFR 239)",
+    "'Up to 98.5% of market price' (GOLD-precious-metals-006) unless that percentage is actually paid for the stated purity/weight for a meaningful share of transactions, and 'market price' is defined (spot vs melt vs dealer bid)",
+    "Fake official look: U.S. Mint, Treasury, IRS, Social Security, or eagle/seal styling that implies federal endorsement (39 USC 3001(h); 31 USC 333 Mint name/emblem misuse)",
+    "'Numismatic' / 'semi-numismatic' premiums used to justify huge markups on common coins (FINRA/CFTC investor bulletin)",
+    "'Free gold' / big freebies that hide the spread and commissions (FINRA Q7 red flag)",
+    "IRA claims that skip custodian identity, storage location, all fees, and IRC 408(m) eligibility limits",
+    "Implying the IRA custodian vetted the dealer or the investment (SEC/FINRA/NASAA SDIRA alert: custodians typically do not)",
+    "Age-targeted 'protect your retirement' scare copy as a default audience claim without client-specific evidence (fraudsters target retirees; that is not a license to stereotype every buyer)"
+  ],
+  "compliance_notes": [
+    "FTC Act s.5: investment and buyback claims must be truthful and substantiated before mailing. No guaranteed profits; disclose material risks.",
+    "16 CFR Part 23 (Jewelry, Precious Metals, and Pewter Guides): do not misrepresent metallic content, karat/fineness, weight, or value in ads or appraisals.",
+    "FINRA + CFTC Investor Bulletin (2024-03-20) and CFTC 'Lies Versus Facts' flier: warn against cold calls, unsolicited email, junk mail, and pop-up dealers for physical metals/IRA pitches; demand written fees, spread vs spot, buy-back price, and registration checks. Free-kit lead magnets followed by high-pressure phone closings are a known scam pattern — legal only if fully non-deceptive, and still a compliance red zone.",
+    "SEC/FINRA/NASAA Investor Alert on self-directed IRAs: custodians generally do not investigate the assets or promoters; precious metals in SDIRAs carry fraud, fee, and liquidity risks.",
+    "IRC 408(m): most collectibles are treated as distributions; exceptions exist for certain coins and for gold/silver/platinum/palladium bullion of required fineness held by a bank or approved nonbank trustee. Home storage of IRA metals can be treated as a taxable distribution. Ads must not imply any metal/coin is IRA-eligible.",
+    "39 USC 3001(h): government look-alike solicitations are nonmailable unless truly affiliated or the required conspicuous disclaimers appear on the mailpiece and outer cover ('THIS IS NOT A GOVERNMENT DOCUMENT' / federal-endorsement disclaimer).",
+    "31 USC 333 / U.S. Mint business guidelines: civil fines for misuse of Mint or Treasury names, emblems, or symbols implying sponsorship.",
+    "FTC Mail, Internet, or Telephone Order Merchandise Rule (16 CFR 435): if selling metals by mail/phone/online, have a reasonable basis to ship in the advertised time (or 30 days), and offer delay consent or refund.",
+    "FTC Telemarketing Sales Rule (16 CFR 310): investment telemarketing (including some inbound responses to ads) requires cost/fee disclosures before payment; honor entity-specific Do Not Call; National DNC applies to outbound telemarketing. Precious-metals investment cases have alleged TSR violations.",
+    "State/local secondhand precious-metals dealer and pawn licenses, hold periods, ID/reporting, and sometimes cash-payment limits vary (e.g., Maryland state licensing + hold; Connecticut restrictions). Show license numbers where required. Temporary buying events often need separate local permits.",
+    "Pawn loans: state pawn statutes and Truth in Lending/Reg Z may apply to credit terms; do not advertise 'loan' APRs without required disclosures.",
+    "Spot vs dealer spread honesty: always selling above spot and buying below is normal — hiding the spread is the fraud pattern FINRA flags."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear of inflation/collapse is allowed when non-deceptive; joy/relief on cash-for-gold is equally valid.",
+    "Only laws/compliance are hard limits — and they are heavy in this vertical.",
+    "Every angle and emotion_by_offer combo carries sell_the_outcome_line.",
+    "Never quote agency/gold response numbers as fact; label agency-only unverified.",
+    "No retiree/senior demographic default without industry-specific evidence."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "dated_cash_buying_event",
+      "primary_emotion": "urgency / relief",
+      "why": "A real date creates urgency; the outcome is cash in hand for unused metal.",
+      "headline_offer_patterns": [
+        "'We're buying [dates]'",
+        "'Cash on the spot — free estimate'"
+      ],
+      "reinforcing_photo": "Real staff at a clean buying counter with a scale",
+      "what_backfires": "Fake 'this week only' every week; 'highest price' with no basis; unlicensed pop-up events",
+      "combos": [
+        {
+          "headline": "We're buying gold this week.",
+          "offer": "Buying event [Mon–Fri dates]; free estimate; cash on the spot",
+          "photo_scene": "Staff weighing a bracelet on a counter scale",
+          "sell_the_outcome_line": "Leave with cash for the jewelry you never wear."
+        },
+        {
+          "headline": "Five days. Fair cash for your gold.",
+          "offer": "Walk-in buying [dates]; no appointment needed",
+          "photo_scene": "Clean storefront with open sign and hours",
+          "sell_the_outcome_line": "Turn a junk drawer into money for bills or a weekend."
+        },
+        {
+          "headline": "Local buyers. Real dates.",
+          "offer": "Event [dates] at [address]; license #[X]",
+          "photo_scene": "Owner greeting a customer at the door",
+          "sell_the_outcome_line": "A straight answer on what your gold is worth — today."
+        }
+      ],
+      "compliance_flags": [
+        "Temporary/off-site buying events often need local permits and hold-period compliance.",
+        "State secondhand precious-metals dealer license and reporting rules apply.",
+        "'Highest price' claims need a testable basis or should be dropped."
+      ],
+      "evidence": [
+        "GOLD-precious-metals-001/005/009"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "bonus_cash_on_sale",
+      "primary_emotion": "smart-shopper confidence",
+      "why": "A concrete bonus threshold feels like winning vs the next buyer — only atop an honest base payout.",
+      "headline_offer_patterns": [
+        "'Extra $[X] when you sell $[Y]+'",
+        "'Coupon: +$[X]/+$[Y] at tiers'"
+      ],
+      "reinforcing_photo": "Cash and jewelry together; big bonus badge",
+      "what_backfires": "Bonus that requires impossible purity; tiny type excluding most pieces",
+      "combos": [
+        {
+          "headline": "Extra $[X] when you sell $[Y]+ of gold.",
+          "offer": "Bonus coupon with this card; thresholds printed",
+          "photo_scene": "Gold chains and a cash envelope",
+          "sell_the_outcome_line": "More cash in your pocket for the same jewelry."
+        },
+        {
+          "headline": "Gold is up. Your bonus is too.",
+          "offer": "+$[X] on $[Y]+ / +$[Z] on $[W]+",
+          "photo_scene": "Spot-price chalkboard next to a bonus sticker (spot labeled as illustrative, not a promise)",
+          "sell_the_outcome_line": "Get paid for metal you were already ready to let go."
+        },
+        {
+          "headline": "Bring this card. Keep more cash.",
+          "offer": "Extra $[X] on qualifying sales this month",
+          "photo_scene": "Customer smiling at checkout with cash (model-released)",
+          "sell_the_outcome_line": "A better payout without haggling all afternoon."
+        }
+      ],
+      "compliance_flags": [
+        "Bonus terms, testing method, and exclusions must be clear with the offer (FTC s.5).",
+        "Do not imply spot-price moves guarantee a seller profit after dealer spread."
+      ],
+      "evidence": [
+        "GOLD-precious-metals-002/003"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "free_estimate_walk_in",
+      "primary_emotion": "relief / trust",
+      "why": "Removes fear of committing before knowing value; reciprocity from a free assay.",
+      "headline_offer_patterns": [
+        "'Free estimate'",
+        "'No appointment needed'"
+      ],
+      "reinforcing_photo": "Friendly appraiser with loupe/scale; transparent process",
+      "what_backfires": "'Free estimate' that pressures an immediate lowball sale; hidden melt fees",
+      "combos": [
+        {
+          "headline": "Free estimate. Cash if you want it.",
+          "offer": "No-obligation free estimate; walk-ins welcome",
+          "photo_scene": "Appraiser explaining a written offer sheet",
+          "sell_the_outcome_line": "Know the number before you decide to sell."
+        },
+        {
+          "headline": "Cut out the middle man.",
+          "offer": "Free estimate; cash on the spot",
+          "photo_scene": "Simple counter, no cluttered pawn shelves in frame",
+          "sell_the_outcome_line": "A clear payout without the runaround."
+        },
+        {
+          "headline": "Scan for today's buy rates.",
+          "offer": "QR to current dealer bid ranges by metal; free in-store assay",
+          "photo_scene": "Phone scanning a QR beside a rate board",
+          "sell_the_outcome_line": "Walk in informed, walk out decided."
+        }
+      ],
+      "compliance_flags": [
+        "Published 'rates' must match what you actually pay for stated purity/weight.",
+        "16 CFR Part 23: no misstated karat/fineness in the appraisal story."
+      ],
+      "evidence": [
+        "GOLD-precious-metals-005/008/011"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "mail_in_or_free_pickup",
+      "primary_emotion": "ease / relief",
+      "why": "Convenience for people who will not visit a store; timeline honesty is the trust builder.",
+      "headline_offer_patterns": [
+        "'Free insured shipping kit'",
+        "'Free local pickup'",
+        "'Paid next day' only if true"
+      ],
+      "reinforcing_photo": "Sealed kit, labeled bag, simple 1-2-3 steps",
+      "what_backfires": "Slow pay, bait-and-switch assay, '98.5% of market' that isn't",
+      "combos": [
+        {
+          "headline": "Cash for gold without leaving home.",
+          "offer": "Free insured shipping kit; paid within [N] business days of assay",
+          "photo_scene": "Kit contents laid out neatly",
+          "sell_the_outcome_line": "Ship it once, get paid, done."
+        },
+        {
+          "headline": "We'll pick it up. You'll get paid.",
+          "offer": "Free local pickup & insured transport; written offer before you release items",
+          "photo_scene": "Branded car or courier with a sealed case",
+          "sell_the_outcome_line": "No store visit, no guessing what it's worth."
+        },
+        {
+          "headline": "Easy as 1-2-3.",
+          "offer": "Request kit → ship → get paid; state payout % definition vs spot/melt",
+          "photo_scene": "Three-step icons with real packaging photos",
+          "sell_the_outcome_line": "A simple path from jewelry drawer to cash."
+        }
+      ],
+      "compliance_flags": [
+        "16 CFR 435 shipment/payment timing must be real.",
+        "State dealer licensing still applies to mail-in buyers; Florida and other states may require disclosures on-card (GOLD-precious-metals-006 licensing claim pattern — verify current law).",
+        "Define 'market price' if quoting a payout percentage."
+      ],
+      "evidence": [
+        "GOLD-precious-metals-004/006"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "private_heirloom_appraisal",
+      "primary_emotion": "trust / reverence",
+      "why": "Sentimental sellers need dignity; appointment framing reduces pawn-shop stigma.",
+      "headline_offer_patterns": [
+        "'Private consultation'",
+        "'Heirloom evaluation'"
+      ],
+      "reinforcing_photo": "Quiet desk consult; soft light on the piece",
+      "what_backfires": "Pressure to melt heirlooms same day; disrespectful scrap language",
+      "combos": [
+        {
+          "headline": "Trusted evaluations for pieces that matter.",
+          "offer": "Private consultation by appointment; written offer; no obligation",
+          "photo_scene": "Appraiser and client reviewing a ring under a lamp",
+          "sell_the_outcome_line": "Clarity on value before you keep or sell a family piece."
+        },
+        {
+          "headline": "Know before you let go.",
+          "offer": "Free heirloom appraisal hour every [weekday]",
+          "photo_scene": "Velvet tray with an heirloom brooch",
+          "sell_the_outcome_line": "Decide with a real number, not a guess."
+        },
+        {
+          "headline": "Cash in your gold with confidence.",
+          "offer": "Scan to schedule a private appraisal",
+          "photo_scene": "Secure display and credential wall",
+          "sell_the_outcome_line": "Feel respected while you turn metal into money."
+        }
+      ],
+      "compliance_flags": [
+        "Appraisal representations must be non-deceptive (FTC s.5; 16 CFR 23).",
+        "If also offering pawn loans, separate credit disclosures may apply."
+      ],
+      "evidence": [
+        "GOLD-precious-metals-008/010"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "bullion_or_ira_education_kit",
+      "primary_emotion": "fear (macro) -> control / calm",
+      "why": "Common market lead magnet, but regulator-warned; use only with radical fee transparency and no fake official look. Prefer local established dealers over boiler-room kits.",
+      "headline_offer_patterns": [
+        "'Free investor guide' with full fee schedule promised",
+        "'See our spot + premium pricing'"
+      ],
+      "reinforcing_photo": "Real bullion with assay card; real storefront — never seals/eagles",
+      "what_backfires": "Guaranteed returns; government-backed myths; hiding spread; SDIRA 'custodian approved' lies; senior scare as default",
+      "combos": [
+        {
+          "headline": "See the real cost of owning metal.",
+          "offer": "Free pricing sheet: spot, our premium, buy-back spread, storage fees",
+          "photo_scene": "Printed fee sheet beside a 1-oz bar",
+          "sell_the_outcome_line": "Know what you pay — and what you'd get back — before you buy."
+        },
+        {
+          "headline": "Diversify with metal you can hold.",
+          "offer": "Visit for transparent bullion quotes; IRA metals only via named custodian with written fee list",
+          "photo_scene": "Coins on a simple wood table in a real shop",
+          "sell_the_outcome_line": "A tangible slice of savings you understand."
+        },
+        {
+          "headline": "Ask us the 10 questions regulators want answered.",
+          "offer": "Free consult covering FINRA/CFTC's 10 questions (spread, fees, registration)",
+          "photo_scene": "Advisor with a checklist (not a telemarketing headset farm)",
+          "sell_the_outcome_line": "Buy only if the numbers still make sense after the fees."
+        }
+      ],
+      "compliance_flags": [
+        "CRITICAL: no guaranteed returns; disclose spread, commissions, storage, IRA custodian fees in writing before sale (FINRA/CFTC 2024).",
+        "No government look-alike (39 USC 3001; 31 USC 333).",
+        "IRC 408(m) eligibility and custodian possession rules; no home-storage IRA claims.",
+        "TSR/DNC if phone follow-up; FINRA explicitly flags junk-mail + free-gift + 'lead trader' handoff patterns.",
+        "Do not imply SDIRA custodian vetted the dealer (SEC/FINRA/NASAA alert)."
+      ],
+      "evidence": [
+        "SRC-FINRA-CFTC-2024",
+        "SRC-CFTC-LIES",
+        "SRC-WGC-2024-NA",
+        "SRC-IRS-408m"
+      ],
+      "evidence_strength": "strong compliance evidence; thin positive response evidence (not in gold set)"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "Gold-set 'HIGHEST PRICE GUARANTEED' / 'top dollar' (GOLD-precious-metals-001/002/005) vs FTC substantiation and 16 CFR 239 guarantee rules",
+      "resolution": "Compliance wins: drop absolute 'highest' claims unless a clear, honest comparison basis is stated and honored; prefer 'free estimate' + transparent bid."
+    },
+    {
+      "conflict": "Market-common free IRA kit + telemarketing vs FINRA/CFTC warning not to respond to junk mail/cold calls and vs TSR disclosure duties",
+      "resolution": "Compliance wins: if a client insists on kits, require full written fee/spread/custodian disclosure on the mailer path, no fake official design, no guaranteed returns, and lawful DNC/TSR practices. Prefer local bullion transparency over boiler-room lead gen."
+    },
+    {
+      "conflict": "Fraudsters target retirees (FINRA/CFTC) vs Patrick's ban on unsupported age/demographic angles",
+      "resolution": "Patrick + evidence rule wins for creative targeting: do not default to 'senior gold' audiences. You may factually warn about scams in compliance copy; you may not invent 'retirees buy gold' as the buyer thesis."
+    },
+    {
+      "conflict": "'Up to 98.5% of market price' (GOLD-precious-metals-006) vs spread honesty",
+      "resolution": "Compliance wins: define market price (spot/melt/dealer bid), purity gates, and typical payout; 'up to' needs a meaningful share actually receiving the max."
+    }
+  ]
+}

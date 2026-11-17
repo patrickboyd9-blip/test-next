@@ -556,7 +556,7 @@ export class AnthropicCreativeEngine implements CreativeEngine {
   async reviewUploadedDesign(input: {
     front: UploadedArtworkFace
     back: UploadedArtworkFace
-  }): Promise<string[]> {
+  }): Promise<UploadedReviewResult> {
     const response = await this.client.messages.create({
       model: MODEL,
       max_tokens: REVIEW_MAX_TOKENS,
@@ -586,14 +586,21 @@ export class AnthropicCreativeEngine implements CreativeEngine {
     if (!toolUse) {
       throw new Error("Creative engine did not return design feedback.")
     }
-    return normalizeDesignReview(toolUse.input)
+    const printed = (toolUse.input as { printed_text?: unknown }).printed_text
+    return { suggestions: normalizeDesignReview(toolUse.input), printedText: typeof printed === "string" ? printed : "" }
   }
+}
+
+export interface UploadedReviewResult {
+  suggestions: string[]
+  /** Words the reviewer read off the artwork, for the compliance check. */
+  printedText: string
 }
 
 export async function reviewUploadedArtworkWithAnthropic(
   apiKey: string,
   input: { front: UploadedArtworkFace; back: UploadedArtworkFace }
-): Promise<string[]> {
+): Promise<UploadedReviewResult> {
   return new AnthropicCreativeEngine(apiKey).reviewUploadedDesign(input)
 }
 

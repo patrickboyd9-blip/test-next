@@ -1,0 +1,321 @@
+{
+  "schema_version": "1.1",
+  "slug": "optometry",
+  "industry": "Optometry practices and optical shops (comprehensive eye exams, glasses, contact lenses, pediatric vision visits)",
+  "last_updated": "2026-11-04",
+  "words_and_claims_to_avoid": [
+    "'Board-certified by the [State] Optometry Board' when the board licenses but does not certify (e.g., Texas Optometry Board guidance) — name the real certifying organization if any",
+    "Disease-cure / 'reverses glaucoma/AMD' claims without basis; implied medical guarantees",
+    "'Free eye exam' that requires buying frames without disclosing the condition and usual exam fee (state rules vary; NJ explicitly restricts contingency)",
+    "Texas-style illegal 'free eyeglasses' inducements where banned (Texas Occ. Code §351.404 — verify state)",
+    "Holding Rx hostage or implying patients must buy glasses/contacts on-site to get their prescription (illegal under FTC Eyeglass Rule / Contact Lens Rule)",
+    "'Most insurance accepted' if false; typos like 'acceptes' from templates",
+    "Before/after vision miracles without typical-results care (16 CFR 255)",
+    "Children's photos without parental authorization"
+  ],
+  "compliance_notes": [
+    "FTC Contact Lens Rule (16 CFR 315): after a contact lens fitting, automatically provide the Rx copy whether or not requested; no extra fee, no required purchase, no waiver; confirmation-of-release recordkeeping rules apply for sellers with financial interest in lenses. FTC sent warning letters in 2025 citing penalties up to the then-current civil penalty amount per violation.",
+    "FTC Eyeglass Rule (16 CFR 456): provide spectacle Rx immediately after refractive exam before offering to sell ophthalmic goods; cannot condition the exam on purchase; no extra fee for Rx release.",
+    "Free/discounted exam ads: disclose usual fee, what the exam includes/excludes, and whether purchase is required — several state boards require this; some states restrict free eyewear premiums.",
+    "State optometry board advertising rules vary (price itemization for contacts/glasses, specialty advertising, certification wording) — client must confirm.",
+    "16 CFR 233/251: frame % off, second-pair, free fitting/trial conditions need bona fide prices and clear terms.",
+    "Privacy: mail creative should not imply use of confidential medical information; follow HIPAA for any patient storytelling (authorization).",
+    "39 USC 3001: no official medical bureau look-alike mailers."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: pride, relief, care, anticipation are fine when legal.",
+    "Only laws/compliance are hard limits (FTC Contact Lens Rule / Eyeglass Rule, state optometry boards, truthful pricing).",
+    "Every angle and emotion_by_offer combo carries sell_the_outcome_line.",
+    "Vendor ROI labeled agency-only unverified; never print as fact on a client card.",
+    "Prefer one clear offer + one real photo + one QR (roofing-round5 directional).",
+    "No age default; kids' offers OK when the offer is truly pediatric — not as a demographic stereotype."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "frames_percent_or_dollar_off",
+      "primary_emotion": "pride / delight",
+      "why": "Most common gold offer; ties style identity to savings.",
+      "headline_offer_patterns": [
+        "'20% off first complete pair'",
+        "'$50–$75 off frames'",
+        "'15–20% off designer frames'"
+      ],
+      "reinforcing_photo": "Patient portrait in frames or frame selection moment",
+      "what_backfires": "Designer logos that imply brands you do not carry; % off with hidden lens exclusions",
+      "combos": [
+        {
+          "headline": "Modern eye care. Stylish eyewear.",
+          "offer": "20% off your first complete pair of glasses; 30% off second pair",
+          "photo_scene": "In-office frame wall + smiling patient",
+          "sell_the_outcome_line": "Walk out seeing clearly — and liking how you look doing it."
+        },
+        {
+          "headline": "Elevate your look.",
+          "offer": "20% off first pair of designer frames",
+          "photo_scene": "Warm studio portrait in frames",
+          "sell_the_outcome_line": "Frames that feel like you, with vision that keeps up."
+        },
+        {
+          "headline": "$75 toward your first pair.",
+          "offer": "$75 off first pair / 50% off second pair lenses (VSP/flex notes only if accurate)",
+          "photo_scene": "Hands choosing frames at a mirror",
+          "sell_the_outcome_line": "Use the savings where it shows — on your face."
+        },
+        {
+          "headline": "Complimentary style consult.",
+          "offer": "Style consult + 15% off designer frames",
+          "photo_scene": "Optician fitting frames on a real guest",
+          "sell_the_outcome_line": "Leave with a pair you do not want to take off."
+        }
+      ],
+      "compliance_flags": [
+        "Disclose lens/frame exclusions and end date.",
+        "Brand names only if carried.",
+        "Exam separate vs package pricing honesty (state rules)."
+      ],
+      "evidence": [
+        "GOLD-optometry-001/004/007/015"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "second_pair_discount",
+      "primary_emotion": "smart relief / pride",
+      "why": "Backup/sun pairs are an easy add-on outcome; frequent in gold.",
+      "headline_offer_patterns": [
+        "'50% off second pair'",
+        "'20% off first with purchase of second'",
+        "'BOGO-style lens deals'"
+      ],
+      "reinforcing_photo": "Two pairs (clear + sun) with patient",
+      "what_backfires": "Second pair that is a tiny non-prescription readers only — disclose",
+      "combos": [
+        {
+          "headline": "One for work. One for weekends.",
+          "offer": "50% off second pair with purchase at regular price",
+          "photo_scene": "Desk glasses + sunglasses side by side",
+          "sell_the_outcome_line": "Always have the right pair within reach."
+        },
+        {
+          "headline": "50% off your second pair.",
+          "offer": "Buy a pair at regular price, save 50% on the second",
+          "photo_scene": "Patient holding two frame options",
+          "sell_the_outcome_line": "Backup vision without a backup budget crisis."
+        },
+        {
+          "headline": "Complete the set.",
+          "offer": "20% off first pair when you buy a second",
+          "photo_scene": "Outdoor lifestyle sharp focus",
+          "sell_the_outcome_line": "Sun and indoor covered — both comfortable."
+        }
+      ],
+      "compliance_flags": [
+        "Define what qualifies as the second pair (lenses/frames).",
+        "Regular price must be bona fide (16 CFR 233)."
+      ],
+      "evidence": [
+        "GOLD-optometry-002/004/010"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "exam_price_or_exam_bundle",
+      "primary_emotion": "relief / care",
+      "why": "Transparent exam pricing reduces appointment anxiety; common with new-patient frame credits.",
+      "headline_offer_patterns": [
+        "'Eye exam + $50 off glasses'",
+        "'$89 pediatric eye exam'",
+        "'Free eye exam with frame purchase' (disclose carefully)",
+        "'$40 credit toward frames with any exam'"
+      ],
+      "reinforcing_photo": "Friendly OD talking with patient (not invasive instrument horror)",
+      "what_backfires": "Free exam contingent on purchase where banned; omitting dilation/contact fees",
+      "combos": [
+        {
+          "headline": "Expert eye care right in the neighborhood.",
+          "offer": "Eye exam + $50 off glasses for new patients",
+          "photo_scene": "Doctor and patient reviewing frame options after exam",
+          "sell_the_outcome_line": "Know your eyes are checked — and leave with clearer days ahead."
+        },
+        {
+          "headline": "Kids' vision checkup — just $49.",
+          "offer": "$49 kids' vision checkup + free glasses case",
+          "photo_scene": "Child smiling in frames (consent)",
+          "sell_the_outcome_line": "Give them a clear view of the classroom."
+        },
+        {
+          "headline": "Back-to-school vision checks — just $89.",
+          "offer": "$89 pediatric comprehensive exam (inclusions listed)",
+          "photo_scene": "Parent and child at reception",
+          "sell_the_outcome_line": "Start the school year without squinting through it."
+        },
+        {
+          "headline": "Exam today. Credit toward frames.",
+          "offer": "$40 instant credit toward a frame with any eye exam",
+          "photo_scene": "Frame credit called out beside a warm clinic photo",
+          "sell_the_outcome_line": "Turn the checkup into a fresh look in one visit — if you choose."
+        }
+      ],
+      "compliance_flags": [
+        "List what the exam price includes/excludes.",
+        "Free exam with purchase: disclose usual fee and that Rx is released regardless (Eyeglass Rule).",
+        "Follow state limits on free eyewear premiums (e.g., Texas).",
+        "Never condition exam on buying glasses."
+      ],
+      "evidence": [
+        "GOLD-optometry-006/008/011/012/013/014",
+        "SRC-FTC-EYEGLASS-456",
+        "SRC-NJ-13-38",
+        "SRC-TOB-ADS"
+      ],
+      "evidence_strength": "directional + compliance-heavy"
+    },
+    {
+      "offer_type": "contact_lens_fitting_trial",
+      "primary_emotion": "ease / anticipation",
+      "why": "Trial reduces fit anxiety; gold features free fitting + 10-day trial.",
+      "headline_offer_patterns": [
+        "'Free contact lens fitting + 10-day trial'",
+        "'25% off 1-year supply of contacts'",
+        "'Contacts alternative to glasses savings'"
+      ],
+      "reinforcing_photo": "Clean lens-on-finger or active day without glasses",
+      "what_backfires": "Implying Rx will be withheld until purchase; trial that hides exam/fitting fees",
+      "combos": [
+        {
+          "headline": "Free contact lens fitting + 10-day trial.",
+          "offer": "Free fitting + 10-day trial for new patients (exam fee disclosed if separate)",
+          "photo_scene": "Woman inserting a contact lens, clean clinical light",
+          "sell_the_outcome_line": "Try life without frames for ten days — then decide."
+        },
+        {
+          "headline": "Contacts for the year, lighter.",
+          "offer": "25% off a 1-year supply of contact lenses (or glasses — print choice clearly)",
+          "photo_scene": "Boxes of daily lenses with a clear lifestyle inset",
+          "sell_the_outcome_line": "Stock up once and see clearly every morning."
+        },
+        {
+          "headline": "Ditch the frames when you want.",
+          "offer": "New contact lens wearer package: fitting + trial + first box offer",
+          "photo_scene": "Same person glasses-on / contacts lifestyle diptych (honest)",
+          "sell_the_outcome_line": "Choose glasses or contacts day by day — both working for you."
+        }
+      ],
+      "compliance_flags": [
+        "Automatic Rx release after fitting (16 CFR 315) — never contradict in ad copy.",
+        "Itemize exam vs fitting vs lens costs where state rules require.",
+        "Trial eligibility and brand limits disclosed.",
+        "FTC 2025 enforcement: no waiver/extra fee for Rx."
+      ],
+      "evidence": [
+        "GOLD-optometry-005/009",
+        "SRC-FTC-CLR-315",
+        "SRC-FTC-CLR-2025"
+      ],
+      "evidence_strength": "directional + strong compliance"
+    },
+    {
+      "offer_type": "new_patient_or_new_location",
+      "primary_emotion": "belonging / curiosity",
+      "why": "Relocation and new-patient credits are frequent; habit discontinuity for movers.",
+      "headline_offer_patterns": [
+        "'Visit our new location'",
+        "'Dr. ___ has relocated'",
+        "'Open house — $50 off frames'",
+        "'New patients welcome'"
+      ],
+      "reinforcing_photo": "Real exterior/team; map",
+      "what_backfires": "Doctor portrait who left the practice; open house with undisclosed sales pressure",
+      "combos": [
+        {
+          "headline": "Visit our new location!",
+          "offer": "50% off second pair / welcome frame credit",
+          "photo_scene": "New storefront + interior optical",
+          "sell_the_outcome_line": "Same trusted care — easier to get to — with a welcome toward your next pair."
+        },
+        {
+          "headline": "We've moved — your Rx file can too.",
+          "offer": "Open house: take $50 off frames",
+          "photo_scene": "Team at the new reception desk",
+          "sell_the_outcome_line": "Find the office that already feels like yours."
+        },
+        {
+          "headline": "New patients welcome.",
+          "offer": "20% off eye exam with purchase of glasses OR separate new-patient frame % (print one clear structure)",
+          "photo_scene": "Warm consult room handshake",
+          "sell_the_outcome_line": "Start a long-term eye care relationship with a clearer first visit."
+        }
+      ],
+      "compliance_flags": [
+        "Do not imply records transfer violates patient choice — patients control PHI authorizations.",
+        "Open-house freebies follow free/pricing guides.",
+        "Rx release rules still apply on day one."
+      ],
+      "evidence": [
+        "GOLD-optometry-002/003/004/011",
+        "SRC-VERPLANKEN-WOOD-2006"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "limited_time_seasonal_school",
+      "primary_emotion": "care / urgency (real calendar)",
+      "why": "School calendar is a legitimate cue; gold uses dated back-to-school prices.",
+      "headline_offer_patterns": [
+        "'Back-to-school special'",
+        "'Kids' exam just $[X] through [date]'",
+        "'Fall frame event'"
+      ],
+      "reinforcing_photo": "Child/teen in frames with school cue (consent)",
+      "what_backfires": "Fake perpetual 'back to school' in February; pressure that exams prevent all learning issues",
+      "combos": [
+        {
+          "headline": "Back-to-school special.",
+          "offer": "Eye exam + $50 off glasses for new patients through [date]",
+          "photo_scene": "Smiling student in glasses with backpack",
+          "sell_the_outcome_line": "Help them see every assignment clearly from day one."
+        },
+        {
+          "headline": "See the board. Own the semester.",
+          "offer": "Kids' exam $[X] through [date]",
+          "photo_scene": "Classroom-adjacent lifestyle sharp focus",
+          "sell_the_outcome_line": "Confidence in class starts with comfortable vision."
+        },
+        {
+          "headline": "Fall frames event.",
+          "offer": "Limited-time [X]% off select frames (collection named)",
+          "photo_scene": "Autumn-toned portrait in new frames",
+          "sell_the_outcome_line": "A fresh look for the season you are actually in."
+        }
+      ],
+      "compliance_flags": [
+        "Real end dates.",
+        "Do not claim exams cure learning disabilities.",
+        "Kids photo consent.",
+        "Pediatric price inclusions listed."
+      ],
+      "evidence": [
+        "GOLD-optometry-006/008"
+      ],
+      "evidence_strength": "directional"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "'Free exam with frame purchase' common in gold vs state rules that restrict purchase-contingent free exams / free eyewear",
+      "resolution": "Compliance wins: follow FTC Rx-release rules always; follow the strictest applicable state board rule on free exams/eyewear; disclose usual fees."
+    },
+    {
+      "conflict": "Vendor ROI (PM/MinuteMarketing) vs evidence standards",
+      "resolution": "Agency-only unverified; useful as existence proof of optical mail, not as printable lift."
+    },
+    {
+      "conflict": "AOA annual-exam consensus messaging vs noted evidence gaps on interval",
+      "resolution": "May inspire reminder angles; do not invent 'proven every adult must annually' causal claims on cards."
+    },
+    {
+      "conflict": "'Board-certified' market language vs boards that only license",
+      "resolution": "Compliance: name the true certifying organization or do not claim board certification by the licensing board."
+    }
+  ]
+}

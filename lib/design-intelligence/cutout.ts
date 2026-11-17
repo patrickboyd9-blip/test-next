@@ -17,7 +17,9 @@ export interface Raster {
 
 const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
 
-export function cutoutSubjectRequested(spec: { designRationale?: unknown }): boolean {
+export function cutoutSubjectRequested(spec: { designRationale?: unknown; layoutHints?: { templateId?: string } }): boolean {
+  // Photo-led Pro layouts (every trade but Medicare) always print a full real scene.
+  if (spec.layoutHints?.templateId?.startsWith("roof_")) return false
   if (!spec.designRationale || typeof spec.designRationale !== "object") return false
   const rationale = spec.designRationale as { vertical?: string; grid?: { intentional_break?: string } }
   if (rationale.vertical === "hvac") return false

@@ -1,0 +1,359 @@
+{
+  "schema_version": "1.1",
+  "slug": "medicare",
+  "industry": "Medicare (licensed agents/brokers/TPMOs and plans: Medicare Advantage, Part D, Medicare Supplement/Medigap)",
+  "last_updated": "2026-10-30",
+  "words_and_claims_to_avoid": [
+    "Anything implying government endorsement or connection: 'Official', 'Medicare Notice', 'Benefits update', 'Federal benefit information', Capitol/eagle/flag/seal imagery, red-white-blue notice styling, Medicare card facsimiles (42 USC 1320b-10; 39 USC 3001(h); 42 CFR 422.2262). A 'not affiliated' footer does NOT cure it.",
+    "Using a Medicare card image without CMS authorization (gold 006/007 mock cards).",
+    "'Free' to describe a $0 premium, reduced premium or reduced cost-sharing (422.2262). 'MY SERVICE IS FREE!' (gold 007) is about the agent's service: OK only if accurate and not confused with plan costs.",
+    "Claims that CMS or Medicare endorses or recommends you; implying an MA plan is a Medicare supplement; implying plans are only for seniors.",
+    "Fake or invented deadlines, 'respond within 5 days', 'final notice' (CMS 'mislead or confuse'; MMR-513 negative example).",
+    "Plan-specific benefit numbers ($0 premium, '$X dental', Part B giveback) unless the piece is filed/approved through the plan as marketing with all required disclaimers (gold 013 'plans from $0 premium').",
+    "Cash, gift cards that work like cash (Visa/Amazon/Walmart) or gifts over nominal value ($15/item, $75/year per OIG); any gift conditioned on enrolling.",
+    "Meals at marketing events (only at educational events); 'free dinner & door prizes' sales seminars (gold 017 Ballo).",
+    "Non-health products (annuities, life) cross-sold in Medicare appointments; superlatives you can't support if CMS asks.",
+    "Frail, lonely, hospital-bed imagery as default; sepia nostalgia (MMR-523)."
+  ],
+  "compliance_notes": [
+    "42 CFR 422.2260-2274 (MA) and 423.2260-2274 (Part D) govern communications and marketing; TPMOs (agents/brokers/FMOs) are covered. CY2027 final rule CMS-4212-F (91 FR 17583, Apr 6 2026) applies to marketing from Oct 1 2026.",
+    "TPMO disclaimer required in print marketing (422.2267(e)(41)), current wording: 'We do not offer every plan available in your area. Currently we represent [insert number of organizations] organizations which offer [insert number of plans] products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.' (SHIP reference removed by CMS-4212-F). Use the variant for TPMOs representing all organizations if applicable.",
+    "422.2264 unsolicited contact: unsolicited direct mail is allowed; door-to-door, cold calls, texts, voicemails, DMs and calls to confirm receipt of mail are not. A returned reply card (BRC) makes a callback solicited; scope-of-appointment (SOA) and BRC permission valid 12 months. CMS-4212-F removed the 48-hour wait between SOA and appointment and allows SOA collection at educational events.",
+    "Events: educational events must be advertised as educational and can't market plans; marketing events may follow an educational event (CY2027) with notice and a chance to leave; no meals at marketing events; no required sign-in sheets; raffle info used only for the raffle.",
+    "Gifts: nominal value only per OIG ($15/item, $75/year aggregate in OIG's policy statement), offered to everyone regardless of enrollment, never cash or cash equivalents; promotional items need the 'no obligation to enroll' disclaimer (422.2267(e)(37)). A blog claims the 2026 MCMG raised this to $17/$85 - unverified; confirm against current CMS guidance.",
+    "Customer service numbers must show hours of operation and TTY in the same size; if 1-800-MEDICARE appears, include its hours (24/7).",
+    "No unsolicited materials referencing the MA OEP (Jan 1-Mar 31) to MA enrollees (422.2263).",
+    "Agency/organization name at least 12-pt, not hidden; testimonials only from actual enrollees, paid endorsements/actors disclosed (422.2262).",
+    "Medigap is state-regulated: Medicare Supplement ads follow NAIC Model 660 as adopted; many states require filing ads with the commissioner (Model 660 contemplates filing at least 30 days before use where the commissioner requires review).",
+    "42 USC 1320b-10: up to $5,000 per violation, each mail piece separate. Iowa consent judgments (MMR-527/528) show enforcement against government-lookalike senior mail."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear, joy, pride, status, relief, nostalgia are all options; the client chooses.",
+    "Only laws/compliance are hard limits.",
+    "Every angle and combo carries a sell-the-outcome line.",
+    "Unverified (agency/vendor-only) results are labeled; never quote them as fact on a card.",
+    "No age/demographic angle unless a cited source supports it for this industry; even then, check Fair Housing / ECOA before using it in housing or credit.",
+    "Medicare-specific: fear is allowed only when the fact is true and current (e.g., real late-enrollment penalties, real AEP dates) and paired with a clear free step; CMS bans anything that misleads or confuses, so never manufacture urgency."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "t65_iep_free_review",
+      "primary_emotion": "readiness / prudent fear",
+      "why": "IEP is a legal 7-month window; penalties are real; most people want a clear plan.",
+      "headline_offer_patterns": [
+        "'Turning 65? Let's make your Medicare plan.'",
+        "'New to Medicare? Start with a free checklist.'",
+        "'Medicare can be confusing. It doesn't have to be.' (gold 002/016)"
+      ],
+      "reinforcing_photo": "Active 60-something outdoors with a phone.",
+      "what_backfires": "Mock Medicare cards, government styling, invented deadlines, maze/puzzle clip art that reinforces confusion without relief (gold 014/018 - fine as a device only if the offer resolves it).",
+      "combos": [
+        {
+          "headline": "Turning 65? Your Medicare window is 7 months. Let's make a plan.",
+          "offer": "Free New-to-Medicare checklist + 30-minute review",
+          "photo_scene": "Person finishing a morning bike ride, phone in hand",
+          "sell_the_outcome_line": "Start Medicare without penalties, gaps or second-guessing."
+        },
+        {
+          "headline": "Medicare can be confusing. Your plan shouldn't be.",
+          "offer": "Free review with a licensed local agent; reply card",
+          "photo_scene": "Agent and client at a kitchen table with a doctor list",
+          "sell_the_outcome_line": "Know your doctors and prescriptions are covered before day one."
+        },
+        {
+          "headline": "Signing up late can cost you for life. Signing up right takes 30 minutes.",
+          "offer": "Free timing check (Parts A, B, D)",
+          "photo_scene": "Couple at a café table with a notebook",
+          "sell_the_outcome_line": "Get it right once and stop worrying about it."
+        }
+      ],
+      "compliance_flags": [
+        "TPMO disclaimer.",
+        "No government look (1320b-10, 3001(h)); no Medicare card image without CMS authorization.",
+        "Penalty facts stated accurately and attributed to Medicare.gov.",
+        "Phone with hours + TTY."
+      ],
+      "evidence": [
+        "SRC-MEDICARE-ENROLL",
+        "SRC-MEDICARE-PENALTY",
+        "SRC-WITTE-1992",
+        "SRC-CMS-2262",
+        "SRC-CMS-2267",
+        "SRC-GOLD-MEDICARE"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "aep_annual_review",
+      "primary_emotion": "vigilance / control",
+      "why": "Plans change yearly; most don't compare (KFF). Real deadline Dec 7.",
+      "headline_offer_patterns": [
+        "'Did your plan change for [year]?'",
+        "'Don't settle for less' (gold 010 retention)"
+      ],
+      "reinforcing_photo": "Couple with pill organizer and agent.",
+      "what_backfires": "'Last chance!' outside real windows; implying their plan is ending when it isn't.",
+      "combos": [
+        {
+          "headline": "Your plan can change every year. Did yours change for [year]?",
+          "offer": "Free annual review before Dec 7",
+          "photo_scene": "Couple at a dining table with a pill organizer and notepad",
+          "sell_the_outcome_line": "No surprises at the pharmacy counter next year."
+        },
+        {
+          "headline": "Same doctors? Same drugs? Let's make sure they're still covered.",
+          "offer": "Free doctor + drug check across the plans we represent",
+          "photo_scene": "Agent checking a printed list with a client",
+          "sell_the_outcome_line": "Keep the care you count on."
+        },
+        {
+          "headline": "Annual Enrollment: Oct 15-Dec 7. One call covers it.",
+          "offer": "Free review appointment (SOA collected first)",
+          "photo_scene": "Agent on the phone, calendar showing December",
+          "sell_the_outcome_line": "Make one good decision and enjoy the holidays."
+        }
+      ],
+      "compliance_flags": [
+        "Next-year marketing no earlier than Oct 1.",
+        "Plan-specific benefits only in plan-approved materials.",
+        "TPMO disclaimer; hours + TTY."
+      ],
+      "evidence": [
+        "SRC-KFF-COMPARE",
+        "SRC-MCWILLIAMS-2011",
+        "SRC-CMS-2263",
+        "SRC-MEDICARE-ENROLL"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "doctor_and_drug_check",
+      "primary_emotion": "security / continuity",
+      "why": "Losing doctors is the key fear; MMR-524 personalization (agency-attributed).",
+      "headline_offer_patterns": [
+        "'Before you pick a plan, let's check your doctors are in it.'"
+      ],
+      "reinforcing_photo": "Client with their family doctor (permissioned).",
+      "what_backfires": "Naming specific doctors without accurate network data/permission; promising a doctor is in network.",
+      "combos": [
+        {
+          "headline": "Before you pick a plan, let's check your doctors are in it.",
+          "offer": "Free doctor + prescription check",
+          "photo_scene": "Client and family doctor at the clinic door",
+          "sell_the_outcome_line": "Keep seeing the doctors who already know you."
+        },
+        {
+          "headline": "Write down your doctors. We'll do the rest.",
+          "offer": "Reply card with lines for doctors and drugs",
+          "photo_scene": "Hand writing a doctor list on the card",
+          "sell_the_outcome_line": "Your care, unchanged; your choice, simpler."
+        },
+        {
+          "headline": "Five doctors near [town]. Which plans include yours?",
+          "offer": "Personalized network check (accurate data only)",
+          "photo_scene": "Local clinic exterior",
+          "sell_the_outcome_line": "Stay close to home for the care you need."
+        }
+      ],
+      "compliance_flags": [
+        "Provider names only with accurate, current network data and plan approval; this can make the piece plan-specific marketing.",
+        "TPMO disclaimer."
+      ],
+      "evidence": [
+        "SRC-MMR-MEDICARE",
+        "SRC-CMS-2262"
+      ],
+      "evidence_strength": "moderate (agency)"
+    },
+    {
+      "offer_type": "medigap_open_enrollment",
+      "primary_emotion": "prudent urgency (real window)",
+      "why": "Medigap open enrollment is a 6-month window starting the month you're 65+ with Part B; guaranteed-issue rights outside it are limited (Medicare.gov).",
+      "headline_offer_patterns": [
+        "'Your Medigap open enrollment lasts 6 months. Here's why that matters.'",
+        "'Coverage Medicare doesn't provide' (gold 012)"
+      ],
+      "reinforcing_photo": "Traveling couple with luggage (Medigap's nationwide-provider appeal) - only if the plan benefit is accurately described.",
+      "what_backfires": "Implying Medigap is a government plan; comparing MA and Medigap misleadingly; calling MA a supplement.",
+      "combos": [
+        {
+          "headline": "Your Medigap window is 6 months. After that, it can be harder to get.",
+          "offer": "Free Medigap price comparison",
+          "photo_scene": "Couple loading a car for a road trip",
+          "sell_the_outcome_line": "Go where you want and keep the coverage you chose."
+        },
+        {
+          "headline": "Original Medicare leaves gaps. Let's look at filling them.",
+          "offer": "Free Medigap quote from the companies we represent",
+          "photo_scene": "Agent showing a simple coverage chart",
+          "sell_the_outcome_line": "Predictable costs, fewer surprise bills."
+        },
+        {
+          "headline": "Same Medigap plan letter, different prices. We'll compare.",
+          "offer": "Side-by-side price check",
+          "photo_scene": "Two printed quotes on a table",
+          "sell_the_outcome_line": "Same coverage, more left over each month."
+        }
+      ],
+      "compliance_flags": [
+        "State Medigap ad rules (NAIC 660 as adopted; possible filing).",
+        "No government look; state guaranteed-issue facts accurately."
+      ],
+      "evidence": [
+        "SRC-MEDIGAP-OE",
+        "SRC-NAIC-660",
+        "SRC-GOLD-MEDICARE"
+      ],
+      "evidence_strength": "moderate (facts) / thin (creative)"
+    },
+    {
+      "offer_type": "educational_seminar",
+      "primary_emotion": "curiosity / belonging",
+      "why": "Seminars draw groups (gold 017: 44 attendees/33 clients, vendor; MMR-517/518). CY2027 lets a marketing event follow an educational one with notice.",
+      "headline_offer_patterns": [
+        "'Medicare 101: a free class at [venue].'"
+      ],
+      "reinforcing_photo": "Venue room with attendees (meal photo only for educational events).",
+      "what_backfires": "'Free dinner & door prizes' at a sales event (meals banned at marketing events); unlabeled event type; required sign-in.",
+      "combos": [
+        {
+          "headline": "Medicare 101: a free class at [library].",
+          "offer": "Educational event; light refreshments; no plan sales",
+          "photo_scene": "Small group in a library room, presenter at a whiteboard",
+          "sell_the_outcome_line": "Leave understanding Medicare, not more confused."
+        },
+        {
+          "headline": "Bring your questions about Medicare. Leave with answers.",
+          "offer": "Free educational Q&A; optional personal appointment afterwards (SOA)",
+          "photo_scene": "Attendee asking a question, others smiling",
+          "sell_the_outcome_line": "An hour that saves you a season of second-guessing."
+        },
+        {
+          "headline": "New to Medicare? Join neighbors for a free class.",
+          "offer": "Educational session at [venue], [date]",
+          "photo_scene": "Neighbors chatting before the session",
+          "sell_the_outcome_line": "Learn it once, with people in the same spot as you."
+        }
+      ],
+      "compliance_flags": [
+        "Label as educational; no plan-specific marketing at educational events; meals only at educational events.",
+        "If a marketing event follows: notice and opportunity to leave (CY2027).",
+        "No sign-in requirement; raffle data only for raffle; gifts nominal."
+      ],
+      "evidence": [
+        "SRC-CMS-2264",
+        "SRC-CMS-4212F",
+        "SRC-GOLD-MEDICARE",
+        "SRC-MMR-MEDICARE"
+      ],
+      "evidence_strength": "thin (vendor) / clear law"
+    },
+    {
+      "offer_type": "nominal_gift_or_guide",
+      "primary_emotion": "reciprocity",
+      "why": "Small free items (a guide, a pill organizer) earn attention (#2); strict nominal-value rules.",
+      "headline_offer_patterns": [
+        "'Free Medicare guide - mail the card.'"
+      ],
+      "reinforcing_photo": "The actual guide/pill organizer on a table.",
+      "what_backfires": "Gift cards that work like cash, gifts over nominal value, gifts only for enrollees.",
+      "combos": [
+        {
+          "headline": "Free plain-English Medicare guide.",
+          "offer": "Mail the card; no obligation to enroll",
+          "photo_scene": "Guide booklet next to reading glasses and coffee",
+          "sell_the_outcome_line": "Answers at your kitchen table, on your schedule."
+        },
+        {
+          "headline": "A free 7-day pill organizer for your review.",
+          "offer": "Nominal gift, no obligation to enroll",
+          "photo_scene": "Pill organizer next to a calendar",
+          "sell_the_outcome_line": "Get organized, inside and out."
+        },
+        {
+          "headline": "Your Medicare checklist, free.",
+          "offer": "Checklist + review offer",
+          "photo_scene": "Hand ticking a printed checklist",
+          "sell_the_outcome_line": "Know you didn't miss a step."
+        }
+      ],
+      "compliance_flags": [
+        "Nominal value ($15/item, $75/yr per OIG statement); not cash or cash equivalent; offered regardless of enrollment.",
+        "'No obligation to enroll' disclaimer.",
+        "Reply card makes follow-up permitted; SOA before a marketing appointment."
+      ],
+      "evidence": [
+        "SRC-OIG-NOMINAL",
+        "SRC-CMS-2263",
+        "SRC-CMS-2267",
+        "SRC-CMS-2264"
+      ],
+      "evidence_strength": "thin (creative) / clear law"
+    },
+    {
+      "offer_type": "sep_moved_or_life_change",
+      "primary_emotion": "relief / readiness",
+      "why": "Moves and coverage changes trigger Special Enrollment Periods; a life event is a natural moment (TP-12).",
+      "headline_offer_patterns": [
+        "'Moved to [area]? Your Medicare options may have changed.'"
+      ],
+      "reinforcing_photo": "Couple unpacking in a new home.",
+      "what_backfires": "Claiming the reader definitely has an SEP; urgency without a real date.",
+      "combos": [
+        {
+          "headline": "Moved to [area]? Your Medicare options may have changed.",
+          "offer": "Free check of plans available at your new address",
+          "photo_scene": "Couple unpacking dishes in a new kitchen",
+          "sell_the_outcome_line": "Settle in with doctors close to your new home."
+        },
+        {
+          "headline": "Retiring and leaving your work coverage?",
+          "offer": "Free timing review to avoid gaps",
+          "photo_scene": "Retirement send-off at an office, candid",
+          "sell_the_outcome_line": "Retire without a coverage gap."
+        },
+        {
+          "headline": "Life changed. Your coverage can too.",
+          "offer": "Free eligibility check",
+          "photo_scene": "Person reading mail at a new front door",
+          "sell_the_outcome_line": "Coverage that fits the life you have now."
+        }
+      ],
+      "compliance_flags": [
+        "Describe SEP eligibility as 'may qualify'; don't promise.",
+        "Mover lists: lawful sourcing; no health-status targeting (422.2262)."
+      ],
+      "evidence": [
+        "SRC-MEDICARE-ENROLL",
+        "SRC-CMS-2262"
+      ],
+      "evidence_strength": "thin"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "Humana 'official' look lifted response +24% (MMR-520, agency) vs 42 USC 1320b-10 / 39 USC 3001(h) / Iowa enforcement (MMR-527/528)",
+      "resolution": "Law wins: important-looking own-brand design is fine; no government cues of any kind."
+    },
+    {
+      "conflict": "Gold 017 'free dinner & door prizes' seminar (44 attendees, 33 clients, vendor) vs 422.2263 no meals at marketing events",
+      "resolution": "Law wins: meals only at educational events; marketing events get no meal, and gifts stay nominal."
+    },
+    {
+      "conflict": "Gold 006/007 mock Medicare card graphics vs 422.2262 and 42 USC 1320b-10",
+      "resolution": "Law wins: no card facsimile without CMS authorization."
+    },
+    {
+      "conflict": "Repo synthesis TPMO wording ('Any information we provide is limited to those plans...') vs current eCFR 422.2267(e)(41) wording",
+      "resolution": "Current regulation wins: use the eCFR text with organization/plan counts; SHIP reference removed for CY2027."
+    },
+    {
+      "conflict": "Patrick's emotion-agnostic rule (fear OK) vs CMS 'mislead or confuse' standard",
+      "resolution": "Both apply: fear is allowed when it's a true, current fact (penalties, real dates) with a clear free step; manufactured urgency or scare framing that confuses is out."
+    },
+    {
+      "conflict": "Secondary blog claims a $17/$85 nominal gift cap vs OIG policy statement $15/$75",
+      "resolution": "Verified primary source wins until CMS/OIG text confirms a change: use $15/$75."
+    }
+  ]
+}

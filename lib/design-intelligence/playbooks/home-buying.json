@@ -1,0 +1,331 @@
+{
+  "schema_version": "1.1",
+  "slug": "home-buying",
+  "industry": "Cash home buyers / 'We Buy Houses' investors and wholesalers (mail aimed at homeowners who might sell)",
+  "last_updated": "2026-10-29",
+  "words_and_claims_to_avoid": [
+    "'URGENT NOTICE', 'FINAL NOTICE' (GOLD-004, GOLD-012), case/reference numbers, seals, or layouts that look like a lender, court, county or government notice (39 USC 3001(h); FTC s.5).",
+    "'Stop foreclosure' / 'save your home' / 'we'll stop the auction' (MARS/Reg O: no results claims; required disclosures).",
+    "'Highest price', 'top dollar', 'fair market value' for a discounted cash offer (sellers typically get less; iBuyer discount ~3.6%).",
+    "'No fees' if there are any deductions, closing costs or assignment spreads.",
+    "'We're buying, not wholesaling' if the contract will be assigned.",
+    "Naming private distress facts ('we see you're behind on taxes'), or 'sinkhole/bankruptcy/foreclosure' lists that read as accusations (GOLD-008).",
+    "'Seniors: downsize now' and other age/familial-status targeting (Fair Housing / no evidence).",
+    "Fake handwritten 'I drove by and loved your house' if nobody did."
+  ],
+  "compliance_notes": [
+    "Government/lender look-alike: 39 USC 3001(h) - anything implying government connection must carry the disclaimer; avoid notice-style design entirely. FTC Act s.5 covers lender/court look-alikes.",
+    "Foreclosure rescue (MARS, Reg O 12 CFR 1015): if the mail mentions avoiding foreclosure or saving the home, required disclosures include that you are not associated with the government or the lender, and you can't claim results or take advance fees. Purely 'we buy your house' offers may fall outside, but distress-list mail often drifts in; counsel should review.",
+    "California Home Equity Sales Contracts Act (Civ. Code 1695 et seq.): buying a residence in foreclosure (NOD recorded) requires specific contract language and a 5-business-day cancellation right; violations carry heavy liability.",
+    "Wholesaler laws: Oklahoma SB 1075 (eff. Nov 1 2025) requires written disclosure of intent to assign, advice to seek counsel, and 2-business-day cancellation. Pennsylvania Act 52 of 2024 brings wholesaling under license law with wholesale-contract disclosures and a 30-day cancellation right. Illinois: marketing or dealing in assignable contracts 2+ times in 12 months requires a broker license (225 ILCS 454/1-10). Philadelphia also licenses wholesalers. Other states are adding rules; check yearly.",
+    "Fair Housing Act applies to purchases of dwellings: don't target or exclude by protected class (including selecting neighborhoods as racial proxies); interpretation for investor-buyer mail should be confirmed by counsel.",
+    "Testimonials and 'we've bought 500 homes' claims: substantiation, real and typical (16 CFR 255).",
+    "TCPA/DNC for follow-up calls and texts (skip-traced numbers are high-risk).",
+    "'$500 bonus cash at closing' (GOLD-001, 017): state real-estate inducement rules may apply if licensed; disclose conditions."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear, joy, pride, status, relief, nostalgia are all options; the client chooses.",
+    "Only laws/compliance are hard limits.",
+    "Every angle and combo carries a sell-the-outcome line.",
+    "Unverified (agency/vendor-only) results are labeled; never quote them as fact on a card.",
+    "No age/demographic angle unless a cited source supports it for this industry; even then, check Fair Housing / ECOA before using it in housing or credit."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "cash_offer_fast_close",
+      "primary_emotion": "relief / certainty",
+      "why": "Sellers trade ~3.6% for speed and certainty (Buchak); many lose open-market deals (Zillow).",
+      "headline_offer_patterns": [
+        "'Written cash offer in [N] hours'",
+        "'Close in as little as [N] days, or on your date'"
+      ],
+      "reinforcing_photo": "Keys handed over on a porch; calendar date circled.",
+      "what_backfires": "'Top dollar' claims; fake countdowns.",
+      "combos": [
+        {
+          "headline": "Pick your closing date.",
+          "offer": "Written cash offer in 24 hours; close in [7-30] days",
+          "photo_scene": "Keys handover on a porch, calendar inset",
+          "sell_the_outcome_line": "Sell as-is, on your timeline, and start your next chapter."
+        },
+        {
+          "headline": "No buyer financing to fall through.",
+          "offer": "Cash, no appraisal or loan contingency",
+          "photo_scene": "Local buyer with clipboard at the curb",
+          "sell_the_outcome_line": "One offer, one closing, no surprises."
+        },
+        {
+          "headline": "Moving for work? Sell before you go.",
+          "offer": "Offer in 24 hours; flexible move-out",
+          "photo_scene": "Packed car in a driveway",
+          "sell_the_outcome_line": "Start the new job without a house hanging over you."
+        }
+      ],
+      "compliance_flags": [
+        "Speed claims must be achievable and typical (FTC s.5).",
+        "Wholesale assignment disclosures (OK, PA, IL).",
+        "CA Civ 1695 if NOD recorded."
+      ],
+      "evidence": [
+        "SRC-BUCHAK",
+        "SRC-ZILLOW-SELLERS-2025"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "as_is_no_repairs",
+      "primary_emotion": "relief",
+      "why": "Core gold promise; repairs/showings are the felt burden.",
+      "headline_offer_patterns": [
+        "'No repairs. No cleaning. No showings.'",
+        "'Any condition, any situation'"
+      ],
+      "reinforcing_photo": "Real dated room or overgrown yard + friendly local buyer.",
+      "what_backfires": "Mocking the house; accusatory condition lists (sinkhole, bankruptcy).",
+      "combos": [
+        {
+          "headline": "No repairs. No cleaning. No showings.",
+          "offer": "We buy as-is + free cleanout",
+          "photo_scene": "Dated kitchen, buyer smiling with clipboard",
+          "sell_the_outcome_line": "Walk away with your check and leave the to-do list behind."
+        },
+        {
+          "headline": "Leave what you don't want.",
+          "offer": "Free haul-away of anything left",
+          "photo_scene": "Garage with old furniture, truck outside",
+          "sell_the_outcome_line": "Take what matters, we'll handle the rest."
+        },
+        {
+          "headline": "Fixer-upper? We'll fix it, not you.",
+          "offer": "As-is cash offer",
+          "photo_scene": "Peeling porch paint, sunny day",
+          "sell_the_outcome_line": "Skip the contractor bids and move on."
+        }
+      ],
+      "compliance_flags": [
+        "'No fees' only if true; disclose any closing-cost deductions."
+      ],
+      "evidence": [
+        "GOLD-home-buying-001-012",
+        "SRC-HOMEVESTORS"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "bonus_cash_at_closing",
+      "primary_emotion": "greed / reciprocity",
+      "why": "Gold GOLD-001/017 '$500 bonus cash at closing'; concrete gift raises response (vendor claims).",
+      "headline_offer_patterns": [
+        "'$[X] extra at closing when you mention this card'"
+      ],
+      "reinforcing_photo": "Closing table with handshake.",
+      "what_backfires": "Bonus that's netted out of a lower offer (deceptive).",
+      "combos": [
+        {
+          "headline": "$[X] extra at closing. Just mention this card.",
+          "offer": "$[X] bonus on top of our written offer",
+          "photo_scene": "Handshake at a closing table",
+          "sell_the_outcome_line": "Sell as-is and keep a little more."
+        },
+        {
+          "headline": "Moving costs? We'll cover $[X].",
+          "offer": "$[X] moving allowance at closing",
+          "photo_scene": "Moving truck in a driveway",
+          "sell_the_outcome_line": "Your next home, with moving costs handled."
+        },
+        {
+          "headline": "Cleanout and $[X]? Yes.",
+          "offer": "Free cleanout + $[X] bonus",
+          "photo_scene": "Empty clean room, keys on counter",
+          "sell_the_outcome_line": "Leave light, leave paid."
+        }
+      ],
+      "compliance_flags": [
+        "Bonus must be real and not offset in the price (FTC s.5).",
+        "If licensed, state inducement/rebate rules may apply."
+      ],
+      "evidence": [
+        "GOLD-home-buying-001, 017"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "tired_landlord",
+      "primary_emotion": "frustration -> relief",
+      "why": "Absentee owners are a clean audience moment; GOLD-013 vendor result.",
+      "headline_offer_patterns": [
+        "'Tired of tenants?'",
+        "'We buy rentals with tenants in place'"
+      ],
+      "reinforcing_photo": "Split: 2 a.m. repair call vs relaxed weekend.",
+      "what_backfires": "Encouraging illegal tenant removal; 'we'll get rid of your tenants'.",
+      "combos": [
+        {
+          "headline": "Tired of 2 a.m. repair calls?",
+          "offer": "Cash for rentals, tenants in place",
+          "photo_scene": "Split night repair / sunny weekend",
+          "sell_the_outcome_line": "Cash out of the rental and get your weekends back."
+        },
+        {
+          "headline": "Your rental. Your exit.",
+          "offer": "Offer in 24 hours, we handle the leases",
+          "photo_scene": "Landlord handing over a keyring",
+          "sell_the_outcome_line": "Stop managing, start enjoying the equity."
+        },
+        {
+          "headline": "Vacancy again?",
+          "offer": "As-is cash offer on vacant rentals",
+          "photo_scene": "Empty unit with 'For Rent' sign",
+          "sell_the_outcome_line": "Turn an empty unit into money in the bank."
+        }
+      ],
+      "compliance_flags": [
+        "Tenant rights (state/local) - no claims about removing tenants.",
+        "Fair Housing: don't reference tenant demographics."
+      ],
+      "evidence": [
+        "GOLD-home-buying-013"
+      ],
+      "evidence_strength": "thin (vendor)"
+    },
+    {
+      "offer_type": "inherited_probate",
+      "primary_emotion": "grief -> relief",
+      "why": "Distance, cleanout, family coordination; tell-not-sell tone (MMR-637).",
+      "headline_offer_patterns": [
+        "'Inherited a house? We can make it simple.'"
+      ],
+      "reinforcing_photo": "Calm sunlit porch; no sadness clichés.",
+      "what_backfires": "Condolence-cards that feel predatory; urgency.",
+      "combos": [
+        {
+          "headline": "Inherited a house? We can make it simple.",
+          "offer": "As-is offer; we work with your executor/attorney",
+          "photo_scene": "Sunlit porch, empty rocking chair",
+          "sell_the_outcome_line": "Honor the home, settle the estate, and move forward together."
+        },
+        {
+          "headline": "Live far away from the house?",
+          "offer": "We handle cleanout, repairs and closing remotely",
+          "photo_scene": "Hand holding a set of old keys",
+          "sell_the_outcome_line": "Settle it without flying back every month."
+        },
+        {
+          "headline": "Family can't agree on the house?",
+          "offer": "Written offer everyone can review",
+          "photo_scene": "Family around a kitchen table with papers",
+          "sell_the_outcome_line": "A clear number that helps everyone decide."
+        }
+      ],
+      "compliance_flags": [
+        "Probate sales may need court approval; don't imply you can bypass it.",
+        "No look-alike court notices."
+      ],
+      "evidence": [
+        "MMR-637"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "pre_foreclosure_or_financial_distress",
+      "primary_emotion": "fear -> relief",
+      "why": "Owners in distress value speed; the heaviest legal zone.",
+      "headline_offer_patterns": [
+        "'Options if you're behind on payments' with required disclosures"
+      ],
+      "reinforcing_photo": "Kitchen table conversation, calm.",
+      "what_backfires": "'URGENT/FINAL NOTICE', foreclosure-rescue promises, lender look-alikes (law).",
+      "combos": [
+        {
+          "headline": "Behind on payments? You have options.",
+          "offer": "Free, no-obligation talk about selling as-is",
+          "photo_scene": "Calm kitchen-table conversation",
+          "sell_the_outcome_line": "Sell on your terms and keep your equity, not the stress."
+        },
+        {
+          "headline": "Selling might protect your credit and equity.",
+          "offer": "Written cash offer; you decide",
+          "photo_scene": "Person reading a letter with coffee, morning light",
+          "sell_the_outcome_line": "Choose your next step with a clear number."
+        },
+        {
+          "headline": "Talk to a local buyer, not a call center.",
+          "offer": "Meet [Name], local since [year]",
+          "photo_scene": "Local buyer portrait on their street",
+          "sell_the_outcome_line": "A real person who'll explain every option."
+        }
+      ],
+      "compliance_flags": [
+        "Reg O/MARS disclosures if foreclosure relief is mentioned; no results claims, no advance fees.",
+        "CA Civ 1695 equity-purchaser contract rules (5-day cancel).",
+        "Never look like lender/court/government (39 USC 3001(h)).",
+        "Avoid 'protect your credit' unless substantiated; consider 'may'."
+      ],
+      "evidence": [
+        "SRC-REG-O",
+        "SRC-CA-1695",
+        "SRC-39USC3001"
+      ],
+      "evidence_strength": "thin (creative); law strong"
+    },
+    {
+      "offer_type": "free_valuation_no_obligation",
+      "primary_emotion": "curiosity / control",
+      "why": "Low-commitment entry for sellers not yet decided (Zillow: months of consideration).",
+      "headline_offer_patterns": [
+        "'What would we pay for [Address]?'",
+        "'Two numbers: our cash offer and a listing estimate'"
+      ],
+      "reinforcing_photo": "Their street; envelope/letter style.",
+      "what_backfires": "Claiming the cash offer equals market value.",
+      "combos": [
+        {
+          "headline": "What would we pay for [Address]?",
+          "offer": "Free, no-obligation written cash offer",
+          "photo_scene": "Letter-style card with street photo",
+          "sell_the_outcome_line": "Know your options before you decide."
+        },
+        {
+          "headline": "Cash offer or list? See both.",
+          "offer": "Written cash offer + agent estimate side by side",
+          "photo_scene": "Two-column comparison graphic",
+          "sell_the_outcome_line": "Pick the path that fits your life, with real numbers."
+        },
+        {
+          "headline": "No pressure. Just a number.",
+          "offer": "Offer by text in 24 hours",
+          "photo_scene": "Phone with a text thread",
+          "sell_the_outcome_line": "Decide on your own time."
+        }
+      ],
+      "compliance_flags": [
+        "Personalized address mail is fine; don't add private financial facts.",
+        "Side-by-side comparisons must be fair (FTC s.5)."
+      ],
+      "evidence": [
+        "SRC-ZILLOW-SELLERS-2025",
+        "GOLD-home-buying-009",
+        "MMR-005"
+      ],
+      "evidence_strength": "thin"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "Gold 'URGENT NOTICE' / 'FINAL NOTICE!' cards (GOLD-004, 012) vs 39 USC 3001(h) and FTC deception",
+      "resolution": "Law wins: no notice-style designs; urgency via real reasons (your date, fast close)."
+    },
+    {
+      "conflict": "Gold 'any condition (foreclosure, sinkhole, bankruptcy)' (GOLD-008) vs Reg O and respect",
+      "resolution": "Law wins where foreclosure relief is implied; reframe as 'any condition, any situation' and add MARS disclosures if foreclosure is named."
+    },
+    {
+      "conflict": "Vendor 'Tired of Tenants?' 5-deal result vs no independent data",
+      "resolution": "Use as a pattern only; label unverified."
+    },
+    {
+      "conflict": "'Top dollar / fair price' copy vs Buchak et al. (~3.6% discount)",
+      "resolution": "Verified study wins: sell certainty and convenience, not highest price."
+    }
+  ]
+}

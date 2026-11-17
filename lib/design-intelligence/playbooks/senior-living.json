@@ -1,0 +1,323 @@
+{
+  "schema_version": "1.1",
+  "slug": "senior-living",
+  "industry": "Senior living communities and adjacent care (independent living, assisted living, memory care; some gold also covers in-home care agencies)",
+  "last_updated": "2026-11-05",
+  "words_and_claims_to_avoid": [
+    "'Adult living' / 'adult community' / 'adults only' phrasing when claiming housing-for-older-persons intent (24 CFR 100.306(b))",
+    "'We want active, independent seniors only' — can read as disability preference under Fair Housing (describe services/property, not desired body ability)",
+    "Fear-mongering abandonment guilt framed as fact ('if you don't move them, you are abandoning them')",
+    "Unsubstantiated fill rates, wait-list scarcity, or 'last apartment' urgency",
+    "VA / Medicare / Medicaid benefit dollar amounts that imply government partnership or guaranteed eligibility without disclaimers (39 USC 3001; benefit rules)",
+    "Resident testimonials or identifiable photos with health/care details without HIPAA (and likeness) authorization",
+    "Claiming a care level (memory care, skilled nursing, Medicaid beds) the community is not licensed/authorized to provide",
+    "Fake clinical guarantees or 'cures dementia' language",
+    "Government seal / official notice look-alikes"
+  ],
+  "compliance_notes": [
+    "Fair Housing Act: ads for dwellings must not indicate preference/limitation based on protected classes (24 CFR 100.75). Housing-for-older-persons communities may advertise age intent consistently with 24 CFR Part 100 Subpart E; do not use 'adult living/adult community' language per 100.306(b).",
+    "Describe property and services; avoid casting/copy that signals only non-disabled residents are welcome. Include Equal Housing Opportunity logo/statement on housing ads as industry practice.",
+    "FTC Act: move-in prices, waived fees, gift cards, and 'limited time' need substantiation, clear restrictions, and real end dates — no deceptive urgency.",
+    "State senior-living / AL / nursing home advertising and licensing: print only true license status and care levels; rules vary by state — client confirms.",
+    "HIPAA: identifiable resident stories/photos that include health or care information need a valid authorization (45 CFR 164.508) — not buried in admission paperwork alone as a marketing blanket.",
+    "VA Aid & Attendance / benefit mailers: do not imply federal endorsement; use required disclaimers if the creative could look governmental (39 USC 3001).",
+    "CMS MA/TPMO rules generally apply only to plan marketing — keep pure community ads clean of plan enrollment claims unless the client is actually a plan marketer.",
+    "39 USC 3001: no government look-alike mailers."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: relief, care, joy, fear-of-isolation are fine when legal and not deceptive.",
+    "Only laws/compliance are hard limits (FHA, FTC, HIPAA, state licensing, 39 USC 3001).",
+    "Every angle and emotion_by_offer combo carries sell_the_outcome_line.",
+    "Vendor ROI labeled agency-only unverified; never print as fact on a client card.",
+    "Prefer one clear offer + one real photo + one QR (roofing-round5 directional).",
+    "Dual audience OK; do not invent abandonment guilt as fact."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "move_in_special_first_month_pricing",
+      "primary_emotion": "relief / anticipation",
+      "why": "Dominant community gold pattern: $99 first month, waived community fees, moving expense help, rate locks with dated windows.",
+      "headline_offer_patterns": [
+        "'Move-In Special — $99 for the first month'",
+        "'Waive your community fee (up to $[X]) if you move in by [date]'",
+        "'2 bedrooms at 1-bedroom pricing + moving help'",
+        "'Lock in your rate for [N] years when you move in by [date]'"
+      ],
+      "reinforcing_photo": "Warm suite or family welcome moment — not a price sticker alone",
+      "what_backfires": "Perpetual 'limited time' with no end date; hiding community fees elsewhere; bait pricing unavailable",
+      "combos": [
+        {
+          "headline": "Move-in special.",
+          "offer": "$99 for the first month (restrictions apply; ends [date])",
+          "photo_scene": "Caregiver/family hug in a bright apartment",
+          "sell_the_outcome_line": "Settle in with a gentler first month on the budget."
+        },
+        {
+          "headline": "Limited-time community fee waived.",
+          "offer": "Move in by [date] — community fee waived up to $[X]",
+          "photo_scene": "Real campus exterior + smiling resident",
+          "sell_the_outcome_line": "Put the savings toward settling in, not the paperwork fee."
+        },
+        {
+          "headline": "Like winning the lotto on your next chapter.",
+          "offer": "2BR at 1BR pricing + up to $[Y] moving help (move by [date])",
+          "photo_scene": "Happy couple in a finished living room (authorized)",
+          "sell_the_outcome_line": "More space to live — without paying the usual jump on day one."
+        },
+        {
+          "headline": "Lock in your rate.",
+          "offer": "Rate lock for [N] years when you move in by [date]",
+          "photo_scene": "Resident reviewing a clear pricing sheet with a counselor",
+          "sell_the_outcome_line": "Predictable housing costs while life gets simpler."
+        }
+      ],
+      "compliance_flags": [
+        "Print restrictions, usual fees, and a real end date.",
+        "Bona fide price basis (16 CFR 233).",
+        "Do not invent scarcity of apartments."
+      ],
+      "evidence": [
+        "GOLD-senior-living-001/006/007/011/025"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "free_tour_or_lunch_and_learn",
+      "primary_emotion": "curiosity / confidence",
+      "why": "Tours and educational events are the primary conversion step; gold pairs tours with answers, gift cards, and RSVP dates.",
+      "headline_offer_patterns": [
+        "'With a tour, you get answers'",
+        "'$[25] gift card after your tour'",
+        "'Senior Moving Masterclass — [date]'",
+        "'Scan to schedule a family tour'"
+      ],
+      "reinforcing_photo": "Real common space / dining / activity — invite energy",
+      "what_backfires": "Gift card that requires signing a lease; pressure tours; stock gray cutouts",
+      "combos": [
+        {
+          "headline": "With a tour, you get answers.",
+          "offer": "Complimentary tour (in-person or virtual)",
+          "photo_scene": "Smiling couple in a sunlit lounge",
+          "sell_the_outcome_line": "See the rhythm of a day here before you decide anything."
+        },
+        {
+          "headline": "Tour on us — thank-you gift after.",
+          "offer": "$[25] store gift card after a completed tour (terms)",
+          "photo_scene": "Welcome desk with a host and guest",
+          "sell_the_outcome_line": "Spend an hour learning — leave with clarity and a small thank-you."
+        },
+        {
+          "headline": "Lunch & learn: what moving can look like.",
+          "offer": "Free lunch & learn on [date] — RSVP",
+          "photo_scene": "Small group at a dining table with a facilitator",
+          "sell_the_outcome_line": "Ask the awkward questions with other families in the room."
+        },
+        {
+          "headline": "Schedule a family tour.",
+          "offer": "Free private family tour + care overview",
+          "photo_scene": "Adult child walking a parent through a garden courtyard",
+          "sell_the_outcome_line": "Make the next conversation about a place you have actually seen together."
+        }
+      ],
+      "compliance_flags": [
+        "Disclose gift-card conditions (16 CFR 251).",
+        "No lease required to receive the thank-you if advertised as tour-only.",
+        "Event date must be real."
+      ],
+      "evidence": [
+        "GOLD-senior-living-005/010/029/035"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "respite_or_short_stay",
+      "primary_emotion": "relief / trialability",
+      "why": "Short stays lower commitment for families unsure about a permanent move; thinner in gold — use when the community truly offers respite.",
+      "headline_offer_patterns": [
+        "'Try a short stay / respite week'",
+        "'Caregiver break — short-term stay'",
+        "'First week complimentary' (only if true and disclosed)"
+      ],
+      "reinforcing_photo": "Guest suite made up / resident enjoying a quiet morning",
+      "what_backfires": "Advertising respite when not licensed/staffed for it; hiding nightly rates",
+      "combos": [
+        {
+          "headline": "Need a short stay while you figure out the next step?",
+          "offer": "Respite / short-term stay — ask about [N]-night rates",
+          "photo_scene": "Comfortable guest suite with natural light",
+          "sell_the_outcome_line": "Give everyone a safer week — and room to think."
+        },
+        {
+          "headline": "A break for the caregiver. A soft landing for them.",
+          "offer": "Short-stay package with meals + activities included (list)",
+          "photo_scene": "Resident at a group activity with staff nearby",
+          "sell_the_outcome_line": "Rest knowing they are fed, safe, and not alone."
+        },
+        {
+          "headline": "Try life here before you commit.",
+          "offer": "Trial stay credit toward move-in if you join by [date] (if real program)",
+          "photo_scene": "Same person unpacking a small suitcase in a bright room",
+          "sell_the_outcome_line": "Test the fit with a suitcase — not a leap of faith."
+        }
+      ],
+      "compliance_flags": [
+        "Only if the community legally offers respite/short stay.",
+        "Disclose nightly/weekly price and what's included.",
+        "No medical outcome guarantees."
+      ],
+      "evidence": [
+        "GOLD-senior-living-032 (first-week free home-care adjacent — verify applicability)",
+        "Market practice — thin in community gold"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "memory_care_or_assisted_level_invite",
+      "primary_emotion": "care / steadiness",
+      "why": "Gold memory/assisted cards use specialized staffing + family assessment CTAs; accuracy of care level is non-negotiable.",
+      "headline_offer_patterns": [
+        "'Specialized memory care with heart'",
+        "'Assisted living — personalized assessment'",
+        "'Limited availability — schedule a family tour'"
+      ],
+      "reinforcing_photo": "Gentle family connection or trained caregiver with resident (authorized)",
+      "what_backfires": "Overstating clinical capability; panic imagery; disability-exclusion language",
+      "combos": [
+        {
+          "headline": "Specialized memory care with heart.",
+          "offer": "Family assessment + tour",
+          "photo_scene": "Outdoor hand-holding parent and adult child",
+          "sell_the_outcome_line": "Support that protects dignity while keeping connection possible."
+        },
+        {
+          "headline": "Assisted living that still feels like home.",
+          "offer": "Personalized professional assessment (complimentary)",
+          "photo_scene": "Caregiver helping with a sweater by a sunny window",
+          "sell_the_outcome_line": "Help with the hard parts — and space for the parts that still feel like them."
+        },
+        {
+          "headline": "Get answers about the right level of care.",
+          "offer": "Free care consultation for your family",
+          "photo_scene": "Counselor at a table with adult children reviewing options",
+          "sell_the_outcome_line": "Leave knowing which level fits — without guessing alone."
+        }
+      ],
+      "compliance_flags": [
+        "Advertise only licensed/authorized care levels.",
+        "No dementia cure claims.",
+        "FHA: do not imply only 'independent' applicants welcome.",
+        "HIPAA for identifiable resident health stories."
+      ],
+      "evidence": [
+        "GOLD-senior-living-005/008/002",
+        "SRC-SHN-GENX-2025"
+      ],
+      "evidence_strength": "directional + compliance-heavy"
+    },
+    {
+      "offer_type": "referral_or_family_invite",
+      "primary_emotion": "belonging / gratitude",
+      "why": "Family and resident referrals are a real sales channel; gold is lighter here — only with a real program.",
+      "headline_offer_patterns": [
+        "'Know a family looking? Refer and both benefit'",
+        "'Invite your parents to lunch on us'",
+        "'Resident referral thank-you'"
+      ],
+      "reinforcing_photo": "Multi-generation table or two families touring together",
+      "what_backfires": "Unclear who gets the credit; rewards that look like illegal kickbacks in regulated contexts — client legal review",
+      "combos": [
+        {
+          "headline": "Bring your family for lunch.",
+          "offer": "Complimentary lunch for [N] guests with a scheduled tour",
+          "photo_scene": "Dining room with families at a sunny table",
+          "sell_the_outcome_line": "Taste the day-to-day before you talk contracts."
+        },
+        {
+          "headline": "Know someone who needs a softer landing?",
+          "offer": "Referral thank-you $[X] after move-in (terms)",
+          "photo_scene": "Handshake in a courtyard",
+          "sell_the_outcome_line": "Help another family find solid ground — and get appreciated for it."
+        },
+        {
+          "headline": "You want the best for your parents.",
+          "offer": "Family invite: private tour + Q&A checklist",
+          "photo_scene": "Adult child and parent reviewing a simple checklist together",
+          "sell_the_outcome_line": "Walk in prepared — walk out clearer."
+        }
+      ],
+      "compliance_flags": [
+        "Referral rewards: confirm state/federal restrictions for healthcare-adjacent settings.",
+        "Print eligibility and timing.",
+        "No fake referral scarcity."
+      ],
+      "evidence": [
+        "GOLD-senior-living-038",
+        "Market practice — thin referral creative in gold"
+      ],
+      "evidence_strength": "thin-moderate"
+    },
+    {
+      "offer_type": "limited_time_incentive",
+      "primary_emotion": "urgency (real calendar) / relief",
+      "why": "Gold uses dated move-in windows and seasonal specials; calendar truth beats fake countdown.",
+      "headline_offer_patterns": [
+        "'Move in by [date]'",
+        "'Limited-time special'",
+        "'Scan for a free private offer'"
+      ],
+      "reinforcing_photo": "Seasonal community life matching the deadline season",
+      "what_backfires": "Evergreen 'limited time'; fake waitlists; QR to a vague 'private offer' with no substance",
+      "combos": [
+        {
+          "headline": "Limited-time move-in window.",
+          "offer": "Special pricing if you move in by [date]",
+          "photo_scene": "Autumn/spring campus path with residents walking",
+          "sell_the_outcome_line": "Use a real calendar date to make the next chapter concrete."
+        },
+        {
+          "headline": "This season's welcome offer.",
+          "offer": "Tour this month — ask about the [month] incentive",
+          "photo_scene": "Decorated common room matching the season",
+          "sell_the_outcome_line": "A timed welcome that makes starting easier now."
+        },
+        {
+          "headline": "Scan for this month's private offer.",
+          "offer": "QR reveals current documented special (must exist)",
+          "photo_scene": "Simple card face with one QR and a warm lifestyle photo",
+          "sell_the_outcome_line": "See today's real welcome — not a forever teaser."
+        }
+      ],
+      "compliance_flags": [
+        "Real end dates only.",
+        "Private offer behind QR must match advertised promise.",
+        "FTC substantiation on urgency."
+      ],
+      "evidence": [
+        "GOLD-senior-living-003/007/031"
+      ],
+      "evidence_strength": "directional"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "Family 'peace of mind' safety messaging vs FHA risk of implying only able-bodied/'independent' residents are welcome",
+      "resolution": "Compliance wins: sell safety/services and real life; avoid 'active independent only' casting and copy."
+    },
+    {
+      "conflict": "Vendor ROI / room-fill claims vs evidence standards",
+      "resolution": "Agency-only unverified; existence proof of mail use, not printable lift."
+    },
+    {
+      "conflict": "VA benefit dollar headlines in gold vs 39 USC 3001 / eligibility truth",
+      "resolution": "Law wins: no government look-alike; no guaranteed benefit claims; disclose that eligibility is individual."
+    },
+    {
+      "conflict": "Fear/abandonment angles vs Patrick emotion-agnostic stance + deception rules",
+      "resolution": "Fear OK when evidence-based and non-deceptive; do not frame abandonment guilt as fact."
+    },
+    {
+      "conflict": "Home-care gold cards vs community senior-living clients",
+      "resolution": "Match care setting to the client; do not paste home-care offers onto a community that does not provide them."
+    }
+  ]
+}

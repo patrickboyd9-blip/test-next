@@ -55,6 +55,8 @@ export function proFrontRegions(id: RoofingProTemplateId): ProRegion[] {
     case "roof_coupon":
       return [
         { id: "photo", kind: "photo", role: "photo", x: 0, y: 0, w: 8, h: 2.46, bleed: true, subject: "scene" },
+        // Trade-colored base under the coupon bar. No cream panel (owner votes).
+        { id: "base", kind: "shape", role: "field", x: 0, y: 3.5, w: 8, h: 1.5, bleed: true, fill: "field" },
         { id: "offer-tile", kind: "shape", role: "offer-tile", x: 0, y: 2.38, w: 8, h: 1.2, bleed: true, fill: "offer" },
         { id: "offer", kind: "text", role: "offer", x: 0.38, y: 2.52, w: 5.5, h: 0.92 },
         { id: "headline", kind: "text", role: "headline", x: 0.38, y: 3.7, w: 7.24, h: 0.4 },
@@ -96,7 +98,7 @@ export function proFrontRegions(id: RoofingProTemplateId): ProRegion[] {
     case "roof_neighborhood":
       return [
         { id: "photo", kind: "photo", role: "photo", x: 0, y: 0, w: 8, h: 2.32, bleed: true, subject: "scene" },
-        { id: "paper", kind: "shape", role: "paper", x: 0, y: 2.26, w: 8, h: 2.74, bleed: true, fill: "paper" },
+        { id: "base", kind: "shape", role: "field", x: 0, y: 2.26, w: 8, h: 2.74, bleed: true, fill: "field" },
         { id: "headline", kind: "text", role: "headline", x: 0.4, y: 2.46, w: 7.2, h: 0.58 },
         { id: "offer-tile", kind: "shape", role: "offer-tile", x: 0.4, y: 3.12, w: 4.7, h: 0.42, fill: "offer" },
         { id: "offer", kind: "text", role: "offer", x: 0.52, y: 3.16, w: 4.46, h: 0.34 },

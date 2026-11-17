@@ -244,6 +244,8 @@ function classify(value: string, mode: ClassifyMode): string {
   if (/\blife insurance\b|\bfinal expense\b|\bburial insurance\b/.test(text)) return "life-insurance"
   if (/\bhomeowners?\b|\bhome owner\b/.test(text) && /\binsurance\b/.test(text)) return "home-insurance"
   if (/\bhome insurance\b/.test(text)) return "home-insurance"
+  // A realtor stays real estate even when the offer mentions cleaning, repairs, or a roof.
+  if (/\breal estate\b|\brealtors?\b|\brealty\b|\bbrokerage\b|\blisting (?:appointment|consult\w*|agent)\b/.test(text) && !/\bwe buy\b|\bcash offer\b|\bbuy your house\b/.test(text)) return "real-estate-agents"
   if (hvacSignal(text, mode)) return "hvac"
   if (windowSignal(text, mode)) return "windows-gutters-siding"
   if (plumbingSignal(text)) return "plumbing"
@@ -307,7 +309,7 @@ function restaurantSignal(text: string, mode: ClassifyMode): boolean {
 }
 
 function realEstateSignal(text: string, mode: ClassifyMode): boolean {
-  if (/\breal estate\b|\brealtor\b|\bopen house\b/.test(text)) return true
+  if (/\breal estate\b|\brealtors?\b|\brealty\b|\bopen house\b/.test(text)) return true
   if (/\b(?:home|house)\s+listing\b/.test(text)) return true
   return mode === "label" && /\blisting\b/.test(text)
 }

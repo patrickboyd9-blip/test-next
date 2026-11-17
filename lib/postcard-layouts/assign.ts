@@ -3,6 +3,7 @@ import { referenceVerticalsForBrief } from "@/lib/reference-corpus/select-refere
 
 import { isPostcardTemplate, type PostcardTemplateId, type VerticalPaletteId } from "./ids"
 import { templatesForPalette } from "./templates"
+import { industryForBrief, NONE_INDUSTRY } from "@/lib/research-library/industry"
 
 /**
  * Copy can pull a roofing composition forward. The cue has to name the idea.
@@ -59,6 +60,7 @@ export function assignTemplates<T extends CreativeDirection>(
 ): T[] {
   const palette = verticalPaletteForBrief(brief)
   const allowed = templatesForPalette(palette)
+  const trade = tradeSlug(brief)
   const used = new Set<PostcardTemplateId>()
   const ranked = directions
     .map((direction, index) => ({ direction, index }))
@@ -89,7 +91,7 @@ export function assignTemplates<T extends CreativeDirection>(
     const templateId = chosen.get(index) ?? allowed[0]
     return {
       ...direction,
-      spec: withTemplate(direction.spec, templateId, palette),
+      spec: withTemplate(direction.spec, templateId, palette, trade),
     }
   })
 }
@@ -99,7 +101,12 @@ export function assignTemplateToSpec(brief: CampaignBrief, spec: CreativeSpec): 
   const allowed = templatesForPalette(palette)
   const current = spec.layoutHints?.templateId
   const templateId = current && allowed.includes(current) ? current : allowed[0]
-  return withTemplate(spec, templateId, palette)
+  return withTemplate(spec, templateId, palette, tradeSlug(brief))
+}
+
+function tradeSlug(brief: CampaignBrief): string | undefined {
+  const slug = industryForBrief(brief)
+  return slug === NONE_INDUSTRY ? undefined : slug
 }
 
 function cuedTemplate(
@@ -116,12 +123,14 @@ function cuedTemplate(
 function withTemplate(
   spec: CreativeSpec,
   templateId: PostcardTemplateId,
-  palette: VerticalPaletteId
+  palette: VerticalPaletteId,
+  trade?: string
 ): CreativeSpec {
   const hints: LayoutHints = {
     ...spec.layoutHints,
     templateId,
     verticalPalette: palette,
+    ...(trade ? { trade } : {}),
   }
   return { ...spec, layoutHints: hints }
 }

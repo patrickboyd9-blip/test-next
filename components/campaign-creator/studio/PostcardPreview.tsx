@@ -28,7 +28,7 @@ import {
   addressSideQrPayload,
   resolveAddressSide,
 } from "@/lib/campaign-creator/address-side"
-import { composeAddressSideFace } from "@/lib/campaign-creator/address-side-layout"
+import { composeAddressSideFace, isSoftFadeBack } from "@/lib/campaign-creator/address-side-layout"
 import { composeGridCard } from "@/lib/design-intelligence/grid-composer"
 import { isDesignRationale } from "@/lib/design-intelligence/rationale"
 import { composeRoofingProCard } from "@/lib/roofing-pro/compose"
@@ -36,6 +36,7 @@ import { isRoofingProTemplate } from "@/lib/roofing-pro/ids"
 import { attorneyAdMark } from "@/lib/design-intelligence/attorney-compliance"
 import { isPostcardTemplate, isVerticalPalette } from "@/lib/postcard-layouts/ids"
 import { paletteById } from "@/lib/postcard-layouts/palette"
+import { tradePalette } from "@/lib/postcard-layouts/trade-palettes"
 import { slotPhotoSources } from "@/lib/postcard-layouts/photos"
 import { TEMPLATE_META } from "@/lib/postcard-layouts/templates"
 
@@ -150,6 +151,7 @@ export function PostcardPreview({
         returnAddress: brief?.businessInfo?.address,
         disclaimerText: disclaimer,
         complianceMark,
+        trade: spec.layoutHints?.trade,
       })
     : null
   const studioCard = proCard ?? (isDesignRationale(spec.designRationale)
@@ -167,9 +169,11 @@ export function PostcardPreview({
     ? composeAddressSideFace({
         size: trimSize,
         pairing: "trade",
-        palette: paletteById(
-          isVerticalPalette(spec.layoutHints?.verticalPalette) ? spec.layoutHints.verticalPalette : "general"
-        ),
+        palette: spec.layoutHints?.trade
+          ? tradePalette(spec.layoutHints.trade)
+          : paletteById(
+              isVerticalPalette(spec.layoutHints?.verticalPalette) ? spec.layoutHints.verticalPalette : "general"
+            ),
         spec: sharedSpec,
         businessName: contact.businessName,
         phone: contact.phone,
@@ -193,7 +197,9 @@ export function PostcardPreview({
         qrDestination: contact.qrPayload ?? undefined,
       })
     : null
-  const backPhoto = backResolved ? addressSidePreviewSrc(backResolved, sources[0] ?? imagery.src) : null
+  const backPhoto = backResolved
+    ? addressSidePreviewSrc(backResolved, sources[0] ?? imagery.src) ?? (isSoftFadeBack(backPlan) ? sources[0] ?? imagery.src : null)
+    : null
   const backContact = {
     ...contact,
     qrPayload: isAddressSide ? addressSideQrPayload(sharedSpec, contact.qrPayload) ?? null : contact.qrPayload,

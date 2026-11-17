@@ -1,0 +1,297 @@
+{
+  "schema_version": "1.1",
+  "slug": "laundromat",
+  "industry": "Coin-op / self-serve laundromats, wash-dry-fold, pickup & delivery laundry, and hybrid dry-cleaning drop-off",
+  "last_updated": "2026-11-04",
+  "words_and_claims_to_avoid": [
+    "Unqualified 'eco', 'green', 'planet-friendly', 'non-toxic' detergent or process claims without competent, specific substantiation (FTC Green Guides, 16 CFR 260.4 / 260.2)",
+    "'Official' / census / government-looking notices about laundry requirements (39 USC 3001)",
+    "'Same-day' / '24-hour' turnaround that the store cannot keep; 'always ready in X hours' without conditions",
+    "'Lowest prices in town' / 'cheapest wash' without a defined, testable basis (FTC s.5)",
+    "Fake scarcity ('only today') if the offer runs indefinitely",
+    "Membership/app 'unlimited washes' that hide fees, auto-renew, or geographic limits",
+    "Senior discounts presented as if all laundry buyers are seniors without a real program"
+  ],
+  "compliance_notes": [
+    "FTC Act s.5 + 16 CFR 233/251: percent-off, dollar-off, and free soap/dry/fold need a bona fide regular price and clear conditions next to the offer.",
+    "FTC Green Guides (16 CFR Part 260): general environmental benefit claims for detergent or 'eco laundry' usually require qualification and scientific substantiation — prefer specific, limited claims.",
+    "39 USC 3001: no government look-alike EDDM or 'mandatory laundry notice' mailers.",
+    "Turnaround and pickup promises: if advertised, they must be typically achievable; print service area, minimums, and exclusions.",
+    "Loyalty/app memberships with auto-renew: ROSCA (online) and state ARL (e.g., CA B&P 17600 et seq.) disclosure/cancel rules may apply.",
+    "Price advertising for self-serve vend prices: do not bait with a machine size that is rarely available; state which washers the promo covers.",
+    "If promoting dry cleaning drop-off operated by a third party, do not imply in-house processing if false."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear, joy, relief, status, belonging are fine when they fit and stay legal.",
+    "Only laws/compliance are hard limits.",
+    "Every angle and emotion_by_offer combo carries sell_the_outcome_line.",
+    "Vendor ROI labeled agency-only unverified; never print as fact on a client card.",
+    "Prefer one clear offer + one real photo + one QR (roofing-round5 directional) unless client insists on a coupon grid.",
+    "No age/senior default unless the client has a real discount and evidence supports targeting."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "first_order_percent_or_dollar_off",
+      "primary_emotion": "relief / reciprocity",
+      "why": "Lowers trial cost for a new store or service; reciprocity starts the habit.",
+      "headline_offer_patterns": [
+        "'[X]% off your first order'",
+        "'$[Y] off first wash-dry-fold'",
+        "'Save 40% on your first pickup'"
+      ],
+      "reinforcing_photo": "Folded laundry stack or guest at a clean fold counter",
+      "what_backfires": "Hidden minimum weight; 'first order' undefined; stacking exclusions in micro type",
+      "combos": [
+        {
+          "headline": "Laundry day, handled.",
+          "offer": "[X]% off your first wash-dry-fold order (ends [date])",
+          "photo_scene": "Folded towels on a real kitchen counter",
+          "sell_the_outcome_line": "Get your Saturday back with clean clothes waiting."
+        },
+        {
+          "headline": "New to us? Start with a deal.",
+          "offer": "$[Y] off first order over [min]",
+          "photo_scene": "Bright self-serve aisle",
+          "sell_the_outcome_line": "Try the cleanest machines nearby without risking a full-price first load."
+        },
+        {
+          "headline": "40% off your first pickup.",
+          "offer": "40% off first pickup & delivery order with code (service area applies)",
+          "photo_scene": "Laundry bag on a porch",
+          "sell_the_outcome_line": "Leave a bag; open the door to folded clothes."
+        },
+        {
+          "headline": "First dry-cleaning order, lighter.",
+          "offer": "20% off first dry-cleaning drop-off",
+          "photo_scene": "Pressed shirts on hangers",
+          "sell_the_outcome_line": "Walk into the week looking put-together."
+        }
+      ],
+      "compliance_flags": [
+        "State regular price basis for % off (16 CFR 233).",
+        "Define first-order, min spend/weight, end date with the offer (16 CFR 251 if framed as free/gift)."
+      ],
+      "evidence": [
+        "GOLD-laundromat-001/006/012/013/015"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "free_addon_soap_dry_fold",
+      "primary_emotion": "delight / ease",
+      "why": "A free dry or free soap is concrete and easy to picture on laundry day.",
+      "headline_offer_patterns": [
+        "'FREE SOAP with a wash'",
+        "'Free dry [day]'",
+        "'Free folding for [N] items'"
+      ],
+      "reinforcing_photo": "Detergent bottle at a machine or clothes coming out of a dryer",
+      "what_backfires": "Free dry that requires an expensive wash size not disclosed; coupon grids that bury the real gift",
+      "combos": [
+        {
+          "headline": "Wash on us for the soap.",
+          "offer": "FREE SOAP with any wash purchase (one per visit; ends [date])",
+          "photo_scene": "Hand pouring soap into a commercial washer",
+          "sell_the_outcome_line": "One less thing to carry — and a cleaner load."
+        },
+        {
+          "headline": "Mondays: free dry.",
+          "offer": "Free drying on Mondays with paid wash (machine size stated)",
+          "photo_scene": "Warm towels from a dryer",
+          "sell_the_outcome_line": "Leave with soft, dry clothes without feeding every dryer cycle."
+        },
+        {
+          "headline": "We'll fold the first ten.",
+          "offer": "Free folding for up to 10 items with drop-off",
+          "photo_scene": "Staff folding at a clean table",
+          "sell_the_outcome_line": "Pick up laundry that is ready to put away."
+        }
+      ],
+      "compliance_flags": [
+        "'Free' conditions and regular price of the required purchase must be clear (16 CFR 251).",
+        "Do not advertise free dry on all machines if only some qualify."
+      ],
+      "evidence": [
+        "GOLD-laundromat-002/003/007"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "pickup_delivery_intro",
+      "primary_emotion": "relief",
+      "why": "Sells time; gold heavily features free pickup + intro discount.",
+      "headline_offer_patterns": [
+        "'Free pickup & delivery'",
+        "'$[X] off your first three orders'",
+        "'25% off first pickup'"
+      ],
+      "reinforcing_photo": "Driver/doorstep handoff of folded laundry",
+      "what_backfires": "Promising citywide delivery when radius is 3 miles; same-day claims that slip",
+      "combos": [
+        {
+          "headline": "We pick up. You don't.",
+          "offer": "Free pickup & delivery + $[X] off first order",
+          "photo_scene": "Branded bag on porch steps",
+          "sell_the_outcome_line": "Reclaim the hour you used to spend at the laundromat."
+        },
+        {
+          "headline": "Doorstep clean.",
+          "offer": "$10 off each of your first three orders; free delivery",
+          "photo_scene": "Guest receiving folded stack at the door",
+          "sell_the_outcome_line": "Three easy weeks of laundry — already started."
+        },
+        {
+          "headline": "Bag on the stoop. Done.",
+          "offer": "25% off first pickup & delivery; free delivery",
+          "photo_scene": "Apartment hallway with laundry bag",
+          "sell_the_outcome_line": "Apartment living without the basement laundry line."
+        }
+      ],
+      "compliance_flags": [
+        "Print service area, minimum order, and turnaround honestly.",
+        "Auto-pay/app subscriptions need cancel/renewal disclosures if used."
+      ],
+      "evidence": [
+        "GOLD-laundromat-004/006/010/013/015"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "grand_opening_reopening",
+      "primary_emotion": "curiosity / belonging",
+      "why": "Legitimate news + opening gift creates trial.",
+      "headline_offer_patterns": [
+        "'Grand opening — free dry'",
+        "'New ownership — [X]% off this week'",
+        "'Come see our new look'"
+      ],
+      "reinforcing_photo": "Store exterior with banner or sparkling new machine row",
+      "what_backfires": "Calling every week a grand opening; fake 'new machines' if only cosmetic paint",
+      "combos": [
+        {
+          "headline": "Grand opening — get fresh.",
+          "offer": "Opening-week free dry with wash; hours [x–y]",
+          "photo_scene": "Exterior with grand-opening banner",
+          "sell_the_outcome_line": "Be first in line for the cleanest laundry day on the block."
+        },
+        {
+          "headline": "Under new ownership.",
+          "offer": "[X]% off this week for neighbors",
+          "photo_scene": "Owner/staff waving in a bright store",
+          "sell_the_outcome_line": "Meet the team that actually keeps the machines working."
+        },
+        {
+          "headline": "All-new washers are here.",
+          "offer": "Promo card $[X] off load / free dry day-one",
+          "photo_scene": "Row of new front-loaders",
+          "sell_the_outcome_line": "Faster cycles, fewer out-of-order signs."
+        }
+      ],
+      "compliance_flags": [
+        "Opening claims must be true; limit windows must be real.",
+        "EDDM: no official/government look."
+      ],
+      "evidence": [
+        "GOLD-laundromat-005/007/011/012"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "self_serve_card_or_coupon",
+      "primary_emotion": "ease",
+      "why": "Simple dollar-off card load or postcard coupon matches self-serve gold.",
+      "headline_offer_patterns": [
+        "'$1 off with this postcard'",
+        "'$5 off laundry card'",
+        "'Tiered $ off dry cleaning'"
+      ],
+      "reinforcing_photo": "Guest at a card kiosk or washer with a simple coupon callout",
+      "what_backfires": "Five-coupon grids that dilute the message (directional from roofing-round5)",
+      "combos": [
+        {
+          "headline": "Bring this card. Save a buck.",
+          "offer": "$1.00 off (one visit; ends [date])",
+          "photo_scene": "Smiling guest with a laundry basket",
+          "sell_the_outcome_line": "A lighter load — on the wallet and the to-do list."
+        },
+        {
+          "headline": "Load your card. Keep more clean.",
+          "offer": "$5 off laundry card purchase of $[N]+",
+          "photo_scene": "Hand at a value-load kiosk",
+          "sell_the_outcome_line": "More washes ready when laundry day hits."
+        },
+        {
+          "headline": "One clear neighbor coupon.",
+          "offer": "$[X] off any self-serve visit this month",
+          "photo_scene": "Clean store interior wide shot",
+          "sell_the_outcome_line": "Walk out with clean clothes and a reason to come back."
+        }
+      ],
+      "compliance_flags": [
+        "One end date; state what the dollar-off applies to.",
+        "If using a multi-coupon back, keep the front to one hero offer."
+      ],
+      "evidence": [
+        "GOLD-laundromat-009/014",
+        "roofing-round5 directional"
+      ],
+      "evidence_strength": "thin-moderate"
+    },
+    {
+      "offer_type": "new_mover_neighbor",
+      "primary_emotion": "belonging / relief",
+      "why": "Movers lose old laundry habits and need a nearby store (habit discontinuity).",
+      "headline_offer_patterns": [
+        "'New to [town]? First wash on us (terms)'",
+        "'Welcome to the neighborhood — [X]% off'",
+        "'Your new laundry is [X] blocks away'"
+      ],
+      "reinforcing_photo": "Storefront with a recognizable local street cue + map",
+      "what_backfires": "Generic 'new resident' official-looking forms; senior-default targeting without evidence",
+      "combos": [
+        {
+          "headline": "New to [town]? We've got laundry.",
+          "offer": "New-neighbor [X]% off first visit (ID/ address proof if needed — disclose)",
+          "photo_scene": "Exterior with street landmark",
+          "sell_the_outcome_line": "Find your laundry spot before the first overflowing hamper."
+        },
+        {
+          "headline": "Welcome — first fold is easier here.",
+          "offer": "$[Y] off first wash-dry-fold for new movers",
+          "photo_scene": "Moving boxes beside a laundry bag",
+          "sell_the_outcome_line": "Unpack into clean drawers, not a pile of dirty clothes."
+        },
+        {
+          "headline": "Your building's laundry backup.",
+          "offer": "Free soap + $[X] off first self-serve visit",
+          "photo_scene": "Apartment building near a bright laundromat",
+          "sell_the_outcome_line": "When the basement machines are down, you're still covered."
+        }
+      ],
+      "compliance_flags": [
+        "No government/HOA look-alike (39 USC 3001).",
+        "Any identity check for 'new neighbor' must be stated without discriminatory screening."
+      ],
+      "evidence": [
+        "SRC-VERPLANKEN-WOOD-2006",
+        "SRC-CLA-OVERVIEW",
+        "GOLD-laundromat-015"
+      ],
+      "evidence_strength": "moderate principle; thin card response"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "Gold multi-coupon fronts (e.g., five dry-cleaning tiers) vs roofing-round5 single-offer preference",
+      "resolution": "Patrick directional votes prefer one hero offer; coupon grids remain legal if truthful. Default to one offer on the mail face."
+    },
+    {
+      "conflict": "'Eco/green laundry' marketing common in industry vs FTC Green Guides",
+      "resolution": "Compliance wins: no unqualified green claims; only specific, substantiated environmental statements."
+    },
+    {
+      "conflict": "Vendor/gallery ROI absence vs desire for response proof",
+      "resolution": "Leave thin; do not invent lift. Label any future vendor cases agency-only unverified."
+    }
+  ]
+}

@@ -1,0 +1,302 @@
+{
+  "schema_version": "1.1",
+  "slug": "dental",
+  "industry": "Dental (general, family, cosmetic, implants, orthodontics/aligners)",
+  "last_updated": "2026-11-02",
+  "words_and_claims_to_avoid": [
+    "'Pain-free' / 'painless' dentistry (some states prohibit; e.g., Idaho per ADA guide; GOLD-dental-051)",
+    "'Specialist' / 'practice limited to' unless the dentist meets the ADA-recognized specialty and state rules (ADA Code 5.H; state laws)",
+    "Unsubstantiated superiority ('best dentist in town', '#1') - some states ban superiority claims outright (e.g., Florida per ADA guide)",
+    "'Lifetime guarantee' or 'lifetime whitening' without stating whose life and all conditions (16 CFR 239.4; some states prohibit guarantees in dental ads, e.g., Illinois per ADA guide) (GOLD-dental-026/028)",
+    "'Your benefits expire December 31' as a universal statement - say 'if your plan resets on a calendar year'",
+    "'$0 cleanings' / 'Free with insurance' without saying it depends on the patient's coverage (GOLD-dental-020/065); never waive copays routinely",
+    "'$350 value' / '(a value of $X)' unless that is the price actually charged (16 CFR 233) (GOLD-dental-023)",
+    "Patient photos, names or before/afters without written HIPAA authorization; composite or stock 'results'",
+    "Government/insurer look-alike notices about benefits (39 USC 3001)"
+  ],
+  "compliance_notes": [
+    "FTC Act s.5 + ADA Code 5.F: no false or misleading claims; health claims need competent and reliable scientific evidence; claims must be substantiated before printing.",
+    "Fee ads vary by state (verified via ADA's legal guide; client must confirm current rules): Florida rule 64B5-4.003 requires a 'minimum fee' disclaimer, a stated period (or 90 days) and ADA CDT description/code for advertised fees; Indiana requires the full and discounted price and period; California requires disclosure of everything included and excluded, and for discounts the non-discounted fee, the discount, duration and eligible groups.",
+    "Florida s. 456.062 (verified, 2026 statutes): any ad for a free, discounted or reduced-fee service by a dentist (ch. 466) and other listed licensees must print, in capital letters and clearly distinguishable: 'THE PATIENT AND ANY OTHER PERSON RESPONSIBLE FOR PAYMENT HAS A RIGHT TO REFUSE TO PAY, CANCEL PAYMENT, OR BE REIMBURSED FOR PAYMENT FOR ANY OTHER SERVICE, EXAMINATION, OR TREATMENT THAT IS PERFORMED AS A RESULT OF AND WITHIN 72 HOURS OF RESPONDING TO THE ADVERTISEMENT FOR THE FREE, DISCOUNTED FEE, OR REDUCED FEE SERVICE, EXAMINATION, OR TREATMENT.'",
+    "Illinois (per ADA guide, 225 ILCS 25/45): a dentist may not charge a new patient for any service provided at the time of an advertised free exam. New Jersey (N.J.A.C. 13:30-6.2): free/discounted services must be offered equally to all eligible patients regardless of third-party coverage.",
+    "Medicare/Medicaid patients (OIG, verified): free items/services to beneficiaries must stay within nominal value ($15 per item, $75 per patient per year, no cash equivalents) unless an exception applies; routine copay/deductible waivers and 'no out-of-pocket' ads are suspect (OIG Special Fraud Alert). Applies to 'Accepting Medicaid/Medicare' cards (GOLD-dental-017/064) that also offer freebies.",
+    "Social-coupon/referral-fee arrangements may be fee-splitting under state rules and ADA Code 4.E; referral gifts to patients vary by state.",
+    "HIPAA (verified): mailing about the practice's own services to its own patients is not 'marketing' needing authorization (unless a third party pays for the communication). Patient photos/testimonials need written authorization. Keep treatment details off the outside of a postcard.",
+    "Testimonials and before/afters: 16 CFR 255 (results shown are taken as typical; disclose generally expected results); California BPC 651 requires comparable before/after presentation, the procedures named, and the statement that the same results may not occur for all patients.",
+    "Financing ('$0 down braces', '$X/mo'): Reg Z 12 CFR 1026.24 trigger terms apply (see roofing.json/hvac.json for the full rule); 'Financing available' is the safe phrase."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear, joy, pride, relief are all options; the client chooses.",
+    "Only laws/compliance are hard limits.",
+    "Every angle carries a sell-the-outcome line.",
+    "Unverified (agency-only) results are labeled; never quote them as fact on a card."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "new_patient_special",
+      "primary_emotion": "relief / smart-shopper confidence",
+      "why": "Cost is the top barrier (59%); a clear all-in price removes uncertainty. The most common gold-set offer ($29-$199 exam/X-rays/cleaning).",
+      "headline_offer_patterns": [
+        "'$[X] new-patient visit: exam, X-rays, cleaning'",
+        "'One price. No surprises.'"
+      ],
+      "reinforcing_photo": "Real hygienist with a relaxed patient in a bright operatory",
+      "what_backfires": "Stacking 4+ offers; vague 'specials' with no price; '(a $350 value)' anchors that aren't real prices",
+      "combos": [
+        {
+          "headline": "Exam, X-rays and cleaning. One price.",
+          "offer": "$[X] new-patient visit (state what's included; valid through [date])",
+          "photo_scene": "Hygienist and patient laughing in a sunlit operatory",
+          "sell_the_outcome_line": "A clean smile and a clear plan, with no surprise bill."
+        },
+        {
+          "headline": "Been a while? Start fresh for $[X].",
+          "offer": "$[X] new-patient visit",
+          "photo_scene": "Patient settling into the chair, team smiling",
+          "sell_the_outcome_line": "Feel good about your teeth again."
+        },
+        {
+          "headline": "Your first visit, priced up front.",
+          "offer": "$[X] new-patient special + free electric toothbrush (nominal value)",
+          "photo_scene": "Front desk welcome with the real team",
+          "sell_the_outcome_line": "Walk out knowing exactly where you stand."
+        }
+      ],
+      "compliance_flags": [
+        "State fee rules: FL minimum-fee disclaimer + period + CDT codes; CA list included/excluded services; IN full and discounted price.",
+        "FL 456.062 72-hour statement on discounted/free-service ads.",
+        "NJ/IL-style rules: offer equally regardless of insurance; no charge for other services at a free-exam visit (IL)."
+      ],
+      "evidence": [
+        "SRC-HEALTHAFF-2016",
+        "GOLD-dental-006/024/049/057",
+        "GOLD-dental-049 (PostcardMania, vendor-reported 264 responses) - agency-only unverified"
+      ],
+      "evidence_strength": "strong barrier evidence; card-level directional"
+    },
+    {
+      "offer_type": "free_consult_cosmetic_implant_aligner",
+      "primary_emotion": "pride / hope (gain)",
+      "why": "High-ticket elective care: a free consult lowers the first step; sell the life outcome (confidence, eating, photos).",
+      "headline_offer_patterns": [
+        "'Free [implant/Invisalign] consultation'",
+        "'Stop hiding your smile'",
+        "'$[X] off [aligners/braces]' with a real deadline"
+      ],
+      "reinforcing_photo": "Candid laugh, eating an apple, family photo moment",
+      "what_backfires": "Clinical close-ups of tools/implant screws; 'perfect' stock teeth that look fake; brand-name claims beyond the product used",
+      "combos": [
+        {
+          "headline": "Stop hiding your smile.",
+          "offer": "Free smile consultation + $[X] off aligners through [date]",
+          "photo_scene": "Candid laugh at a dinner table",
+          "sell_the_outcome_line": "Laugh in photos without thinking about it."
+        },
+        {
+          "headline": "Missing a tooth? Eat what you love again.",
+          "offer": "Free implant consultation; implant price from $[X] (all-in terms listed)",
+          "photo_scene": "Person biting into an apple, natural light",
+          "sell_the_outcome_line": "Bite, chew and smile with confidence."
+        },
+        {
+          "headline": "It's never too late to love your smile.",
+          "offer": "$[X] off Invisalign treatment",
+          "photo_scene": "Adult professional smiling at work",
+          "sell_the_outcome_line": "The confident first impression you want."
+        }
+      ],
+      "compliance_flags": [
+        "Invisalign is a trademark: only use it if the practice provides Invisalign; otherwise say 'clear aligners'.",
+        "Before/after: HIPAA authorization; comparable images; CA BPC 651 statement.",
+        "'Free consultation' must be truly free; no charge folded into the later case (16 CFR 251).",
+        "Specialty wording only if qualified (ADA 5.H)."
+      ],
+      "evidence": [
+        "SRC-ADA-HPI-2015",
+        "GOLD-dental-003/008/010/011/029/055",
+        "GOLD-dental-011 (MinuteMarketing, vendor-reported 88 Invisalign cases) - agency-only unverified"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "emergency_toothache",
+      "primary_emotion": "fear -> relief",
+      "why": "Acute pain is a strong, immediate loss; EPPM: pair the threat with a fast, easy action. Keep-the-card utility.",
+      "headline_offer_patterns": [
+        "'Toothache? Same-day emergency visits'",
+        "'$[X] emergency exam'"
+      ],
+      "reinforcing_photo": "Person holding cheek (GOLD-dental-063) or calm patient after relief; the phone number big",
+      "what_backfires": "Graphic blood/tool images; promising 'same day' without capacity",
+      "combos": [
+        {
+          "headline": "Toothache? We'll see you today.",
+          "offer": "$[X] emergency exam + X-ray [if same-day is true]",
+          "photo_scene": "Person holding their cheek, then relief inset",
+          "sell_the_outcome_line": "Pain gone, sleep back, tonight."
+        },
+        {
+          "headline": "Keep this card. Your tooth will thank you.",
+          "offer": "Emergency exam $[X]; walk-ins welcome [if true]",
+          "photo_scene": "Fridge-magnet mock-up",
+          "sell_the_outcome_line": "One call when it hurts, and it's handled."
+        },
+        {
+          "headline": "Broken tooth? Don't wait.",
+          "offer": "Free limited emergency exam (truly free; FL 72-hour statement)",
+          "photo_scene": "Calm dentist at the chair",
+          "sell_the_outcome_line": "Back to eating and smiling, fast."
+        }
+      ],
+      "compliance_flags": [
+        "'Same-day' must be substantiated.",
+        "FL 456.062 statement on free/discounted emergency exams; IL no-charge rule at free visits.",
+        "Medicare/Medicaid patients: free exam value within OIG nominal limits."
+      ],
+      "evidence": [
+        "GOLD-dental-006/018/063",
+        "EPPM (Witte 1992)"
+      ],
+      "evidence_strength": "moderate principle; card-level thin"
+    },
+    {
+      "offer_type": "benefits_expire_year_end",
+      "primary_emotion": "loss aversion / urgency",
+      "why": "A real deadline for calendar-year plans (seasonally relevant Nov-Dec). Loss framing of benefits already paid for.",
+      "headline_offer_patterns": [
+        "'Use your dental benefits before they reset'",
+        "'Don't leave your benefits on the table'"
+      ],
+      "reinforcing_photo": "Calendar with the reset date circled; happy patient at checkout",
+      "what_backfires": "Claiming all plans expire Dec 31; insurer look-alike design",
+      "combos": [
+        {
+          "headline": "Use your benefits before they reset.",
+          "offer": "Book by [date]; we file your claim",
+          "photo_scene": "Wall calendar with Dec 31 circled",
+          "sell_the_outcome_line": "Start the new year with a healthy smile you already paid for."
+        },
+        {
+          "headline": "Your benefits are use-it-or-lose-it.",
+          "offer": "Free benefits check + cleaning appointment",
+          "photo_scene": "Front desk staff with a patient, smiling",
+          "sell_the_outcome_line": "Get every dollar of care you've earned."
+        },
+        {
+          "headline": "Last call for this year's cleaning.",
+          "offer": "Evening/Saturday appointments [if true] before [date]",
+          "photo_scene": "Bright operatory at dusk",
+          "sell_the_outcome_line": "Done before the holidays, nothing wasted."
+        }
+      ],
+      "compliance_flags": [
+        "Say 'if your plan resets on a calendar year'; unused maximums usually don't carry over, but check the plan (not verified for all plans).",
+        "No insurer logos or official-notice styling (39 USC 3001; FTC s.5)."
+      ],
+      "evidence": [
+        "GOLD-dental-002/013",
+        "Loss aversion; fresh start (Dai et al. 2014)"
+      ],
+      "evidence_strength": "directional + strong principle"
+    },
+    {
+      "offer_type": "new_mover_welcome",
+      "primary_emotion": "belonging / relief",
+      "why": "Moving breaks habits (Verplanken & Wood 2006); movers must pick a new dentist.",
+      "headline_offer_patterns": [
+        "'Welcome to the neighborhood'",
+        "'Your new dental home'"
+      ],
+      "reinforcing_photo": "Real team in front of the real office",
+      "what_backfires": "Generic stock family; no face of the doctor",
+      "combos": [
+        {
+          "headline": "New to [town]? Meet your new dental home.",
+          "offer": "$[X] new-patient visit for new neighbors",
+          "photo_scene": "Team waving outside the office",
+          "sell_the_outcome_line": "One less thing to figure out in your new town."
+        },
+        {
+          "headline": "Welcome home. We saved you a chair.",
+          "offer": "Free electric toothbrush with first visit",
+          "photo_scene": "Doctor at the front door",
+          "sell_the_outcome_line": "A dentist who knows your family by name."
+        },
+        {
+          "headline": "Your new neighbors trust us.",
+          "offer": "$[X] family new-patient special",
+          "photo_scene": "Kids high-fiving the hygienist (with authorization)",
+          "sell_the_outcome_line": "Settled in, smiles covered."
+        }
+      ],
+      "compliance_flags": [
+        "Toothbrush gift fine; to Medicare/Medicaid patients keep within $15/item, $75/year.",
+        "Social proof ('neighbors trust us') needs a real basis (e.g., actual patient count)."
+      ],
+      "evidence": [
+        "SRC-VERPLANKEN-WOOD-2006",
+        "GOLD-dental-045/048/067",
+        "MMR-285 (PostcardMania) - agency-only unverified"
+      ],
+      "evidence_strength": "moderate principle; vendor-only card evidence"
+    },
+    {
+      "offer_type": "membership_plan_uninsured",
+      "primary_emotion": "security / smart-shopper relief",
+      "why": "For the uninsured, a predictable annual fee answers the cost barrier.",
+      "headline_offer_patterns": [
+        "'No insurance? Join our plan for $[X]/yr'",
+        "'Cleanings, exams and X-rays included'"
+      ],
+      "reinforcing_photo": "Family at the front desk; simple plan card graphic",
+      "what_backfires": "Calling it 'insurance'; hidden auto-renew",
+      "combos": [
+        {
+          "headline": "No insurance? No problem.",
+          "offer": "In-house plan $[X]/yr: 2 cleanings, exams, X-rays + [Y]% off treatment",
+          "photo_scene": "Plan card mock-up with a family",
+          "sell_the_outcome_line": "Care you can count on, at a price you know."
+        },
+        {
+          "headline": "Dental care, one simple yearly price.",
+          "offer": "$[X]/yr adults, $[Y]/yr kids",
+          "photo_scene": "Parent and child brushing",
+          "sell_the_outcome_line": "Healthy smiles without the insurance hassle."
+        },
+        {
+          "headline": "Skip the insurance maze.",
+          "offer": "Join today, first cleaning this month",
+          "photo_scene": "Smiling hygienist with membership card",
+          "sell_the_outcome_line": "Peace of mind for your whole family's smiles."
+        }
+      ],
+      "compliance_flags": [
+        "Don't call an in-house plan 'insurance'; some states regulate discount plans (not verified per state).",
+        "Auto-renew: state ARLs (e.g., CA 17602 as amended by AB 2863) and ROSCA online."
+      ],
+      "evidence": [
+        "GOLD-dental-036/043/052",
+        "contradictions.md MMR-064 membership soft expiry"
+      ],
+      "evidence_strength": "thin"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "Gold set is dominated by stacked multi-offer fronts (GOLD-dental-012/031/047/051) and MMR-284 credits a multi-offer card vs roofing round-5 votes for one offer per card",
+      "resolution": "No dental votes yet; votes from roofing are cross-vertical and directional. Default to one hero offer with secondary offers on the back, and test. Patrick's dental votes will override once they exist."
+    },
+    {
+      "conflict": "'Pain-free dentistry' (GOLD-dental-051) and 'lifetime guarantee' (GOLD-dental-026) vs state dental rules",
+      "resolution": "Compliance wins: use 'comfort-focused' and spell out any warranty terms; skip guarantees where the state bans them."
+    },
+    {
+      "conflict": "'$0 cleaning' / 'free with insurance' (GOLD-dental-020/065) vs OIG copay-waiver alert and NJ equal-offer rule",
+      "resolution": "Compliance wins: say 'Most PPO plans cover cleanings at 100%; we'll check yours' only if true, and never waive copays routinely."
+    },
+    {
+      "conflict": "Fear angle vs 'stay positive' healthcare conventions",
+      "resolution": "Emotion-agnostic: the fear data (72.6%) supports naming fear when paired with a real comfort action (EPPM). The client chooses."
+    }
+  ]
+}

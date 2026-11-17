@@ -1,0 +1,295 @@
+{
+  "schema_version": "1.1",
+  "slug": "vet-pet",
+  "industry": "Veterinary clinics, pet hospitals, urgent/ER, boarding/daycare, grooming, and related pet services",
+  "last_updated": "2026-11-03",
+  "words_and_claims_to_avoid": [
+    "'Specialist' / 'board-certified' / 'board eligible' unless the veterinarian currently holds and maintains certification from an AVMA ABVS-recognized specialty organization (AVMA PVME); use 'practice limited to' when not certified",
+    "'Cure' / disease-outcome guarantees for animals without substantiation; testimonials that imply typical medical results (FTC 16 CFR 255; AVMA PVME)",
+    "'$X value' on free exams unless that is the price actually charged (16 CFR 233/251) (common on GOLD-vet-pet-001/006/017)",
+    "Stacking five+ unrelated coupon circles on the front that bury the hero offer (GOLD-vet-pet-001/039 pattern vs roofing round-5 one-offer preference)",
+    "Advertising DEA controlled substances (opioids, ketamine, etc.) as consumer mail offers; keep drug talk to general preventive categories only when legally marketable",
+    "'Fear-Free' / trademarked certifications unless the practice actually holds them",
+    "Fake scarcity on boarding ('only 2 spots') unless capacity is truly limited"
+  ],
+  "compliance_notes": [
+    "AVMA Principles of Veterinary Medical Ethics: advertising must not be false, deceptive, or misleading (including by material omission); testimonials should be readily verifiable; follow FTC endorsement guides; 'specialist' reserved for current board certification; no 'board eligible/qualified'.",
+    "State veterinary boards add advertising rules (varies by state); verify local rules before 'best vet', superiority, or guarantee language.",
+    "FTC Act s.5 + 16 CFR 255 (2023) + Consumer Reviews and Testimonials Rule: real clients, material connections disclosed, typical-results implied by testimonials.",
+    "16 CFR 251/233: 'free' and former-price/'value' claims need real regular prices and clear conditions next to the offer.",
+    "Wellness-plan auto-renewals: disclose price, what's included, how to cancel (ROSCA for online signup; state ARL where applicable, e.g. California).",
+    "Children's photos of kids with pets need parent consent; pet photos of clients need owner permission.",
+    "Do not imply government endorsement or official 'pet census' mail (39 USC 3001)."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear, love, relief, belonging are all options when they fit and stay legal; the client chooses.",
+    "Only laws/compliance are hard limits.",
+    "Every angle and every emotion_by_offer combo carries a sell_the_outcome_line.",
+    "Unverified (agency-only) results are labeled; never quote them as fact on a card."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "free_or_discounted_first_exam",
+      "primary_emotion": "relief / smart-shopper confidence",
+      "why": "Removes the #1 cost barrier for the first step into the clinic; converts on the experience and treatment plan, not the coupon alone.",
+      "headline_offer_patterns": [
+        "'First exam free'",
+        "'50% off first wellness exam'",
+        "'New client exam $[X]'"
+      ],
+      "reinforcing_photo": "Calm exam with real staff and a relaxed pet",
+      "what_backfires": "Hidden 'exam only' exclusions in microtype; '$X value' that isn't a real price; stacked 6-coupon fronts",
+      "combos": [
+        {
+          "headline": "First wellness exam: $[X].",
+          "offer": "New-client wellness exam $[X] (exam only; vaccines/labs extra) through [date]",
+          "photo_scene": "Vet listening to a dog's chest while owner watches",
+          "sell_the_outcome_line": "Know your pet is healthy, without fearing the walk-in price."
+        },
+        {
+          "headline": "All wet noses welcome.",
+          "offer": "50% off your pet's first exam",
+          "photo_scene": "Happy dog at reception with a tech kneeling",
+          "sell_the_outcome_line": "A soft landing for a first visit, and a plan you understand."
+        },
+        {
+          "headline": "Free first office visit for new clients.",
+          "offer": "Free introductory office visit (state inclusions; expires [date])",
+          "photo_scene": "Cat being gently examined on a towel",
+          "sell_the_outcome_line": "Start care today, and leave with clarity not sticker shock."
+        },
+        {
+          "headline": "When was the last checkup?",
+          "offer": "10% off exams for new clients",
+          "photo_scene": "Owner hugging a senior dog",
+          "sell_the_outcome_line": "Catch small problems before they become scary ones."
+        }
+      ],
+      "compliance_flags": [
+        "16 CFR 251/233: disclose what 'free'/'value' means next to the offer; regular price must be real.",
+        "Do not imply the free exam includes surgery, labs, or controlled meds unless it does."
+      ],
+      "evidence": [
+        "SRC-GALLUP-PETSMART-2025",
+        "GOLD-vet-pet-001/006/010/013/017/068"
+      ],
+      "evidence_strength": "strong barrier; card-level directional"
+    },
+    {
+      "offer_type": "wellness_plan_membership",
+      "primary_emotion": "relief / predictability",
+      "why": "Spreads preventive cost into a monthly habit; pairs with Watson-style routine conditioning.",
+      "headline_offer_patterns": [
+        "'Essential wellness from $[X]/mo'",
+        "'First month free'",
+        "'50% off wellness plan fee'"
+      ],
+      "reinforcing_photo": "Pet receiving preventive care or owner reviewing a simple plan sheet",
+      "what_backfires": "Buried auto-renew; unclear what's included; hard cancellation",
+      "combos": [
+        {
+          "headline": "Preventive care, one monthly price.",
+          "offer": "Wellness plans from $[X]/mo; first month free; cancel terms printed",
+          "photo_scene": "Staff showing a printed plan checklist to an owner",
+          "sell_the_outcome_line": "Budget for health, not emergencies."
+        },
+        {
+          "headline": "50% off your wellness plan fee.",
+          "offer": "New-plan signup: 50% off enrollment fee through [date]",
+          "photo_scene": "Dog getting a treat after vaccines",
+          "sell_the_outcome_line": "Stay ahead of illness without a surprise bill every visit."
+        },
+        {
+          "headline": "Lock in yearly care for less stress.",
+          "offer": "Exam + core preventives bundled; month-to-month option stated",
+          "photo_scene": "Cat carrier open, calm cat, smiling tech",
+          "sell_the_outcome_line": "More good years together, on a schedule you can keep."
+        }
+      ],
+      "compliance_flags": [
+        "Auto-renew disclosures and easy cancel (ROSCA online; state ARL where applicable).",
+        "List inclusions/exclusions; don't call it 'insurance' unless it is."
+      ],
+      "evidence": [
+        "GOLD-vet-pet-001/062",
+        "SRC-GALLUP-PETSMART-2025"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "dental_or_procedure_promo",
+      "primary_emotion": "love / mild fear of preventable pain",
+      "why": "Seasonal dental/spay promos are common; sell comfort and longevity, not graphic pathology unless the client chooses a stronger fear frame and stays factual.",
+      "headline_offer_patterns": [
+        "'$50 off dental cleaning'",
+        "'25% off spay/neuter through [month]'",
+        "'$50 off dental exam & cleaning'"
+      ],
+      "reinforcing_photo": "Bright, clean dental suite or a pet with visibly comfortable demeanor post-care (no gore)",
+      "what_backfires": "Guaranteed medical outcomes; before/after disease photos presented as typical; omitting anesthesia/risks when required by state rules",
+      "combos": [
+        {
+          "headline": "Dental month: cleaner teeth, happier meals.",
+          "offer": "$[X] off routine dental cleaning through [date] (exam required)",
+          "photo_scene": "Dog happily eating after a checkup",
+          "sell_the_outcome_line": "Fresher breath and fewer painful mouth problems ahead."
+        },
+        {
+          "headline": "Spay/neuter special this month.",
+          "offer": "$[X] off spay/neuter through [date]",
+          "photo_scene": "Healthy young dog with owner on a walk",
+          "sell_the_outcome_line": "Protect their future health, and keep your household calmer."
+        },
+        {
+          "headline": "New clients: $50 off dental exam & cleaning.",
+          "offer": "$50 off dental exam & cleaning (or free first exam alternative)",
+          "photo_scene": "Vet gently lifting a lip to show clean teeth (non-graphic)",
+          "sell_the_outcome_line": "Comfortable chewing again, and a cleaner bill of health."
+        }
+      ],
+      "compliance_flags": [
+        "No outcome guarantees; anesthesia and eligibility rules disclosed as required by state board.",
+        "FTC 255 if using patient testimonials."
+      ],
+      "evidence": [
+        "GOLD-vet-pet-011/024/058/067",
+        "SRC-AVMA-PVME"
+      ],
+      "evidence_strength": "directional (gold) + ethics rules verified"
+    },
+    {
+      "offer_type": "boarding_daycare_travel",
+      "primary_emotion": "guilt-relief / love",
+      "why": "Travel forces a decision; parents buy reassurance the pet will be safe and enriched.",
+      "headline_offer_patterns": [
+        "'15% off first stay'",
+        "'First day of daycare free'",
+        "'$10 off boarding for new customers'"
+      ],
+      "reinforcing_photo": "Play groups with staff supervision; cams if real",
+      "what_backfires": "Hiding vaccine requirements; overcrowded photos that look chaotic; fake 'limited space' without a real cap",
+      "combos": [
+        {
+          "headline": "Going on vacation? Your pet should too.",
+          "offer": "15% off your pet's first stay",
+          "photo_scene": "Dogs playing in a fenced yard with a staff member",
+          "sell_the_outcome_line": "Enjoy your trip knowing they're playing, not just waiting."
+        },
+        {
+          "headline": "First day of daycare free.",
+          "offer": "First day free (vaccinations required)",
+          "photo_scene": "Happy dog mid-play with a toy",
+          "sell_the_outcome_line": "A tired, happy dog and a quieter house when you get home."
+        },
+        {
+          "headline": "Reserve boarding before the holidays fill up.",
+          "offer": "$10 off boarding for new customers; real capacity note",
+          "photo_scene": "Clean indoor suite with a bed and water",
+          "sell_the_outcome_line": "A safe home away from home when you can't be there."
+        }
+      ],
+      "compliance_flags": [
+        "State vaccine and licensing requirements for boarding; print key requirements near the offer.",
+        "Scarcity must be real."
+      ],
+      "evidence": [
+        "GOLD-vet-pet-034/036/046/070"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "grooming_new_client",
+      "primary_emotion": "pride / affection / relief",
+      "why": "Appearance and comfort outcomes are immediate and photo-friendly; common gold offer.",
+      "headline_offer_patterns": [
+        "'10–20% off first groom'",
+        "'Free nail trim with full groom'",
+        "'30% off for new neighbors'"
+      ],
+      "reinforcing_photo": "Freshly groomed pet looking proud; real groomer in frame",
+      "what_backfires": "Breed-result guarantees; before/after that imply typical dramatic transformation without disclosure",
+      "combos": [
+        {
+          "headline": "Treat them to the best haircut in town.",
+          "offer": "10% off first grooming (expires [date])",
+          "photo_scene": "Groomer finishing a neat trim, pet calm",
+          "sell_the_outcome_line": "A pet that looks loved, and feels comfortable in their coat."
+        },
+        {
+          "headline": "Welcome, neighbor: 30% off grooming.",
+          "offer": "30% off first grooming for new movers",
+          "photo_scene": "Fluffy dog on a grooming table with a smile",
+          "sell_the_outcome_line": "Look neighborhood-ready without the shed-everywhere stress."
+        },
+        {
+          "headline": "Free nail trim with a full groom.",
+          "offer": "Free nail trim when you book a full-service package",
+          "photo_scene": "Tech gently trimming nails",
+          "sell_the_outcome_line": "Softer paws on your floors, and a pet who walks easier."
+        }
+      ],
+      "compliance_flags": [
+        "Price/% claims need real base prices; testimonials need FTC 255 compliance."
+      ],
+      "evidence": [
+        "GOLD-vet-pet-012/016/054/055/060"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "new_mover_welcome",
+      "primary_emotion": "belonging / relief",
+      "why": "Movers need a local vet fast; habit discontinuity opens the window.",
+      "headline_offer_patterns": [
+        "'New to town? Free welcome exam'",
+        "'Welcome neighbor' grooming/boarding bundle",
+        "'We welcome you and your pet'"
+      ],
+      "reinforcing_photo": "Team outside the real clinic; local street cue",
+      "what_backfires": "Targeting rented lists without CAN-SPAM/mail compliance hygiene; overclaiming 'everyone's favorite vet'",
+      "combos": [
+        {
+          "headline": "New to [town]? Let's make your pet feel at home.",
+          "offer": "Free welcome exam (scan to book)",
+          "photo_scene": "Clinic exterior with staff waving and a leashed dog",
+          "sell_the_outcome_line": "Your pet's new medical home, sorted in one visit."
+        },
+        {
+          "headline": "Welcome to the neighborhood!",
+          "offer": "First checkup free + printed secondary wellness perks on back",
+          "photo_scene": "Map pin over the clinic + friendly team photo",
+          "sell_the_outcome_line": "One less errand in a new city: a vet you already trust."
+        },
+        {
+          "headline": "We welcome you and your pet.",
+          "offer": "New-client specials: free 1st exam or $[X] off dental",
+          "photo_scene": "Receptionist greeting an owner and carrier",
+          "sell_the_outcome_line": "Settle in faster, with your pet's care already covered."
+        }
+      ],
+      "compliance_flags": [
+        "No government look-alike 'official welcome' packets (39 USC 3001).",
+        "Offer geography/time limits must be real."
+      ],
+      "evidence": [
+        "GOLD-vet-pet-005/058/060/072",
+        "SRC-VERPLANKEN-WOOD-2006"
+      ],
+      "evidence_strength": "moderate principle; vendor card results unverified"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "Gold fronts often stack 4–6 coupon circles (GOLD-vet-pet-001/039/055) vs roofing round-5 preference for one clear offer",
+      "resolution": "No vet votes yet; default to one hero offer on the front and secondary offers on the back; Patrick's votes override once they exist."
+    },
+    {
+      "conflict": "'Board-certified' / 'specialist' language in some clinic marketing vs AVMA PVME specialty rules",
+      "resolution": "Compliance wins: only current ABVS-recognized diplomates use specialist/board-certified; others use 'practice limited to'."
+    },
+    {
+      "conflict": "Vendor-published ROI/response on PostcardMania/OMNI cases vs need for verified evidence",
+      "resolution": "Label agency-only unverified; never print those numbers on client cards as proof."
+    }
+  ]
+}

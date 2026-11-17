@@ -1,0 +1,350 @@
+{
+  "schema_version": "1.1",
+  "slug": "hvac",
+  "industry": "HVAC (heating & cooling)",
+  "last_updated": "2026-11-02",
+  "words_and_claims_to_avoid": [
+    "Government look-alike design, 'official notice', fake checks or invoices (39 USC 3001)",
+    "Unsubstantiated 'best', '#1', 'guaranteed savings', percent-savings claims (FTC Act s.5)",
+    "Invented or composite testimonials, star ratings or review counts (16 CFR 255)",
+    "'Free' unless it truly costs nothing and carries no hidden obligation",
+    "Fake expiration dates or fake scarcity; any deadline printed must be real",
+    "Demographic/age targeting language (e.g., 'seniors', 'retirees') unless the client has evidence it fits their actual buyers",
+    "Federal tax-credit claims for heat pumps/AC/furnaces: the 25C Energy Efficient Home Improvement Credit ended for property placed in service after Dec 31, 2025",
+    "'Government program' or utility-affiliation implications",
+    "Percent-savings claims without substantiation",
+    "'Upcoming federal mandates will increase prices up to 24%' (GOLD-hvac-018): unsubstantiated percentage, and EPA's July 2026 rule removed the R-410A install deadline for pre-2025 inventory",
+    "'R-410A is banned' / 'you must replace your system': repair and component replacement remain legal",
+    "Health claims for IAQ products ('Breathe Pure', 'kills viruses', 'allergy relief') without competent and reliable scientific evidence (GOLD-hvac-052)",
+    "'Rebates available' / 'Up to $X in rebates' unless the client names a currently open program (GOLD-hvac-024/044)"
+  ],
+  "compliance_notes": [
+    "If the sale closes in the home: FTC Cooling-Off Rule (16 CFR 429) applies to $25+ in-home sales; the client's contract must carry the 3-day cancel notice. States can add longer windows (e.g., California's 5-day window for buyers 65+ is documented for solar contracts).",
+    "Print the client's contractor license number where the state requires it in ads; requirements vary by state, and the client must confirm their own state's rule (we only verified the specific state rules named below).",
+    "Any discount must be off a real, recently charged price.",
+    "IRS: 25C not allowed for property placed in service after 12/31/2025 (OBBB, P.L. 119-21). Any 2026+ card must NOT reference a federal tax credit for HVAC. State/utility rebates only if the client verifies the current program.",
+    "ENERGY STAR mark only per EPA brand rules; never imply you are EPA.",
+    "Repair visits the buyer requested are excluded from Cooling-Off, but upsold equipment during the visit is covered.",
+    "Reg Z, 12 CFR 1026.24 (verified): if a card states a down payment amount or %, the number of payments or repayment period (e.g., 'for 18 months', 'no payments for 12 months'), a payment amount ('$99/mo'), or a finance charge amount, it must also state the down payment, the full repayment terms and the 'annual percentage rate' using that term. Any rate (e.g., '0%') must be stated as an APR. Terms must be ones actually offered. Safe alternative: 'Financing available', which uses no trigger terms. Have the lender review.",
+    "FTC 'Free' Guide, 16 CFR 251 (verified): (1) 'free with purchase' means the paid item is at its regular price (sold openly for about 30 days), with no markup or downgrade to cover the free item; (2) all conditions go right next to the offer, not in an asterisk footnote; (3) if the main job is priced by negotiation or bid (typical for roofs, siding and window packages), 'free [item] with purchase' is improper; (4) don't run the same 'free' offer more than 6 months in any 12; (5) 'gift' or 'bonus' wording doesn't cure a deceptive 'free'.",
+    "Warranty ads, 16 CFR 239 + 702 (verified): 'lifetime/life' must say whose or what life (239.4); 'satisfaction/money-back guarantee' only if the full price is refunded on request, with conditions disclosed (239.3); advertise a warranty only if it is promptly honored (239.5). For consumer products over $15 with a written warranty, the terms must be available before sale; door-to-door sellers must tell buyers before closing that copies are available (702.3); ads should say where the full warranty can be seen (239.2).",
+    "EPA Technology Transitions (verified 2026-11-02): final rule published 5/26/2026, effective 7/27/2026, removes the 1/1/2026 installation deadline for residential/light-commercial AC and heat-pump split systems whose specified components were all made or imported before 1/1/2025; that inventory may be installed until depleted. Other new systems must use refrigerant under 700 GWP. Homeowners may repair and replace components of existing R-410A systems. Note: EPA's FAQ page still shows the old 1/1/2026 text; the Federal Register rule wins.",
+    "IRA home energy rebates (HEAR/HOMES), checked 2026-11-02: most states not open, paused or waitlisted; DOE revised rules effective 9/1/2026 bar HEAR electric-appliance rebates for oil/gas-to-electric fuel switching (electric-to-electric or new construction only) per NEFI trade-association summary. Do not print 'rebates available' unless the client's state program is open and the job qualifies.",
+    "FTC 'Free' Guide applies to 'FREE service call with repair' (GOLD-hvac-040/045): the repair must be at the regular price, conditions next to the offer.",
+    "Maintenance memberships with automatic renewal: ROSCA (15 USC 8403) for online sign-ups plus state auto-renewal laws (e.g., California Bus. & Prof. 17602, amended by AB 2863 for contracts on/after 7/1/2025): clear terms, express consent, easy cancellation. FTC 2024 'click-to-cancel' amendments were vacated (8th Cir., July 2025); FTC ANPRM March 2026, no new rule yet.",
+    "Gift card tied to financing (GOLD-hvac-057 '$500 gift card with financing'): have the lender review whether it affects Reg Z disclosures; we did not verify a rule on this specific pattern.",
+    "'10% off seniors & veterans' (GOLD-hvac-026/045) is a real discount and lawful if honored; it is not evidence that age targeting works (no verified study)."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear, joy, pride, relief are all options; the client chooses.",
+    "Only laws/compliance are hard limits.",
+    "Every angle carries a sell-the-outcome line.",
+    "Unverified (agency-only) results are labeled; never quote them as fact on a card."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "seasonal_tuneup",
+      "primary_emotion": "foresight / relief (avoid the breakdown)",
+      "why": "Seasonal service windows train customers to buy ahead (Girl Scout cookie-season pattern, campaign-library-mando-verticals.md). 5 of 11 HVAC gold pieces are seasonal tune-ups (GOLD-hvac-001, 006, 009, 011).",
+      "headline_offer_patterns": [
+        "'$[X] [season] tune-up'",
+        "'It's time for your furnace tune-up'"
+      ],
+      "reinforcing_photo": "Tech servicing the outdoor condenser (summer) or furnace (winter)",
+      "what_backfires": "Coupon walls with 6+ offers (GOLD-hvac-002) dilute the main offer (C-3PO accent-inflation note)",
+      "combos": [
+        {
+          "headline": "Your AC picks the worst day to quit. Beat it.",
+          "offer": "$[X] pre-summer tune-up",
+          "photo_scene": "Tech at the condenser in bright sun",
+          "sell_the_outcome_line": "Cool, easy nights all summer."
+        },
+        {
+          "headline": "Don't forget: it's furnace tune-up time.",
+          "offer": "$[X] [N]-point tune-up",
+          "photo_scene": "Tech at the furnace, warm interior light",
+          "sell_the_outcome_line": "Warm mornings all winter, with no surprises."
+        },
+        {
+          "headline": "Book before the first heat wave.",
+          "offer": "$[X] tune-up, real end date",
+          "photo_scene": "Family relaxed indoors, heat shimmer outside",
+          "sell_the_outcome_line": "Comfort that's ready before you need it."
+        },
+        {
+          "headline": "Pick your tune-up. Skip the breakdown.",
+          "offer": "Good $[X] / Better $[Y] / Best $[Z] tune-up (real prices)",
+          "photo_scene": "Tech with gauges at the condenser, homeowner in the background",
+          "sell_the_outcome_line": "Walk into a cool house on the hottest day of the year."
+        }
+      ],
+      "compliance_flags": [
+        "Seasonal deadlines must be real.",
+        "'[N]-point' must match the actual checklist."
+      ],
+      "evidence": [
+        "GOLD-hvac-001, 006, 009, 011 (vendor; response UNKNOWN)",
+        "campaign-library-mando-verticals.md seasonal window",
+        "GOLD-hvac-042/054 tiered tune-up ladders (response UNKNOWN); GOLD-hvac-026/045 PostcardMania vendor-reported results (agency-only unverified)"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "dollar_off_system",
+      "primary_emotion": "anticipation / smart-shopper pride",
+      "why": "Specific dollar figures anchor value. GOLD-hvac-004, 007 and 008 lead with $500/$750 off.",
+      "headline_offer_patterns": [
+        "'Save $[X] when you replace your system'"
+      ],
+      "reinforcing_photo": "New unit freshly installed, tech beside it",
+      "what_backfires": "Fear-based replacement claims that misstate regulations (GOLD-hvac-004 R-22)",
+      "combos": [
+        {
+          "headline": "Save $[X] on a new system.",
+          "offer": "$[X] off complete install",
+          "photo_scene": "New condenser, tech checking it",
+          "sell_the_outcome_line": "A quieter, more comfortable home for years."
+        },
+        {
+          "headline": "Old system? Your bill may be paying for it.",
+          "offer": "$[X] off a high-efficiency system",
+          "photo_scene": "Tech with a new unit",
+          "sell_the_outcome_line": "Comfort that costs less to run, if substantiated."
+        },
+        {
+          "headline": "Spring savings: $[X] off a new system.",
+          "offer": "$[X] off, real end date",
+          "photo_scene": "Family on the couch, comfortable",
+          "sell_the_outcome_line": "Every room just right, all year."
+        }
+      ],
+      "compliance_flags": [
+        "Efficiency and savings claims need substantiation.",
+        "No federal 25C tax-credit claims (ended 12/31/2025)."
+      ],
+      "evidence": [
+        "GOLD-hvac-004, 007, 008"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "financing",
+      "primary_emotion": "relief (affordability) as a secondary line",
+      "why": "GOLD-hvac-005 leads with 'Financing with 0% interest!'. Roofing round 5 suggests financing-first headlines frame the purchase as debt (cross-vertical inference, not tested in HVAC).",
+      "headline_offer_patterns": [
+        "Outcome headline + '0% for [N] months' in the offer bar"
+      ],
+      "reinforcing_photo": "New system installed",
+      "what_backfires": "Headline leads with the loan",
+      "combos": [
+        {
+          "headline": "Comfort now. Easy monthly payments.",
+          "offer": "0% APR for [N] months, with full Reg Z terms",
+          "photo_scene": "Family comfortable indoors",
+          "sell_the_outcome_line": "Cool now, with payments that fit."
+        },
+        {
+          "headline": "Beat the heat this summer.",
+          "offer": "Financing available, ask for terms",
+          "photo_scene": "Tech installing a unit",
+          "sell_the_outcome_line": "No more sweating the breakdown or the bill."
+        },
+        {
+          "headline": "A new system without the big check.",
+          "offer": "Payments from $[X]/mo with terms",
+          "photo_scene": "New unit installed",
+          "sell_the_outcome_line": "Comfort today, budget intact."
+        }
+      ],
+      "compliance_flags": [
+        "Reg Z, 12 CFR 1026.24 (verified): if a card states a down payment amount or %, the number of payments or repayment period (e.g., 'for 18 months', 'no payments for 12 months'), a payment amount ('$99/mo'), or a finance charge amount, it must also state the down payment, the full repayment terms and the 'annual percentage rate' using that term. Any rate (e.g., '0%') must be stated as an APR. Terms must be ones actually offered. Safe alternative: 'Financing available', which uses no trigger terms. Have the lender review."
+      ],
+      "evidence": [
+        "GOLD-hvac-005",
+        "Patrick round 5 votes (feedback/roofing-round5.md; one voter, directional) (roofing, cross-vertical)"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "new_customer_neighbor",
+      "primary_emotion": "belonging / trust",
+      "why": "'We're in your neighborhood' and 'Pardon our trucks' use local social proof (GOLD-hvac-009, 010). Mando's earlier library also documents handwritten job-radius mail for HVAC.",
+      "headline_offer_patterns": [
+        "'Pardon our trucks. We're fixing your neighbor's HVAC!'"
+      ],
+      "reinforcing_photo": "Branded truck on a real local street",
+      "what_backfires": "Generic 'new customer' with no local cue",
+      "combos": [
+        {
+          "headline": "Pardon our trucks. We're fixing your neighbor's AC.",
+          "offer": "$[X] off for neighbors this month",
+          "photo_scene": "Branded van in a driveway on the street",
+          "sell_the_outcome_line": "The same reliable comfort your neighbors trust."
+        },
+        {
+          "headline": "We're in your neighborhood this week.",
+          "offer": "$[X] tune-up",
+          "photo_scene": "Tech walking up a local driveway",
+          "sell_the_outcome_line": "Fast help from people already nearby."
+        },
+        {
+          "headline": "New customer? Welcome.",
+          "offer": "[X]% off first service, with real terms",
+          "photo_scene": "Tech greeting a homeowner at the door",
+          "sell_the_outcome_line": "One call and it's handled."
+        }
+      ],
+      "compliance_flags": [
+        "Only claim nearby jobs that happened."
+      ],
+      "evidence": [
+        "GOLD-hvac-009, 010",
+        "Mando syntheses (HVAC radius, Day-18)"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "guarantee",
+      "primary_emotion": "trust / risk reversal",
+      "why": "Benjamin Franklin's punctuality guarantee pattern; GOLD-hvac-005 '100% customer satisfaction'.",
+      "headline_offer_patterns": [
+        "Specific guarantee with terms"
+      ],
+      "reinforcing_photo": "Uniformed tech at the door",
+      "what_backfires": "'100% satisfaction' with no terms",
+      "combos": [
+        {
+          "headline": "On time, or the visit's on us.",
+          "offer": "Real punctuality guarantee",
+          "photo_scene": "Tech checking a watch at the door",
+          "sell_the_outcome_line": "Your day stays on schedule."
+        },
+        {
+          "headline": "Fixed right the first time, or we come back at no charge.",
+          "offer": "Guarantee terms on the back",
+          "photo_scene": "Tech at work",
+          "sell_the_outcome_line": "Comfort you can count on."
+        },
+        {
+          "headline": "Experts you can trust.",
+          "offer": "Free second opinion",
+          "photo_scene": "Tech explaining to a homeowner",
+          "sell_the_outcome_line": "No guesswork, no surprises."
+        }
+      ],
+      "compliance_flags": [
+        "Guarantee terms disclosed and honored."
+      ],
+      "evidence": [
+        "Benjamin Franklin guarantees (plumbing, cross-vertical)",
+        "GOLD-hvac-005"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "emergency_24_7",
+      "primary_emotion": "fear -> relief",
+      "why": "No-heat/no-cool is an acute loss; the card must be kept for the moment it happens (magnet/fridge utility). EPPM: threat + immediate, easy action.",
+      "headline_offer_patterns": [
+        "'No heat at 2 a.m.? We answer.'",
+        "'24/7 service' badge + one phone number big"
+      ],
+      "reinforcing_photo": "Technician arriving at a front door at night with a flashlight/van lights; or tech at a furnace",
+      "what_backfires": "Fake countdowns or 'emergency alert' styling; promising response times the client can't meet",
+      "combos": [
+        {
+          "headline": "No heat? We answer at 2 a.m.",
+          "offer": "24/7 service; $[X] off any repair",
+          "photo_scene": "Tech at the front door at night, porch light on",
+          "sell_the_outcome_line": "Your family warm again tonight, not next Tuesday."
+        },
+        {
+          "headline": "Keep this card. You'll be glad you did.",
+          "offer": "Free service call with any repair (regular repair prices)",
+          "photo_scene": "Magnet-style card mock-up on a fridge",
+          "sell_the_outcome_line": "One call and it's handled."
+        },
+        {
+          "headline": "When the AC quits, we don't.",
+          "offer": "Same-day service [if true] + $[X] off",
+          "photo_scene": "Tech on a ladder at an air handler (GOLD-hvac-017)",
+          "sell_the_outcome_line": "A cool, quiet house by bedtime."
+        }
+      ],
+      "compliance_flags": [
+        "'Same-day'/response-time claims need substantiation (FTC s.5).",
+        "Emergency in-home sales: Cooling-Off Rule exception needs the buyer's signed handwritten waiver; upsells are covered."
+      ],
+      "evidence": [
+        "GOLD-hvac-017 (real campaign, response UNKNOWN)",
+        "EPPM (Witte 1992)"
+      ],
+      "evidence_strength": "moderate principle; card-level thin"
+    },
+    {
+      "offer_type": "maintenance_membership",
+      "primary_emotion": "security / belonging",
+      "why": "Recurring relationship; 'member' status signals priority. Commitment/consistency once joined.",
+      "headline_offer_patterns": [
+        "'Members never wait'",
+        "'Join the Comfort Club for $[X]/mo'"
+      ],
+      "reinforcing_photo": "Handshake at the condenser; membership card object",
+      "what_backfires": "Hidden auto-renew or hard cancellation (legal risk and resentment); too many perks listed",
+      "combos": [
+        {
+          "headline": "Two visits a year. Zero surprises.",
+          "offer": "Comfort Club $[X]/mo: 2 tune-ups, priority service, [Y]% off repairs; cancel anytime",
+          "photo_scene": "Tech + homeowner handshake",
+          "sell_the_outcome_line": "Comfort you never have to think about."
+        },
+        {
+          "headline": "Members skip the line.",
+          "offer": "Priority scheduling + free first tune-up when you join",
+          "photo_scene": "Tech van in a driveway, morning light",
+          "sell_the_outcome_line": "When it's 100 degrees, you're first."
+        },
+        {
+          "headline": "Your system's personal trainer.",
+          "offer": "Club membership, first month $[X]",
+          "photo_scene": "Tech cleaning coils, close-up",
+          "sell_the_outcome_line": "A system that lasts longer and runs quieter."
+        }
+      ],
+      "compliance_flags": [
+        "Auto-renew: state ARLs (e.g., CA 17602 as amended by AB 2863) + ROSCA online; print price, term, renewal and how to cancel.",
+        "'Free first tune-up' must follow 16 CFR 251."
+      ],
+      "evidence": [
+        "GOLD-hvac-005 'exclusive member' (real campaign, response UNKNOWN)"
+      ],
+      "evidence_strength": "thin (gold pattern) + moderate principle"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "GOLD-hvac-004 'If you have an R-22 model AC, the refrigeration has been banned!' vs EPA",
+      "resolution": "EPA wins. Production and import of R-22 ended 1/1/2020, but EPA says there is no ban on using or servicing existing R-22 systems. Accurate framing: 'R-22 is no longer produced; repairs can get pricier. Know your options.'"
+    },
+    {
+      "conflict": "GOLD-hvac-005 financing headline vs roofing round 5",
+      "resolution": "Roofing votes don't directly apply to HVAC. Default to financing as secondary and split-test."
+    },
+    {
+      "conflict": "GOLD-hvac-001/002 '$1,000 rebate' style offers vs 25C credit ending",
+      "resolution": "Only real, current utility or manufacturer rebates the client verifies. No federal credit."
+    },
+    {
+      "conflict": "GOLD-hvac-018 'federal mandates will increase prices up to 24%... beat the increase' vs EPA July 2026 rule and FTC substantiation",
+      "resolution": "Law/facts win. The 1/1/2026 install deadline was removed for pre-2025 inventory and the 24% figure is unsubstantiated. Urgency must come from season or a real promo deadline, not a regulatory scare."
+    },
+    {
+      "conflict": "GOLD-hvac-024/044 'rebates available / up to $1,700 in rebates' vs HEAR/HOMES mostly closed and the 9/1/2026 fuel-switching restriction",
+      "resolution": "Compliance wins: rebate mentions only when the client names an open program and the job qualifies."
+    },
+    {
+      "conflict": "GOLD-hvac-052 'Breathe Pure, Live Better' IAQ health framing vs FTC health-claim substantiation",
+      "resolution": "Sell the comfort outcome (fresher-feeling air, less dust) unless the client has competent and reliable scientific evidence for health claims."
+    }
+  ]
+}

@@ -1,0 +1,319 @@
+{
+  "schema_version": "1.1",
+  "slug": "outdoor-living",
+  "industry": "Outdoor living construction and hardscape (decks, patios, pavers, outdoor kitchens, pergolas/patio covers, fire features, decorative concrete, related outdoor structures)",
+  "last_updated": "2026-11-05",
+  "words_and_claims_to_avoid": [
+    "'Licensed/insured/bonded' if not currently true — print license number where state ads require it",
+    "'Starting at $X' based on a stripped project nobody buys without disclosing what that price includes",
+    "Unsubstantiated 'maintenance-free forever' / 50-year durability without manufacturer+install proof",
+    "'HOA approved' / 'permits included' if not true for the job",
+    "Fake storm or 'last build slot this year' urgency",
+    "Financing-first headlines that make the project feel like debt (roofing-round5 directional) without clear outcome",
+    "'$X/month' or '0% / no payments until…' without Reg Z required disclosures when triggering terms appear",
+    "Government inspection / permit-office look-alike mailers (39 USC 3001)",
+    "Before/after that exaggerate typical results without context"
+  ],
+  "compliance_notes": [
+    "Print contractor license numbers where the state requires them in advertising; client confirms their state rule.",
+    "FTC Act / 16 CFR 233: discounts and package prices need bona fide reference prices and clear scope (size, materials, exclusions).",
+    "'Starting at' / fixed package prices (e.g., 14x16 patio for $4998): define inclusions/exclusions so the price is not a bait.",
+    "Wood/composite/paver durability and warranty claims must match manufacturer and installer warranties actually offered.",
+    "HOA/permit: say 'we help with permits' only if true; never claim HOA approval before review.",
+    "Financing: 12 CFR 1026.24 — payment amount, finance charge, down payment, or number of payments can trigger required APR and term disclosures; state only terms actually available.",
+    "FTC Cooling-Off Rule (16 CFR 429): covered in-home sales $25+ generally need the 3-business-day cancel notice in the contract; states may add longer windows.",
+    "16 CFR 251: free design consult / free estimate conditions disclosed if purchase required.",
+    "39 USC 3001: no official city permit or inspection notice look-alikes."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: desire, pride, mild calendar urgency, relief are fine when legal.",
+    "Only laws/compliance are hard limits.",
+    "Every angle and emotion_by_offer combo carries sell_the_outcome_line.",
+    "Vendor ROI labeled agency-only unverified; never print as fact on a client card.",
+    "Prefer one finished outdoor hero + one offer + one QR (roofing-round5 directional).",
+    "No age/senior default."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "free_design_consult_or_estimate",
+      "primary_emotion": "anticipation / confidence",
+      "why": "Most common risk reducer in gold — free consultation, free quote, free on-site analysis, 3D design consult.",
+      "headline_offer_patterns": [
+        "'Free consultation & design'",
+        "'Complimentary Masterpiece Consultation'",
+        "'Free quote'",
+        "'Free no-obligation 3D design consultation'"
+      ],
+      "reinforcing_photo": "Designer on-site with tablet OR finished space that the consult leads to",
+      "what_backfires": "Hard-sell 'free' visits; promising 3D renders not actually provided",
+      "combos": [
+        {
+          "headline": "Outdoor living built beautiful.",
+          "offer": "Free consultation & design",
+          "photo_scene": "Overhead stone patio with fire pit and chairs",
+          "sell_the_outcome_line": "Leave the consult with a plan you can picture every evening."
+        },
+        {
+          "headline": "What would a new deck do for your home?",
+          "offer": "Complimentary design consultation",
+          "photo_scene": "Dusk covered deck with outdoor kitchen",
+          "sell_the_outcome_line": "See the layout before you commit a single board."
+        },
+        {
+          "headline": "Your backyard oasis starts with a plan.",
+          "offer": "Free no-obligation 3D design consultation",
+          "photo_scene": "Luxury patio dining under string lights",
+          "sell_the_outcome_line": "Walk the design in 3D — then decide with eyes open."
+        },
+        {
+          "headline": "Beautify your outdoors with custom pavers.",
+          "offer": "Schedule a free consultation today",
+          "photo_scene": "Curving paver walkway through a garden",
+          "sell_the_outcome_line": "Know the look and the number before work begins."
+        }
+      ],
+      "compliance_flags": [
+        "If 'free' requires a signed contract, disclose (16 CFR 251).",
+        "Only promise 3D/design deliverables you provide.",
+        "License number in ads where required."
+      ],
+      "evidence": [
+        "GOLD-outdoor-living-008/009/010/011/012/018/025"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "dollar_or_percent_off_project",
+      "primary_emotion": "smart relief / desire",
+      "why": "Gold uses concrete $400–$500 off over $4k–$5k thresholds, 10% off labor/patio, $200 off stamped patio.",
+      "headline_offer_patterns": [
+        "'$500 off projects over $5,000'",
+        "'$400 off any project over $4,000'",
+        "'10% off patio installation'",
+        "'$200 OFF your project'"
+      ],
+      "reinforcing_photo": "Finished project matching the offer category (patio/deck/wall)",
+      "what_backfires": "Thresholds that never apply; % off with no bona fide regular price; cluttered tier charts on the front",
+      "combos": [
+        {
+          "headline": "Built to last. Designed to impress.",
+          "offer": "Spring special: $500 off projects over $5,000 — ends [date]",
+          "photo_scene": "Paver patio with fire pit and Adirondack chairs",
+          "sell_the_outcome_line": "Save on the build that becomes your favorite room."
+        },
+        {
+          "headline": "Your dream backyard starts here.",
+          "offer": "$400 off any project over $4,000 — limited-time spring offer",
+          "photo_scene": "Seat wall and fire pit at dusk",
+          "sell_the_outcome_line": "Put the savings into the details you'll actually use."
+        },
+        {
+          "headline": "Improve value and beauty with pavers.",
+          "offer": "10% off patio installation + free estimates",
+          "photo_scene": "Grid or hero of completed lit patio",
+          "sell_the_outcome_line": "A yard you're proud to show — for less than full price."
+        },
+        {
+          "headline": "Decorative concrete, done right.",
+          "offer": "$200 off your project (min scope disclosed)",
+          "photo_scene": "Stamped patio with pergola and furniture",
+          "sell_the_outcome_line": "A finished surface that invites bare feet and company."
+        }
+      ],
+      "compliance_flags": [
+        "Print minimum project size, end date, exclusions.",
+        "Bona fide regular prices (16 CFR 233).",
+        "One hero offer on the front."
+      ],
+      "evidence": [
+        "GOLD-outdoor-living-006/007/013/014/015"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "financing",
+      "primary_emotion": "ease / relief (keep outcome-led)",
+      "why": "Present in gold (no-interest/no-payments sunroom package; financing available badges) and common for big outdoor tickets — compliance-heavy.",
+      "headline_offer_patterns": [
+        "'Financing available'",
+        "'No interest, no payments until [date]'",
+        "'0% / monthly payments' (disclose fully)"
+      ],
+      "reinforcing_photo": "Finished outdoor space first; financing as support not the hero",
+      "what_backfires": "Debt-first headline with no outcome image (roofing-round5); missing APR/terms",
+      "combos": [
+        {
+          "headline": "Get away from it all without leaving home.",
+          "offer": "Ask about financing — example terms with APR disclosed",
+          "photo_scene": "Bright sunroom / covered patio lifestyle",
+          "sell_the_outcome_line": "Start evenings outdoors while the payments fit the month."
+        },
+        {
+          "headline": "Strength and style that lasts.",
+          "offer": "FREE quote; financing available (current programs)",
+          "photo_scene": "Retaining wall and patio at sunset",
+          "sell_the_outcome_line": "Build the space now — with terms that are printed clearly."
+        },
+        {
+          "headline": "Your deck this season — payments that make sense.",
+          "offer": "Promotional financing example: $[mo]/mo APR [X]% for [N] months (labeled example)",
+          "photo_scene": "Finished deck with family grilling",
+          "sell_the_outcome_line": "Enjoy the cookouts while the numbers stay understandable."
+        }
+      ],
+      "compliance_flags": [
+        "12 CFR 1026.24 triggering terms → disclose down payment, repayment terms, APR.",
+        "Only advertise terms actually available from the creditor.",
+        "Deferred interest: clear wording.",
+        "Keep creative outcome-led (Patrick/roofing-round5 directional)."
+      ],
+      "evidence": [
+        "GOLD-outdoor-living-024/026",
+        "SRC-REGZ-1026-24"
+      ],
+      "evidence_strength": "directional + strong compliance"
+    },
+    {
+      "offer_type": "seasonal_install_window",
+      "primary_emotion": "prudence / calendar urgency",
+      "why": "Spring specials and dated book-by windows recur; winter labor % appears in one real card.",
+      "headline_offer_patterns": [
+        "'Spring special — limited time'",
+        "'10% off labor for winter season (ends [date])'",
+        "'Book by [date] for [season] install'",
+        "'Deck season is now year-round' (if build method true)"
+      ],
+      "reinforcing_photo": "Season-true outdoor living in use",
+      "what_backfires": "Perpetual spring special in November; capacity lies",
+      "combos": [
+        {
+          "headline": "Spring backyard special.",
+          "offer": "$[X] off projects over $[N] booked by [date]",
+          "photo_scene": "Fresh patio with spring plantings",
+          "sell_the_outcome_line": "Be ready to host when the first warm weekends arrive."
+        },
+        {
+          "headline": "Winter booking advantage.",
+          "offer": "[10]% off labor rates for winter season through [date]",
+          "photo_scene": "Outdoor kitchen / stone work (honest winter or prior project)",
+          "sell_the_outcome_line": "Lock the crew now — enjoy the space when you want it most."
+        },
+        {
+          "headline": "Reserve your build window.",
+          "offer": "Book a consult by [date] for [month] installation slot",
+          "photo_scene": "Crew setting pavers with house in frame",
+          "sell_the_outcome_line": "Skip the peak-season waitlist scramble."
+        }
+      ],
+      "compliance_flags": [
+        "Real end dates and real capacity.",
+        "Seasonal % off needs bona fide reference pricing.",
+        "No invented weather emergencies."
+      ],
+      "evidence": [
+        "GOLD-outdoor-living-006/007/019/021/029"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "package_price_or_upgrade_bundle",
+      "primary_emotion": "clarity / desire",
+      "why": "Gold includes fixed patio+firepit packages and % off fireplace with patio over threshold — specificity helps.",
+      "headline_offer_patterns": [
+        "'14x16 paver patio + firepit for $[4998]'",
+        "'25% off outdoor fireplace with patio project over $5,000'",
+        "'25% off sunroom package'",
+        "'10% off $3000+ patio cover'"
+      ],
+      "reinforcing_photo": "Exact package style shown (same materials class)",
+      "what_backfires": "Package photo of a $30k yard selling a $5k kit; hidden site-condition exclusions",
+      "combos": [
+        {
+          "headline": "Paver patio special.",
+          "offer": "14' x 16' Unilock-style patio with [size] firepit for $[4998] (inclusions listed)",
+          "photo_scene": "Matching patio + firepit project photo",
+          "sell_the_outcome_line": "Know the number for a complete gathering spot — not a mystery quote."
+        },
+        {
+          "headline": "Build your backyard sanctuary.",
+          "offer": "25% off outdoor fireplace with any patio project over $5,000",
+          "photo_scene": "Dusk patio with kitchen and fireplace + family",
+          "sell_the_outcome_line": "Add the fire feature that makes guests linger."
+        },
+        {
+          "headline": "Shade when you need it.",
+          "offer": "10% off patio covers $[3000]+ (coupon terms)",
+          "photo_scene": "Pergola/cover over seating with string lights",
+          "sell_the_outcome_line": "Use the patio at noon without baking."
+        }
+      ],
+      "compliance_flags": [
+        "Itemize what the package price includes/excludes (demo, permits, railings, site conditions).",
+        "'Starting at' honesty.",
+        "Upgrade % off: state qualifying project and fireplace/cover model class."
+      ],
+      "evidence": [
+        "GOLD-outdoor-living-022/023/024/032"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "referral",
+      "primary_emotion": "belonging / gratitude",
+      "why": "Thin in outdoor-living gold; neighborhood projects spread by referral — optional if client has a real program.",
+      "headline_offer_patterns": [
+        "'Refer a neighbor — both save $[X]'",
+        "'Love your patio? Share it.'"
+      ],
+      "reinforcing_photo": "Two neighboring backyards / hosts at a fence line",
+      "what_backfires": "Unclear credit timing; fake scarcity of referral slots",
+      "combos": [
+        {
+          "headline": "Know a neighbor dreaming of a patio?",
+          "offer": "Refer them: you both get $[X] off (after job completion)",
+          "photo_scene": "Two decks/patios on adjacent homes",
+          "sell_the_outcome_line": "Share the crew you trust — and trim your next upgrade."
+        },
+        {
+          "headline": "Thanks for the introduction.",
+          "offer": "Referral credit $[X] when their project books",
+          "photo_scene": "Handshake in a finished backyard",
+          "sell_the_outcome_line": "Help someone get their outdoor room — get appreciated for it."
+        },
+        {
+          "headline": "Your yard. Their tour.",
+          "offer": "Host a neighbors' walkthrough — thank-you gift $[Y]",
+          "photo_scene": "Small group touring a completed patio at dusk",
+          "sell_the_outcome_line": "Show the finished space that started with one consult."
+        }
+      ],
+      "compliance_flags": [
+        "Print who earns credit and when.",
+        "No deceptive referral limits.",
+        "Thin in gold — optional."
+      ],
+      "evidence": [
+        "Market practice; thin in GOLD-outdoor-living"
+      ],
+      "evidence_strength": "thin"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "Financing offers in gold vs roofing-round5 dislike of financing-first creative",
+      "resolution": "Patrick votes (directional): keep financing secondary to outdoor outcome; still obey Reg Z if terms appear."
+    },
+    {
+      "conflict": "Vendor ROI vs evidence standards",
+      "resolution": "Agency-only unverified."
+    },
+    {
+      "conflict": "'Starting at' / package prices vs typical upgraded jobs",
+      "resolution": "Compliance: define inclusions; do not bait with an unavailable configuration."
+    },
+    {
+      "conflict": "Landscaping playbook patterns vs outdoor-living specificity",
+      "resolution": "Reuse structure (consult/seasonal/financing) but write outdoor-structure outcomes and photos — not mowing/fertilizer offers."
+    }
+  ]
+}

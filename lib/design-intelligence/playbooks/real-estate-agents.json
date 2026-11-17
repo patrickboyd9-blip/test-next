@@ -1,0 +1,348 @@
+{
+  "schema_version": "1.1",
+  "slug": "real-estate-agents",
+  "industry": "Real estate agents and brokerages (listing and buyer-side farming)",
+  "last_updated": "2026-10-29",
+  "words_and_claims_to_avoid": [
+    "Fair Housing: 'perfect for families', 'ideal for young couples', 'adult community' (unless legally exempt housing for older persons), 'safe neighborhood', 'exclusive', 'great schools' as a demographic proxy, church/ethnic landmarks as selling points (42 USC 3604(c); 24 CFR 100.75).",
+    "'Sold' or 'we sold' on a property the agent/broker didn't participate in as listing or cooperating broker (NAR SoP 12-7).",
+    "'#1 agent', 'top 1%', 'most homes sold' without a current, named, verifiable source and timeframe.",
+    "'Guaranteed sale in 60 days or I'll buy it' (GOLD-006) unless a written program with conditions exists and is stated.",
+    "'Best deal in today's HOT market' (GOLD-009) - unsubstantiated puffery bordering on a factual claim.",
+    "Gift-card inducements ('$250 Home Depot card for listing', GOLD-006-008) in states that restrict inducements/rebates.",
+    "'Free CMA' implying it's an appraisal (only licensed appraisers do appraisals; GOLD-010-012 'free appraisal' must be a real appraisal).",
+    "Implying the agent's fee is set or non-negotiable (post-2024 NAR settlement: commissions negotiable)."
+  ],
+  "compliance_notes": [
+    "Fair Housing Act: no discriminatory statements or preferences in ads, including imagery; 24 CFR 100.75(c)(3) bars selecting media or locations to deny particular segments info. HUD's old human-model guidance (1989/1995 Part 109 era) and 2024 digital-ad guidance were withdrawn/archived, but the statute still applies: use diverse/non-signaling people or no people. Don't build mail lists by protected class.",
+    "California: first-contact solicitations must show the licensee's name and DRE license number; ads must show the responsible broker identity (BPC 10140.6; 10 CCR 2773). If an MLO, show NMLS ID.",
+    "New York: cease-and-desist zones bar soliciting listings from homeowners who've registered (19 NYCRR 175.17). Suppress those addresses.",
+    "Inducements/rebates: some states bar or restrict them. Per a secondary survey (EZ Agents, Oct 2026), rebates are prohibited in AK, KS, MS, MO, OK, OR, TN; AL unsettled; LA permits disclosed. Tennessee rule 1260-02-.33 requires broker approval and a written offer disclosing value/conditions and says a closing gift card can't be advertised to induce business. Confirm with the state commission.",
+    "NAR Code of Ethics (if REALTOR): SoP 12-7 (only listing/cooperating broker may claim 'sold'); Article 12 true picture in advertising; SoP 12-4/12-5 brokerage name.",
+    "NAR settlement (effective Aug 17 2024): written buyer agreements before touring; no MLS compensation offers; don't advertise 'free buyer representation' unless true; fees negotiable.",
+    "RESPA Section 8: no kickbacks for referring settlement services (lenders, title); co-marketing mail with lenders must be paid at fair market value.",
+    "Testimonials/reviews: 16 CFR 255; 'Just sold' prices must be public/consented.",
+    "TCPA/Do-Not-Call for follow-up calls/texts to QR leads."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear, joy, pride, status, relief, nostalgia are all options; the client chooses.",
+    "Only laws/compliance are hard limits.",
+    "Every angle and combo carries a sell-the-outcome line.",
+    "Unverified (agency/vendor-only) results are labeled; never quote them as fact on a card.",
+    "No age/demographic angle unless a cited source supports it for this industry; even then, check Fair Housing / ECOA before using it in housing or credit."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "free_home_valuation_cma",
+      "primary_emotion": "curiosity / gain",
+      "why": "Profit is the top seller priority; 'what's it worth' is low-commitment and personal. Most common gold offer.",
+      "headline_offer_patterns": [
+        "'What's [Address] worth today?'",
+        "'Free valuation from a local agent, not an algorithm'"
+      ],
+      "reinforcing_photo": "Real street in the farm area; or the recipient's own home (MMR-004 pattern) if from public imagery.",
+      "what_backfires": "Calling it an 'appraisal'; generic stock mansions; listing-grid layouts.",
+      "combos": [
+        {
+          "headline": "Your home on [Street] may be worth more than you think.",
+          "offer": "Free valuation, delivered in 24 hours",
+          "photo_scene": "Golden-hour photo of the actual street",
+          "sell_the_outcome_line": "Know your number, then decide your next move."
+        },
+        {
+          "headline": "Online estimates guess. I walk through.",
+          "offer": "Free in-person valuation",
+          "photo_scene": "Agent with tape measure in a sunny kitchen",
+          "sell_the_outcome_line": "A price you can plan your life around."
+        },
+        {
+          "headline": "Curious? Scan for your number.",
+          "offer": "Free valuation via QR",
+          "photo_scene": "Close-up of a front door with house number",
+          "sell_the_outcome_line": "Plan your next chapter on real numbers."
+        },
+        {
+          "headline": "Prices on [Street] moved this year.",
+          "offer": "Free market update for your address",
+          "photo_scene": "Map-style art of the neighborhood",
+          "sell_the_outcome_line": "See what your equity can do for you."
+        }
+      ],
+      "compliance_flags": [
+        "Not an 'appraisal' unless by a licensed appraiser.",
+        "License + broker on card (CA 10 CCR 2773).",
+        "NY cease-and-desist suppression."
+      ],
+      "evidence": [
+        "SRC-ZILLOW-SELLERS-2025",
+        "GOLD-real-estate-agents-001-005"
+      ],
+      "evidence_strength": "moderate (motive) / thin (creative)"
+    },
+    {
+      "offer_type": "just_listed_just_sold",
+      "primary_emotion": "FOMO / social proof",
+      "why": "Local, timely proof; neighbors notice nearby sales.",
+      "headline_offer_patterns": [
+        "'Just sold: [N] days, [N] offers'",
+        "'Your neighbor just sold. Curious what yours could do?'"
+      ],
+      "reinforcing_photo": "The actual home with SOLD rider.",
+      "what_backfires": "Claiming 'sold' for a sale you weren't part of; stale sales.",
+      "combos": [
+        {
+          "headline": "Just sold on [Street]: [N] days, [N] offers.",
+          "offer": "Free valuation using this sale",
+          "photo_scene": "The real house with a SOLD sign",
+          "sell_the_outcome_line": "Your neighbor's sale could be your head start."
+        },
+        {
+          "headline": "Buyers are looking at [Neighborhood].",
+          "offer": "I have buyers who missed this one",
+          "photo_scene": "Open-house crowd on a porch",
+          "sell_the_outcome_line": "Sell to buyers who are already waiting."
+        },
+        {
+          "headline": "Just listed near you.",
+          "offer": "Private preview this weekend",
+          "photo_scene": "Front door ajar, warm light",
+          "sell_the_outcome_line": "See the market before it sees you."
+        }
+      ],
+      "compliance_flags": [
+        "SoP 12-7: 'sold' only if listing or cooperating broker.",
+        "Sale price only if public/consented.",
+        "'I have buyers' must be true (FTC s.5)."
+      ],
+      "evidence": [
+        "GOLD-real-estate-agents-013, 017",
+        "SRC-NAR-COE"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "free_staging_or_prep_services",
+      "primary_emotion": "pride / relief",
+      "why": "Profit and timeline priorities; prep is effort removal. Gold offers free staging (GOLD-001-003).",
+      "headline_offer_patterns": [
+        "'Free staging consultation when you list'",
+        "'We prep. You pack.'"
+      ],
+      "reinforcing_photo": "Before/after staged living room.",
+      "what_backfires": "Making the current home look bad; vague 'concierge'.",
+      "combos": [
+        {
+          "headline": "Make it look like the home you'll miss.",
+          "offer": "Free staging consult when you list with me",
+          "photo_scene": "Before/after living room",
+          "sell_the_outcome_line": "Sell at your best price without the weekend projects."
+        },
+        {
+          "headline": "We prep. You pack.",
+          "offer": "Free photos + staging + cleaning coordination",
+          "photo_scene": "Photographer setting up a shot",
+          "sell_the_outcome_line": "Focus on your next home, we'll handle this one."
+        },
+        {
+          "headline": "Your house, at its best.",
+          "offer": "Free pre-listing prep plan",
+          "photo_scene": "Fresh flowers on a staged dining table",
+          "sell_the_outcome_line": "Proud of the sale, not stressed by it."
+        }
+      ],
+      "compliance_flags": [
+        "Free Guide (16 CFR 251): conditions (listing agreement required) next to offer.",
+        "Check state inducement rules for free services tied to listing."
+      ],
+      "evidence": [
+        "GOLD-real-estate-agents-001-003"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "gift_card_or_inducement",
+      "primary_emotion": "reciprocity / greed",
+      "why": "Gold GOLD-006-008 offer a $250 Home Depot gift card. A concrete gift draws response but is the most legally risky offer in this vertical.",
+      "headline_offer_patterns": [
+        "'List by [date], get a $[X] [store] card' (only where legal)"
+      ],
+      "reinforcing_photo": "Homeowner in a hardware store aisle planning a project.",
+      "what_backfires": "Running it in a restricting state; implying a rebate on commission without disclosure.",
+      "combos": [
+        {
+          "headline": "A $[X] head start on your next home.",
+          "offer": "$[X] gift card with signed listing (where permitted; terms)",
+          "photo_scene": "Couple in a hardware aisle with a cart",
+          "sell_the_outcome_line": "Your next home, already improving."
+        },
+        {
+          "headline": "Thanks for meeting with me.",
+          "offer": "$[X] coffee card for a valuation appointment (where permitted)",
+          "photo_scene": "Coffee on a kitchen counter with a printed valuation",
+          "sell_the_outcome_line": "Your number, over coffee, no pressure."
+        },
+        {
+          "headline": "Know someone moving? Thank you in advance.",
+          "offer": "Referral thank-you gift (where permitted)",
+          "photo_scene": "Handwritten thank-you card",
+          "sell_the_outcome_line": "Help a friend find the right agent."
+        }
+      ],
+      "compliance_flags": [
+        "State rebate/inducement laws vary (AK, KS, MS, MO, OK, OR, TN restrict per secondary source; TN 1260-02-.33 specifics).",
+        "RESPA Section 8 if gift tied to settlement-service referral.",
+        "Free Guide conditions."
+      ],
+      "evidence": [
+        "GOLD-real-estate-agents-006-008",
+        "SRC-TN-1260",
+        "SRC-EZAGENTS-REBATES"
+      ],
+      "evidence_strength": "thin; legal risk high"
+    },
+    {
+      "offer_type": "guaranteed_sale_or_performance",
+      "primary_emotion": "security / certainty",
+      "why": "54% of sellers had a deal fall through; a real guarantee addresses certainty. Gold GOLD-006 'sell in 60 days guaranteed'.",
+      "headline_offer_patterns": [
+        "'Sold in [N] days or [specific remedy]' (written terms)"
+      ],
+      "reinforcing_photo": "Calendar with closing date circled; keys handover.",
+      "what_backfires": "Guarantees with hidden conditions; 'or I'll buy it' at a lowball undisclosed price.",
+      "combos": [
+        {
+          "headline": "Sold in [N] days, or I cut my fee.",
+          "offer": "Written performance guarantee (terms on back)",
+          "photo_scene": "Calendar with a circled closing date",
+          "sell_the_outcome_line": "A closing date you can plan your move around."
+        },
+        {
+          "headline": "Over half of sellers lose a deal. Here's how we keep yours.",
+          "offer": "Free pre-listing review incl. buyer-financing checks",
+          "photo_scene": "Agent with printed plan at kitchen table",
+          "sell_the_outcome_line": "One sale, one closing, no do-overs."
+        },
+        {
+          "headline": "Know your exit before you list.",
+          "offer": "Written timeline + backup-offer plan",
+          "photo_scene": "Keys exchanged on a porch",
+          "sell_the_outcome_line": "Move on your schedule, not the market's."
+        }
+      ],
+      "compliance_flags": [
+        "Written terms required; FTC s.5 and state license-law advertising rules on guarantees.",
+        "Cite the 54% stat as 'Zillow 2025'."
+      ],
+      "evidence": [
+        "SRC-ZILLOW-SELLERS-2025",
+        "GOLD-real-estate-agents-006"
+      ],
+      "evidence_strength": "moderate (stat) / thin (creative)"
+    },
+    {
+      "offer_type": "market_report_or_farming_touch",
+      "primary_emotion": "curiosity / belonging",
+      "why": "Long seller consideration and tenure make repeat exposure valuable (Zajonc); a useful report is reciprocity.",
+      "headline_offer_patterns": [
+        "'[Neighborhood] quarterly: what sold, for how much'"
+      ],
+      "reinforcing_photo": "Local landmark; agent candid on the street.",
+      "what_backfires": "MLS data dumped as layout (C-3PO cliché).",
+      "combos": [
+        {
+          "headline": "Your neighbor. Your agent.",
+          "offer": "Free quarterly [Neighborhood] report",
+          "photo_scene": "Agent walking a dog on a local street",
+          "sell_the_outcome_line": "Advice from someone who'll still be your neighbor after closing."
+        },
+        {
+          "headline": "What sold on your street this season.",
+          "offer": "Text [code] for the full report",
+          "photo_scene": "Simple map with 3 sold pins",
+          "sell_the_outcome_line": "Know your market without the guesswork."
+        },
+        {
+          "headline": "Happy [N]-year home anniversary.",
+          "offer": "Free equity check-in (past clients)",
+          "photo_scene": "Front door with a wreath",
+          "sell_the_outcome_line": "See how far your home has taken you."
+        }
+      ],
+      "compliance_flags": [
+        "Fair Housing 100.75(c)(3): farm by geography, not protected class.",
+        "License/broker line."
+      ],
+      "evidence": [
+        "SRC-ZAJONC-1968",
+        "SRC-NAR-2025",
+        "MMR-642",
+        "MMR-567"
+      ],
+      "evidence_strength": "moderate (exposure theory) / thin (creative)"
+    },
+    {
+      "offer_type": "buyer_side_or_new_agent_intro",
+      "primary_emotion": "anticipation / trust",
+      "why": "Buyers find agents via friends (43%); new agents (GOLD-018 vendor: 7 closings, 604% ROI, unverified) need intro + proof.",
+      "headline_offer_patterns": [
+        "'Thinking of buying? Free buyer consult'",
+        "'New to [Brokerage], not new to [Town]'"
+      ],
+      "reinforcing_photo": "Agent handing keys to a smiling buyer on a porch.",
+      "what_backfires": "'Free buyer representation' (post-settlement, compensation is negotiated in writing).",
+      "combos": [
+        {
+          "headline": "Your first keys start with one conversation.",
+          "offer": "Free 20-min buyer consult",
+          "photo_scene": "Keys handed over on a porch",
+          "sell_the_outcome_line": "Walk into your own place with confidence."
+        },
+        {
+          "headline": "New to [Brokerage]. Not new to [Town].",
+          "offer": "Free neighborhood tour",
+          "photo_scene": "Agent at a local café",
+          "sell_the_outcome_line": "An agent who knows the streets you want."
+        },
+        {
+          "headline": "Rent going up again?",
+          "offer": "Free 'what can I afford' session (with a licensed lender partner)",
+          "photo_scene": "Moving boxes in an apartment hallway",
+          "sell_the_outcome_line": "Turn rent into a home of your own."
+        }
+      ],
+      "compliance_flags": [
+        "NAR settlement: written buyer agreement before touring; fees negotiable.",
+        "Affordability talk with a lender: Reg Z trigger terms; RESPA co-marketing at fair market value.",
+        "Fair Housing on imagery."
+      ],
+      "evidence": [
+        "SRC-NAR-2025",
+        "SRC-NAR-SETTLEMENT",
+        "GOLD-real-estate-agents-018"
+      ],
+      "evidence_strength": "thin"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "Gold $250 gift-card listing inducement (GOLD-006-008) vs state inducement/rebate rules",
+      "resolution": "Law wins by state; only run where permitted with required disclosures."
+    },
+    {
+      "conflict": "Gold 'sell in 60 days guaranteed' / 'best deal in HOT market' vs FTC substantiation and license-law ad rules",
+      "resolution": "Law wins: written terms or drop."
+    },
+    {
+      "conflict": "Gold/vendor 'Your neighbor just sold' cards by non-participating agents vs NAR SoP 12-7",
+      "resolution": "Code wins for REALTORS: say 'A home near you sold' (not 'we sold') unless listing/cooperating broker."
+    },
+    {
+      "conflict": "Gold glossy listing-photo templates vs Patrick's roofing vote ('just a nice house' unpersuasive) and C-3PO AP-009",
+      "resolution": "Patrick's votes win over vendor examples: lead with life outcome or local proof; listing photo as support, not hero."
+    },
+    {
+      "conflict": "NAR demographic data (age, first-time buyer share) vs Fair Housing",
+      "resolution": "Law wins: use demographics to understand, not to target or depict preferences."
+    }
+  ]
+}

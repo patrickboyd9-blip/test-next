@@ -195,6 +195,8 @@ export interface LayoutHints {
   templateId?: PostcardTemplateId
   /** Palette family. The painter checks contrast. */
   verticalPalette?: VerticalPaletteId
+  /** Gold industry slug of the brief. Picks the trade palette on photo-led layouts. */
+  trade?: string
 }
 
 export interface SpecDiffChange {
@@ -514,6 +516,8 @@ export interface UploadedDesignReview {
   declined?: boolean
   /** Three to five suggestions. No scores or grades. */
   suggestions?: string[]
+  /** Plain-language advertising-rule warnings from the playbook compliance check. Never blocking. */
+  complianceWarnings?: string[]
   reviewedAt?: string
 }
 

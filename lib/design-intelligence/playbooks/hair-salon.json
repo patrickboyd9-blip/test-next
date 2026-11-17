@@ -1,0 +1,302 @@
+{
+  "schema_version": "1.1",
+  "slug": "hair-salon",
+  "industry": "Hair salons, barbershops, color specialists, and salon-spa hybrids (cuts, color, blowouts, smoothing treatments, bridal)",
+  "last_updated": "2026-11-03",
+  "words_and_claims_to_avoid": [
+    "'Organic', 'toxin-free', 'chemical-free' color/smoothing without competent substantiation for the finished product/service as used (FTC s.5)",
+    "'Formaldehyde-free' keratin/Brazilian Blowout claims if the product releases formaldehyde when heated (FDA warning history; CA AG settlement with Brazilian Blowout) — disclose risks; never claim safe/free if false",
+    "Before/after photos presented as typical results without generally expected results (16 CFR 255.2); edited lighting/hair density that misleads; no guest authorization",
+    "'Free haircut' that requires buying a more expensive service without stating the regular price of the paid service and all conditions (16 CFR 251; 16 CFR 233)",
+    "'[X]% off any service' / '50% off' (GOLD-hair-salon-003/025/029) without a real regular price and offer period",
+    "'Color specialists' / medical-sounding repair claims ('regrows hair', 'cures damage') without truth and licensing",
+    "Multi-coupon grids that bury the real deal (Patrick directional preference: one clear offer) — legal if truthful, but often weaker creative",
+    "Guarantees of a specific look lasting 'forever' without conditions (16 CFR 239)",
+    "Children's images without parent written consent"
+  ],
+  "compliance_notes": [
+    "FTC Act s.5: service and product claims (including keratin/smoothing, organic, results) need substantiation before printing.",
+    "16 CFR 255 (2023 Endorsement Guides): testimonials and before/afters imply typical results; 'results not typical' is unlikely to cure; disclose generally expected results; material connections disclosed; real consumers.",
+    "16 CFR 251 ('Free') and 16 CFR 233 (deceptive pricing): free-with-purchase and percent-off need a bona fide regular price; state conditions with the offer.",
+    "FDA + OSHA history on hair-smoothing products that release formaldehyde when heated: do not advertise 'formaldehyde-free' or unqualified 'safe' if methylene glycol/formaldehyde releasers are present; train staff; follow OSHA hazard communication for workers (salon ops, reflected in consumer-facing honesty).",
+    "State cosmetology board rules: licensing claims, booth-renter advertising, and sometimes price advertising vary — client must confirm. Do not imply a booth renter is the salon entity if inaccurate.",
+    "Florida and other states may have specific free/discounted health-related ad rules; pure cosmetology hair services are usually outside Florida's 72-hour dental/medical free-offer statute, but hybrid med-spa/salon ads that include medical procedures inherit those rules (see med-spa-chiro.json).",
+    "Gift cards: state gift-card/escheat rules on expiration and fees; print material terms.",
+    "Automatic membership/loyalty renewals: ROSCA for online sign-up; California ARL (B&P 17602 / AB 2863) for auto-renew disclosures and cancellation — relevant if the salon sells memberships.",
+    "EDDM/new-mover lists: no deceptive 'official' neighbor notices (39 USC 3001)."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: pride, belonging, anticipation, even FOMO for event deadlines are fine when legal.",
+    "Only laws/compliance are hard limits.",
+    "Every angle and emotion_by_offer combo carries sell_the_outcome_line.",
+    "Vendor ROI labeled agency-only unverified; never print as fact on a client card.",
+    "Prefer one clear offer unless the client knowingly chooses a coupon grid."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "first_visit_percent_or_dollar_off",
+      "primary_emotion": "relief / belonging",
+      "why": "Lowers the risk of trying a new stylist; reciprocity starts the relationship.",
+      "headline_offer_patterns": [
+        "'[X]% off your first visit'",
+        "'$[X] toward your first service'",
+        "'New guests welcome'"
+      ],
+      "reinforcing_photo": "Warm team photo or stylist greeting a guest",
+      "what_backfires": "Hidden exclusions; stacking fine print; treating first-timers as a one-and-done coupon farm with bad service",
+      "combos": [
+        {
+          "headline": "New guests welcome.",
+          "offer": "$[X] toward your first service (new guests; ends [date])",
+          "photo_scene": "Receptionist smiling with a coffee bar in view",
+          "sell_the_outcome_line": "Feel at home in the chair on visit one."
+        },
+        {
+          "headline": "15% off your first visit.",
+          "offer": "15% off first haircut or style; one per guest",
+          "photo_scene": "Fresh blowout in natural light",
+          "sell_the_outcome_line": "A low-risk way to find your new stylist."
+        },
+        {
+          "headline": "Need a new look? We've got you.",
+          "offer": "First-visit [X]% off + free style consult",
+          "photo_scene": "Consult at the chair with a look-book",
+          "sell_the_outcome_line": "Leave looking like the best version of you."
+        },
+        {
+          "headline": "$20 gift toward your first service.",
+          "offer": "$20 toward any first service",
+          "photo_scene": "Salon exterior with open sign",
+          "sell_the_outcome_line": "Start the relationship with something nice already paid for."
+        }
+      ],
+      "compliance_flags": [
+        "State regular price basis for % off (16 CFR 233).",
+        "Print new-guest definition, end date, and stacking rules with the offer (16 CFR 251 if 'gift/free')."
+      ],
+      "evidence": [
+        "GOLD-hair-salon-006/007/013/017",
+        "GOLD-hair-salon-003 (vendor case, agency-only unverified)"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "cut_and_color_bundle",
+      "primary_emotion": "pride / excitement",
+      "why": "Bundles reduce anxiety about a high-ticket color change; outcome is the finished look.",
+      "headline_offer_patterns": [
+        "'$[X] off cut & color'",
+        "'Free haircut with color/highlights (first-time)'"
+      ],
+      "reinforcing_photo": "Color reveal / glossy finished style",
+      "what_backfires": "Before/after as typical; 'organic color' without proof; bait pricing",
+      "combos": [
+        {
+          "headline": "Color you'll want in every photo.",
+          "offer": "$[X] off cut & color this month",
+          "photo_scene": "Guest laughing mid-reveal",
+          "sell_the_outcome_line": "Turn heads for the right reasons."
+        },
+        {
+          "headline": "Free haircut with color.",
+          "offer": "Free haircut with color or highlights for first-time guests; state regular prices",
+          "photo_scene": "Color bowl and foils stylized cleanly (process as craft, not medical)",
+          "sell_the_outcome_line": "Walk out with a complete new look, not a half-finished one."
+        },
+        {
+          "headline": "Highlight your style.",
+          "offer": "$10 off cut & color (limited time)",
+          "photo_scene": "Sunlit highlights close-up (detail/macro premium)",
+          "sell_the_outcome_line": "Brightness that matches your mood."
+        }
+      ],
+      "compliance_flags": [
+        "Free cut with color: disclose paid service's regular price and conditions (16 CFR 251/233).",
+        "Before/after: 16 CFR 255 typical results + written guest authorization."
+      ],
+      "evidence": [
+        "GOLD-hair-salon-009/012/029/030"
+      ],
+      "evidence_strength": "thin-moderate"
+    },
+    {
+      "offer_type": "mens_barber_first_cut",
+      "primary_emotion": "confidence / ease",
+      "why": "Price clarity and masculine tone match barber gold cards; routine specials condition repeat visits.",
+      "headline_offer_patterns": [
+        "'$[X] first haircut'",
+        "'$[Y] off midweek'",
+        "'Walk-ins welcome'"
+      ],
+      "reinforcing_photo": "Barber mid-cut; shop atmosphere",
+      "what_backfires": "Spa-soft language; coupon clutter; senior/military discounts that aren't real",
+      "combos": [
+        {
+          "headline": "Ultimate men's cuts.",
+          "offer": "$[X] first haircut",
+          "photo_scene": "Barber finishing a fade",
+          "sell_the_outcome_line": "Look sharp without thinking about it."
+        },
+        {
+          "headline": "$5 off haircuts Tue & Wed.",
+          "offer": "Weekday price special; hours listed",
+          "photo_scene": "Empty chair ready, clean station",
+          "sell_the_outcome_line": "A better cut that fits your week."
+        },
+        {
+          "headline": "Classic cut. Modern finish.",
+          "offer": "First cut $[X]; bring a friend next cut [Y]% off",
+          "photo_scene": "Two friends in chairs (consent)",
+          "sell_the_outcome_line": "Walk out ready for work, weekend, or both."
+        }
+      ],
+      "compliance_flags": [
+        "Discount categories (military/senior) must be real and clearly stated.",
+        "Referral/bring-a-friend terms clear; no deceptive 'free' loops."
+      ],
+      "evidence": [
+        "GOLD-hair-salon-001/005/019/022/028"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "grand_opening_or_reopening",
+      "primary_emotion": "curiosity / anticipation",
+      "why": "New location or reopen needs awareness; first-N gifts create a real early rush.",
+      "headline_offer_patterns": [
+        "'Grand opening [date]'",
+        "'First [N] guests get [gift]'",
+        "'[X]% off any service' with details"
+      ],
+      "reinforcing_photo": "Salon exterior ribbon/team; renovated interior labeled if new",
+      "what_backfires": "Fake scarcity; 50% off forever; no map",
+      "combos": [
+        {
+          "headline": "Grand opening Saturday.",
+          "offer": "Free gifts to the first [N] guests; demos listed",
+          "photo_scene": "Team outside the new storefront",
+          "sell_the_outcome_line": "Be first to claim your chair in the new space."
+        },
+        {
+          "headline": "Now reopening — help us celebrate.",
+          "offer": "[X]% off any service with this card through [date]",
+          "photo_scene": "Bright renovated interior",
+          "sell_the_outcome_line": "A fresh salon for a fresh start."
+        },
+        {
+          "headline": "Welcome to the neighborhood.",
+          "offer": "20% off a service of your choice + gift for first [N]",
+          "photo_scene": "Neighborhood street + salon awning",
+          "sell_the_outcome_line": "Look local — find your people and your stylist."
+        }
+      ],
+      "compliance_flags": [
+        "First-N scarcity must be real; track redemptions.",
+        "Percent-off needs bona fide regular prices and an end date.",
+        "GOLD-hair-salon-003/034 vendor/owner results are agency-only unverified."
+      ],
+      "evidence": [
+        "GOLD-hair-salon-003/011/014/025/034",
+        "MMR-389 (agency-only unverified)"
+      ],
+      "evidence_strength": "moderate principle; agency-only results"
+    },
+    {
+      "offer_type": "gift_card_or_holiday_gift",
+      "primary_emotion": "love / generosity (giver) + anticipation (recipient)",
+      "why": "Mother's Day and gift cards convert givers who want an experience outcome for someone else.",
+      "headline_offer_patterns": [
+        "'Give her the perfect [Mother's Day] gift'",
+        "'Gift card + [X]% off services'"
+      ],
+      "reinforcing_photo": "Gift box / two people hugging after a reveal — not a lonely stock model",
+      "what_backfires": "Expired gift cards against state law; weak 'stuff' gifts instead of the experience",
+      "combos": [
+        {
+          "headline": "Give her the perfect Mother's Day gift.",
+          "offer": "Gift card with [X]% off haircuts & styles through [date]",
+          "photo_scene": "Mom mid-laugh with fresh hair",
+          "sell_the_outcome_line": "Give her an hour that feels like hers."
+        },
+        {
+          "headline": "The gift of a great hair day.",
+          "offer": "Salon gift cards from $[X]; bonus $[Y] when you buy $[Z]",
+          "photo_scene": "Gift card on a clean vanity",
+          "sell_the_outcome_line": "A present she'll actually use — and feel."
+        },
+        {
+          "headline": "Bridal party glam starts here.",
+          "offer": "Bridal trial $[X] / party packages listed",
+          "photo_scene": "Bridal styling in progress (consent)",
+          "sell_the_outcome_line": "Feel camera-ready for the moments that last."
+        }
+      ],
+      "compliance_flags": [
+        "Gift-card expiration/fee rules vary by state — print material terms.",
+        "Bonus-value offers need clear conditions (16 CFR 233/251)."
+      ],
+      "evidence": [
+        "GOLD-hair-salon-018/020/027"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "free_consult_or_add_on",
+      "primary_emotion": "relief / trust",
+      "why": "Free consult or add-on (brow wax, deep conditioning) reciprocity without forcing a big ticket first.",
+      "headline_offer_patterns": [
+        "'Free hair consultation'",
+        "'Free brow wax with haircut'",
+        "'Free deep conditioning with first color'"
+      ],
+      "reinforcing_photo": "Consult conversation; add-on service in progress",
+      "what_backfires": "Consult that is a hard sell; 'free' add-on with raised base price",
+      "combos": [
+        {
+          "headline": "Not sure what you need? Start with a free consult.",
+          "offer": "Free hair consultation; no obligation",
+          "photo_scene": "Stylist and guest reviewing photos on a tablet",
+          "sell_the_outcome_line": "Leave with a plan you believe in."
+        },
+        {
+          "headline": "Free brow wax with your haircut.",
+          "offer": "Free eyebrow wax with haircut, facial, or massage (print eligible services)",
+          "photo_scene": "Clean brow detailing close-up",
+          "sell_the_outcome_line": "One visit, polished finish."
+        },
+        {
+          "headline": "Free deep conditioning on us.",
+          "offer": "Free deep conditioning with first color service",
+          "photo_scene": "Steam towel / mask texture detail (premium sensory)",
+          "sell_the_outcome_line": "Soft, healthy-feeling hair you want to touch."
+        }
+      ],
+      "compliance_flags": [
+        "'Free' add-ons: do not inflate the paid service price to compensate (16 CFR 251).",
+        "Keratin/smoothing consults: no false formaldehyde-free/safe claims (FDA/CA AG)."
+      ],
+      "evidence": [
+        "GOLD-hair-salon-010/017"
+      ],
+      "evidence_strength": "thin"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "Gold multi-coupon grids (GOLD-hair-salon-001/017/026/032) vs roofing-round-5 directional preference for one photo + one offer + one QR",
+      "resolution": "Patrick's votes (directional) prefer single-offer clarity; coupon grids remain legal if truthful. Default to one hero offer; use grids only when the client insists or a test requires it."
+    },
+    {
+      "conflict": "'Formaldehyde-free' / 'safe' keratin & Brazilian Blowout style claims (market common; GOLD-hair-salon-009 lists Brazilian Blowout price) vs FDA/OSHA/CA AG history",
+      "resolution": "Compliance wins: never claim formaldehyde-free or unqualified safe if the product can release formaldehyde when heated; price the service only with honest product disclosures."
+    },
+    {
+      "conflict": "Vendor ROI claims (PostcardMania Fantastic Sams / Hair By Katy; Salon Today Pyara) vs evidence rules",
+      "resolution": "Label agency-only unverified; do not print ROI on client mailers as proof."
+    },
+    {
+      "conflict": "Before/after transformation creative vs 16 CFR 255 typical-results rule",
+      "resolution": "Compliance wins: authorized real guests only; disclose generally expected results; prefer outcome-feeling photos over miraculous composites."
+    }
+  ]
+}

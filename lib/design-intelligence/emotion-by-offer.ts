@@ -1,42 +1,36 @@
 import type { CampaignBrief } from "@/lib/campaign-creator/types"
-import table from "./emotion-by-offer.json"
 
-type Combo = { headline: string; offer: string; photo: string }
-type Row = { offer: string; emotion: string; photo: string; avoid: string; combos: Combo[] }
-const PLAYBOOK = table as Record<string, Row[]>
+import { offerRowFor, playbookForBrief } from "./playbooks"
+import type { PlaybookOfferRow } from "./playbook-types"
 
-const INDUSTRY: Array<[string, RegExp]> = [
-  ["solar", /\bsolar\b/i],
-  ["hvac", /\bhvac\b|\bfurnace|\bair condition|\bheat pump|\b(?:a\/c|ac)\b/i],
-  ["plumbing", /\bplumb|\bwater heater|\bdrain|\bpipe|\bsewer/i],
-  ["windows-gutters-siding", /\bwindows?\b|\bgutters?\b|\bsiding\b/i],
-  ["roofing", /\broof|\bshingle/i],
-]
+export { offerRowFor, playbookForBrief } from "./playbooks"
 
-const OFFER: Array<[string, RegExp]> = [
-  ["dollar_off", /\$\s?\d[\d,]*\s*off\b/i],
-  ["percent_off", /\d+%\s*off\b|\bdiscount\b/i],
-  ["financing", /\bfinanc|\bAPR\b/i],
-  ["free_inspection", /\bfree\b.*\b(?:inspection|check|estimate|assessment|quote)\b/i],
-  ["seasonal", /\bseason|\bwinter|\bsummer|\bstorm|\bhurricane/i],
-]
+/** The playbook row (trade + offer type) for this brief, or null when no playbook matches. */
+export function emotionRowForBrief(brief: CampaignBrief): { slug: string; row: PlaybookOfferRow } | null {
+  const playbook = playbookForBrief(brief)
+  if (!playbook?.emotion_by_offer?.length) return null
+  return { slug: playbook.slug, row: offerRowFor(playbook, `${brief.offer ?? ""} ${brief.goal ?? ""}`) }
+}
 
-/** Emotion and photo guidance from the Ad Psych playbook for this brief's trade and offer. Empty when nothing matches. */
+/**
+ * Emotion, photo, and compliance guidance from the Ad Psych playbook for this
+ * brief's trade and offer type. The card writer must follow it. Empty when nothing matches.
+ */
 export function emotionByOfferGuidance(brief: CampaignBrief): string {
-  const b = brief as unknown as Record<string, unknown>
-  const text = [b.offer, b.goal, b.industry, b.services, (b.businessInfo as Record<string, unknown> | undefined)?.name]
-    .filter((v) => typeof v === "string").join(" ")
-  const industry = INDUSTRY.find(([, re]) => re.test(text))?.[0]
-  const rows = industry ? PLAYBOOK[industry] : undefined
-  if (!rows?.length) return ""
-  const offerText = typeof b.offer === "string" ? b.offer : ""
-  const kind = OFFER.find(([, re]) => re.test(offerText))?.[0]
-  const row = rows.find((r) => kind && r.offer.includes(kind)) ?? rows.find((r) => r.offer.includes("dollar_off")) ?? rows[0]!
-  const combos = row.combos.map((c) => `  - "${c.headline}" / ${c.offer} / photo: ${c.photo}`).join("\n")
+  const playbook = playbookForBrief(brief)
+  if (!playbook?.emotion_by_offer?.length) return ""
+  const row = offerRowFor(playbook, `${brief.offer ?? ""} ${brief.goal ?? ""}`)
+  const combos = (row.combos ?? [])
+    .map((c) => `  - "${c.headline}" / ${c.offer} / photo: ${c.photo_scene ?? ""}${c.sell_the_outcome_line ? ` / outcome: ${c.sell_the_outcome_line}` : ""}`)
+    .join("\n")
+  const avoid = (playbook.words_and_claims_to_avoid ?? []).slice(0, 14).map((w) => `  - ${w}`).join("\n")
+  const flags = (row.compliance_flags ?? []).map((w) => `  - ${w}`).join("\n")
   return `
-Emotion by offer (patterns only, write new lines):
-- Lead emotion: ${row.emotion}
-- Photo that reinforces it: ${row.photo}
-- What backfires: ${row.avoid}
-${combos ? `- Example headline / offer / photo combos:\n${combos}` : ""}`
+Ad Psych playbook: ${playbook.industry} (${playbook.slug}), offer type "${row.offer_type}". Follow it (patterns only, write new lines):
+- Lead emotion (required): ${row.primary_emotion}
+- Why: ${row.why ?? ""}
+- Headline/offer patterns: ${(row.headline_offer_patterns ?? []).join("; ")}
+- Photo that reinforces it: ${row.reinforcing_photo ?? ""}
+- What backfires: ${row.what_backfires ?? ""}
+${combos ? `- Example headline / offer / photo combos:\n${combos}\n` : ""}${flags ? `- Compliance for this offer type:\n${flags}\n` : ""}${avoid ? `- Never print these words or claims (law and the client's rules):\n${avoid}\n` : ""}- The subheadline sells the outcome of this specific offer. Never use a filler line like "Call today."`
 }

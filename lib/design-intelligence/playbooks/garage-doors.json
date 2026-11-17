@@ -1,0 +1,299 @@
+{
+  "schema_version": "1.1",
+  "slug": "garage-doors",
+  "industry": "Residential garage door sales, installation, spring/opener repair, and preventive tune-ups",
+  "last_updated": "2026-11-04",
+  "words_and_claims_to_avoid": [
+    "'Licensed' / 'C-13' / 'bonded/insured' if not currently true in the service state",
+    "Invented hail/storm 'your neighborhood was hit' without a factual basis",
+    "'Lifetimeproof' / 'maintenance-free forever' / lifetime claims that exceed the real warranty",
+    "Manufacturer warranty stated as if it were the contractor's labor warranty without distinction",
+    "APR-free '0% financing' without term, fees, and approved-credit conditions when required",
+    "DIY spring tips that encourage unsafe consumer spring work while selling fear",
+    "'From $99 springs' bait if most jobs are far higher — use 'starting at' only with clear scope"
+  ],
+  "compliance_notes": [
+    "State contractor licensing: garage door installation/repair often requires a contractor license (classification varies; California example via CSLB). Do not advertise as a licensed contractor if unlicensed. Verify the client's license class before printing.",
+    "FTC s.5 / 16 CFR 233/251: dollar-off, percent-off, free estimates, free remotes — bona fide prices and conditions.",
+    "Financing ads: if a rate, monthly payment, or '0%' is stated, include required credit disclosures (TILA/Reg Z concepts; state retail-installment/open-end ad rules e.g. CA B&P 17538.7 patterns) — 'financing available' alone is safer than a naked rate.",
+    "Warranty clarity: separate manufacturer product warranty from installer labor warranty in copy.",
+    "Safety claims about springs/cables: do not overclaim injury statistics you cannot source; do encourage professional service consistent with industry safety guidance.",
+    "Storm/hurricane ratings: only claim tested ratings the product actually carries; no fake storm-damage urgency.",
+    "39 USC 3001: no official inspection notice look-alikes."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear, joy, relief, status, belonging are fine when they fit and stay legal.",
+    "Only laws/compliance are hard limits.",
+    "Every angle and emotion_by_offer combo carries sell_the_outcome_line.",
+    "Vendor ROI labeled agency-only unverified; never print as fact on a client card.",
+    "Prefer one clear offer + one real photo + one QR (roofing-round5 directional) unless client insists on a coupon grid.",
+    "No age/senior default unless the client has a real discount and evidence supports targeting."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "dollar_or_percent_off_new_door",
+      "primary_emotion": "pride / aspiration",
+      "why": "Concrete savings on a visible home upgrade; dominant gold pattern ($100–$200 / 10–20% off).",
+      "headline_offer_patterns": [
+        "'$200 off a new garage door'",
+        "'20% off replacements'",
+        "'$100 off standard 16x7 / 8x7'"
+      ],
+      "reinforcing_photo": "Full-bleed home with the new door as hero",
+      "what_backfires": "Pretty house that barely shows the door; exclusions that gut the offer",
+      "combos": [
+        {
+          "headline": "Make a statement with your garage door.",
+          "offer": "$200 OFF garage door purchase (models listed; ends [date])",
+          "photo_scene": "Carriage-style door on a real suburban home",
+          "sell_the_outcome_line": "Come home to a front that finally matches the care you put inside."
+        },
+        {
+          "headline": "20% off replacements.",
+          "offer": "20% off garage door replacements this month",
+          "photo_scene": "Modern dark door, full width of card",
+          "sell_the_outcome_line": "A quieter, sharper door — and a visible upgrade neighbors notice."
+        },
+        {
+          "headline": "We just did your neighbor's door.",
+          "offer": "$200 off installation when you book this month",
+          "photo_scene": "Install crew finishing a door two houses down (permission)",
+          "sell_the_outcome_line": "Get the same finished look already on your street."
+        },
+        {
+          "headline": "Is it time for a new garage door?",
+          "offer": "$100 off regular 16x7 & 8x7 basic colors + free estimate",
+          "photo_scene": "Before/after door inset with honest lighting",
+          "sell_the_outcome_line": "Stop apologizing for the faded door every time you pull in."
+        }
+      ],
+      "compliance_flags": [
+        "Print model/color exclusions and end date.",
+        "Licensed contractor claims only if true.",
+        "Before/after: typical results + authorization (16 CFR 255)."
+      ],
+      "evidence": [
+        "GOLD-garage-doors-001/002/005/008/010/013/015"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "tuneup_maintenance_package",
+      "primary_emotion": "relief / prudence",
+      "why": "Low-ticket annual cue; gold heavily features $29–$99 tune-ups.",
+      "headline_offer_patterns": [
+        "'$99 lube, tune & balance (reg. $149)'",
+        "'Fall tune-up $29.95'",
+        "'Maintenance package $89'"
+      ],
+      "reinforcing_photo": "Tech inspecting opener/rollers with clipboard",
+      "what_backfires": "Scare copy about death springs with no service path; bait tune-up that always upsells a full door",
+      "combos": [
+        {
+          "headline": "Extend the life of your garage door.",
+          "offer": "$99 lube, tune & balance (reg. $149) this month",
+          "photo_scene": "Tech balancing a door mid-open",
+          "sell_the_outcome_line": "Smooth, quiet opens — and fewer 6 a.m. surprise failures."
+        },
+        {
+          "headline": "Fall garage door tune-up.",
+          "offer": "$29.95 tune-up (includes listed checklist)",
+          "photo_scene": "Clipboard checklist beside an opener",
+          "sell_the_outcome_line": "Head into winter knowing the door is ready."
+        },
+        {
+          "headline": "50% off rollers + tune.",
+          "offer": "50% OFF rollers / $[X] tune package",
+          "photo_scene": "Close-up of nylon rollers on a track",
+          "sell_the_outcome_line": "Quiet the rumble that wakes the house."
+        }
+      ],
+      "compliance_flags": [
+        "If showing 'reg.' price, it must be bona fide (16 CFR 233).",
+        "Checklist of included services should match what is delivered."
+      ],
+      "evidence": [
+        "GOLD-garage-doors-003/008/009/010/011"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "spring_opener_repair_dollar_off",
+      "primary_emotion": "anxiety → relief",
+      "why": "Broken springs are the classic emergency purchase.",
+      "headline_offer_patterns": [
+        "'$50 off spring replacement'",
+        "'Springs starting at $99' (scope clear)",
+        "'$25 off same-day appointments'"
+      ],
+      "reinforcing_photo": "Tech at the spring/drum area (safe staging) or door stuck halfway",
+      "what_backfires": "Encouraging DIY spring replacement; 'starting at' that never is",
+      "combos": [
+        {
+          "headline": "Spring broke? We'll get you parking again.",
+          "offer": "$50 off spring replacement (ends [date])",
+          "photo_scene": "Garage door stuck mid-way with car half-out",
+          "sell_the_outcome_line": "Drive out to work without borrowing the neighbor's driveway."
+        },
+        {
+          "headline": "Same-day garage door help.",
+          "offer": "$25 off same-day appointments",
+          "photo_scene": "Van in driveway, tech walking to door",
+          "sell_the_outcome_line": "Same day: door works, routine restored."
+        },
+        {
+          "headline": "Opener acting up?",
+          "offer": "$100 off new openers / buy one remote get 2nd half off (as offered)",
+          "photo_scene": "Hand pressing a remote as door rises",
+          "sell_the_outcome_line": "One click — and you're in."
+        }
+      ],
+      "compliance_flags": [
+        "Do not instruct consumers to adjust high-tension springs themselves.",
+        "'Starting at' must reflect a genuinely available job scope."
+      ],
+      "evidence": [
+        "GOLD-garage-doors-006/009/012/014",
+        "SRC-DASMA-SAFETY"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "free_estimate",
+      "primary_emotion": "relief / confidence",
+      "why": "Lowers risk on a high-ticket door decision.",
+      "headline_offer_patterns": [
+        "'FREE estimates'",
+        "'Free design consult'",
+        "'$0 service call' (if true)"
+      ],
+      "reinforcing_photo": "Estimator with tablet showing door styles at the home",
+      "what_backfires": "'Free estimate' that is a high-pressure door-to-door pitch; fake $0 call then mandatory fees undisclosed",
+      "combos": [
+        {
+          "headline": "See your door options at home.",
+          "offer": "FREE estimates on repair or replacement",
+          "photo_scene": "Estimator and homeowner looking at door samples",
+          "sell_the_outcome_line": "Know the price and the look before you commit."
+        },
+        {
+          "headline": "Professional install you can rely on.",
+          "offer": "Free estimate + $[X] off if you book within [N] days (if using deadline, make it real)",
+          "photo_scene": "Finished install crew handshake",
+          "sell_the_outcome_line": "A clear plan for a door that works and looks right."
+        },
+        {
+          "headline": "$0 service call this month.",
+          "offer": "$0 service call / diagnosis credit toward repair (terms)",
+          "photo_scene": "Tech diagnosing an opener",
+          "sell_the_outcome_line": "Find out what's wrong without paying just to ask."
+        }
+      ],
+      "compliance_flags": [
+        "If diagnosis fee is waived only when work is booked, say so (16 CFR 251).",
+        "No fake urgency windows."
+      ],
+      "evidence": [
+        "GOLD-garage-doors-004/008"
+      ],
+      "evidence_strength": "thin-moderate"
+    },
+    {
+      "offer_type": "financing",
+      "primary_emotion": "relief / aspiration",
+      "why": "Helps cash-flow a full replacement; must stay outcome-led per Patrick directional feedback.",
+      "headline_offer_patterns": [
+        "'12 months financing available'",
+        "'Ask about monthly payments'",
+        "'$[X] off — financing on approved credit'"
+      ],
+      "reinforcing_photo": "Beautiful new door; finance as support badge",
+      "what_backfires": "Financing-first headline that makes the door feel like debt (roofing-round5 hated pattern)",
+      "combos": [
+        {
+          "headline": "Upgrade your door. Payments available.",
+          "offer": "$200 off + financing available (on approved credit)",
+          "photo_scene": "Premium door full-bleed",
+          "sell_the_outcome_line": "Get the curb appeal now — stretch the cost over time if you choose."
+        },
+        {
+          "headline": "New door this month.",
+          "offer": "Ask about 12-month financing; 10% off if paying cash (if true; disclose)",
+          "photo_scene": "Family car pulling into upgraded garage",
+          "sell_the_outcome_line": "Park with pride without waiting another season."
+        },
+        {
+          "headline": "The door first. The plan second.",
+          "offer": "Free estimate — we'll review cash and financed options",
+          "photo_scene": "Door detail craftsmanship close-up",
+          "sell_the_outcome_line": "Choose the look; then choose how to pay."
+        }
+      ],
+      "compliance_flags": [
+        "If APR, payment, or 0% is advertised, include required credit disclosures.",
+        "'On approved credit' and lender identity when required by state/federal ad rules.",
+        "Do not hide that financing may be via a third party."
+      ],
+      "evidence": [
+        "GOLD-garage-doors-005",
+        "roofing-round5"
+      ],
+      "evidence_strength": "thin for response; moderate for creative direction"
+    },
+    {
+      "offer_type": "seasonal_storm_promo",
+      "primary_emotion": "security (market-specific)",
+      "why": "Seasonal maintenance and wind-rated upgrades appear in gold; only use where weather/codes match.",
+      "headline_offer_patterns": [
+        "'Summer offers: $200 off / $50 service'",
+        "'Hurricane-rated — [X]% off'",
+        "'Pre-storm tune-up $[X]'"
+      ],
+      "reinforcing_photo": "Rated door on a local-architecture home; or tech prepping before storm season",
+      "what_backfires": "Invented 'storm hit your block' if it did not; selling fear nationally with Florida creative",
+      "combos": [
+        {
+          "headline": "Summer garage door offers.",
+          "offer": "$200 OFF new door / $50 off service call",
+          "photo_scene": "Sunlit home with crisp door",
+          "sell_the_outcome_line": "Fix it in the dry season — not during the first bad night."
+        },
+        {
+          "headline": "Rated for the wind you get.",
+          "offer": "[X]% off hurricane-rated replacements (product named)",
+          "photo_scene": "Reinforced door close-up with honest rating mark",
+          "sell_the_outcome_line": "Close up knowing the door matches local wind reality."
+        },
+        {
+          "headline": "Pre-season tune-up.",
+          "offer": "$[X] tune-up before storm season",
+          "photo_scene": "Tech testing balance as clouds gather (not disaster porn)",
+          "sell_the_outcome_line": "A door that still works when you need to leave fast."
+        }
+      ],
+      "compliance_flags": [
+        "No deceptive storm-urgency.",
+        "Rating claims must match the product.",
+        "Licensing still required for install."
+      ],
+      "evidence": [
+        "GOLD-garage-doors-001/002"
+      ],
+      "evidence_strength": "thin-moderate; geography-bound"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "Financing-led creative in some gold/templates vs roofing-round5 dislike of financing-first",
+      "resolution": "Patrick directional: lead with door outcome; financing supports. Compliance still requires APR disclosures when rates are quoted."
+    },
+    {
+      "conflict": "Storm/hurricane fear angle vs markets without wind risk",
+      "resolution": "Use only where codes/weather make ratings meaningful; elsewhere prefer curb appeal or repair relief."
+    },
+    {
+      "conflict": "PostcardMania ROI on GOLD-003 vs evidence rules",
+      "resolution": "Agency-only unverified; do not print as client proof."
+    }
+  ]
+}

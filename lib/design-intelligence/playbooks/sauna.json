@@ -1,0 +1,216 @@
+{
+  "schema_version": "1.1",
+  "slug": "sauna",
+  "industry": "Residential / DTC saunas (infrared and traditional units, outdoor barrel/cabin saunas, related accessories and warranties)",
+  "last_updated": "2026-11-05",
+  "words_and_claims_to_avoid": [
+    "Disease cure/treat/prevent claims (cancer, heart disease, COVID, diabetes, etc.) without competent and reliable scientific evidence — FTC has warned sauna marketers",
+    "'Detoxifies heavy metals' / miracle detox claims without substantiation",
+    "Weight-loss guarantees or 'melt pounds' promises without evidence",
+    "Infrared vs traditional performance claims that are inaccurate to the product",
+    "'Doctor recommended' / medical device implications if not true/authorized",
+    "'America's most beloved' / #1 ranking without a real substantiated basis",
+    "Fake scarcity on mystery codes; demo codes presented as unique personal offers",
+    "Electrical/install 'licensed' claims if the seller does not provide licensed install",
+    "Financing 'as low as $X/mo' without Reg Z triggering-term disclosures when required"
+  ],
+  "compliance_notes": [
+    "FTC Act + Health Products Compliance Guidance: health benefit claims need competent and reliable scientific evidence (often RCTs for disease claims). Do not advertise saunas as treating/preventing/curing disease without that evidence.",
+    "FTC COVID-era warning letters went to infrared sauna marketers for unsupported virus/immune disease claims — treat disease claims as high risk.",
+    "Keep copy experiential (relaxation, routine, comfort) unless the client holds substantiation for a specific health claim.",
+    "Infrared vs traditional: only claim differences that are true for the SKU (heat type, temperature range, cabinetry) — no invented clinical superiority.",
+    "16 CFR 233/251: %/$ off, mystery offers, free gifts need clear conditions and bona fide prices.",
+    "If quoting monthly payments or APR: Regulation Z / 12 CFR 1026.24 triggering-term disclosures (down payment, repayment terms, APR).",
+    "Installation: if advertising delivery/install, state what is included and only claim licensed electrical work if true in the jurisdiction.",
+    "39 USC 3001: no official health-agency look-alike mailers."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: calm, aspiration, unfinished-intent curiosity are fine when legal.",
+    "Only laws/compliance are hard limits — especially FTC health-claim substantiation.",
+    "Every angle and emotion_by_offer combo carries sell_the_outcome_line.",
+    "Vendor ROI labeled agency-only unverified; never print as fact on a client card.",
+    "Prefer one product hero + one offer + one QR (roofing-round5 directional).",
+    "Leave thin: do not invent studies or extra gold patterns."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "mystery_or_percent_dollar_off_first_order",
+      "primary_emotion": "curiosity / anticipation",
+      "why": "Three of four gold cards use a mystery/first-order code pattern for Peak Saunas.",
+      "headline_offer_patterns": [
+        "'Mystery offer on your first order'",
+        "'[CODE] — scan to shop'",
+        "'First-order savings'"
+      ],
+      "reinforcing_photo": "Studio or room product hero of the exact sauna model",
+      "what_backfires": "Demo codes reused across samples presented as unique; deep discount that cheapens a premium ASP without a gift alternative",
+      "combos": [
+        {
+          "headline": "Experience relaxation like never before.",
+          "offer": "Mystery offer on first order with code [CODE]",
+          "photo_scene": "Cedar infrared sauna product hero",
+          "sell_the_outcome_line": "Bring the after-work exhale into a room you already own."
+        },
+        {
+          "headline": "Your first sauna order, sweeter.",
+          "offer": "[X]% or $[Y] off first order through [date]",
+          "photo_scene": "Sauna glowing in a finished basement corner",
+          "sell_the_outcome_line": "Start the habit with a welcome that respects the investment."
+        },
+        {
+          "headline": "Scan for your first-order offer.",
+          "offer": "Mystery code valid on first purchase (exclusions listed)",
+          "photo_scene": "Clean product three-quarter shot",
+          "sell_the_outcome_line": "See the deal, see the unit, decide with both in view."
+        }
+      ],
+      "compliance_flags": [
+        "Disclose exclusions, stack rules, end date.",
+        "Code must work as advertised.",
+        "No fake personalization on a mass demo code."
+      ],
+      "evidence": [
+        "GOLD-sauna-001/003"
+      ],
+      "evidence_strength": "directional (thin)"
+    },
+    {
+      "offer_type": "free_gift_with_purchase",
+      "primary_emotion": "reciprocity / unfinished intent",
+      "why": "GOLD-sauna-002 uses free essential oils with code FREEOIL on an abandoned-cart card — gift can protect price.",
+      "headline_offer_patterns": [
+        "'Free essential oil gift with sauna purchase'",
+        "'You left something behind — gift inside'",
+        "'Free accessory kit with your unit'"
+      ],
+      "reinforcing_photo": "Product hero + small inset of the gift item",
+      "what_backfires": "Gift that requires buying a tiny SKU only; hiding shipping fees that erase the gift value",
+      "combos": [
+        {
+          "headline": "You left something behind.",
+          "offer": "Free essential oil gift with sauna purchase — code FREEOIL (or client code)",
+          "photo_scene": "Light-wood sauna in a minimal room",
+          "sell_the_outcome_line": "Finish what you started — and step into a calmer evening sooner."
+        },
+        {
+          "headline": "A gift for your first heat session.",
+          "offer": "Free starter aroma kit with qualifying sauna",
+          "photo_scene": "Oils beside an open sauna door",
+          "sell_the_outcome_line": "Make night one feel complete the moment you sit down."
+        },
+        {
+          "headline": "Come back for the sauna — keep the gift.",
+          "offer": "GWP accessory with purchase over $[N]",
+          "photo_scene": "Abandoned-cart style product reminder",
+          "sell_the_outcome_line": "Return to the upgrade you already imagined at home."
+        }
+      ],
+      "compliance_flags": [
+        "16 CFR 251 free-offer conditions.",
+        "State gift contents and qualifying purchase.",
+        "Abandoned-cart targeting must follow privacy/email-SMS consent rules on the client's stack (mail list sourcing honesty)."
+      ],
+      "evidence": [
+        "GOLD-sauna-002"
+      ],
+      "evidence_strength": "directional (single example)"
+    },
+    {
+      "offer_type": "warranty_or_ownership_upsell",
+      "primary_emotion": "relief / prudence",
+      "why": "GOLD-sauna-004 is a post-purchase extended-warranty discount framed as stress-free relaxation.",
+      "headline_offer_patterns": [
+        "'Extended warranty with a discount'",
+        "'Stress-free ownership'",
+        "'Protect your sauna'"
+      ],
+      "reinforcing_photo": "Aspirational installed sauna (outdoor/poolside if true to product)",
+      "what_backfires": "Warranty terms that are mostly exclusions; implying medical protection",
+      "combos": [
+        {
+          "headline": "Here's to stress-free relaxation.",
+          "offer": "Extended warranty at a discounted rate for owners",
+          "photo_scene": "Outdoor sauna beside a pool with landscape backdrop",
+          "sell_the_outcome_line": "Relax harder knowing coverage is already handled."
+        },
+        {
+          "headline": "Protect the investment you love.",
+          "offer": "Owner warranty upgrade — save $[X] through [date]",
+          "photo_scene": "Close detail of craftsmanship + happy owner inset",
+          "sell_the_outcome_line": "Keep the ritual going without a repair scare."
+        },
+        {
+          "headline": "Ownership, simplified.",
+          "offer": "Warranty + seasonal maintenance tips pack (if real)",
+          "photo_scene": "Towel and water bottle ready at the sauna bench",
+          "sell_the_outcome_line": "Fewer what-ifs — more evenings in the heat."
+        }
+      ],
+      "compliance_flags": [
+        "Warranty advertising must match the actual contract (FTC Mag-Moss / warranty rules as applicable).",
+        "No disease-protection implications.",
+        "Discount basis bona fide."
+      ],
+      "evidence": [
+        "GOLD-sauna-004"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "delivery_install_or_financing_package",
+      "primary_emotion": "ease / relief",
+      "why": "Not shown in the thin gold set; common in high-ticket home wellness retail — include carefully as optional, not as gold-proven.",
+      "headline_offer_patterns": [
+        "'Free delivery / white-glove install'",
+        "'Financing available'",
+        "'Seasonal install slots'"
+      ],
+      "reinforcing_photo": "Crew placing the unit OR finished install in a real home",
+      "what_backfires": "'Free install' that excludes electrical; monthly payment without APR disclosures",
+      "combos": [
+        {
+          "headline": "Delivered. Placed. Ready to heat.",
+          "offer": "Free delivery + standard placement (electrical exclusions disclosed)",
+          "photo_scene": "Unit being set in a garage/patio corner",
+          "sell_the_outcome_line": "Go from order to first session without wrestling the crate alone."
+        },
+        {
+          "headline": "Make the monthly number work.",
+          "offer": "Financing available — ask for current APR example",
+          "photo_scene": "Finished indoor sauna with soft evening light",
+          "sell_the_outcome_line": "Spread the investment while the calm starts this month."
+        },
+        {
+          "headline": "Seasonal delivery window.",
+          "offer": "Book install by [date] for [season] delivery slot",
+          "photo_scene": "Outdoor barrel sauna in season-appropriate weather",
+          "sell_the_outcome_line": "Have it ready when you actually want to use it."
+        }
+      ],
+      "compliance_flags": [
+        "Disclose what install does/does not include (especially electrical).",
+        "Licensed electrician claims only if true.",
+        "Reg Z disclosures if payments/APR/triggering terms appear.",
+        "Not evidenced in gold — mark optional."
+      ],
+      "evidence": [
+        "Not in GOLD-sauna set — market-likely only"
+      ],
+      "evidence_strength": "thin"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "Wellness/aspirational health language in gold vs FTC disease-claim enforcement history for saunas",
+      "resolution": "Law wins: keep experiential unless client has competent scientific substantiation for a specific claim."
+    },
+    {
+      "conflict": "PostPilot ROAS (25x / 18x) vs evidence standards",
+      "resolution": "Agency-only unverified; brand-level, not card-proof."
+    },
+    {
+      "conflict": "Desire to pad offer types vs thin gold n=4",
+      "resolution": "Standing rule: leave thin; financing/install offers marked thin/optional."
+    }
+  ]
+}

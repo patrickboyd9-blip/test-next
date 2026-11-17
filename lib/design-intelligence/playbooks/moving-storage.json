@@ -1,0 +1,350 @@
+{
+  "schema_version": "1.1",
+  "slug": "moving-storage",
+  "industry": "Moving companies and self-storage",
+  "last_updated": "2026-10-29",
+  "words_and_claims_to_avoid": [
+    "Unsubstantiated 'top-rated', 'award-winning', '#1', 'best' (GOLD-002, GOLD-015) unless the rating/award is real, current and named (FTC Act s.5).",
+    "'Guaranteed price' or 'no hidden fees' unless the estimate is actually binding and the terms match 49 CFR 375.403.",
+    "'Fully insured' or 'full value protection included' unless true; liability options must match the released-rates notice.",
+    "'Most popular in New York' style claims (GOLD-018) without data.",
+    "'Fast, affordable and safe' as an unqualified promise; 'safe' for goods implies a guarantee.",
+    "Bundle price tables ('2BR $695', GOLD-018) without stating hours, crew size, what's included and limits.",
+    "'Moving is the most stressful life event' as a fact (not supported by Holmes & Rahe)."
+  ],
+  "compliance_notes": [
+    "Interstate household goods movers: every advertisement must show the name on the DOT registration and the number in the exact form 'U.S. DOT No. [number]' (49 CFR 375.207). Ads must be 'truthful, straightforward, and honest'.",
+    "Household goods BROKERS must show physical address, U.S. DOT number and MC number, and state that they are a broker that will not transport the goods and will arrange an FMCSA-authorized carrier (49 CFR 371.107).",
+    "Estimates (interstate): a physical survey is required (on-site or live/recorded video) unless the shipper waives it in writing; written binding or non-binding estimate; non-binding estimates must be free, and the shipper can't be made to pay more than 110% at delivery (49 CFR 375.401/.405). So 'free estimate' is accurate for non-binding; a mover MAY charge for a binding estimate, so 'free binding estimate' must be true.",
+    "California intrastate movers: need a Bureau of Household Goods and Services permit; advertising without one is unlawful (BPC 19237). The permit number in 'CAL-T' form is expected in ads (BHGS Max 4 tariff; CPUC has cited carriers for omitting it). Other states license intrastate movers separately: client must confirm their state rule.",
+    "'Free boxes' / 'free packing materials' (GOLD-002, 004, 008, 014): FTC Free Guide applies; state conditions next to the offer (16 CFR 251).",
+    "Self-storage 'first month free' / '$1 first month' (GOLD-012, 013, 017): show the regular monthly rate, admin fees, insurance/protection-plan requirements and any minimum stay next to the offer. Lien/auction terms are state law (self-service storage lien acts); don't advertise 'no lien' type claims.",
+    "Referral rewards (GOLD-012 '1 month free for referrals'): real terms; reviews or testimonials obtained via incentives must disclose the incentive (16 CFR 255).",
+    "Price comparisons ('save $500') must be off a real price actually charged (FTC deceptive pricing guides, 16 CFR 233).",
+    "In-home sales of moving supplies or storage contracts at the home: FTC Cooling-Off Rule may apply (16 CFR 429)."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear, joy, pride, status, relief, nostalgia are all options; the client chooses.",
+    "Only laws/compliance are hard limits.",
+    "Every angle and combo carries a sell-the-outcome line.",
+    "Unverified (agency/vendor-only) results are labeled; never quote them as fact on a card.",
+    "No age/demographic angle unless a cited source supports it for this industry; even then, check Fair Housing / ECOA before using it in housing or credit."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "dollar_off_move",
+      "primary_emotion": "smart-shopper relief",
+      "why": "Moving is a big, uncertain bill; a concrete $ off shrinks it. Gold: $50 off local (GOLD-007/008/016), up to $500 off (GOLD-003), $100 off $1,000+ (GOLD-014).",
+      "headline_offer_patterns": [
+        "'$[X] off your local move' + minimum hours",
+        "'Up to $[X] off' only with the tiers stated",
+        "'$[X] off moves over [N] hours'"
+      ],
+      "reinforcing_photo": "Crew loading a branded truck; the family relaxed in the background.",
+      "what_backfires": "'Up to' with no tiers; dense service lists (GOLD-010/011); stock AI-looking movers (GOLD-019-022).",
+      "combos": [
+        {
+          "headline": "Moving next month? Keep $[X] in your pocket.",
+          "offer": "$[X] off local moves of [N]+ hours",
+          "photo_scene": "Crew carrying a sofa to a branded truck",
+          "sell_the_outcome_line": "More budget for the new place, less for the move."
+        },
+        {
+          "headline": "Your first night in the new place, not your tenth trip.",
+          "offer": "$[X] off any full-day move",
+          "photo_scene": "Family on the new porch as the last box comes in",
+          "sell_the_outcome_line": "Sleep in your new home with the bed already made."
+        },
+        {
+          "headline": "Big move? Bigger savings.",
+          "offer": "$[A] off local / $[B] off long distance",
+          "photo_scene": "Split: local street vs highway truck",
+          "sell_the_outcome_line": "One crew, one price, from door to door."
+        },
+        {
+          "headline": "We lift. You point.",
+          "offer": "$[X] off with [Y]-hour minimum",
+          "photo_scene": "Homeowner pointing, crew placing dresser",
+          "sell_the_outcome_line": "You decide where it goes. We do the rest."
+        }
+      ],
+      "compliance_flags": [
+        "Discount must be off the mover's real regular rate (16 CFR 233).",
+        "State minimums/exclusions next to the offer.",
+        "Interstate: 'U.S. DOT No.' line on the card (49 CFR 375.207); CA intrastate: CAL-T permit number."
+      ],
+      "evidence": [
+        "GOLD-moving-storage-003, 007, 008, 014, 016",
+        "SRC-GOLD-MOVING"
+      ],
+      "evidence_strength": "thin (vendor-only)"
+    },
+    {
+      "offer_type": "free_estimate",
+      "primary_emotion": "security / certainty",
+      "why": "Fear of a surprise bill or hostage load is documented by FMCSA; a written estimate after a real survey is the antidote. Nearly every gold card carries 'FREE estimate'.",
+      "headline_offer_patterns": [
+        "'Free written estimate, in-home or by video'",
+        "'Know your price before moving day'",
+        "'Binding estimate available' (only if offered)"
+      ],
+      "reinforcing_photo": "Estimator walking a room with a tablet; or a video-survey phone screen showing a living room.",
+      "what_backfires": "'Instant quote' with no survey (implies sight-unseen pricing, the classic rogue-mover pattern); 'guaranteed price' on a non-binding estimate.",
+      "combos": [
+        {
+          "headline": "The price we quote is the price you pay.",
+          "offer": "Free written estimate; binding estimates available",
+          "photo_scene": "Estimator handing a printed estimate across a kitchen table",
+          "sell_the_outcome_line": "Moving day with no surprise bill."
+        },
+        {
+          "headline": "Know your moving cost before you pack a box.",
+          "offer": "Free in-home or video estimate",
+          "photo_scene": "Phone screen showing a video walkthrough of a living room",
+          "sell_the_outcome_line": "Plan the move around real numbers."
+        },
+        {
+          "headline": "No guesses. No surprises.",
+          "offer": "Free survey + written estimate in [N] hours",
+          "photo_scene": "Estimator and homeowner in a garage full of boxes",
+          "sell_the_outcome_line": "Peace of mind from the first call to the last box."
+        }
+      ],
+      "compliance_flags": [
+        "Interstate: non-binding estimates must be free; binding estimates may be charged, so say 'free' only if true (49 CFR 375.401/.405).",
+        "Don't call a rate quote an estimate; FMCSA says 'a rate quote is not an estimate'.",
+        "Physical survey or written waiver required."
+      ],
+      "evidence": [
+        "SRC-FMCSA-375-401",
+        "SRC-FMCSA-FRAUD",
+        "GOLD-moving-storage-001, 003, 007"
+      ],
+      "evidence_strength": "moderate (fear documented); thin (creative)"
+    },
+    {
+      "offer_type": "free_boxes_or_supplies",
+      "primary_emotion": "reciprocity / relief",
+      "why": "A tangible gift solves the first chore. Gold: 30 free boxes (GOLD-002), $50 packing materials (GOLD-004), free boxes with every move (GOLD-014/015).",
+      "headline_offer_patterns": [
+        "'[N] free boxes when you book'",
+        "'Mover's choice: $[X] off OR [N] free boxes'"
+      ],
+      "reinforcing_photo": "Stack of branded boxes and tape at a front door.",
+      "what_backfires": "Gift with hidden conditions; low-value gift hyped as a big 'value'.",
+      "combos": [
+        {
+          "headline": "Packing starts here. On us.",
+          "offer": "[N] free boxes when you book by [date]",
+          "photo_scene": "Branded box stack at the front door",
+          "sell_the_outcome_line": "Start packing tonight."
+        },
+        {
+          "headline": "Your choice: $[X] off or [N] free boxes.",
+          "offer": "Mover's choice offer (expires [date])",
+          "photo_scene": "Two-panel: coupon vs box stack",
+          "sell_the_outcome_line": "Pick what makes your move easier."
+        },
+        {
+          "headline": "Everything you need to pack. Delivered.",
+          "offer": "Free starter packing kit with any [N]-hour move",
+          "photo_scene": "Crew member handing a kit to a homeowner",
+          "sell_the_outcome_line": "One less errand in a busy month."
+        }
+      ],
+      "compliance_flags": [
+        "16 CFR 251: conditions next to the offer; move price not raised to cover the gift."
+      ],
+      "evidence": [
+        "GOLD-moving-storage-002, 004, 014, 015",
+        "SRC-BERTRAND-2010 (choice/menus: keep options to two)"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "new_mover_or_life_event",
+      "primary_emotion": "anticipation / joy",
+      "why": "Moves are housing- and family-driven (Census) and sellers mostly cite a life event (Zillow). Trigger lists (just listed / under contract) catch the window; C-3PO TP-12: one audience moment per piece.",
+      "headline_offer_patterns": [
+        "'Just listed? Let's get you moving.'",
+        "'Congratulations on the sale. We'll handle the move.'"
+      ],
+      "reinforcing_photo": "Family in a bright empty new living room, crew bringing in the last box.",
+      "what_backfires": "Naming private details ('we saw your home is in foreclosure'); generic service lists.",
+      "combos": [
+        {
+          "headline": "Sold the house? Let's get you home.",
+          "offer": "$[X] off when you book within 30 days",
+          "photo_scene": "Family unpacking in a sunny new room",
+          "sell_the_outcome_line": "Spend move weekend settling in, not hauling."
+        },
+        {
+          "headline": "New keys. New chapter.",
+          "offer": "Free estimate + [N] free boxes",
+          "photo_scene": "Hand turning a key, crew truck behind",
+          "sell_the_outcome_line": "Walk into your new home ready to live."
+        },
+        {
+          "headline": "Closing soon? Lock your moving date.",
+          "offer": "Reserve your date with a free estimate",
+          "photo_scene": "Calendar on a fridge with 'MOVE DAY' circled, boxes below",
+          "sell_the_outcome_line": "Move day planned, nothing left to chance."
+        }
+      ],
+      "compliance_flags": [
+        "Listing-trigger data is public, but don't state or imply knowledge of private financial facts (FTC s.5).",
+        "Interstate DOT line / CA CAL-T line."
+      ],
+      "evidence": [
+        "SRC-CENSUS-CPS-2023",
+        "SRC-ZILLOW-SELLERS-2025",
+        "SRC-CDI-RUBRIC",
+        "SRC-MMR-500"
+      ],
+      "evidence_strength": "moderate (motive) / thin (creative)"
+    },
+    {
+      "offer_type": "storage_first_month",
+      "primary_emotion": "relief",
+      "why": "Space shortage (46%) and moving (30%) are the top storage reasons (SSA 2025). Gold: first month free (GOLD-013/017), 25% off first 3 months (GOLD-009), $1 first month (GOLD-012).",
+      "headline_offer_patterns": [
+        "'First month $1 on [size] units'",
+        "'Moving? Renovating? Store it here.' (GOLD-013)",
+        "'[X]% off your first 3 months'"
+      ],
+      "reinforcing_photo": "Clean, lit unit with labeled boxes; inset of a cleared garage or staged room.",
+      "what_backfires": "Feature checklists with no outcome (GOLD-010/011); hiding admin fees or required insurance.",
+      "combos": [
+        {
+          "headline": "Park in your garage again.",
+          "offer": "First month $[X] on [size] units",
+          "photo_scene": "Before/after garage + tidy storage unit",
+          "sell_the_outcome_line": "Your space back, your things 5 minutes away."
+        },
+        {
+          "headline": "Selling? Clear the clutter, not your memories.",
+          "offer": "[X]% off first 3 months",
+          "photo_scene": "Staged living room + unit with labeled boxes",
+          "sell_the_outcome_line": "A home buyers can picture themselves in."
+        },
+        {
+          "headline": "Remodel without the chaos.",
+          "offer": "First month free on units [size]+",
+          "photo_scene": "Contractor in an empty kitchen + stored furniture",
+          "sell_the_outcome_line": "A clear room for the crew, a safe spot for your stuff."
+        },
+        {
+          "headline": "Moving in stages? We'll hold the rest.",
+          "offer": "Truck + unit bundle: $[X] off",
+          "photo_scene": "Crew unloading into a unit",
+          "sell_the_outcome_line": "Move on your timeline."
+        }
+      ],
+      "compliance_flags": [
+        "Show regular rate, admin fee, required protection plan and minimum term next to the offer.",
+        "'Climate-controlled' and 'secure/24-hour' claims must be accurate (FTC s.5)."
+      ],
+      "evidence": [
+        "SRC-SSA-2025",
+        "GOLD-moving-storage-009, 012, 013, 017",
+        "MMR-045"
+      ],
+      "evidence_strength": "moderate (motive) / thin (creative)"
+    },
+    {
+      "offer_type": "referral",
+      "primary_emotion": "belonging / reciprocity",
+      "why": "Local moves and repeat local households make referrals natural; gold GOLD-012 gives 1 month free for referrals.",
+      "headline_offer_patterns": [
+        "'Know someone moving? You both get $[X].'"
+      ],
+      "reinforcing_photo": "Two neighbors waving across driveways with a moving truck between.",
+      "what_backfires": "Paying for reviews without disclosure.",
+      "combos": [
+        {
+          "headline": "Friends don't let friends move alone.",
+          "offer": "$[X] off for you and your referral",
+          "photo_scene": "Two neighbors with a truck between them",
+          "sell_the_outcome_line": "Help a friend and save on your next move."
+        },
+        {
+          "headline": "Your neighbor moved with us.",
+          "offer": "$[X] referral credit",
+          "photo_scene": "Truck on the recipient's street",
+          "sell_the_outcome_line": "The crew your street already trusts."
+        },
+        {
+          "headline": "Storing with us? Bring a friend.",
+          "offer": "1 month free per referral (terms on back)",
+          "photo_scene": "Two people carrying boxes into a facility",
+          "sell_the_outcome_line": "Share the space, share the savings."
+        }
+      ],
+      "compliance_flags": [
+        "Incentivized reviews must disclose the incentive (16 CFR 255).",
+        "'Your neighbor moved with us' only if true for that route."
+      ],
+      "evidence": [
+        "GOLD-moving-storage-012"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "seasonal_or_off_peak",
+      "primary_emotion": "smart-shopper / control",
+      "why": "Price-sensitive local movers can shift dates; a real off-peak discount is concrete. No gold card or study tested this; included as a logical offer type only.",
+      "headline_offer_patterns": [
+        "'Move midweek, save $[X]'",
+        "'Beat the summer rush: book by [date]'"
+      ],
+      "reinforcing_photo": "Calendar with a weekday circled; quiet street with a truck.",
+      "what_backfires": "Fake 'rush' scarcity; deadlines that keep rolling.",
+      "combos": [
+        {
+          "headline": "Move on a Tuesday. Keep $[X].",
+          "offer": "$[X] off Mon-Thu moves",
+          "photo_scene": "Quiet street, truck, morning light",
+          "sell_the_outcome_line": "Same crew, calmer day, smaller bill."
+        },
+        {
+          "headline": "Book before the summer rush.",
+          "offer": "$[X] off moves booked by [date]",
+          "photo_scene": "Calendar on a fridge, boxes stacked",
+          "sell_the_outcome_line": "Get the date you want, not what's left."
+        },
+        {
+          "headline": "Winter move? Warm welcome.",
+          "offer": "$[X] off [month] moves",
+          "photo_scene": "Crew carrying boxes into a warm-lit home",
+          "sell_the_outcome_line": "Settle in before the holidays."
+        }
+      ],
+      "compliance_flags": [
+        "Deadline must be real; don't re-run 'ends soon' indefinitely (FTC s.5).",
+        "Bertrand et al. (2010) found longer deadlines didn't hurt take-up in loan mail; test 2 vs 6 weeks."
+      ],
+      "evidence": [
+        "SRC-BERTRAND-2010 (deadline result, MMR-419)"
+      ],
+      "evidence_strength": "thin (logical, untested here)"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "GOLD-002 'TOP-RATED' and GOLD-015 'Award-Winning' vs FTC substantiation",
+      "resolution": "Law wins: name the real rating source/award and date, or drop it and sell the outcome."
+    },
+    {
+      "conflict": "Vendor 'instant quote / call now for a price' (GOLD-005, 019-022) vs FMCSA estimate rules and rogue-mover warnings",
+      "resolution": "Law wins for interstate: a rate quote is not an estimate; lead with a free written estimate after a (video) survey. Instant quotes are fine as a first step if labeled 'quote, not an estimate'."
+    },
+    {
+      "conflict": "Common copy claim 'moving is one of life's most stressful events' vs Holmes & Rahe (1967)",
+      "resolution": "Verified study wins: don't print it as a fact. 'Moving is a lot' as emotional copy is fine."
+    },
+    {
+      "conflict": "Gold GOLD-018 bundle price table vs C-3PO one-job-per-piece and Bertrand (fewer options convert better)",
+      "resolution": "Verified study wins over vendor sample: show one hero price (or two options max) with what's included."
+    }
+  ]
+}

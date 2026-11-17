@@ -1,0 +1,303 @@
+{
+  "schema_version": "1.1",
+  "slug": "life-insurance",
+  "industry": "Life insurance (term, whole, final expense, mortgage protection, juvenile; agents, agencies, direct carriers)",
+  "last_updated": "2026-10-30",
+  "words_and_claims_to_avoid": [
+    "'No medical exam' without the adjacent, equal-prominence disclosure that issue may depend on health answers, when issue isn't guaranteed (NAIC 570 Sec. 5C).",
+    "'Low cost' / 'inexpensive' for guaranteed-issue products (5H); 'free insurance' for a reduced first premium (5T(3)).",
+    "'Immediate coverage' / 'guaranteed acceptance' if benefits are graded or there's a waiting period, unless the limitation is prominent (5G).",
+    "'Funeral Expenses', 'Final Supplemental Plan', 'Death Benefits Update', 'Federal Benefit Information', 'Medicare', 'Social Security' or seals/eagles in a way that implies government connection (42 USC 1320b-10; disclaimers don't cure it).",
+    "'Special', 'limited enrollment', 'only [N] policies' unless true (5T).",
+    "Unsourced statistics, e.g., gold 008 'Average funeral costs are between $7,000-$10,000' (5R requires source; FTC Sec. 5).",
+    "Calling a product something other than life insurance (5D); 'financial planner' titles for insurance-only producers (5N).",
+    "'Pennies a day' / '<$1/day' unless it's a real premium for a stated age/health/amount (gold 022 uses a female-31 example).",
+    "Unaudited vendor results quoted as fact."
+  ],
+  "compliance_notes": [
+    "NAIC Model 570 as adopted by the state governs life ads: insurer named (Sec. 6A); policy type described (5E); graded benefits and non-level premiums prominently described; testimonials genuine with paid relationships disclosed; statistics sourced; insurers keep ad files 5 years (Sec. 9).",
+    "42 USC 1320b-10 bans words/emblems implying Social Security/Medicare/government connection, including 'Funeral Expenses', 'Final Supplemental Plan' and 'Death Benefits Update'; up to $5,000 per violation, each piece separately; disclaimers don't cure.",
+    "39 USC 3001(h): government look-alike mail is nonmailable without the required disclaimers.",
+    "Producer license disclosure (e.g., CA Ins. Code 1725.5); state unfair trade practices (NAIC 880) and anti-rebating limits on gifts (seminar meals/donuts are inducements - check state cap).",
+    "Reply-card leads: follow-up calls are subject to TSR/TCPA/state rules (not researched here).",
+    "Juvenile life: marketing to parents only; avoid implying school endorsement (570 Sec. 5S student rules are analogous)."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear, joy, pride, status, relief, nostalgia are all options; the client chooses.",
+    "Only laws/compliance are hard limits.",
+    "Every angle and combo carries a sell-the-outcome line.",
+    "Unverified (agency/vendor-only) results are labeled; never quote them as fact on a card.",
+    "No age/demographic angle unless a cited source supports it for this industry; even then, check Fair Housing / ECOA before using it in housing or credit."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "term_price_example",
+      "primary_emotion": "surprise / relief",
+      "why": "Cost overestimation is the main barrier (LIMRA 2025).",
+      "headline_offer_patterns": [
+        "'$[amount] of coverage for $[premium]/month (healthy [age], [term] term).'",
+        "'Most people guess wrong. Here's the real price.'"
+      ],
+      "reinforcing_photo": "Bedtime story with a young parent.",
+      "what_backfires": "Teaser prices without the qualifiers; '$15/mo' with no age/health/amount; 'pennies a day' gimmicks.",
+      "combos": [
+        {
+          "headline": "Most people guess life insurance costs far more than it does.",
+          "offer": "Real example: $[amount] [term] term for a healthy [age]-year-old at $[premium]/mo; free personal quote",
+          "photo_scene": "Parent reading a bedtime story",
+          "sell_the_outcome_line": "Peace of mind for less than your streaming bill."
+        },
+        {
+          "headline": "Is your family protected? It may cost less than lunch.",
+          "offer": "Free quote in 2 minutes by QR",
+          "photo_scene": "Family lunch on a park bench",
+          "sell_the_outcome_line": "Protect the people you love without changing how you live."
+        },
+        {
+          "headline": "Guess the price. Then see the real one.",
+          "offer": "Scan, enter age/amount, see a real quote",
+          "photo_scene": "Couple on the couch looking at a phone, surprised smile",
+          "sell_the_outcome_line": "Cross 'life insurance' off the list tonight."
+        }
+      ],
+      "compliance_flags": [
+        "Price examples must state insurer, product, amount, term, age, health/tobacco class (570 Secs. 5, 6).",
+        "Non-level premiums described prominently."
+      ],
+      "evidence": [
+        "SRC-LIMRA-2025",
+        "SRC-NAIC-570",
+        "SRC-KT-1979"
+      ],
+      "evidence_strength": "strong (barrier)"
+    },
+    {
+      "offer_type": "family_protection_needs_check",
+      "primary_emotion": "fear / love",
+      "why": "Core category motive; fear appeals work with an easy action.",
+      "headline_offer_patterns": [
+        "'If you weren't here tomorrow...'",
+        "'What would happen if one of you were not in the picture?' (AXA gold 023)"
+      ],
+      "reinforcing_photo": "Family photo on the fridge with one gap.",
+      "what_backfires": "Caskets, hospital beds, crying children (no efficacy); guilt with no next step.",
+      "combos": [
+        {
+          "headline": "If you weren't here tomorrow, would they keep the house?",
+          "offer": "Free 10-minute needs check",
+          "photo_scene": "Kids playing in the yard, parent watching from the porch",
+          "sell_the_outcome_line": "Your kids stay in their school and their rooms, whatever happens."
+        },
+        {
+          "headline": "Take one person out of this picture. Then call us.",
+          "offer": "Free coverage estimate for your family",
+          "photo_scene": "Family snapshot with one figure faded",
+          "sell_the_outcome_line": "They'll miss you. They won't have to worry about money."
+        },
+        {
+          "headline": "You protect them every day. Here's how to keep doing it.",
+          "offer": "Free needs check + quote",
+          "photo_scene": "Parent walking a child to school",
+          "sell_the_outcome_line": "Keep showing up for them, even if you can't."
+        }
+      ],
+      "compliance_flags": [
+        "Insurer identity; no misleading benefit claims; no guarantee of approval."
+      ],
+      "evidence": [
+        "SRC-ROGERS-1975",
+        "SRC-WITTE-1992",
+        "SRC-TANNENBAUM-2015",
+        "SRC-WATSON",
+        "SRC-GOLD-LIFE"
+      ],
+      "evidence_strength": "moderate (theory) / thin (creative)"
+    },
+    {
+      "offer_type": "no_exam_or_simplified_issue",
+      "primary_emotion": "relief (easy)",
+      "why": "Removing the exam lowers effort; gold 005/006 'no medical exam' (MinuteMarketing 6,500 cards/38 policies, vendor). Heavily regulated wording.",
+      "headline_offer_patterns": [
+        "'Apply without a medical exam.*' + adjacent disclosure",
+        "'Coverage in days, not weeks (for qualifying applicants).'"
+      ],
+      "reinforcing_photo": "Person applying on a phone at the kitchen counter.",
+      "what_backfires": "'No exam' without the health-questions disclosure; 'everyone approved'.",
+      "combos": [
+        {
+          "headline": "No medical exam. Just a few health questions.",
+          "offer": "Issuance depends on your answers (equal-prominence disclosure). Free quote.",
+          "photo_scene": "Woman answering questions on a phone at the counter",
+          "sell_the_outcome_line": "Done before your coffee gets cold."
+        },
+        {
+          "headline": "Skip the needles. Protect your family.",
+          "offer": "Simplified-issue term quote; approval depends on health answers",
+          "photo_scene": "Dad with toddler on shoulders",
+          "sell_the_outcome_line": "Covered without taking a day off."
+        },
+        {
+          "headline": "Apply from the couch.",
+          "offer": "Online application, no exam for qualifying applicants",
+          "photo_scene": "Couple on the couch with a laptop",
+          "sell_the_outcome_line": "Protection that fits into a Tuesday night."
+        }
+      ],
+      "compliance_flags": [
+        "NAIC 570 5C disclosure adjacent and equally prominent.",
+        "If guaranteed issue: no 'low cost'; graded benefits prominent (5G/5H)."
+      ],
+      "evidence": [
+        "SRC-NAIC-570",
+        "SRC-GOLD-LIFE"
+      ],
+      "evidence_strength": "thin (creative) / clear law"
+    },
+    {
+      "offer_type": "final_expense_guaranteed_issue",
+      "primary_emotion": "responsibility / legacy",
+      "why": "Planning to spare family the cost; very scrutinized products.",
+      "headline_offer_patterns": [
+        "'Leave them memories, not bills.'",
+        "'Leave a legacy of love, not debt.' (gold 016)"
+      ],
+      "reinforcing_photo": "Active grandparent with grandkids.",
+      "what_backfires": "Caskets/funerals; unsourced funeral-cost stats; 'Final Supplemental Plan' and government-styled 'benefit update' wording; frail/lonely seniors.",
+      "combos": [
+        {
+          "headline": "Leave them memories, not bills.",
+          "offer": "Free planning guide + quote; graded-benefit limits stated plainly if applicable",
+          "photo_scene": "Grandparent laughing with grandkids at a picnic table",
+          "sell_the_outcome_line": "Your family gathers to remember you, not to figure out how to pay."
+        },
+        {
+          "headline": "One less thing for your kids to worry about.",
+          "offer": "Reply card for a no-obligation quote",
+          "photo_scene": "Grandparent and adult child gardening together",
+          "sell_the_outcome_line": "Your wishes handled, your family free to grieve."
+        },
+        {
+          "headline": "Plan it once. Then go enjoy your life.",
+          "offer": "Free workbook + quote",
+          "photo_scene": "Couple fishing off a dock",
+          "sell_the_outcome_line": "Settle it now and spend your days on what you love."
+        }
+      ],
+      "compliance_flags": [
+        "42 USC 1320b-10 word list ('Funeral Expenses', 'Final Supplemental Plan', 'Death Benefits Update').",
+        "NAIC 570 5G/5H graded benefits and 'low cost' ban for guaranteed issue.",
+        "Statistic sources (5R).",
+        "Age is a product eligibility fact; state ages accurately."
+      ],
+      "evidence": [
+        "SRC-NAIC-570",
+        "SRC-1320B10",
+        "SRC-GOLD-LIFE",
+        "SRC-MMR-LIFE"
+      ],
+      "evidence_strength": "thin (creative) / clear law"
+    },
+    {
+      "offer_type": "mortgage_protection",
+      "primary_emotion": "security",
+      "why": "New mortgage/refi moment; gold 004/015/018/020.",
+      "headline_offer_patterns": [
+        "'Refinanced your home?'",
+        "'If you can't pay the mortgage, what happens?'"
+      ],
+      "reinforcing_photo": "Family on their own front steps.",
+      "what_backfires": "Styling that implies it's from the lender or a government program (common in mortgage-protection mail).",
+      "combos": [
+        {
+          "headline": "Just refinanced? Make sure the house stays theirs.",
+          "offer": "Free quote sized to your mortgage",
+          "photo_scene": "Family on their front steps",
+          "sell_the_outcome_line": "Your family keeps the home, not the payment."
+        },
+        {
+          "headline": "Your mortgage has a plan. Does your family?",
+          "offer": "Reply card for a free quote",
+          "photo_scene": "Couple painting a nursery",
+          "sell_the_outcome_line": "Build the home, protect the home."
+        },
+        {
+          "headline": "If you can't pay the mortgage, what happens?",
+          "offer": "Free mortgage-protection review",
+          "photo_scene": "Parent and kids on a porch swing",
+          "sell_the_outcome_line": "They stay right where they are."
+        }
+      ],
+      "compliance_flags": [
+        "Clear statement that you are not the lender and not affiliated with any government agency (Reg N/39 USC 3001 analog; 570 Sec. 6).",
+        "Lead lists built from mortgage data: check state rules and the Homebuyers Privacy Protection Act limits on trigger leads (credit-based)."
+      ],
+      "evidence": [
+        "SRC-GOLD-LIFE",
+        "SRC-NAIC-570",
+        "SRC-39USC3001"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "seminar_or_workshop",
+      "primary_emotion": "curiosity / belonging",
+      "why": "Gold 010 seminar invite with donuts (final expense). Education-first reduces pressure.",
+      "headline_offer_patterns": [
+        "'Free coffee + 45 minutes on protecting your family.'"
+      ],
+      "reinforcing_photo": "Small friendly room with a presenter and attendees.",
+      "what_backfires": "Meals/gifts above the state anti-rebating cap; bait-and-switch 'educational' events that are sales pitches.",
+      "combos": [
+        {
+          "headline": "Coffee, donuts, and straight answers about life insurance.",
+          "offer": "Free 45-minute workshop at [venue], no obligation",
+          "photo_scene": "Library meeting room with a presenter",
+          "sell_the_outcome_line": "Leave knowing exactly what you need, and what you don't."
+        },
+        {
+          "headline": "Bring your questions. We'll bring the coffee.",
+          "offer": "Small-group Q&A at [venue]",
+          "photo_scene": "Coffee and a whiteboard",
+          "sell_the_outcome_line": "One morning to settle a question you've put off for years."
+        },
+        {
+          "headline": "How much life insurance does a family really need?",
+          "offer": "Free evening class",
+          "photo_scene": "Couples taking notes",
+          "sell_the_outcome_line": "A clear number and a plan before you go home."
+        }
+      ],
+      "compliance_flags": [
+        "Meals/refreshments are inducements: state anti-rebating cap (NAIC 880 2020).",
+        "Identify as an insurance producer/sales event if it is one."
+      ],
+      "evidence": [
+        "SRC-GOLD-LIFE",
+        "SRC-NAIC-880"
+      ],
+      "evidence_strength": "thin"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "Gold 005/006/010 'no medical exam, immediate coverage' vs NAIC 570 5C/5G",
+      "resolution": "Law wins: keep the ease benefit, add the adjacent health-questions disclosure and prominent graded-benefit limits."
+    },
+    {
+      "conflict": "Gold 008 'Average funeral costs are between $7,000-$10,000' vs NAIC 570 5R and FTC Sec. 5",
+      "resolution": "Law wins: no unsourced stats; use a current sourced figure supplied by the client or drop it."
+    },
+    {
+      "conflict": "Final-expense mail commonly styled like benefit notices vs 42 USC 1320b-10",
+      "resolution": "Law wins: no 'Final Supplemental Plan', 'Funeral Expenses' or 'Death Benefits Update' framing, no seals; disclaimers don't fix it."
+    },
+    {
+      "conflict": "Gold '$15/mo for $250k' headlines (001/007/014) vs LIMRA evidence that a real price corrects overestimation",
+      "resolution": "Both point the same way, but law sets the form: keep a specific price, add age/health/term/insurer qualifiers next to it."
+    },
+    {
+      "conflict": "LIMRA reports bigger need gaps among some racial and income groups vs standing rule on demographics",
+      "resolution": "Standing rule wins for creative: no race/income angle. Use LIMRA's age-linked cost misperception only where it applies (young families), as an evidence-based exception."
+    }
+  ]
+}

@@ -1,0 +1,294 @@
+{
+  "schema_version": "1.1",
+  "slug": "handyman",
+  "industry": "Residential handyman / odd-job repair, punch-list fixes, and light maintenance (drywall, fixtures, doors, minor plumbing/electrical where licensed to do so)",
+  "last_updated": "2026-11-04",
+  "words_and_claims_to_avoid": [
+    "'Licensed contractor' / 'fully licensed' if operating under a handyperson exemption or lacking the required license class",
+    "'Insured/bonded' if policies are lapsed or nonexistent",
+    "'We do electrical/plumbing' in jurisdictions requiring specialty licenses the sender lacks",
+    "'From $X/hour' that is rarely available; unclear trip fees",
+    "Fake urgency ('call in the next 10 minutes')",
+    "Unwarranted 'seniors only' targeting without a real discount program",
+    "Government/inspection official look-alikes (39 USC 3001)"
+  ],
+  "compliance_notes": [
+    "State contractor law varies. California example: B&P 7048 minor-work exemption — as amended, under $1,000 total, casual/minor, no building permit, not part of a larger project, and the person may not employ others; advertising as a contractor or implying contractor qualification removes the exemption. Unlicensed advertisers must disclose they are not licensed when advertising under the exemption (CSLB AB 2622 guidance).",
+    "Never advertise permit-required work or licensed trades without the proper license.",
+    "FTC s.5 / 16 CFR 233/251: free estimates, $ off, % off need clear conditions and bona fide prices.",
+    "'Insured/bonded' — only if true; consider stating what insurance covers at a high level if making strong safety claims.",
+    "Price 'from' / hourly: disclose trip fees and minimums that materially change the price.",
+    "39 USC 3001: no fake city inspection notices.",
+    "If using senior/veteran discounts, they must be real and non-deceptive; do not invent a senior audience default."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: relief, pride, anxiety-reduction, belonging are fine when legal.",
+    "Only laws/compliance are hard limits.",
+    "Every angle and emotion_by_offer combo carries sell_the_outcome_line.",
+    "Vendor ROI labeled agency-only unverified; never print as fact on a client card.",
+    "Prefer one clear offer + one real photo + one QR (roofing-round5 directional).",
+    "No age/senior default unless real discount + evidence."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "free_estimate_or_assessment",
+      "primary_emotion": "relief / confidence",
+      "why": "Dominant gold pattern; reduces hiring risk.",
+      "headline_offer_patterns": [
+        "'FREE estimates'",
+        "'FREE 20-point maintenance assessment'",
+        "'Zero-cost project assessment'"
+      ],
+      "reinforcing_photo": "Pro with clipboard in the home",
+      "what_backfires": "Free estimate that is only a phone quote when 'in-person' was promised; pressure tactics",
+      "combos": [
+        {
+          "headline": "Stop guessing. Start fixing.",
+          "offer": "ZERO-COST PROJECT ASSESSMENT",
+          "photo_scene": "Handyman with tablet inspecting a wall",
+          "sell_the_outcome_line": "Know exactly what it takes before you spend a dollar on repairs."
+        },
+        {
+          "headline": "Your home's annual health check.",
+          "offer": "FREE 20-point maintenance assessment",
+          "photo_scene": "Clipboard checklist in a bright kitchen",
+          "sell_the_outcome_line": "Walk away with a prioritized list instead of a vague worry."
+        },
+        {
+          "headline": "Need help on your next project?",
+          "offer": "Free estimates — no job too big or small",
+          "photo_scene": "Smiling pro at the front door",
+          "sell_the_outcome_line": "One conversation that clears the fog on cost and scope."
+        },
+        {
+          "headline": "Complimentary home health inspection.",
+          "offer": "Complimentary 20-point inspection & repair estimate",
+          "photo_scene": "Checking a faucet / outlet cover carefully",
+          "sell_the_outcome_line": "Catch the small stuff before it becomes a weekend emergency."
+        }
+      ],
+      "compliance_flags": [
+        "If 'free' requires booking paid work, disclose (16 CFR 251).",
+        "Do not call it an 'official inspection'."
+      ],
+      "evidence": [
+        "GOLD-handyman-001/004/005/008/010/012"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "dollar_or_percent_off_first_job",
+      "primary_emotion": "relief / reciprocity",
+      "why": "Concrete welcome savings; common in gold ($25–$100 tiers, 20% off).",
+      "headline_offer_patterns": [
+        "'$50 OFF your project'",
+        "'20% OFF your first service'",
+        "'New customers save $50'",
+        "'Tiered $25/$50/$75/$100 off'"
+      ],
+      "reinforcing_photo": "Finished fix detail + one offer bar",
+      "what_backfires": "Tier grids that bury the deal; % off with no regular price basis",
+      "combos": [
+        {
+          "headline": "Your to-do list, done.",
+          "offer": "$50 OFF your project (min $[N]; ends [date])",
+          "photo_scene": "Pro installing a door hardware set",
+          "sell_the_outcome_line": "Pay a little less to finally clear the punch list."
+        },
+        {
+          "headline": "First service, lighter.",
+          "offer": "20% OFF your first service",
+          "photo_scene": "Freshly patched and painted drywall corner",
+          "sell_the_outcome_line": "Try a pro once — keep the weekend for yourself."
+        },
+        {
+          "headline": "New customers save $50.",
+          "offer": "$50 off first job for new customers",
+          "photo_scene": "Branded van parked at a real house",
+          "sell_the_outcome_line": "Start the relationship with something already knocked out."
+        }
+      ],
+      "compliance_flags": [
+        "Min job size and end date with offer.",
+        "Regular price basis for % off (16 CFR 233).",
+        "Prefer one hero tier on the front."
+      ],
+      "evidence": [
+        "GOLD-handyman-002/003/007/011"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "seasonal_maintenance_package",
+      "primary_emotion": "prudence / relief",
+      "why": "Seasonal cues create annual habit; present in gold.",
+      "headline_offer_patterns": [
+        "'Seasonal maintenance packages — save now'",
+        "'Your home's seasonal to-do list, done.'"
+      ],
+      "reinforcing_photo": "Season-appropriate exterior/interior maintenance in progress",
+      "what_backfires": "Fake storm urgency; package contents vague",
+      "combos": [
+        {
+          "headline": "Seasonal to-do list, done.",
+          "offer": "Seasonal maintenance package at discounted price (list inclusions)",
+          "photo_scene": "Weatherstripping / door adjustment in fall light",
+          "sell_the_outcome_line": "Be ready for the season without a Saturday on a ladder."
+        },
+        {
+          "headline": "Spring punch list special.",
+          "offer": "Bundle [N] small fixes for $[X]",
+          "photo_scene": "Multiple small finished fixes collage (honest)",
+          "sell_the_outcome_line": "Open the windows season with the house already caught up."
+        },
+        {
+          "headline": "Pre-winter home check.",
+          "offer": "Complimentary assessment + $[Y] off listed winter prep items",
+          "photo_scene": "Tech checking exterior doors/seals",
+          "sell_the_outcome_line": "Fewer drafts, fewer surprises, calmer mornings."
+        }
+      ],
+      "compliance_flags": [
+        "Itemize what the package includes.",
+        "No invented weather emergency."
+      ],
+      "evidence": [
+        "GOLD-handyman-012/013"
+      ],
+      "evidence_strength": "thin-moderate"
+    },
+    {
+      "offer_type": "new_customer_welcome",
+      "primary_emotion": "belonging / relief",
+      "why": "Neighbor/hero framing + welcome $ off appears in gold.",
+      "headline_offer_patterns": [
+        "'There's a hero in your neighborhood'",
+        "'We've got your back'",
+        "'New customers save $50'"
+      ],
+      "reinforcing_photo": "Friendly local tech portrait with real home backdrop",
+      "what_backfires": "Stock 'superhero' cheese; claiming neighborhood exclusivity falsely",
+      "combos": [
+        {
+          "headline": "There's a helper in your neighborhood.",
+          "offer": "New customer $[X] off first visit",
+          "photo_scene": "Real tech waving at a porch",
+          "sell_the_outcome_line": "Know who to call when something small breaks."
+        },
+        {
+          "headline": "Need a handyman? We've got your back.",
+          "offer": "FREE in-person consultation for new neighbors",
+          "photo_scene": "Owner in branded shirt with tool belt (real)",
+          "sell_the_outcome_line": "Meet the person who can clear your list — starting with a free walkthrough."
+        },
+        {
+          "headline": "Welcome — first fix on easier terms.",
+          "offer": "New customers save $50",
+          "photo_scene": "Finished interior fix in afternoon light",
+          "sell_the_outcome_line": "A smoother move-in or a lighter first month in the house."
+        }
+      ],
+      "compliance_flags": [
+        "License/exemption disclosure if required in-state.",
+        "EDDM: no official resident notice look."
+      ],
+      "evidence": [
+        "GOLD-handyman-001/011/014"
+      ],
+      "evidence_strength": "directional"
+    },
+    {
+      "offer_type": "multi_item_punch_list_discount",
+      "primary_emotion": "relief / efficiency",
+      "why": "Bundling multiple small jobs matches how homeowners actually hire.",
+      "headline_offer_patterns": [
+        "'Tiered $ off jobs over set amounts'",
+        "'More items, more savings'",
+        "'One call punch-list special'"
+      ],
+      "reinforcing_photo": "Several completed small tasks / checklist with checks",
+      "what_backfires": "Complex tier charts on the front; bait tiers",
+      "combos": [
+        {
+          "headline": "Stack the small jobs. Save once.",
+          "offer": "$25/$50/$75/$100 off at stated job totals (print thresholds)",
+          "photo_scene": "Checklist with three items checked",
+          "sell_the_outcome_line": "One visit clears more — and costs less per fix."
+        },
+        {
+          "headline": "Punch list special.",
+          "offer": "$[X] off when we complete [N]+ listed items in one trip",
+          "photo_scene": "Tech carrying tools between rooms",
+          "sell_the_outcome_line": "Stop hosting a different trade every Saturday."
+        },
+        {
+          "headline": "No job too small — bring several.",
+          "offer": "Free estimate on multi-item lists + $[Y] off first combined visit",
+          "photo_scene": "Before tray of odd jobs / after tidy room",
+          "sell_the_outcome_line": "Leave the day with more working and less nagging at the edges of your vision."
+        }
+      ],
+      "compliance_flags": [
+        "State thresholds clearly; avoid deceptive tier math.",
+        "Ensure combined work still within license/exemption rules."
+      ],
+      "evidence": [
+        "GOLD-handyman-003"
+      ],
+      "evidence_strength": "thin-moderate"
+    },
+    {
+      "offer_type": "referral_or_loyalty",
+      "primary_emotion": "belonging / gratitude",
+      "why": "Neighborhood services grow via referral; use only if client has a real program (thin in gold — include carefully).",
+      "headline_offer_patterns": [
+        "'Refer a neighbor — both save $[X]'",
+        "'Return customer $[Y] off'"
+      ],
+      "reinforcing_photo": "Two neighboring homes / handshake at a porch",
+      "what_backfires": "Referral rewards that violate local solicitation rules; unclear who gets the credit",
+      "combos": [
+        {
+          "headline": "Know someone with a to-do list?",
+          "offer": "Refer a neighbor: you both get $[X] off (terms)",
+          "photo_scene": "Two porches on the same street",
+          "sell_the_outcome_line": "Help a neighbor and make your next fix cheaper."
+        },
+        {
+          "headline": "Glad you're back.",
+          "offer": "$[Y] off your next visit for return customers",
+          "photo_scene": "Familiar tech recognized at the door",
+          "sell_the_outcome_line": "Keep the same trusted hands on the house."
+        },
+        {
+          "headline": "Thanks for the introduction.",
+          "offer": "Referral credit $[X] after the new job books",
+          "photo_scene": "Simple thank-you note with tools softly in background",
+          "sell_the_outcome_line": "Share someone who shows up — and get something back."
+        }
+      ],
+      "compliance_flags": [
+        "Print who qualifies and when credit applies.",
+        "No fake 'limited referrals left' scarcity."
+      ],
+      "evidence": [
+        "Market practice; thin in gold — mark as optional"
+      ],
+      "evidence_strength": "thin"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "'We do it all' gold language vs state licensing limits",
+      "resolution": "Compliance wins: only advertise work the sender may legally perform; disclose unlicensed status when required (e.g., CA exemption ads)."
+    },
+    {
+      "conflict": "Senior discount lines in some gold vs Patrick no-default-senior rule",
+      "resolution": "Patrick votes + evidence rule: use only with a real discount and no invented senior audience science."
+    },
+    {
+      "conflict": "PostcardMania revenue claims vs evidence rules",
+      "resolution": "Agency-only unverified."
+    }
+  ]
+}

@@ -1,0 +1,370 @@
+{
+  "schema_version": "1.1",
+  "slug": "cleaning-pressure-washing",
+  "industry": "Cleaning (house cleaning, carpet/rug) and pressure/soft washing",
+  "last_updated": "2026-10-28",
+  "words_and_claims_to_avoid": [
+    "Government look-alike design, 'official notice', fake checks or invoices (39 USC 3001)",
+    "Unsubstantiated 'best', '#1', 'voted #1', 'guaranteed results', percent-savings claims (FTC Act s.5)",
+    "Invented or composite testimonials, star ratings or review counts (16 CFR 255)",
+    "'Free' unless it truly costs nothing and carries no hidden obligation (16 CFR 251)",
+    "Fake expiration dates or fake scarcity; any deadline printed must be real",
+    "Demographic/age targeting language (e.g., 'seniors', 'retirees') unless the client has evidence it fits their actual buyers",
+    "Any vendor case-study result (calls, ROI, revenue) printed as if it were the client's own result",
+    "'Sanitized', 'disinfected', 'kills 99.9% of germs', 'antibacterial', 'allergen-free' unless the client uses an EPA-registered product for that use and the claim matches its label (40 CFR 152.15)",
+    "'Healthy home' or health benefits (GOLD-002 'key to a healthy home') unless substantiated",
+    "'Kills mold/algae/moss' for soft washing unless the product is registered for it and the client meets state applicator rules (pesticidal claim)",
+    "'Eco-friendly', 'green', 'biodegradable', 'non-toxic', 'safe for plants/pets' without specific substantiation (16 CFR 260)",
+    "'Get your deposit back' (outcome the cleaner doesn't control)",
+    "'Licensed, bonded and insured' unless all three are true",
+    "AI-looking photos passed off as the client's own work (GOLD-007 looks AI-generated): before/after must be real"
+  ],
+  "compliance_notes": [
+    "Any discount or 'save X%' must be off a real, recently charged price; 'save 40%' with no reference price is not allowed.",
+    "FTC 'Free' Guide, 16 CFR 251 (verified): (1) 'free with purchase' means the paid item is at its regular price (sold openly for about 30 days), with no markup or downgrade to cover the free item; (2) all conditions go right next to the offer, not in an asterisk footnote; (3) if the main job is priced by negotiation or bid, 'free [item] with purchase' is improper; (4) don't run the same 'free' offer more than 6 months in any 12; (5) 'gift' or 'bonus' wording doesn't cure a deceptive 'free'.",
+    "Testimonials and star ratings must be real, typical and current; disclose any material connection (16 CFR 255).",
+    "FTC Green Guides, 16 CFR 260 (verified; they cover claims about services too): unqualified 'eco-friendly', 'green' or 'environmentally safe' claims are deceptive (260.4); qualify to a specific, provable benefit (e.g., 'We donate usable furniture to [named charity]'). 'Recyclable', 'biodegradable' and similar claims have their own tests (260.8, 260.12).",
+    "Antimicrobial/mold claims (verified product rule): claiming that cleaning sanitizes, disinfects or kills germs, mold or algae is a pesticidal claim; products must be EPA-registered for that use and claims must match the label. How strictly this applies to a service company's own ad copy is a counsel question, so default to outcome language ('fresh', 'spotless', 'like new').",
+    "Before/after photos are implied performance claims (FTC Act s.5): must be real, typical and not edited to exaggerate.",
+    "Some states license pressure-washing chemical application (algaecides) as pesticide work; not verified state by state: client must confirm.",
+    "Veteran/first-responder/essential-worker discounts are fine; define eligibility and verification on the card."
+  ],
+  "standing_rules": [
+    "Emotion-agnostic: fear, disgust, joy, pride, status, relief are all options; the client chooses.",
+    "Only laws/compliance are hard limits.",
+    "Every angle and combo carries a sell-the-outcome line.",
+    "Unverified (agency/vendor-only) results are labeled; never quote them as fact on a card."
+  ],
+  "emotion_by_offer": [
+    {
+      "offer_type": "dollar_off_first_clean",
+      "primary_emotion": "relief / low-risk trial",
+      "why": "Most interior gold cards use a first-clean dollar offer (GOLD-006 $30, GOLD-007 $20, GOLD-002 $35). Specific dollars beat vague percents (#15).",
+      "headline_offer_patterns": [
+        "'$[X] off your first cleaning'",
+        "Outcome headline + dollar badge"
+      ],
+      "reinforcing_photo": "Bright, tidy room with someone relaxing.",
+      "what_backfires": "'We love your home like it's our own' with an AI-looking photo (reads fake); health claims to justify the price.",
+      "combos": [
+        {
+          "headline": "A spotless home starts here.",
+          "offer": "$[X] off your first cleaning",
+          "photo_scene": "Sunlit, tidy living room",
+          "sell_the_outcome_line": "Walk in the door and exhale."
+        },
+        {
+          "headline": "Come home to clean.",
+          "offer": "$[X] off your first clean",
+          "photo_scene": "Parent and kids relaxing on a clean couch",
+          "sell_the_outcome_line": "Your weekends, back."
+        },
+        {
+          "headline": "Skip the scrubbing this week.",
+          "offer": "$[X] off first visit",
+          "photo_scene": "Cleaner finishing a sparkling kitchen",
+          "sell_the_outcome_line": "More time for what matters to you."
+        }
+      ],
+      "compliance_flags": [
+        "No 'sanitized/healthy home' unless label-backed.",
+        "Real first-time-customer terms."
+      ],
+      "evidence": [
+        "GOLD-cleaning-pressure-washing-002, 006, 007",
+        "SRC-WHILLANS-2017"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "exterior_wash_before_after",
+      "primary_emotion": "disgust, then pride",
+      "why": "Visible grime triggers disgust (Curtis et al. 2011); a real before/after makes the fix obvious (GOLD-003).",
+      "headline_offer_patterns": [
+        "'Restore your home's beauty'",
+        "Before/after split + $ off"
+      ],
+      "reinforcing_photo": "Real before/after of siding, roof or driveway.",
+      "what_backfires": "Fake or AI before/after; 'kills mold/algae' without registered product.",
+      "combos": [
+        {
+          "headline": "Restore your home's beauty.",
+          "offer": "$[X] off house washing; $[Y] off windows",
+          "photo_scene": "Split before/after of siding",
+          "sell_the_outcome_line": "A house that looks new again."
+        },
+        {
+          "headline": "Is that green on your siding?",
+          "offer": "Free estimate",
+          "photo_scene": "Close-up algae streaks beside a clean section",
+          "sell_the_outcome_line": "Bright, clean siding you're proud of."
+        },
+        {
+          "headline": "Your driveway called. It wants its color back.",
+          "offer": "$[X] off driveway cleaning",
+          "photo_scene": "Half-cleaned driveway stripe",
+          "sell_the_outcome_line": "Curb appeal in one afternoon."
+        }
+      ],
+      "compliance_flags": [
+        "Real photos; typical results.",
+        "Pesticidal-claim caution for algae/moss."
+      ],
+      "evidence": [
+        "GOLD-cleaning-pressure-washing-003",
+        "SRC-CURTIS-2011",
+        "SRC-EPA-CLEANING-PESTICIDE"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "bundle_free_add_on",
+      "primary_emotion": "smart-shopper pride / reciprocity",
+      "why": "GOLD-004: free driveway cleaning with roof cleaning. Reciprocity (#2) plus perceived bonus.",
+      "headline_offer_patterns": [
+        "'FREE [add-on] with any [main service]'"
+      ],
+      "reinforcing_photo": "Clean roof + bright driveway in one shot.",
+      "what_backfires": "Raising the roof-cleaning price to cover the 'free' driveway (16 CFR 251).",
+      "combos": [
+        {
+          "headline": "Freshen your whole exterior.",
+          "offer": "Free driveway cleaning with any roof cleaning",
+          "photo_scene": "Clean roof and driveway, sunny day",
+          "sell_the_outcome_line": "One visit, whole house looks new."
+        },
+        {
+          "headline": "Book the house wash. Walkway included.",
+          "offer": "Walkway cleaning included with any house wash (bid-priced jobs)",
+          "photo_scene": "Crew washing a front walkway",
+          "sell_the_outcome_line": "Every step to your door, spotless."
+        },
+        {
+          "headline": "Two problems, one visit.",
+          "offer": "Free gutter brightening with house wash",
+          "photo_scene": "Bright white gutters on a clean home",
+          "sell_the_outcome_line": "Done once, done right."
+        }
+      ],
+      "compliance_flags": [
+        "16 CFR 251: 'FREE with purchase' only works if the main service has a published regular price (sold at it ~30 days) and isn't bid/negotiated; if roof cleaning is quoted per job, say 'driveway cleaning included' instead. Conditions next to the offer."
+      ],
+      "evidence": [
+        "GOLD-cleaning-pressure-washing-004",
+        "SRC-FTC-FREE-251"
+      ],
+      "evidence_strength": "moderate"
+    },
+    {
+      "offer_type": "seasonal_or_limited",
+      "primary_emotion": "anticipation / urgency",
+      "why": "GOLD-008 '20% off this month only' (vendor results). Spring and pre-holiday guest timing are natural triggers (inference).",
+      "headline_offer_patterns": [
+        "'[X]% off through [real date]'",
+        "'Ready for guests?'"
+      ],
+      "reinforcing_photo": "Clean home exterior in spring light or a dining room set for guests.",
+      "what_backfires": "Fake deadlines; 'save X%' without a real regular price.",
+      "combos": [
+        {
+          "headline": "Restore your curb appeal before spring.",
+          "offer": "[X]% off through [date]",
+          "photo_scene": "Fresh home exterior with spring flowers",
+          "sell_the_outcome_line": "The best-looking house on the block this spring."
+        },
+        {
+          "headline": "Ready for holiday guests?",
+          "offer": "$[X] off a deep clean booked by [date]",
+          "photo_scene": "Dining table set in a sparkling room",
+          "sell_the_outcome_line": "Host with nothing to hide."
+        },
+        {
+          "headline": "Clean slate for the new season.",
+          "offer": "$[X] off through [date]",
+          "photo_scene": "Bright entryway",
+          "sell_the_outcome_line": "Start the season fresh."
+        }
+      ],
+      "compliance_flags": [
+        "Real deadline; real reference price."
+      ],
+      "evidence": [
+        "GOLD-cleaning-pressure-washing-008"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "move_out_flat_rate",
+      "primary_emotion": "relief",
+      "why": "GOLD-009 flat-rate move-out from $99 (vendor results). Price certainty during a stressful event.",
+      "headline_offer_patterns": [
+        "'Moving? Leave the cleaning to us'",
+        "'Flat-rate from $[X]'"
+      ],
+      "reinforcing_photo": "Empty sparkling room, keys on counter.",
+      "what_backfires": "Promising the deposit back; 'from $99' when most jobs cost far more without saying what's included.",
+      "combos": [
+        {
+          "headline": "Moving? Leave the cleaning to us.",
+          "offer": "Flat-rate move-out cleanings from $[X]",
+          "photo_scene": "Empty clean room, keys on counter",
+          "sell_the_outcome_line": "Hand over the keys and walk away happy."
+        },
+        {
+          "headline": "Last box packed? We'll take it from here.",
+          "offer": "Move-out clean from $[X] (what's included listed)",
+          "photo_scene": "Cleaner wiping empty cabinets",
+          "sell_the_outcome_line": "One less thing on moving day."
+        },
+        {
+          "headline": "Leave it spotless without lifting a finger.",
+          "offer": "Flat-rate move-out clean",
+          "photo_scene": "Bright empty kitchen",
+          "sell_the_outcome_line": "Focus on the new place."
+        }
+      ],
+      "compliance_flags": [
+        "'From' price must be genuinely available; list what's included."
+      ],
+      "evidence": [
+        "GOLD-cleaning-pressure-washing-009"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "neighbor_proof",
+      "primary_emotion": "belonging",
+      "why": "GOLD-010 'We Just Washed Your Neighbor's House' (template). Local norms (#3).",
+      "headline_offer_patterns": [
+        "'We just [washed/cleaned] on [street]'"
+      ],
+      "reinforcing_photo": "Crew at a nearby home.",
+      "what_backfires": "Naming neighbors without consent; claiming you worked nearby when you didn't.",
+      "combos": [
+        {
+          "headline": "We just washed your neighbor's house.",
+          "offer": "$[X] off while we're nearby",
+          "photo_scene": "Crew washing a nearby home",
+          "sell_the_outcome_line": "Match the cleanest house on the street."
+        },
+        {
+          "headline": "Your street is looking sharp.",
+          "offer": "$[X] off this week",
+          "photo_scene": "Row of bright homes",
+          "sell_the_outcome_line": "Join the neighbors who already did it."
+        },
+        {
+          "headline": "On [street] this week.",
+          "offer": "Route discount $[X]",
+          "photo_scene": "Branded truck at curb",
+          "sell_the_outcome_line": "Clean, quick, and right next door."
+        }
+      ],
+      "compliance_flags": [
+        "Only if true."
+      ],
+      "evidence": [
+        "GOLD-cleaning-pressure-washing-010"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "recurring_plan",
+      "primary_emotion": "security / ease",
+      "why": "Commitment (#7) and repeated pairing (Watson; mere exposure #19). No cleaning-specific test found.",
+      "headline_offer_patterns": [
+        "'Every other week, handled'",
+        "'Lock in $[X]/visit'"
+      ],
+      "reinforcing_photo": "Calm, tidy home at day's end.",
+      "what_backfires": "Hidden auto-renewal; long contracts on a first card.",
+      "combos": [
+        {
+          "headline": "Every other Friday, handled.",
+          "offer": "$[X] off your first recurring clean",
+          "photo_scene": "Family relaxing in a clean home Friday evening",
+          "sell_the_outcome_line": "A clean house without ever thinking about it."
+        },
+        {
+          "headline": "Never clean on a weekend again.",
+          "offer": "Recurring plan, $[X]/visit",
+          "photo_scene": "Couple heading out for a Saturday hike",
+          "sell_the_outcome_line": "Weekends are yours."
+        },
+        {
+          "headline": "Clean, on repeat.",
+          "offer": "First recurring visit $[X] off",
+          "photo_scene": "Spotless kitchen",
+          "sell_the_outcome_line": "One less thing to manage."
+        }
+      ],
+      "compliance_flags": [
+        "Price, frequency, cancellation stated."
+      ],
+      "evidence": [
+        "SRC-WHILLANS-2017",
+        "SRC-WATSON"
+      ],
+      "evidence_strength": "thin"
+    },
+    {
+      "offer_type": "affinity_discount",
+      "primary_emotion": "pride / gratitude",
+      "why": "GOLD-005 (veterans & first responders) and GOLD-012 (essential workers) use group discounts. No results published.",
+      "headline_offer_patterns": [
+        "'[X]% off for veterans & first responders'"
+      ],
+      "reinforcing_photo": "Clean home exterior; badge-style offer panel.",
+      "what_backfires": "Patriotic imagery implying government affiliation; undefined eligibility.",
+      "combos": [
+        {
+          "headline": "Curb appeal starts here.",
+          "offer": "[X]% off for veterans & first responders",
+          "photo_scene": "Bright freshly washed home",
+          "sell_the_outcome_line": "Come home to a house that shines."
+        },
+        {
+          "headline": "Thank you for your service. Let us serve you.",
+          "offer": "[X]% off for veterans",
+          "photo_scene": "Clean front porch with a flag (no government seals)",
+          "sell_the_outcome_line": "A fresh start, with our thanks."
+        },
+        {
+          "headline": "You take care of us. We'll take care of your home.",
+          "offer": "[X]% off for healthcare workers",
+          "photo_scene": "Clean house exterior",
+          "sell_the_outcome_line": "Rest easy on your day off."
+        }
+      ],
+      "compliance_flags": [
+        "No government seals (39 USC 3001); eligibility defined."
+      ],
+      "evidence": [
+        "GOLD-cleaning-pressure-washing-005, 012"
+      ],
+      "evidence_strength": "thin"
+    }
+  ],
+  "emotion_by_offer_conflicts": [
+    {
+      "conflict": "GOLD-002 'Clean, sanitized floors are the key to a healthy home!' vs EPA pesticidal-claim rule and FTC substantiation",
+      "resolution": "Compliance wins: drop 'sanitized' and 'healthy home' unless label-backed and substantiated; sell 'fresh, spotless floors you love walking on'."
+    },
+    {
+      "conflict": "Soft-wash marketing 'eco-friendly / kills mold and algae' vs Green Guides (16 CFR 260) and FIFRA",
+      "resolution": "Law wins: qualify any environmental claim specifically, and only make kill claims with a registered product used per label."
+    },
+    {
+      "conflict": "GOLD-007 'We love your home like it's our own' with an AI-looking photo vs real-photo before/after rule",
+      "resolution": "Real photos win: AI or stock imagery must not look like the client's own work. The warm headline is fine."
+    },
+    {
+      "conflict": "GOLD-004 'FREE driveway cleaning with purchase of a roof cleaning' vs 16 CFR 251 when roof cleaning is quoted per job",
+      "resolution": "Law wins: use 'FREE' only with a published regular price; otherwise 'included'."
+    },
+    {
+      "conflict": "Vendor ROI figures (e.g., GOLD-007 1,520%, GOLD-008 670%) vs never printing unverified numbers",
+      "resolution": "Unaudited vendor claims; weak evidence only."
+    }
+  ]
+}

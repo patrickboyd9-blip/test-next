@@ -58,16 +58,17 @@ export const TEMPLATE_META: Record<PostcardTemplateId, TemplateMeta> = {
  * directions. A cue in the copy can pull local pride or commercial restoration
  * forward. Medicare never enters this list.
  */
+const TRADE_PRO: readonly PostcardTemplateId[] = ["roof_fade_offer", "roof_full_bleed", "roof_coupon", "roof_neighborhood"]
+
 const TEMPLATES_FOR: Record<string, readonly PostcardTemplateId[]> = {
   roofing: ROOFING_PRO_AVAILABLE_IDS,
-  // The two photo-fade compositions work for any trade; bordered layouts stay in every list.
-  plumbing: ["roof_full_bleed", "offer_starburst", "roof_fade_offer", "deadline_coupon", "neighbor_letter"],
-  hvac: ["roof_full_bleed", "service_band", "roof_fade_offer", "deadline_coupon", "color_block"],
+  // Every non-roofing trade uses the photo-led Pro layouts: soft fade most often,
+  // a full-bleed, and one bordered coupon. No cream split panels, no cutouts.
+  plumbing: TRADE_PRO,
+  hvac: TRADE_PRO,
   medicare: ["medicare_calm", "portrait_aside", "neighbor_letter"],
-  real_estate: BEFORE_AFTER_ENABLED
-    ? ["roof_full_bleed", "portrait_aside", "roof_fade_offer", "before_after", "neighbor_letter"]
-    : ["roof_full_bleed", "portrait_aside", "roof_fade_offer", "neighbor_letter"],
-  general: ["roof_full_bleed", "color_block", "roof_fade_offer", "trust_proof", "service_band", "offer_starburst"],
+  real_estate: TRADE_PRO,
+  general: TRADE_PRO,
 }
 
 export function templatesForPalette(palette: string): readonly PostcardTemplateId[] {

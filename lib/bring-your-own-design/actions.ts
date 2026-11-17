@@ -5,7 +5,7 @@ import { getCampaignRepository } from "@/lib/campaign-creator/repository"
 import type { Campaign, DesignSource } from "@/lib/campaign-creator/types"
 import { buildPostcard5x8PrintSpec } from "@/lib/print-spec/postcard-5x8-print-spec"
 
-import { normalizeDesignReview } from "./design-review"
+import { normalizeDesignReview, uploadComplianceWarnings } from "./design-review"
 import { preflightBlocksApproval } from "./preflight"
 import { renderUploadedPostcardPdf } from "./render-uploaded-pdf"
 import { openUploadedDesign, resolveUploadedDesignStore, uploadedDesignKey } from "./store"
@@ -55,13 +55,14 @@ export async function requestUploadedDesignReview(campaignId: string): Promise<C
   }
 
   let suggestions: string[]
+  let complianceWarnings: string[] = []
   try {
-    suggestions = normalizeDesignReview({
-      suggestions: await reviewUploadedArtwork({
-        front: { bytes: front.bytes, mediaType: design.front.mediaType },
-        back: { bytes: back.bytes, mediaType: design.back.mediaType },
-      }),
+    const result = await reviewUploadedArtwork({
+      front: { bytes: front.bytes, mediaType: design.front.mediaType },
+      back: { bytes: back.bytes, mediaType: design.back.mediaType },
     })
+    suggestions = normalizeDesignReview({ suggestions: result.suggestions })
+    complianceWarnings = uploadComplianceWarnings(result.printedText, campaign.brief)
   } catch (error) {
     console.error("Uploaded design review failed:", error)
     throw new Error("We couldn't finish that review. You can still approve the proof.")
@@ -69,6 +70,7 @@ export async function requestUploadedDesignReview(campaignId: string): Promise<C
 
   return repository.saveUploadedDesignReview(campaignId, {
     suggestions,
+    ...(complianceWarnings.length ? { complianceWarnings } : {}),
     reviewedAt: new Date().toISOString(),
   })
 }
