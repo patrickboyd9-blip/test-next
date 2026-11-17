@@ -216,10 +216,34 @@ function fontFaceCss(): string {
 }
 
 /**
+ * One Chrome at a time. Parallel postcard renders on a busy runner starve
+ * each other and the devtools port never opens before the deadline.
+ */
+let chromeQueue: Promise<void> = Promise.resolve()
+
+function runChrome(htmlPath: string, pngPath: string, width: number, height: number): Promise<void> {
+  const job = chromeQueue.then(() => runChromeAttempt(htmlPath, pngPath, width, height))
+  chromeQueue = job.then(
+    () => undefined,
+    () => undefined
+  )
+  return job
+}
+
+async function runChromeAttempt(htmlPath: string, pngPath: string, width: number, height: number): Promise<void> {
+  try {
+    await launchChrome(htmlPath, pngPath, width, height)
+  } catch (error) {
+    if (!(error instanceof Error) || !/timed out/i.test(error.message)) throw error
+    await launchChrome(htmlPath, pngPath, width, height)
+  }
+}
+
+/**
  * Headless Chrome on this machine writes a screenshot and then stays up,
  * so the capture goes through the devtools protocol and the process is stopped after.
  */
-function runChrome(htmlPath: string, pngPath: string, width: number, height: number): Promise<void> {
+function launchChrome(htmlPath: string, pngPath: string, width: number, height: number): Promise<void> {
   const profile = path.join(path.dirname(htmlPath), "chrome-profile")
   const args = [
     "--headless=new",
@@ -254,7 +278,7 @@ function runChrome(htmlPath: string, pngPath: string, width: number, height: num
     const log = (chunk: Buffer) => {
       if (started || settled) return
       buffer += chunk.toString()
-      const match = /DevTools listening on ws:\/\/127\.0\.0\.1:(\d+)\//.exec(buffer)
+      const match = /DevTools listening on ws:\/\/(?:127\.0\.0\.1|localhost|\[::1\]):(\d+)\//.exec(buffer)
       if (!match) return
       started = true
       capturePostcard(Number(match[1]), width, height)
