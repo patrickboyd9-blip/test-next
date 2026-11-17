@@ -16,7 +16,7 @@ export default async function AppLayout({
   const account = session
     ? {
         name: session.name,
-        detail: session.fixture ? "Local fixture. Not a signed-in account." : session.businessName,
+        detail: session.fixture ? "Sample account. Nothing is mailed or charged." : session.businessName,
         initials: sessionInitials(session.name),
       }
     : null;

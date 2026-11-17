@@ -1,8 +1,8 @@
 "use server"
 
-import { getSession } from "@/lib/auth/session"
+import { getSession, previewDemoAllowed } from "@/lib/auth/session"
 
-import { designRequestInputFromForm, imageTypeFor } from "./parse"
+import { designRequestInputFromForm, imageTypeFor, parseDesignRequest } from "./parse"
 import { saveDesignRequest, type SaveDesignRequestResult } from "./save"
 import type { IncomingImage } from "./types"
 import { getDesignRequestStore } from "./store"
@@ -12,6 +12,20 @@ import { designRequestsForAccount } from "./visibility"
 export async function submitDesignRequest(formData: FormData): Promise<SaveDesignRequestResult> {
   const session = await getSession()
   if (!session) return { ok: false, error: "Sign in required." }
+  if (previewDemoAllowed()) {
+    const checked = parseDesignRequest(designRequestInputFromForm(formData))
+    if (!checked.ok) return checked
+    return {
+      ok: true,
+      request: {
+        id: "preview-demo",
+        ...checked.value,
+        uploads: [],
+        createdAt: new Date(0).toISOString(),
+        ownerId: session.userId,
+      },
+    }
+  }
   const logo = await readImage(formData.get("logo"))
   if (isImageError(logo)) return { ok: false, error: logo.error }
   const images: IncomingImage[] = []

@@ -1,13 +1,14 @@
 import { redirect } from "next/navigation"
 
 import { createDraftCampaign } from "@/lib/campaign-creator/actions"
-import { getSession } from "@/lib/auth/session"
+import { getSession, previewDemoAllowed } from "@/lib/auth/session"
 
 export const runtime = "nodejs"
 /** Each visit creates a new campaign. A prerendered redirect would 404. */
 export const dynamic = "force-dynamic"
 
 export default async function NewCampaignPage() {
+  if (previewDemoAllowed()) redirect("/app/mail")
   const session = await getSession()
   if (!session) {
     return (

@@ -14,7 +14,9 @@ export default async function CommandCenterPage() {
     <CockpitFrame>
       <div className="flex items-center gap-4 px-4 pt-4">
         <SidebarTrigger className="text-[#e7f2fb]" />
-        {!session ? (
+        {session?.fixture ? (
+          <p className="text-sm text-[#8aa0b4]">Preview demo. Sample account. Nothing is mailed or charged.</p>
+        ) : !session ? (
           <p className="text-sm text-[#8aa0b4]">Not signed in. The list below is a sample, not an account.</p>
         ) : null}
       </div>

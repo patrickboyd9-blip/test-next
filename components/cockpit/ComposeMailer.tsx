@@ -435,7 +435,7 @@ export function ComposeMailer({
           >
             Back
           </button>
-          {path && path !== "team" && !lastStep ? (
+          {!lastStep ? (
             <button
               type="button"
               onClick={continueStep}
