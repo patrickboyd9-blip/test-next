@@ -5,7 +5,7 @@ Each rule has a test that CI runs. A failure means the rule was broken.
 | Rule | Test |
 | --- | --- |
 | The price shown is the full price, not postage by itself. Until a schedule is set, the label is Placeholder and nothing is charged. | `lib/ops/rules.test.ts` |
-| Nothing is charged unless that account has an approval on the record. A charge from this module still does not call a payment provider. | `lib/ops/rules.test.ts` |
+| Nothing is charged unless that account has an approval on the record. Stripe test checkout opens only after that approval, for the full price, and `charged` becomes true only from a verified webhook. A live secret key does not run unless `STRIPE_LIVE_ENABLED` is true. | `lib/ops/rules.test.ts`, `lib/ops/stripe.test.ts` |
 | Comet does not reveal partners, model or hosting names, internal costs, prompts, or research sources. Prompt-injection attempts get a deflection. | `lib/ops/rules.test.ts`, `lib/assistant/help.test.ts` |
 | Address boxes stay 265.5×208 pt on 5×8 and 263×213 pt on 6×9. Barcode zones stay 433×46 pt and 432×47 pt, anchored from the bottom-right of the trim. | `lib/ops/rules.test.ts`, `lib/print-spec/barcode-clear-zone.test.ts` |
 | Research photographs are not committed. | `lib/ops/rules.test.ts` |

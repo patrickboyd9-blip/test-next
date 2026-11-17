@@ -1,4 +1,4 @@
-import { reviewListAction, startCheckoutAction } from "@/lib/mail-journey/actions"
+import { payFullPriceAction, reviewListAction, startCheckoutAction } from "@/lib/mail-journey/actions"
 import type { ListReview } from "@/lib/mail-journey/list-import"
 import type { MailJob } from "@/lib/mail-journey/job"
 import type { QuoteResult } from "@/lib/mail-journey/pricing"
@@ -29,7 +29,7 @@ export function MailJourneyReview(props: {
         <h1 className="text-2xl font-semibold tracking-tight">Review before anything is sent</h1>
         <p className="text-sm text-muted-foreground">
           Checkout stays closed until the front, the back, the accepted addresses, and an approved
-          price all match. This page does not charge a card and does not mail.
+          price all match. Coming back from the payment page does not mark this order paid, and nothing is mailed from here.
         </p>
       </div>
 
@@ -119,6 +119,15 @@ export function MailJourneyReview(props: {
             <input type="hidden" name="campaignId" value={props.campaignId} />
             <button type="submit" className="rounded-md border px-3 py-2 text-sm">
               Record this approval
+            </button>
+          </form>
+        ) : null}
+        {props.job?.state === "awaiting_payment" && props.quote.ok ? (
+          <form action={payFullPriceAction}>
+            <input type="hidden" name="campaignId" value={props.campaignId} />
+            <input type="hidden" name="jobId" value={props.job.id} />
+            <button type="submit" className="rounded-md border px-3 py-2 text-sm">
+              Pay the full price, {(props.quote.quote.totalCents / 100).toFixed(2)} {props.quote.quote.currency.toUpperCase()}, by card or US bank
             </button>
           </form>
         ) : null}

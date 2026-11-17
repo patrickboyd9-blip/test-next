@@ -15,8 +15,10 @@ export const dynamic = "force-dynamic"
 
 export default async function OrderReviewPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ checkout?: string }>
 }) {
   const session = await getSession()
   if (!session) {
@@ -31,6 +33,13 @@ export default async function OrderReviewPage({
   }
 
   const { id } = await params
+  const { checkout } = await searchParams
+  const checkoutNote =
+    checkout === "return"
+      ? "You came back from payment. This page does not mark the order paid, and nothing was mailed."
+      : checkout === "cancel" || checkout === "closed"
+        ? "Payment did not start. Nothing was charged and nothing was mailed."
+        : null
   let campaign
   try {
     campaign = await requireOwnedCampaign(id)
@@ -53,6 +62,7 @@ export default async function OrderReviewPage({
         <SidebarTrigger className="-ml-1" />
         <span className="text-sm font-medium text-muted-foreground">Order review</span>
       </header>
+      {checkoutNote ? <p className="px-6 pt-6 text-sm text-muted-foreground lg:px-8">{checkoutNote}</p> : null}
       <MailJourneyReview
         campaignId={id}
         proof={proof}
