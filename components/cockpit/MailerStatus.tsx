@@ -13,19 +13,28 @@ import {
 } from "@/lib/mailer-compose/flow"
 
 import { ProofTray } from "./ProofCard"
+import { MailFlight } from "./sky"
 import { CockpitFrame, Eyebrow, Panel } from "./ui"
 
-export function MailerStatus({ mailer, proof }: { mailer: InFlightMailer; proof: MailerProof | null }) {
+export function MailerStatus({
+  mailer,
+  proof,
+  framed = true,
+}: {
+  mailer: InFlightMailer
+  proof: MailerProof | null
+  framed?: boolean
+}) {
   const needs = statusNeedsYou(mailer.status)
-  return (
-    <CockpitFrame>
-      <div className="mx-auto flex max-w-3xl flex-col gap-5 px-4 py-6 sm:px-6 sm:py-8">
+  const Title = framed ? "h1" : "h2"
+  const body = (
+      <div className={framed ? "mx-auto flex max-w-3xl flex-col gap-5 px-4 py-6 sm:px-6 sm:py-8" : "flex flex-col gap-5"}>
         <Link href="/app" className="text-sm text-[#8ecfff]">
           Home
         </Link>
         <div className="space-y-2">
           <Eyebrow>Mailer</Eyebrow>
-          <h1 className="text-3xl font-semibold tracking-tight">{mailer.name}</h1>
+          <Title className="text-3xl font-semibold tracking-tight">{mailer.name}</Title>
           <p className="text-[#b7c9d8]">
             {mailer.listName} · {mailer.people} people
           </p>
@@ -48,8 +57,8 @@ export function MailerStatus({ mailer, proof }: { mailer: InFlightMailer; proof:
         {proof ? <ProofTray proof={{ ...proof, shop: proof.shop || SAMPLE_SHOP }} /> : null}
         <p className="text-sm text-[#8aa0b4]">Sample status. No live mail tracking is connected.</p>
       </div>
-    </CockpitFrame>
   )
+  return framed ? <CockpitFrame>{body}</CockpitFrame> : body
 }
 
 export function PreviewStatus({ id }: { id: string }) {
@@ -113,5 +122,16 @@ export function PreviewStatus({ id }: { id: string }) {
     )
   }
   if (!mailer) return <CockpitFrame><p className="px-6 py-10 text-[#b7c9d8]">Loading the preview…</p></CockpitFrame>
-  return <MailerStatus mailer={mailer} proof={proof} />
+  return (
+    <CockpitFrame>
+      <div className="mx-auto flex max-w-3xl flex-col gap-5 px-4 py-6 sm:px-6 sm:py-8">
+        <div className="space-y-3 text-center">
+          <MailFlight mode="arrive" />
+          <h1 className="mm-caption text-3xl font-semibold tracking-tight">Your mail is on its way</h1>
+          <p className="text-sm text-[#b7c9d8]">Preview only. Nothing was mailed and nothing was charged.</p>
+        </div>
+        <MailerStatus mailer={mailer} proof={proof} framed={false} />
+      </div>
+    </CockpitFrame>
+  )
 }

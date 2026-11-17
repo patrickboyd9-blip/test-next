@@ -38,6 +38,7 @@ import { TEMPLATE_INDUSTRIES, TEMPLATE_INDUSTRY_LABELS, type TemplateIndustry } 
 import { StartChoices, type StartPath } from "./StartChoices"
 
 import { ProofTray } from "./ProofCard"
+import { MailFlight } from "./sky"
 import { CockpitFrame, Eyebrow, fieldClass, Panel } from "./ui"
 
 const STEP_LABEL: Record<ComposeStep, string> = {
@@ -238,7 +239,12 @@ export function ComposeMailer({
           </Panel>
         ) : null}
 
-        {step === "what" && path === null ? <StartChoices onChoose={setPath} /> : null}
+        {step === "what" && path === null ? (
+          <div className="space-y-2">
+            <MailFlight mode="drift" />
+            <StartChoices onChoose={setPath} />
+          </div>
+        ) : null}
 
         {step === "what" && path === "team" ? (
           <Panel className="bg-white p-4 text-neutral-900 sm:p-6">

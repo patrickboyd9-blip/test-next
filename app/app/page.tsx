@@ -3,6 +3,7 @@ import Link from "next/link"
 import { getSession } from "@/lib/auth/session"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { HomeBoard } from "@/components/cockpit/HomeBoard"
+import { CockpitFrame } from "@/components/cockpit/ui"
 import { SAMPLE_SHOP } from "@/lib/mailer-compose/flow"
 
 export default async function CommandCenterPage() {
@@ -10,7 +11,7 @@ export default async function CommandCenterPage() {
   const shop = session?.businessName || SAMPLE_SHOP
 
   return (
-    <div className="flex flex-1 flex-col bg-[#05080f]">
+    <CockpitFrame>
       <div className="flex items-center gap-4 px-4 pt-4">
         <SidebarTrigger className="text-[#e7f2fb]" />
         {!session ? (
@@ -33,6 +34,6 @@ export default async function CommandCenterPage() {
           </Link>
         </div>
       </div>
-    </div>
+    </CockpitFrame>
   )
 }

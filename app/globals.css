@@ -70,6 +70,67 @@
   animation: float 4s ease-in-out infinite;
 }
 
+/* Cockpit sky flight. Transform and opacity only. Reduced motion shows the still. */
+@keyframes mm-drift {
+  0% { transform: translate(12px, 86px) rotate(-14deg); opacity: 0; }
+  12% { opacity: 0.95; }
+  40% { transform: translate(118px, 28px) rotate(-6deg); opacity: 0.95; }
+  74% { transform: translate(214px, 50px) rotate(3deg); opacity: 0.95; }
+  100% { transform: translate(286px, 76px) rotate(6deg); opacity: 0; }
+}
+
+@keyframes mm-arrive {
+  0% { transform: translate(-6px, 18px) scale(0.5) rotate(-18deg); opacity: 0; }
+  18% { opacity: 1; }
+  100% { transform: translate(286px, 76px) scale(1) rotate(4deg); opacity: 1; }
+}
+
+@keyframes mm-flag {
+  from { transform: rotate(70deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes mm-trail {
+  from { stroke-dashoffset: 90; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes mm-caption {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+.mm-flag {
+  transform-box: view-box;
+  transform-origin: 332px 78px;
+}
+
+.mm-flight-drift .mm-flag { transform: rotate(70deg); }
+.mm-flight-drift .mm-card-move { animation: mm-drift 16s ease-in-out infinite; }
+.mm-flight-drift .mm-trail { animation: mm-trail 16s linear infinite; }
+
+.mm-flight-arrive .mm-card-move { animation: mm-arrive 2.8s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.mm-flight-arrive .mm-flag { animation: mm-flag 0.45s ease-out 2s both; }
+.mm-flight-arrive .mm-trail { animation: mm-trail 2.8s linear both; }
+.mm-caption { animation: mm-caption 0.55s ease-out 2.15s both; }
+
+.mm-card-move { opacity: 0; }
+.mm-card-rest { opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mm-card-move,
+  .mm-flag,
+  .mm-trail,
+  .mm-caption {
+    animation: none !important;
+  }
+  .mm-flight-drift .mm-flag { transform: rotate(70deg); }
+  .mm-flight-arrive .mm-flag { transform: none; }
+  .mm-card-move { opacity: 0 !important; }
+  .mm-card-rest { opacity: 1; }
+  .mm-caption { opacity: 1; transform: none; }
+}
+
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);

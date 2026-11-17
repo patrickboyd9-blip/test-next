@@ -2,15 +2,18 @@ import Link from "next/link"
 
 import { SAMPLE_MAILERS, STATUS_LABEL, statusNeedsYou } from "@/lib/mailer-compose/flow"
 
-import { CockpitFrame, Eyebrow, Panel } from "./ui"
+import { MailFlight } from "./sky"
+import { Eyebrow, Panel } from "./ui"
 
 export function HomeBoard({ shop }: { shop: string }) {
   const waiting = SAMPLE_MAILERS.filter((item) => statusNeedsYou(item.status)).length
   return (
-    <CockpitFrame>
-      <div className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-8 sm:px-6 sm:py-12">
+    <div className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-8 sm:px-6 sm:py-12">
         <div className="space-y-5">
-          <Eyebrow>How&apos;s my mail doing?</Eyebrow>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <Eyebrow>How&apos;s my mail doing?</Eyebrow>
+            <MailFlight mode="drift" />
+          </div>
           <h1 className="max-w-xl text-3xl font-semibold tracking-tight sm:text-5xl">
             {waiting > 0 ? "One sample mailer is waiting on you." : "Nothing is waiting on you."}
           </h1>
@@ -63,7 +66,6 @@ export function HomeBoard({ shop }: { shop: string }) {
           Sample only. No results, no response rate, and no live tracking.
           {waiting > 0 ? " One sample proof is ready for a look." : ""}
         </p>
-      </div>
-    </CockpitFrame>
+    </div>
   )
 }

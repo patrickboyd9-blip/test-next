@@ -2,14 +2,12 @@ import type { ReactNode } from "react"
 
 import { cn } from "@/lib/utils"
 
+import { SpaceSky } from "./sky"
+
 export function CockpitFrame({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <div className={cn("relative min-h-svh overflow-hidden bg-[#05080f] text-[#e7f2fb]", className)}>
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-24"
-        style={{ backgroundImage: "linear-gradient(to bottom, rgba(92,225,255,0.08), transparent)" }}
-      />
+      <SpaceSky />
       <div className="relative">{children}</div>
     </div>
   )
