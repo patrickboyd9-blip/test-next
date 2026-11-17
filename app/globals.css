@@ -271,10 +271,10 @@
 
 .mm-postbox {
   position: absolute;
-  right: 0;
-  top: calc(44vh - 246px);
-  width: 280px;
-  height: 270px;
+  right: 5.5rem;
+  top: calc(44vh - 157px);
+  width: 188px;
+  height: 181px;
   pointer-events: none;
   isolation: isolate;
   animation: mm-box-drift 16s ease-in-out infinite alternate;
@@ -322,17 +322,27 @@
   bottom: -42%;
   pointer-events: none;
   -webkit-mask-image:
-    linear-gradient(90deg, transparent 0%, #000 20%, #000 90%, transparent 100%),
-    linear-gradient(180deg, #000 0%, #000 70%, rgba(0, 0, 0, 0.4) 86%, transparent 100%);
+    linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.2) 7%, #000 26%, #000 74%, rgba(0, 0, 0, 0.2) 93%, transparent 100%),
+    linear-gradient(180deg, #000 0%, #000 36%, rgba(0, 0, 0, 0.62) 58%, rgba(0, 0, 0, 0.22) 80%, transparent 100%);
   -webkit-mask-composite: source-in;
   mask-image:
-    linear-gradient(90deg, transparent 0%, #000 20%, #000 90%, transparent 100%),
-    linear-gradient(180deg, #000 0%, #000 70%, rgba(0, 0, 0, 0.4) 86%, transparent 100%);
+    linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.2) 7%, #000 26%, #000 74%, rgba(0, 0, 0, 0.2) 93%, transparent 100%),
+    linear-gradient(180deg, #000 0%, #000 36%, rgba(0, 0, 0, 0.62) 58%, rgba(0, 0, 0, 0.22) 80%, transparent 100%);
   mask-composite: intersect;
+}
+
+.mm-terrain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 0%, transparent 32%, rgba(5, 12, 20, 0.2) 50%, rgba(3, 8, 14, 0.72) 74%, rgba(2, 6, 11, 0.94) 100%);
 }
 
 .mm-terrain-photo {
   object-fit: fill;
+  filter: saturate(0.72) brightness(0.86);
 }
 
 .mm-mailer {
@@ -395,7 +405,7 @@
   display: flex;
   justify-content: center;
   margin-top: 0.25rem;
-  padding-bottom: 4.25rem;
+  padding-bottom: 3.25rem;
 }
 
 @media (min-width: 1024px) {
@@ -406,8 +416,8 @@
   position: relative;
   right: auto;
   top: auto;
-  width: 188px;
-  height: 164px;
+  width: 126px;
+  height: 110px;
 }
 
 @media (max-width: 640px) {
