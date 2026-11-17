@@ -12,6 +12,7 @@ Each rule has a test that CI runs. A failure means the rule was broken.
 | Private keys and live payment secrets are not committed. | `lib/ops/rules.test.ts` |
 | One account cannot read or write another account's campaign. | `lib/auth/account-boundary.test.ts` |
 | AI and mail actions slow down after a short burst. | `lib/ops/rules.test.ts` |
-| Create, proof, price, approve, send, and charge are recorded in an append-only log. | `lib/ops/audit.ts`, `lib/ops/mail-flow.ts`, `lib/ops/rules.test.ts` |
+| Create, proof, price, approve, send, charge, and a scan are recorded in an append-only log. | `lib/ops/audit.ts`, `lib/ops/mail-flow.ts`, `lib/ops/rules.test.ts` |
+| A mailer QR sits outside the address panel and the barcode clear zone. A scan stores time, campaign, and recipient id, then forwards. Empty results stay empty. | `lib/tracking/tracking.test.ts` |
 
 The log has no update or delete. It records who acted, which record, when, and a before and after snapshot.
