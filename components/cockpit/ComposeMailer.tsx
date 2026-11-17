@@ -32,6 +32,7 @@ import {
   tonySample,
   type ProposedMailer,
 } from "@/lib/mailer-compose/interview"
+import type { CampaignBrief } from "@/lib/campaign-creator/types"
 import { listMailTemplates, getMailTemplate } from "@/lib/mail-templates/query"
 import { TEMPLATE_INDUSTRIES, TEMPLATE_INDUSTRY_LABELS, type TemplateIndustry } from "@/lib/mail-templates/types"
 
@@ -83,7 +84,7 @@ export function ComposeMailer({
   const [quick, setQuick] = useState(initialQuick)
   const tony = sampleBeat == null ? null : tonySample(sampleBeat)
   const [chat, setChat] = useState(tony?.turns ?? [{ role: "assistant" as const, text: ACCOMPLISH_QUESTION, choices: EXAMPLE_PROMPTS }])
-  const [known, setKnown] = useState<Parameters<typeof interviewReply>[1]>({})
+  const [known, setKnown] = useState<Partial<CampaignBrief>>({})
   const [proposal, setProposal] = useState<ProposedMailer | null>(tony?.proposal ?? null)
   const [frontFile, setFrontFile] = useState<HeldDesign | null>(null)
   const [backFile, setBackFile] = useState<HeldDesign | null>(null)
