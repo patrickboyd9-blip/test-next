@@ -1,4 +1,5 @@
 import type { MailOrderRecord } from "@/lib/click2mail/order-record"
+import type { StrategyGuidance } from "@/lib/strategy/advise"
 import type {
   MailPieceCatalogId,
   MailPieceCatalogVersion,
@@ -623,6 +624,8 @@ export interface Campaign {
    * Separate from the logo and from a finished-art upload.
    */
   jobCreative?: JobCreative
+  /** Saved evidence card. A later library refresh must not replace the offer stored here. */
+  strategyGuidance?: StrategyGuidance
   /** Internal signal only — never surfaced to the customer as a score. */
   readyForBriefReview: boolean
   createdAt: string
