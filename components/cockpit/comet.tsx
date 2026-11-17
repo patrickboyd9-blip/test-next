@@ -49,15 +49,13 @@ function place(w: number, viewH: number, t: number, dive: boolean): Point {
       u,
     )
   }
-  const high = quad(
-    { x: -0.3 * w, y: viewH * 0.078 },
-    { x: 0.5 * w, y: viewH * 0.07 },
-    { x: 1.22 * w, y: viewH * 0.084 },
+  // Right-hand sky, clear of the top bar and the headline block.
+  return quad(
+    { x: 0.84 * w, y: 156 },
+    { x: 0.96 * w, y: 136 },
+    { x: 1.1 * w, y: 150 },
     u,
   )
-  if (u < 0.74) return high
-  const k = (u - 0.74) / 0.26
-  return { x: high.x, y: high.y + k * k * (viewH * 0.32 - high.y) }
 }
 
 function velocity(w: number, viewH: number, t: number, dive: boolean) {
@@ -78,8 +76,11 @@ function envelope(t: number) {
   return Math.min(1, t / 0.08) * Math.min(1, (1 - t) / 0.24)
 }
 
-function filament(seed: number, s: number) {
-  return Math.sin(seed + s * 46) * 0.65 + Math.sin(seed * 1.9 + s * 19) * 0.35
+function rotate(v: Point, degrees: number): Point {
+  const a = (degrees * Math.PI) / 180
+  const c = Math.cos(a)
+  const s = Math.sin(a)
+  return { x: v.x * c - v.y * s, y: v.x * s + v.y * c }
 }
 
 function ribbon(
@@ -131,88 +132,57 @@ function paintComet(
   if (fade <= 0.01) return
   const scale = Math.min(1.05, Math.max(0.72, viewH / 900))
   const vel = velocity(w, viewH, t, dive)
-  const back = { x: -vel.x, y: -vel.y }
-  const side = { x: -vel.y, y: vel.x }
-
+  const away = { x: -vel.x, y: -vel.y }
+  const dustDir = rotate(away, 6 + (seed % 3))
+  const ionDir = rotate(away, -8)
+  const dustLen = 128 * scale
+  const ionLen = 168 * scale
   const dust: Point[] = []
   const dustPerp: Point[] = []
-  const steps = 42
-  for (let i = 0; i <= steps; i++) {
-    const s = i / steps
-    const u = t - s * Math.min(0.62, t)
-    if (u < 0) break
-    const p = place(w, viewH, u, dive)
-    const tangent = velocity(w, viewH, Math.max(0.001, u), dive)
-    const normal = { x: -tangent.y, y: tangent.x }
-    const drift = s * s * 10 * scale + filament(seed, s) * 2.4 * s * scale
-    dust.push({ x: p.x + normal.x * drift, y: p.y + Math.abs(normal.y) * drift + s * s * 16 * scale })
-    dustPerp.push(normal)
+  const ion: Point[] = []
+  const ionPerp: Point[] = []
+  const dustSide = { x: -dustDir.y, y: dustDir.x }
+  const ionSide = { x: -ionDir.y, y: ionDir.x }
+  for (let i = 0; i <= 28; i++) {
+    const s = i / 28
+    dust.push({
+      x: head.x + dustDir.x * dustLen * s + dustSide.x * dustLen * 0.08 * s * s,
+      y: head.y + dustDir.y * dustLen * s + dustSide.y * dustLen * 0.08 * s * s,
+    })
+    dustPerp.push(dustSide)
+    ion.push({
+      x: head.x + ionDir.x * ionLen * s,
+      y: head.y + ionDir.y * ionLen * s,
+    })
+    ionPerp.push(ionSide)
   }
 
   ctx.save()
-  ctx.globalCompositeOperation = "lighter"
-
-  ribbon(ctx, dust, dustPerp, (s) => (1.8 + s * s * 13) * scale, [
-    [0, `rgba(255, 244, 226, ${0.78 * fade})`],
-    [0.16, `rgba(255, 178, 120, ${0.46 * fade})`],
-    [0.55, `rgba(214, 124, 70, ${0.16 * fade})`],
-    [1, "rgba(170, 96, 58, 0)"],
+  ctx.globalCompositeOperation = "screen"
+  ctx.filter = `blur(${7 * scale}px)`
+  ribbon(ctx, ion, ionPerp, (s) => (1.2 + s * ionLen * 0.045) * scale, [
+    [0, `rgba(150, 190, 255, ${0.22 * fade})`],
+    [0.35, `rgba(70, 120, 230, ${0.1 * fade})`],
+    [1, "rgba(40, 80, 200, 0)"],
   ])
-
-  for (let i = 1; i < dust.length; i += 3) {
-    const s = i / dust.length
-    const radius = (8 + s * 18) * scale
-    const glow = ctx.createRadialGradient(dust[i].x, dust[i].y, 0, dust[i].x, dust[i].y, radius)
-    glow.addColorStop(0, `rgba(255, 214, 170, ${0.16 * (1 - s) * fade})`)
-    glow.addColorStop(1, "rgba(255, 214, 170, 0)")
-    ctx.fillStyle = glow
-    ctx.beginPath()
-    ctx.arc(dust[i].x, dust[i].y, radius, 0, Math.PI * 2)
-    ctx.fill()
-  }
-
-  ctx.lineCap = "round"
-  for (const offset of [-0.7, 0.15, 0.85]) {
-    ctx.beginPath()
-    dust.forEach((p, i) => {
-      const s = i / Math.max(1, dust.length - 1)
-      const n = dustPerp[i]
-      const x = p.x + n.x * offset * (2 + s * 7) * scale
-      const y = p.y + n.y * offset * (2 + s * 7) * scale
-      if (i === 0) ctx.moveTo(x, y)
-      else ctx.lineTo(x, y)
-    })
-    ctx.strokeStyle = `rgba(255, 228, 196, ${(0.07 + Math.abs(offset) * 0.04) * fade})`
-    ctx.lineWidth = (0.6 + Math.abs(offset)) * scale
-    ctx.stroke()
-  }
-
-  const ionLen = Math.min(w * 0.5, 560) * (0.55 + 0.45 * t)
-  const ion: Point[] = []
-  const ionPerp: Point[] = []
-  for (let i = 0; i <= 28; i++) {
-    const s = i / 28
-    ion.push({
-      x: head.x + back.x * ionLen * s - side.x * s * 6 * scale,
-      y: head.y + back.y * ionLen * s - 18 * s * scale,
-    })
-    ionPerp.push(side)
-  }
-  ribbon(ctx, ion, ionPerp, (s) => (0.6 + s * 2.6) * scale, [
-    [0, `rgba(236, 250, 255, ${0.9 * fade})`],
-    [0.12, `rgba(120, 196, 255, ${0.62 * fade})`],
-    [0.45, `rgba(70, 140, 255, ${0.28 * fade})`],
-    [1, "rgba(40, 90, 220, 0)"],
+  ctx.filter = `blur(${9 * scale}px)`
+  ribbon(ctx, dust, dustPerp, (s) => (2 + s * dustLen * 0.17) * scale, [
+    [0, `rgba(255, 255, 255, ${0.95 * fade})`],
+    [0.35, `rgba(236, 250, 255, ${0.72 * fade})`],
+    [0.75, `rgba(210, 238, 255, ${0.38 * fade})`],
+    [1, "rgba(190, 225, 255, 0)"],
   ])
+  ctx.filter = "none"
 
   const blooms: Array<[number, string, string]> = [
-    [20 * scale, `rgba(150, 220, 255, ${0.34 * fade})`, "rgba(150, 220, 255, 0)"],
-    [8 * scale, `rgba(230, 252, 255, ${0.8 * fade})`, "rgba(230, 252, 255, 0)"],
-    [2.4 * scale, `rgba(255, 255, 255, ${fade})`, "rgba(214, 250, 255, 0)"],
+    [22 * scale, `rgba(186, 226, 255, ${0.3 * fade})`, "rgba(186, 226, 255, 0)"],
+    [9 * scale, `rgba(240, 252, 255, ${0.75 * fade})`, "rgba(210, 240, 255, 0)"],
+    [3.2 * scale, `rgba(255, 255, 255, ${fade})`, "rgba(230, 248, 255, 0)"],
   ]
   for (const [radius, inner, outer] of blooms) {
     const glow = ctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, radius)
     glow.addColorStop(0, inner)
+    glow.addColorStop(0.2, inner)
     glow.addColorStop(1, outer)
     ctx.fillStyle = glow
     ctx.beginPath()
