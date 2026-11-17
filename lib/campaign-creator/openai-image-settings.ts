@@ -74,14 +74,14 @@ export function snapGptImageSize(width: number, height: number): string | null {
   return isSupportedGptImageSize(size) ? size : null
 }
 
-export function resolveOpenAIImageModel(env?: NodeJS.ProcessEnv): string {
+export function resolveOpenAIImageModel(env?: Record<string, string | undefined>): string {
   const pinned = env?.OPENAI_IMAGE_MODEL?.trim()
   return pinned || OPENAI_IMAGE_MODEL_PIN
 }
 
 export function resolveOpenAIImageSettings(
   tier: StudioImageTier,
-  env?: NodeJS.ProcessEnv
+  env?: Record<string, string | undefined>
 ): ResolvedImageSettings {
   const preview = tier === "preview"
   const fallbackQuality = preview

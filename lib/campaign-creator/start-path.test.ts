@@ -114,6 +114,9 @@ test("generation on a campaign with no stored path records AI instead of waiting
       name: "Roofing inspection",
       rationale: "A proven mailer.",
       spec: { headline: "Free inspection" },
+      designedToDrive: "Calls",
+      tags: [],
+      recommended: false,
       createdAt: now,
     },
   ]

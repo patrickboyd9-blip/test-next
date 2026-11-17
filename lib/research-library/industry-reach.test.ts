@@ -278,7 +278,7 @@ test("pest control and restaurants are not dropped, and insurance is not all Med
     images: [],
     analysis: { id: "PM-015", vertical: "plumbing", grade: "C+", summary: "Mailbox plumbing and air card." },
   }
-  const env = { DESIGN_OWNER_FAVORITES: "PM-999" } as NodeJS.ProcessEnv
+  const env = { DESIGN_OWNER_FAVORITES: "PM-999" } as unknown as NodeJS.ProcessEnv
   const pestPick = selectReferences([pest, restaurant], { goal: "Treat for termites", offer: "Free pest inspection" }, env)
   assert.ok(pestPick.peers.some((pick) => pick.id === "PM-056"))
   const foodPick = selectReferences([pest, restaurant], { goal: "Fill the restaurant", offer: "A pizza special" }, env)
@@ -394,7 +394,7 @@ test("a record outside the master list stays none and is not a same-industry exa
   const picked = selectReferences(
     [travel, heating],
     { offer: "Free inspection for broken AC units", businessInfo: { name: "Coastal Comfort Heating & Air" } },
-    { DESIGN_OWNER_FAVORITES: "PM-999" } as NodeJS.ProcessEnv
+    { DESIGN_OWNER_FAVORITES: "PM-999" } as unknown as NodeJS.ProcessEnv
   )
   assert.equal(picked.peers.some((peer) => peer.id === "MMR-900"), false)
   assert.ok(picked.peers.some((peer) => peer.id === "PM-015"))

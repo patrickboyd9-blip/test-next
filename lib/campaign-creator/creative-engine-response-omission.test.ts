@@ -436,7 +436,7 @@ test("generation prompts treat contact inclusion as a direction-level Engine dec
     assert.match(text, /at least one direction must include that destination/)
   }
 
-  assert.equal(GENERATED_SPEC_TOOL_REQUIRED.includes("callToAction"), false)
+  assert.equal((GENERATED_SPEC_TOOL_REQUIRED as readonly string[]).includes("callToAction"), false)
   assert.doesNotMatch(intelligence, /includes or omits contact/)
   assert.doesNotMatch(intelligence, /at least one direction must include that phone/)
 })

@@ -83,7 +83,7 @@ export interface OpenAIImageGenerationResult {
 
 export function buildOpenAIImageRequest(
   brief: ImageBrief,
-  options?: { tier?: StudioImageTier; env?: NodeJS.ProcessEnv }
+  options?: { tier?: StudioImageTier; env?: Record<string, string | undefined> }
 ): OpenAIImagesGenerationsRequest {
   const settings = resolveOpenAIImageSettings(options?.tier ?? "preview", options?.env)
   return {
@@ -110,7 +110,7 @@ export class OpenAIImageGenerationAdapter implements ImageGenerationAdapter {
   #fetchImpl: typeof fetch
   #now: () => Date
   #createId: () => string
-  #env: NodeJS.ProcessEnv | undefined
+  #env: Record<string, string | undefined> | undefined
 
   constructor(options: {
     apiKey: string
@@ -118,7 +118,7 @@ export class OpenAIImageGenerationAdapter implements ImageGenerationAdapter {
     now?: () => Date
     createId?: () => string
     /** When omitted, production reads process.env at call time. */
-    env?: NodeJS.ProcessEnv
+    env?: Record<string, string | undefined>
   }) {
     const apiKey = options.apiKey.trim()
     if (!apiKey) {

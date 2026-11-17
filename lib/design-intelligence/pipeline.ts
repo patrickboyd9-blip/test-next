@@ -294,17 +294,17 @@ export async function applyDesignIntelligence(
   const roofish = /\broof|\bshingle|\bstorm (?:damage|restoration)|\bhail\b/i.test(`${brief.offer ?? ""} ${brief.goal ?? ""} ${brief.businessInfo?.name ?? ""}`)
   if (persuasionVertical(brief) === "roofing" || roofish) {
     const lines = distinctRoofingHeadlines({
-      headlines: directions.map((d: any) => d.spec?.headline ?? ""),
+      headlines: directions.map((d: { spec?: { headline?: string } }) => d.spec?.headline ?? ""),
       offer: brief.offer ?? "",
       city: brief.businessInfo?.city,
       goal: brief.goal,
       businessName: brief.businessInfo?.name,
     })
-    directions.forEach((d: any, i: number) => { if (d.spec) d.spec = { ...d.spec, headline: normalizeQuestion(lines[i] ?? "") } })
+    directions.forEach((d: { spec?: { headline?: string } }, i: number) => { if (d.spec) d.spec = { ...d.spec, headline: normalizeQuestion(lines[i] ?? "") } })
     // Storm lines only over a storm-damage photo; otherwise a non-storm angle.
-    const views = directions.map((d: any) => ({ spec: d.spec, role: d.spec?.designRationale?.persuasion?.role }))
+    const views = directions.map((d: { spec?: { headline?: string; visualDirection?: string; designRationale?: { persuasion?: { role?: string } } } }) => ({ spec: d.spec, role: d.spec?.designRationale?.persuasion?.role }))
     alignStormHeadlines(views)
-    directions.forEach((d: any, i: number) => { if (d.spec) d.spec = views[i]!.spec })
+    directions.forEach((d: { spec?: unknown }, i: number) => { if (d.spec) d.spec = views[i]!.spec })
   }
   return { ...result, directions }
 }

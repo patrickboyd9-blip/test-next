@@ -37,7 +37,7 @@ export interface BlobObjectStore {
   remove(pathname: string): Promise<void>
 }
 
-export function blobReadWriteToken(env: NodeJS.ProcessEnv = process.env): string | null {
+export function blobReadWriteToken(env: Record<string, string | undefined> = process.env): string | null {
   const token = env.BLOB_READ_WRITE_TOKEN?.trim()
   return token || null
 }

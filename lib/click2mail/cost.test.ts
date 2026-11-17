@@ -41,9 +41,9 @@ test("postage rates can be overridden without editing the screen", () => {
   const rates = loadPostcardPostage({
     C2M_POSTAGE_5X8_STANDARD: "0.51",
     C2M_POSTAGE_NONSTANDARD: "0.90",
-  } as NodeJS.ProcessEnv)
+  } as unknown as NodeJS.ProcessEnv)
   assert.equal(rates.standardFirstClassDollars, 0.51)
   assert.equal(rates.nonstandardFirstClassDollars, 0.9)
   assert.equal(postageEstimate(2, rates).amountLabel, "$1.02")
-  assert.equal(loadPostcardPostage({ C2M_POSTAGE_5X8_STANDARD: "nope" } as NodeJS.ProcessEnv).standardFirstClassDollars, 0.495)
+  assert.equal(loadPostcardPostage({ C2M_POSTAGE_5X8_STANDARD: "nope" } as unknown as NodeJS.ProcessEnv).standardFirstClassDollars, 0.495)
 })

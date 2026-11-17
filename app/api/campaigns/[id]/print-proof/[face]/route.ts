@@ -1,5 +1,7 @@
 import { denyUnlessCampaignOwner } from "@/lib/auth/campaign-access"
+import { getSession } from "@/lib/auth/session"
 import { getCampaignRepository } from "@/lib/campaign-creator/repository"
+import { beginMailAction, finishMailAction } from "@/lib/ops/mail-flow"
 import { renderAiPrintFile } from "@/lib/click2mail/ai-print-file"
 import { printFileKeepOutIssues, printFilePage } from "@/lib/print-spec/print-proof"
 
@@ -21,6 +23,15 @@ export async function GET(
   if (face !== "front" && face !== "back" && face !== "check") return new Response("Not found", { status: 404 })
   const denied = await denyUnlessCampaignOwner(id)
   if (denied) return denied
+  const session = await getSession()
+  await beginMailAction(session?.userId ?? "unknown", "proof")
+  await finishMailAction({
+    actorId: session?.userId ?? "unknown",
+    action: "proof",
+    subjectId: id,
+    before: null,
+    after: { face },
+  })
   const campaign = await repository.getCampaign(id)
   if (!campaign?.mailPiece) return new Response("Not found", { status: 404 })
   let file

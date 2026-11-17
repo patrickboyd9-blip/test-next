@@ -25,7 +25,7 @@ import { examToneVariants, EXAM_BRIEFS } from "./exam"
 import { loadSeedAnalyses, type LibraryRecord } from "./library"
 import { selectReferences } from "./select"
 
-const rulesEnv = { DESIGN_DIRECTOR: "rules", DESIGN_CRITIC: "machine", DESIGN_CANDIDATE_RENDERS: "off" } as NodeJS.ProcessEnv
+const rulesEnv = { DESIGN_DIRECTOR: "rules", DESIGN_CRITIC: "machine", DESIGN_CANDIDATE_RENDERS: "off" } as unknown as NodeJS.ProcessEnv
 
 test("Wondercide becomes a structure, not a copy of the mailer", () => {
   const analysis = loadSeedAnalyses().find((item) => item.id === "PM-056")
@@ -371,7 +371,7 @@ test("backfill stores structural blueprints without a vision key", async () => {
   try {
     const store = createFileDocumentStore(root)
     const report = await backfillBlueprints({
-      env: {} as NodeJS.ProcessEnv,
+      env: {} as unknown as NodeJS.ProcessEnv,
       store,
       records: [{
         id: "PM-056",
@@ -392,8 +392,8 @@ test("backfill stores structural blueprints without a vision key", async () => {
   }
 })
 
-function record(id: string, analysis: LibraryRecord["analysis"]): LibraryRecord {
-  return { id, source: "seed", analysis, images: [], needsAnalysis: false }
+function record(id: string, analysis?: Partial<NonNullable<LibraryRecord["analysis"]>>): LibraryRecord {
+  return { id, source: "seed", analysis: analysis as LibraryRecord["analysis"], images: [], needsAnalysis: false }
 }
 
 function tagged(

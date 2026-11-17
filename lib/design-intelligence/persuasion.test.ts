@@ -274,7 +274,7 @@ test("three directions use three psychologies and the chosen line is the headlin
   const plans = [0, 1, 2].map((index) => selectPersuasion({
     brief,
     vertical: "roofing",
-    role: roleForDirection(index, brief.primaryEmotion),
+    role: roleForDirection(index),
   }))
   assert.deepEqual(plans.map((plan) => plan.role), ["outcome", "threat", "trust"])
   assert.deepEqual(plans.map((plan) => plan.primaryEmotion.label), ["Love and protection of family", "Fear of leaks and damage", "Trust"])

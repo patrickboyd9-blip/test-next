@@ -92,7 +92,7 @@ const COLLECTIONS: Record<DocumentCollection, CollectionSql> = {
   },
 }
 
-export function postgresUrl(env: NodeJS.ProcessEnv = process.env): string | null {
+export function postgresUrl(env: Record<string, string | undefined> = process.env): string | null {
   const databaseUrl = env.DATABASE_URL?.trim()
   if (databaseUrl) return databaseUrl
   const postgres = env.POSTGRES_URL?.trim()
@@ -100,7 +100,7 @@ export function postgresUrl(env: NodeJS.ProcessEnv = process.env): string | null
   return null
 }
 
-export function storageMode(env: NodeJS.ProcessEnv = process.env): "postgres" | "file" {
+export function storageMode(env: Record<string, string | undefined> = process.env): "postgres" | "file" {
   return postgresUrl(env) ? "postgres" : "file"
 }
 
