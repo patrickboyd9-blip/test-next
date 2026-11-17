@@ -69,6 +69,19 @@ export function offerIsFigure(offer: string): boolean {
   return /^\$?\d[\d,]*(?:\.\d+)?%?(?:\s|$)/.test(cleaned)
 }
 
+/**
+ * "FREE inspection" can be a big FREE. "Free drink with physical redemption
+ * of the mailer" is one phrase. Splitting it hides the condition.
+ * A bare service word stays a figure. Anything longer stays together.
+ */
+export function offerPhraseStaysTogether(offer: string): boolean {
+  const lock = heroLockup(offer)
+  if (lock.numeral !== "FREE") return false
+  const rest = lock.rest.trim()
+  if (!rest) return false
+  return !/^(?:inspection|estimate|quote|check|checkup|evaluation|consultation)$/i.test(rest)
+}
+
 export function heroLockup(offer: string): { numeral: string; rest: string } {
   const cleaned = offer.replace(/\s+/g, " ").trim()
   if (isFreeOffer(cleaned)) {

@@ -187,7 +187,7 @@ export function composeGridCard(input: GridComposeInput): GridCard {
       rect: lockupBounds(responseContent, { qrRect, website: websiteText }),
       qrRect,
       qrInches: QR_IN,
-      qrLabel: SCAN_LABEL,
+      qrLabel: qrRect.w > 0.2 ? SCAN_LABEL : "",
       qrLabelPt: 9,
       phone: phoneText.text ? phoneText : undefined,
       website: websiteText.text ? websiteText : undefined,
@@ -292,14 +292,12 @@ function composeIntegrated(
   const websiteFits = urlLinePt >= URL_MIN_PT
   const websiteBoxH = 0.22
   const phoneBoxH = 0.34
-  const qrRect: InchRect = {
-    x: typeColumn.x,
-    y: round2(safeBottom - QR_IN),
-    w: QR_IN,
-    h: QR_IN,
-  }
-  const websiteY = round2(qrRect.y - 0.06 - websiteBoxH)
-  const phoneY = round2(websiteY - 0.05 - phoneBoxH)
+  const includeQr = website.trim().length > 0
+  const qrRect: InchRect = includeQr
+    ? { x: typeColumn.x, y: round2(safeBottom - QR_IN), w: QR_IN, h: QR_IN }
+    : { x: typeColumn.x, y: round2(safeBottom - phoneBoxH), w: 0, h: 0 }
+  const websiteY = includeQr ? round2(qrRect.y - 0.06 - websiteBoxH) : round2(safeBottom - websiteBoxH)
+  const phoneY = includeQr ? round2(websiteY - 0.05 - phoneBoxH) : round2(safeBottom - phoneBoxH)
   const showName = !nameAlreadyOnCard(headlineTexts, name)
   const nameBoxH = showName ? 0.5 : 0
   const joinedOffer = hvacOfferPhrase(input.rationale.vertical, offerParts.numeral, offerParts.rest)
@@ -416,7 +414,7 @@ function composeIntegrated(
       },
       qrRect,
       qrInches: QR_IN,
-      qrLabel: SCAN_LABEL,
+      qrLabel: qrRect.w > 0.2 ? SCAN_LABEL : "",
       qrLabelPt: 9,
       phone: phoneText.text ? phoneText : undefined,
       website: websiteText.text ? websiteText : undefined,
@@ -736,7 +734,7 @@ function composeOfferStrip(
       },
       qrRect,
       qrInches: QR_IN,
-      qrLabel: SCAN_LABEL,
+      qrLabel: qrRect.w > 0.2 ? SCAN_LABEL : "",
       qrLabelPt: 9,
       phone: phoneText.text ? phoneText : undefined,
       website: websiteText.text ? websiteText : undefined,
@@ -1146,13 +1144,16 @@ function placeResponse(input: {
   ink: string
   urlMin?: number
 }): { qrRect: InchRect; phone: FittedText; website: FittedText; stackBottom: number; stackRoom: number } {
-  const websiteH = 0.26
-  const gap = 0.08
-  const rowH = QR_IN
+  const websiteH = input.website.trim() ? 0.26 : 0
+  const gap = input.website.trim() ? 0.08 : 0
+  const includeQr = input.website.trim().length > 0
+  const rowH = includeQr ? QR_IN : 0.4
   const lockupH = rowH + gap + websiteH
   const lockupTop = input.content.y + input.content.h - lockupH
-  const qrRect: InchRect = { x: input.content.x, y: lockupTop, w: QR_IN, h: QR_IN }
-  const textX = qrRect.x + qrRect.w + 0.12
+  const qrRect: InchRect = includeQr
+    ? { x: input.content.x, y: lockupTop, w: QR_IN, h: QR_IN }
+    : { x: input.content.x, y: lockupTop, w: 0, h: 0 }
+  const textX = includeQr ? qrRect.x + qrRect.w + 0.12 : input.content.x
   const textW = Math.max(0.8, input.content.x + input.content.w - textX)
   const phoneH = 0.4
   const phone = fitText({
@@ -1166,7 +1167,7 @@ function placeResponse(input: {
   })
   const website = fitText({
     text: input.website,
-    rect: { x: input.content.x, y: lockupTop + rowH + gap, w: input.content.w, h: websiteH },
+    rect: { x: input.content.x, y: lockupTop + rowH + gap, w: input.content.w, h: websiteH || 0.05 },
     role: "label",
     pairing: input.pairing,
     color: input.ink,

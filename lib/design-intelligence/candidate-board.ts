@@ -34,11 +34,11 @@ import {
 } from "./taste-retrieval"
 import { ATTORNEY_AD_LABEL, attorneyAdMark } from "./attorney-compliance"
 import { scrubUnstatedAudience, scrubUnstatedName, statedNameFallback } from "./audience-facts"
-import { applyOutcomeHeadline, clientFactText, distinctRoofingHeadlines, headlineVariants, persuasionVertical, roleForDirection, selectPersuasion, type DirectionRole } from "./persuasion"
+import { applyOutcomeHeadline, clientFactText, customerDeclinedQr, distinctRoofingHeadlines, headlineVariants, persuasionVertical, roleForDirection, selectPersuasion, type DirectionRole } from "./persuasion"
 import type { ImageryRole, LeadJob } from "@/lib/campaign-creator/types"
 import { briefHasNumeralOffer, verticalForBrief } from "./vertical"
 import { assignTemplates } from "@/lib/postcard-layouts/assign"
-import { offerIsFigure } from "./offer-copy"
+import { offerIsFigure, offerPhraseStaysTogether } from "./offer-copy"
 import { loadTasteCorpus, visionTasteStore, type VisionTaste } from "./vision-taste"
 import { referencePicksForCritique, requestComparativeCritique } from "./vision-critic"
 import { formatArtDirectorEvidence, goldExpectationFromHits, layoutTuneFromHits } from "@/lib/research-library/evidence"
@@ -375,9 +375,14 @@ async function scoreFamily(input: {
         : undefined,
     }),
   }
-  const presentation = rolePresentation(role)
+  const kind = persuasionVertical(input.brief, rationale.vertical)
+  const presentation = rolePresentation(role, kind)
   const figure = offerIsFigure(spec.offer ?? input.brief.offer ?? "")
-  const offerHero = figure && rationale.vertical !== "medicare_insurance" && role !== "trust"
+  const offerHero =
+    figure &&
+    !offerPhraseStaysTogether(spec.offer ?? input.brief.offer ?? "") &&
+    rationale.vertical !== "medicare_insurance" &&
+    role !== "trust"
   rationale = {
     ...rationale,
     grid: { name: presentation.grid, alignment: "left", intentional_break: presentation.mode },
@@ -556,13 +561,14 @@ function applyBoard(result: GenerateDirectionsResult, board: BoardResult, brief:
     const role = winner.rationale.persuasion?.role
     return {
       ...direction,
-      name: role ? strategyName(role) : scrubUnstatedName(direction.name, facts, statedNameFallback(brief.offer, brief.goal)),
+      name: role ? strategyName(role, persuasionVertical(brief)) : scrubUnstatedName(direction.name, facts, statedNameFallback(brief.offer, brief.goal)),
       rationale: scrubUnstatedAudience(direction.rationale, facts) || `Offers ${brief.offer?.trim() || brief.goal?.trim() || "the stated offer"}.`,
       recommended: best ? winner === best : false,
-      oneLineDifference: role ? customerWhyLine(role) : winner.summary,
+      oneLineDifference: role ? customerWhyLine(role, persuasionVertical(brief)) : winner.summary,
       spec: {
         ...direction.spec,
         ...winner.spec,
+        ...suppliedContact(brief, facts),
         designRationale: winner.rationale,
         palette: [
           winner.rationale.palette.neutral_hex[0] ?? "#F4F1EA",
@@ -680,7 +686,10 @@ function rationaleForFamily(
   return checked.rationale
 }
 
-function rolePresentation(role: DirectionRole): {
+const PIZZA_SLICE =
+  "A single slice of pizza on a plain plate, cheese and crust visible, warm light, no readable type, no logo, and no people."
+
+function rolePresentation(role: DirectionRole, kind = ""): {
   mode: CompositionMode
   grid: GridName
   summary: string
@@ -693,7 +702,7 @@ function rolePresentation(role: DirectionRole): {
   leadJob: LeadJob
 } {
   if (role === "threat") {
-    return {
+    return pizzaPhoto(kind, {
       mode: "full-bleed",
       grid: "full-bleed-plus-panel",
       summary: "The headline sits on the photograph. The offer is a small line.",
@@ -704,10 +713,10 @@ function rolePresentation(role: DirectionRole): {
       visualDirection: "The problem itself, quiet and honest. No wreckage, no countdown, and no made-up damage.",
       imageryRole: "consequence",
       leadJob: "problem",
-    }
+    })
   }
   if (role === "trust") {
-    return {
+    return pizzaPhoto(kind, {
       mode: "panel",
       grid: "thirds",
       summary: "A full-height portrait beside the headline.",
@@ -718,32 +727,70 @@ function rolePresentation(role: DirectionRole): {
       visualDirection: "One local person, face fully in frame, room above the head, calm daylight. Not the same scene as the other cards.",
       imageryRole: "crew",
       leadJob: "trust",
-    }
+    })
   }
-  return {
-    mode: "integrated",
-    grid: "centered-stack",
+  const base = {
+    mode: "integrated" as const,
+    grid: "centered-stack" as const,
     summary: "The headline is the result, on an open canvas.",
     placement: "The result headline sits on the open canvas. The offer is a small line.",
     subject: "The finished result of the job, in daylight, no person in the frame",
     crop: "The finished work, open sky, no person",
-    photoMode: "result",
+    photoMode: "result" as const,
     visualDirection: "The finished result of the job, daylight, no person in the frame. Not a portrait and not the problem.",
-    imageryRole: "neighborhood",
-    leadJob: "offer",
+    imageryRole: "neighborhood" as const,
+    leadJob: "offer" as const,
   }
+  return pizzaPhoto(kind, base)
 }
 
-export function strategyName(role: DirectionRole): string {
+function pizzaPhoto<T extends { subject: string; visualDirection: string }>(kind: string, base: T): T {
+  if (kind !== "pizza") return base
+  return { ...base, subject: PIZZA_SLICE, visualDirection: PIZZA_SLICE }
+}
+
+export function strategyName(role: DirectionRole, kind = ""): string {
+  if (kind === "pizza" || kind === "food") {
+    if (role === "threat") return "Before the night goes"
+    if (role === "trust") return "The shop"
+    return "The meal"
+  }
   if (role === "threat") return "Before it spreads"
   if (role === "trust") return "Local proof"
   return "The outcome"
 }
 
-export function customerWhyLine(role: DirectionRole): string {
+export function customerWhyLine(role: DirectionRole, kind = ""): string {
+  if (kind === "pizza" || kind === "food") {
+    if (role === "threat") return "One honest reason to call. No deadline and no made-up number."
+    if (role === "trust") return "The shop name carries the proof."
+    return "The headline is the meal. The offer stays in the customer's own words."
+  }
   if (role === "threat") return "One honest risk, then one easy step. No deadline and no made-up number."
   if (role === "trust") return "A local face and the business name carry the proof."
   return "The headline is the result the homeowner wants. A free, dollar, or percent offer is the largest type."
+}
+
+function suppliedContact(brief: CampaignBrief, facts: string): Partial<CreativeSpec> {
+  const phone = brief.phone?.trim() || brief.businessInfo?.phone?.trim() || ""
+  const website = brief.website?.trim() || brief.businessInfo?.website?.trim() || ""
+  const declined = customerDeclinedQr(facts)
+  return {
+    ...(phone ? { phone } : {}),
+    website,
+    qrDestination: declined ? "" : brief.qrDestination?.trim() || "",
+    body: dropUnsupported(brief.otherRequirements, facts),
+    subheadline: "",
+    ...(declined ? { callToAction: "" } : {}),
+  }
+}
+
+function dropUnsupported(line: string | undefined, facts: string): string {
+  const text = line?.replace(/\s+/g, " ").trim() ?? ""
+  if (!text) return ""
+  if (/\blicensed\b|\binsured\b|\blocally owned\b|\bsince \d{4}\b/i.test(text) && !/\blicensed\b|\binsured\b/i.test(facts)) return ""
+  if (/\bscan\b/i.test(text) && customerDeclinedQr(facts)) return ""
+  return text
 }
 
 function orderFamilies(feel: string, signals?: TasteSignals): Family[] {
