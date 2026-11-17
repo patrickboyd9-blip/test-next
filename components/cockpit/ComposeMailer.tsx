@@ -40,6 +40,7 @@ import { StartChoices, type StartPath } from "./StartChoices"
 import { ProofTray } from "./ProofCard"
 import { ProofFrame } from "@/components/campaign-creator/upload/ProofFrame"
 import { classifyDesignUpload, type DesignPreviewMedia } from "@/lib/mailer-compose/design-preview"
+import { cometLiveTurn } from "@/lib/mailer-compose/live-turn"
 import { CometMark } from "@/components/assistant/CometMark"
 import { ASSISTANT_NAME } from "@/lib/assistant/comet"
 
@@ -64,6 +65,7 @@ export function ComposeMailer({
   initialPath = null,
   initialQuick = false,
   sampleBeat = null,
+  liveChat = false,
 }: {
   shop: string
   initialStep?: ComposeStep
@@ -71,6 +73,8 @@ export function ComposeMailer({
   initialPath?: StartPath | null
   initialQuick?: boolean
   sampleBeat?: number | null
+  /** True only when production can call the conversation engine. */
+  liveChat?: boolean
 }) {
   const router = useRouter()
   const [step, setStep] = useState<ComposeStep>(initialStep)
@@ -168,7 +172,28 @@ export function ComposeMailer({
     patch({ uploadedName: file.name, uploadedPeople: count, listId: null })
   }
 
-  function answer(text: string) {
+  async function answer(text: string) {
+    if (liveChat) {
+      const result = await cometLiveTurn({
+        brief: known,
+        history: chat.map((turn) => ({ role: turn.role, text: turn.text })),
+        message: text,
+        refining: false,
+      })
+      if (result.live) {
+        setKnown(result.brief)
+        setChat((current) => [
+          ...current,
+          { role: "customer", text },
+          { role: "assistant", text: result.ready ? `${result.reply}\n\n${result.line}` : result.reply },
+        ])
+        if (result.ready) {
+          setProposal({ shop: result.shop, line: result.line, why: result.reply, audience: result.audience, revision: 0 })
+          patch({ brief: result.line })
+        }
+        return
+      }
+    }
     const next = interviewReply(text, known)
     setKnown(next.brief)
     setChat((current) => [
@@ -183,8 +208,23 @@ export function ComposeMailer({
     }
   }
 
-  function tweak(reaction: string) {
+  async function tweak(reaction: string) {
     if (!proposal) return
+    if (liveChat) {
+      const result = await cometLiveTurn({
+        brief: known,
+        history: chat.map((turn) => ({ role: turn.role, text: turn.text })),
+        message: reaction,
+        refining: true,
+      })
+      if (result.live) {
+        setKnown(result.brief)
+        setProposal({ ...proposal, line: result.line, why: result.reply, audience: result.audience, revision: proposal.revision + 1 })
+        patch({ brief: result.line })
+        setChat((current) => [...current, { role: "customer", text: reaction }, { role: "assistant", text: result.reply }])
+        return
+      }
+    }
     const next = reactToProposal(proposal, reaction)
     setProposal(next)
     patch({ brief: next.line })
@@ -391,7 +431,7 @@ export function ComposeMailer({
             <button type="button" onClick={() => setQuick(true)} className="min-h-11 text-sm text-[#8ecfff]">
               I already know what I want
             </button>
-            <p className="text-xs text-[#8aa0b4]">Sample conversation. No live model is called.</p>
+            {liveChat ? null : <p className="text-xs text-[#8aa0b4]">Sample conversation. No live model is called.</p>}
           </Panel>
         ) : null}
 

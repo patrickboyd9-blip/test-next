@@ -1,7 +1,7 @@
 /**
  * Preview stand-in for the Campaign Creator conversation.
  * It uses the same industry list as the editor. No model is called.
- * Every reply says Sample so it is not mistaken for a live answer.
+ * The screen badge says this is a sample. The lines themselves stay plain.
  */
 import type { CampaignBrief } from "@/lib/campaign-creator/types"
 import { industryForBrief } from "@/lib/research-library/industry"
@@ -64,7 +64,7 @@ export function interviewReply(customerText: string, known: Partial<CampaignBrie
   if (!brief.desiredRecipientAction) {
     const trade = tradeLabel(brief)
     return {
-      reply: `Sample. ${trade}. ${ACTION_QUESTION}`,
+      reply: `${trade}. ${ACTION_QUESTION}`,
       choices: ACTION_CHOICES,
       ready: false,
       brief,
@@ -72,7 +72,7 @@ export function interviewReply(customerText: string, known: Partial<CampaignBrie
   }
   if (!brief.audience?.description) {
     return {
-      reply: `Sample. They should ${actionPhrase(brief.desiredRecipientAction)}. ${AUDIENCE_QUESTION}`,
+      reply: `They should ${actionPhrase(brief.desiredRecipientAction)}. ${AUDIENCE_QUESTION}`,
       choices: AUDIENCE_CHOICES,
       ready: false,
       brief,
@@ -100,7 +100,7 @@ export function proposalFor(brief: Partial<CampaignBrief>): ProposedMailer {
       line: "Tuesday 2-for-1 large pizzas",
       audience,
       revision: 0,
-      why: "Sample. Slow nights are the gap, so the card leads with one easy weeknight offer and asks them to call.",
+      why: "Slow nights are the gap, so the card leads with one easy weeknight offer and asks them to call.",
     }
   }
   const shop = named && !/your business/i.test(named) ? named : trade
@@ -110,7 +110,7 @@ export function proposalFor(brief: Partial<CampaignBrief>): ProposedMailer {
     line,
     audience,
     revision: 0,
-    why: `Sample. Business: ${trade.toLowerCase()}. Goal: ${action}. Audience: ${audience}.`,
+    why: `Business: ${trade.toLowerCase()}. Goal: ${action}. Audience: ${audience}.`,
   }
 }
 
@@ -135,7 +135,9 @@ export function reactToProposal(proposal: ProposedMailer, reaction: string): Pro
       ...proposal,
       revision,
       line,
-      why: `Sample. Made the ${trade.toLowerCase()} line lighter (pass ${revision}). The appointment and ${audience} stay.`,
+      why: revision === 1
+        ? `I made the ${trade.toLowerCase()} line lighter. The appointment and ${audience} stay.`
+        : `I lightened the ${trade.toLowerCase()} line again. Same appointment, same ${audience}.`,
     }
   }
   if (/photo/i.test(reaction)) {
@@ -147,7 +149,7 @@ export function reactToProposal(proposal: ProposedMailer, reaction: string): Pro
       ...proposal,
       revision,
       line: `${proposal.line.split(" — ")[0]} — ${pictures[(revision - 1) % pictures.length]}`,
-      why: `Sample. Changed the picture to pass ${revision}. ${trade} still asks them to book, for ${audience}. No new photo file is generated.`,
+      why: `The picture is now ${pictures[(revision - 1) % pictures.length]!.replace(/\.$/, "").toLowerCase()}. ${trade} still asks them to book, for ${audience}. No new photo file is generated.`,
     }
   }
   if (/bigger|offer/i.test(reaction)) {
@@ -159,10 +161,10 @@ export function reactToProposal(proposal: ProposedMailer, reaction: string): Pro
       ...proposal,
       revision,
       line: offers[(revision - 1) % offers.length]!,
-      why: `Sample. Made the offer larger (pass ${revision}). Still ${trade.toLowerCase()}, still for ${audience}.`,
+      why: `The offer is bigger now. Still ${trade.toLowerCase()}, still for ${audience}.`,
     }
   }
-  return { ...proposal, revision, why: `Sample. Kept the ${trade.toLowerCase()} card. I did not treat “${reaction}” as a new offer.` }
+  return { ...proposal, revision, why: `I kept the ${trade.toLowerCase()} card. I did not treat “${reaction}” as a new offer.` }
 }
 
 const TRADE_LABEL: Record<string, string> = {

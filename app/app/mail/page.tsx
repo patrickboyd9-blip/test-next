@@ -1,4 +1,5 @@
 import { ComposeMailer } from "@/components/cockpit/ComposeMailer"
+import { cometChatIsLive } from "@/lib/mailer-compose/live-turn"
 import type { StartPath } from "@/components/cockpit/StartChoices"
 import { composeSteps, emptyDraft, LIST_BEFORE_PROOF, SAMPLE_SHOP, type ComposeStep } from "@/lib/mailer-compose/flow"
 
@@ -28,6 +29,7 @@ export default async function NewMailerPage({
       initialPath={path}
       initialQuick={params.quick === "1"}
       sampleBeat={Number.isFinite(beat) ? beat : null}
+      liveChat={await cometChatIsLive()}
     />
   )
 }
