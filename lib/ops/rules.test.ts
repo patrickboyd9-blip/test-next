@@ -28,12 +28,12 @@ test("address and barcode boxes stay the confirmed point sizes", () => {
 })
 
 test("a charge without an approval is refused and the log only grows", async () => {
-  const before = readAudit().length
-  assert.throws(() => chargeMailer("ada@example.com", "campaign-unapproved"), /without approval/)
-  const priced = priceMailer("ada@example.com", "campaign-unapproved")
+  const before = (await readAudit()).length
+  await assert.rejects(() => chargeMailer("ada@example.com", "campaign-unapproved"), /without approval/)
+  const priced = await priceMailer("ada@example.com", "campaign-unapproved")
   assert.equal(priced.postageOnly, false)
   assert.equal(priced.configured, false)
-  const after = readAudit()
+  const after = await readAudit()
   assert.ok(after.length > before)
   assert.equal(after.some((event) => event.action === "charge" && event.after && (event.after as { charged?: boolean }).charged === true), false)
 })
@@ -67,10 +67,10 @@ test("research images and private keys are not in the repo", () => {
   assert.deepEqual(secrets, [])
 })
 
-test("rate limiting stops a burst", () => {
+test("rate limiting stops a burst", async () => {
   const key = `burst-${Date.now()}`
-  for (let i = 0; i < 30; i += 1) assert.equal(consumeRate(key).ok, true)
-  assert.equal(consumeRate(key).ok, false)
+  for (let i = 0; i < 30; i += 1) assert.equal((await consumeRate(key)).ok, true)
+  assert.equal((await consumeRate(key)).ok, false)
 })
 
 function walk(dir: string, visit: (file: string) => void) {

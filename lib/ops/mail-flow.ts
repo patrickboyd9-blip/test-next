@@ -8,34 +8,34 @@ import { requireRate } from "./rate-limit"
  * Callers record the before and after here. This module does not print or take payment.
  */
 
-export function beginMailAction(actorId: string, action: AuditAction | "ai"): void {
-  requireRate(`${action}:${actorId}`)
+export async function beginMailAction(actorId: string, action: AuditAction | "ai"): Promise<void> {
+  await requireRate(`${action}:${actorId}`)
 }
 
-export function finishMailAction(input: {
+export async function finishMailAction(input: {
   actorId: string
   action: AuditAction
   subjectId: string
   before: unknown
   after: unknown
-}): void {
-  appendAudit(input)
+}): Promise<void> {
+  await appendAudit(input)
 }
 
-export function priceMailer(actorId: string, subjectId: string, env: NodeJS.ProcessEnv = process.env) {
-  beginMailAction(actorId, "price")
+export async function priceMailer(actorId: string, subjectId: string, env: NodeJS.ProcessEnv = process.env) {
+  await beginMailAction(actorId, "price")
   const schedule = readApprovedSchedule(env)
   const after = schedule
     ? { configured: true, total: "full" as const }
     : { configured: false, total: "placeholder" as const, postageOnly: false }
-  finishMailAction({ actorId, action: "price", subjectId, before: null, after })
+  await finishMailAction({ actorId, action: "price", subjectId, before: null, after })
   return after
 }
 
-export function chargeMailer(actorId: string, subjectId: string): { charged: false } {
-  beginMailAction(actorId, "charge")
-  const allowed = approvedBy(actorId, subjectId)
-  finishMailAction({
+export async function chargeMailer(actorId: string, subjectId: string): Promise<{ charged: false }> {
+  await beginMailAction(actorId, "charge")
+  const allowed = await approvedBy(actorId, subjectId)
+  await finishMailAction({
     actorId,
     action: "charge",
     subjectId,

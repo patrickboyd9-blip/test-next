@@ -5,7 +5,7 @@ import { after } from "next/server"
 
 import { CampaignAccessError, requireOwnedCampaign } from "@/lib/auth/campaign-access"
 import { getSession, previewDemoAllowed } from "@/lib/auth/session"
-import { beginMailAction, finishMailAction } from "@/lib/ops/mail-flow"
+import { beginMailAction, finishMailAction, priceMailer } from "@/lib/ops/mail-flow"
 
 import {
   getActiveSpec,
@@ -76,9 +76,9 @@ export async function createDraftCampaign(): Promise<Campaign> {
     if (!demo) throw new Error("The preview campaign could not be opened.")
     return forCustomer(demo)
   }
-  beginMailAction(session.userId, "create")
+  await beginMailAction(session.userId, "create")
   const created = await repository.createCampaign(session.userId)
-  finishMailAction({
+  await finishMailAction({
     actorId: session.userId,
     action: "create",
     subjectId: created.id,
@@ -222,9 +222,9 @@ export async function confirmCampaignQuantity(campaignId: string): Promise<Campa
 export async function launchCampaign(campaignId: string): Promise<Campaign> {
   const before = await owned(campaignId)
   const session = await getSession()
-  beginMailAction(session?.userId ?? "unknown", "send")
+  await beginMailAction(session?.userId ?? "unknown", "send")
   const launched = await repository.launch(campaignId)
-  finishMailAction({
+  await finishMailAction({
     actorId: session?.userId ?? "unknown",
     action: "send",
     subjectId: campaignId,
@@ -238,7 +238,7 @@ const generationLocks = new Map<string, Promise<Campaign>>()
 
 export async function generateStudioCreative(campaignId: string): Promise<Campaign> {
   const session = await getSession()
-  beginMailAction(session?.userId ?? "unknown", "ai")
+  await beginMailAction(session?.userId ?? "unknown", "ai")
   await owned(campaignId)
   const inFlight = generationLocks.get(campaignId)
   if (inFlight) return forCustomer(await inFlight)
@@ -461,9 +461,10 @@ export async function updateAddressSide(campaignId: string, edit: AddressSideEdi
 export async function approveCreative(campaignId: string): Promise<Campaign> {
   const before = await owned(campaignId)
   const session = await getSession()
-  beginMailAction(session?.userId ?? "unknown", "approve")
+  await priceMailer(session?.userId ?? "unknown", campaignId)
+  await beginMailAction(session?.userId ?? "unknown", "approve")
   const approved = await repository.approveCreative(campaignId)
-  finishMailAction({
+  await finishMailAction({
     actorId: session?.userId ?? "unknown",
     action: "approve",
     subjectId: campaignId,

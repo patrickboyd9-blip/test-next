@@ -24,8 +24,8 @@ export async function GET(
   const denied = await denyUnlessCampaignOwner(id)
   if (denied) return denied
   const session = await getSession()
-  beginMailAction(session?.userId ?? "unknown", "proof")
-  finishMailAction({
+  await beginMailAction(session?.userId ?? "unknown", "proof")
+  await finishMailAction({
     actorId: session?.userId ?? "unknown",
     action: "proof",
     subjectId: id,
