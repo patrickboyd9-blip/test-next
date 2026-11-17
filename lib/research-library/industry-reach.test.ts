@@ -45,6 +45,7 @@ const SAMPLE_BRIEFS: Record<GoldIndustry, CampaignBrief> = {
   "pest-control": { goal: "Treat the house for termites", offer: "Free pest inspection" },
   plumbing: { goal: "Clear a drain and check the water heater", offer: "Free plumbing check" },
   "precious-metals": { goal: "We buy gold and silver", offer: "A precious metals quote" },
+  "private-chef": { goal: "Book a private chef for a dinner", offer: "Catering and meal prep" },
   "real-estate-agents": { goal: "List the house with a realtor", offer: "A free listing consult" },
   "restaurants-food": { goal: "Fill the restaurant on Tuesday", offer: "A pizza night special" },
   "retail-grand-openings": { goal: "Announce a grand opening", offer: "Store opening week" },
@@ -401,7 +402,7 @@ test("a record outside the master list stays none and is not a same-industry exa
 })
 
 test("the eleven new industries resolve, and garage doors and salons leave their old buckets", () => {
-  assert.equal(GOLD_INDUSTRIES.length, 39)
+  assert.equal(GOLD_INDUSTRIES.length, 40)
   assert.equal(industryForBrief({ goal: "Replace the garage door", offer: "Free estimate" }), "garage-doors")
   assert.notEqual(industryForBrief({ goal: "Remodel the kitchen cabinets", offer: "Free estimate" }), "garage-doors")
   assert.equal(industryForBrief({ goal: "Book a haircut", offer: "Salon week" }), "hair-salon")

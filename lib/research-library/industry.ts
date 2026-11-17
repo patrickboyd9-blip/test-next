@@ -13,7 +13,7 @@ import { createHash } from "node:crypto"
 
 import type { CampaignBrief } from "@/lib/campaign-creator/types"
 
-export const TAGGER_VERSION = "2026-10-27-39"
+export const TAGGER_VERSION = "2026-11-17-40"
 
 export const GOLD_INDUSTRIES = [
   "auto-insurance",
@@ -45,6 +45,7 @@ export const GOLD_INDUSTRIES = [
   "pest-control",
   "plumbing",
   "precious-metals",
+  "private-chef",
   "real-estate-agents",
   "restaurants-food",
   "retail-grand-openings",
@@ -257,6 +258,7 @@ function classify(value: string, mode: ClassifyMode): string {
   if (dentalSignal(text, mode)) return "dental"
   if (/\bmed spa\b|\bmedspa\b|\bchiro\b|\bbotox\b|\baesthetic\b/.test(text)) return "med-spa-chiro"
   if (vetSignal(text, mode)) return "vet-pet"
+  if (/\bprivate chefs?\b|\bcatering\b|\bmeal prep\b|\bpersonal chefs?\b/.test(text)) return "private-chef"
   if (restaurantSignal(text, mode)) return "restaurants-food"
   if (/\bgym\b|\bfitness\b|\byoga\b/.test(text)) return "gyms-fitness"
   if (cleaningSignal(text, mode)) return "cleaning-pressure-washing"
