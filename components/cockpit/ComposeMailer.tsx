@@ -450,11 +450,17 @@ export function ComposeMailer({
               ))}
             </div>
             <ul className="space-y-2">
-              {listMailTemplates(industry === "all" ? undefined : industry).slice(0, 6).map((item) => (
+              {(industry === "all"
+                ? listMailTemplates().filter((item, index, all) => all.findIndex((other) => other.industry === item.industry) === index)
+                : listMailTemplates(industry)
+              ).map((item) => (
                 <li key={item.id}>
-                  <button type="button" onClick={() => { setTemplateId(item.id); patch({ brief: item.spec.offer || item.summary }) }} className={`min-h-14 w-full rounded-xl border px-4 text-left ${templateId === item.id ? "border-[#5ce1ff]" : "border-[#245068]"}`}>
-                    <span className="block font-medium">{item.name}</span>
-                    <span className="text-sm text-[#8aa0b4]">{item.summary}</span>
+                  <button type="button" onClick={() => { setTemplateId(item.id); patch({ brief: item.spec.offer || item.summary }) }} className={`flex min-h-14 w-full items-center gap-3 rounded-xl border px-4 text-left ${templateId === item.id ? "border-[#5ce1ff]" : "border-[#245068]"}`}>
+                    <span aria-hidden className="h-10 w-4 shrink-0 rounded-full" style={{ background: item.spec.palette?.[0] ?? "#245068" }} />
+                    <span>
+                      <span className="block font-medium">{item.name}</span>
+                      <span className="text-sm text-[#8aa0b4]">{item.layoutRecipe ? item.layoutRecipe.replace("-", " ") : item.summary}</span>
+                    </span>
                   </button>
                 </li>
               ))}

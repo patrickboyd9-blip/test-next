@@ -13,6 +13,8 @@ export const TEMPLATE_INDUSTRIES = [
   "dental",
   "real_estate",
   "landscaping",
+  "auto_repair",
+  "cleaning",
 ] as const
 
 export type TemplateIndustry = (typeof TEMPLATE_INDUSTRIES)[number]
@@ -26,6 +28,8 @@ export const TEMPLATE_INDUSTRY_LABELS: Record<TemplateIndustry, string> = {
   dental: "Dental",
   real_estate: "Real estate",
   landscaping: "Landscaping",
+  auto_repair: "Auto repair",
+  cleaning: "Cleaning",
 }
 
 /**
@@ -46,6 +50,13 @@ export interface MailTemplate {
   sampleBusinessName: string
   size: TemplateSize
   spec: CreativeSpec
+  /**
+   * Gold research record whose structure inspired this card.
+   * The words and pictures are ours. The record is not copied.
+   */
+  sourcePatternId?: string
+  /** Our layout, named by structure only. */
+  layoutRecipe?: "split-photo" | "offer-bar" | "coupon-band" | "type-led"
 }
 
 export function isTemplateIndustry(value: string): value is TemplateIndustry {
