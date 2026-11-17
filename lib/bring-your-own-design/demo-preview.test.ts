@@ -8,10 +8,8 @@ import { openUploadedDesign, resolveUploadedDesignStore } from "./store"
 
 test("preview demo keeps an uploaded PNG in memory and reads it back", async () => {
   const previousVercel = process.env.VERCEL_ENV
-  const previousNode = process.env.NODE_ENV
   const previousDemo = process.env.DEMO_MODE
   process.env.VERCEL_ENV = "preview"
-  process.env.NODE_ENV = "production"
   delete process.env.DEMO_MODE
   try {
     const png = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10, 9])
@@ -22,7 +20,6 @@ test("preview demo keeps an uploaded PNG in memory and reads it back", async () 
     assert.equal(opened.bytes[0], 137)
   } finally {
     restore("VERCEL_ENV", previousVercel)
-    restore("NODE_ENV", previousNode)
     restore("DEMO_MODE", previousDemo)
   }
 })
@@ -40,7 +37,7 @@ test("every preview server can open the same demo campaign", async () => {
   }
 })
 
-function restore(name: "VERCEL_ENV" | "NODE_ENV" | "DEMO_MODE", value: string | undefined) {
+function restore(name: "VERCEL_ENV" | "DEMO_MODE", value: string | undefined) {
   if (value === undefined) delete process.env[name]
   else process.env[name] = value
 }
