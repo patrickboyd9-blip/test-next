@@ -6,7 +6,7 @@ export function GuidancePanel({ campaignId, guidance }: { campaignId: string; gu
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Why this direction</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Comet · Why this direction</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           One recommendation and at most two alternatives. This is not a promise of more replies, and it is not legal approval.
         </p>

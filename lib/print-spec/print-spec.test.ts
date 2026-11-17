@@ -3,6 +3,7 @@ import { inflateSync } from "node:zlib"
 import { test } from "node:test"
 
 import { POSTCARD_5X8_V1 } from "../mail-catalog/pieces/postcard-5x8"
+import { CLICK2MAIL_RESERVED_POINTS } from "./click2mail-keep-outs"
 import {
   PRINT_SPEC_NON_GOALS,
   buildPostcard5x8PrintSpec,
@@ -51,19 +52,21 @@ test("address-face keep-outs move from trim top-left onto the canvas", () => {
   assert.ok(panel)
   assert.ok(barcode)
 
-  assert.equal(panel.trim.xInches, 4.3125)
-  assert.equal(panel.trim.yInches, 2.125)
-  assert.equal(panel.canvas.xInches, 4.5625)
-  assert.equal(panel.canvas.yInches, 2.375)
-  assert.equal(panel.pdf.xPoints, 4.5625 * 72)
+  const want = CLICK2MAIL_RESERVED_POINTS["5x8"]
+  assert.equal(panel.pdf.widthPoints, want.mailingPanel.widthPoints)
+  assert.equal(panel.pdf.heightPoints, want.mailingPanel.heightPoints)
+  assert.equal(panel.trim.xInches, 8 - want.mailingPanel.widthPoints / 72)
+  assert.equal(panel.trim.yInches, 5 - want.mailingPanel.heightPoints / 72)
+  assert.equal(panel.canvas.xInches, panel.trim.xInches + 0.25)
+  assert.equal(panel.canvas.yInches, panel.trim.yInches + 0.25)
   assert.equal(panel.pdf.yPoints, 18)
 
-  assert.equal(barcode.trim.xInches, 2)
-  assert.equal(barcode.trim.yInches, 4.375)
-  assert.equal(barcode.canvas.xInches, 2.25)
-  assert.equal(barcode.canvas.yInches, 4.625)
-  assert.equal(barcode.pdf.widthPoints, 6 * 72)
-  assert.equal(barcode.pdf.heightPoints, 0.625 * 72)
+  assert.equal(barcode.pdf.widthPoints, want.barcodeClearZone.widthPoints)
+  assert.equal(barcode.pdf.heightPoints, want.barcodeClearZone.heightPoints)
+  assert.equal(barcode.trim.xInches, 8 - want.barcodeClearZone.widthPoints / 72)
+  assert.equal(barcode.trim.yInches, 5 - want.barcodeClearZone.heightPoints / 72)
+  assert.equal(barcode.canvas.xInches, barcode.trim.xInches + 0.25)
+  assert.equal(barcode.canvas.yInches, barcode.trim.yInches + 0.25)
 })
 
 test("PDF page boxes match the 8.5 by 5.5 inch canvas and name the RGB limit", () => {

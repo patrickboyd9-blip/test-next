@@ -4,7 +4,7 @@ import { randomUUID } from "crypto"
 import { after } from "next/server"
 
 import { CampaignAccessError, requireOwnedCampaign } from "@/lib/auth/campaign-access"
-import { getSession } from "@/lib/auth/session"
+import { getSession, previewDemoAllowed } from "@/lib/auth/session"
 
 import {
   getActiveSpec,
@@ -70,6 +70,11 @@ function requireCreativeCanvas(
 export async function createDraftCampaign(): Promise<Campaign> {
   const session = await getSession()
   if (!session) throw new CampaignAccessError(401, "Sign in required.")
+  if (previewDemoAllowed()) {
+    const demo = await repository.getCampaign("preview-demo")
+    if (!demo) throw new Error("The preview campaign could not be opened.")
+    return forCustomer(demo)
+  }
   return forCustomer(await repository.createCampaign(session.userId))
 }
 

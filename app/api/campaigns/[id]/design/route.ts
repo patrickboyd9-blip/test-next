@@ -41,15 +41,20 @@ export async function POST(
   }
 
   const bytes = Buffer.from(await file.arrayBuffer())
-  const design = await saveDesignFace({
-    campaign,
-    face,
-    fileName: file.name,
-    bytes,
-    declaredType: file.type,
-  })
-  const saved = await repository.saveUploadedDesign(id, design)
-  return json({ campaign: saved })
+  try {
+    const design = await saveDesignFace({
+      campaign,
+      face,
+      fileName: file.name,
+      bytes,
+      declaredType: file.type,
+    })
+    const saved = await repository.saveUploadedDesign(id, design)
+    return json({ campaign: saved })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "The file could not be prepared."
+    return json({ error: message || "The file could not be prepared. Try a PNG, JPG, or PDF again." }, 400)
+  }
 }
 
 function json(body: unknown, status = 200): Response {

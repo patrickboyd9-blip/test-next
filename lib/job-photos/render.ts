@@ -10,6 +10,7 @@ import {
 } from "pdf-lib"
 
 import type { JobCreative, JobPhotoRecord } from "@/lib/campaign-creator/types"
+import { paintBarcodeClearZone } from "@/lib/print-spec/barcode-clear-zone"
 import { addressSideContentRect, rectsOverlap } from "@/lib/print-spec/address-side-content"
 import { buildPostcard5x8PrintSpec } from "@/lib/print-spec/postcard-5x8-print-spec"
 
@@ -85,6 +86,7 @@ export async function renderJobProof(
       maxWidth: content.widthInches * 72,
     })
   }
+  paintBarcodeClearZone(backPage, buildPostcard5x8PrintSpec())
   const bytes = await doc.save()
   return { bytes, front, back }
 }

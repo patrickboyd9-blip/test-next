@@ -2,16 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import {
-  BarChart3,
-  LayoutDashboard,
-  LayoutTemplate,
-  Megaphone,
-  PenLine,
-  Settings,
-  Sparkles,
-  Users,
-} from "lucide-react"
+import { LayoutDashboard, LayoutTemplate, Megaphone, PenLine, Sparkles } from "lucide-react"
 
 import {
   Sidebar,
@@ -21,7 +12,6 @@ import {
   SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
@@ -31,18 +21,20 @@ interface NavItem {
   label: string
   href: string
   icon: React.ComponentType<{ className?: string }>
-  soon?: boolean
 }
 
+const itemClass =
+  "min-h-11 text-[#A9B4C2] hover:text-[#f7fbff] data-active:text-[#f7fbff] [&_svg]:text-current"
+
 const NAV_ITEMS: NavItem[] = [
-  { label: "Command Center", href: "/app", icon: LayoutDashboard },
-  { label: "Campaigns", href: "/app/campaigns/new", icon: Megaphone },
-  { label: "Audience", href: "/app/audience", icon: Users, soon: true },
+  { label: "Home", href: "/app", icon: LayoutDashboard },
+  { label: "New mailer", href: "/app/mail", icon: Megaphone },
+]
+
+const ADVANCED_ITEMS: NavItem[] = [
+  { label: "Full editor", href: "/app/campaigns/new", icon: Sparkles },
   { label: "Templates", href: "/app/templates", icon: LayoutTemplate },
   { label: "Design requests", href: "/app/design-requests", icon: PenLine },
-  { label: "AI Creator", href: "/app/ai-creator", icon: Sparkles, soon: true },
-  { label: "Insights", href: "/app/insights", icon: BarChart3, soon: true },
-  { label: "Settings", href: "/app/settings", icon: Settings, soon: true },
 ]
 
 export function AppSidebar({
@@ -53,13 +45,27 @@ export function AppSidebar({
   const pathname = usePathname()
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar
+      collapsible="icon"
+      className="border-[#1c3d52] bg-[#070b14]"
+      style={
+        {
+          "--sidebar": "#070b14",
+          "--sidebar-foreground": "#e7f2fb",
+          "--sidebar-accent": "#102433",
+          "--sidebar-accent-foreground": "#e7f2fb",
+          "--sidebar-border": "#1c3d52",
+          "--sidebar-primary": "#5ce1ff",
+          "--sidebar-primary-foreground": "#041018",
+        } as React.CSSProperties
+      }
+    >
       <SidebarHeader>
-        <div className="flex h-8 items-center gap-2 px-2">
-          <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground">
+        <div className="flex h-10 items-center gap-2 px-2">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-[#5ce1ff] text-xs font-bold text-[#041018]">
             M
           </span>
-          <span className="truncate text-sm font-semibold group-data-[collapsible=icon]:hidden">
+          <span className="truncate font-mono text-[11px] font-medium uppercase tracking-[0.18em] group-data-[collapsible=icon]:hidden">
             Modern Mail
           </span>
         </div>
@@ -73,28 +79,35 @@ export function AppSidebar({
                 const isActive = pathname === item.href
                 const Icon = item.icon
 
-                if (item.soon) {
-                  return (
-                    <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton
-                        disabled
-                        tooltip={`${item.label} — coming soon`}
-                      >
-                        <Icon />
-                        <span>{item.label}</span>
-                      </SidebarMenuButton>
-                      <SidebarMenuBadge>Soon</SidebarMenuBadge>
-                    </SidebarMenuItem>
-                  )
-                }
-
                 return (
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton
                       isActive={isActive}
+                      className={itemClass}
                       tooltip={item.label}
                       render={<Link href={item.href} />}
                     >
+                      <Icon />
+                      <span>{item.label}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <p className="px-2 pb-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[#7ee7ff] group-data-[collapsible=icon]:hidden">
+              Advanced
+            </p>
+            <SidebarMenu>
+              {ADVANCED_ITEMS.map((item) => {
+                const isActive = pathname === item.href
+                const Icon = item.icon
+                return (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton isActive={isActive} className={itemClass} tooltip={item.label} render={<Link href={item.href} />}>
                       <Icon />
                       <span>{item.label}</span>
                     </SidebarMenuButton>

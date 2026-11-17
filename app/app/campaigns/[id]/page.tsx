@@ -61,6 +61,9 @@ export default async function CampaignPage({
         <Link href={`/app/campaigns/${id}/job-photos`} className="text-sm text-muted-foreground underline">
           Job photos
         </Link>
+        <Link href={`/app/campaigns/${id}/follow-up`} className="text-sm text-muted-foreground underline">
+          Follow-up
+        </Link>
         <Link href={`/app/campaigns/${id}/history`} className="text-sm text-muted-foreground underline">
           History
         </Link>

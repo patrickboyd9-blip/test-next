@@ -183,14 +183,17 @@ export function composeAddressSideFace(input: AddressSideLayoutInput): PostcardF
     { id: "paper", role: "paper", rect: { x: 0, y: 0, w: trim.w, h: trim.h }, fill: input.palette.paper },
   ]
   if (fade) {
-    // Bleeds off the left, top, and bottom edges. Stops at the content edge,
-    // so the address, postage, and barcode zone keep plain paper.
+    // Bleeds off the left and top. Stops at the content edge and at the
+    // barcode clear zone, so that zone stays plain white.
     // A fixed sky crop shoves the top of the photo off the card. That is how
     // backs were cutting off heads. Only a scene with no face may drop sky.
     const person = input.photoSubject === "person"
     const sky = person ? 0 : FADE_SKY_CROP
     const right = round2(content.x + content.w)
-    const photoRect = { x: 0, y: -sky, w: right, h: round2(trim.h + sky) }
+    // The photograph and its veil stop at the barcode clear zone. They do not
+    // run to the trim, or the zone would be photo instead of plain white.
+    const zoneTop = geometry.keepOuts.find((item) => item.id === "barcode_strip")?.trim.yInches ?? trim.h
+    const photoRect = { x: 0, y: -sky, w: right, h: roundDown(zoneTop + sky) }
     const focal = person ? focalKeepingHead(photoRect, MAILER_PHOTO_ASPECT) : { x: 0.5, y: 0.5 }
     photos.unshift({
       id: SOFT_FADE_BACK_PHOTO_ID,
@@ -210,7 +213,10 @@ export function composeAddressSideFace(input: AddressSideLayoutInput): PostcardF
     // Veil is a neutral dark, not the saturated trade scrim. Teal or green
     // blended over skin is the yellow cast on the back. The headline band
     // below keeps the real trade field.
-    shapes.push({ id: "back-fade", role: "solid-scrim", rect: { x: 0, y: fadeTop, w: right, h: round2(trim.h - fadeTop) }, fill: photoVeilHex(input.palette.scrim) })
+    const scrimH = roundDown(zoneTop - fadeTop)
+    if (scrimH > 0.05) {
+      shapes.push({ id: "back-fade", role: "solid-scrim", rect: { x: 0, y: fadeTop, w: right, h: scrimH }, fill: photoVeilHex(input.palette.scrim) })
+    }
     // The free strip above the mailing panel carries the front headline on the trade field,
     // so the back is not a big empty paper block. It never reaches the panel or the barcode strip.
     const panel = geometry.keepOuts.find((item) => item.id === "mailing_panel")
@@ -288,4 +294,9 @@ function canvasToTrim(rect: InchesRect, bleed: number): InchRect {
 
 function round2(value: number): number {
   return Math.round(value * 100) / 100
+}
+
+/** Stay on the safe side of a keep-out. Rounding up would enter the zone. */
+function roundDown(value: number): number {
+  return Math.floor(value * 100) / 100
 }

@@ -1,3 +1,5 @@
+import { previewDemoAllowed } from "@/lib/auth/session"
+
 import type { GeneratedAsset, ImageGenerationAdapter, ImageGenerationOptions } from "./image-generation"
 import type { ImageBrief } from "./image-brief"
 import { createOpenAIImageGenerationAdapter } from "./openai-image-generation"
@@ -9,6 +11,13 @@ import { createImagenImageGenerationAdapter } from "./replicate-image-generation
  * token is missing or a generation fails.
  */
 export function createDefaultImageGenerationAdapter(env: NodeJS.ProcessEnv = process.env): ImageGenerationAdapter {
+  if (previewDemoAllowed(env)) {
+    return {
+      async generate(): Promise<GeneratedAsset> {
+        throw new Error("Preview demo does not generate photos.")
+      },
+    }
+  }
   if (env.IMAGE_PROVIDER?.trim().toLowerCase() === "openai" || !env.REPLICATE_API_TOKEN?.trim()) return createOpenAIImageGenerationAdapter()
   const primary = createImagenImageGenerationAdapter(env)
   return {

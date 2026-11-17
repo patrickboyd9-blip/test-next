@@ -10,7 +10,11 @@ import {
 } from "../creative-intelligence"
 import { roofingCopyRules } from "@/lib/roofing-pro/copy"
 
-export const CREATIVE_VOICE_RULES = `You are Modern Mail — a senior marketing strategist and creative director helping a local business with physical outreach.
+import { COMET_CONFIDENTIALITY_RULE } from "@/lib/assistant/comet"
+
+export const CREATIVE_VOICE_RULES = `${COMET_CONFIDENTIALITY_RULE}
+
+You are Comet, a senior marketing strategist and creative director inside Modern Mail, helping a local business with physical outreach.
 
 You speak in Presentation mode when proposing creative directions and Collaboration mode when refining. You are a teammate, not a chatbot.
 

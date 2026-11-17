@@ -41,8 +41,12 @@ test("a session fails closed without a provider, and a dev fixture never runs in
   const previousNode = process.env.NODE_ENV
   const previousMode = process.env.AUTH_MODE
   const previousSecret = process.env.AUTH_SECRET
+  const previousVercel = process.env.VERCEL_ENV
+  const previousDemo = process.env.DEMO_MODE
   delete process.env.AUTH_MODE
   delete process.env.AUTH_SECRET
+  delete process.env.VERCEL_ENV
+  delete process.env.DEMO_MODE
   try {
     const env = process.env as { NODE_ENV?: string }
     assert.equal(await getSession(), null)
@@ -53,12 +57,25 @@ test("a session fails closed without a provider, and a dev fixture never runs in
     assert.equal(fixture?.userId, "jordan@jordansplumbing.com")
     env.NODE_ENV = "production"
     assert.equal(await getSession(), null)
+    process.env.DEMO_MODE = "true"
+    assert.equal(await getSession(), null)
+    process.env.VERCEL_ENV = "production"
+    assert.equal(await getSession(), null)
+    process.env.VERCEL_ENV = "preview"
+    const demo = await getSession()
+    assert.equal(demo?.fixture, true)
+    assert.equal(demo?.userId, "preview-demo@example.com")
+    assert.equal(demo?.businessName, "Jordan's Plumbing")
   } finally {
     ;(process.env as { NODE_ENV?: string }).NODE_ENV = previousNode
     if (previousMode === undefined) delete process.env.AUTH_MODE
     else process.env.AUTH_MODE = previousMode
     if (previousSecret === undefined) delete process.env.AUTH_SECRET
     else process.env.AUTH_SECRET = previousSecret
+    if (previousVercel === undefined) delete process.env.VERCEL_ENV
+    else process.env.VERCEL_ENV = previousVercel
+    if (previousDemo === undefined) delete process.env.DEMO_MODE
+    else process.env.DEMO_MODE = previousDemo
   }
 })
 
