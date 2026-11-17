@@ -22,8 +22,9 @@ test("the gallery plans one photo for each of the 24 templates", () => {
     assert.match(job.prompt, /Do not crop a face/)
     assert.match(job.prompt, /No logos and no lettering/)
     assert.doesNotMatch(job.prompt, /Sample\./)
+    assert.equal(galleryPhotoSrc(job.templateId), job.publicPath)
   }
-  assert.equal(galleryPhotoSrc(jobs[0]?.templateId ?? "missing"), null)
+  assert.equal(galleryPhotoSrc("not-a-template"), null)
 })
 
 test("the spend cap stops at $6.50 and will not start a photo past $7", () => {
