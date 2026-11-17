@@ -1,6 +1,5 @@
 import { listMailTemplates } from "./query"
-import type { MailTemplate } from "./query"
-import type { TemplateIndustry } from "./types"
+import type { MailTemplate, TemplateIndustry } from "./types"
 
 /** The eight industries in this gallery. Add a slug here when a later set is ready. */
 export const GALLERY_V1_INDUSTRIES = [
