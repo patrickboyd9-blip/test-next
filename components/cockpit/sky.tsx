@@ -22,8 +22,17 @@ function starLayer(points: number[][], size: number, alpha: number) {
     .join(",")
 }
 
-export function SpaceSky({ hero = false, arrival = false }: { hero?: boolean; arrival?: boolean }) {
+export function SpaceSky({
+  hero = false,
+  arrival = false,
+  postbox,
+}: {
+  hero?: boolean
+  arrival?: boolean
+  postbox?: "home" | "start" | "arrive"
+}) {
   const tone = arrival ? "mm-sky mm-sky-hero mm-sky-arrival" : hero ? "mm-sky mm-sky-hero" : "mm-sky"
+  const box = postbox ?? (arrival ? "arrive" : hero ? "home" : null)
   return (
     <div aria-hidden className={tone}>
       <div className="mm-sky-wash" />
@@ -33,6 +42,40 @@ export function SpaceSky({ hero = false, arrival = false }: { hero?: boolean; ar
       <div className="mm-limb" />
       {hero || arrival ? <div className={arrival ? "mm-comet mm-comet-arrive" : "mm-comet"} /> : null}
       {arrival ? <div className="mm-flash" /> : null}
+      {box ? <Postbox scale={box} /> : null}
+    </div>
+  )
+}
+
+function Postbox({ scale }: { scale: "home" | "start" | "arrive" }) {
+  const tone = scale === "arrive" ? "mm-postbox mm-postbox-arrive" : scale === "start" ? "mm-postbox mm-postbox-start" : "mm-postbox"
+  return (
+    <div className={tone} aria-hidden>
+      <svg viewBox="0 0 72 128" className="h-full w-full overflow-visible">
+        <defs>
+          <filter id="mm-card-glow" x="-90%" y="-90%" width="280%" height="280%">
+            <feGaussianBlur stdDeviation="1.6" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          <filter id="mm-post-rim" x="-35%" y="-35%" width="170%" height="170%">
+            <feDropShadow dx="-0.6" dy="-1.2" stdDeviation="1.1" floodColor="#8ef0ff" floodOpacity="0.65" />
+          </filter>
+        </defs>
+        <g className="mm-post-card" filter="url(#mm-card-glow)">
+          <rect x="27" y="48" width="16" height="10" rx="1.2" fill="#e7fbff" />
+        </g>
+        <g filter="url(#mm-post-rim)">
+          <path
+            fill="#071018"
+            fillRule="evenodd"
+            d="M24 108 V74 C24 48 48 48 48 74 V108 Z M29 78 H43 V81 H29 Z M33 108 H39 V124 H33 Z"
+          />
+        </g>
+        <ellipse className="mm-post-pulse" cx="36" cy="84" rx="11" ry="3.5" fill="#7ee7ff" />
+      </svg>
     </div>
   )
 }

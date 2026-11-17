@@ -210,11 +210,92 @@
   .mm-caption, .mm-intro { opacity: 1; transform: none; }
 }
 
+.mm-postbox {
+  position: absolute;
+  right: 6%;
+  top: calc(46vh - 58px);
+  width: 64px;
+  height: 112px;
+  pointer-events: none;
+}
+
+.mm-postbox-start {
+  width: 44px;
+  height: 76px;
+  right: 5%;
+  top: calc(46vh - 18px);
+}
+
+.mm-postbox-arrive {
+  width: 92px;
+  height: 160px;
+  right: 11%;
+  top: 5.6rem;
+}
+
+.mm-post-card {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  animation: mm-slip 12s ease-in-out infinite;
+}
+
+.mm-post-pulse {
+  opacity: 0;
+  animation: mm-box-pulse 12s ease-out infinite;
+}
+
+.mm-postbox-arrive .mm-post-card {
+  animation: mm-slip-once 3.2s ease-in-out 0.4s both;
+}
+
+.mm-postbox-arrive .mm-post-pulse {
+  animation: mm-box-pulse-once 3.2s ease-out 0.4s both;
+}
+
+@keyframes mm-slip {
+  0%, 18% { opacity: 0; transform: translate(-36px, -28px) rotate(-12deg); }
+  26% { opacity: 1; }
+  40% { opacity: 1; transform: translate(0, -4px) rotate(-1deg); }
+  48% { opacity: 0; transform: translate(0, 6px) rotate(0deg); }
+  100% { opacity: 0; transform: translate(0, 6px) rotate(0deg); }
+}
+
+@keyframes mm-box-pulse {
+  0%, 40% { opacity: 0; }
+  50% { opacity: 0.55; }
+  62%, 100% { opacity: 0; }
+}
+
+@keyframes mm-slip-once {
+  0% { opacity: 0; transform: translate(22px, -70px) rotate(-16deg); }
+  35% { opacity: 1; }
+  78% { opacity: 1; transform: translate(0, -4px) rotate(0deg); }
+  100% { opacity: 1; transform: translate(0, 5px) rotate(0deg); }
+}
+
+@keyframes mm-box-pulse-once {
+  0%, 60% { opacity: 0; }
+  78% { opacity: 0.7; }
+  100% { opacity: 0.28; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mm-post-card,
+  .mm-post-pulse {
+    animation: none !important;
+  }
+  .mm-post-card { opacity: 1; transform: translate(0, 4px); }
+  .mm-post-pulse { opacity: 0.28; }
+}
+
 @media (max-width: 640px) {
   .mm-sky-hero .mm-limb { top: 64vh; }
   .mm-comet { top: 54vh; width: 62vw; }
   .mm-sky-arrival .mm-limb { top: 16rem; }
   .mm-comet-arrive, .mm-sky-arrival .mm-flash { top: 14.5rem; }
+  .mm-postbox { z-index: 2; width: 34px; height: 60px; right: 0; top: calc(64vh - 8px); }
+  .mm-postbox-arrive { top: 8.5rem; right: 6%; width: 72px; height: 126px; }
 }
 
 :root {

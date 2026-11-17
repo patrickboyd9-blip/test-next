@@ -167,7 +167,7 @@ export function ComposeMailer({
   }
 
   return (
-    <CockpitFrame hero={path === null && step === "what"}>
+    <CockpitFrame hero={path === null && step === "what"} postbox={path === null && step === "what" ? "start" : undefined}>
       <div className="mx-auto flex max-w-3xl flex-col gap-5 px-4 py-6 sm:px-6 sm:py-8">
         <div className="flex items-center justify-between gap-3">
           <Link href="/app" className="text-sm text-[#8ecfff]">

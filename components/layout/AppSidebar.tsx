@@ -23,6 +23,9 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>
 }
 
+const itemClass =
+  "min-h-11 text-[#A9B4C2] hover:text-[#f7fbff] data-active:text-[#f7fbff] [&_svg]:text-current"
+
 const NAV_ITEMS: NavItem[] = [
   { label: "Home", href: "/app", icon: LayoutDashboard },
   { label: "New mailer", href: "/app/mail", icon: Megaphone },
@@ -80,7 +83,7 @@ export function AppSidebar({
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton
                       isActive={isActive}
-                      className="min-h-11"
+                      className={itemClass}
                       tooltip={item.label}
                       render={<Link href={item.href} />}
                     >
@@ -104,7 +107,7 @@ export function AppSidebar({
                 const Icon = item.icon
                 return (
                   <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton isActive={isActive} className="min-h-11" tooltip={item.label} render={<Link href={item.href} />}>
+                    <SidebarMenuButton isActive={isActive} className={itemClass} tooltip={item.label} render={<Link href={item.href} />}>
                       <Icon />
                       <span>{item.label}</span>
                     </SidebarMenuButton>
