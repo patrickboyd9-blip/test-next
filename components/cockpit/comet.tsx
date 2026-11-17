@@ -159,18 +159,18 @@ function paintComet(
 
   ctx.save()
   ctx.globalCompositeOperation = "screen"
-  ctx.filter = `blur(${7 * scale}px)`
-  ribbon(ctx, ion, ionPerp, (s) => (1.2 + s * ionLen * 0.045) * scale, [
-    [0, `rgba(150, 190, 255, ${0.22 * fade})`],
-    [0.35, `rgba(70, 120, 230, ${0.1 * fade})`],
-    [1, "rgba(40, 80, 200, 0)"],
-  ])
   ctx.filter = `blur(${9 * scale}px)`
   ribbon(ctx, dust, dustPerp, (s) => (2 + s * dustLen * 0.17) * scale, [
     [0, `rgba(255, 255, 255, ${0.95 * fade})`],
     [0.35, `rgba(236, 250, 255, ${0.72 * fade})`],
     [0.75, `rgba(210, 238, 255, ${0.38 * fade})`],
     [1, "rgba(190, 225, 255, 0)"],
+  ])
+  ctx.filter = `blur(${4.5 * scale}px)`
+  ribbon(ctx, ion, ionPerp, (s) => (1.4 + s * ionLen * 0.04) * scale, [
+    [0, `rgba(110, 155, 255, ${0.48 * fade})`],
+    [0.45, `rgba(45, 95, 220, ${0.24 * fade})`],
+    [1, "rgba(25, 60, 180, 0)"],
   ])
   ctx.filter = "none"
 
@@ -225,12 +225,14 @@ function CometRealistic({ arrival }: { arrival: boolean }) {
     function draw(travel: number, strength: number) {
       const rect = fit()
       ctx!.clearRect(0, 0, rect.width, rect.height)
-      paintComet(ctx!, rect.width, rect.height, window.innerHeight, travel, strength, arrival, seed)
       canvas!.dataset.pass = travel.toFixed(3)
+      // The phone headline fills the width, so the pass stays off that screen.
+      if (!arrival && window.innerWidth < 640) return
+      paintComet(ctx!, rect.width, rect.height, window.innerHeight, travel, strength, arrival, seed)
     }
 
     if (reduced.matches) {
-      draw(0.62, 0.28)
+      if (arrival || window.innerWidth >= 640) draw(0.62, 0.28)
       return () => {
         stopped = true
       }
