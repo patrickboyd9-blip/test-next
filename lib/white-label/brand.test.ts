@@ -1,7 +1,18 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
 
+import { readFileSync } from "node:fs"
+
 import { applyBrand, defaultWhiteLabel, parseWhiteLabel, POWERED_BY, STOCK_APP_NAME } from "./brand"
+import { DOMAIN_COST_LINES } from "./domain-cost"
+
+test("the custom-domain note is a price list and does not connect a domain", () => {
+  assert.equal(DOMAIN_COST_LINES.some((line) => line.includes("not connected")), true)
+  assert.equal(DOMAIN_COST_LINES.some((line) => line.includes("$20 a month")), true)
+  const form = readFileSync(new URL("../../app/app/settings/page.tsx", import.meta.url), "utf8")
+  assert.match(form, /domain-cost/)
+  assert.doesNotMatch(form, /coming soon/i)
+})
 
 test("white label is on by default and still says Modern Mail until the account changes it", () => {
   const brand = applyBrand(null)

@@ -4,6 +4,7 @@ import { WhiteLabelForm } from "@/components/settings/WhiteLabelForm"
 import { CockpitFrame, Eyebrow, Panel } from "@/components/cockpit/ui"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { getSession } from "@/lib/auth/session"
+import { DOMAIN_COST_AS_OF, DOMAIN_COST_LINES } from "@/lib/white-label/domain-cost"
 import { readWhiteLabel } from "@/lib/white-label/store"
 
 export const dynamic = "force-dynamic"
@@ -49,6 +50,15 @@ export default async function SettingsPage() {
             Branding only. The switch is on unless you turn it off. A custom domain is not connected.
           </p>
           {session && brand ? <WhiteLabelForm initial={brand} /> : <p className="text-sm">Sign in to save branding.</p>}
+          <div className="mt-4 rounded-xl border border-[#245068] px-3 py-3 text-sm text-[#b7c9d8]" data-slot="domain-cost">
+            <p className="font-medium text-[#f7fbff]">Custom domain cost</p>
+            <p className="mt-1 text-xs text-[#8aa0b4]">Checked {DOMAIN_COST_AS_OF}. Not connected.</p>
+            <ul className="mt-2 space-y-2">
+              {DOMAIN_COST_LINES.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+          </div>
         </Panel>
         <Panel className="p-5">
           <h2 className="font-medium">Team</h2>
