@@ -12,7 +12,7 @@ export function HomeBoard({ shop, sample = true }: { shop: string; sample?: bool
   const comet = cometHomeNote(SAMPLE_MAILERS, sample)
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-8 sm:px-6 sm:py-12">
-        <div className="relative space-y-5">
+        <div className="relative space-y-5" data-flight-copy>
           <div className="relative z-10">
             <Eyebrow>How&apos;s my mail doing?</Eyebrow>
           </div>

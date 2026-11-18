@@ -6,6 +6,7 @@
 import Image from "next/image"
 
 import { SkyComet } from "./comet"
+import { MailFlight } from "./MailFlight"
 
 const FAR = [
   [4, 8], [9, 18], [15, 6], [21, 22], [28, 11], [34, 4], [40, 16], [47, 9],
@@ -52,6 +53,7 @@ export function SpaceSky({
       {hero || arrival ? <SkyComet arrival={arrival} /> : null}
       {arrival ? <div className="mm-flash" /> : null}
       {box ? <Postbox scale={box} /> : null}
+      {box === "home" ? <MailFlight /> : null}
     </div>
   )
 }
