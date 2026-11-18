@@ -6,7 +6,12 @@ const nextConfig: NextConfig = {
   // pdf-lib's font kit is server-only and does not bundle cleanly.
   serverExternalPackages: ["@anthropic-ai/sdk", "pdf-lib", "@pdf-lib/fontkit"],
   outputFileTracingIncludes: {
-    "/app/campaigns/[id]": ["./lib/print-spec/fonts/**/*", "./lib/design-intelligence/seed/**/*"],
+    "/app/campaigns/[id]": [
+      "./lib/print-spec/fonts/**/*",
+      "./lib/design-intelligence/seed/**/*",
+      "./lib/design-intelligence/ad-psych/**/*.md",
+    ],
+    "/app/campaigns/[id]/guidance": ["./lib/design-intelligence/ad-psych/**/*.md"],
     "/api/cron/design-library": ["./lib/design-intelligence/seed/**/*"],
     "/api/design-library/sync": ["./lib/design-intelligence/seed/**/*"],
     "/api/design-benchmark": ["./lib/design-intelligence/seed/**/*"],
