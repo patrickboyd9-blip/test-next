@@ -15,7 +15,18 @@ export async function askCometAction(
   proofHref = "",
 ): Promise<HelpAnswer> {
   const session = await getSession()
-  await beginMailAction(session?.userId ?? "anonymous", "ai")
+  if (!session) {
+    return {
+      reply: "Sign in required.",
+      sample: false,
+      acted: false,
+      mailed: false,
+      charged: false,
+      links: [],
+      offerPerson: false,
+    }
+  }
+  await beginMailAction(session.userId, "ai")
   const apiKey = process.env.ANTHROPIC_API_KEY?.trim() ?? ""
   const engine = apiKey ? await liveHelpEngine(apiKey) : null
   return answerHelp(

@@ -1,3 +1,5 @@
+import { denyUnlessSignedIn } from "@/lib/auth/require-session"
+import { limitPublic } from "@/lib/ops/public-rate"
 import { designTemplate, isDesignTemplateSize } from "@/lib/print-spec/design-templates"
 import { renderDesignOverlayPng } from "@/lib/print-spec/render-design-template-png"
 import { renderDesignTemplatePdf } from "@/lib/print-spec/render-design-template-pdf"
@@ -20,7 +22,11 @@ function cached(key: string, build: () => Buffer): Buffer {
  * PDF is two pages (front, then back) at the full bleed size.
  * PNG is a transparent overlay of one face. Geometry comes from the print spec.
  */
-export function GET(request: Request): Response {
+export async function GET(request: Request): Promise<Response> {
+  const denied = await denyUnlessSignedIn()
+  if (denied) return denied
+  const limited = await limitPublic(request, "templates", 40)
+  if (limited) return limited
   const url = new URL(request.url)
   const sizeParam = url.searchParams.get("size")
   if (!isDesignTemplateSize(sizeParam)) {

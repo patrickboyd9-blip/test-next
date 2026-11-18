@@ -100,27 +100,77 @@
 .mm-limb {
   position: absolute;
   left: 50%;
-  width: 180%;
-  height: 64vh;
-  bottom: -46vh;
+  width: 240%;
+  height: 78vh;
+  bottom: -58vh;
   transform: translateX(-50%);
   border-radius: 50%;
-  background: radial-gradient(ellipse at 50% 0%, rgba(8, 22, 32, 0.2) 0%, rgba(4, 10, 16, 0.85) 28%, #03060c 62%);
-  box-shadow:
-    inset 0 1px 0 rgba(210, 248, 255, 0.28),
-    0 -22px 70px rgba(56, 170, 190, 0.14);
+  overflow: visible;
+  background: transparent;
+}
+
+.mm-limb-ground,
+.mm-limb-texture,
+.mm-limb-air,
+.mm-limb-sun {
+  position: absolute;
+  pointer-events: none;
+}
+
+.mm-limb-ground {
+  inset: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse 48% 22% at 22% 2%, rgba(86, 132, 158, 0.28), transparent 62%),
+    radial-gradient(ellipse 36% 18% at 68% 8%, rgba(12, 28, 42, 0.55), transparent 70%),
+    linear-gradient(180deg, #16384a 0%, #0c2230 7%, #07141e 16%, #040b12 34%, #02060c 62%);
+}
+
+.mm-limb-texture {
+  inset: 0;
+  border-radius: 50%;
+  opacity: 0.28;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-size: 180px 180px;
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 42%);
+  mask-image: linear-gradient(180deg, #000 0%, transparent 42%);
+}
+
+.mm-limb-air {
+  left: -6%;
+  right: -6%;
+  top: -6px;
+  height: 70px;
+  background: linear-gradient(
+    180deg,
+    rgba(186, 242, 255, 0) 0%,
+    rgba(186, 242, 255, 0.16) 34%,
+    rgba(232, 252, 255, 0.92) 48%,
+    rgba(86, 176, 230, 0.55) 58%,
+    rgba(18, 70, 130, 0.22) 76%,
+    transparent 100%
+  );
+  filter: blur(3.5px);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 14%, #000 72%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 14%, #000 72%, transparent 100%);
+}
+
+.mm-limb-sun {
+  left: 6%;
+  top: -56px;
+  width: 32%;
+  height: 150px;
+  background: radial-gradient(ellipse at 42% 72%, rgba(255, 236, 214, 0.5), rgba(150, 214, 255, 0.22) 38%, transparent 72%);
+  filter: blur(12px);
+  mix-blend-mode: screen;
 }
 
 .mm-sky-hero .mm-limb {
-  top: 46vh;
+  top: 44vh;
   bottom: auto;
-  width: 190%;
-  height: 92vh;
-  background: linear-gradient(180deg, #123242 0%, #0a1c28 16%, #071018 34%, #03060c 58%);
-  box-shadow:
-    inset 0 2px 0 rgba(232, 253, 255, 0.8),
-    inset 0 16px 36px rgba(80, 200, 220, 0.28),
-    0 -26px 80px rgba(72, 196, 210, 0.32);
+  width: 260%;
+  height: 110vh;
 }
 
 .mm-sky-arrival .mm-limb {
@@ -128,6 +178,7 @@
   height: 80vh;
 }
 
+/* Classic comet streak. Kept so COMET_STYLE=classic can restore it unchanged. */
 .mm-comet {
   position: absolute;
   left: -8%;
@@ -148,6 +199,14 @@
   top: 12.6rem;
   width: min(54vw, 520px);
   animation: mm-comet-arrive 2.6s cubic-bezier(0.16, 0.7, 0.2, 1) both;
+}
+
+.mm-comet-realistic {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
 .mm-flash {
@@ -212,98 +271,378 @@
 
 .mm-postbox {
   position: absolute;
-  right: 3.5%;
-  top: calc(46vh - 118px);
-  width: 132px;
-  height: 188px;
+  right: 5.5rem;
+  top: calc(44vh - 157px);
+  width: 188px;
+  height: 181px;
   pointer-events: none;
+  isolation: isolate;
+  animation: mm-box-drift 16s ease-in-out infinite alternate;
 }
 
 .mm-postbox-start {
-  width: 78px;
-  height: 112px;
-  right: 4%;
-  top: calc(46vh - 72px);
+  width: 210px;
+  height: 196px;
+  right: 3%;
+  top: calc(44vh - 150px);
 }
 
 .mm-postbox-arrive {
-  width: 150px;
-  height: 214px;
-  right: 8%;
-  top: 6.5rem;
+  width: 320px;
+  height: 300px;
+  right: 7%;
+  top: calc(14rem - 248px);
 }
 
-.mm-post-haze { opacity: 0.22; }
+.mm-post-glow {
+  position: absolute;
+  left: 8%;
+  right: 10%;
+  top: 18%;
+  height: 48%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 40% 50%, rgba(90, 196, 255, 0.42), rgba(40, 120, 180, 0.12) 46%, transparent 72%);
+  filter: blur(16px);
+  animation: mm-mail-glow 8s ease-in-out infinite;
+}
 
-.mm-post-card {
-  transform-box: fill-box;
-  transform-origin: 68px 102px;
+.mm-post-photo {
+  z-index: 1;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 10px 16px rgba(4, 16, 28, 0.35)) drop-shadow(-6px 0 14px rgba(70, 180, 255, 0.16));
+}
+
+.mm-terrain {
+  position: absolute;
+  z-index: 2;
+  width: 176%;
+  height: 102%;
+  left: -28%;
+  bottom: -42%;
+  pointer-events: none;
+  -webkit-mask-image:
+    linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.2) 7%, #000 26%, #000 74%, rgba(0, 0, 0, 0.2) 93%, transparent 100%),
+    linear-gradient(180deg, #000 0%, #000 36%, rgba(0, 0, 0, 0.62) 58%, rgba(0, 0, 0, 0.22) 80%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.2) 7%, #000 26%, #000 74%, rgba(0, 0, 0, 0.2) 93%, transparent 100%),
+    linear-gradient(180deg, #000 0%, #000 36%, rgba(0, 0, 0, 0.62) 58%, rgba(0, 0, 0, 0.22) 80%, transparent 100%);
+  mask-composite: intersect;
+}
+
+.mm-terrain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 0%, transparent 32%, rgba(5, 12, 20, 0.2) 50%, rgba(3, 8, 14, 0.72) 74%, rgba(2, 6, 11, 0.94) 100%);
+}
+
+.mm-terrain-photo {
+  object-fit: fill;
+  filter: saturate(0.72) brightness(0.86);
+}
+
+.mm-mailer {
+  position: absolute;
+  z-index: 3;
+  left: 16%;
+  top: 41%;
+  width: 18%;
+  height: 7%;
+  border-radius: 1px;
+  background: linear-gradient(180deg, #f7fbff 0%, #d7e4ee 100%);
+  box-shadow: 0 0 10px rgba(190, 230, 255, 0.35);
   opacity: 0;
-  animation: mm-slip 20s ease-in-out infinite;
+  animation: mm-slip 18s cubic-bezier(0.22, 0.61, 0.36, 1) infinite;
 }
 
-.mm-post-trail {
-  stroke-dasharray: 70;
-  stroke-dashoffset: 70;
-  animation: mm-trail 20s ease-in-out infinite;
+.mm-postbox-arrive .mm-mailer {
+  animation: mm-slip-once 4.6s cubic-bezier(0.22, 0.61, 0.36, 1) 0.45s both;
 }
 
-@keyframes mm-trail {
-  0%, 58% { stroke-dashoffset: 70; opacity: 0; }
-  68% { stroke-dashoffset: 12; opacity: 0.75; }
-  78% { stroke-dashoffset: 0; opacity: 0.3; }
-  86%, 100% { opacity: 0; }
+@keyframes mm-box-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(0, -5px, 0); }
 }
 
-.mm-post-pulse {
-  opacity: 0;
-  animation: mm-box-pulse 20s ease-out infinite;
-}
-
-.mm-postbox-arrive .mm-post-card {
-  animation: mm-slip-once 4.2s ease-in-out 0.6s both;
-}
-
-.mm-postbox-arrive .mm-post-pulse {
-  animation: mm-box-pulse-once 4.2s ease-out 0.6s both;
+@keyframes mm-mail-glow {
+  0%, 100% { opacity: 0.42; }
+  50% { opacity: 0.72; }
 }
 
 @keyframes mm-slip {
-  0%, 58% { opacity: 0; transform: translate(-54px, -36px) rotate(-8deg); }
-  66% { opacity: 1; }
-  76% { opacity: 1; transform: translate(0, 2px) rotate(0deg); }
-  84% { opacity: 0; transform: translate(2px, 8px) rotate(0deg); }
-  100% { opacity: 0; transform: translate(2px, 8px) rotate(0deg); }
-}
-
-@keyframes mm-box-pulse {
-  0%, 74% { opacity: 0; }
-  82% { opacity: 0.45; }
-  92%, 100% { opacity: 0; }
+  0%, 64% { opacity: 0; transform: translate3d(-120%, -55%, 0) rotate(-7deg); }
+  72% { opacity: 0.92; }
+  84% { opacity: 0.85; transform: translate3d(18%, 8%, 0) rotate(0deg); }
+  92%, 100% { opacity: 0; transform: translate3d(34%, 14%, 0) rotate(0deg); }
 }
 
 @keyframes mm-slip-once {
-  0% { opacity: 0; transform: translate(-48px, -42px) rotate(-10deg); }
-  28% { opacity: 1; }
-  70% { opacity: 1; transform: translate(0, 0) rotate(0deg); }
-  100% { opacity: 1; transform: translate(0, 6px) rotate(0deg); }
-}
-
-@keyframes mm-box-pulse-once {
-  0%, 62% { opacity: 0; }
-  78% { opacity: 0.55; }
-  100% { opacity: 0.22; }
+  0% { opacity: 0; transform: translate3d(-130%, -60%, 0) rotate(-8deg); }
+  22% { opacity: 0.95; }
+  68% { opacity: 0.9; transform: translate3d(16%, 6%, 0) rotate(0deg); }
+  100% { opacity: 0; transform: translate3d(36%, 16%, 0) rotate(0deg); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mm-post-card,
-  .mm-post-pulse,
-  .mm-post-trail {
+  .mm-postbox,
+  .mm-post-glow,
+  .mm-mailer {
     animation: none !important;
   }
-  .mm-post-card { opacity: 1; transform: translate(0, 6px); }
-  .mm-post-pulse { opacity: 0.22; }
-  .mm-post-trail { opacity: 0; }
+  .mm-post-glow { opacity: 0.4; }
+  .mm-mailer { opacity: 0; }
+}
+
+/* Long curve into the same slot. The .mm-mailer slip above is unchanged. */
+.mm-flight-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.mm-flight {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 54px;
+  height: 34px;
+  offset-rotate: auto;
+  offset-anchor: center;
+  animation: mm-flight-move 8.4s cubic-bezier(0.45, 0.08, 0.22, 1) both;
+  filter: drop-shadow(0 6px 7px rgba(8, 14, 22, 0.28));
+}
+
+.mm-flight-glow {
+  position: absolute;
+  left: -16px;
+  top: 9px;
+  width: 18px;
+  height: 14px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(186, 216, 240, 0.28), transparent 72%);
+  filter: blur(1.4px);
+}
+
+.mm-flight-piece {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  animation: mm-flight-scale 8.4s ease-out both;
+}
+
+.mm-postbox.mm-flight-arrive::after {
+  content: "";
+  position: absolute;
+  z-index: 4;
+  left: 16%;
+  top: 41%;
+  width: 18%;
+  height: 7%;
+  border-radius: 1px;
+  background: linear-gradient(180deg, #f7fbff 0%, #d7e4ee 100%);
+  box-shadow: 0 0 10px rgba(190, 230, 255, 0.45);
+  animation: mm-slip-once 1.15s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+@keyframes mm-flight-move {
+  from { offset-distance: 0%; }
+  to { offset-distance: 100%; }
+}
+
+@keyframes mm-flight-scale {
+  0% { transform: scale(0.62); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mm-flight-layer { display: none; }
+}
+
+@media (max-width: 1023px) {
+  .mm-flight-layer { display: none; }
+}
+
+.mm-limb-hour {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 42% 16% at 16% 0%, rgba(255, 186, 120, var(--limb-amber, 0)), transparent 70%),
+    radial-gradient(ellipse 34% 14% at 80% 1%, rgba(176, 132, 214, var(--limb-violet, 0)), transparent 68%);
+  mix-blend-mode: screen;
+  transition: background 1.8s linear;
+}
+
+.mm-limb-hour::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgba(3, 12, 32, var(--limb-night, 0.2)), transparent 26%);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+.mm-proof-scene {
+  display: block;
+  width: min(100%, 420px);
+  margin-inline: auto;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  perspective: 1200px;
+  cursor: pointer;
+}
+
+.mm-proof-card {
+  position: relative;
+  display: block;
+  min-height: 16rem;
+  transform-style: preserve-3d;
+  border-radius: 12px;
+  box-shadow: 0 18px 40px rgba(20, 16, 10, 0.28);
+}
+
+.mm-proof-intro {
+  animation: mm-proof-turn 1.8s cubic-bezier(0.22, 0.7, 0.2, 1) both;
+}
+
+.mm-proof-back {
+  transform: rotateY(180deg);
+}
+
+.mm-proof-face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  backface-visibility: hidden;
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), transparent 28%),
+    repeating-linear-gradient(0deg, rgba(80, 60, 30, 0.035) 0 1px, transparent 1px 3px);
+}
+
+.mm-proof-front { transform: rotateY(0deg); }
+.mm-proof-rear { transform: rotateY(180deg); }
+
+.mm-proof-glint {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.55) 48%, transparent 60%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateZ(2px);
+}
+
+.mm-proof-intro .mm-proof-glint {
+  animation: mm-proof-glint 1.8s ease-out both;
+}
+
+@keyframes mm-proof-turn {
+  0% { transform: rotateY(-70deg) rotateX(8deg) translateZ(0); }
+  46% { transform: rotateY(8deg) rotateX(2deg); }
+  72% { transform: rotateY(188deg) rotateX(4deg); }
+  100% { transform: rotateY(0deg) rotateX(0deg); }
+}
+
+@keyframes mm-proof-glint {
+  0%, 100% { opacity: 0; }
+  18% { opacity: 0.85; }
+  36% { opacity: 0; }
+  68% { opacity: 0.55; }
+}
+
+.mm-milestone {
+  position: fixed;
+  inset: 0;
+  z-index: 24;
+  pointer-events: none;
+}
+
+.mm-milestone-comet {
+  position: absolute;
+  left: -18%;
+  top: 18%;
+  width: min(84vw, 920px);
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent 0%, rgba(190, 240, 255, 0.2) 12%, rgba(244, 252, 255, 0.95) 86%, #fff 100%);
+  box-shadow:
+    0 0 18px rgba(240, 252, 255, 1),
+    0 0 48px rgba(140, 210, 255, 0.75),
+    0 0 90px rgba(90, 170, 255, 0.35);
+  animation: mm-milestone-pass 5.6s cubic-bezier(0.22, 0.55, 0.18, 1) both;
+}
+
+.mm-milestone-note {
+  position: absolute;
+  left: 50%;
+  top: 16%;
+  margin: 0;
+  transform: translateX(-50%);
+  border: 1px solid rgba(180, 220, 240, 0.35);
+  border-radius: 999px;
+  background: rgba(6, 14, 24, 0.72);
+  padding: 0.45rem 0.9rem;
+  color: #e7f6ff;
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
+  animation: mm-milestone-note 5.6s ease both;
+}
+
+@keyframes mm-milestone-pass {
+  0% { transform: translate3d(0, 10px, 0) rotate(-7deg); opacity: 0; }
+  14% { opacity: 1; }
+  100% { transform: translate3d(78vw, -28px, 0) rotate(-2deg); opacity: 0; }
+}
+
+@keyframes mm-milestone-note {
+  0%, 12% { opacity: 0; }
+  28%, 72% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mm-proof-card,
+  .mm-proof-glint,
+  .mm-milestone-comet,
+  .mm-milestone-note {
+    animation: none !important;
+  }
+  .mm-milestone { display: none; }
+}
+
+@media (max-width: 1023px) {
+  .mm-sky-hero:not(.mm-sky-arrival) .mm-postbox:not(.mm-postbox-start) { display: none; }
+}
+
+.mm-postbox-slot {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.25rem;
+  padding-bottom: 3.25rem;
+}
+
+@media (min-width: 1024px) {
+  .mm-postbox-slot { display: none; }
+}
+
+.mm-postbox-slot .mm-postbox {
+  position: relative;
+  right: auto;
+  top: auto;
+  width: 126px;
+  height: 110px;
 }
 
 @media (max-width: 640px) {
@@ -311,8 +650,8 @@
   .mm-comet { top: 54vh; width: 62vw; }
   .mm-sky-arrival .mm-limb { top: 16rem; }
   .mm-comet-arrive, .mm-sky-arrival .mm-flash { top: 14.5rem; }
-  .mm-postbox { width: 72px; height: 104px; right: 2px; top: calc(64vh - 36px); }
-  .mm-postbox-arrive { top: 9rem; right: 4%; width: 96px; height: 138px; }
+  .mm-postbox-start { width: 120px; height: 112px; right: -32px; top: calc(64vh - 92px); }
+  .mm-postbox-arrive { top: calc(16rem - 118px); right: -12px; width: 156px; height: 146px; }
 }
 
 :root {

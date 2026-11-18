@@ -5,15 +5,19 @@ import { cometIntroSeen } from "@/lib/assistant/intro-action"
 import { getSession, previewDemoAllowed } from "@/lib/auth/session"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { HomeBoard } from "@/components/cockpit/HomeBoard"
+import { MilestoneComet } from "@/components/cockpit/MilestoneComet"
 import { CockpitFrame } from "@/components/cockpit/ui"
 import { SAMPLE_SHOP } from "@/lib/mailer-compose/flow"
 
 export default async function CommandCenterPage({
   searchParams,
 }: {
-  searchParams: Promise<{ intro?: string }>
+  searchParams: Promise<{ intro?: string; hour?: string; milestone?: string; preview?: string }>
 }) {
   const params = await searchParams
+  const allowTune = previewDemoAllowed() || process.env.NODE_ENV !== "production"
+  const hour = allowTune && params.hour ? Number(params.hour) : Number.NaN
+  const milestone = allowTune && params.milestone ? Number(params.milestone) : Number.NaN
   const session = await getSession()
   const shop = session?.businessName || SAMPLE_SHOP
   const replay = params.intro === "1" && (previewDemoAllowed() || process.env.NODE_ENV !== "production")
@@ -21,7 +25,7 @@ export default async function CommandCenterPage({
   const showIntro = replay || Boolean(session && !seen)
 
   return (
-    <CockpitFrame hero>
+    <CockpitFrame hero hour={Number.isFinite(hour) ? hour : undefined}>
       <div className="flex items-center gap-4 px-4 pt-4">
         <SidebarTrigger className="text-[#e7f2fb]" />
         {session?.fixture ? (
@@ -31,6 +35,13 @@ export default async function CommandCenterPage({
         ) : null}
       </div>
       <HomeBoard shop={shop} sample={!session || session.fixture} />
+      <MilestoneComet
+        total={0}
+        ownerId={session?.userId ?? "signed-out"}
+        sample={!session || Boolean(session.fixture)}
+        preview={params.preview === "1"}
+        force={Number.isFinite(milestone) ? milestone : undefined}
+      />
       <CometIntro open={showIntro} />
       <div className="mx-auto mb-10 flex w-full max-w-3xl flex-col gap-2 px-4 text-sm sm:px-6">
         <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#7ee7ff]">Advanced</p>

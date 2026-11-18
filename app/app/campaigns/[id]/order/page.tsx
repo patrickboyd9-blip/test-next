@@ -5,7 +5,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { requireOwnedCampaign } from "@/lib/auth/campaign-access"
 import { getSession } from "@/lib/auth/session"
 import { getJourneyStore } from "@/lib/mail-journey/job"
-import { listIdentity, reviewCustomerList } from "@/lib/mail-journey/list-import"
+import { reviewCustomerList } from "@/lib/mail-journey/list-import"
 import { attemptMail, readLiveGate } from "@/lib/mail-journey/mail-gate"
 import { buildQuote, readApprovedSchedule } from "@/lib/mail-journey/pricing"
 import { freezeProof } from "@/lib/mail-journey/proof"
@@ -18,7 +18,7 @@ export default async function OrderReviewPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ checkout?: string }>
+  searchParams: Promise<{ checkout?: string; cap?: string }>
 }) {
   const session = await getSession()
   if (!session) {
@@ -33,9 +33,11 @@ export default async function OrderReviewPage({
   }
 
   const { id } = await params
-  const { checkout } = await searchParams
+  const { checkout, cap } = await searchParams
   const checkoutNote =
-    checkout === "return"
+    cap === "over"
+      ? "This total is over your spending cap. Nothing was charged and nothing was mailed."
+      : checkout === "return"
       ? "You came back from payment. This page does not mark the order paid, and nothing was mailed."
       : checkout === "cancel" || checkout === "closed"
         ? "Payment did not start. Nothing was charged and nothing was mailed."

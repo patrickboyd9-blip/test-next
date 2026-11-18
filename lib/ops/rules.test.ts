@@ -7,9 +7,10 @@ import { answerHelp } from "@/lib/assistant/help"
 import { PLACEHOLDER_FULL_PRICE } from "@/lib/mailer-compose/flow"
 import { CLICK2MAIL_RESERVED_POINTS } from "@/lib/print-spec/click2mail-keep-outs"
 
-import { readAudit } from "./audit"
-import { chargeMailer, priceMailer } from "./mail-flow"
+import { appendAudit, readAudit } from "./audit"
+import { chargeMailer, priceMailer, startApprovedCheckout } from "./mail-flow"
 import { consumeRate } from "./rate-limit"
+import { setSpendingCap } from "./spend-cap"
 
 const ROOT = process.cwd()
 
@@ -67,11 +68,63 @@ test("research images and private keys are not in the repo", () => {
   assert.deepEqual(secrets, [])
 })
 
+test("a charge over the spending cap is refused and nothing is mailed", async () => {
+  const actor = `cap-${Date.now()}`
+  const subject = `camp-${Date.now()}`
+  await appendAudit(
+    {
+      actorId: actor,
+      action: "approve",
+      subjectId: subject,
+      before: null,
+      after: { approved: true, postageOnly: false, amountCents: 100 },
+    },
+    new Date()
+  )
+  await setSpendingCap(actor, 100)
+  let called = false
+  await assert.rejects(
+    () =>
+      startApprovedCheckout({
+        actorId: actor,
+        subjectId: subject,
+        jobId: "job-cap",
+        pieceCount: 1,
+        amountCents: 200,
+        origin: "https://example.com",
+        env: priceEnv(),
+        fetchImpl: async () => {
+          called = true
+          throw new Error("checkout should not open")
+        },
+      }),
+    /spending cap/
+  )
+  assert.equal(called, false)
+  const charges = (await readAudit()).filter((event) => event.actorId === actor && event.action === "charge")
+  assert.equal(charges.some((event) => (event.after as { charged?: boolean }).charged === true), false)
+  assert.equal(charges.some((event) => (event.after as { postageOnly?: boolean }).postageOnly === false), true)
+})
+
 test("rate limiting stops a burst", async () => {
   const key = `burst-${Date.now()}`
   for (let i = 0; i < 30; i += 1) assert.equal((await consumeRate(key)).ok, true)
   assert.equal((await consumeRate(key)).ok, false)
 })
+
+function priceEnv(): NodeJS.ProcessEnv {
+  return {
+    ...process.env,
+    MAIL_APPROVED_PRICE_JSON: JSON.stringify({
+      id: "sched",
+      status: "approved",
+      currency: "usd",
+      perPieceCents: 200,
+      termsVersion: "v1",
+      effectiveUntil: "2099-01-01T00:00:00.000Z",
+    }),
+  }
+}
 
 function walk(dir: string, visit: (file: string) => void) {
   for (const name of readdirSync(dir)) {

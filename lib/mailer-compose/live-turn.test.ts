@@ -38,4 +38,11 @@ test("production uses the live interview only when ANTHROPIC_API_KEY is set", as
 
   process.env.ANTHROPIC_API_KEY = "present"
   assert.equal(await cometChatIsLive(), true)
+  const turn = await cometLiveTurn({
+    brief: {},
+    history: [],
+    message: "hello",
+    refining: false,
+  })
+  assert.deepEqual(turn, { live: false })
 })
