@@ -50,8 +50,8 @@ export function MailFlight() {
     const glideBusy = () => {
       const mailer = visibleMailbox()?.querySelector(".mm-mailer")
       const animation = mailer instanceof HTMLElement ? mailer.getAnimations()[0] : undefined
-      const time = animation?.currentTime
-      if (typeof time !== "number") return false
+      if (!animation || typeof animation.currentTime !== "number") return false
+      const time = animation.currentTime
       const duration = animation.effect?.getComputedTiming().duration
       const span = typeof duration === "number" && duration > 0 ? duration : 18000
       return glideOccupies(time / span)
