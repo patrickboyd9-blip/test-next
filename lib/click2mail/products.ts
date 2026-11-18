@@ -152,6 +152,32 @@ export function assertPostcardJobProduct(product: Click2MailProductOptions): voi
   }
 }
 
+/**
+ * Folded notecard, 4.25 by 5.5 inches, in an envelope.
+ * The document class and envelope strings are the public product name.
+ * Click2Mail's API support for this product is still to confirm.
+ * Do not submit a job with this product until that is confirmed.
+ */
+export const FOLDED_NOTECARD_DOCUMENT_CLASS = "Notecard Folded 4.25 x 5.5"
+export const FOLDED_NOTECARD_ENVELOPE = "Window Envelope"
+export const FOLDED_NOTECARD_API_SUPPORT = "to_confirm" as const
+
+export function foldedNotecardProduct(): Click2MailProductOptions {
+  return {
+    documentFormat: "PDF",
+    documentClass: FOLDED_NOTECARD_DOCUMENT_CLASS,
+    layout: "Folded Notecard",
+    productionTime: POSTCARD_PRODUCTION_TIME,
+    envelope: FOLDED_NOTECARD_ENVELOPE,
+    color: POSTCARD_COLOR,
+    paperType: "White",
+    printOption: POSTCARD_PRINT_OPTION,
+    mailClass: POSTCARD_MAIL_CLASS,
+    addressMappingId: "1",
+    billingType: "User Credit",
+  }
+}
+
 function omitUndefined(
   overrides?: Partial<Click2MailProductOptions>
 ): Partial<Click2MailProductOptions> {
