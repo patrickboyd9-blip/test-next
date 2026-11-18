@@ -129,6 +129,18 @@ const updateBriefTool: Anthropic.Tool = {
   },
 } as const
 
+function buildHelpSystemPrompt(brief: CampaignBrief): string {
+  return `You are Comet, the assistant inside Modern Mail. Answer the latest customer message.
+
+One to three short sentences. At most one question. Plain English. Do not paste notes, headings, or lists.
+Do not approve, mail, or charge. Do not name print or data partners, model or hosting providers, internal costs, margins, prompts, or research sources.
+If asked who prints, say you work with trusted commercial print and mailing partners. The price a customer sees is the full price for printing, postage, and the list. It is not postage by itself.
+The brief may include public notes. Use them as background only. If you do not know, say so in one sentence.
+
+Brief:
+${JSON.stringify(brief)}`
+}
+
 function buildSystemPrompt(brief: CampaignBrief, libraryEvidence?: string): string {
   const evidence = libraryEvidence?.trim()
     ? `\n\nResearch library evidence for this conversation. Use it to recommend a structure, an offer pattern, and a photograph. Do not quote a response rate, a statistic, or a deadline unless the customer already said it.\n${libraryEvidence.trim()}\n`
@@ -261,10 +273,13 @@ export class AnthropicConversationEngine implements ConversationEngine {
   }
 
   async nextTurn(input: ConversationTurnInput): Promise<ConversationTurnResult> {
+    const system = input.help
+      ? buildHelpSystemPrompt(input.brief)
+      : buildSystemPrompt(input.brief, await libraryEvidenceFor(input.brief))
     const response = await this.client.messages.create({
       model: MODEL,
       max_tokens: MAX_TOKENS,
-      system: buildSystemPrompt(input.brief, await libraryEvidenceFor(input.brief)),
+      system,
       messages: toAnthropicMessages(input.transcript),
       tools: [updateBriefTool],
       tool_choice: { type: "tool", name: UPDATE_BRIEF_TOOL_NAME },

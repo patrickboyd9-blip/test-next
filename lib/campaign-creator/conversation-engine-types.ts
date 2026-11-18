@@ -4,6 +4,11 @@ export interface ConversationTurnInput {
   brief: CampaignBrief
   transcript: ConversationMessage[]
   message: string
+  /**
+   * Help chat. Skips the research library and asks for a short reply.
+   * Campaign turns leave this unset.
+   */
+  help?: boolean
 }
 
 export interface ConversationTurnResult {

@@ -66,6 +66,7 @@ export function ComposeMailer({
   initialDraft,
   initialPath = null,
   initialQuick = false,
+  initialIndustry = null,
   sampleBeat = null,
   liveChat = false,
 }: {
@@ -74,6 +75,7 @@ export function ComposeMailer({
   initialDraft?: ComposeDraft
   initialPath?: StartPath | null
   initialQuick?: boolean
+  initialIndustry?: TemplateIndustry | null
   sampleBeat?: number | null
   /** True only when production can call the conversation engine. */
   liveChat?: boolean
@@ -91,7 +93,7 @@ export function ComposeMailer({
   const [backFile, setBackFile] = useState<HeldDesign | null>(null)
   const [designError, setDesignError] = useState("")
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
-  const [industry, setIndustry] = useState<TemplateIndustry | "all">("all")
+  const [industry, setIndustry] = useState<TemplateIndustry | "all">(initialIndustry ?? "all")
   const [templateId, setTemplateId] = useState<string | null>(null)
   const [advanced, setAdvanced] = useState(false)
   const [listError, setListError] = useState("")
