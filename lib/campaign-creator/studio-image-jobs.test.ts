@@ -249,7 +249,10 @@ test("the chosen direction is regenerated at final size after the previews", asy
   }
 
   assert.equal(load.pending, false)
-  assert.deepEqual(tiers, ["dir-a:preview", "dir-b:preview", "dir-a:final"])
+  const previews = tiers.filter((tier) => tier.endsWith(":preview"))
+  assert.deepEqual(previews.slice().sort(), ["dir-a:preview", "dir-b:preview"])
+  assert.equal(tiers.at(-1), "dir-a:final")
+  assert.ok(tiers.indexOf("dir-a:final") > Math.max(tiers.indexOf("dir-a:preview"), tiers.indexOf("dir-b:preview")))
   const finals = load.records.filter((record) => record.tier === "final")
   assert.equal(finals.length, 1)
   assert.match(finals[0]?.asset.src ?? "", /--final\.png$/)

@@ -63,6 +63,7 @@ export type StudioPhotoCheck = (input: StudioPhotoCheckInput) => Promise<boolean
  * the same mechanism with an extra package, so it is not used.
  *
  * Every preview that is ready to run starts in the same request, together.
+ * The chosen direction's final file starts after those previews finish.
  * The browser still polls, and each finished photograph shows up on its own.
  * A killed run leaves that job stale; the next poll retries it once.
  * A picture that already landed in storage is never generated again.
@@ -149,15 +150,20 @@ export async function syncStudioDirectionImages(options: {
   if (first.due.length === 0) return first.load
 
   const work = async () => {
-    await Promise.all(first.due.map((slot) => executeStudioImageJob({
-      campaignId: options.campaignId,
-      campaignBrief: options.campaignBrief,
-      store,
-      createAdapter: options.createAdapter,
-      slot,
-      now,
-      photoCheck: options.photoCheck,
-    })))
+    const run = (slots: PreparedSlot[]) =>
+      Promise.all(slots.map((slot) => executeStudioImageJob({
+        campaignId: options.campaignId,
+        campaignBrief: options.campaignBrief,
+        store,
+        createAdapter: options.createAdapter,
+        slot,
+        now,
+        photoCheck: options.photoCheck,
+      })))
+    const previews = first.due.filter((slot) => slot.item.tier === "preview")
+    const finals = first.due.filter((slot) => slot.item.tier !== "preview")
+    if (previews.length > 0) await run(previews)
+    if (finals.length > 0) await run(finals)
   }
 
   if (options.runInline) {

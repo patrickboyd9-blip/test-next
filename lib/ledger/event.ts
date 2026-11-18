@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto"
+import { createHash, randomBytes } from "node:crypto"
 import { link, mkdir, readFile, readdir, unlink, writeFile } from "node:fs/promises"
 import path from "node:path"
 
@@ -46,15 +46,16 @@ export function createFileLedgerStore(directory: string): LedgerStore {
       const dest = fileFor(event.id)
       const existing = await readJson<LedgerEvent>(dest)
       if (existing) return { event: existing, created: false }
-      const temp = path.join(directory, `.tmp-${event.id}`)
+      const temp = path.join(directory, `.tmp-${event.id}-${randomBytes(4).toString("hex")}`)
       await writeFile(temp, JSON.stringify(event), "utf-8")
       try {
         await link(temp, dest)
         return { event, created: true }
       } catch (error) {
-        if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error
+        const code = (error as NodeJS.ErrnoException).code
+        if (code !== "EEXIST" && code !== "ENOENT") throw error
         const winner = await readJson<LedgerEvent>(dest)
-        if (!winner) throw new Error("The earlier event could not be read.")
+        if (!winner) throw error
         return { event: winner, created: false }
       } finally {
         await unlink(temp).catch(() => undefined)
