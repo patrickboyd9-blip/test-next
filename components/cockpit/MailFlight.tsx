@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 
 import { FlightEnvelope } from "./FlightEnvelope"
 import {
+  DOOR_LAG_MS,
   DOOR_OPEN_MS,
   DOOR_SHUT_MS,
   ENTER_MS,
@@ -77,8 +78,12 @@ export function MailFlight() {
       const marks = measure()
       if (!marks) return
       flying = true
+      handed = false
       setPath(flightPath(marks))
       setRun((value) => value + 1)
+      frame = window.requestAnimationFrame(() => {
+        frame = window.requestAnimationFrame(watchArrival)
+      })
     }
 
     const armIdle = () => {
@@ -127,25 +132,52 @@ export function MailFlight() {
         insert.style.width = `${flightRect.width}px`
         insert.style.height = `${flightRect.height}px`
         doorBusy = true
+        flightEl.style.visibility = "hidden"
         box.classList.add("mm-flight-enter", "mm-door-live")
+        const shutAt = ENTER_MS + DOOR_LAG_MS
         later.push(window.setTimeout(() => {
           box.classList.remove("mm-flight-enter")
           box.classList.add("mm-door-shut")
-        }, ENTER_MS))
+        }, shutAt))
         later.push(window.setTimeout(() => {
           box.classList.remove("mm-door-shut")
           box.classList.add("mm-door-open")
-        }, ENTER_MS + DOOR_SHUT_MS))
+        }, shutAt + DOOR_SHUT_MS))
         later.push(window.setTimeout(() => {
           box.classList.remove("mm-door-live", "mm-door-open")
           doorBusy = false
-        }, ENTER_MS + DOOR_SHUT_MS + DOOR_OPEN_MS))
+        }, shutAt + DOOR_SHUT_MS + DOOR_OPEN_MS))
       }
       setPath(null)
     }
+    let handed = false
+    const handoff = () => {
+      if (handed) return
+      handed = true
+      const flightEl = document.querySelector(".mm-flight")
+      if (flightEl instanceof HTMLElement) {
+        flightEl.getAnimations().forEach((animation) => {
+          if (animation.animationName === "mm-flight-move") animation.pause()
+        })
+      }
+      finish()
+    }
+    const watchArrival = () => {
+      if (!alive || !flying || handed) return
+      const flightEl = document.querySelector(".mm-flight")
+      const mouth = visibleMailbox()?.querySelector(".mm-mouth")
+      if (flightEl instanceof HTMLElement && mouth instanceof HTMLElement) {
+        const piece = flightEl.getBoundingClientRect()
+        const hole = mouth.getBoundingClientRect()
+        const cx = piece.left + piece.width / 2
+        const cy = piece.top + piece.height / 2
+        if (cx >= hole.left && cx <= hole.right && cy >= hole.top && cy <= hole.bottom) handoff()
+      }
+      if (!handed) frame = window.requestAnimationFrame(watchArrival)
+    }
     const layer = () => document.querySelector("[data-mail-flight]")
     const onEnd = (event: Event) => {
-      if ((event as AnimationEvent).animationName === "mm-flight-move") finish()
+      if ((event as AnimationEvent).animationName === "mm-flight-move") handoff()
     }
     document.addEventListener("animationend", onEnd)
 

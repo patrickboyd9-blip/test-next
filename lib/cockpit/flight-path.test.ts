@@ -3,7 +3,7 @@ import { test } from "node:test"
 
 import { readFileSync } from "node:fs"
 
-import { DOOR_OPEN_MS, DOOR_SHUT_MS, ENTER_MS, FLIGHT_MS, IDLE_MS, flightAllowed, flightPath, glideOccupies, pathTangentsMeet, slotPoint } from "./flight-path"
+import { DOOR_LAG_MS, DOOR_OPEN_MS, DOOR_PAST, DOOR_REST, DOOR_SHUT_FRAME, DOOR_SHUT_MS, ENTER_MS, FLIGHT_MS, IDLE_MS, doorFrameInsideMailbox, doorFramesInCss, flightAllowed, flightPath, glideOccupies, pathTangentsMeet, slotPoint } from "./flight-path"
 
 test("the flight is skipped on a phone and when motion is reduced", () => {
   assert.equal(flightAllowed(1440, false), true)
@@ -37,8 +37,21 @@ test("a flight waits while the existing glide is in the slot", () => {
   assert.equal(FLIGHT_MS >= 8000 && FLIGHT_MS <= 10000, true)
   assert.equal(IDLE_MS, 300_000)
   assert.equal(ENTER_MS >= 400 && ENTER_MS <= 600, true)
+  assert.equal(DOOR_LAG_MS > 0 && DOOR_LAG_MS < 150, true)
   assert.equal(DOOR_SHUT_MS >= 300 && DOOR_SHUT_MS <= 400, true)
   assert.equal(DOOR_OPEN_MS >= 260 && DOOR_OPEN_MS <= 340, true)
+})
+
+test("every door frame stays inside the rendered mailbox", () => {
+  for (const frame of [DOOR_REST, DOOR_PAST, DOOR_SHUT_FRAME]) {
+    assert.equal(doorFrameInsideMailbox(frame), true)
+  }
+  const css = readFileSync(new URL("../../app/globals.css", import.meta.url), "utf8")
+  const frames = doorFramesInCss(css)
+  assert.equal(frames.length >= 4, true)
+  for (const frame of frames) assert.equal(doorFrameInsideMailbox(frame), true)
+  const rig = css.slice(css.indexOf(".mm-door-rig {"), css.indexOf(".mm-post-door {"))
+  assert.match(rig, /overflow:\s*hidden/)
 })
 
 test("the long flight enters the box, and the slot glide is untouched", () => {
