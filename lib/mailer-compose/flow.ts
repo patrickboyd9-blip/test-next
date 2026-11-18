@@ -124,6 +124,13 @@ export const SAMPLE_MAILERS: InFlightMailer[] = [
   },
 ]
 
+export const SIZE_REQUIRED_MESSAGE = "Choose a 5×8 or a 6×9 postcard."
+
+/** Nothing is chosen until the person picks. A stored default is not a choice. */
+export function postcardSizeChosen(size: string | null): size is "5x8" | "6x9" {
+  return size === "5x8" || size === "6x9"
+}
+
 export function emptyDraft(): ComposeDraft {
   return {
     listId: null,
