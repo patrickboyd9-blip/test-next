@@ -1,5 +1,5 @@
 import type { Campaign, UploadedDesign, UploadedDesignFile } from "@/lib/campaign-creator/types"
-import { buildPostcard5x8PrintSpec } from "@/lib/print-spec/postcard-5x8-print-spec"
+import { buildPostcard5x8PrintSpec, type PostcardGeometry } from "@/lib/print-spec/postcard-5x8-print-spec"
 
 import { sniffDesignMedia } from "./decode-raster"
 import { prepareDesignFace } from "./prepare-face"
@@ -19,6 +19,7 @@ export async function saveDesignFace(input: {
   bytes: Buffer
   declaredType: string
   store?: UploadedDesignStore
+  geometry?: PostcardGeometry
 }): Promise<UploadedDesign> {
   const store = input.store ?? resolveUploadedDesignStore()
   const media = sniffDesignMedia(input.bytes, input.declaredType)
@@ -41,7 +42,12 @@ export async function saveDesignFace(input: {
     key,
   }
   const next = mergeDesign(input.campaign.uploadedDesign, input.face, file, [])
-  next.issues = await prepareStoredDesign(input.campaign.id, next, store)
+  next.issues = await prepareStoredDesign(
+    input.campaign.id,
+    next,
+    store,
+    input.geometry ?? buildPostcard5x8PrintSpec()
+  )
   next.checkedAt = new Date().toISOString()
   next.approvedAt = undefined
   next.printFileKey = undefined
@@ -69,9 +75,9 @@ function mergeDesign(
 async function prepareStoredDesign(
   campaignId: string,
   design: UploadedDesign,
-  store: UploadedDesignStore
+  store: UploadedDesignStore,
+  geometry: PostcardGeometry
 ): Promise<DesignPreflightIssue[]> {
-  const geometry = buildPostcard5x8PrintSpec()
   const issues: DesignPreflightIssue[] = []
   for (const face of ["front", "back"] as const) {
     const file = design[face]

@@ -9,6 +9,7 @@ import { getSession } from "@/lib/auth/session"
 import { noteForSession } from "@/lib/ledger/note"
 
 import { finishMailAction, startApprovedCheckout } from "@/lib/ops/mail-flow"
+import { approvalFitsCap } from "@/lib/ops/spend-cap"
 
 import { approvalCovers, createApproval } from "./approval"
 import { getJourneyStore, jobFromApproval } from "./job"
@@ -55,6 +56,19 @@ export async function startCheckoutAction(formData: FormData): Promise<void> {
   const identity = listIdentity(review.accepted)
   const now = new Date().toISOString()
   const quote = buildQuote(readApprovedSchedule(), identity.count, now)
+  if (quote.ok) {
+    const cap = await approvalFitsCap(session.userId, campaignId, quote.quote.totalCents)
+    if (!cap.ok) {
+      await finishMailAction({
+        actorId: session.userId,
+        action: "charge",
+        subjectId: campaignId,
+        before: { approved: false },
+        after: { charged: false, postageOnly: false, total: "full", reason: "cap" },
+      })
+      redirect(`/app/campaigns/${campaignId}/order?cap=over`)
+    }
+  }
   if (!proof.ok || review.headerError || review.invalid.length > 0 || !quote.ok) {
     await noteForSession({
       campaignId,
