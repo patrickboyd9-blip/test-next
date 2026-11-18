@@ -6,7 +6,7 @@ import type { Campaign, CampaignCreative, UploadedDesign } from "./types"
 export function duplicateCampaign(
   source: Campaign,
   now: string,
-  id = randomUUID(),
+  id: string = randomUUID(),
   name?: string
 ): Campaign {
   const baseName = (source.name || source.brief.businessInfo?.name || "Campaign").replace(/\s+/g, " ").trim() || "Campaign"

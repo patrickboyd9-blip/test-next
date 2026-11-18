@@ -33,7 +33,7 @@ export type DocumentCollection =
 const SAFE_FILE_ID = /^[A-Za-z0-9_-]{1,200}$/
 
 interface CollectionSql {
-  table: "campaigns" | "reference_corpus" | "design_library" | "vision_taste" | "concept_feedback" | "blueprints"
+  table: "campaigns" | "reference_corpus" | "design_library" | "vision_taste" | "concept_feedback" | "blueprints" | "white_label"
   ddl: string
 }
 
