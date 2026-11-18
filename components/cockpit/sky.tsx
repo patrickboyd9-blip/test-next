@@ -94,10 +94,10 @@ function Postbox({ scale }: { scale: "home" | "start" | "arrive" }) {
       />
       <span className="mm-door-rig">
         <Image
-          src="/brand/mailbox/mailbox-door-crop.webp"
+          src="/brand/mailbox/mailbox-door.webp"
           alt=""
-          width={526}
-          height={143}
+          fill
+          sizes={scale === "start" ? "(max-width: 640px) 120px, 210px" : "(max-width: 640px) 148px, 300px"}
           className="mm-post-door"
         />
       </span>
