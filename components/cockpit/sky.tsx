@@ -6,6 +6,7 @@
 import Image from "next/image"
 
 import { SkyComet } from "./comet"
+import { LimbHour } from "./LimbHour"
 import { MailFlight } from "./MailFlight"
 
 const FAR = [
@@ -31,10 +32,12 @@ export function SpaceSky({
   hero = false,
   arrival = false,
   postbox,
+  hour,
 }: {
   hero?: boolean
   arrival?: boolean
   postbox?: "home" | "start" | "arrive"
+  hour?: number
 }) {
   const tone = arrival ? "mm-sky mm-sky-hero mm-sky-arrival" : hero ? "mm-sky mm-sky-hero" : "mm-sky"
   const box = postbox ?? (arrival ? "arrive" : hero ? "home" : null)
@@ -49,6 +52,7 @@ export function SpaceSky({
         <div className="mm-limb-texture" />
         <div className="mm-limb-air" />
         <div className="mm-limb-sun" />
+        <LimbHour hour={hour} />
       </div>
       {hero || arrival ? <SkyComet arrival={arrival} /> : null}
       {arrival ? <div className="mm-flash" /> : null}
