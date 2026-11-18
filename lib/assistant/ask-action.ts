@@ -7,7 +7,18 @@ import { answerHelp, type HelpAnswer } from "./help"
 
 export async function askCometAction(question: string, page: string, step: string): Promise<HelpAnswer> {
   const session = await getSession()
-  await beginMailAction(session?.userId ?? "anonymous", "ai")
+  if (!session) {
+    return {
+      reply: "Sign in required.",
+      sample: false,
+      acted: false,
+      mailed: false,
+      charged: false,
+      links: [],
+      offerPerson: false,
+    }
+  }
+  await beginMailAction(session.userId, "ai")
   return answerHelp({
     question,
     page,

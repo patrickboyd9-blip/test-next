@@ -1,12 +1,18 @@
+import { denyUnlessSignedIn } from "@/lib/auth/require-session"
+import { limitPublic } from "@/lib/ops/public-rate"
 import { renderPostcard5x8PrintSpecPdf } from "@/lib/print-spec/render-print-spec-pdf"
 import { renderPostcard5x8PrintSpecPng } from "@/lib/print-spec/render-print-spec-png"
 
 /**
  * Geometry proof for the 5×8 catalog.
  * PDF by default. `?format=png&face=front|back` returns the 300 DPI RGB raster.
- * No Click2Mail login, job, or payment.
+ * No Click2Mail login, job, or payment. Signed-in accounts only.
  */
-export function GET(request: Request): Response {
+export async function GET(request: Request): Promise<Response> {
+  const denied = await denyUnlessSignedIn()
+  if (denied) return denied
+  const limited = await limitPublic(request, "print-spec", 20)
+  if (limited) return limited
   const url = new URL(request.url)
   if (url.searchParams.get("format") === "png") {
     const face = url.searchParams.get("face") === "front" ? "front" : "back"

@@ -1,6 +1,6 @@
 "use server"
 
-import { previewDemoAllowed } from "@/lib/auth/session"
+import { getSession, previewDemoAllowed } from "@/lib/auth/session"
 import { getConversationEngine } from "@/lib/campaign-creator/conversation-engine"
 import type { CampaignBrief, ConversationMessage } from "@/lib/campaign-creator/types"
 
@@ -32,6 +32,7 @@ export async function cometLiveTurn(input: {
       audience: string
     }
 > {
+  if (!(await getSession())) return { live: false }
   if (!(await cometChatIsLive())) return { live: false }
   const engine = await getConversationEngine()
   const transcript: ConversationMessage[] = input.history.map((turn, index) => ({
