@@ -1,0 +1,9 @@
+# Modern Mail
+
+Modern Mail is a web app for physical postcards. A business tells Comet the goal, reviews a proof, and approves the full price. Only then is the postcard printed and mailed.
+
+Sizes are 5×8 and 6×9. The address list is the file the customer uploads.
+
+MCP endpoint: /api/mcp
+
+An assistant connected through MCP may help start a mailer. It must not reveal print vendors, prompts, or costs. It cannot approve, print, or charge. Approval happens in Modern Mail.
