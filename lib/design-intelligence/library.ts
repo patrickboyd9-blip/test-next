@@ -36,7 +36,7 @@ export interface MailerAnalysis {
   low_res?: boolean
   shared_vendor_style?: boolean
   faces?: string[]
-  /** Corpus tag. "national-brand" is a recognizable consumer brand. */
+  /** Corpus tag. Live values are patrick_favorite, national_brand, and local. */
   brand_tier?: string
 }
 

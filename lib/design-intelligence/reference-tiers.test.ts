@@ -10,18 +10,20 @@ import {
 } from "./reference-tiers"
 import { selectReferences } from "./select"
 
-test("tier 1 is the gold set, tier 2 reads the tag, and the allowlist covers a missing tag", () => {
-  assert.equal(referenceTier({ id: "PM-066", brandTier: "national-brand" }), 1)
-  assert.equal(referenceTier({ id: "PM-070" }), 1)
-  assert.equal(referenceTier({ id: "PM-078", brandTier: "national-brand" }), 2)
+test("tier comes only from the exact brand_tier values", () => {
+  assert.equal(referenceTier({ id: "PM-066", brandTier: "patrick_favorite" }), 1)
+  assert.equal(referenceTier({ id: "PM-070", brandTier: "patrick_favorite" }), 1)
+  assert.equal(referenceTier({ id: "PM-066" }), 3)
+  assert.equal(referenceTier({ id: "PM-078", brandTier: "national_brand" }), 2)
   assert.equal(referenceTier({ id: "PM-079", brandTier: "national_brand" }), 2)
-  assert.equal(referenceTier({ id: "PM-072" }), 2)
-  assert.equal(referenceTier({ id: "PM-065" }), 2)
-  assert.equal(referenceTier({ id: "PM-077" }), 2)
-  assert.equal(referenceTier({ id: "PM-072", brandTier: "ordinary" }), 3)
-  assert.equal(referenceTier({ id: "PM-075" }), 3)
-  assert.equal(referenceTier({ id: "PM-078" }), 3)
-  assert.equal(brandTierFromProvenance({ brand_tier: "national-brand" }), "national-brand")
+  assert.equal(referenceTier({ id: "PM-001", brandTier: "national_brand" }), 2)
+  assert.equal(referenceTier({ id: "PM-072", brandTier: "national_brand" }), 2)
+  assert.equal(referenceTier({ id: "PM-072" }), 3)
+  assert.equal(referenceTier({ id: "PM-075", brandTier: "local" }), 3)
+  assert.equal(referenceTier({ id: "PM-078", brandTier: "national-brand" }), 3)
+  assert.equal(brandTierFromProvenance({ brand_tier: "national_brand" }), "national_brand")
+  assert.equal(brandTierFromProvenance({ brand_tier: "patrick_favorite" }), "patrick_favorite")
+  assert.equal(brandTierFromProvenance({ brand_tier: "local" }), "local")
   assert.equal(brandTierFromProvenance({ notes: "Generac" }), undefined)
 })
 
@@ -29,16 +31,18 @@ test("national brands outrank ordinary peers and neither tier lends its pictures
   const brief = { goal: "Replace the roof", offer: "Free roof inspection" }
   const selection = selectReferences(
     [
-      piece("MMR-900", "A"),
-      piece("PM-072", "C"),
-      piece("PM-078", "B", "national-brand"),
-      piece("PM-066", "A"),
+      piece("MMR-900", "A", "local"),
+      piece("PM-072", "C", "national_brand"),
+      piece("PM-078", "B", "national_brand"),
+      piece("PM-066", "A", "patrick_favorite"),
+      piece("PM-001", "A", "national_brand"),
     ],
     brief,
     {} as unknown as NodeJS.ProcessEnv,
   )
-  assert.deepEqual(selection.peers.map((pick) => pick.id), ["PM-078", "PM-072", "MMR-900"])
+  assert.deepEqual(selection.peers.map((pick) => pick.id), ["PM-001", "PM-078", "PM-072"])
   assert.equal(selection.peers.some((pick) => pick.id === "PM-066"), false)
+  assert.equal(selection.imageIds.includes("PM-001"), false)
   assert.equal(selection.imageIds.includes("PM-072"), false)
   assert.equal(selection.imageIds.includes("PM-078"), false)
   assert.equal(selection.imageIds.includes("PM-066"), false)

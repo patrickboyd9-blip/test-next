@@ -1,26 +1,14 @@
 /**
  * Three-tier retrieval for physical references.
- * Tier 1 is Patrick's gold mailers. Tier 2 is a recognizable national brand.
- * Tier 3 is everything else. The lesson is the structure. The name, the logo,
- * the photographs, and the wording stay with the mailer.
+ * The corpus tag is the only source: patrick_favorite, national_brand, or local.
+ * The lesson is the structure. The name, the logo, the photographs, and the
+ * wording stay with the mailer.
  */
 
 import { leaksReferenceIdentity } from "./patrick-gold"
 
-export const PATRICK_FAVORITE_TIER_IDS = ["PM-066", "PM-067", "PM-068", "PM-069", "PM-070"] as const
-
-/** Used only when a piece has no brand_tier tag yet. */
-export const NATIONAL_BRAND_FALLBACK_IDS = [
-  "PM-065",
-  "PM-072",
-  "PM-073",
-  "PM-074",
-  "PM-076",
-  "PM-077",
-] as const
-
-const FAVORITES = new Set<string>(PATRICK_FAVORITE_TIER_IDS)
-const FALLBACK = new Set<string>(NATIONAL_BRAND_FALLBACK_IDS)
+export const BRAND_TIER_VALUES = ["patrick_favorite", "national_brand", "local"] as const
+export type BrandTierValue = (typeof BRAND_TIER_VALUES)[number]
 
 const BRAND_NAMES = [
   "dr. squatch",
@@ -38,13 +26,14 @@ const BRAND_NAMES = [
 
 export type ReferenceTier = 1 | 2 | 3
 
-export function normalizeBrandTier(value: string | null | undefined): string | undefined {
+export function normalizeBrandTier(value: string | null | undefined): BrandTierValue | undefined {
   if (typeof value !== "string") return undefined
-  const tag = value.trim().toLowerCase().replace(/[_\s]+/g, "-")
-  return tag.length > 0 ? tag : undefined
+  const tag = value.trim().toLowerCase()
+  if (tag === "patrick_favorite" || tag === "national_brand" || tag === "local") return tag
+  return undefined
 }
 
-export function brandTierFromProvenance(raw: unknown): string | undefined {
+export function brandTierFromProvenance(raw: unknown): BrandTierValue | undefined {
   if (!raw || typeof raw !== "object") return undefined
   const record = raw as Record<string, unknown>
   const direct = record.brand_tier ?? record.brandTier
@@ -53,15 +42,13 @@ export function brandTierFromProvenance(raw: unknown): string | undefined {
 }
 
 export function isNationalBrand(input: { id: string; brandTier?: string | null }): boolean {
-  const tag = normalizeBrandTier(input.brandTier)
-  if (tag === "national-brand") return true
-  if (tag) return false
-  return FALLBACK.has(input.id)
+  return normalizeBrandTier(input.brandTier) === "national_brand"
 }
 
 export function referenceTier(input: { id: string; brandTier?: string | null }): ReferenceTier {
-  if (FAVORITES.has(input.id)) return 1
-  if (isNationalBrand(input)) return 2
+  const tag = normalizeBrandTier(input.brandTier)
+  if (tag === "patrick_favorite") return 1
+  if (tag === "national_brand") return 2
   return 3
 }
 
