@@ -127,10 +127,10 @@ export function MailFlight() {
         insert.style.width = `${flightRect.width}px`
         insert.style.height = `${flightRect.height}px`
         doorBusy = true
-        box.classList.add("mm-flight-enter", "mm-door-live")
+        box.classList.add("mm-flight-enter")
         later.push(window.setTimeout(() => {
           box.classList.remove("mm-flight-enter")
-          box.classList.add("mm-door-shut")
+          box.classList.add("mm-door-live", "mm-door-shut")
         }, ENTER_MS))
         later.push(window.setTimeout(() => {
           box.classList.remove("mm-door-shut")
