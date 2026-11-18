@@ -130,7 +130,7 @@ export function ComposeMailer({
   const lastStep = steps[steps.length - 1] === step
   const gateOpen = path !== null && sizeConfirmed && namePicked
   const showTracker = gateOpen && path !== "team"
-  const firstLabel = path === "upload" ? "Upload" : path === "template" ? "Template" : "What"
+  const firstLabel = path === "upload" ? "Upload" : path === "template" ? "Mailer Gallery" : "What"
 
   function patch(partial: Partial<ComposeDraft>) {
     setDraft((current) => ({ ...current, ...partial }))
@@ -571,8 +571,8 @@ export function ComposeMailer({
         {step === "what" && gateOpen && path === "template" ? (
           <Panel className="space-y-4 p-4 sm:p-6">
             <div>
-              <Eyebrow>Template</Eyebrow>
-              <h1 className="mt-2 text-2xl font-semibold">Start from the Mailer Gallery</h1>
+              <Eyebrow>Mailer Gallery</Eyebrow>
+              <h1 className="mt-2 text-2xl font-semibold">Use something from the gallery</h1>
             </div>
             <div className="flex flex-wrap gap-2">
               <button type="button" onClick={() => setIndustry("all")} className="min-h-11 rounded-full border border-[#245068] px-3 text-sm">All</button>

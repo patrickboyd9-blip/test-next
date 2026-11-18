@@ -10,6 +10,7 @@ export type StartPath = "ai" | "upload" | "template" | "team"
 const CHOICES: Array<{
   id: StartPath
   title: string
+  line?: string
   description: string
   icon: "comet" | "upload" | "template" | "team"
   featured?: boolean
@@ -17,6 +18,7 @@ const CHOICES: Array<{
   {
     id: "ai",
     title: `Chat with ${ASSISTANT_NAME}`,
+    line: "Use our AI Chatbot to help you design a mailer",
     description: `Tell ${ASSISTANT_NAME} your goal. ${ASSISTANT_NAME} asks a few follow-ups and designs the postcard.`,
     icon: "comet",
     featured: true,
@@ -29,8 +31,8 @@ const CHOICES: Array<{
   },
   {
     id: "template",
-    title: "Start from the Mailer Gallery",
-    description: "Pick a mailer for your kind of business, then add your name and offer.",
+    title: "Use something from the gallery",
+    description: "Pick a mailer from the Mailer Gallery for your kind of business, then add your name and offer.",
     icon: "template",
   },
   {
@@ -66,6 +68,7 @@ export function StartChoices({ onChoose }: { onChoose: (path: StartPath) => void
                 {choice.icon === "comet" ? <CometMark className="size-6" /> : choice.icon === "upload" ? <Upload className="size-5" aria-hidden /> : choice.icon === "template" ? <LayoutTemplate className="size-5" aria-hidden /> : <PenLine className="size-5" aria-hidden />}
               </span>
               <span className="text-lg font-semibold">{choice.title}</span>
+              {choice.line ? <span className="text-sm font-medium text-[#e7f2fb]">{choice.line}</span> : null}
               <span className="text-sm leading-6 text-[#b7c9d8]">{choice.description}</span>
             </button>
           )

@@ -480,7 +480,7 @@ class StoredCampaignRepository implements CampaignRepository {
 
   async beginTemplatePath(id: string, templateId: string): Promise<Campaign> {
     const template = getMailTemplate(templateId)
-    if (!template) throw new Error("That template is no longer available.")
+    if (!template) throw new Error("That gallery mailer is no longer available.")
     const campaign = await this.require(id)
     applyTemplateStart(campaign, template, new Date().toISOString())
     return this.write(campaign)

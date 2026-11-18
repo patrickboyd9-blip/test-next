@@ -51,8 +51,8 @@ export function StartPathChoice({
         <div className="flex">
           <ChoiceCard
             choice="template"
-            title="Start from the Mailer Gallery"
-            description="Browse proven mailers for your industry, then let AI tailor one to your business."
+            title="Use something from the gallery"
+            description="Pick a mailer from the Mailer Gallery, then change the words, offer, and colors."
             icon={<LayoutTemplate className="size-4" />}
             onClick={onStartFromTemplate}
           />

@@ -10,7 +10,7 @@ const AI_SUBTITLE =
 const UPLOAD_SUBTITLE =
   "Upload your own front and back. We'll check it for print and show you a proof."
 const TEMPLATE_SUBTITLE =
-  "Browse proven mailers for your industry, then let AI tailor one to your business."
+  "Pick a mailer from the Mailer Gallery, then change the words, offer, and colors."
 const TEAM_SUBTITLE =
   "Share your logo, offer, and style. Our designers build a custom postcard for you."
 
@@ -22,7 +22,7 @@ test("the first screen is four equal choices and hides the prompt", () => {
   assert.ok(copy.includes(AI_SUBTITLE))
   assert.ok(copy.includes("I already have a design"))
   assert.ok(copy.includes(UPLOAD_SUBTITLE))
-  assert.ok(copy.includes("Start from the Mailer Gallery"))
+  assert.ok(copy.includes("Use something from the gallery"))
   assert.ok(copy.includes(TEMPLATE_SUBTITLE))
   assert.ok(copy.includes("Have our team design it"))
   assert.ok(copy.includes(TEAM_SUBTITLE))
@@ -51,8 +51,8 @@ test("the first screen is four equal choices and hides the prompt", () => {
   assert.match(html, /items-stretch/)
 
   assert.equal(html.indexOf("Design it with AI") < html.indexOf("I already have a design"), true)
-  assert.equal(html.indexOf("I already have a design") < html.indexOf("Start from the Mailer Gallery"), true)
-  assert.equal(html.indexOf("Start from the Mailer Gallery") < html.indexOf("Have our team design it"), true)
+  assert.equal(html.indexOf("I already have a design") < html.indexOf("Use something from the gallery"), true)
+  assert.equal(html.indexOf("Use something from the gallery") < html.indexOf("Have our team design it"), true)
   assert.doesNotMatch(html, /What would you like to accomplish\?/)
   assert.doesNotMatch(html, /I want to get more appointments from homeowners nearby\./)
   assert.doesNotMatch(html, /<textarea/)
@@ -90,11 +90,12 @@ test("choosing I already have a design opens the upload flow, with a way back", 
   assert.doesNotMatch(html, /I want to get more appointments from homeowners nearby\./)
 })
 
-test("choosing Start from the Mailer Gallery opens the industry gallery", () => {
+test("choosing the gallery opens the industry mailers", () => {
   const html = render("template")
   const copy = decode(html)
 
-  assert.match(html, /Start from the Mailer Gallery/)
+  assert.match(html, /Use something from the gallery/)
+  assert.match(html, /Mailer Gallery/)
   assert.match(html, /Filter by industry/)
   assert.ok(copy.includes("Roofing"))
   assert.ok(copy.includes("HVAC"))

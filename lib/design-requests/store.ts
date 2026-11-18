@@ -160,6 +160,10 @@ function requestFile(directory: string, id: string): string {
   return path.join(/*turbopackIgnore: true*/ directory, `${id}.json`)
 }
 
+function optionalText(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim() ? value : undefined
+}
+
 function sortNewest(requests: DesignRequest[]): DesignRequest[] {
   return [...requests].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
 }
@@ -185,6 +189,8 @@ function parseRequest(value: unknown): DesignRequest | null {
     websiteUrl: record.websiteUrl,
     otherResponse: record.otherResponse,
     notes: record.notes,
+    cardWords: optionalText(record.cardWords),
+    slogans: optionalText(record.slogans),
     size: record.size,
     uploads: record.uploads ?? [],
     createdAt: record.createdAt ?? new Date(0).toISOString(),
