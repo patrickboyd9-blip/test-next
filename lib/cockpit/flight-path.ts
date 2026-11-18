@@ -4,8 +4,61 @@ export const FLIGHT_MS = 8400
 export const IDLE_MS = 5 * 60 * 1000
 /** After the curve, the envelope slides into the mouth. The door then shuts and opens. */
 export const ENTER_MS = 480
+/** The shut begins this long after the envelope is inside. It must stay under 150ms. */
+export const DOOR_LAG_MS = 90
 export const DOOR_SHUT_MS = 380
 export const DOOR_OPEN_MS = 300
+
+/** Door overlay, as percentages of the rendered mailbox. Every frame stays inside it. */
+export interface DoorFrame {
+  left: number
+  top: number
+  width: number
+  height: number
+}
+
+export const DOOR_REST: DoorFrame = { left: 3.02, top: 50.89, width: 45.38, height: 12.82 }
+export const DOOR_PAST: DoorFrame = { left: 18, top: 18, width: 40, height: 34 }
+export const DOOR_SHUT_FRAME: DoorFrame = { left: 21, top: 21, width: 36, height: 32 }
+
+export function doorFrameInsideMailbox(frame: DoorFrame): boolean {
+  return frame.left >= 0
+    && frame.top >= 0
+    && frame.width > 0
+    && frame.height > 0
+    && frame.width <= 55
+    && frame.height <= 40
+    && frame.left + frame.width <= 100
+    && frame.top + frame.height <= 100
+}
+
+/** Pull every positioned frame out of the door keyframes. */
+export function doorFramesInCss(css: string): DoorFrame[] {
+  const blocks = ["mm-door-close", "mm-door-open"].map((name) => {
+    const start = css.indexOf(`@keyframes ${name}`)
+    const open = css.indexOf("{", start)
+    const end = css.indexOf("\n}", open)
+    return css.slice(open, end)
+  })
+  const frames: DoorFrame[] = []
+  for (const block of blocks) {
+    const chunks = block.split("\n  }")
+    for (const chunk of chunks) {
+      const left = chunk.match(/left:\s*([\d.]+)%/)
+      const top = chunk.match(/top:\s*(-?[\d.]+)%/)
+      const width = chunk.match(/width:\s*([\d.]+)%/)
+      const height = chunk.match(/height:\s*([\d.]+)%/)
+      if (!left || !top || !width || !height) continue
+      frames.push({
+        left: Number(left[1]),
+        top: Number(top[1]),
+        width: Number(width[1]),
+        height: Number(height[1]),
+      })
+    }
+  }
+  return frames
+}
 
 export interface FlightPoint {
   x: number
