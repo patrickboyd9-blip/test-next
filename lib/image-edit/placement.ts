@@ -36,7 +36,7 @@ export function placementLimits(size: PostcardSizeId, face: ProofFace): Placemen
 
 export function placeLayer(box: LayerBox, limits: PlacementLimits): LayerBox {
   const safe = limits.safe
-  let w = clamp(box.w, MIN_W, safe.w)
+  const w = clamp(box.w, MIN_W, safe.w)
   let h = clamp(box.h, MIN_H, safe.h)
   let x = clamp(box.x, safe.x, safe.x + safe.w - w)
   let y = clamp(box.y, safe.y, safe.y + safe.h - h)
