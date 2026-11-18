@@ -6,6 +6,7 @@
 import Image from "next/image"
 
 import { SkyComet } from "./comet"
+import { FlightEnvelope } from "./FlightEnvelope"
 import { LimbHour } from "./LimbHour"
 import { MailFlight } from "./MailFlight"
 
@@ -76,6 +77,11 @@ function Postbox({ scale }: { scale: "home" | "start" | "arrive" }) {
   return (
     <div className={tone} aria-hidden>
       <span className="mm-post-glow" />
+      <span className="mm-mouth">
+        <span className="mm-flight-insert">
+          <FlightEnvelope className="mm-flight-piece" paperId="mm-flight-paper-slot" />
+        </span>
+      </span>
       <Image
         src="/brand/mailbox/mailbox.webp"
         alt=""
@@ -83,6 +89,11 @@ function Postbox({ scale }: { scale: "home" | "start" | "arrive" }) {
         sizes={scale === "start" ? "(max-width: 640px) 120px, 210px" : "(max-width: 640px) 148px, 300px"}
         className="mm-post-photo"
       />
+      <span className="mm-door-rig">
+        <span className="mm-door">
+          <span className="mm-door-led" />
+        </span>
+      </span>
       <picture className="mm-terrain">
         <source srcSet="/brand/mailbox/terrain.webp" type="image/webp" />
         <Image

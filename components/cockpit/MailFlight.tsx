@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from "react"
 
+import { FlightEnvelope } from "./FlightEnvelope"
 import {
+  DOOR_OPEN_MS,
+  DOOR_SHUT_MS,
+  ENTER_MS,
   FLIGHT_MS,
   IDLE_MS,
   flightAllowed,
@@ -14,7 +18,7 @@ import {
 
 /**
  * A second piece of mail. The small slip already inside the mailbox is left alone.
- * This one takes the long curve and only then borrows the same slot fade.
+ * This one takes the long curve, slides into the mouth, and the door shuts and opens.
  */
 export function MailFlight() {
   const [path, setPath] = useState<string | null>(null)
@@ -25,7 +29,9 @@ export function MailFlight() {
     let frame = 0
     let idle = 0
     let retry = 0
+    const later: number[] = []
     let flying = false
+    let doorBusy = false
     let alive = true
 
     const measure = (): FlightMarks | null => {
@@ -58,7 +64,7 @@ export function MailFlight() {
     }
 
     const launch = () => {
-      if (!alive || flying) return
+      if (!alive || flying || doorBusy) return
       if (!flightAllowed(window.innerWidth, reduced.matches)) {
         setPath(null)
         return
@@ -104,8 +110,37 @@ export function MailFlight() {
     const finish = () => {
       flying = false
       const box = visibleMailbox()
-      box?.classList.add("mm-flight-arrive")
-      window.setTimeout(() => box?.classList.remove("mm-flight-arrive"), 1200)
+      const flightEl = document.querySelector(".mm-flight")
+      const mouth = box?.querySelector(".mm-mouth")
+      const insert = box?.querySelector(".mm-flight-insert")
+      if (
+        box &&
+        mouth instanceof HTMLElement &&
+        insert instanceof HTMLElement &&
+        flightEl instanceof HTMLElement &&
+        flightAllowed(window.innerWidth, reduced.matches)
+      ) {
+        const mouthRect = mouth.getBoundingClientRect()
+        const flightRect = flightEl.getBoundingClientRect()
+        insert.style.left = `${flightRect.left - mouthRect.left}px`
+        insert.style.top = `${flightRect.top - mouthRect.top}px`
+        insert.style.width = `${flightRect.width}px`
+        insert.style.height = `${flightRect.height}px`
+        doorBusy = true
+        box.classList.add("mm-flight-enter")
+        later.push(window.setTimeout(() => {
+          box.classList.remove("mm-flight-enter")
+          box.classList.add("mm-door-live", "mm-door-shut")
+        }, ENTER_MS))
+        later.push(window.setTimeout(() => {
+          box.classList.remove("mm-door-shut")
+          box.classList.add("mm-door-open")
+        }, ENTER_MS + DOOR_SHUT_MS))
+        later.push(window.setTimeout(() => {
+          box.classList.remove("mm-door-live", "mm-door-open")
+          doorBusy = false
+        }, ENTER_MS + DOOR_SHUT_MS + DOOR_OPEN_MS))
+      }
       setPath(null)
     }
     const layer = () => document.querySelector("[data-mail-flight]")
@@ -119,6 +154,7 @@ export function MailFlight() {
       window.cancelAnimationFrame(frame)
       window.clearTimeout(idle)
       window.clearTimeout(retry)
+      for (const id of later) window.clearTimeout(id)
       window.removeEventListener("resize", onResize)
       for (const name of ["mousemove", "keydown", "scroll", "touchstart", "pointerdown"] as const) {
         window.removeEventListener(name, onActivity)
@@ -133,18 +169,7 @@ export function MailFlight() {
     <div key={run} className="mm-flight-layer" data-mail-flight aria-hidden>
       <span className="mm-flight" style={{ offsetPath: `path('${path}')`, animationDuration: `${FLIGHT_MS}ms` }}>
         <span className="mm-flight-glow" />
-        <svg className="mm-flight-piece" viewBox="0 0 68 42" style={{ animationDuration: `${FLIGHT_MS}ms` }}>
-          <defs>
-            <pattern id="mm-flight-paper" width="3" height="3" patternUnits="userSpaceOnUse">
-              <rect width="3" height="3" fill="#f4efe6" />
-              <path d="M0 3 L3 0" stroke="#e6ddd1" strokeWidth="0.35" />
-            </pattern>
-          </defs>
-          <rect x="1.2" y="1.2" width="65.6" height="39.6" rx="1.4" fill="url(#mm-flight-paper)" />
-          <path d="M2 2 L34 24 L66 2" fill="none" stroke="#d8cfc2" strokeWidth="0.7" />
-          <path d="M2 40 L34 24 L66 40" fill="none" stroke="#e4dcd0" strokeWidth="0.45" />
-          <rect x="50" y="4.2" width="13" height="9.2" rx="0.4" fill="#b85a49" stroke="#8c4034" strokeWidth="0.45" strokeDasharray="0.7 0.55" />
-        </svg>
+        <FlightEnvelope className="mm-flight-piece" style={{ animationDuration: `${FLIGHT_MS}ms` }} />
       </span>
     </div>
   )

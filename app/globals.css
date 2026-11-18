@@ -437,18 +437,115 @@
   animation: mm-flight-scale 8.4s ease-out both;
 }
 
-.mm-postbox.mm-flight-arrive::after {
-  content: "";
+/* The mouth clips the arriving envelope. The photo sits above it, so the shell hides what has gone inside. */
+.mm-mouth {
   position: absolute;
+  z-index: 0;
+  left: -6%;
+  top: 18%;
+  width: 68%;
+  height: 42%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.mm-flight-insert {
+  position: absolute;
+  width: 54px;
+  height: 34px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mm-postbox.mm-flight-enter .mm-flight-insert {
+  opacity: 1;
+  animation: mm-into-box 480ms cubic-bezier(0.4, 0.05, 0.2, 1) forwards;
+}
+
+@keyframes mm-into-box {
+  0% { transform: translate3d(-18px, -22px, 0) rotate(-8deg); }
+  100% { transform: translate3d(36px, -4px, 0) rotate(2deg) scale(0.62); }
+}
+
+.mm-door-rig {
+  position: absolute;
+  inset: 0;
   z-index: 4;
-  left: 16%;
-  top: 41%;
-  width: 18%;
-  height: 7%;
-  border-radius: 1px;
-  background: linear-gradient(180deg, #f7fbff 0%, #d7e4ee 100%);
-  box-shadow: 0 0 10px rgba(190, 230, 255, 0.45);
-  animation: mm-slip-once 1.15s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  pointer-events: none;
+  perspective: 1600px;
+  perspective-origin: 46% 48%;
+  opacity: 0;
+}
+
+.mm-postbox.mm-door-live .mm-door-rig { opacity: 1; }
+
+.mm-postbox.mm-door-live .mm-post-photo {
+  -webkit-mask-image: url("/brand/mailbox/door-mask.png?v=5");
+  mask-image: url("/brand/mailbox/door-mask.png?v=5");
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center bottom;
+  mask-position: center bottom;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.mm-door {
+  --door-open: 98deg;
+  position: absolute;
+  left: 29%;
+  top: 28%;
+  width: 32%;
+  height: 34%;
+  transform-origin: 58% 100%;
+  transform: rotateX(var(--door-open)) rotateZ(-6deg);
+  border-radius: 3px 10px 5px 4px;
+  background:
+    linear-gradient(185deg, rgba(120, 196, 255, 0.16), transparent 22%),
+    linear-gradient(112deg, #1c2632 0%, #0e141c 46%, #1a222c 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(186, 214, 232, 0.16),
+    inset 0 -10px 16px rgba(0, 0, 0, 0.28);
+}
+
+.mm-door-led {
+  position: absolute;
+  left: 7%;
+  right: 12%;
+  top: 7%;
+  height: 2px;
+  border-radius: 2px;
+  background: #8adfff;
+  box-shadow: 0 0 6px 1px rgba(90, 200, 255, 0.8);
+}
+
+.mm-postbox.mm-door-shut .mm-door {
+  animation: mm-door-close 380ms cubic-bezier(0.22, 0.72, 0.18, 1) both;
+}
+
+.mm-postbox.mm-door-open .mm-door {
+  animation: mm-door-open 300ms cubic-bezier(0.32, 0.04, 0.2, 1) both;
+}
+
+.mm-postbox.mm-door-shut .mm-door-led {
+  animation: mm-led-boost 380ms ease-out both;
+}
+
+@keyframes mm-door-close {
+  0% { transform: rotateX(var(--door-open)) rotateZ(-6deg); }
+  74% { transform: rotateX(-6deg) rotateZ(0deg); }
+  100% { transform: rotateX(0deg) rotateZ(0deg); }
+}
+
+@keyframes mm-door-open {
+  0% { transform: rotateX(0deg) rotateZ(0deg); }
+  100% { transform: rotateX(var(--door-open)) rotateZ(-6deg); }
+}
+
+@keyframes mm-led-boost {
+  0% { filter: brightness(1); }
+  58% { filter: brightness(2.2); box-shadow: 0 0 14px 3px rgba(170, 230, 255, 0.95); }
+  100% { filter: brightness(1.1); }
 }
 
 @keyframes mm-flight-move {
@@ -462,7 +559,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mm-flight-layer { display: none; }
+  .mm-flight-layer,
+  .mm-flight-insert,
+  .mm-door-rig { display: none; }
 }
 
 @media (max-width: 1023px) {

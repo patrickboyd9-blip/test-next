@@ -2,6 +2,10 @@
 
 export const FLIGHT_MS = 8400
 export const IDLE_MS = 5 * 60 * 1000
+/** After the curve, the envelope slides into the mouth. The door then shuts and opens. */
+export const ENTER_MS = 480
+export const DOOR_SHUT_MS = 380
+export const DOOR_OPEN_MS = 300
 
 export interface FlightPoint {
   x: number
