@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
 
-import { FLIGHT_MS, IDLE_MS, flightAllowed, flightPath, glideOccupies, slotPoint } from "./flight-path"
+import { FLIGHT_MS, IDLE_MS, flightAllowed, flightPath, glideOccupies, pathTangentsMeet, slotPoint } from "./flight-path"
 
 test("the flight is skipped on a phone and when motion is reduced", () => {
   assert.equal(flightAllowed(1440, false), true)
@@ -24,6 +24,7 @@ test("the path starts at the lower left, crests, dips, and ends in the slot", ()
   assert.match(path, new RegExp(`${slot.x.toFixed(1)} ${slot.y.toFixed(1)}$`))
   assert.equal(path.split(" C ").length, 5)
   assert.ok(slot.y < 860)
+  assert.equal(pathTangentsMeet(path), true)
 })
 
 test("a flight waits while the existing glide is in the slot", () => {
@@ -31,6 +32,6 @@ test("a flight waits while the existing glide is in the slot", () => {
   assert.equal(glideOccupies(0.7), true)
   assert.equal(glideOccupies(0.93), true)
   assert.equal(glideOccupies(0.95), false)
-  assert.equal(FLIGHT_MS >= 3500 && FLIGHT_MS <= 5000, true)
+  assert.equal(FLIGHT_MS >= 8000 && FLIGHT_MS <= 10000, true)
   assert.equal(IDLE_MS, 300_000)
 })
