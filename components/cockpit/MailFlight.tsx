@@ -38,8 +38,13 @@ export function MailFlight() {
 
     const pauseGlide = () => {
       window.clearTimeout(glideHold)
-      visibleMailbox()?.classList.add("mm-glide-hold")
-      for (const animation of slipAnimations()) animation.currentTime = 0
+      const box = visibleMailbox()
+      box?.classList.add("mm-glide-hold")
+      box?.classList.remove("mm-flight-arrive")
+      for (const animation of slipAnimations()) {
+        animation.pause()
+        animation.currentTime = 0
+      }
     }
 
     const releaseGlide = () => {
@@ -47,6 +52,8 @@ export function MailFlight() {
       glideHold = window.setTimeout(() => {
         const box = visibleMailbox()
         box?.classList.remove("mm-glide-hold")
+        box?.classList.add("mm-flight-arrive")
+        window.setTimeout(() => box?.classList.remove("mm-flight-arrive"), 1200)
         for (const animation of slipAnimations()) {
           animation.currentTime = 0
           animation.play()
@@ -133,9 +140,6 @@ export function MailFlight() {
 
     const finish = () => {
       flying = false
-      const box = visibleMailbox()
-      box?.classList.add("mm-flight-arrive")
-      window.setTimeout(() => box?.classList.remove("mm-flight-arrive"), 1200)
       releaseGlide()
       setPath(null)
     }

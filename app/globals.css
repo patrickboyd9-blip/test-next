@@ -363,9 +363,16 @@
   animation: mm-slip-once 4.6s cubic-bezier(0.22, 0.61, 0.36, 1) 0.45s both;
 }
 
-/* Held while a flight is out, and for 30s after it ends. The 18s slip itself is unchanged. */
+/* Held while a flight is out, and for 30s after the envelope is gone. The 18s slip itself is unchanged. */
 .mm-postbox.mm-glide-hold .mm-mailer {
   animation-play-state: paused;
+  opacity: 0 !important;
+}
+
+.mm-postbox.mm-glide-hold.mm-flight-arrive::after {
+  content: none;
+  animation: none !important;
+  opacity: 0 !important;
 }
 
 @keyframes mm-box-drift {
