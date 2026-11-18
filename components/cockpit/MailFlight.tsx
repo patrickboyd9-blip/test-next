@@ -157,7 +157,7 @@ export function MailFlight() {
       const flightEl = document.querySelector(".mm-flight")
       if (flightEl instanceof HTMLElement) {
         flightEl.getAnimations().forEach((animation) => {
-          if (animation instanceof CSSAnimation && animation.animationName === "mm-flight-move") animation.pause()
+          if (animation.animationName === "mm-flight-move") animation.pause()
         })
       }
       finish()
