@@ -54,7 +54,7 @@ export function TemplateGallery({ onBack, onSelect }: TemplateGalleryProps) {
       </button>
 
       <div className="flex flex-col gap-2">
-        <h1 className="text-xl font-semibold tracking-tight">Start from a template</h1>
+        <h1 className="text-xl font-semibold tracking-tight">Start from the Mailer Gallery</h1>
         <p className="text-sm leading-6 text-muted-foreground">
           Browse proven mailers for your industry, then let AI tailor one to your business.
         </p>

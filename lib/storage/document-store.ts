@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from "fs/promises"
+import { mkdir, readdir, readFile, writeFile } from "fs/promises"
 import path from "path"
 
 import { neon } from "@neondatabase/serverless"
@@ -11,6 +11,7 @@ import { neon } from "@neondatabase/serverless"
 export interface DocumentStore {
   get(id: string): Promise<unknown | null>
   put(id: string, document: unknown): Promise<void>
+  list(): Promise<unknown[]>
 }
 
 export interface SqlExecutor {
@@ -27,6 +28,7 @@ export type DocumentCollection =
   | "vision_taste"
   | "concept_feedback"
   | "blueprints"
+  | "white_label"
 
 const SAFE_FILE_ID = /^[A-Za-z0-9_-]{1,200}$/
 
@@ -90,6 +92,15 @@ const COLLECTIONS: Record<DocumentCollection, CollectionSql> = {
       updated_at timestamptz NOT NULL DEFAULT now()
     )`,
   },
+  white_label: {
+    table: "white_label",
+    ddl: `CREATE TABLE IF NOT EXISTS white_label (
+      id text PRIMARY KEY,
+      data jsonb NOT NULL,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      updated_at timestamptz NOT NULL DEFAULT now()
+    )`,
+  },
 }
 
 export function postgresUrl(env: Record<string, string | undefined> = process.env): string | null {
@@ -120,6 +131,9 @@ export function defaultDocumentDirectory(collection: DocumentCollection): string
   if (collection === "blueprints") {
     return path.join(process.cwd(), ".data", "blueprints")
   }
+  if (collection === "white_label") {
+    return path.join(process.cwd(), ".data", "white-label")
+  }
   return path.join(process.cwd(), ".data", "reference-corpus")
 }
 
@@ -132,6 +146,9 @@ export function createMemoryDocumentStore(): DocumentStore {
     },
     async put(id, document) {
       docs.set(id, document)
+    },
+    async list() {
+      return [...docs.values()]
     },
   }
 }
@@ -159,6 +176,30 @@ export function createFileDocumentStore(directory: string): DocumentStore {
         JSON.stringify(document, null, 2),
         "utf-8"
       )
+    },
+
+    async list() {
+      let names: string[]
+      try {
+        names = await readdir(directory)
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === "ENOENT") return []
+        throw error
+      }
+      const documents: unknown[] = []
+      for (const name of names) {
+        if (!name.endsWith(".json")) continue
+        const id = name.slice(0, -".json".length)
+        if (!SAFE_FILE_ID.test(id)) continue
+        try {
+          const raw = await readFile(path.join(directory, name), "utf-8")
+          documents.push(JSON.parse(raw) as unknown)
+        } catch (error) {
+          if ((error as NodeJS.ErrnoException).code === "ENOENT") continue
+          throw error
+        }
+      }
+      return documents
     },
   }
 }
@@ -235,6 +276,12 @@ export function createPostgresDocumentStore(
            updated_at = now()`,
         [id, JSON.stringify(document)]
       )
+    },
+
+    async list() {
+      await ensure()
+      const rows = await executor.query<{ data: unknown }>(`SELECT data FROM ${spec.table}`)
+      return rows.map((row) => parseDocument(row.data))
     },
   }
 }

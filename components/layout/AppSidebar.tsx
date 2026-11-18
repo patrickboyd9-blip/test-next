@@ -1,11 +1,21 @@
 "use client"
 
 import Link from "next/link"
+import { usePathname } from "next/navigation"
+import {
+  BarChart3,
+  CreditCard,
+  Images,
+  LayoutDashboard,
+  LifeBuoy,
+  List,
+  Megaphone,
+  Settings,
+  Sparkles,
+} from "lucide-react"
 
 import { signOutAction } from "@/lib/auth/actions"
-import { usePathname } from "next/navigation"
-import { LayoutDashboard, LayoutTemplate, Megaphone, PenLine, Sparkles } from "lucide-react"
-
+import { CometMark } from "@/components/assistant/CometMark"
 import {
   Sidebar,
   SidebarContent,
@@ -18,6 +28,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
+import type { AppliedBrand } from "@/lib/white-label/brand"
 
 interface NavItem {
   label: string
@@ -29,20 +40,26 @@ const itemClass =
   "min-h-11 text-[#A9B4C2] hover:text-[#f7fbff] data-active:text-[#f7fbff] [&_svg]:text-current"
 
 const NAV_ITEMS: NavItem[] = [
-  { label: "Home", href: "/app", icon: LayoutDashboard },
-  { label: "New mailer", href: "/app/mail", icon: Megaphone },
+  { label: "Command Center", href: "/app", icon: LayoutDashboard },
+  { label: "Campaigns", href: "/app/campaigns", icon: Megaphone },
+  { label: "Lists", href: "/app/lists", icon: List },
+  { label: "Mailer Gallery", href: "/app/templates", icon: Images },
+  { label: "Reports", href: "/app/reports", icon: BarChart3 },
+  { label: "Billing", href: "/app/billing", icon: CreditCard },
+  { label: "Settings", href: "/app/settings", icon: Settings },
 ]
 
-const ADVANCED_ITEMS: NavItem[] = [
-  { label: "Full editor", href: "/app/campaigns/new", icon: Sparkles },
-  { label: "Templates", href: "/app/templates", icon: LayoutTemplate },
-  { label: "Design requests", href: "/app/design-requests", icon: PenLine },
+const PINNED: NavItem[] = [
+  { label: "Ask Comet", href: "/app/help?ask=1", icon: Sparkles },
+  { label: "Help", href: "/app/help", icon: LifeBuoy },
 ]
 
 export function AppSidebar({
   account,
+  brand,
 }: {
   account: { name: string; detail: string; initials: string } | null
+  brand: AppliedBrand
 }) {
   const pathname = usePathname()
 
@@ -57,18 +74,27 @@ export function AppSidebar({
           "--sidebar-accent": "#102433",
           "--sidebar-accent-foreground": "#e7f2fb",
           "--sidebar-border": "#1c3d52",
-          "--sidebar-primary": "#5ce1ff",
-          "--sidebar-primary-foreground": "#041018",
+          "--sidebar-primary": brand.accent,
+          "--sidebar-primary-foreground": brand.ink,
         } as React.CSSProperties
       }
     >
       <SidebarHeader>
         <div className="flex h-10 items-center gap-2 px-2">
-          <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-[#5ce1ff] text-xs font-bold text-[#041018]">
-            M
-          </span>
+          {brand.logoDataUrl ? (
+            // The mark is the account's file.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={brand.logoDataUrl} alt="" className="size-7 shrink-0 rounded-md object-contain" />
+          ) : (
+            <span
+              className="flex size-7 shrink-0 items-center justify-center rounded-md text-xs font-bold"
+              style={{ background: brand.accent, color: brand.ink }}
+            >
+              {brand.appName.slice(0, 1).toUpperCase()}
+            </span>
+          )}
           <span className="truncate font-mono text-[11px] font-medium uppercase tracking-[0.18em] group-data-[collapsible=icon]:hidden">
-            Modern Mail
+            {brand.appName}
           </span>
         </div>
       </SidebarHeader>
@@ -76,52 +102,31 @@ export function AppSidebar({
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
+            <Link
+              href="/app/mail"
+              className="mx-2 mb-3 inline-flex min-h-12 w-[calc(100%-1rem)] items-center justify-center rounded-xl px-3 text-sm font-semibold group-data-[collapsible=icon]:hidden"
+              style={{ background: brand.accent, color: brand.ink }}
+            >
+              New Mailer Campaign
+            </Link>
             <SidebarMenu>
-              {NAV_ITEMS.map((item) => {
-                const isActive = pathname === item.href
-                const Icon = item.icon
-
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      isActive={isActive}
-                      className={itemClass}
-                      tooltip={item.label}
-                      render={<Link href={item.href} />}
-                    >
-                      <Icon />
-                      <span>{item.label}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <p className="px-2 pb-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[#7ee7ff] group-data-[collapsible=icon]:hidden">
-              Advanced
-            </p>
-            <SidebarMenu>
-              {ADVANCED_ITEMS.map((item) => {
-                const isActive = pathname === item.href
-                const Icon = item.icon
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton isActive={isActive} className={itemClass} tooltip={item.label} render={<Link href={item.href} />}>
-                      <Icon />
-                      <span>{item.label}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )
-              })}
+              {NAV_ITEMS.map((item) => (
+                <NavLink key={item.href} item={item} active={pathname === item.href} />
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter>
+        <SidebarMenu>
+          {PINNED.map((item) => (
+            <NavLink key={item.href} item={item} active={pathname === "/app/help" && item.href === "/app/help"} comet={item.label === "Ask Comet"} />
+          ))}
+        </SidebarMenu>
+        {brand.poweredBy ? (
+          <p className="px-2 pt-2 text-[11px] text-[#8aa0b4] group-data-[collapsible=icon]:hidden">{brand.poweredBy}</p>
+        ) : null}
         <div className="flex items-center gap-2 rounded-md p-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0">
           <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-sidebar-accent text-xs font-medium text-sidebar-accent-foreground">
             {account?.initials ?? "?"}
@@ -150,5 +155,17 @@ export function AppSidebar({
 
       <SidebarRail />
     </Sidebar>
+  )
+}
+
+function NavLink({ item, active, comet = false }: { item: NavItem; active: boolean; comet?: boolean }) {
+  const Icon = item.icon
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton isActive={active} className={itemClass} tooltip={item.label} render={<Link href={item.href} />}>
+        {comet ? <CometMark className="size-4" /> : <Icon />}
+        <span>{item.label}</span>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
   )
 }

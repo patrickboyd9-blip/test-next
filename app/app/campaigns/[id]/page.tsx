@@ -2,6 +2,7 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 
 import { CampaignCreatorView } from "@/components/campaign-creator/CampaignCreatorView"
+import { DuplicateCampaignButton } from "@/components/campaigns/DuplicateCampaignButton"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { isDesignReviewAvailable } from "@/lib/bring-your-own-design/design-review"
 import { getCampaign } from "@/lib/campaign-creator/actions"
@@ -72,18 +73,38 @@ export default async function CampaignPage({
         <Link href={`/app/campaigns/${id}/order`} className="text-sm text-muted-foreground underline">
           Review list and checkout
         </Link>
+        <a href="#editor" className="text-sm font-medium underline">
+          Open full editor
+        </a>
+        <Link href="/app/design-requests" className="text-sm text-muted-foreground underline">
+          Design request
+        </Link>
+        <Link href="/app/templates" className="text-sm text-muted-foreground underline">
+          Mailer Gallery
+        </Link>
       </header>
+      <div className="flex flex-wrap items-center gap-4 border-b px-4 py-3">
+        <DuplicateCampaignButton id={campaign.id} name={campaign.name || campaign.brief.businessInfo?.name || "Campaign"} />
+        <Link href={`/app/campaigns/${id}/results`} className="text-sm underline">
+          Results
+        </Link>
+        <Link href={`/app/campaigns/${id}/order`} className="text-sm underline">
+          Proof and checkout
+        </Link>
+      </div>
       <p className="border-b px-4 py-3 text-sm text-muted-foreground">
         {campaignEditorNote(campaign)}{" "}
         <Link href={`/app/campaigns/${id}/guidance`} className="underline">
           Review the evidence
         </Link>
       </p>
+      <div id="editor">
       <CampaignCreatorView
         initialCampaign={campaign}
         printMailMode={printMailMode()}
         designReviewAvailable={isDesignReviewAvailable()}
       />
+      </div>
     </div>
   )
 }

@@ -13,11 +13,11 @@ export default function TemplatesPage() {
     <div className="flex min-h-svh flex-col">
       <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
         <SidebarTrigger className="-ml-1" />
-        <span className="text-sm font-medium text-muted-foreground">Templates</span>
+        <span className="text-sm font-medium text-muted-foreground">Mailer Gallery</span>
       </header>
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-10 px-6 py-10">
         <div className="flex flex-col gap-3">
-          <h1 className="text-2xl font-semibold tracking-tight">Design the postcard somewhere else</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Mailer Gallery</h1>
           <p className="text-sm leading-6 text-muted-foreground">
             Download a template, design the front and the back in Figma, Canva, or Photoshop,
             then upload both files in your campaign. The page is larger than the finished card

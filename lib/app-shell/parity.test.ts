@@ -7,16 +7,16 @@ function source(path: string): string {
 }
 
 const features: { name: string; file: string; needle: string }[] = [
-  { name: "Home", file: "components/layout/AppSidebar.tsx", needle: 'href: "/app"' },
-  { name: "New mailer", file: "components/layout/AppSidebar.tsx", needle: 'href: "/app/mail"' },
+  { name: "Home", file: "components/layout/AppSidebar.tsx", needle: 'label: "Command Center", href: "/app"' },
+  { name: "New mailer", file: "components/layout/AppSidebar.tsx", needle: 'href="/app/mail"' },
   { name: "Upload my own design", file: "components/cockpit/StartChoices.tsx", needle: "Upload my own design" },
   { name: "Upload proof", file: "components/cockpit/ComposeMailer.tsx", needle: "ProofEditor" },
   { name: "Chat with Comet", file: "components/cockpit/StartChoices.tsx", needle: "Chat with ${ASSISTANT_NAME}" },
-  { name: "Start from a template", file: "components/cockpit/StartChoices.tsx", needle: "Start from a template" },
+  { name: "Start from a template", file: "components/cockpit/StartChoices.tsx", needle: "Start from the Mailer Gallery" },
   { name: "Team design request", file: "components/cockpit/ComposeMailer.tsx", needle: "DesignRequestForm" },
-  { name: "Full editor", file: "components/layout/AppSidebar.tsx", needle: 'href: "/app/campaigns/new"' },
-  { name: "Templates", file: "components/layout/AppSidebar.tsx", needle: 'href: "/app/templates"' },
-  { name: "Design requests", file: "components/layout/AppSidebar.tsx", needle: 'href: "/app/design-requests"' },
+  { name: "Full editor", file: "app/app/campaigns/[id]/page.tsx", needle: "Open full editor" },
+  { name: "Templates", file: "components/layout/AppSidebar.tsx", needle: 'label: "Mailer Gallery", href: "/app/templates"' },
+  { name: "Design requests", file: "app/app/campaigns/[id]/page.tsx", needle: 'href="/app/design-requests"' },
   { name: "Proof and full price", file: "components/cockpit/ComposeMailer.tsx", needle: "PLACEHOLDER_FULL_PRICE" },
   { name: "List upload", file: "components/cockpit/ComposeMailer.tsx", needle: "countAddresses" },
   { name: "Evidence guidance", file: "app/app/campaigns/[id]/page.tsx", needle: "/guidance" },

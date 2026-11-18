@@ -1,18 +1,21 @@
-import Link from "next/link"
-
 import { CometIntro } from "@/components/assistant/CometIntro"
-import { cometIntroSeen } from "@/lib/assistant/intro-action"
-import { getSession, previewDemoAllowed } from "@/lib/auth/session"
-import { SidebarTrigger } from "@/components/ui/sidebar"
-import { HomeBoard } from "@/components/cockpit/HomeBoard"
+import { CommandCenter } from "@/components/cockpit/CommandCenter"
 import { MilestoneComet } from "@/components/cockpit/MilestoneComet"
 import { CockpitFrame } from "@/components/cockpit/ui"
+import { SidebarTrigger } from "@/components/ui/sidebar"
+import { cometIntroSeen } from "@/lib/assistant/intro-action"
+import { getSession, previewDemoAllowed } from "@/lib/auth/session"
+import { listOwnedCampaigns } from "@/lib/campaign-creator/actions"
+import { emptySnapshot, labeledSampleSnapshot, snapshotFrom } from "@/lib/command-center/snapshot"
 import { SAMPLE_SHOP } from "@/lib/mailer-compose/flow"
+import { readAudit } from "@/lib/ops/audit"
+import { applyBrand } from "@/lib/white-label/brand"
+import { readWhiteLabel } from "@/lib/white-label/store"
 
 export default async function CommandCenterPage({
   searchParams,
 }: {
-  searchParams: Promise<{ intro?: string; hour?: string; milestone?: string; preview?: string }>
+  searchParams: Promise<{ intro?: string; hour?: string; milestone?: string; preview?: string; sample?: string }>
 }) {
   const params = await searchParams
   const allowTune = previewDemoAllowed() || process.env.NODE_ENV !== "production"
@@ -20,9 +23,13 @@ export default async function CommandCenterPage({
   const milestone = allowTune && params.milestone ? Number(params.milestone) : Number.NaN
   const session = await getSession()
   const shop = session?.businessName || SAMPLE_SHOP
-  const replay = params.intro === "1" && (previewDemoAllowed() || process.env.NODE_ENV !== "production")
+  const replay = params.intro === "1" && allowTune
   const seen = session ? await cometIntroSeen(session.userId) : false
   const showIntro = replay || Boolean(session && !seen)
+  const settings = session ? await readWhiteLabel(session.userId).catch(() => null) : null
+  const brand = applyBrand(settings)
+  const sample = params.sample === "1" && allowTune
+  const snapshot = sample ? labeledSampleSnapshot() : await liveSnapshot(session?.userId)
 
   return (
     <CockpitFrame hero hour={Number.isFinite(hour) ? hour : undefined}>
@@ -31,10 +38,10 @@ export default async function CommandCenterPage({
         {session?.fixture ? (
           <p className="text-sm text-[#8aa0b4]">Preview demo. Sample account. Nothing is mailed or charged.</p>
         ) : !session ? (
-          <p className="text-sm text-[#8aa0b4]">Not signed in. The list below is a sample, not an account.</p>
+          <p className="text-sm text-[#8aa0b4]">Not signed in. The figures below stay empty.</p>
         ) : null}
       </div>
-      <HomeBoard shop={shop} sample={!session || session.fixture} />
+      <CommandCenter shop={shop} brand={brand} snapshot={snapshot} />
       <MilestoneComet
         total={0}
         ownerId={session?.userId ?? "signed-out"}
@@ -43,21 +50,18 @@ export default async function CommandCenterPage({
         force={Number.isFinite(milestone) ? milestone : undefined}
       />
       <CometIntro open={showIntro} />
-      <div className="mx-auto mb-10 flex w-full max-w-3xl flex-col gap-2 px-4 text-sm sm:px-6">
-        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#7ee7ff]">Advanced</p>
-        <p className="text-[#8aa0b4]">The older editor is still here. This page does not show result numbers.</p>
-        <div className="flex flex-wrap gap-4">
-          <Link href="/app/campaigns/new" className="min-h-11 text-[#8ecfff]">
-            Full editor
-          </Link>
-          <Link href="/app/templates" className="min-h-11 text-[#8ecfff]">
-            Templates
-          </Link>
-          <Link href="/app/design-requests" className="min-h-11 text-[#8ecfff]">
-            Design requests
-          </Link>
-        </div>
-      </div>
     </CockpitFrame>
   )
+}
+
+async function liveSnapshot(ownerId: string | undefined) {
+  if (!ownerId) return emptySnapshot()
+  try {
+    const campaigns = await listOwnedCampaigns()
+    const audit = await readAudit().catch(() => [])
+    const charges = audit.filter((event) => event.actorId === ownerId)
+    return snapshotFrom(campaigns, charges, new Date().toISOString(), ownerId)
+  } catch {
+    return emptySnapshot()
+  }
 }

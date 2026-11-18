@@ -12,6 +12,8 @@ import { RESPONSE_METHODS, RESPONSE_METHOD_LABELS, type ResponseMethod } from "@
 
 interface DesignRequestFormProps {
   onBack: () => void
+  postcardSize?: "5x8" | "6x9"
+  campaignName?: string
 }
 
 const METHOD_HINT: Record<ResponseMethod, string> = {
@@ -21,8 +23,8 @@ const METHOD_HINT: Record<ResponseMethod, string> = {
   other: "Something else you will describe",
 }
 
-export function DesignRequestForm({ onBack }: DesignRequestFormProps) {
-  const [companyName, setCompanyName] = useState("")
+export function DesignRequestForm({ onBack, postcardSize, campaignName }: DesignRequestFormProps) {
+  const [companyName, setCompanyName] = useState(campaignName ?? "")
   const [address, setAddress] = useState("")
   const [vibe, setVibe] = useState("")
   const [offer, setOffer] = useState("")
@@ -32,7 +34,7 @@ export function DesignRequestForm({ onBack }: DesignRequestFormProps) {
   const [websiteUrl, setWebsiteUrl] = useState("")
   const [otherResponse, setOtherResponse] = useState("")
   const [notes, setNotes] = useState("")
-  const [size, setSize] = useState("")
+  const [size, setSize] = useState(postcardSize ?? "")
   const [logoName, setLogoName] = useState("")
   const [imageCount, setImageCount] = useState(0)
   const [error, setError] = useState<string | null>(null)
@@ -231,17 +233,24 @@ export function DesignRequestForm({ onBack }: DesignRequestFormProps) {
       </Field>
 
       <Field id="size" label="Size">
-        <select
-          id="size"
-          name="size"
-          value={size}
-          onChange={(event) => setSize(event.target.value)}
-          className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-        >
-          <option value="">No preference</option>
-          <option value="5x8">5×8</option>
-          <option value="6x9">6×9</option>
-        </select>
+        {postcardSize ? (
+          <>
+            <input type="hidden" name="size" value={postcardSize} />
+            <p className="text-sm">{postcardSize === "6x9" ? "6×9" : "5×8"}. Chosen before this brief.</p>
+          </>
+        ) : (
+          <select
+            id="size"
+            name="size"
+            value={size}
+            onChange={(event) => setSize(event.target.value)}
+            className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          >
+            <option value="">No preference</option>
+            <option value="5x8">5×8</option>
+            <option value="6x9">6×9</option>
+          </select>
+        )}
         <p className="text-xs leading-5 text-muted-foreground">
           Both sizes keep a quarter inch of bleed and a safe area inside the cut.
         </p>
