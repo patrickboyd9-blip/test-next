@@ -583,6 +583,8 @@ export interface Campaign {
   ownerId: string
   /** Name the customer gave this campaign. Required on the upload path. */
   name?: string
+  /** Finished size the customer asked for. 5×8 or 6×9. */
+  postcardSize?: "5x8" | "6x9"
   /**
    * How the campaign started.
    * "ai" continues through strategy into generated directions.

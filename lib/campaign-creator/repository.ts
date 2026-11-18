@@ -138,6 +138,8 @@ export interface CampaignRepository {
   saveMailOrder(id: string, order: MailOrderRecord): Promise<Campaign>
   saveJobCreative(id: string, creative: JobCreative): Promise<Campaign>
   saveStrategyGuidance(id: string, guidance: StrategyGuidance, options?: { explicit?: boolean }): Promise<Campaign>
+  setMailerFacts(id: string, facts: { name?: string; postcardSize?: "5x8" | "6x9" }): Promise<Campaign>
+  cloneCampaign(id: string, ownerId: string): Promise<Campaign>
 }
 
 function backfillDirectionRevisions(
@@ -549,6 +551,50 @@ class StoredCampaignRepository implements CampaignRepository {
     }
     campaign.updatedAt = stamp
     return this.write(campaign)
+  }
+
+  async setMailerFacts(id: string, facts: { name?: string; postcardSize?: "5x8" | "6x9" }): Promise<Campaign> {
+    const campaign = await this.require(id)
+    if (facts.name !== undefined) {
+      const name = facts.name.trim()
+      if (!name) throw new Error("Add a name for this campaign.")
+      campaign.name = name.slice(0, 80)
+    }
+    if (facts.postcardSize !== undefined) {
+      if (facts.postcardSize !== "5x8" && facts.postcardSize !== "6x9") {
+        throw new Error("Choose a 5×8 or 6×9 postcard.")
+      }
+      const locked =
+        Boolean(campaign.mailPiece) ||
+        Boolean(campaign.uploadedDesign?.approvedAt) ||
+        campaign.status === "creative_approved"
+      if (locked && campaign.postcardSize && campaign.postcardSize !== facts.postcardSize) {
+        throw new Error("The postcard size is locked after the proof is approved.")
+      }
+      campaign.postcardSize = facts.postcardSize
+    }
+    campaign.updatedAt = new Date().toISOString()
+    return this.write(campaign)
+  }
+
+  async cloneCampaign(id: string, ownerId: string): Promise<Campaign> {
+    const source = await this.require(id)
+    if (!ownerId.trim() || source.ownerId !== ownerId) throw new Error("Campaign not found.")
+    const now = new Date().toISOString()
+    const copy: Campaign = {
+      ...structuredClone(source),
+      id: randomUUID(),
+      ownerId,
+      name: source.name ? `Copy of ${source.name}`.slice(0, 80) : "Copy of mailer",
+      mailOrder: undefined,
+      mailOrderHistory: undefined,
+      createdAt: now,
+      updatedAt: now,
+    }
+    if (copy.status === "launched" || copy.status === "quantity_confirmed" || copy.status === "audience_confirmed") {
+      copy.status = copy.mailPiece || copy.uploadedDesign?.approvedAt ? "creative_approved" : copy.creative.directions.length > 0 ? "creative_ready" : "draft"
+    }
+    return this.write(copy)
   }
 }
 

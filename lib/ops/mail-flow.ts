@@ -3,6 +3,7 @@ import type { SqlExecutor } from "@/lib/storage/document-store"
 
 import { appendAudit, approvedBy, readAudit, type AuditAction } from "./audit"
 import { requireRate } from "./rate-limit"
+import { chargeFitsCap } from "./spend-cap"
 import {
   checkoutForm,
   fullPriceCents,
@@ -112,6 +113,20 @@ export async function startApprovedCheckout(
       input.executor
     )
     throw new Error(price.ok ? "The amount is not the full price. Nothing was charged." : price.message)
+  }
+  const cap = await chargeFitsCap(input.actorId, price.amountCents, input.executor)
+  if (!cap.ok) {
+    await finishMailAction(
+      {
+        actorId: input.actorId,
+        action: "charge",
+        subjectId: input.subjectId,
+        before: { approved: true },
+        after: { charged: false, postageOnly: false, total: "full", reason: "cap" },
+      },
+      input.executor
+    )
+    throw new Error(cap.message)
   }
   const key = stripeSecretDecision(env)
   if (!key.ok) {

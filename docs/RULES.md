@@ -14,5 +14,9 @@ Each rule has a test that CI runs. A failure means the rule was broken.
 | AI and mail actions slow down after a short burst. | `lib/ops/rules.test.ts` |
 | Create, proof, price, approve, send, charge, and a scan are recorded in an append-only log. | `lib/ops/audit.ts`, `lib/ops/mail-flow.ts`, `lib/ops/rules.test.ts` |
 | A mailer QR sits outside the address panel and the barcode clear zone. A scan stores time, campaign, and recipient id, then forwards. Empty results stay empty. | `lib/tracking/tracking.test.ts` |
+| An assistant token belongs to one account. Revoking it stops it. That account cannot read or choose another account's mailer or list. | `lib/mcp/mcp.test.ts` |
+| An assistant can prepare a mailer and ask for approval. Nothing is approved, printed, or charged until the customer approves in the app. The price it shows is the full price, never postage by itself. | `lib/mcp/mcp.test.ts` |
+| A spending cap blocks a charge that would go over it. The assistant cannot raise the cap. | `lib/ops/rules.test.ts`, `lib/mcp/mcp.test.ts` |
+| Every assistant action is written to the audit log and slows down after a short burst. Replies do not include partners, costs, prompts, research sources, or another customer's data. | `lib/mcp/mcp.test.ts` |
 
 The log has no update or delete. It records who acted, which record, when, and a before and after snapshot.
