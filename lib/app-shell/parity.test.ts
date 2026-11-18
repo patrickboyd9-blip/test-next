@@ -26,6 +26,7 @@ const features: { name: string; file: string; needle: string }[] = [
   { name: "Click2Mail order", file: "app/app/campaigns/[id]/page.tsx", needle: "/order" },
   { name: "Logo upload", file: "components/campaign-creator/LogoUpload.tsx", needle: "type=\"file\"" },
   { name: "Ask Comet", file: "app/app/layout.tsx", needle: "AskComet" },
+  { name: "API settings", file: "app/app/settings/page.tsx", needle: 'href="/app/settings/api"' },
 ]
 
 for (const feature of features) {

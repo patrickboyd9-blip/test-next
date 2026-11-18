@@ -1,3 +1,5 @@
+import Link from "next/link"
+
 import { WhiteLabelForm } from "@/components/settings/WhiteLabelForm"
 import { CockpitFrame, Eyebrow, Panel } from "@/components/cockpit/ui"
 import { SidebarTrigger } from "@/components/ui/sidebar"
@@ -17,6 +19,20 @@ export default async function SettingsPage() {
           <Eyebrow>Settings</Eyebrow>
         </div>
         <h1 className="text-3xl font-semibold">Settings</h1>
+        <nav aria-label="Settings" className="flex flex-wrap gap-2">
+          <span
+            aria-current="page"
+            className="inline-flex min-h-10 items-center rounded-full border border-[#7ee7ff] bg-[#102433] px-4 text-sm text-[#f7fbff]"
+          >
+            Account
+          </span>
+          <Link
+            href="/app/settings/api"
+            className="inline-flex min-h-10 items-center rounded-full border border-[#1c3d52] px-4 text-sm text-[#b7c9d8] hover:border-[#3d6d88] hover:text-[#f7fbff]"
+          >
+            API & AI assistants
+          </Link>
+        </nav>
         <Panel className="p-5">
           <h2 className="font-medium">Business profile</h2>
           {session ? (

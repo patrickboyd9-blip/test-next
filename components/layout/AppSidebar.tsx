@@ -111,7 +111,15 @@ export function AppSidebar({
             </Link>
             <SidebarMenu>
               {NAV_ITEMS.map((item) => (
-                <NavLink key={item.href} item={item} active={pathname === item.href} />
+                <NavLink
+                  key={item.href}
+                  item={item}
+                  active={
+                    item.href === "/app"
+                      ? pathname === "/app"
+                      : pathname === item.href || pathname.startsWith(`${item.href}/`)
+                  }
+                />
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
