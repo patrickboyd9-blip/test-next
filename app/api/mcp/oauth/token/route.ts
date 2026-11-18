@@ -1,9 +1,12 @@
 import { exchangeAuthorizationCode, exchangeRefreshToken } from "@/lib/mcp/oauth"
+import { limitPublic } from "@/lib/ops/public-rate"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
 export async function POST(request: Request): Promise<Response> {
+  const limited = await limitPublic(request, "mcp-token", 20, 10 * 60_000)
+  if (limited) return limited
   const fields = await readFields(request)
   const grant = fields.get("grant_type") ?? ""
   if (grant === "authorization_code") {
