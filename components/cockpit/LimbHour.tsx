@@ -6,21 +6,25 @@ import { limbTint, type LimbTint } from "@/lib/cockpit/moments"
 
 /** A quiet wash on the planet limb. It does not move the comet, the mailbox, or the glide. */
 export function LimbHour({ hour }: { hour?: number }) {
-  const [tint, setTint] = useState<LimbTint>(() => limbTint(hour ?? 12))
+  const fixed = typeof hour === "number" ? limbTint(hour) : null
+  const [liveTint, setLiveTint] = useState<LimbTint | null>(null)
 
   useEffect(() => {
-    if (typeof hour === "number") {
-      setTint(limbTint(hour))
-      return
-    }
+    if (typeof hour === "number") return
     const read = () => {
       const now = new Date()
-      setTint(limbTint(now.getHours() + now.getMinutes() / 60))
+      setLiveTint(limbTint(now.getHours() + now.getMinutes() / 60))
     }
-    read()
+    const kick = window.setTimeout(read, 0)
     const timer = window.setInterval(read, 60_000)
-    return () => window.clearInterval(timer)
+    return () => {
+      window.clearTimeout(kick)
+      window.clearInterval(timer)
+    }
   }, [hour])
+
+  const tint = fixed ?? liveTint
+  if (!tint) return null
 
   return (
     <div

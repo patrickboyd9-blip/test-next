@@ -31,11 +31,16 @@ export function MilestoneComet({
       ? forced
       : milestoneToShow({ total, seen, sample, preview })
     if (!next) return
-    setMark(next)
-    setShow(true)
+    const start = window.setTimeout(() => {
+      setMark(next)
+      setShow(true)
+    }, 0)
     if (!preview) writeSeen(ownerId, [...seen, next])
     const timer = window.setTimeout(() => setShow(false), 6400)
-    return () => window.clearTimeout(timer)
+    return () => {
+      window.clearTimeout(start)
+      window.clearTimeout(timer)
+    }
   }, [total, ownerId, sample, preview, force])
 
   if (!show || !mark) return null

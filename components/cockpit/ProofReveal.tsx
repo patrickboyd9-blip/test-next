@@ -14,11 +14,6 @@ export function ProofReveal({
   const [intro, setIntro] = useState(true)
 
   useEffect(() => {
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    if (reduced) {
-      setIntro(false)
-      return
-    }
     const timer = window.setTimeout(() => setIntro(false), 1900)
     return () => window.clearTimeout(timer)
   }, [])

@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react"
 
 import {
-  FLIGHT_MS,
   IDLE_MS,
   flightAllowed,
   flightPath,
