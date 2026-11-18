@@ -71,12 +71,13 @@ function editText(
   }
   if (/\b(red|blue|black|white|gold)\b/i.test(instruction) && /\b(color|text|words)\b/i.test(instruction)) {
     const color = colorFor(instruction)
-    const texts = onFace.filter((layer) => layer.kind === "text")
-    if (texts.length === 0) return { layers, message: BAKED_TEXT, kind: "text" }
+    const target = /\b(text|words)\b/i.test(instruction) ? "text" : onFace.some((layer) => layer.kind === "color") ? "color" : "text"
+    const targets = onFace.filter((layer) => layer.kind === target)
+    if (targets.length === 0) return { layers, message: BAKED_TEXT, kind: "text" }
     return {
       kind: "text",
-      message: "Changed the text color.",
-      layers: layers.map((layer) => (layer.face === face && layer.kind === "text" ? { ...layer, color } : layer)),
+      message: target === "color" ? "Changed the color layer." : "Changed the text color.",
+      layers: layers.map((layer) => (layer.face === face && layer.kind === target ? { ...layer, color } : layer)),
     }
   }
   const shift = movement(instruction)

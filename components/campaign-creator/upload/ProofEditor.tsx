@@ -175,7 +175,9 @@ function LayerView({
         window.addEventListener("pointerup", stop)
       }}
     >
-      {layer.kind === "text" ? (
+      {layer.kind === "color" ? (
+        <div className="h-full w-full rounded-sm" style={{ background: layer.color }} />
+      ) : layer.kind === "text" ? (
         <p className="h-full w-full overflow-hidden text-center font-semibold leading-tight" style={{ color: layer.color, fontSize: "clamp(10px, 1.6vw, 18px)" }}>
           {layer.text}
         </p>

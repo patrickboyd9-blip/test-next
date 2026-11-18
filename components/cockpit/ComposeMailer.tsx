@@ -43,6 +43,8 @@ import { StartChoices, type StartPath } from "./StartChoices"
 
 import { ProofTray } from "./ProofCard"
 import { ProofEditor } from "@/components/campaign-creator/upload/ProofEditor"
+import { GalleryProof } from "@/components/cockpit/GalleryProof"
+import { layersForGallery } from "@/lib/mail-templates/gallery-layers"
 import type { ProofLayer } from "@/lib/image-edit/types"
 import { classifyDesignUpload, type DesignPreviewMedia } from "@/lib/mailer-compose/design-preview"
 import { cometLiveTurn } from "@/lib/mailer-compose/live-turn"
@@ -102,6 +104,7 @@ export function ComposeMailer({
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const [industry, setIndustry] = useState<TemplateIndustry | "all">(initialIndustry ?? "all")
   const [templateId, setTemplateId] = useState<string | null>(null)
+  const [galleryLayers, setGalleryLayers] = useState<ProofLayer[] | null>(null)
   const [advanced, setAdvanced] = useState(false)
   const [listError, setListError] = useState("")
   const steps = composeSteps(LIST_BEFORE_PROOF)
@@ -547,7 +550,7 @@ export function ComposeMailer({
                 : listMailTemplates(industry)
               ).map((item) => (
                 <li key={item.id}>
-                  <button type="button" onClick={() => { setTemplateId(item.id); patch({ brief: item.spec.offer || item.summary }) }} className={`flex min-h-14 w-full items-center gap-3 rounded-xl border px-4 text-left ${templateId === item.id ? "border-[#5ce1ff]" : "border-[#245068]"}`}>
+                  <button type="button" onClick={() => { setTemplateId(item.id); setGalleryLayers(layersForGallery(item)); patch({ brief: item.spec.offer || item.summary }) }} className={`flex min-h-14 w-full items-center gap-3 rounded-xl border px-4 text-left ${templateId === item.id ? "border-[#5ce1ff]" : "border-[#245068]"}`}>
                     {galleryPhotoSrc(item.id) ? (
                       <img src={galleryPhotoSrc(item.id) ?? ""} alt="" className="h-14 w-20 shrink-0 rounded-md object-cover" />
                     ) : (
@@ -561,8 +564,10 @@ export function ComposeMailer({
                 </li>
               ))}
             </ul>
-            {templateId ? (
+            {templateId && galleryLayers ? (
               <div className="space-y-3">
+                <p className="text-sm text-[#b7c9d8]">The picture color, headline, offer, and response are separate layers. Ask Comet to change them. Undo puts the last change back.</p>
+                <GalleryProof layers={galleryLayers} onChange={setGalleryLayers} />
                 <p className="text-sm text-[#b7c9d8]">Add your details. Sample text stays if you skip one.</p>
                 <input value={draft.phone} onChange={(event) => patch({ phone: event.target.value })} placeholder="Phone" className={fieldClass()} />
                 <input value={draft.brief} onChange={(event) => patch({ brief: event.target.value })} placeholder="Offer" className={fieldClass()} />
