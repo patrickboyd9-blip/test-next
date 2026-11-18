@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 
 import {
   FLIGHT_MS,
+  GLIDE_AFTER_FLIGHT_MS,
   IDLE_MS,
   flightAllowed,
   flightPath,
@@ -25,8 +26,33 @@ export function MailFlight() {
     let frame = 0
     let idle = 0
     let retry = 0
+    let glideHold = 0
     let flying = false
     let alive = true
+
+    const slipAnimations = () => {
+      const mailer = visibleMailbox()?.querySelector(".mm-mailer")
+      if (!(mailer instanceof HTMLElement)) return []
+      return mailer.getAnimations().filter((animation) => animation instanceof CSSAnimation && animation.animationName === "mm-slip")
+    }
+
+    const pauseGlide = () => {
+      window.clearTimeout(glideHold)
+      visibleMailbox()?.classList.add("mm-glide-hold")
+      for (const animation of slipAnimations()) animation.currentTime = 0
+    }
+
+    const releaseGlide = () => {
+      window.clearTimeout(glideHold)
+      glideHold = window.setTimeout(() => {
+        const box = visibleMailbox()
+        box?.classList.remove("mm-glide-hold")
+        for (const animation of slipAnimations()) {
+          animation.currentTime = 0
+          animation.play()
+        }
+      }, GLIDE_AFTER_FLIGHT_MS)
+    }
 
     const measure = (): FlightMarks | null => {
       if (!flightAllowed(window.innerWidth, reduced.matches)) return null
@@ -71,6 +97,7 @@ export function MailFlight() {
       const marks = measure()
       if (!marks) return
       flying = true
+      pauseGlide()
       setPath(flightPath(marks))
       setRun((value) => value + 1)
     }
@@ -87,7 +114,10 @@ export function MailFlight() {
       if (!flying) return
       const marks = measure()
       setPath(marks ? flightPath(marks) : null)
-      if (!marks) flying = false
+      if (!marks) {
+        flying = false
+        releaseGlide()
+      }
     }
 
     const onActivity = () => armIdle()
@@ -106,6 +136,7 @@ export function MailFlight() {
       const box = visibleMailbox()
       box?.classList.add("mm-flight-arrive")
       window.setTimeout(() => box?.classList.remove("mm-flight-arrive"), 1200)
+      releaseGlide()
       setPath(null)
     }
     const layer = () => document.querySelector("[data-mail-flight]")
@@ -119,6 +150,8 @@ export function MailFlight() {
       window.cancelAnimationFrame(frame)
       window.clearTimeout(idle)
       window.clearTimeout(retry)
+      window.clearTimeout(glideHold)
+      visibleMailbox()?.classList.remove("mm-glide-hold")
       window.removeEventListener("resize", onResize)
       for (const name of ["mousemove", "keydown", "scroll", "touchstart", "pointerdown"] as const) {
         window.removeEventListener(name, onActivity)
