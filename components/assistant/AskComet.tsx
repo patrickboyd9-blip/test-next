@@ -35,7 +35,16 @@ export function AskComet() {
     setTurns((current) => [...current, { role: "customer", text }])
     setThinking(true)
     try {
-      const answer: HelpAnswer = await askCometAction(text, pathname, step)
+      const brief = params.get("brief") ?? ""
+      const hasProof =
+        (step === "proof" && brief.trim().length > 0 && !/sample proof/i.test(brief)) ||
+        /\/campaigns\/[^/]+\/order/.test(pathname)
+      const proofHref = `${pathname}${params.toString() ? `?${params.toString()}` : ""}`
+      const history = turns
+        .filter((turn) => turn.role === "customer" || turn.role === "assistant")
+        .slice(-8)
+        .map((turn) => ({ role: turn.role, text: turn.text }))
+      const answer: HelpAnswer = await askCometAction(text, pathname, step, history, hasProof, proofHref)
       setTurns((current) => [
         ...current,
         { role: "assistant", text: answer.reply, links: answer.links, offerPerson: answer.offerPerson },
