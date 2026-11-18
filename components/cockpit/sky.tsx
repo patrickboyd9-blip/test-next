@@ -73,6 +73,13 @@ function Postbox({ scale }: { scale: "home" | "start" | "arrive" }) {
   return (
     <div className={tone} aria-hidden>
       <span className="mm-post-glow" />
+      <Image
+        src="/brand/mailbox/mailbox-body.webp"
+        alt=""
+        fill
+        sizes={scale === "start" ? "(max-width: 640px) 120px, 210px" : "(max-width: 640px) 148px, 300px"}
+        className="mm-post-body"
+      />
       <span className="mm-mouth">
         <span className="mm-flight-insert">
           <FlightEnvelope className="mm-flight-piece" paperId="mm-flight-paper-slot" />
@@ -86,9 +93,13 @@ function Postbox({ scale }: { scale: "home" | "start" | "arrive" }) {
         className="mm-post-photo"
       />
       <span className="mm-door-rig">
-        <span className="mm-door">
-          <span className="mm-door-led" />
-        </span>
+        <Image
+          src="/brand/mailbox/mailbox-door.webp"
+          alt=""
+          fill
+          sizes={scale === "start" ? "(max-width: 640px) 120px, 210px" : "(max-width: 640px) 148px, 300px"}
+          className="mm-post-door"
+        />
       </span>
       <picture className="mm-terrain">
         <source srcSet="/brand/mailbox/terrain.webp" type="image/webp" />
