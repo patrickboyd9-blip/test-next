@@ -96,6 +96,8 @@ export function applyRecoverMissingMailPiece(campaign: Campaign, now: string): v
 
 export interface CampaignRepository {
   createCampaign(ownerId: string): Promise<Campaign>
+  listForOwner(ownerId: string): Promise<Campaign[]>
+  insertCampaign(campaign: Campaign): Promise<Campaign>
   getCampaign(id: string): Promise<Campaign | null>
   appendMessage(id: string, message: ConversationMessage): Promise<Campaign>
   updateBrief(id: string, patch: Partial<CampaignBrief>): Promise<Campaign>
@@ -269,6 +271,21 @@ class StoredCampaignRepository implements CampaignRepository {
       updatedAt: now,
     }
     return this.write(campaign)
+  }
+
+  async listForOwner(ownerId: string): Promise<Campaign[]> {
+    const rows = await this.store.list()
+    return rows
+      .filter((row): row is Campaign => {
+        if (!row || typeof row !== "object") return false
+        return (row as Campaign).ownerId === ownerId && typeof (row as Campaign).id === "string"
+      })
+      .map((row) => normalizeCampaign(row))
+      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+  }
+
+  async insertCampaign(campaign: Campaign): Promise<Campaign> {
+    return this.write(normalizeCampaign(campaign))
   }
 
   async getCampaign(id: string): Promise<Campaign | null> {

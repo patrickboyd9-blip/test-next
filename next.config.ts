@@ -5,6 +5,13 @@ const nextConfig: NextConfig = {
   // (via server actions) hangs the first request with idle CPU.
   // pdf-lib's font kit is server-only and does not bundle cleanly.
   serverExternalPackages: ["@anthropic-ai/sdk", "pdf-lib", "@pdf-lib/fontkit"],
+  async redirects() {
+    return [
+      { source: "/app/gallery", destination: "/app/templates", permanent: false },
+      { source: "/app/advanced", destination: "/app", permanent: false },
+      { source: "/app/advanced/:path*", destination: "/app", permanent: false },
+    ]
+  },
   outputFileTracingIncludes: {
     "/app/campaigns/[id]": [
       "./lib/print-spec/fonts/**/*",

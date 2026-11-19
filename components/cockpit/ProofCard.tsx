@@ -1,9 +1,10 @@
 import type { MailerProof } from "@/lib/mailer-compose/flow"
+import { applyBrand, type AppliedBrand } from "@/lib/white-label/brand"
 
 import { ProofReveal } from "./ProofReveal"
 
 /** Neutral tray so the card colors are not tinted by the cockpit. */
-export function ProofTray({ proof }: { proof: MailerProof }) {
+export function ProofTray({ proof, brand = applyBrand(null) }: { proof: MailerProof; brand?: AppliedBrand }) {
   return (
     <div className="rounded-2xl bg-[#e6e2d8] p-4 text-[#1a1c1f] sm:p-6">
       <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.18em] text-[#5c564c]">Proof · sample layout</p>
@@ -11,7 +12,7 @@ export function ProofTray({ proof }: { proof: MailerProof }) {
         front={
           <article className="flex h-full min-h-56 flex-col justify-between bg-[#12243f] p-5 text-white">
             <div>
-              <p className="text-sm font-medium text-white/80">{proof.shop}</p>
+              <p className="text-sm font-medium" style={{ color: brand.accent }}>{proof.shop}</p>
               {proof.logoName ? <p className="mt-1 text-xs text-[#f0b429]">Logo · {proof.logoName}</p> : null}
             </div>
             <p className="my-4 text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">{proof.line}</p>
@@ -42,6 +43,12 @@ export function ProofTray({ proof }: { proof: MailerProof }) {
           </article>
         }
       />
+      {brand.poweredBy ? <p className="mt-3 text-xs text-[#5c564c]">{brand.poweredBy}</p> : null}
+      {brand.supportEmail ? (
+        <p className="mt-1 text-xs text-[#5c564c]">
+          {brand.supportName || "Support"} · {brand.supportEmail}
+        </p>
+      ) : null}
     </div>
   )
 }

@@ -38,6 +38,7 @@ import { getMailPiece } from "@/lib/mail-catalog/catalog"
 import { generateCampaignStrategy } from "@/lib/campaign-strategy/strategy-generator"
 import { listCampaignVotes, saveConceptVote } from "@/lib/design-intelligence/concept-feedback"
 import { reviseFromNote } from "@/lib/design-intelligence/refine-note"
+import { duplicateCampaign } from "./duplicate"
 
 const repository = getCampaignRepository()
 
@@ -86,6 +87,34 @@ export async function createDraftCampaign(): Promise<Campaign> {
     after: { id: created.id, status: created.status },
   })
   return forCustomer(created)
+}
+
+export async function listOwnedCampaigns(): Promise<Campaign[]> {
+  const session = await getSession()
+  if (!session) return []
+  try {
+    const rows = await repository.listForOwner(session.userId)
+    return rows.map(forCustomer)
+  } catch {
+    return []
+  }
+}
+
+export async function duplicateOwnedCampaign(campaignId: string, name: string): Promise<Campaign> {
+  const source = await owned(campaignId)
+  const session = await getSession()
+  if (!session) throw new CampaignAccessError(401, "Sign in required.")
+  await beginMailAction(session.userId, "create")
+  const copy = duplicateCampaign(source, new Date().toISOString(), randomUUID(), name)
+  const saved = await repository.insertCampaign(copy)
+  await finishMailAction({
+    actorId: session.userId,
+    action: "create",
+    subjectId: saved.id,
+    before: { sourceId: source.id },
+    after: { id: saved.id, status: saved.status, name: saved.name },
+  })
+  return forCustomer(saved)
 }
 
 /** Opens a catalog mailer in Studio on this draft. */

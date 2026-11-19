@@ -9,6 +9,7 @@ import {
   canContinue,
   composeSteps,
   countAddresses,
+  campaignNameReady,
   emptyDraft,
   firstMailerEffort,
   LIST_BEFORE_PROOF,
@@ -66,6 +67,13 @@ test("the list comes after the proof unless the flag says otherwise", () => {
   const effort = firstMailerEffort()
   assert.equal(effort.screens, 4)
   assert.equal(effort.clicks, 5)
+})
+
+test("a campaign name is required and stays short", () => {
+  assert.equal(campaignNameReady(""), false)
+  assert.equal(campaignNameReady("A"), false)
+  assert.equal(campaignNameReady("Spring tune-up"), true)
+  assert.equal(campaignNameReady("x".repeat(81)), false)
 })
 
 test("an uploaded list replaces the saved one", () => {

@@ -8,6 +8,7 @@ import { DesignRequestForm } from "@/components/campaign-creator/design-request/
 import {
   approvePreview,
   canApprove,
+  campaignNameReady,
   canContinue,
   composeSteps,
   countAddresses,
@@ -51,6 +52,8 @@ import { cometLiveTurn } from "@/lib/mailer-compose/live-turn"
 import { CometMark } from "@/components/assistant/CometMark"
 import { ASSISTANT_NAME } from "@/lib/assistant/comet"
 
+import { useBrand } from "@/components/brand/BrandProvider"
+
 import { CockpitFrame, Eyebrow, fieldClass, Panel } from "./ui"
 
 const STEP_LABEL: Record<ComposeStep, string> = {
@@ -86,12 +89,14 @@ export function ComposeMailer({
   liveChat?: boolean
 }) {
   const router = useRouter()
+  const brand = useBrand()
   const [step, setStep] = useState<ComposeStep>(initialStep)
   const [draft, setDraft] = useState<ComposeDraft>(initialDraft ?? emptyDraft())
   const [path, setPath] = useState<StartPath | null>(initialPath)
   const [postcardSize, setPostcardSize] = useState<"5x8" | "6x9" | null>(null)
   const [sizeConfirmed, setSizeConfirmed] = useState(false)
   const [sizeMessage, setSizeMessage] = useState("")
+  const [namePicked, setNamePicked] = useState(false)
   const [quick, setQuick] = useState(initialQuick)
   const tony = sampleBeat == null ? null : tonySample(sampleBeat)
   const [chat, setChat] = useState(tony?.turns ?? [{ role: "assistant" as const, text: ACCOMPLISH_QUESTION, choices: EXAMPLE_PROMPTS }])
@@ -123,7 +128,8 @@ export function ComposeMailer({
           : canContinue("what", draft)
   const ready = step === "what" ? stepOneReady : canContinue(step, draft)
   const lastStep = steps[steps.length - 1] === step
-  const showTracker = path !== null && sizeConfirmed && path !== "team"
+  const gateOpen = path !== null && sizeConfirmed && namePicked
+  const showTracker = gateOpen && path !== "team"
   const firstLabel = path === "upload" ? "Upload" : path === "template" ? "Template" : "What"
 
   function patch(partial: Partial<ComposeDraft>) {
@@ -204,7 +210,7 @@ export function ComposeMailer({
   async function answer(text: string) {
     if (liveChat) {
       const result = await cometLiveTurn({
-        brief: known,
+        brief: { ...known, otherRequirements: postcardNote(draft) },
         history: chat.map((turn) => ({ role: turn.role, text: turn.text })),
         message: text,
         refining: false,
@@ -223,7 +229,7 @@ export function ComposeMailer({
         return
       }
     }
-    const next = interviewReply(text, known)
+    const next = interviewReply(text, { ...known, otherRequirements: postcardNote(draft) })
     setKnown(next.brief)
     setChat((current) => [
       ...current,
@@ -241,7 +247,7 @@ export function ComposeMailer({
     if (!proposal) return
     if (liveChat) {
       const result = await cometLiveTurn({
-        brief: known,
+        brief: { ...known, otherRequirements: postcardNote(draft) },
         history: chat.map((turn) => ({ role: turn.role, text: turn.text })),
         message: reaction,
         refining: true,
@@ -398,18 +404,49 @@ export function ComposeMailer({
           </Panel>
         ) : null}
 
-        {step === "what" && sizeConfirmed && path === "team" ? (
-          <Panel className="bg-white p-4 text-neutral-900 sm:p-6">
-            <DesignRequestForm onBack={() => setPath(null)} />
+        {path && sizeConfirmed && !namePicked ? (
+          <Panel className="space-y-4 p-4 sm:p-6" data-name-step>
+            <div>
+              <Eyebrow>Name</Eyebrow>
+              <h1 className="mt-2 text-2xl font-semibold">Name this campaign</h1>
+              <p className="mt-1 text-sm text-[#b7c9d8]">This is how it shows up in your list. You can change it later.</p>
+            </div>
+            <label className="block text-sm">
+              Campaign name
+              <input
+                value={draft.campaignName}
+                onChange={(event) => patch({ campaignName: event.target.value })}
+                className={`${fieldClass()} mt-1`}
+                placeholder="Spring tune-up"
+              />
+            </label>
+            <div className="flex gap-3">
+              <button type="button" onClick={() => setSizeConfirmed(false)} className="min-h-11 text-sm text-[#8ecfff]">Back</button>
+              <button
+                type="button"
+                disabled={!campaignNameReady(draft.campaignName)}
+                onClick={() => setNamePicked(true)}
+                className="min-h-11 rounded-xl bg-[#5ce1ff] px-4 text-sm font-semibold text-[#041018] disabled:opacity-40"
+              >
+                Continue
+              </button>
+            </div>
           </Panel>
         ) : null}
 
-        {step === "what" && sizeConfirmed && path === "ai" && !quick ? (
+        {step === "what" && gateOpen && path === "team" ? (
+          <Panel className="bg-white p-4 text-neutral-900 sm:p-6">
+            <DesignRequestForm onBack={() => setNamePicked(false)} postcardSize={draft.size} campaignName={draft.campaignName} />
+          </Panel>
+        ) : null}
+
+        {step === "what" && gateOpen && path === "ai" && !quick ? (
           <Panel className="space-y-4 p-4 sm:p-6">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <Eyebrow>Chat</Eyebrow>
                 <h1 className="mt-2 text-2xl font-semibold">What would you like to accomplish?</h1>
+                <p className="mt-1 text-sm text-[#8aa0b4]">{draft.campaignName} · {draft.size === "6x9" ? "6×9" : "5×8"} postcard</p>
               </div>
               <label className="inline-flex min-h-11 cursor-pointer items-center text-sm text-[#8ecfff]">
                 <span className="sr-only">Add a logo</span>
@@ -448,6 +485,7 @@ export function ComposeMailer({
             {proposal ? (
               <div className="space-y-3">
                 <ProofTray
+                  brand={brand}
                   proof={{
                     shop: proposal.shop,
                     line: proposal.line,
@@ -490,7 +528,7 @@ export function ComposeMailer({
           </Panel>
         ) : null}
 
-        {step === "what" && sizeConfirmed && path === "ai" && quick ? (
+        {step === "what" && gateOpen && path === "ai" && quick ? (
           <Panel className="space-y-4 p-4 sm:p-6">
             <div>
               <Eyebrow>What</Eyebrow>
@@ -510,12 +548,12 @@ export function ComposeMailer({
           </Panel>
         ) : null}
 
-        {step === "what" && sizeConfirmed && path === "upload" ? (
+        {step === "what" && gateOpen && path === "upload" ? (
           <Panel className="space-y-4 p-4 sm:p-6">
             <div>
               <Eyebrow>Upload</Eyebrow>
               <h1 className="mt-2 text-2xl font-semibold">Upload the front and the back</h1>
-              <p className="mt-1 text-sm text-[#8aa0b4]">PNG, JPG, or PDF. Each file stays in this browser and is fitted on the proof. Nothing is uploaded or mailed.</p>
+              <p className="mt-1 text-sm text-[#8aa0b4]">PNG, JPG, or PDF. Fitted to the {draft.size === "6x9" ? "6×9" : "5×8"} postcard. Each file stays in this browser. Nothing is uploaded or mailed.</p>
             </div>
             <label className="block text-sm">Front
               <input type="file" accept="image/png,image/jpeg,application/pdf,.png,.jpg,.jpeg,.pdf" className="mt-1 block min-h-12 w-full text-sm" onChange={(event) => void onDesign("front", event.target.files?.[0] ?? null)} />
@@ -530,11 +568,11 @@ export function ComposeMailer({
           </Panel>
         ) : null}
 
-        {step === "what" && sizeConfirmed && path === "template" ? (
+        {step === "what" && gateOpen && path === "template" ? (
           <Panel className="space-y-4 p-4 sm:p-6">
             <div>
               <Eyebrow>Template</Eyebrow>
-              <h1 className="mt-2 text-2xl font-semibold">Start from a template</h1>
+              <h1 className="mt-2 text-2xl font-semibold">Start from the Mailer Gallery</h1>
             </div>
             <div className="flex flex-wrap gap-2">
               <button type="button" onClick={() => setIndustry("all")} className="min-h-11 rounded-full border border-[#245068] px-3 text-sm">All</button>
@@ -548,7 +586,7 @@ export function ComposeMailer({
               {(industry === "all"
                 ? listMailTemplates().filter((item, index, all) => all.findIndex((other) => other.industry === item.industry) === index)
                 : listMailTemplates(industry)
-              ).map((item) => (
+              ).filter((item) => item.size === draft.size).map((item) => (
                 <li key={item.id}>
                   <button type="button" onClick={() => { setTemplateId(item.id); setGalleryLayers(layersForGallery(item)); patch({ brief: item.spec.offer || item.summary }) }} className={`flex min-h-14 w-full items-center gap-3 rounded-xl border px-4 text-left ${templateId === item.id ? "border-[#5ce1ff]" : "border-[#245068]"}`}>
                     {galleryPhotoSrc(item.id) ? (
@@ -564,6 +602,9 @@ export function ComposeMailer({
                 </li>
               ))}
             </ul>
+            {draft.size === "6x9" ? (
+              <p className="text-sm text-[#b7c9d8]">The gallery mailers are 5×8. Go back and choose 5×8 to start from one, or keep 6×9 and use chat or an upload.</p>
+            ) : null}
             {templateId && galleryLayers ? (
               <div className="space-y-3">
                 <p className="text-sm text-[#b7c9d8]">The picture color, headline, offer, and response are separate layers. Ask Comet to change them. Undo puts the last change back.</p>
@@ -610,7 +651,7 @@ export function ComposeMailer({
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={logoUrl} alt={proof.logoName ?? "Logo"} className="h-14 w-24 rounded-md bg-white object-contain p-1" />
               ) : null}
-              <ProofTray proof={proof} />
+              <ProofTray proof={proof} brand={brand} />
             </Panel>
           </div>
         ) : null}
@@ -634,7 +675,7 @@ export function ComposeMailer({
           </Panel>
         ) : null}
 
-        {path && sizeConfirmed && path !== "team" ? <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        {gateOpen && path !== "team" ? <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <button
             type="button"
             onClick={() => {
@@ -669,6 +710,7 @@ export function ComposeMailer({
           </button>
           {advanced ? (
             <div className="mt-3 space-y-3">
+              <p className="text-sm text-[#b7c9d8]">Postcard size: {draft.size === "6x9" ? "6×9" : "5×8"}. Chosen before the design.</p>
               <label className="block text-sm">
                 Phone on the card
                 <input
@@ -696,6 +738,12 @@ export function ComposeMailer({
       </div>
     </CockpitFrame>
   )
+}
+
+function postcardNote(draft: ComposeDraft): string {
+  const size = draft.size === "6x9" ? "6×9" : "5×8"
+  const name = draft.campaignName.replace(/\s+/g, " ").trim()
+  return `Postcard size ${size}. Campaign name ${name}.`
 }
 
 function SizeChoice({

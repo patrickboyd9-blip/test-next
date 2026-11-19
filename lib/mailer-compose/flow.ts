@@ -78,6 +78,7 @@ export interface ComposeDraft {
   brief: string
   logoName: string | null
   size: "5x8" | "6x9"
+  campaignName: string
   phone: string
   website: string
 }
@@ -139,6 +140,7 @@ export function emptyDraft(): ComposeDraft {
     brief: "",
     logoName: null,
     size: "5x8",
+    campaignName: "",
     phone: "",
     website: "",
   }
@@ -162,6 +164,12 @@ export function selectedPeople(draft: ComposeDraft, lists: SavedList[] = SAVED_L
 export function selectedListName(draft: ComposeDraft, lists: SavedList[] = SAVED_LISTS): string {
   if (draft.uploadedName && draft.uploadedPeople > 0) return draft.uploadedName
   return lists.find((item) => item.id === draft.listId)?.name ?? "No list yet"
+}
+
+/** A campaign needs a name before the design starts. Two characters is enough. */
+export function campaignNameReady(name: string): boolean {
+  const clean = name.replace(/\s+/g, " ").trim()
+  return clean.length >= 2 && clean.length <= 80
 }
 
 function briefReady(draft: ComposeDraft): boolean {

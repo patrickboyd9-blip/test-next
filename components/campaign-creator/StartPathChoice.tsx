@@ -33,7 +33,7 @@ export function StartPathChoice({
           <ChoiceCard
             choice="ai"
             title="Design it with AI"
-            description="Tell us your goal and our AI designs a ready-to-mail postcard in minutes."
+            description="Tell us the goal. A few questions, then a postcard. Nothing is mailed until you approve it."
             icon={<Sparkles className="size-4" />}
             emphasized
             onClick={onDesignWithAi}
@@ -51,7 +51,7 @@ export function StartPathChoice({
         <div className="flex">
           <ChoiceCard
             choice="template"
-            title="Start from a template"
+            title="Start from the Mailer Gallery"
             description="Browse proven mailers for your industry, then let AI tailor one to your business."
             icon={<LayoutTemplate className="size-4" />}
             onClick={onStartFromTemplate}

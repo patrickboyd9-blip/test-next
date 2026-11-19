@@ -22,7 +22,7 @@ export function AskComet() {
   const params = useSearchParams()
   const step = params.get("step") ?? ""
   const proof = step === "proof" || pathname.includes("proof")
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(params.get("ask") === "1")
   const [thinking, setThinking] = useState(false)
   const [note, setNote] = useState("")
   const [savedNote, setSavedNote] = useState(false)

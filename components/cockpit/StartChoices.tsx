@@ -29,7 +29,7 @@ const CHOICES: Array<{
   },
   {
     id: "template",
-    title: "Start from a template",
+    title: "Start from the Mailer Gallery",
     description: "Pick a mailer for your kind of business, then add your name and offer.",
     icon: "template",
   },
