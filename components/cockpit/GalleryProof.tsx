@@ -9,9 +9,11 @@ import { geometryFor } from "@/lib/postcard-layouts/compose"
 
 export function GalleryProof({
   layers,
+  backgroundSrc,
   onChange,
 }: {
   layers: ProofLayer[]
+  backgroundSrc?: string | null
   onChange: (layers: ProofLayer[]) => void
 }) {
   const [past, setPast] = useState<ProofLayer[][]>([])
@@ -29,6 +31,11 @@ export function GalleryProof({
   return (
     <div className="space-y-3" data-gallery-proof>
       <div className="relative overflow-hidden rounded-lg border bg-[#071018]" style={{ aspectRatio: `${width} / ${height}` }}>
+        {backgroundSrc ? (
+          // The empty scene is the background. Words stay on their own layers.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={backgroundSrc} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        ) : null}
         {layers.map((layer) => (
           <div
             key={layer.id}

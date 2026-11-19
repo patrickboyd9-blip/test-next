@@ -1,4 +1,4 @@
-import { listMailTemplates } from "./query"
+import { getMailTemplate } from "./query"
 import type { MailTemplate, TemplateIndustry } from "./types"
 
 /** The eight industries in this gallery. Add a slug here when a later set is ready. */
@@ -38,11 +38,22 @@ const PATTERN: Record<string, { sourcePatternId: string; layoutRecipe: NonNullab
   "landscaping-backyard-light": { sourcePatternId: "gold/landscaping.json#type-led", layoutRecipe: "type-led" },
 }
 
+const V1_IDS = [
+  ...Object.keys(PATTERN),
+  "auto-repair-brake-check",
+  "auto-repair-oil-service",
+  "auto-repair-inspection",
+  "cleaning-first-visit",
+  "cleaning-move-out",
+  "cleaning-weekly",
+]
+
+/** The original 24 gallery mailers. Later expansion records stay out of this set. */
 export function galleryV1(): MailTemplate[] {
-  return GALLERY_V1_INDUSTRIES.flatMap((industry) =>
-    listMailTemplates(industry).map((template) => {
-      const extra = PATTERN[template.id]
-      return extra ? { ...template, ...extra } : template
-    }),
-  )
+  return V1_IDS.map((id) => {
+    const template = getMailTemplate(id)
+    if (!template) throw new Error(`Missing gallery mailer ${id}.`)
+    const extra = PATTERN[id]
+    return extra ? { ...template, ...extra } : template
+  })
 }

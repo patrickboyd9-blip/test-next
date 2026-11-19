@@ -608,7 +608,7 @@ export function ComposeMailer({
             {templateId && galleryLayers ? (
               <div className="space-y-3">
                 <p className="text-sm text-[#b7c9d8]">The picture color, headline, offer, and response are separate layers. Ask Comet to change them. Undo puts the last change back.</p>
-                <GalleryProof layers={galleryLayers} onChange={setGalleryLayers} />
+                <GalleryProof layers={galleryLayers} backgroundSrc={galleryPhotoSrc(templateId)} onChange={setGalleryLayers} />
                 <p className="text-sm text-[#b7c9d8]">Add your details. Sample text stays if you skip one.</p>
                 <input value={draft.phone} onChange={(event) => patch({ phone: event.target.value })} placeholder="Phone" className={fieldClass()} />
                 <input value={draft.brief} onChange={(event) => patch({ brief: event.target.value })} placeholder="Offer" className={fieldClass()} />

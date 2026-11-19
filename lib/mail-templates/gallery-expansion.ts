@@ -1,5 +1,11 @@
+import { buildOpenAIImagePrompt, servicePhotoPromptFailures } from "@/lib/campaign-creator/photography-shot-list"
+import { toImageBrief, type ImageBrief } from "@/lib/campaign-creator/image-brief"
+import type { CreativeSpec } from "@/lib/campaign-creator/types"
 import { RESEARCH_TASTE_PACK } from "@/lib/reference-corpus/taste-pack"
 import type { ReferenceCard } from "@/lib/reference-corpus/reference-card"
+
+import { EXPANSION_SCENES } from "./gallery-expansion-scenes"
+import type { MailTemplate } from "./types"
 
 /** Customer trades for the next gallery. Research names are mapped, not copied. */
 export const GALLERY_VERTICALS = [
@@ -30,16 +36,44 @@ export const FAVORITE_SOURCE_IDS = ["PM-066", "PM-067", "PM-068", "PM-069", "PM-
 export const ITEMS_PER_VERTICAL = 18
 export const IMAGES_PER_ITEM = 1
 export const CENTS_PER_IMAGE = 15
-export const SPEND_CAP_CENTS = 700
+/** Hard ceiling. A request that would pass this amount must not start. */
+export const EXPANSION_HARD_CAP_CENTS = 2200
+
+const PALETTE: Record<GalleryVertical, string[]> = {
+  roofing: ["#3d4a3a", "#d7c4a3", "#f4efe6"],
+  hvac: ["#1f3a4d", "#8fb8c9", "#f7f4ee"],
+  restaurant: ["#6b2d1a", "#e7c98a", "#f7f1e8"],
+  dental: ["#d7ebe8", "#1e3a4c", "#f7fbfa"],
+  real_estate: ["#5c6b4a", "#e6d7c3", "#f7f4ee"],
+  landscaping: ["#1f4d32", "#c4d7a3", "#f4f7ef"],
+  auto_repair: ["#3a3a3a", "#e36a2e", "#f4f1ea"],
+  cleaning: ["#d9e4ea", "#3d5a66", "#f7fbfc"],
+}
+
+const SHOP: Record<GalleryVertical, string> = {
+  roofing: "Local Roof Care",
+  hvac: "Local Comfort",
+  restaurant: "Local Table",
+  dental: "Local Dental",
+  real_estate: "Local Homes",
+  landscaping: "Local Yard",
+  auto_repair: "Local Garage",
+  cleaning: "Local Clean",
+}
 
 export interface GalleryExpansionSlot {
   id: string
   vertical: GalleryVertical
+  name: string
+  headline: string
+  scene: string
+  prompt: string
+  brief: ImageBrief
   sourceId: string | null
-  /** Lower sorts first. Favorites PM-066 through PM-070 are 0 through 4. */
   tier: number
-  approach: string
   images: 1
+  fileName: string
+  publicPath: string
 }
 
 export interface GalleryExpansionPlan {
@@ -47,8 +81,7 @@ export interface GalleryExpansionPlan {
   images: number
   estimatedCents: number
   capCents: number
-  status: "stopped"
-  reason: string
+  status: "ready"
 }
 
 export function sourceTier(id: string): number {
@@ -56,49 +89,116 @@ export function sourceTier(id: string): number {
   return index === -1 ? FAVORITE_SOURCE_IDS.length : index
 }
 
-export function planGalleryExpansion(
-  cards: readonly ReferenceCard[] = RESEARCH_TASTE_PACK
-): GalleryExpansionPlan {
+/** Whether another picture at `nextCents` may start. Equal to the cap is allowed. Past it is not. */
+export function expansionSpendDecision(spentCents: number, nextCents = CENTS_PER_IMAGE): "ok" | "ceiling" {
+  if (spentCents + nextCents > EXPANSION_HARD_CAP_CENTS) return "ceiling"
+  return "ok"
+}
+
+export function planGalleryExpansion(cards: readonly ReferenceCard[] = RESEARCH_TASTE_PACK): GalleryExpansionPlan {
   const items: GalleryExpansionSlot[] = []
   for (const vertical of GALLERY_VERTICALS) {
+    const scenes = EXPANSION_SCENES[vertical]
+    if (scenes.length !== ITEMS_PER_VERTICAL) {
+      throw new Error(`${vertical} needs ${ITEMS_PER_VERTICAL} scenes.`)
+    }
     const sources = cards
       .filter((card) => RESEARCH_FOR[vertical].includes(card.vertical))
       .slice()
       .sort((a, b) => sourceTier(a.mmrId) - sourceTier(b.mmrId) || a.mmrId.localeCompare(b.mmrId))
-    for (let index = 0; index < ITEMS_PER_VERTICAL; index += 1) {
-      const source = sources[index % Math.max(sources.length, 1)]
-      const usable = sources.length > 0 ? source : undefined
+    scenes.forEach(([headline, scene], index) => {
+      const source = sources.length > 0 ? sources[index % sources.length] : undefined
+      const id = `${vertical.replace(/_/g, "-")}-scene-${String(index + 1).padStart(2, "0")}`
+      const picture = expansionPicture(id, headline, scene)
       items.push({
-        id: `${vertical}-${String(index + 1).padStart(2, "0")}`,
+        id,
         vertical,
-        sourceId: usable?.mmrId ?? null,
-        tier: usable ? sourceTier(usable.mmrId) : sourceTier("none"),
-        approach: usable ? scrub(usable.principles[0] ?? usable.compositionNotes) : "No reviewed card for this trade. One original picture is still required. Do not borrow another trade's photograph.",
-        images: IMAGES_PER_ITEM,
+        name: headline,
+        headline,
+        scene,
+        prompt: picture.prompt,
+        brief: picture.brief,
+        sourceId: source?.mmrId ?? null,
+        tier: source ? sourceTier(source.mmrId) : sourceTier("none"),
+        images: 1,
+        fileName: `${id}.png`,
+        publicPath: `/gallery/${id}.png`,
       })
-    }
+    })
   }
-  const images = items.reduce((sum, item) => sum + item.images, 0)
-  const estimatedCents = images * CENTS_PER_IMAGE
+  const images = items.length * IMAGES_PER_ITEM
   return {
     items,
     images,
-    estimatedCents,
-    capCents: SPEND_CAP_CENTS,
-    status: "stopped",
-    reason: `${images} original pictures at ${CENTS_PER_IMAGE} cents each is ${estimatedCents} cents. The cap is ${SPEND_CAP_CENTS} cents, so no pictures were made.`,
+    estimatedCents: images * CENTS_PER_IMAGE,
+    capCents: EXPANSION_HARD_CAP_CENTS,
+    status: "ready",
   }
 }
 
-/** Documents that favorites exist and sort before ordinary research ids. */
 export function favoriteIdsInOrder(): readonly string[] {
-  return [...FAVORITE_SOURCE_IDS].sort((a, b) => sourceTier(a) - sourceTier(b))
+  return [...FAVORITE_SOURCE_IDS]
 }
 
-function scrub(value: string): string {
-  return value
-    .replace(/\b\d{3}[-.\s]?\d{3}[-.\s]?\d{4}\b/g, "")
-    .replace(/\S+@\S+/g, "")
-    .replace(/\s+/g, " ")
-    .trim()
+export function expansionTemplates(): MailTemplate[] {
+  return planGalleryExpansion().items.map((item) => expansionTemplate(item))
+}
+
+function expansionTemplate(item: GalleryExpansionSlot): MailTemplate {
+  const spec: CreativeSpec = {
+    layoutVariant: "image_grounded",
+    headline: item.headline,
+    subheadline: "A plain offer for a neighbor.",
+    body: "The words sit on their own layer. The picture has none.",
+    callToAction: "Ask for a visit",
+    offer: item.headline,
+    phone: "(555) 010-0199",
+    website: "https://local.example/visit",
+    qrDestination: "https://local.example/visit",
+    visualDirection: item.scene,
+    tone: "Plain",
+    palette: PALETTE[item.vertical],
+    imagery: "stock_generic_local",
+    leadJob: "offer",
+    imageryRole: "neighborhood",
+    backLayout: "standard_address",
+  }
+  return {
+    id: item.id,
+    industry: item.vertical,
+    name: item.name,
+    summary: "An original empty scene. The words are a separate layer.",
+    sampleBusinessName: SHOP[item.vertical],
+    size: "5x8",
+    spec,
+    sourcePatternId: item.sourceId ? `research/${item.sourceId}` : undefined,
+    layoutRecipe: "split-photo",
+  }
+}
+
+function expansionPicture(id: string, headline: string, scene: string): { prompt: string; brief: ImageBrief } {
+  const spec: CreativeSpec = {
+    layoutVariant: "image_grounded",
+    headline,
+    subheadline: "",
+    body: "",
+    callToAction: "Ask for a visit",
+    offer: "A quiet visit",
+    visualDirection: scene,
+    imageryRole: "neighborhood",
+    leadJob: "offer",
+    backLayout: "standard_address",
+  }
+  const brief = toImageBrief(spec, { variationKey: id })
+  if (!brief) throw new Error(`No picture brief for ${id}.`)
+  brief.artDirection = {
+    ...brief.artDirection,
+    subject: scene,
+    refuse: `${brief.artDirection.refuse} No logos and no lettering. No people, no hands, no faces. Single photograph, one scene, not a collage, no split screen.`,
+  }
+  brief.visualDirection = scene
+  const prompt = buildOpenAIImagePrompt(brief)
+  const failures = servicePhotoPromptFailures(prompt)
+  if (failures.length > 0) throw new Error(`${id} prompt is not ready: ${failures.join(", ")}`)
+  return { prompt, brief }
 }
