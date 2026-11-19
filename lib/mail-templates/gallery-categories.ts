@@ -1,5 +1,6 @@
 import { galleryPhotoSrc } from "./gallery-photo-src"
-import { galleryV1 } from "./gallery-v1"
+import { GALLERY_V1_INDUSTRIES } from "./gallery-v1"
+import { listMailTemplates } from "./query"
 import { TEMPLATE_INDUSTRY_LABELS, type TemplateIndustry } from "./types"
 
 export interface GalleryPhoto {
@@ -22,25 +23,15 @@ export interface GalleryCategory {
  * as soon as the catalog and the photo manifest list them.
  */
 export function galleryCategories(): GalleryCategory[] {
-  const groups = new Map<TemplateIndustry, GalleryPhoto[]>()
-  for (const template of galleryV1()) {
-    const src = galleryPhotoSrc(template.id)
-    if (!src) continue
-    const photos = groups.get(template.industry) ?? []
-    photos.push({
-      id: template.id,
-      name: template.name,
-      summary: template.summary,
-      src,
-      industry: template.industry,
+  return GALLERY_V1_INDUSTRIES.flatMap((id) => {
+    const photos = listMailTemplates(id).flatMap((template) => {
+      const src = galleryPhotoSrc(template.id)
+      if (!src) return []
+      return [{ id: template.id, name: template.name, summary: template.summary, src, industry: id }]
     })
-    groups.set(template.industry, photos)
-  }
-  return [...groups.entries()].map(([id, photos]) => ({
-    id,
-    label: TEMPLATE_INDUSTRY_LABELS[id],
-    photos,
-  }))
+    if (photos.length === 0) return []
+    return [{ id, label: TEMPLATE_INDUSTRY_LABELS[id], photos }]
+  })
 }
 
 /** "3 of 18" for the photo currently open in a category. */
