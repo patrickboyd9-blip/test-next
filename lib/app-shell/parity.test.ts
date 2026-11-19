@@ -12,7 +12,7 @@ const features: { name: string; file: string; needle: string }[] = [
   { name: "Upload my own design", file: "components/cockpit/StartChoices.tsx", needle: "Upload my own design" },
   { name: "Upload proof", file: "components/cockpit/ComposeMailer.tsx", needle: "ProofEditor" },
   { name: "Chat with Comet", file: "components/cockpit/StartChoices.tsx", needle: "Chat with ${ASSISTANT_NAME}" },
-  { name: "Start from a template", file: "components/cockpit/StartChoices.tsx", needle: "Start from the Mailer Gallery" },
+  { name: "Use something from the gallery", file: "components/cockpit/StartChoices.tsx", needle: "Use something from the gallery" },
   { name: "Team design request", file: "components/cockpit/ComposeMailer.tsx", needle: "DesignRequestForm" },
   { name: "Full editor", file: "app/app/campaigns/[id]/page.tsx", needle: "Open full editor" },
   { name: "Templates", file: "components/layout/AppSidebar.tsx", needle: 'label: "Mailer Gallery", href: "/app/templates"' },

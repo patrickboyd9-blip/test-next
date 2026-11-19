@@ -34,6 +34,8 @@ export function DesignRequestForm({ onBack, postcardSize, campaignName }: Design
   const [websiteUrl, setWebsiteUrl] = useState("")
   const [otherResponse, setOtherResponse] = useState("")
   const [notes, setNotes] = useState("")
+  const [cardWords, setCardWords] = useState("")
+  const [slogans, setSlogans] = useState("")
   const [size, setSize] = useState(postcardSize ?? "")
   const [logoName, setLogoName] = useState("")
   const [imageCount, setImageCount] = useState(0)
@@ -221,6 +223,33 @@ export function DesignRequestForm({ onBack, postcardSize, campaignName }: Design
           />
         </Field>
       )}
+
+      <section className="flex flex-col gap-3" data-slot="card-words">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-sm font-medium">Words for the card</h2>
+          <p className="text-sm leading-6 text-muted-foreground">
+            Optional. Write the exact words you want on the card, and any slogan or tagline.
+          </p>
+        </div>
+        <Field id="card-words" label="Specific words or verbiage">
+          <Textarea
+            id="card-words"
+            name="cardWords"
+            value={cardWords}
+            placeholder="Spring tune-up. Call today."
+            onChange={(event) => setCardWords(event.target.value)}
+          />
+        </Field>
+        <Field id="slogans" label="Slogans or taglines">
+          <Textarea
+            id="slogans"
+            name="slogans"
+            value={slogans}
+            placeholder="The roof you can forget about"
+            onChange={(event) => setSlogans(event.target.value)}
+          />
+        </Field>
+      </section>
 
       <Field id="notes" label="Notes">
         <Textarea

@@ -69,6 +69,21 @@ test("a request requires the company, address, vibe, offer, and a response metho
   assert.deepEqual(parsed.value.responseMethods, ["qr", "phone", "website", "other"])
   assert.equal(parsed.value.size, "6x9")
   assert.equal(parsed.value.qrUrl, "https://harborroofing.com/inspect")
+  assert.equal(parsed.value.cardWords, undefined)
+  assert.equal(parsed.value.slogans, undefined)
+
+  const withWords = parseDesignRequest({
+    ...complete,
+    cardWords: "Call this week for a free inspection.",
+    slogans: "The roof you can forget about",
+  })
+  assert.equal(withWords.ok, true)
+  if (withWords.ok) {
+    assert.equal(withWords.value.cardWords, "Call this week for a free inspection.")
+    assert.equal(withWords.value.slogans, "The roof you can forget about")
+  }
+  const tooLong = parseDesignRequest({ ...complete, cardWords: "word ".repeat(400) })
+  assert.equal(tooLong.ok, false)
 })
 
 test("requests and their images round-trip in files and in postgres", async () => {

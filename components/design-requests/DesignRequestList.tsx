@@ -41,6 +41,8 @@ export function DesignRequestList({ requests }: DesignRequestListProps) {
                   <Detail label="Vibe" value={request.vibe} />
                   <Detail label="Size" value={sizeLabel(request.size)} />
                   <Detail label="Response" value={responseSummary(request)} />
+                  {request.cardWords ? <Detail label="Words for the card" value={request.cardWords} /> : null}
+                  {request.slogans ? <Detail label="Slogans or taglines" value={request.slogans} /> : null}
                   {request.notes ? <Detail label="Notes" value={request.notes} /> : null}
                 </dl>
                 {request.uploads.length > 0 && (

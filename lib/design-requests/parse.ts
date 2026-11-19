@@ -17,6 +17,8 @@ export interface ParsedDesignRequest {
   websiteUrl?: string
   otherResponse?: string
   notes?: string
+  cardWords?: string
+  slogans?: string
   size?: DesignRequestSize
 }
 
@@ -30,6 +32,7 @@ const VIBE_MAX = 200
 const OFFER_MAX = 200
 const OTHER_MAX = 200
 const NOTES_MAX = 2000
+const WORDS_MAX = 1000
 
 export const DESIGN_REQUEST_IMAGE_TYPES = {
   "image/png": "png",
@@ -48,6 +51,8 @@ export function parseDesignRequest(input: DesignRequestInput | undefined): Parse
   const vibe = clean(input?.vibe)
   const offer = clean(input?.offer)
   const notes = clean(input?.notes)
+  const cardWords = clean(input?.cardWords)
+  const slogans = clean(input?.slogans)
   const otherResponse = clean(input?.otherResponse)
   const methods = uniqueMethods(input?.responseMethods)
 
@@ -87,6 +92,8 @@ export function parseDesignRequest(input: DesignRequestInput | undefined): Parse
     }
   }
   if (notes && notes.length > NOTES_MAX) return { ok: false, error: "Use a shorter note." }
+  if (cardWords.length > WORDS_MAX) return { ok: false, error: "Use fewer words for the card." }
+  if (slogans.length > WORDS_MAX) return { ok: false, error: "Use a shorter slogan or tagline." }
 
   const sizeResult = parseSize(input?.size)
   if (!sizeResult.ok) return sizeResult
@@ -104,6 +111,8 @@ export function parseDesignRequest(input: DesignRequestInput | undefined): Parse
       websiteUrl,
       otherResponse: methods.includes("other") ? otherResponse : undefined,
       notes: notes || undefined,
+      cardWords: cardWords || undefined,
+      slogans: slogans || undefined,
       size: sizeResult.size,
     },
   }
@@ -121,6 +130,8 @@ export function designRequestInputFromForm(formData: FormData): DesignRequestInp
     websiteUrl: stringField(formData, "websiteUrl"),
     otherResponse: stringField(formData, "otherResponse"),
     notes: stringField(formData, "notes"),
+    cardWords: stringField(formData, "cardWords"),
+    slogans: stringField(formData, "slogans"),
     size: stringField(formData, "size"),
   }
 }

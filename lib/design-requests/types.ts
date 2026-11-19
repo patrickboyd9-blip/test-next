@@ -34,6 +34,10 @@ export interface DesignRequest {
   websiteUrl?: string
   otherResponse?: string
   notes?: string
+  /** Exact words the customer wants printed. Optional. */
+  cardWords?: string
+  /** Slogans or taglines. Optional. */
+  slogans?: string
   size?: DesignRequestSize
   uploads: DesignRequestUpload[]
   createdAt: string
@@ -55,6 +59,8 @@ export interface DesignRequestInput {
   websiteUrl?: string
   otherResponse?: string
   notes?: string
+  cardWords?: string
+  slogans?: string
   size?: string
 }
 

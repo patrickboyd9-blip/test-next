@@ -74,7 +74,7 @@ export function helpRefusesAction(question: string): boolean {
 export function pageHint(page: string, step?: string): string {
   if (step === "proof" || page.includes("proof")) return "You are on the proof. Look it over, then continue to who receives it."
   if (step === "to") return "You are choosing who receives it. Pick a list, then you will see the full price."
-  if (step === "what" || page.endsWith("/mail")) return "You are starting a mailer. Pick chat, an upload, a template, or a person."
+  if (step === "what" || page.endsWith("/mail")) return "You are starting a mailer. Pick chat, an upload, the Mailer Gallery, or a person."
   if (page === "/app" || page.endsWith("/app")) return "You are home."
   return "You can start a mailer from Home."
 }
