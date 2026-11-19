@@ -4,7 +4,7 @@ import type { PostcardSizeId } from "@/lib/postcard-layouts/ids"
 export interface ProofLayer {
   id: string
   face: "front" | "back"
-  kind: "image" | "text"
+  kind: "image" | "text" | "color"
   /** Percents of the artwork canvas, origin at the top left. */
   x: number
   y: number
