@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Modern Mail</title>
+  <style>
+    body { margin: 0; font-family: Georgia, serif; background: #0c1424; color: #e7f2fb; }
+    main { max-width: 360px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    h1 { font-size: 18px; margin: 0; }
+    p, label { font-size: 13px; line-height: 1.4; color: #c5d4e4; }
+    button, input, select { font: inherit; }
+    button { min-height: 40px; border: 0; border-radius: 10px; background: #5ce1ff; color: #041018; font-weight: 600; }
+    button.quiet { background: transparent; color: #5ce1ff; border: 1px solid #245068; }
+    input, select { min-height: 40px; border-radius: 10px; border: 1px solid #245068; background: #071018; color: #e7f2fb; padding: 0 10px; }
+    .warn { color: #ffd7a8; }
+    .sheet { display: flex; gap: 8px; }
+    .card { flex: 1; background: #f7fbff; color: #102033; border-radius: 6px; position: relative; overflow: hidden; }
+    .card span { position: absolute; left: 6px; top: 4px; font-size: 10px; }
+    .guide { position: absolute; border: 1px dashed #1d6f8a; }
+    .hold { position: absolute; background: rgba(29, 111, 138, 0.16); border: 1px solid #1d6f8a; font-size: 8px; padding: 2px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Modern Mail</h1>
+    <p>Add a front page and a back page at the print size, then send the PDF to your campaign. Guides are locked and left out of the print file.</p>
+    <label>Size
+      <select id="size">
+        <option value="5x8">5 × 8</option>
+        <option value="6x9">6 × 9</option>
+      </select>
+    </label>
+    <button id="create" type="button">Create front and back</button>
+    <label>Modern Mail token
+      <input id="token" type="password" autocomplete="off" />
+    </label>
+    <label>Campaign
+      <select id="campaign"><option value="">New campaign</option></select>
+    </label>
+    <button id="load" class="quiet" type="button">Load my campaigns</button>
+    <label>Campaign name <input id="name" placeholder="Spring postcard" /></label>
+    <label>Return business <input id="business" placeholder="Harbor Roofing" /></label>
+    <label>Return street <input id="street" placeholder="1 Main St" /></label>
+    <label>City <input id="city" placeholder="Austin" /></label>
+    <label>State <input id="state" placeholder="TX" maxlength="2" /></label>
+    <label>ZIP <input id="zip" placeholder="78701" /></label>
+    <button id="send" type="button">Check and send</button>
+    <p id="status"></p>
+    <div id="preview" class="sheet" hidden></div>
+  </main>
+  <script type="module">
+    const status = document.getElementById("status")
+    const origin = "https://test-next-modern-mail2.vercel.app"
+    const SIZES = {
+      "5x8": { w: 8.5, h: 5.5, px: [2550, 1650] },
+      "6x9": { w: 9.5, h: 6.5, px: [2850, 1950] },
+    }
+    let sandbox = null
+    let addOnUISdk = null
+    void connectAddOn()
+    async function connectAddOn() {
+      try {
+        const loaded = await Promise.race([
+          import("https://express.adobe.com/static/add-on-sdk/sdk.js"),
+          new Promise((resolve) => setTimeout(() => resolve(null), 600)),
+        ])
+        if (!loaded) return
+        addOnUISdk = loaded.default
+        await addOnUISdk.ready
+        sandbox = await addOnUISdk.instance.runtime.apiProxy("documentSandbox")
+      } catch {
+        addOnUISdk = null
+        sandbox = null
+      }
+    }
+    document.getElementById("create").onclick = async () => {
+      const id = document.getElementById("size").value
+      const spec = SIZES[id]
+      drawPreview(id)
+      if (sandbox) await sandbox.create(id)
+      status.textContent = "Front and back are " + spec.px[0] + " × " + spec.px[1] + " pixels, which is " + spec.w + " × " + spec.h + " in. Guides stay off the print file."
+    }
+    document.getElementById("send").onclick = async () => {
+      const spec = SIZES[document.getElementById("size").value]
+      if (!sandbox || !addOnUISdk) {
+        status.textContent = "Page size is " + spec.w + " × " + spec.h + " in with 0.25 in bleed. Guides are left out of the print file."
+        return
+      }
+      if (sandbox) await sandbox.hideGuides()
+      const rendition = await addOnUISdk.app.document.createRenditions(
+        { range: addOnUISdk.constants.Range.entireDocument, format: addOnUISdk.constants.RenditionFormat.pdf },
+        addOnUISdk.constants.RenditionIntent.export,
+      )
+      if (sandbox) await sandbox.showGuides()
+      const pages = await addOnUISdk.app.document.getPagesMetadata({ range: addOnUISdk.constants.Range.entireDocument })
+      for (const page of pages) {
+        const inches = { w: page.size.width / page.pixelsPerInch, h: page.size.height / page.pixelsPerInch }
+        const close = Math.abs(inches.w - spec.w) < 0.05 && Math.abs(inches.h - spec.h) < 0.05
+        if (!close) {
+          status.textContent = "A page is " + inches.w.toFixed(2) + " × " + inches.h.toFixed(2) + " in. It needs to be " + spec.w + " × " + spec.h + " in."
+          status.className = "warn"
+          return
+        }
+        if (page.pixelsPerInch && page.pixelsPerInch < 300) {
+          status.textContent = "A page is under 300 pixels per inch."
+          status.className = "warn"
+          return
+        }
+      }
+      await uploadBlobs(rendition.map((item) => item.blob))
+    }
+    document.getElementById("load").onclick = loadCampaigns
+    function drawPreview(id) {
+      const spec = SIZES[id]
+      const preview = document.getElementById("preview")
+      preview.hidden = false
+      preview.innerHTML = ""
+      for (const face of ["Front", "Back"]) {
+        const card = document.createElement("div")
+        card.className = "card"
+        card.style.aspectRatio = spec.w + " / " + spec.h
+        card.innerHTML = "<span>" + face + "</span>"
+        const trim = document.createElement("div")
+        trim.className = "guide"
+        const insetX = (0.25 / spec.w) * 100
+        const insetY = (0.25 / spec.h) * 100
+        trim.style.left = insetX + "%"
+        trim.style.top = insetY + "%"
+        trim.style.width = (100 - insetX * 2) + "%"
+        trim.style.height = (100 - insetY * 2) + "%"
+        card.appendChild(trim)
+        if (face === "Back") {
+          const hold = document.createElement("div")
+          hold.className = "hold"
+          hold.textContent = "Address"
+          const pagePtW = spec.w * 72
+          const pagePtH = spec.h * 72
+          const panel = id === "6x9" ? [263, 213] : [265.5, 208]
+          hold.style.width = (panel[0] / pagePtW) * 100 + "%"
+          hold.style.height = (panel[1] / pagePtH) * 100 + "%"
+          hold.style.right = (18 / pagePtW) * 100 + "%"
+          hold.style.bottom = (18 / pagePtH) * 100 + "%"
+          card.appendChild(hold)
+        }
+        preview.appendChild(card)
+      }
+    }
+    async function uploadBlobs(blobs) {
+      const token = document.getElementById("token").value.trim()
+      if (!token) {
+        status.textContent = "Paste a token from Modern Mail settings."
+        return
+      }
+      const headers = { Authorization: "Bearer " + token, "Content-Type": "application/json" }
+      let campaignId = document.getElementById("campaign").value
+      if (!campaignId) {
+        const created = await fetch(origin + "/api/design-plugins/campaigns", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ name: document.getElementById("name").value, size: document.getElementById("size").value, brief: "A postcard designed for Modern Mail." }),
+        })
+        const campaign = await created.json()
+        if (!created.ok) {
+          status.textContent = campaign.error || "The mailer was not created."
+          return
+        }
+        campaignId = campaign.id
+      }
+      const faces = ["front", "back"]
+      for (let index = 0; index < blobs.length && index < 2; index += 1) {
+        const contentBase64 = await blobToBase64(blobs[index])
+        const sent = await fetch(origin + "/api/design-plugins/upload", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            campaignId,
+            face: faces[index],
+            fileName: faces[index] + ".pdf",
+            contentBase64,
+            businessName: document.getElementById("business").value,
+            street: document.getElementById("street").value,
+            city: document.getElementById("city").value,
+            state: document.getElementById("state").value,
+            postalCode: document.getElementById("zip").value,
+          }),
+        })
+        const body = await sent.json()
+        if (!sent.ok || (body.issues && body.issues.length)) {
+          status.textContent = body.error || (body.issues || []).map((item) => item.message).join(" ")
+          status.className = "warn"
+          return
+        }
+      }
+      status.textContent = "Sent to Modern Mail. Open the campaign to approve the proof and the full price. Nothing is mailed yet."
+    }
+    function blobToBase64(blob) {
+      return new Promise((resolve) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(String(reader.result).split(",")[1] || "")
+        reader.readAsDataURL(blob)
+      })
+    }
+    async function loadCampaigns() {
+      const token = document.getElementById("token").value.trim()
+      if (!token) {
+        status.textContent = "Paste a token from Modern Mail settings."
+        return
+      }
+      const listed = await fetch(origin + "/api/design-plugins/campaigns", { headers: { Authorization: "Bearer " + token } })
+      const body = await listed.json()
+      if (!listed.ok) {
+        status.textContent = body.error || "The campaigns could not be loaded."
+        return
+      }
+      const select = document.getElementById("campaign")
+      select.innerHTML = '<option value="">New campaign</option>'
+      for (const item of body.campaigns || []) {
+        const option = document.createElement("option")
+        option.value = item.id
+        option.textContent = item.name
+        select.appendChild(option)
+      }
+      status.textContent = "Choose a campaign, or leave New campaign selected."
+    }
+  </script>
+</body>
+</html>
