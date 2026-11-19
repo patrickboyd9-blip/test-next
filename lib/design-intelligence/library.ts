@@ -36,6 +36,8 @@ export interface MailerAnalysis {
   low_res?: boolean
   shared_vendor_style?: boolean
   faces?: string[]
+  /** Corpus tag. Live values are patrick_favorite, national_brand, and local. */
+  brand_tier?: string
 }
 
 export type LibrarySource = "seed" | "mando" | "c3po" | "analyzed"
@@ -56,6 +58,8 @@ export interface LibraryRecord {
   grade?: string
   needsAnalysis: boolean
   syncedAt?: string
+  /** From the corpus brand_tier tag, when the sync has seen one. */
+  brandTier?: string
 }
 
 const SAFE_ID = /^[A-Za-z0-9_-]{1,80}$/
@@ -242,6 +246,7 @@ export function mergeRecord(existing: LibraryRecord | undefined, synced: Library
     images: synced.images.length > 0 ? synced.images : existing.images,
     vertical: synced.vertical ?? existing.vertical ?? existing.analysis?.vertical,
     grade: synced.grade ?? existing.grade ?? existing.analysis?.grade,
+    brandTier: synced.brandTier ?? existing.brandTier,
     needsAnalysis: synced.analysis || existing.analysis ? false : synced.needsAnalysis,
     source: synced.source,
   }
@@ -261,6 +266,7 @@ export function parseStoredRecord(raw: unknown): LibraryRecord | null {
     images: Array.isArray(record.images) ? record.images.filter(isImage) : [],
     vertical: typeof record.vertical === "string" ? record.vertical : undefined,
     grade: typeof record.grade === "string" ? record.grade : undefined,
+    brandTier: typeof record.brandTier === "string" ? record.brandTier : undefined,
     needsAnalysis: Boolean(record.needsAnalysis),
     syncedAt: typeof record.syncedAt === "string" ? record.syncedAt : undefined,
   }

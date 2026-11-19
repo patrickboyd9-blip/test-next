@@ -9,6 +9,7 @@ import {
 } from "./library"
 import { ownerFavoriteIds } from "./owner-favorites"
 import { patrickGoldForBrief } from "./patrick-gold"
+import { NATIONAL_BRAND_GUARD, referenceTier } from "./reference-tiers"
 import { industriesAdjacent, industryForBrief, normalizeIndustry, resolveIndustry } from "@/lib/research-library/industry"
 import type { DesignVertical } from "./rationale"
 import { verticalForBrief } from "./vertical"
@@ -66,10 +67,10 @@ export function selectReferences(
     .map((record) => toPick(record, "dont"))
 
   const peers = records
-    .filter((record) => !isAntiExample(record) && !favoriteIds.has(record.id))
+    .filter((record) => !isAntiExample(record) && !favoriteIds.has(record.id) && referenceTier(tierOf(record)) !== 1)
     .map((record) => ({ record, score: peerScore(record, vertical, brief) }))
     .filter((item) => item.score > 0)
-    .sort((a, b) => b.score - a.score || a.record.id.localeCompare(b.record.id))
+    .sort((a, b) => referenceTier(tierOf(a.record)) - referenceTier(tierOf(b.record)) || b.score - a.score || a.record.id.localeCompare(b.record.id))
     .slice(0, PEER_LIMIT)
     .map((item) => toPick(item.record, "peer"))
 
@@ -87,6 +88,7 @@ export function selectReferences(
   for (const pick of [...anchors, ...peers]) {
     const record = byId.get(pick.id)
     if (!record?.images.length) continue
+    if (referenceTier(tierOf(record)) < 3) continue
     if (imageIds.length >= IMAGE_LIMIT) break
     imageIds.push(pick.id)
   }
@@ -242,6 +244,7 @@ function toPick(record: LibraryRecord, role: ReferencePick["role"]): ReferencePi
     (role === "dont"
       ? analysis?.anti_patterns?.[0] || "Do not borrow the official-notice costume or a fake deadline."
       : "Do not copy the mark, the amounts, the phone, the photos, or the wording.")
+  const tier = referenceTier(tierOf(record))
   return {
     id: record.id,
     role,
@@ -249,8 +252,12 @@ function toPick(record: LibraryRecord, role: ReferencePick["role"]): ReferencePi
     vertical: record.vertical ?? analysis?.vertical,
     mailbox: record.id.startsWith("PM-") || analysis?.corpus === "pm",
     principle: clip(principle),
-    doNotCopy: clip(doNotCopy),
+    doNotCopy: clip(tier === 2 ? NATIONAL_BRAND_GUARD : doNotCopy),
   }
+}
+
+function tierOf(record: LibraryRecord): { id: string; brandTier?: string | null } {
+  return { id: record.id, brandTier: record.brandTier ?? record.analysis?.brand_tier }
 }
 
 function clip(value: string): string {

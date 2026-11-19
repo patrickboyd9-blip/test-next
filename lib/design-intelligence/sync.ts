@@ -1,6 +1,7 @@
 import type { DocumentStore } from "@/lib/storage/document-store"
 
 import { isForbiddenResearchPath, saveLibraryImage } from "./images"
+import { brandTierFromProvenance } from "./reference-tiers"
 import {
   designLibraryStore,
   loadSeedAnalyses,
@@ -27,6 +28,7 @@ export interface SyncEntry {
   vertical?: string
   imagePath?: string
   recordPath?: string
+  brandTier?: string
   skippedPrivate: string[]
 }
 
@@ -153,6 +155,7 @@ export async function syncReferenceLibraries(input: {
       imagePath: current.imagePath ?? entry.imagePath,
       recordPath: current.recordPath ?? entry.recordPath,
       vertical: current.vertical ?? entry.vertical,
+      brandTier: current.brandTier ?? entry.brandTier,
       skippedPrivate: [...current.skippedPrivate, ...entry.skippedPrivate],
     })
   }
@@ -212,6 +215,7 @@ export async function syncReferenceLibraries(input: {
       images,
       vertical: entry.vertical ?? analysis?.vertical,
       grade: analysis?.grade,
+      brandTier: entry.brandTier,
       needsAnalysis: !analysis && !known.has(entry.id),
       syncedAt: input.now ?? new Date().toISOString(),
     }
@@ -241,10 +245,20 @@ export async function entriesFromPhysicalTree(reader: GithubReader, ref: string)
     const skippedPrivate = files.filter((file) => isForbiddenResearchPath(file.path)).map((file) => file.path)
     const images = files.filter((file) => file.type === "file" && /\.(jpe?g|png|webp)$/i.test(file.name) && !isForbiddenResearchPath(file.path))
     const front = images.find((file) => /front/i.test(file.name)) ?? images[0]
+    const provenance = files.find((file) => file.type === "file" && file.name.endsWith(".provenance.json") && !isForbiddenResearchPath(file.path))
+    let brandTier: string | undefined
+    if (provenance && reader.getJson) {
+      try {
+        brandTier = brandTierFromProvenance(await reader.getJson(provenance.path, ref))
+      } catch {
+        brandTier = undefined
+      }
+    }
     entries.push({
       id: dir.name,
       source: "c3po",
       imagePath: front?.path,
+      brandTier,
       skippedPrivate,
     })
   }
