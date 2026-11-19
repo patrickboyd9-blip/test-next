@@ -1,5 +1,7 @@
 "use client"
 
+import type { ReactNode } from "react"
+
 import { geometryFor } from "@/lib/postcard-layouts/compose"
 import type { PostcardSizeId } from "@/lib/postcard-layouts/ids"
 
@@ -11,13 +13,14 @@ interface ProofFrameProps {
   /** Defaults to 5×8, the upload flow's size. */
   size?: PostcardSizeId
   onError?: () => void
+  children?: ReactNode
 }
 
 /**
  * The uploaded face, with the trim line and the address keep-out drawn on top.
  * Guides use the 5×8 print spec, the same geometry as the template.
  */
-export function ProofFrame({ src, mediaType, face, label, size = "5x8", onError }: ProofFrameProps) {
+export function ProofFrame({ src, mediaType, face, label, size = "5x8", onError, children }: ProofFrameProps) {
   const spec = geometryFor(size)
   const width = spec.artworkCanvasInches.widthInches
   const height = spec.artworkCanvasInches.heightInches
@@ -89,6 +92,7 @@ export function ProofFrame({ src, mediaType, face, label, size = "5x8", onError 
             </text>
           )}
         </svg>
+        {children}
       </div>
     </figure>
   )

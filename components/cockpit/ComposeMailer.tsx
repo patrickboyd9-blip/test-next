@@ -42,7 +42,8 @@ import { TEMPLATE_INDUSTRIES, TEMPLATE_INDUSTRY_LABELS, type TemplateIndustry } 
 import { StartChoices, type StartPath } from "./StartChoices"
 
 import { ProofTray } from "./ProofCard"
-import { ProofFrame } from "@/components/campaign-creator/upload/ProofFrame"
+import { ProofEditor } from "@/components/campaign-creator/upload/ProofEditor"
+import type { ProofLayer } from "@/lib/image-edit/types"
 import { classifyDesignUpload, type DesignPreviewMedia } from "@/lib/mailer-compose/design-preview"
 import { cometLiveTurn } from "@/lib/mailer-compose/live-turn"
 import { CometMark } from "@/components/assistant/CometMark"
@@ -96,6 +97,7 @@ export function ComposeMailer({
   const [proposal, setProposal] = useState<ProposedMailer | null>(tony?.proposal ?? null)
   const [frontFile, setFrontFile] = useState<HeldDesign | null>(null)
   const [backFile, setBackFile] = useState<HeldDesign | null>(null)
+  const [layers, setLayers] = useState<ProofLayer[]>([])
   const [designError, setDesignError] = useState("")
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const [industry, setIndustry] = useState<TemplateIndustry | "all">(initialIndustry ?? "all")
@@ -515,11 +517,11 @@ export function ComposeMailer({
             <label className="block text-sm">Front
               <input type="file" accept="image/png,image/jpeg,application/pdf,.png,.jpg,.jpeg,.pdf" className="mt-1 block min-h-12 w-full text-sm" onChange={(event) => void onDesign("front", event.target.files?.[0] ?? null)} />
             </label>
-            {frontFile ? <ProofFrame src={frontFile.url} mediaType={frontFile.mediaType} face="front" label={`Front · ${frontFile.name}`} size={draft.size} /> : null}
+            {frontFile ? <ProofEditor src={frontFile.url} mediaType={frontFile.mediaType} face="front" label={`Front · ${frontFile.name}`} size={draft.size} layers={layers} onChange={setLayers} /> : null}
             <label className="block text-sm">Back
               <input type="file" accept="image/png,image/jpeg,application/pdf,.png,.jpg,.jpeg,.pdf" className="mt-1 block min-h-12 w-full text-sm" onChange={(event) => void onDesign("back", event.target.files?.[0] ?? null)} />
             </label>
-            {backFile ? <ProofFrame src={backFile.url} mediaType={backFile.mediaType} face="back" label={`Back · ${backFile.name}`} size={draft.size} /> : null}
+            {backFile ? <ProofEditor src={backFile.url} mediaType={backFile.mediaType} face="back" label={`Back · ${backFile.name}`} size={draft.size} layers={layers} onChange={setLayers} /> : null}
             {designError ? <p role="alert" className="rounded-xl bg-[#3a1418] px-3 py-3 text-sm text-[#ffb4b4]">{designError}</p> : null}
             {frontFile && backFile ? <p className="text-sm">Both sides are ready. Continue to the proof.</p> : null}
           </Panel>
@@ -587,8 +589,8 @@ export function ComposeMailer({
               <Eyebrow>Proof</Eyebrow>
               <h1 className="text-2xl font-semibold">Does this look right?</h1>
               <p className="text-sm text-[#b7c9d8]">Your files, fitted inside the postcard. They stay in this browser. Nothing was stored or mailed.</p>
-              <ProofFrame src={frontFile.url} mediaType={frontFile.mediaType} face="front" label={`Front · ${frontFile.name}`} size={draft.size} />
-              <ProofFrame src={backFile.url} mediaType={backFile.mediaType} face="back" label={`Back · ${backFile.name}`} size={draft.size} />
+              <ProofEditor src={frontFile.url} mediaType={frontFile.mediaType} face="front" label={`Front · ${frontFile.name}`} size={draft.size} layers={layers} onChange={setLayers} />
+              <ProofEditor src={backFile.url} mediaType={backFile.mediaType} face="back" label={`Back · ${backFile.name}`} size={draft.size} layers={layers} onChange={setLayers} />
             </Panel>
           </div>
         ) : null}
