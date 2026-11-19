@@ -1,5 +1,8 @@
 import { MAIL_TEMPLATES } from "./catalog"
+import { expansionTemplates } from "./gallery-expansion"
 import type { MailTemplate, TemplateIndustry } from "./types"
+
+const ALL_TEMPLATES: readonly MailTemplate[] = [...MAIL_TEMPLATES, ...expansionTemplates()]
 
 function copyTemplate(template: MailTemplate): MailTemplate {
   return {
@@ -14,12 +17,12 @@ function copyTemplate(template: MailTemplate): MailTemplate {
 /** Every mailer, or the ones in a single industry. Order is the catalog order. */
 export function listMailTemplates(industry?: TemplateIndustry): MailTemplate[] {
   const records = industry
-    ? MAIL_TEMPLATES.filter((template) => template.industry === industry)
-    : MAIL_TEMPLATES
+    ? ALL_TEMPLATES.filter((template) => template.industry === industry)
+    : ALL_TEMPLATES
   return records.map(copyTemplate)
 }
 
 export function getMailTemplate(id: string): MailTemplate | null {
-  const template = MAIL_TEMPLATES.find((record) => record.id === id)
+  const template = ALL_TEMPLATES.find((record) => record.id === id)
   return template ? copyTemplate(template) : null
 }

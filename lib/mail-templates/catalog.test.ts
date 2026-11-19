@@ -8,14 +8,15 @@ import { buildPostcard6x9PrintSpec } from "@/lib/print-spec/postcard-6x9-print-s
 import { getMailTemplate, listMailTemplates } from "./query"
 import { TEMPLATE_INDUSTRIES } from "./types"
 
-test("the catalog has three mailers for each industry, stored as records", () => {
+test("the catalog has three mailers for each industry, plus eighteen expansion scenes", () => {
   const all = listMailTemplates()
-  assert.equal(all.length, TEMPLATE_INDUSTRIES.length * 3)
+  const expansionIndustries = new Set(["roofing", "hvac", "restaurant", "dental", "real_estate", "landscaping", "auto_repair", "cleaning"])
+  assert.equal(all.length, TEMPLATE_INDUSTRIES.length * 3 + expansionIndustries.size * 18)
   assert.equal(new Set(all.map((template) => template.id)).size, all.length)
 
   for (const industry of TEMPLATE_INDUSTRIES) {
     const group = listMailTemplates(industry)
-    assert.equal(group.length, 3)
+    assert.equal(group.length, expansionIndustries.has(industry) ? 21 : 3)
     for (const template of group) {
       assert.equal(template.industry, industry)
       assert.equal(template.size, "5x8")
