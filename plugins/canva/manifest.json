@@ -1,0 +1,8 @@
+{
+  "name": "Modern Mail",
+  "permissions": [
+    "canva:design:content:read",
+    "canva:design:content:write"
+  ],
+  "notes": "These permissions are turned on in the Canva developer portal. The app reads the page so it can check the size, and it writes the front and back pages."
+}
