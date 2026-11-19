@@ -2,6 +2,12 @@
 
 export const FLIGHT_MS = 8400
 export const IDLE_MS = 5 * 60 * 1000
+/** The faint slot slip waits this long after a flight ends before its next cycle. */
+export const GLIDE_AFTER_FLIGHT_MS = 30_000
+
+export function glideResumesAt(flightEndedMs: number): number {
+  return flightEndedMs + GLIDE_AFTER_FLIGHT_MS
+}
 
 export interface FlightPoint {
   x: number
