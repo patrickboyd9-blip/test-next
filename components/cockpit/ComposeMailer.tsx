@@ -740,6 +740,12 @@ export function ComposeMailer({
   )
 }
 
+function postcardNote(draft: ComposeDraft): string {
+  const size = draft.size === "6x9" ? "6×9" : "5×8"
+  const name = draft.campaignName.replace(/\s+/g, " ").trim()
+  return `Postcard size ${size}. Campaign name ${name}.`
+}
+
 function SizeChoice({
   title,
   detail,
