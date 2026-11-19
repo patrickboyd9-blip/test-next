@@ -210,7 +210,7 @@ export function UploadDesign({
         <p className="text-sm leading-6 text-muted-foreground">
           Upload a picture or a one-page PDF for each side. We fit it to this 5×8 postcard,
           including the quarter inch the printer trims. You do not have to resize it.{" "}
-          <a href="/app/templates" className="underline-offset-4 hover:underline">
+          <a href="/app/print-templates" className="underline-offset-4 hover:underline">
             A blank template is here if you want one.
           </a>
         </p>
