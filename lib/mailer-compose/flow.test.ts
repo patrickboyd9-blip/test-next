@@ -1,4 +1,5 @@
 import assert from "node:assert/strict"
+import { readFileSync } from "node:fs"
 import { test } from "node:test"
 
 import { ACCOMPLISH_QUESTION, ACTION_CHOICES, ACTION_QUESTION, AUDIENCE_QUESTION, interviewReply, proposalFor } from "./interview"
@@ -13,11 +14,26 @@ import {
   LIST_BEFORE_PROOF,
   mailerById,
   PLACEHOLDER_FULL_PRICE,
+  postcardSizeChosen,
   proofFromDraft,
+  SIZE_REQUIRED_MESSAGE,
   SAMPLE_MAILERS,
   statusNeedsYou,
   STATUS_LABEL,
 } from "./flow"
+
+test("postcard size is required and is not chosen by the empty draft", () => {
+  assert.equal(postcardSizeChosen(null), false)
+  assert.equal(postcardSizeChosen(emptyDraft().size), true)
+  assert.equal(postcardSizeChosen("5x8"), true)
+  assert.equal(postcardSizeChosen("6x9"), true)
+  assert.equal(postcardSizeChosen("4x6"), false)
+  const screen = readFileSync("components/cockpit/ComposeMailer.tsx", "utf8")
+  assert.match(screen, /data-size-step/)
+  assert.match(screen, /SIZE_REQUIRED_MESSAGE/)
+  assert.equal(SIZE_REQUIRED_MESSAGE, "Choose a 5×8 or a 6×9 postcard.")
+  assert.doesNotMatch(screen, /Card size/)
+})
 
 test("a list file counts people and keeps every data row", () => {
   const csv = ["name,address", "Ada,1 Main", "Ben,2 Main Apt 4", ""].join("\n")

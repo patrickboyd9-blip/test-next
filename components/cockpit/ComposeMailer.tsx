@@ -15,7 +15,9 @@ import {
   LIST_BEFORE_PROOF,
   nextStep,
   PLACEHOLDER_FULL_PRICE,
+  postcardSizeChosen,
   previousStep,
+  SIZE_REQUIRED_MESSAGE,
   proofFromDraft,
   SAVED_LISTS,
   selectedListName,
@@ -84,6 +86,9 @@ export function ComposeMailer({
   const [step, setStep] = useState<ComposeStep>(initialStep)
   const [draft, setDraft] = useState<ComposeDraft>(initialDraft ?? emptyDraft())
   const [path, setPath] = useState<StartPath | null>(initialPath)
+  const [postcardSize, setPostcardSize] = useState<"5x8" | "6x9" | null>(null)
+  const [sizeConfirmed, setSizeConfirmed] = useState(false)
+  const [sizeMessage, setSizeMessage] = useState("")
   const [quick, setQuick] = useState(initialQuick)
   const tony = sampleBeat == null ? null : tonySample(sampleBeat)
   const [chat, setChat] = useState(tony?.turns ?? [{ role: "assistant" as const, text: ACCOMPLISH_QUESTION, choices: EXAMPLE_PROMPTS }])
@@ -113,11 +118,26 @@ export function ComposeMailer({
           : canContinue("what", draft)
   const ready = step === "what" ? stepOneReady : canContinue(step, draft)
   const lastStep = steps[steps.length - 1] === step
-  const showTracker = path !== null && path !== "team"
+  const showTracker = path !== null && sizeConfirmed && path !== "team"
   const firstLabel = path === "upload" ? "Upload" : path === "template" ? "Template" : "What"
 
   function patch(partial: Partial<ComposeDraft>) {
     setDraft((current) => ({ ...current, ...partial }))
+  }
+
+  function chooseSize(size: "5x8" | "6x9") {
+    setPostcardSize(size)
+    setSizeMessage("")
+  }
+
+  function confirmSize() {
+    if (!postcardSizeChosen(postcardSize)) {
+      setSizeMessage(SIZE_REQUIRED_MESSAGE)
+      return
+    }
+    patch({ size: postcardSize })
+    setSizeConfirmed(true)
+    setSizeMessage("")
   }
 
   async function onLogo(file: File | null) {
@@ -299,7 +319,7 @@ export function ComposeMailer({
           ))}
         </ol> : null}
 
-        {step === "to" ? (
+        {sizeConfirmed && step === "to" ? (
           <Panel className="space-y-4 p-4 sm:p-6">
             <div>
               <Eyebrow>To</Eyebrow>
@@ -347,13 +367,39 @@ export function ComposeMailer({
           <StartChoices onChoose={setPath} />
         ) : null}
 
-        {step === "what" && path === "team" ? (
+        {path && !sizeConfirmed ? (
+          <Panel className="space-y-4 p-4 sm:p-6" data-size-step>
+            <div>
+              <Eyebrow>Size</Eyebrow>
+              <h1 className="mt-2 text-2xl font-semibold">Choose the postcard size</h1>
+              <p className="mt-1 text-sm text-[#b7c9d8]">This comes right after how you want to make the card. Nothing is selected until you pick.</p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <SizeChoice title="5×8" detail="The standard postcard. A wide card for a photo, one offer, and a phone." selected={postcardSize === "5x8"} onPick={() => chooseSize("5x8")} />
+              <SizeChoice title="6×9" detail="A larger card, with more room for a photograph. Gallery mailers are 5×8." selected={postcardSize === "6x9"} onPick={() => chooseSize("6x9")} />
+            </div>
+            {sizeMessage ? <p className="text-sm text-[#f0a202]" role="alert">{sizeMessage}</p> : null}
+            <div className="flex gap-3">
+              <button type="button" onClick={() => { setPath(null); setSizeMessage("") }} className="min-h-11 text-sm text-[#8ecfff]">Back</button>
+              <button
+                type="button"
+                onClick={confirmSize}
+                aria-disabled={!postcardSizeChosen(postcardSize)}
+                className={`min-h-11 rounded-xl bg-[#5ce1ff] px-4 text-sm font-semibold text-[#041018] ${postcardSizeChosen(postcardSize) ? "" : "opacity-40"}`}
+              >
+                Continue
+              </button>
+            </div>
+          </Panel>
+        ) : null}
+
+        {step === "what" && sizeConfirmed && path === "team" ? (
           <Panel className="bg-white p-4 text-neutral-900 sm:p-6">
             <DesignRequestForm onBack={() => setPath(null)} />
           </Panel>
         ) : null}
 
-        {step === "what" && path === "ai" && !quick ? (
+        {step === "what" && sizeConfirmed && path === "ai" && !quick ? (
           <Panel className="space-y-4 p-4 sm:p-6">
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -439,7 +485,7 @@ export function ComposeMailer({
           </Panel>
         ) : null}
 
-        {step === "what" && path === "ai" && quick ? (
+        {step === "what" && sizeConfirmed && path === "ai" && quick ? (
           <Panel className="space-y-4 p-4 sm:p-6">
             <div>
               <Eyebrow>What</Eyebrow>
@@ -459,7 +505,7 @@ export function ComposeMailer({
           </Panel>
         ) : null}
 
-        {step === "what" && path === "upload" ? (
+        {step === "what" && sizeConfirmed && path === "upload" ? (
           <Panel className="space-y-4 p-4 sm:p-6">
             <div>
               <Eyebrow>Upload</Eyebrow>
@@ -479,7 +525,7 @@ export function ComposeMailer({
           </Panel>
         ) : null}
 
-        {step === "what" && path === "template" ? (
+        {step === "what" && sizeConfirmed && path === "template" ? (
           <Panel className="space-y-4 p-4 sm:p-6">
             <div>
               <Eyebrow>Template</Eyebrow>
@@ -528,14 +574,14 @@ export function ComposeMailer({
           </Panel>
         ) : null}
 
-        {step === "proof" && path === "upload" && (!frontFile || !backFile) ? (
+        {sizeConfirmed && step === "proof" && path === "upload" && (!frontFile || !backFile) ? (
           <Panel className="space-y-3 p-4 sm:p-6">
             <h1 className="text-2xl font-semibold">The proof needs both files</h1>
             <p role="alert" className="text-sm text-[#ffb4b4]">Upload a PNG, JPG, or PDF for the front and the back. A refresh clears them, because this preview keeps the files in the browser.</p>
           </Panel>
         ) : null}
 
-        {step === "proof" && path === "upload" && frontFile && backFile ? (
+        {sizeConfirmed && step === "proof" && path === "upload" && frontFile && backFile ? (
           <div className="space-y-4">
             <Panel className="space-y-4 p-4 sm:p-6">
               <Eyebrow>Proof</Eyebrow>
@@ -547,7 +593,7 @@ export function ComposeMailer({
           </div>
         ) : null}
 
-        {step === "proof" && path !== "upload" ? (
+        {sizeConfirmed && step === "proof" && path !== "upload" ? (
           <div className="space-y-4">
             <Panel className="space-y-3 p-4 sm:p-6">
               <Eyebrow>Proof</Eyebrow>
@@ -581,7 +627,7 @@ export function ComposeMailer({
           </Panel>
         ) : null}
 
-        {path && path !== "team" ? <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        {path && sizeConfirmed && path !== "team" ? <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <button
             type="button"
             onClick={() => {
@@ -617,17 +663,6 @@ export function ComposeMailer({
           {advanced ? (
             <div className="mt-3 space-y-3">
               <label className="block text-sm">
-                Card size
-                <select
-                  value={draft.size}
-                  onChange={(event) => patch({ size: event.target.value === "6x9" ? "6x9" : "5x8" })}
-                  className={`${fieldClass()} mt-1`}
-                >
-                  <option value="5x8">5×8 postcard</option>
-                  <option value="6x9">6×9 postcard</option>
-                </select>
-              </label>
-              <label className="block text-sm">
                 Phone on the card
                 <input
                   value={draft.phone}
@@ -653,5 +688,29 @@ export function ComposeMailer({
         </Panel>
       </div>
     </CockpitFrame>
+  )
+}
+
+function SizeChoice({
+  title,
+  detail,
+  selected,
+  onPick,
+}: {
+  title: string
+  detail: string
+  selected: boolean
+  onPick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={selected}
+      onClick={onPick}
+      className={`flex min-h-40 flex-col items-start gap-3 rounded-2xl border p-5 text-left ${selected ? "border-[#5ce1ff] bg-[#102433]" : "border-[#1c3d52] bg-[#0c1424]"}`}
+    >
+      <span className="text-2xl font-semibold">{title}</span>
+      <span className="text-sm leading-6 text-[#b7c9d8]">{detail}</span>
+    </button>
   )
 }
