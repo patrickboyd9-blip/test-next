@@ -92,7 +92,7 @@ export const MCP_TOOLS: readonly ToolSpec[] = [
   {
     name: "list_gallery",
     action: "status",
-    description: "List Mailer Gallery templates the customer can start from. Names and summaries only.",
+    description: "List Gallery photos the customer can start from. Names and summaries only.",
     inputSchema: {
       type: "object",
       properties: { industry: { type: "string", description: "Optional. One of the gallery industries." } },
@@ -103,7 +103,7 @@ export const MCP_TOOLS: readonly ToolSpec[] = [
   {
     name: "use_gallery_template",
     action: "create",
-    description: "Start a 5x8 mailer from a Mailer Gallery template. A 6x9 campaign cannot use these templates.",
+    description: "Start a 5x8 mailer from a Gallery photo. A 6x9 campaign cannot use these photos.",
     inputSchema: {
       type: "object",
       required: ["campaignId", "templateId"],

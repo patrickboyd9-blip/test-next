@@ -80,7 +80,7 @@ export default async function CampaignPage({
           Design request
         </Link>
         <Link href="/app/templates" className="text-sm text-muted-foreground underline">
-          Mailer Gallery
+          Gallery
         </Link>
       </header>
       <div className="flex flex-wrap items-center gap-4 border-b px-4 py-3">
