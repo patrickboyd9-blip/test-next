@@ -5,6 +5,17 @@ import { readFileSync } from "node:fs"
 
 import { FLIGHT_MS, GLIDE_AFTER_FLIGHT_MS, IDLE_MS, flightAllowed, flightPath, glideOccupies, glideResumesAt, pathTangentsMeet, slotPoint } from "./flight-path"
 
+test("the command center headline is the anchor the flight measures", () => {
+  const center = readFileSync(new URL("../../components/cockpit/CommandCenter.tsx", import.meta.url), "utf8")
+  const page = readFileSync(new URL("../../app/app/page.tsx", import.meta.url), "utf8")
+  const flight = readFileSync(new URL("../../components/cockpit/MailFlight.tsx", import.meta.url), "utf8")
+  assert.match(center, /data-flight-copy/)
+  assert.match(center, /<h1/)
+  assert.match(page, /<CockpitFrame hero/)
+  assert.match(page, /<CommandCenter/)
+  assert.match(flight, /\[data-flight-copy\]/)
+})
+
 test("the flight is skipped on a phone and when motion is reduced", () => {
   assert.equal(flightAllowed(1440, false), true)
   assert.equal(flightAllowed(1024, false), true)

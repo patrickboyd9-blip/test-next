@@ -16,7 +16,7 @@ export function CommandCenter({
 }) {
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6 sm:py-12">
-      <div className="space-y-3">
+      <div className="space-y-3" data-flight-copy>
         <Eyebrow>Command Center</Eyebrow>
         <h1 className="max-w-xl text-3xl font-semibold tracking-tight sm:text-5xl">Today at a glance</h1>
         <p className="max-w-xl text-base text-[#b7c9d8]">
