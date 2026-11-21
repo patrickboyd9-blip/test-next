@@ -1,5 +1,6 @@
 import Link from "next/link"
 
+import { crossCustomerBenchmarks } from "@/lib/analytics/privacy"
 import { leadsFor, qrForCampaign, scansFor, tapsFor } from "@/lib/analytics/store"
 import { CockpitFrame, Eyebrow, Panel } from "@/components/cockpit/ui"
 import { SidebarTrigger } from "@/components/ui/sidebar"
@@ -9,6 +10,7 @@ export const dynamic = "force-dynamic"
 
 export default async function ReportsPage() {
   const campaigns = await listOwnedCampaigns()
+  const comparisons = crossCustomerBenchmarks()
   return (
     <CockpitFrame>
       <div className="mx-auto flex max-w-3xl flex-col gap-5 px-4 py-8 sm:px-6">
@@ -45,6 +47,21 @@ export default async function ReportsPage() {
             ))}
           </ul>
         )}
+        {comparisons.length > 0 ? (
+          <Panel className="flex flex-col gap-2 p-5 text-sm">
+            <h2 className="font-medium">DRAFT comparison with other businesses</h2>
+            <p className="text-[#b7c9d8]">
+              Shown only at 10 or more scans from 5 or more businesses. Areas of 20,000 people or fewer are combined. That area list is a draft placeholder.
+            </p>
+            <ul className="text-[#b7c9d8]">
+              {comparisons.map((row) => (
+                <li key={`${row.industry}|${row.zip3}`}>
+                  {row.industry}, {row.zip3 === "other" ? "smaller areas combined" : `area ${row.zip3}`}: {row.scans} scans from {row.customers} businesses
+                </li>
+              ))}
+            </ul>
+          </Panel>
+        ) : null}
         <Link href="/app/reports/export" className="inline-flex min-h-11 w-fit items-center rounded-xl bg-[#5ce1ff] px-4 text-sm font-semibold text-[#041018]">
           Download CSV
         </Link>

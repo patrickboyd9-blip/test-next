@@ -8,6 +8,7 @@ import { outcomeFigures } from "@/lib/analytics/money"
 import {
   checkInFor,
   ensureCampaignQr,
+  followUpLeads,
   leadsFor,
   mailedAddresses,
   matchSentence,
@@ -47,6 +48,7 @@ export default async function ResultsPage({ params }: { params: Promise<{ id: st
   })
   const scans = scansFor(id)
   const leads = leadsFor(id)
+  const followUps = followUpLeads(id)
   const charges = (await readAudit().catch(() => [])).filter((event) => {
     if (event.action !== "charge" || event.subjectId !== id) return false
     const after = event.after as { charged?: boolean; amountCents?: number } | null
@@ -147,12 +149,17 @@ export default async function ResultsPage({ params }: { params: Promise<{ id: st
 
       {leads.length > 0 ? (
         <section>
-          <h2 className="text-base font-medium">Leads</h2>
-          <ul className="mt-2 space-y-2 text-sm">
-            {leads.map((lead) => (
-              <li key={lead.id}>{lead.name}{lead.phone ? ` · ${lead.phone}` : ""}{lead.message ? ` · ${lead.message}` : ""}</li>
-            ))}
-          </ul>
+          <h2 className="text-base font-medium">People to contact</h2>
+          <p className="mt-1 text-sm text-muted-foreground">People who opted out are left off this list.</p>
+          {followUps.length === 0 ? (
+            <p className="mt-2 text-sm">No one to contact.</p>
+          ) : (
+            <ul className="mt-2 space-y-2 text-sm">
+              {followUps.map((lead) => (
+                <li key={lead.id}>{lead.name}{lead.phone ? ` · ${lead.phone}` : ""}{lead.message ? ` · ${lead.message}` : ""}</li>
+              ))}
+            </ul>
+          )}
         </section>
       ) : null}
 

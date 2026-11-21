@@ -1,8 +1,19 @@
 import Link from "next/link"
+import { cookies } from "next/headers"
 import { notFound } from "next/navigation"
 
-import { formConsentLine, pageFooterNotice, PRIVACY_PATH } from "@/lib/analytics/privacy"
-import { bookingPresentation, findQr, leadsFor, saveLead } from "@/lib/analytics/store"
+import {
+  consentVariantFor,
+  formConsentLine,
+  pageFooterNotice,
+  personKeyFor,
+  PRIVACY_PATH,
+  recordConsent,
+  recordOptOut,
+  rejectSensitiveFields,
+} from "@/lib/analytics/privacy"
+import { VISITOR_COOKIE } from "@/lib/analytics/read"
+import { findQr, leadsFor, saveLead } from "@/lib/analytics/store"
 
 export const dynamic = "force-dynamic"
 
@@ -11,7 +22,7 @@ export default async function HostedLandingPage({
   searchParams,
 }: {
   params: Promise<{ code: string }>
-  searchParams: Promise<{ sent?: string; book?: string }>
+  searchParams: Promise<{ sent?: string; opted?: string }>
 }) {
   const { code } = await params
   const query = await searchParams
@@ -21,7 +32,7 @@ export default async function HostedLandingPage({
   const business = qr.businessName || "this business"
   const leads = parts.form ? leadsFor(qr.campaignId) : []
   const booking = parts.booking && parts.bookingUrl ? parts.bookingUrl : null
-  const embed = booking && bookingPresentation(booking) === "calendly" && query.book === "1"
+  const consent = formConsentLine(business, consentVariantFor({ phone: true, email: true }))
 
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-lg flex-col gap-6 px-4 py-10">
@@ -39,9 +50,6 @@ export default async function HostedLandingPage({
             Book a time
           </a>
           <p className="text-xs text-neutral-500">We count this tap. We don&apos;t know if a time was booked.</p>
-          {embed ? (
-            <iframe title="Book a time" src={booking} className="min-h-96 w-full rounded-xl border" />
-          ) : null}
         </div>
       ) : null}
       {parts.form ? (
@@ -65,7 +73,7 @@ export default async function HostedLandingPage({
           </label>
           <label className="flex items-start gap-2 text-sm">
             <input name="consent" type="checkbox" required className="mt-1" />
-            <span>{linkedNotice(formConsentLine(business))}</span>
+            <span>{linkedNotice(consent)}</span>
           </label>
           <button type="submit" className="min-h-11 rounded-xl border px-4 text-sm font-semibold">
             Send
@@ -76,6 +84,16 @@ export default async function HostedLandingPage({
       {parts.form ? (
         <p className="text-xs text-neutral-500">{leads.length === 0 ? "No notes yet." : `${leads.length} note${leads.length === 1 ? "" : "s"} saved.`}</p>
       ) : null}
+      <form action={optOutAction} className="flex flex-col gap-2 border-t pt-4">
+        <input type="hidden" name="code" value={qr.code} />
+        <p className="text-xs leading-5 text-neutral-500">DRAFT. Ask {business} not to contact you. This does not delete a note you already sent.</p>
+        <input name="email" type="email" aria-label="Email" placeholder="Email" className="min-h-11 rounded-xl border px-3" />
+        <input name="phone" aria-label="Phone" placeholder="Phone" className="min-h-11 rounded-xl border px-3" />
+        <button type="submit" className="min-h-11 rounded-xl border px-4 text-sm">
+          Opt out
+        </button>
+      </form>
+      {query.opted === "1" ? <p className="text-sm">Opt-out saved. You will be left off follow-up lists.</p> : null}
       <footer className="mt-auto border-t pt-4 text-xs leading-5 text-neutral-500">
         {linkedNotice(pageFooterNotice(business))}
       </footer>
@@ -95,18 +113,57 @@ function linkedNotice(sentence: string) {
   )
 }
 
+async function visitorId(): Promise<string> {
+  const jar = await cookies()
+  return jar.get(VISITOR_COOKIE)?.value ?? ""
+}
+
 async function leadAction(form: FormData) {
   "use server"
+  if (rejectSensitiveFields([...form.keys()])) return
   const { redirect } = await import("next/navigation")
   const code = String(form.get("code") ?? "")
   const qr = findQr(code)
   if (!qr?.parts.form || form.get("consent") !== "on") return
+  const email = String(form.get("email") ?? "")
+  const phone = String(form.get("phone") ?? "")
+  const personKey = personKeyFor({ personKey: await visitorId(), email, phone })
+  const variant = consentVariantFor({ phone: true, email: true })
+  const business = qr.businessName || "this business"
   saveLead({
     campaignId: qr.campaignId,
     name: String(form.get("name") ?? ""),
-    phone: String(form.get("phone") ?? ""),
-    email: String(form.get("email") ?? ""),
+    phone,
+    email,
     message: String(form.get("message") ?? ""),
+    visitor: personKey,
+  })
+  recordConsent({
+    personKey,
+    email,
+    phone,
+    variant,
+    page: `/p/${code}`,
+    businessName: business,
+    wording: formConsentLine(business, variant),
   })
   redirect(`/p/${code}?sent=1`)
+}
+
+async function optOutAction(form: FormData) {
+  "use server"
+  if (rejectSensitiveFields([...form.keys()])) return
+  const { redirect } = await import("next/navigation")
+  const code = String(form.get("code") ?? "")
+  const qr = findQr(code)
+  if (!qr) return
+  const email = String(form.get("email") ?? "")
+  const phone = String(form.get("phone") ?? "")
+  recordOptOut({
+    personKey: personKeyFor({ personKey: await visitorId(), email, phone }),
+    email,
+    phone,
+    page: `/p/${code}`,
+  })
+  redirect(`/p/${code}?opted=1`)
 }

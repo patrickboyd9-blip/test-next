@@ -1,6 +1,18 @@
 import { randomBytes } from "node:crypto"
 
-import { recordSeparatedEvent, deletePerson as deletePersonalRows, resetPrivacyRecords } from "./privacy"
+import {
+  deletePerson as deletePersonalRows,
+  emailHash,
+  isOptedOut,
+  personalRecords,
+  personalRetentionCutoff,
+  personKeyFor,
+  phoneHash,
+  purgeExpiredConsent,
+  purgeExpiredPersonal,
+  recordSeparatedEvent,
+  resetPrivacyRecords,
+} from "./privacy"
 import type { DeviceKind } from "./read"
 
 const ALPHABET = "abcdefghjkmnpqrstuvwxyz23456789"
@@ -52,6 +64,7 @@ export interface LeadRecord {
   phone: string
   email: string
   message: string
+  personKey: string
 }
 
 export interface CheckIn {
@@ -163,12 +176,14 @@ export function logScan(input: Omit<ScanLog, "at" | "campaignId" | "recipientId"
     at: scan.at,
     kind: "scan",
     campaignId: qr.campaignId,
+    customerId: qr.ownerId,
     industry: qr.industry,
     offerType: qr.offerType,
     place: input.place,
     device: input.device,
     personal: { personKey: input.visitor, ip: input.ip },
   })
+  runRetentionJob()
   return scan
 }
 
@@ -190,10 +205,12 @@ export function logTap(code: string, kind: "call" | "booking", at = new Date().t
     at,
     kind: kind === "call" ? "call_tap" : "booking_tap",
     campaignId: qr.campaignId,
+    customerId: qr.ownerId,
     industry: qr.industry,
     offerType: qr.offerType,
     personal: { personKey: personal?.visitor, ip: personal?.ip },
   })
+  runRetentionJob()
   return true
 }
 
@@ -229,11 +246,12 @@ export function activityFor(campaignIds: readonly string[]): {
   }
 }
 
-export function saveLead(input: Omit<LeadRecord, "id" | "at"> & { at?: string; ip?: string; visitor?: string }): LeadRecord | null {
+export function saveLead(input: Omit<LeadRecord, "id" | "at" | "personKey"> & { at?: string; ip?: string; visitor?: string }): LeadRecord | null {
   const qr = [...qrs.values()].find((row) => row.campaignId === input.campaignId && row.recipientId == null)
   if (!qr?.parts.form) return null
   const name = input.name.trim()
   if (name.length < 2) return null
+  const personKey = personKeyFor({ personKey: input.visitor, email: input.email, phone: input.phone })
   const lead: LeadRecord = {
     id: mintCode(),
     at: input.at ?? new Date().toISOString(),
@@ -242,30 +260,81 @@ export function saveLead(input: Omit<LeadRecord, "id" | "at"> & { at?: string; i
     phone: input.phone.trim(),
     email: input.email.trim(),
     message: input.message.trim().slice(0, 1000),
+    personKey,
   }
   leads.push(lead)
   recordSeparatedEvent({
     at: lead.at,
     kind: "lead",
     campaignId: qr.campaignId,
+    customerId: qr.ownerId,
     industry: qr.industry,
     offerType: qr.offerType,
-    personal: { name: lead.name, phone: lead.phone, email: lead.email, ip: input.ip, personKey: input.visitor },
+    personal: { name: lead.name, phone: lead.phone, email: lead.email, ip: input.ip, personKey },
   })
+  runRetentionJob()
   return lead
 }
 
-export function deleteAnalyticsPerson(input: { email?: string; phone?: string; visitorId?: string }): number {
-  const removed = deletePersonalRows(input)
+/** People who asked not to be contacted are left off this list. */
+export function followUpLeads(campaignId: string): LeadRecord[] {
+  return leads.filter(
+    (row) =>
+      row.campaignId === campaignId &&
+      !isOptedOut({ personKey: row.personKey, email: row.email, phone: row.phone })
+  )
+}
+
+/** 24-month purge for personal analytics, plus the separate 5-year consent purge. */
+export function runRetentionJob(now = new Date()): { personal: number; leads: number; cookieIds: number; consent: number } {
+  const cutoff = personalRetentionCutoff(now)
+  const personalRemoved = purgeExpiredPersonal(now)
+  const consentRemoved = purgeExpiredConsent(now)
+  let leadsRemoved = 0
+  for (let index = leads.length - 1; index >= 0; index -= 1) {
+    const lead = leads[index]
+    if (lead && lead.at < cutoff) {
+      leads.splice(index, 1)
+      leadsRemoved += 1
+    }
+  }
+  let cookieIds = 0
+  for (const scan of scans) {
+    if (scan.at < cutoff && scan.visitor) {
+      scan.visitor = ""
+      cookieIds += 1
+    }
+  }
+  return { personal: personalRemoved, leads: leadsRemoved, cookieIds, consent: consentRemoved }
+}
+
+export function deleteAnalyticsPerson(input: { email?: string; phone?: string; visitorId?: string; personKey?: string }): number {
   const email = input.email?.trim().toLowerCase() ?? ""
   const phone = input.phone?.replace(/\D/g, "") ?? ""
+  const keys = new Set<string>()
+  const explicit = input.personKey?.trim() || input.visitorId?.trim() || ""
+  if (explicit) keys.add(explicit)
+  for (const row of personalRecords()) {
+    const emailHit = Boolean(email && row.emailHash === emailHash(email))
+    const phoneHit = Boolean(phone && row.phoneHash === phoneHash(phone))
+    const keyHit = Boolean(row.personKey && keys.has(row.personKey))
+    if ((emailHit || phoneHit || keyHit) && row.personKey) keys.add(row.personKey)
+  }
+  const removed = deletePersonalRows(input)
   for (let index = leads.length - 1; index >= 0; index -= 1) {
     const lead = leads[index]
     if (!lead) continue
     const leadPhone = lead.phone.replace(/\D/g, "")
-    if ((email && lead.email.toLowerCase() === email) || (phone && leadPhone && leadPhone === phone)) {
+    if (
+      (email && lead.email.toLowerCase() === email) ||
+      (phone && leadPhone && leadPhone === phone) ||
+      (lead.personKey && keys.has(lead.personKey))
+    ) {
       leads.splice(index, 1)
     }
+  }
+  for (const scan of scans) {
+    if (scan.visitor && keys.has(scan.visitor)) scan.visitor = ""
   }
   return removed
 }
@@ -310,7 +379,7 @@ function normalizeParts(parts: PageParts): PageParts {
   }
 }
 
-/** Calendly can sit on the page. Any other booking link is a button. */
+/** Classifies a booking link. The landing page links out and does not embed it. */
 export function bookingPresentation(url: string): "calendly" | "button" {
   try {
     const host = new URL(url).hostname.toLowerCase()
