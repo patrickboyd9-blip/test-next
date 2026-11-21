@@ -41,13 +41,14 @@ interface NavItem {
 const itemClass =
   "min-h-11 text-[#A9B4C2] hover:text-[#f7fbff] data-active:text-[#f7fbff] [&_svg]:text-current"
 
+const COMMAND_CENTER: NavItem = { label: "Command Center", href: "/app", icon: LayoutDashboard }
+
 const CREATE: NavItem[] = [
   { label: "Gallery", href: "/app/templates", icon: Images },
   { label: "Print Templates", href: "/app/print-templates", icon: FileDown },
 ]
 
 const MANAGE: NavItem[] = [
-  { label: "Command Center", href: "/app", icon: LayoutDashboard },
   { label: "Campaigns", href: "/app/campaigns", icon: Megaphone },
   { label: "Lists", href: "/app/lists", icon: List },
   { label: "Reports", href: "/app/reports", icon: BarChart3 },
@@ -119,6 +120,9 @@ export function AppSidebar({
             </Link>
             <SidebarMenu className="mb-2 hidden group-data-[collapsible=icon]:flex">
               <NavLink item={{ label: "New Mailer", href: "/app/mail", icon: Megaphone }} active={onMailer} />
+            </SidebarMenu>
+            <SidebarMenu>
+              <NavLink item={COMMAND_CENTER} active={itemActive(COMMAND_CENTER.href, pathname)} />
             </SidebarMenu>
             <Section label="Create" />
             <SidebarMenu>
