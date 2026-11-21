@@ -106,9 +106,16 @@ export default function PrintTemplatesPage() {
           On the back, leave the shaded area empty. That is where the address, postage, and barcode print.
           Campaigns currently mail the 5×8. The 6×9 template is here for a design you are preparing.
         </p>
+        <section className="flex flex-col gap-2">
+          <h2 className="text-base font-medium">Using our plugins</h2>
+          <p className="text-sm leading-6 text-muted-foreground">
+            Figma, Canva, Adobe Express, Photoshop, and InDesign can send the front and the back straight into a campaign.
+          </p>
+          <p className="text-sm text-muted-foreground">Coming soon.</p>
+        </section>
         <p className="text-sm">
-          <Link href="/app/campaigns/new" className="underline-offset-4 hover:underline">
-            Start a campaign
+          <Link href="/app/campaigns/new?path=upload" className="underline-offset-4 hover:underline">
+            Upload my finished design
           </Link>
         </p>
       </main>

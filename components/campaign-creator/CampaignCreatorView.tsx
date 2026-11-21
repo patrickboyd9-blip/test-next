@@ -40,7 +40,7 @@ import { AudienceStage } from "./AudienceStage"
 import { LogoUpload } from "./LogoUpload"
 import { BriefSummaryCard } from "./BriefSummaryCard"
 import { CampaignCreatorLayout } from "./CampaignCreatorLayout"
-import { CampaignOpening } from "./CampaignOpening"
+import { CampaignOpening, type OpeningStep } from "./CampaignOpening"
 import { CollapsedConversation } from "./CollapsedConversation"
 import { Composer } from "./Composer"
 import { ConversationThread } from "./ConversationThread"
@@ -69,12 +69,15 @@ interface CampaignCreatorViewProps {
   initialCampaign: Campaign
   printMailMode: PrintMailMode
   designReviewAvailable?: boolean
+  /** Opens the same upload step as "I already have a design". */
+  initialStep?: Extract<OpeningStep, "upload">
 }
 
 export function CampaignCreatorView({
   initialCampaign,
   printMailMode,
   designReviewAvailable = false,
+  initialStep,
 }: CampaignCreatorViewProps) {
   const [campaign, setCampaignState] = useState<Campaign>(() => campaignForCustomer(initialCampaign))
   const setCampaign = (value: SetStateAction<Campaign>) => {
@@ -290,6 +293,7 @@ export function CampaignCreatorView({
     <>
       {awaitingFirstMessage ? (
         <CampaignOpening
+          initialStep={initialStep}
           composerValue={composerValue}
           onComposerChange={setComposerValue}
           onSend={handleSend}

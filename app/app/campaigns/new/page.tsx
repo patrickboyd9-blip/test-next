@@ -7,7 +7,11 @@ export const runtime = "nodejs"
 /** Each visit creates a new campaign. A prerendered redirect would 404. */
 export const dynamic = "force-dynamic"
 
-export default async function NewCampaignPage() {
+export default async function NewCampaignPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ path?: string }>
+}) {
   const session = await getSession()
   if (!session) {
     return (
@@ -19,6 +23,8 @@ export default async function NewCampaignPage() {
       </div>
     )
   }
+  const params = await searchParams
   const campaign = await createDraftCampaign()
-  redirect(`/app/campaigns/${campaign.id}`)
+  const start = params.path === "upload" ? "?start=upload" : ""
+  redirect(`/app/campaigns/${campaign.id}${start}`)
 }

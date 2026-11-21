@@ -38,10 +38,13 @@ function printMailMode(): PrintMailMode {
 
 export default async function CampaignPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ start?: string }>
 }) {
   const { id } = await params
+  const { start } = await searchParams
   const campaign = await getCampaign(id)
 
   if (!campaign) {
@@ -101,6 +104,7 @@ export default async function CampaignPage({
       <div id="editor">
       <CampaignCreatorView
         initialCampaign={campaign}
+        initialStep={start === "upload" ? "upload" : undefined}
         printMailMode={printMailMode()}
         designReviewAvailable={isDesignReviewAvailable()}
       />
