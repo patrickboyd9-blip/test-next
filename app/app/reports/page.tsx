@@ -1,6 +1,6 @@
 import Link from "next/link"
 
-import { scansFor } from "@/lib/analytics/store"
+import { qrForCampaign, scansFor } from "@/lib/analytics/store"
 import { CockpitFrame, Eyebrow, Panel } from "@/components/cockpit/ui"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { listOwnedCampaigns } from "@/lib/campaign-creator/actions"
@@ -18,6 +18,14 @@ export default async function ReportsPage() {
         </div>
         <h1 className="text-3xl font-semibold">Results across campaigns</h1>
         <p className="text-sm text-[#b7c9d8]">QR scans that were logged. Scans appear after your mail lands.</p>
+        {campaigns.some((campaign) => qrForCampaign(campaign.id)?.destination === "website" || /^https:\/\//i.test(campaign.brief.qrDestination ?? "")) ? (
+          <p className="text-sm text-[#b7c9d8]">
+            Want to see calls and form leads too?{" "}
+            <Link href={`/app/campaigns/${campaigns.find((campaign) => qrForCampaign(campaign.id)?.destination === "website" || /^https:\/\//i.test(campaign.brief.qrDestination ?? ""))?.id}/results`} className="underline">
+              Switch to our free page.
+            </Link>
+          </p>
+        ) : null}
         {campaigns.length === 0 ? (
           <Panel className="p-5 text-sm">No campaigns to report.</Panel>
         ) : (

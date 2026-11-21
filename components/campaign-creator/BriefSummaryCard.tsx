@@ -24,10 +24,12 @@ import {
   resolveEmotion,
 } from "@/lib/design-intelligence/persuasion-emotions"
 import { clientFactText, persuasionVertical } from "@/lib/design-intelligence/persuasion"
+import { ScanChoice } from "@/components/analytics/ScanChoice"
 
 interface BriefSummaryCardProps {
   brief: CampaignBrief
   status: CampaignStatus
+  campaignId?: string
   formatRecommendation?: MailPieceFormatRecommendationView
   onFieldChange: (patch: Partial<CampaignBrief>) => void
   onConfirm: () => void
@@ -222,6 +224,7 @@ function FormatRecommendationSection({
 export function BriefSummaryCard({
   brief,
   status,
+  campaignId,
   formatRecommendation,
   onFieldChange,
   onConfirm,
@@ -389,13 +392,14 @@ export function BriefSummaryCard({
         <Separator />
 
         <div className="flex flex-col gap-3">
-          <Field
-            key={`qrDestination:${brief.qrDestination ?? ""}`}
-            label="QR code destination"
-            value={brief.qrDestination ?? ""}
+          <ScanChoice
+            choice={/^https:\/\//i.test(brief.qrDestination?.trim() ?? "") ? "website" : "page"}
+            website={/^https:\/\//i.test(brief.qrDestination?.trim() ?? "") ? (brief.qrDestination ?? "") : ""}
+            campaignId={campaignId}
             readOnly={readOnly}
-            placeholder="Where should the QR code lead?"
-            onCommit={(value) => onFieldChange({ qrDestination: value })}
+            onChange={(choice, website) =>
+              onFieldChange({ qrDestination: choice === "website" ? website : "" })
+            }
           />
           <Field
             key={`phone:${brief.phone ?? ""}`}

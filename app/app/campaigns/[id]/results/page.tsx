@@ -2,6 +2,7 @@ import Link from "next/link"
 import { headers } from "next/headers"
 import { notFound, redirect } from "next/navigation"
 
+import { ScanChoice } from "@/components/analytics/ScanChoice"
 import { matchback, streetsFromCsv } from "@/lib/analytics/match"
 import { outcomeFigures } from "@/lib/analytics/money"
 import {
@@ -73,26 +74,16 @@ export default async function ResultsPage({ params }: { params: Promise<{ id: st
       </p>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-base font-medium">Where the QR goes</h2>
+        <h2 className="text-base font-medium">When someone scans your QR code</h2>
         <p className="text-sm text-muted-foreground">
-          The recommended page is hosted here. Either choice is logged, then the person continues. One code is printed for the campaign.
+          The code on the postcard is {origin ? `${origin}/q/${qr.code}` : `/q/${qr.code}`}.
         </p>
-        <p className="text-sm">Short link: {origin ? `${origin}/q/${qr.code}` : `/q/${qr.code}`}</p>
-        <form action={saveDestination} className="flex flex-col gap-3 text-sm">
+        <form action={saveDestination} className="flex flex-col gap-3">
           <input type="hidden" name="campaignId" value={id} />
-          <label className="flex items-center gap-2">
-            <input type="radio" name="destination" value="hosted" defaultChecked={qr.destination !== "website"} />
-            Our page (recommended)
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="radio" name="destination" value="website" defaultChecked={qr.destination === "website"} />
-            The business website
-          </label>
-          <input
-            name="website"
-            defaultValue={qr.website ?? campaign.brief.website ?? campaign.brief.businessInfo?.website ?? ""}
-            placeholder="https://example.com/offer"
-            className="min-h-11 rounded-xl border px-3"
+          <ScanChoice
+            choice={qr.destination === "website" ? "website" : "page"}
+            website={qr.website ?? ""}
+            campaignId={id}
           />
           <button type="submit" className="min-h-11 w-fit rounded-xl bg-neutral-950 px-4 text-sm font-semibold text-white">
             Save

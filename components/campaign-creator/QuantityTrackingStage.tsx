@@ -14,20 +14,28 @@ import { Separator } from "@/components/ui/separator"
 import type { CampaignBrief, CampaignStatus } from "@/lib/campaign-creator/types"
 import { isAtOrPastStatus } from "@/lib/campaign-creator/campaign-status"
 
+import { ScanChoice } from "@/components/analytics/ScanChoice"
+
 import { Field } from "./BriefSummaryCard"
 
 interface QuantityTrackingStageProps {
   brief: CampaignBrief
   status: CampaignStatus
+  campaignId?: string
   onFieldChange: (patch: Partial<CampaignBrief>) => void
   onConfirm: () => void
   isConfirming?: boolean
   hideConfirm?: boolean
 }
 
+function isOwnWebsite(value: string | undefined): boolean {
+  return /^https:\/\//i.test(value?.trim() ?? "")
+}
+
 export function QuantityTrackingStage({
   brief,
   status,
+  campaignId,
   onFieldChange,
   onConfirm,
   isConfirming,
@@ -69,13 +77,14 @@ export function QuantityTrackingStage({
 
         <Separator />
 
-        <Field
-          key={`qrDestination:${brief.qrDestination ?? ""}`}
-          label="QR code destination"
-          value={brief.qrDestination ?? ""}
+        <ScanChoice
+          choice={isOwnWebsite(brief.qrDestination) ? "website" : "page"}
+          website={isOwnWebsite(brief.qrDestination) ? (brief.qrDestination ?? "") : ""}
+          campaignId={campaignId}
           readOnly={readOnly}
-          placeholder="Where should the QR code lead?"
-          onCommit={(value) => onFieldChange({ qrDestination: value })}
+          onChange={(choice, website) =>
+            onFieldChange({ qrDestination: choice === "website" ? website : "" })
+          }
         />
         <Field
           key={`phone:${brief.phone ?? ""}`}

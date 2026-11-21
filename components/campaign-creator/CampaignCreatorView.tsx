@@ -327,6 +327,7 @@ export function CampaignCreatorView({
         <BriefSummaryCard
           brief={campaign.brief}
           status={campaign.status}
+          campaignId={campaign.id}
           formatRecommendation={
             showStrategySummary ? formatRecommendation ?? undefined : undefined
           }
@@ -440,6 +441,7 @@ export function CampaignCreatorView({
         <QuantityTrackingStage
           brief={campaign.brief}
           status={campaign.status}
+          campaignId={campaign.id}
           onFieldChange={handleFieldChange}
           onConfirm={handleConfirmQuantity}
           isConfirming={isConfirmingQuantity}
