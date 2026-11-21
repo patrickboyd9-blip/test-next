@@ -23,6 +23,10 @@ export default async function BillingPage() {
           <p className="mt-2 text-sm text-[#b7c9d8]">No card is saved on this account. A charge still waits for approval inside the campaign.</p>
         </Panel>
         <Panel className="p-5">
+          <h2 className="font-medium">Word changes</h2>
+          <p className="mt-2 text-sm text-[#b7c9d8]">More word changes need a card on file. Adding a card is not open yet.</p>
+        </Panel>
+        <Panel className="p-5">
           <h2 className="font-medium">Receipts</h2>
           {receipts.length === 0 ? (
             <p className="mt-2 text-sm text-[#b7c9d8]">No receipts. Nothing has been marked paid.</p>

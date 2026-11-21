@@ -74,7 +74,8 @@ test("finished photos join the gallery by industry and hide internal fields", ()
       assert.equal(photo.name.includes(record.name_risk), false)
       assert.equal(photo.summary.includes(record.name_risk), false)
     }
-    assert.deepEqual(Object.keys(photo).sort(), ["id", "industry", "name", "src", "summary"])
+    assert.equal(photo.kind, "finished")
+    assert.deepEqual(Object.keys(photo).sort(), ["id", "industry", "kind", "name", "src", "summary"])
   }
 
   const vet = galleryCategoryBySlug("vet-pet")

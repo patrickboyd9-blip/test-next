@@ -21,11 +21,21 @@ export async function requestGeminiEdit(input: {
   apiKey: string
   model?: string
   fetchImpl?: typeof fetch
+  /** "lettering" rewrites words already printed on a finished postcard. */
+  purpose?: "scene" | "lettering"
+  logo?: { bytes: Buffer; mimeType: "image/jpeg" | "image/png" }
 }): Promise<Buffer> {
   const key = input.apiKey.trim()
   if (!key) throw new PhotoEditError()
   const model = input.model ?? GEMINI_EDIT_MODEL
   const fetchImpl = input.fetchImpl ?? fetch
+  const parts: Array<Record<string, unknown>> = [
+    { text: editText(input.purpose ?? "scene", input.instruction) },
+    { inlineData: { mimeType: input.mimeType, data: input.image.toString("base64") } },
+  ]
+  if (input.logo) {
+    parts.push({ inlineData: { mimeType: input.logo.mimeType, data: input.logo.bytes.toString("base64") } })
+  }
   const response = await fetchImpl(`${ENDPOINT}/${model}:generateContent`, {
     method: "POST",
     headers: {
@@ -33,22 +43,7 @@ export async function requestGeminiEdit(input: {
       "x-goog-api-key": key,
     },
     body: JSON.stringify({
-      contents: [
-        {
-          role: "user",
-          parts: [
-            {
-              text: `Edit this photograph as requested. Keep the same scene unless the request changes it. Do not add words, letters, logos, or watermarks.\n\nRequest: ${input.instruction}`,
-            },
-            {
-              inlineData: {
-                mimeType: input.mimeType,
-                data: input.image.toString("base64"),
-              },
-            },
-          ],
-        },
-      ],
+      contents: [{ role: "user", parts }],
       generationConfig: { responseModalities: ["IMAGE"] },
     }),
     signal: AbortSignal.timeout(45_000),
@@ -58,6 +53,13 @@ export async function requestGeminiEdit(input: {
   const bytes = imageFromResponse(payload)
   if (!bytes) throw new PhotoEditError()
   return bytes
+}
+
+function editText(purpose: "scene" | "lettering", instruction: string): string {
+  if (purpose === "lettering") {
+    return `Rewrite only the words already printed on this finished postcard. Keep the design, colors, photographs, and layout. Do not add a watermark.\n\n${instruction}`
+  }
+  return `Edit this photograph as requested. Keep the same scene unless the request changes it. Do not add words, letters, logos, or watermarks.\n\nRequest: ${instruction}`
 }
 
 function imageFromResponse(payload: unknown): Buffer | null {

@@ -31,7 +31,14 @@ export const PHOTO_EDIT_SPEND_DDL = `CREATE TABLE IF NOT EXISTS photo_edit_spend
   cents integer NOT NULL
 )`
 
-export const OPS_DDL = [AUDIT_EVENTS_DDL, RATE_EVENTS_DDL, PHOTO_EDIT_SPEND_DDL] as const
+export const WORD_CHANGE_EDITS_DDL = `CREATE TABLE IF NOT EXISTS word_change_edits (
+  id text PRIMARY KEY,
+  at timestamptz NOT NULL,
+  day text NOT NULL,
+  user_id text NOT NULL
+)`
+
+export const OPS_DDL = [AUDIT_EVENTS_DDL, RATE_EVENTS_DDL, PHOTO_EDIT_SPEND_DDL, WORD_CHANGE_EDITS_DDL] as const
 
 const ready = new WeakMap<SqlExecutor, Promise<void>>()
 

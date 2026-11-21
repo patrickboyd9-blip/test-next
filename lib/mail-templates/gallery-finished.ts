@@ -3,6 +3,9 @@ import type { CreativeSpec } from "@/lib/campaign-creator/types"
 import finishedJson from "./gallery-finished.json"
 import { isTemplateIndustry, TEMPLATE_INDUSTRY_LABELS, type MailTemplate, type TemplateIndustry } from "./types"
 
+/** Every picture in gallery-finished.json is a finished postcard, words included. */
+export const FINISHED_GALLERY_KIND = "finished" as const
+
 /** A finished example mailer. Research ids and file paths are not stored here. */
 export interface FinishedGalleryRecord {
   id: string
@@ -53,7 +56,13 @@ export const FINISHED_INDUSTRY_LABELS: Record<string, string> = {
   "windows-gutters-siding": "Windows, Gutters & Siding",
 }
 
-const records = finishedJson.items as FinishedGalleryRecord[]
+const finishedFile = finishedJson as { kind?: string; items: FinishedGalleryRecord[] }
+
+if (finishedFile.kind !== FINISHED_GALLERY_KIND) {
+  throw new Error("Finished gallery data must be marked kind finished.")
+}
+
+const records = finishedFile.items
 
 export function finishedGalleryRecords(): FinishedGalleryRecord[] {
   return records
@@ -80,6 +89,8 @@ export interface FinishedGalleryPhoto {
   summary: string
   src: string
   industry: string
+  /** Flat finished art. The words are already in the picture. */
+  kind: typeof FINISHED_GALLERY_KIND
 }
 
 const SUMMARY = "A finished postcard in this industry."
@@ -100,6 +111,7 @@ export function finishedGalleryPhotos(): FinishedGalleryPhoto[] {
       summary: SUMMARY,
       src: record.url,
       industry,
+      kind: FINISHED_GALLERY_KIND,
     }
   })
 }
