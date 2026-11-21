@@ -3,7 +3,7 @@ import { test } from "node:test"
 
 import type { SqlExecutor } from "@/lib/storage/document-store"
 
-import { AUDIT_EVENTS_DDL, ensureOpsTables, PHOTO_EDIT_SPEND_DDL, RATE_EVENTS_DDL } from "./schema"
+import { AUDIT_EVENTS_DDL, ensureOpsTables, PHOTO_EDIT_SPEND_DDL, RATE_EVENTS_DDL, WORD_CHANGE_EDITS_DDL } from "./schema"
 
 class ScriptedSql implements SqlExecutor {
   readonly statements: string[] = []
@@ -30,9 +30,10 @@ test("the ops migration creates the audit log and the rate window", async () => 
   assert.match(sql.statements[0] ?? "", /CREATE TABLE IF NOT EXISTS audit_events/)
   assert.match(sql.statements[1] ?? "", /CREATE TABLE IF NOT EXISTS rate_events/)
   assert.match(sql.statements[2] ?? "", /CREATE TABLE IF NOT EXISTS photo_edit_spend/)
-  assert.equal(sql.statements.length, 3)
+  assert.match(sql.statements[3] ?? "", /CREATE TABLE IF NOT EXISTS word_change_edits/)
+  assert.equal(sql.statements.length, 4)
   await ensureOpsTables(sql)
-  assert.equal(sql.statements.length, 3)
+  assert.equal(sql.statements.length, 4)
 })
 
 test("a Neon create race is ignored and the next table is still created", async () => {
@@ -43,6 +44,7 @@ test("a Neon create race is ignored and the next table is still created", async 
   assert.match(created, /audit_events/)
   assert.match(created, /rate_events/)
   assert.match(created, /photo_edit_spend/)
+  assert.match(created, /word_change_edits/)
 })
 
 test("a real database error is not cached", async () => {
@@ -57,11 +59,16 @@ test("a real database error is not cached", async () => {
   assert.match(created, /audit_events/)
   assert.match(created, /rate_events/)
   assert.match(created, /photo_edit_spend/)
+  assert.match(created, /word_change_edits/)
 })
 
 test("the statements are the ones the app uses", () => {
   assert.match(AUDIT_EVENTS_DDL, /before jsonb/)
   assert.match(RATE_EVENTS_DDL, /at_ms bigint/)
   assert.match(PHOTO_EDIT_SPEND_DDL, /cents integer/)
-  assert.doesNotMatch(`${AUDIT_EVENTS_DDL}\n${RATE_EVENTS_DDL}\n${PHOTO_EDIT_SPEND_DDL}`, /\bUPDATE\b|\bDELETE\b/)
+  assert.match(WORD_CHANGE_EDITS_DDL, /user_id text/)
+  assert.doesNotMatch(
+    `${AUDIT_EVENTS_DDL}\n${RATE_EVENTS_DDL}\n${PHOTO_EDIT_SPEND_DDL}\n${WORD_CHANGE_EDITS_DDL}`,
+    /\bUPDATE\b|\bDELETE\b/
+  )
 })

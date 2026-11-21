@@ -12,6 +12,7 @@ import {
   clearUploadedDesignApproval,
 } from "@/lib/bring-your-own-design/approval"
 import { applyLeaveUploadPath, applyUploadPathStart, type UploadPathBasics } from "@/lib/bring-your-own-design/upload-path"
+import { applyFinishedProofStart, type FinishedProofDetails } from "@/lib/campaign-creator/finished-proof"
 import { applyTemplateStart } from "@/lib/mail-templates/apply"
 import { getMailTemplate } from "@/lib/mail-templates/query"
 import {
@@ -132,6 +133,7 @@ export interface CampaignRepository {
   unapproveCreative(id: string): Promise<Campaign>
   setDesignSource(id: string, source: DesignSource): Promise<Campaign>
   beginUploadPath(id: string, basics: Partial<UploadPathBasics>): Promise<Campaign>
+  openFinishedProof(id: string, details: FinishedProofDetails): Promise<Campaign>
   beginTemplatePath(id: string, templateId: string): Promise<Campaign>
   leaveUploadPath(id: string): Promise<Campaign>
   saveUploadedDesign(id: string, design: UploadedDesign): Promise<Campaign>
@@ -475,6 +477,12 @@ class StoredCampaignRepository implements CampaignRepository {
   async beginUploadPath(id: string, basics: Partial<UploadPathBasics>): Promise<Campaign> {
     const campaign = await this.require(id)
     applyUploadPathStart(campaign, basics, new Date().toISOString())
+    return this.write(campaign)
+  }
+
+  async openFinishedProof(id: string, details: FinishedProofDetails): Promise<Campaign> {
+    const campaign = await this.require(id)
+    applyFinishedProofStart(campaign, details, new Date().toISOString())
     return this.write(campaign)
   }
 

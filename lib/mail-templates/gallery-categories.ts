@@ -3,12 +3,19 @@ import { galleryPhotoSrc } from "./gallery-photo-src"
 import { GALLERY_V1_INDUSTRIES } from "./gallery-v1"
 import { listMailTemplates } from "./query"
 
+export type GalleryPhotoKind = "photo" | "finished"
+
 export interface GalleryPhoto {
   id: string
   name: string
   summary: string
   src: string
   industry: string
+  /**
+   * "photo" is an empty scene the customer can letter themselves.
+   * "finished" already has the words in the picture.
+   */
+  kind: GalleryPhotoKind
 }
 
 export interface GalleryCategory {
@@ -27,7 +34,7 @@ export function galleryCategories(): GalleryCategory[] {
     const photos = listMailTemplates(id).flatMap((template) => {
       const src = galleryPhotoSrc(template.id)
       if (!src) return []
-      return [{ id: template.id, name: template.name, summary: template.summary, src, industry: id }]
+      return [{ id: template.id, name: template.name, summary: template.summary, src, industry: id, kind: "photo" as const }]
     })
     if (photos.length === 0) return []
     return [{ id, label: galleryIndustryLabel(id), photos }]

@@ -13,6 +13,11 @@ export const PHOTO_EDIT_TOO_LARGE = "That photo is too large to edit."
 export const PHOTO_KEPT = "Kept."
 export const PHOTO_ORIGINAL = "The original photo is back."
 export const PHOTO_SAVE_FAILED = "That photo could not be saved."
+export const WORD_CHANGE_ALLOWANCE = "You've used your free word changes. Add a card to change more words."
+export const WORD_CHANGE_PAUSED = "Word changes are paused for today. Try again tomorrow."
+export const WORD_CHANGE_NEED_DETAILS = "Add the business name, the offer, and a phone number."
+export const WORD_CHANGE_NEED_PLACE = "Choose where the logo should go."
+export const WORD_CHANGE_LOGO = "That logo could not be used. Try a PNG or JPEG."
 
 export const CUSTOMER_PHOTO_MESSAGES = [
   PHOTO_EDITING,
@@ -28,4 +33,9 @@ export const CUSTOMER_PHOTO_MESSAGES = [
   PHOTO_KEPT,
   PHOTO_ORIGINAL,
   PHOTO_SAVE_FAILED,
+  WORD_CHANGE_ALLOWANCE,
+  WORD_CHANGE_PAUSED,
+  WORD_CHANGE_NEED_DETAILS,
+  WORD_CHANGE_NEED_PLACE,
+  WORD_CHANGE_LOGO,
 ] as const
