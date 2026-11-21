@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Modern Mail",
     description: "Tell Comet your goal, approve the proof, and we print and mail the postcard. Nothing is mailed until you approve.",
-    images: [{ url: "/gallery/roofing-after-the-storm.png", alt: "A sample roofing postcard from the Gallery" }],
+    images: [{ url: "/gallery/roofing-after-the-storm.jpg", alt: "A sample roofing postcard from the Gallery" }],
   },
 }
 

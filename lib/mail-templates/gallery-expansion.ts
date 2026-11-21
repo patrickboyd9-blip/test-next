@@ -121,8 +121,8 @@ export function planGalleryExpansion(cards: readonly ReferenceCard[] = RESEARCH_
         sourceId: source?.mmrId ?? null,
         tier: source ? sourceTier(source.mmrId) : sourceTier("none"),
         images: 1,
-        fileName: `${id}.png`,
-        publicPath: `/gallery/${id}.png`,
+        fileName: `${id}.jpg`,
+        publicPath: `/gallery/${id}.jpg`,
       })
     })
   }

@@ -157,8 +157,8 @@ export function planGalleryPhotos(templates: readonly MailTemplate[] = galleryV1
     return {
       templateId: template.id,
       industry: template.industry,
-      fileName: `${template.id}.png`,
-      publicPath: `/gallery/${template.id}.png`,
+      fileName: `${template.id}.jpg`,
+      publicPath: `/gallery/${template.id}.jpg`,
       prompt,
       brief,
     }
