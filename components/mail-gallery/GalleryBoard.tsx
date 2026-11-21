@@ -5,55 +5,39 @@ import Link from "next/link"
 
 import { GalleryProof } from "@/components/cockpit/GalleryProof"
 import type { ProofLayer } from "@/lib/image-edit/types"
-import { galleryCategories, photoCountLabel, type GalleryCategory } from "@/lib/mail-templates/gallery-categories"
+import { photoCountLabel, type GalleryCategory } from "@/lib/mail-templates/gallery-categories"
 import { layersForGallery } from "@/lib/mail-templates/gallery-layers"
 import { getMailTemplate } from "@/lib/mail-templates/query"
 
-export function GalleryBoard() {
-  const categories = galleryCategories()
-  const [open, setOpen] = useState<{ category: number; index: number } | null>(null)
+export function GalleryBoard({ category }: { category: GalleryCategory }) {
+  const [open, setOpen] = useState<number | null>(null)
 
-  if (categories.length === 0) {
+  if (category.photos.length === 0) {
     return <p className="text-sm text-muted-foreground">No pictures in this gallery yet.</p>
   }
 
   return (
-    <div className="flex flex-col gap-10">
-      {categories.map((category, categoryIndex) => (
-        <section key={category.id} className="flex flex-col gap-4" data-gallery-category={category.id}>
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <h2 className="text-xl font-semibold">{category.label}</h2>
+    <div className="flex flex-col gap-4" data-gallery-category={category.id}>
+      <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {category.photos.map((photo, index) => (
+          <li key={photo.id}>
             <button
               type="button"
-              className="min-h-11 rounded-xl border px-3 text-sm"
-              onClick={() => setOpen({ category: categoryIndex, index: 0 })}
+              className="block w-full overflow-hidden rounded-2xl border text-left"
+              onClick={() => setOpen(index)}
             >
-              View {category.label}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={photo.src} alt="" className="aspect-[8/5] w-full object-cover" />
+              <span className="block px-3 py-3 text-sm font-medium">{photo.name}</span>
             </button>
-          </div>
-          <ul className="grid gap-4 sm:grid-cols-2">
-            {category.photos.map((photo, index) => (
-              <li key={photo.id}>
-                <button
-                  type="button"
-                  className="block w-full overflow-hidden rounded-2xl border text-left"
-                  onClick={() => setOpen({ category: categoryIndex, index })}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={photo.src} alt="" className="aspect-[8/5] w-full object-cover" />
-                  <span className="block px-3 py-3 text-sm font-medium">{photo.name}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
-      {open ? (
+          </li>
+        ))}
+      </ul>
+      {open !== null ? (
         <PhotoViewer
-          categories={categories}
-          categoryIndex={open.category}
-          index={open.index}
-          onIndex={(index) => setOpen({ category: open.category, index })}
+          category={category}
+          index={open}
+          onIndex={setOpen}
           onClose={() => setOpen(null)}
         />
       ) : null}
@@ -62,20 +46,17 @@ export function GalleryBoard() {
 }
 
 function PhotoViewer({
-  categories,
-  categoryIndex,
+  category,
   index,
   onIndex,
   onClose,
 }: {
-  categories: GalleryCategory[]
-  categoryIndex: number
+  category: GalleryCategory
   index: number
   onIndex: (index: number) => void
   onClose: () => void
 }) {
-  const category = categories[categoryIndex]
-  const photos = category?.photos ?? []
+  const photos = category.photos
   const photo = photos[index]
   const dialog = useRef<HTMLDivElement>(null)
   const touch = useRef<{ x: number; y: number } | null>(null)
@@ -114,7 +95,7 @@ function PhotoViewer({
       aria-modal="true"
       aria-label={`${category.label} pictures`}
       tabIndex={-1}
-      className="fixed inset-0 z-50 flex flex-col bg-[#041018]/95 p-4 text-white outline-none sm:p-8"
+      className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-[#041018]/95 p-4 text-white outline-none sm:p-8"
       data-photo-viewer={category.id}
       onTouchStart={(event) => {
         const point = event.changedTouches[0]
@@ -153,7 +134,7 @@ function PhotoViewer({
             />
           ) : (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={photo.src} alt="" className="mx-auto max-h-[68vh] w-full rounded-2xl object-contain" />
+            <img src={photo.src} alt="" className="mx-auto max-h-[46vh] w-full rounded-2xl object-contain sm:max-h-[68vh]" />
           )}
           <p className="mt-3 text-sm text-white/80">{photo.name}</p>
         </div>
@@ -161,19 +142,23 @@ function PhotoViewer({
           ›
         </button>
       </div>
-      <div className="mx-auto flex w-full max-w-5xl flex-wrap gap-2">
-        <button type="button" aria-label="Previous photo" className="min-h-11 rounded-xl border border-white/30 px-3 text-sm sm:hidden" onClick={() => step(-1)}>
-          Previous
-        </button>
-        <button type="button" aria-label="Next photo" className="min-h-11 rounded-xl border border-white/30 px-3 text-sm sm:hidden" onClick={() => step(1)}>
-          Next
-        </button>
-        <button type="button" className="min-h-11 rounded-xl border border-white/30 px-3 text-sm" onClick={() => setEditing(true)}>
-          Edit it myself
-        </button>
-        <Link href={`/app/mail?hero=${photo.id}`} className="inline-flex min-h-11 items-center rounded-xl bg-[#5ce1ff] px-3 text-sm font-semibold text-[#041018]">
-          Design it for me
-        </Link>
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-2">
+        <div className="flex gap-2 sm:hidden">
+          <button type="button" aria-label="Previous photo" className="min-h-11 flex-1 rounded-xl border border-white/30 px-3 text-sm" onClick={() => step(-1)}>
+            Previous
+          </button>
+          <button type="button" aria-label="Next photo" className="min-h-11 flex-1 rounded-xl border border-white/30 px-3 text-sm" onClick={() => step(1)}>
+            Next
+          </button>
+        </div>
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+          <button type="button" className="min-h-11 w-full whitespace-normal rounded-xl border border-white/30 px-3 py-2 text-center text-sm leading-5 sm:w-auto" onClick={() => setEditing(true)}>
+            Use this photo to edit myself
+          </button>
+          <Link href={`/app/mail?hero=${photo.id}`} className="inline-flex min-h-11 w-full items-center justify-center whitespace-normal rounded-xl bg-[#5ce1ff] px-3 py-2 text-center text-sm font-semibold leading-5 text-[#041018] sm:w-auto">
+            Use this and have the AI make edits for me
+          </Link>
+        </div>
       </div>
     </div>
   )

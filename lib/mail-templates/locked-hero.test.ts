@@ -2,7 +2,7 @@ import assert from "node:assert/strict"
 import { readFileSync } from "node:fs"
 import { test } from "node:test"
 
-import { galleryCategories, photoCountLabel } from "./gallery-categories"
+import { galleryCategories, galleryCategoryBySlug, galleryIndustrySlug, photoCountLabel } from "./gallery-categories"
 import { getMailTemplate } from "./query"
 import { lockedHeroDesign, lockedHeroMissing, type LockedHeroInput } from "./locked-hero"
 
@@ -49,6 +49,27 @@ test("gallery categories page through every photo, including a later set of 18",
   assert.equal(photoCountLabel(0, roofing.photos.length), `1 of ${roofing.photos.length}`)
 })
 
+test("each industry with photos has its own gallery page", () => {
+  const categories = galleryCategories()
+  assert.deepEqual(
+    categories.map((category) => category.label),
+    ["Roofing", "HVAC", "Restaurant", "Dental", "Real estate", "Landscaping", "Auto repair", "Cleaning"]
+  )
+  assert.equal(galleryIndustrySlug("auto_repair"), "auto-repair")
+  assert.equal(galleryCategoryBySlug("roofing")?.photos.length, 21)
+  assert.equal(galleryCategoryBySlug("auto-repair")?.id, "auto_repair")
+  assert.equal(galleryCategoryBySlug("real-estate")?.label, "Real estate")
+  assert.equal(galleryCategoryBySlug("plumbing"), null)
+  assert.equal(galleryCategoryBySlug("../roofing"), null)
+  const index = readFileSync("components/mail-gallery/GalleryIndex.tsx", "utf8")
+  const industry = readFileSync("app/app/templates/[industry]/page.tsx", "utf8")
+  assert.match(index, /\/app\/templates\//)
+  assert.match(index, /photos/)
+  assert.match(industry, /\n {8}Back\n/)
+  assert.match(industry, /href="\/app\/templates"/)
+  assert.match(industry, /GalleryBoard/)
+})
+
 test("the gallery viewer and the print downloads are separate pages", () => {
   const gallery = readFileSync("app/app/templates/page.tsx", "utf8")
   const board = readFileSync("components/mail-gallery/GalleryBoard.tsx", "utf8")
@@ -56,10 +77,17 @@ test("the gallery viewer and the print downloads are separate pages", () => {
   const sidebar = readFileSync("components/layout/AppSidebar.tsx", "utf8")
   const form = readFileSync("components/mail-gallery/LockedHeroMailer.tsx", "utf8")
   assert.match(gallery, /You have two options/)
+  assert.match(gallery, /GalleryIndex/)
+  assert.doesNotMatch(gallery, /GalleryBoard/)
   assert.doesNotMatch(gallery, /Download PDF/)
   assert.doesNotMatch(gallery, /Mailer Gallery/)
-  assert.match(board, /Edit it myself/)
-  assert.match(board, /Design it for me/)
+  assert.match(board, /Use this photo to edit myself/)
+  assert.match(board, /Use this and have the AI make edits for me/)
+  assert.match(board, /whitespace-normal/)
+  assert.match(board, /flex-col gap-2 sm:flex-row/)
+  assert.doesNotMatch(board, /Edit it myself/)
+  assert.doesNotMatch(board, /Design it for me/)
+  assert.match(form, /Use this and have the AI make edits for me/)
   assert.match(board, /Previous photo/)
   assert.match(board, /Next photo/)
   assert.match(board, /data-photo-count/)
