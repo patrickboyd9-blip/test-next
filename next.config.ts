@@ -1,6 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "o1at7qxja3v9ya7m.public.blob.vercel-storage.com",
+        pathname: "/gallery/**",
+      },
+    ],
+  },
   // Keep the SDK out of the webpack graph. Bundling it during compile of `/`
   // (via server actions) hangs the first request with idle CPU.
   // pdf-lib's font kit is server-only and does not bundle cleanly.
