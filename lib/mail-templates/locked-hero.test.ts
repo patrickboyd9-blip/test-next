@@ -90,7 +90,18 @@ test("the gallery viewer and the print downloads are separate pages", () => {
   const prints = readFileSync("app/app/print-templates/page.tsx", "utf8")
   const sidebar = readFileSync("components/layout/AppSidebar.tsx", "utf8")
   const form = readFileSync("components/mail-gallery/LockedHeroMailer.tsx", "utf8")
-  assert.match(gallery, /You have two options/)
+  assert.match(gallery, /<h1[^>]*>Gallery<\/h1>/)
+  assert.match(
+    gallery,
+    /We've already hand-picked hundreds of standout mailer photos for every industry, so your next postcard is a few clicks away instead of a blank page\./
+  )
+  assert.match(gallery, /How It Works/)
+  assert.match(
+    gallery,
+    /You have two options\. Pick a photo and edit it yourself, or pick a photo and have us design the mailer for you\. Nothing is mailed from this page\./
+  )
+  assert.ok(gallery.indexOf("hand-picked hundreds") < gallery.indexOf("How It Works"))
+  assert.ok(gallery.indexOf("How It Works") < gallery.indexOf("You have two options"))
   assert.match(gallery, /GalleryIndex/)
   assert.doesNotMatch(gallery, /GalleryBoard/)
   assert.doesNotMatch(gallery, /Download PDF/)
