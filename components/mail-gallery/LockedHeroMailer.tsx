@@ -33,7 +33,7 @@ export function LockedHeroMailer({ template }: { template: MailTemplate }) {
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-6 py-10" data-locked-hero={template.id}>
       <div>
         <p className="text-xs tracking-wide text-muted-foreground">GALLERY</p>
-        <h1 className="mt-2 text-2xl font-semibold">Design it for me</h1>
+        <h1 className="mt-2 text-xl font-semibold leading-snug sm:text-2xl">Use this and have the AI make edits for me</h1>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
           This picture stays the hero. Add the same details as a new mailer. This is a sample. Nothing is mailed.
         </p>

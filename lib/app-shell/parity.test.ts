@@ -36,6 +36,25 @@ for (const feature of features) {
   })
 }
 
+test("New Mailer stays above Command Center and Reports stays in Manage", () => {
+  const sidebar = source("components/layout/AppSidebar.tsx")
+  const content = sidebar.slice(sidebar.indexOf("<SidebarContent>"))
+  const mailer = content.indexOf("New Mailer")
+  const center = content.indexOf("COMMAND_CENTER")
+  const create = content.indexOf('label="Create"')
+  const manage = content.indexOf('label="Manage"')
+  const account = sidebar.indexOf('label="Account"')
+  assert.ok(mailer >= 0 && center > mailer)
+  assert.ok(create > center)
+  assert.ok(manage > create)
+  assert.ok(account > manage)
+  const manageItems = sidebar.slice(sidebar.indexOf("const MANAGE"), sidebar.indexOf("const ACCOUNT"))
+  assert.match(manageItems, /Campaigns/)
+  assert.match(manageItems, /Lists/)
+  assert.match(manageItems, /label: "Reports", href: "\/app\/reports"/)
+  assert.doesNotMatch(manageItems, /Command Center/)
+})
+
 test("preview demo still opens the full editor instead of skipping it", () => {
   const page = source("app/app/campaigns/new/page.tsx")
   assert.doesNotMatch(page, /redirect\("\/app\/mail"\)/)

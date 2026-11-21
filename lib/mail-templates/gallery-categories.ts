@@ -1,7 +1,7 @@
 import { galleryPhotoSrc } from "./gallery-photo-src"
 import { GALLERY_V1_INDUSTRIES } from "./gallery-v1"
 import { listMailTemplates } from "./query"
-import { TEMPLATE_INDUSTRY_LABELS, type TemplateIndustry } from "./types"
+import { isTemplateIndustry, TEMPLATE_INDUSTRY_LABELS, type TemplateIndustry } from "./types"
 
 export interface GalleryPhoto {
   id: string
@@ -37,4 +37,17 @@ export function galleryCategories(): GalleryCategory[] {
 /** "3 of 18" for the photo currently open in a category. */
 export function photoCountLabel(index: number, total: number): string {
   return `${index + 1} of ${total}`
+}
+
+/** URL slug for an industry page, such as /app/templates/auto-repair. */
+export function galleryIndustrySlug(id: TemplateIndustry): string {
+  return id.replaceAll("_", "-")
+}
+
+/** The industry that owns this gallery URL, or null when the slug is not one. */
+export function galleryCategoryBySlug(slug: string): GalleryCategory | null {
+  if (!/^[a-z0-9-]+$/.test(slug)) return null
+  const id = slug.replaceAll("-", "_")
+  if (!isTemplateIndustry(id)) return null
+  return galleryCategories().find((category) => category.id === id) ?? null
 }
