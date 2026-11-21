@@ -1,0 +1,1345 @@
+{
+  "items": [
+    {
+      "id": "MM-auto-insurance-016",
+      "industry": "auto-insurance",
+      "fictional_brand_name": "Sparrowcroft Insurance",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/auto-insurance/GOLD-auto-insurance-016__sparrowcroft-insurance.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-auto-insurance-025",
+      "industry": "auto-insurance",
+      "fictional_brand_name": "Tansycombe Mutual",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/auto-insurance/GOLD-auto-insurance-025__tansycombe-mutual.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-auto-insurance-051",
+      "industry": "auto-insurance",
+      "fictional_brand_name": "Penrosewold Insurance",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/auto-insurance/GOLD-auto-insurance-051__penrosewold-insurance.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-auto-insurance-054",
+      "industry": "auto-insurance",
+      "fictional_brand_name": "Larchcroft Insurance",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/auto-insurance/GOLD-auto-insurance-054__larchcroft-insurance.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-auto-insurance-055",
+      "industry": "auto-insurance",
+      "fictional_brand_name": "Spindledale Insurance",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/auto-insurance/GOLD-auto-insurance-055__spindledale-insurance.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-bakery-001",
+      "industry": "bakery",
+      "fictional_brand_name": "Cobbleholt Bakery",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/bakery/GOLD-bakery-001__cobbleholt-bakery.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-bakery-005",
+      "industry": "bakery",
+      "fictional_brand_name": "Lindendale Bakery",
+      "name_risk": "LOW: 'Lindendale' is a fictional place in a fan wiki; no business found",
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/bakery/GOLD-bakery-005__lindendale-bakery.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-bakery-017",
+      "industry": "bakery",
+      "fictional_brand_name": "Marrowthorne Bakery",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/bakery/GOLD-bakery-017__marrowthorne-bakery.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-churches-community-009",
+      "industry": "churches-community",
+      "fictional_brand_name": "Larchwold Community Church",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/churches-community/GOLD-churches-community-009__larchwold-community-church.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-churches-community-018",
+      "industry": "churches-community",
+      "fictional_brand_name": "Heroncombe Community Church",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/churches-community/GOLD-churches-community-018__heroncombe-community-church.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-churches-community-020",
+      "industry": "churches-community",
+      "fictional_brand_name": "Osierley Community Church",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/churches-community/GOLD-churches-community-020__osierley-community-church.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-churches-community-022",
+      "industry": "churches-community",
+      "fictional_brand_name": "Saffroncombe Community Church",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/churches-community/GOLD-churches-community-022__saffroncombe-community-church.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-churches-community-026",
+      "industry": "churches-community",
+      "fictional_brand_name": "Rookmere Community Church",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/churches-community/GOLD-churches-community-026__rookmere-community-church.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-churches-community-046",
+      "industry": "churches-community",
+      "fictional_brand_name": "Teaselridge Community Church",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/churches-community/GOLD-churches-community-046__teaselridge-community-church.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-consumer-products-037",
+      "industry": "consumer-products",
+      "fictional_brand_name": "Nettlemoor Goods",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/consumer-products/GOLD-consumer-products-037__nettlemoor-goods.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-consumer-products-038",
+      "industry": "consumer-products",
+      "fictional_brand_name": "Burrowridge Goods",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/consumer-products/GOLD-consumer-products-038__burrowridge-goods.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-consumer-products-058",
+      "industry": "consumer-products",
+      "fictional_brand_name": "Rowanshaw Goods",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/consumer-products/GOLD-consumer-products-058__rowanshaw-goods.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-consumer-products-065",
+      "industry": "consumer-products",
+      "fictional_brand_name": "Corrieside Footwear",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/consumer-products/GOLD-consumer-products-065__corrieside-footwear.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-garage-doors-007",
+      "industry": "garage-doors",
+      "fictional_brand_name": "Hazelgate Garage & Doors",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/garage-doors/GOLD-garage-doors-007__hazelgate-garage-doors.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-garage-doors-008",
+      "industry": "garage-doors",
+      "fictional_brand_name": "Quillfield Garage Doors",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/garage-doors/GOLD-garage-doors-008__quillfield-garage-doors.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-garage-doors-010",
+      "industry": "garage-doors",
+      "fictional_brand_name": "Spindlehaven Garage & Doors",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/garage-doors/GOLD-garage-doors-010__spindlehaven-garage-doors.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-garage-doors-019",
+      "industry": "garage-doors",
+      "fictional_brand_name": "Yarrowcroft Garage Doors",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/garage-doors/GOLD-garage-doors-019__yarrowcroft-garage-doors.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-garage-doors-031",
+      "industry": "garage-doors",
+      "fictional_brand_name": "Dapplestead Garage Doors",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/garage-doors/GOLD-garage-doors-031__dapplestead-garage-doors.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-gyms-fitness-123",
+      "industry": "gyms-fitness",
+      "fictional_brand_name": "Larkstead Fitness & Martial Arts",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/gyms-fitness/GOLD-gyms-fitness-123__larkstead-fitness-martial-arts.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-gyms-fitness-124",
+      "industry": "gyms-fitness",
+      "fictional_brand_name": "Calderstead Martial Arts",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/gyms-fitness/GOLD-gyms-fitness-124__calderstead-martial-arts.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-gyms-fitness-125",
+      "industry": "gyms-fitness",
+      "fictional_brand_name": "Wicketvale Martial Arts",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/gyms-fitness/GOLD-gyms-fitness-125__wicketvale-martial-arts.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-gyms-fitness-136",
+      "industry": "gyms-fitness",
+      "fictional_brand_name": "Cobblemere Fitness & Strength",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/gyms-fitness/GOLD-gyms-fitness-136__cobblemere-fitness-strength.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-hair-salon-004",
+      "industry": "hair-salon",
+      "fictional_brand_name": "Spindlewick Hair Studio",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/hair-salon/GOLD-hair-salon-004__spindlewick-hair-studio.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-hair-salon-025",
+      "industry": "hair-salon",
+      "fictional_brand_name": "Cloveley Hair Studio",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/hair-salon/GOLD-hair-salon-025__cloveley-hair-studio.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-hair-salon-034",
+      "industry": "hair-salon",
+      "fictional_brand_name": "Wicketshaw Salon & Spa",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/hair-salon/GOLD-hair-salon-034__wicketshaw-salon-spa.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-hair-salon-063",
+      "industry": "hair-salon",
+      "fictional_brand_name": "Harrowdale Hair Studio",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/hair-salon/GOLD-hair-salon-063__harrowdale-hair-studio.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-hair-salon-064",
+      "industry": "hair-salon",
+      "fictional_brand_name": "Ploverfield Salon",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/hair-salon/GOLD-hair-salon-064__ploverfield-salon.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-hair-salon-065",
+      "industry": "hair-salon",
+      "fictional_brand_name": "Orielside Hair Studio",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/hair-salon/GOLD-hair-salon-065__orielside-hair-studio.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-handyman-002",
+      "industry": "handyman",
+      "fictional_brand_name": "Wickerhaven Handyman Co.",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/handyman/GOLD-handyman-002__wickerhaven-handyman-co.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-handyman-003",
+      "industry": "handyman",
+      "fictional_brand_name": "Spindlefell Handyman Co.",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/handyman/GOLD-handyman-003__spindlefell-handyman-co.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-handyman-014",
+      "industry": "handyman",
+      "fictional_brand_name": "Wrenthorne Artisans",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/handyman/GOLD-handyman-014__wrenthorne-artisans.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-handyman-015",
+      "industry": "handyman",
+      "fictional_brand_name": "Rookstead Handyman Co.",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/handyman/GOLD-handyman-015__rookstead-handyman-co.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-handyman-035",
+      "industry": "handyman",
+      "fictional_brand_name": "Burrowley Handyman Co.",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/handyman/GOLD-handyman-035__burrowley-handyman-co.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-home-buying-020",
+      "industry": "home-buying",
+      "fictional_brand_name": "Cloveshaw Cash Partners",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/home-buying/GOLD-home-buying-020__cloveshaw-cash-partners.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-home-buying-022",
+      "industry": "home-buying",
+      "fictional_brand_name": "Heronwick Cash Partners",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/home-buying/GOLD-home-buying-022__heronwick-cash-partners.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-home-buying-023",
+      "industry": "home-buying",
+      "fictional_brand_name": "Kilnshaw Cash Partners",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/home-buying/GOLD-home-buying-023__kilnshaw-cash-partners.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-home-buying-024",
+      "industry": "home-buying",
+      "fictional_brand_name": "Quincemoor Cash Partners",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/home-buying/GOLD-home-buying-024__quincemoor-cash-partners.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-home-buying-025",
+      "industry": "home-buying",
+      "fictional_brand_name": "Chervilridge Cash Partners",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/home-buying/GOLD-home-buying-025__chervilridge-cash-partners.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-home-buying-062",
+      "industry": "home-buying",
+      "fictional_brand_name": "Nettleshaw Cash Partners",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/home-buying/GOLD-home-buying-062__nettleshaw-cash-partners.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-home-insurance-001",
+      "industry": "home-insurance",
+      "fictional_brand_name": "Pippinley Mutual",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/home-insurance/GOLD-home-insurance-001__pippinley-mutual.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-home-insurance-021",
+      "industry": "home-insurance",
+      "fictional_brand_name": "Larchwell Insurance",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/home-insurance/GOLD-home-insurance-021__larchwell-insurance.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-home-insurance-031",
+      "industry": "home-insurance",
+      "fictional_brand_name": "Teaselcombe Mutual",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/home-insurance/GOLD-home-insurance-031__teaselcombe-mutual.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-home-insurance-036",
+      "industry": "home-insurance",
+      "fictional_brand_name": "Starlingmere Insurance",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/home-insurance/GOLD-home-insurance-036__starlingmere-insurance.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-home-insurance-059",
+      "industry": "home-insurance",
+      "fictional_brand_name": "Tansymere Mutual",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/home-insurance/GOLD-home-insurance-059__tansymere-mutual.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-home-remodeling-019",
+      "industry": "home-remodeling",
+      "fictional_brand_name": "Tumbleley Kitchen & Bath",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/home-remodeling/GOLD-home-remodeling-019__tumbleley-kitchen-bath.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-home-remodeling-025",
+      "industry": "home-remodeling",
+      "fictional_brand_name": "Caldershaw Kitchens",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/home-remodeling/GOLD-home-remodeling-025__caldershaw-kitchens.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-home-remodeling-060",
+      "industry": "home-remodeling",
+      "fictional_brand_name": "Bramblebrook Flooring Co.",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/home-remodeling/GOLD-home-remodeling-060__bramblebrook-flooring-co.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-home-remodeling-062",
+      "industry": "home-remodeling",
+      "fictional_brand_name": "Quilldale Garage & Doors",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/home-remodeling/GOLD-home-remodeling-062__quilldale-garage-doors.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-home-remodeling-097",
+      "industry": "home-remodeling",
+      "fictional_brand_name": "Sorrelwell Remodeling Co.",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/home-remodeling/GOLD-home-remodeling-097__sorrelwell-remodeling-co.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-home-remodeling-100",
+      "industry": "home-remodeling",
+      "fictional_brand_name": "Hazelthorne Kitchens",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/home-remodeling/GOLD-home-remodeling-100__hazelthorne-kitchens.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-home-security-008",
+      "industry": "home-security",
+      "fictional_brand_name": "Wicketdale Security",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/home-security/GOLD-home-security-008__wicketdale-security.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-home-security-016",
+      "industry": "home-security",
+      "fictional_brand_name": "Chervilhaven Security",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/home-security/GOLD-home-security-016__chervilhaven-security.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-home-security-019",
+      "industry": "home-security",
+      "fictional_brand_name": "Larkfell Security",
+      "name_risk": "LOW: close to 'Lark Security' (lark-security.com), different name",
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/home-security/GOLD-home-security-019__larkfell-security.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-junk-removal-011",
+      "industry": "junk-removal",
+      "fictional_brand_name": "Tarnvale Haul Co.",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/junk-removal/GOLD-junk-removal-011__tarnvale-haul-co.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-junk-removal-014",
+      "industry": "junk-removal",
+      "fictional_brand_name": "Tallowholt Haul Co.",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/junk-removal/GOLD-junk-removal-014__tallowholt-haul-co.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-junk-removal-022",
+      "industry": "junk-removal",
+      "fictional_brand_name": "Lanternholt Haul Co.",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/junk-removal/GOLD-junk-removal-022__lanternholt-haul-co.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-junk-removal-027",
+      "industry": "junk-removal",
+      "fictional_brand_name": "Aldervale Haul Co.",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/junk-removal/GOLD-junk-removal-027__aldervale-haul-co.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-laundromat-018",
+      "industry": "laundromat",
+      "fictional_brand_name": "Hazelwold Laundromat",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/laundromat/GOLD-laundromat-018__hazelwold-laundromat.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-laundromat-021",
+      "industry": "laundromat",
+      "fictional_brand_name": "Loomridge Laundromat",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/laundromat/GOLD-laundromat-021__loomridge-laundromat.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-laundromat-029",
+      "industry": "laundromat",
+      "fictional_brand_name": "Juniperbury Laundromat",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/laundromat/GOLD-laundromat-029__juniperbury-laundromat.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-laundromat-030",
+      "industry": "laundromat",
+      "fictional_brand_name": "Harrowmoor Laundry Co.",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/laundromat/GOLD-laundromat-030__harrowmoor-laundry-co.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-laundromat-031",
+      "industry": "laundromat",
+      "fictional_brand_name": "Hobstead Laundry Co.",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/laundromat/GOLD-laundromat-031__hobstead-laundry-co.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-laundromat-035",
+      "industry": "laundromat",
+      "fictional_brand_name": "Brackenstead Laundry Co.",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/laundromat/GOLD-laundromat-035__brackenstead-laundry-co.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-laundromat-044",
+      "industry": "laundromat",
+      "fictional_brand_name": "Wickervale Laundromat",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/laundromat/GOLD-laundromat-044__wickervale-laundromat.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-life-insurance-005",
+      "industry": "life-insurance",
+      "fictional_brand_name": "Bramblehaven Mutual",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/life-insurance/GOLD-life-insurance-005__bramblehaven-mutual.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-life-insurance-021",
+      "industry": "life-insurance",
+      "fictional_brand_name": "Dapplecombe Mutual",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/life-insurance/GOLD-life-insurance-021__dapplecombe-mutual.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-life-insurance-026",
+      "industry": "life-insurance",
+      "fictional_brand_name": "Pebblehaven Mutual",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/life-insurance/GOLD-life-insurance-026__pebblehaven-mutual.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-life-insurance-047",
+      "industry": "life-insurance",
+      "fictional_brand_name": "Larkgate Mutual",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/life-insurance/GOLD-life-insurance-047__larkgate-mutual.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-life-insurance-068",
+      "industry": "life-insurance",
+      "fictional_brand_name": "Burrowfell Mutual",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/life-insurance/GOLD-life-insurance-068__burrowfell-mutual.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-med-spa-chiro-005",
+      "industry": "med-spa-chiro",
+      "fictional_brand_name": "Heronley Aesthetics",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/med-spa-chiro/GOLD-med-spa-chiro-005__heronley-aesthetics.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-med-spa-chiro-014",
+      "industry": "med-spa-chiro",
+      "fictional_brand_name": "Hobholt Health & Alignment",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/med-spa-chiro/GOLD-med-spa-chiro-014__hobholt-health-alignment.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-med-spa-chiro-015",
+      "industry": "med-spa-chiro",
+      "fictional_brand_name": "Juniperdale MedSpa",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/med-spa-chiro/GOLD-med-spa-chiro-015__juniperdale-medspa.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-med-spa-chiro-121",
+      "industry": "med-spa-chiro",
+      "fictional_brand_name": "Emberford Aesthetics",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/med-spa-chiro/GOLD-med-spa-chiro-121__emberford-aesthetics.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-med-spa-chiro-133",
+      "industry": "med-spa-chiro",
+      "fictional_brand_name": "Hazelmoor MedSpa",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/med-spa-chiro/GOLD-med-spa-chiro-133__hazelmoor-medspa.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-medicare-015",
+      "industry": "medicare",
+      "fictional_brand_name": "Hobfell Medicare Advisors",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/medicare/GOLD-medicare-015__hobfell-medicare-advisors.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-medicare-036",
+      "industry": "medicare",
+      "fictional_brand_name": "Juniperley Medicare Advisors",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/medicare/GOLD-medicare-036__juniperley-medicare-advisors.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-medicare-037",
+      "industry": "medicare",
+      "fictional_brand_name": "Caldergate Medicare Solutions",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/medicare/GOLD-medicare-037__caldergate-medicare-solutions.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-mortgage-financial-015",
+      "industry": "mortgage-financial",
+      "fictional_brand_name": "Wickerside Wealth Partners",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/mortgage-financial/GOLD-mortgage-financial-015__wickerside-wealth-partners.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-mortgage-financial-029",
+      "industry": "mortgage-financial",
+      "fictional_brand_name": "Saffronfield Financial Partners",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/mortgage-financial/GOLD-mortgage-financial-029__saffronfield-financial-partners.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-mortgage-financial-045",
+      "industry": "mortgage-financial",
+      "fictional_brand_name": "Tallowmere Financial Partners",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/mortgage-financial/GOLD-mortgage-financial-045__tallowmere-financial-partners.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-mortgage-financial-046",
+      "industry": "mortgage-financial",
+      "fictional_brand_name": "Yarrowthorne Financial",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/mortgage-financial/GOLD-mortgage-financial-046__yarrowthorne-financial.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-mortgage-financial-047",
+      "industry": "mortgage-financial",
+      "fictional_brand_name": "Thrushfield Wealth Advisors",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/mortgage-financial/GOLD-mortgage-financial-047__thrushfield-wealth-advisors.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-mortgage-financial-113",
+      "industry": "mortgage-financial",
+      "fictional_brand_name": "Mallowley Financial Partners",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/mortgage-financial/GOLD-mortgage-financial-113__mallowley-financial-partners.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-moving-storage-030",
+      "industry": "moving-storage",
+      "fictional_brand_name": "Kilnwold Haul Co.",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/moving-storage/GOLD-moving-storage-030__kilnwold-haul-co.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-moving-storage-031",
+      "industry": "moving-storage",
+      "fictional_brand_name": "Gablemoor Moving Co.",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/moving-storage/GOLD-moving-storage-031__gablemoor-moving-co.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-moving-storage-033",
+      "industry": "moving-storage",
+      "fictional_brand_name": "Saffronford Moving Co.",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/moving-storage/GOLD-moving-storage-033__saffronford-moving-co.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-moving-storage-042",
+      "industry": "moving-storage",
+      "fictional_brand_name": "Fennelholt Moving Co.",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/moving-storage/GOLD-moving-storage-042__fennelholt-moving-co.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-moving-storage-043",
+      "industry": "moving-storage",
+      "fictional_brand_name": "Orielwick Moving Co.",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/moving-storage/GOLD-moving-storage-043__orielwick-moving-co.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-moving-storage-066",
+      "industry": "moving-storage",
+      "fictional_brand_name": "Penroseford Moving Co.",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/moving-storage/GOLD-moving-storage-066__penroseford-moving-co.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-optometry-001",
+      "industry": "optometry",
+      "fictional_brand_name": "Tumblefield Vision Care",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/optometry/GOLD-optometry-001__tumblefield-vision-care.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-optometry-003",
+      "industry": "optometry",
+      "fictional_brand_name": "Pebblewold Vision Care",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/optometry/GOLD-optometry-003__pebblewold-vision-care.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-optometry-005",
+      "industry": "optometry",
+      "fictional_brand_name": "Yarrowfield Eyecare",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/optometry/GOLD-optometry-005__yarrowfield-eyecare.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-optometry-026",
+      "industry": "optometry",
+      "fictional_brand_name": "Tallowfell Eyecare",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/optometry/GOLD-optometry-026__tallowfell-eyecare.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-optometry-060",
+      "industry": "optometry",
+      "fictional_brand_name": "Sedgeholt Eyecare",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/optometry/GOLD-optometry-060__sedgeholt-eyecare.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-outdoor-living-012",
+      "industry": "outdoor-living",
+      "fictional_brand_name": "Cobblegate Outdoor Co.",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/outdoor-living/GOLD-outdoor-living-012__cobblegate-outdoor-co.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-outdoor-living-026",
+      "industry": "outdoor-living",
+      "fictional_brand_name": "Martenhaven Stone & Patio",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/outdoor-living/GOLD-outdoor-living-026__martenhaven-stone-patio.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-outdoor-living-040",
+      "industry": "outdoor-living",
+      "fictional_brand_name": "Brackenshaw Outdoor Living",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/outdoor-living/GOLD-outdoor-living-040__brackenshaw-outdoor-living.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-outdoor-living-042",
+      "industry": "outdoor-living",
+      "fictional_brand_name": "Dapplevale Outdoor Co.",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/outdoor-living/GOLD-outdoor-living-042__dapplevale-outdoor-co.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-pest-control-002",
+      "industry": "pest-control",
+      "fictional_brand_name": "Wickershaw Pest Solutions",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/pest-control/GOLD-pest-control-002__wickershaw-pest-solutions.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-pest-control-006",
+      "industry": "pest-control",
+      "fictional_brand_name": "Mallowdale Pest Defense",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/pest-control/GOLD-pest-control-006__mallowdale-pest-defense.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-pest-control-007",
+      "industry": "pest-control",
+      "fictional_brand_name": "Thimblemere Pest Solutions",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/pest-control/GOLD-pest-control-007__thimblemere-pest-solutions.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-pest-control-034",
+      "industry": "pest-control",
+      "fictional_brand_name": "Penroseridge Pest Defense",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/pest-control/GOLD-pest-control-034__penroseridge-pest-defense.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-pest-control-063",
+      "industry": "pest-control",
+      "fictional_brand_name": "Fennelvale Pest Care",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/pest-control/GOLD-pest-control-063__fennelvale-pest-care.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-plumbing-042",
+      "industry": "plumbing",
+      "fictional_brand_name": "Martenbury Drain Solutions",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/plumbing/GOLD-plumbing-042__martenbury-drain-solutions.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-plumbing-072",
+      "industry": "plumbing",
+      "fictional_brand_name": "Larkcombe Drain Solutions",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/plumbing/GOLD-plumbing-072__larkcombe-drain-solutions.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-plumbing-085",
+      "industry": "plumbing",
+      "fictional_brand_name": "Starlingthorne Plumbing",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/plumbing/GOLD-plumbing-085__starlingthorne-plumbing.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-plumbing-090",
+      "industry": "plumbing",
+      "fictional_brand_name": "Alderwick Plumbing",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/plumbing/GOLD-plumbing-090__alderwick-plumbing.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-precious-metals-007",
+      "industry": "precious-metals",
+      "fictional_brand_name": "Hollowthorne Gold & Coin",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/precious-metals/GOLD-precious-metals-007__hollowthorne-gold-coin.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-precious-metals-017",
+      "industry": "precious-metals",
+      "fictional_brand_name": "Starlingbury Gold & Coin",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/precious-metals/GOLD-precious-metals-017__starlingbury-gold-coin.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-precious-metals-018",
+      "industry": "precious-metals",
+      "fictional_brand_name": "Marrowcombe Gold & Coin",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/precious-metals/GOLD-precious-metals-018__marrowcombe-gold-coin.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-precious-metals-020",
+      "industry": "precious-metals",
+      "fictional_brand_name": "Osierwell Precious Metals",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/precious-metals/GOLD-precious-metals-020__osierwell-precious-metals.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-retail-grand-openings-044",
+      "industry": "retail-grand-openings",
+      "fictional_brand_name": "Hollowholt Market",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/retail-grand-openings/GOLD-retail-grand-openings-044__hollowholt-market.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-retail-grand-openings-046",
+      "industry": "retail-grand-openings",
+      "fictional_brand_name": "Martenmoor Market",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/retail-grand-openings/GOLD-retail-grand-openings-046__martenmoor-market.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-retail-grand-openings-119",
+      "industry": "retail-grand-openings",
+      "fictional_brand_name": "Gablehaven Market",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/retail-grand-openings/GOLD-retail-grand-openings-119__gablehaven-market.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-retail-grand-openings-121",
+      "industry": "retail-grand-openings",
+      "fictional_brand_name": "Pebbleshaw Jewelry",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/retail-grand-openings/GOLD-retail-grand-openings-121__pebbleshaw-jewelry.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-retail-grand-openings-122",
+      "industry": "retail-grand-openings",
+      "fictional_brand_name": "Fennelbrook Furnishings",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/retail-grand-openings/GOLD-retail-grand-openings-122__fennelbrook-furnishings.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-retail-grand-openings-126",
+      "industry": "retail-grand-openings",
+      "fictional_brand_name": "Fernholt Cabin Co.",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/retail-grand-openings/GOLD-retail-grand-openings-126__fernholt-cabin-co.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-sauna-003",
+      "industry": "sauna",
+      "fictional_brand_name": "Finchwold Saunas",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/sauna/GOLD-sauna-003__finchwold-saunas.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-sauna-004",
+      "industry": "sauna",
+      "fictional_brand_name": "Kilnwick Saunas",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/sauna/GOLD-sauna-004__kilnwick-saunas.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-sauna-008",
+      "industry": "sauna",
+      "fictional_brand_name": "Rowanthorne Saunas",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/sauna/GOLD-sauna-008__rowanthorne-saunas.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-sauna-010",
+      "industry": "sauna",
+      "fictional_brand_name": "Kestrelhaven Wellness",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/sauna/GOLD-sauna-010__kestrelhaven-wellness.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-senior-living-010",
+      "industry": "senior-living",
+      "fictional_brand_name": "Teaselwick Manor",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/senior-living/GOLD-senior-living-010__teaselwick-manor.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-senior-living-029",
+      "industry": "senior-living",
+      "fictional_brand_name": "Merrowcombe Living",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/senior-living/GOLD-senior-living-029__merrowcombe-living.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-senior-living-041",
+      "industry": "senior-living",
+      "fictional_brand_name": "Fernwick Manor",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/senior-living/GOLD-senior-living-041__fernwick-manor.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-senior-living-053",
+      "industry": "senior-living",
+      "fictional_brand_name": "Hollowside Senior Living",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/senior-living/GOLD-senior-living-053__hollowside-senior-living.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-senior-living-054",
+      "industry": "senior-living",
+      "fictional_brand_name": "Brackenwold Senior Living",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/senior-living/GOLD-senior-living-054__brackenwold-senior-living.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-senior-living-055",
+      "industry": "senior-living",
+      "fictional_brand_name": "Sparrowshaw Senior Living",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/senior-living/GOLD-senior-living-055__sparrowshaw-senior-living.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-senior-living-056",
+      "industry": "senior-living",
+      "fictional_brand_name": "Fennelmere Senior Living",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/senior-living/GOLD-senior-living-056__fennelmere-senior-living.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-solar-021",
+      "industry": "solar",
+      "fictional_brand_name": "Osierfell Eco Homes",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/solar/GOLD-solar-021__osierfell-eco-homes.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-solar-030",
+      "industry": "solar",
+      "fictional_brand_name": "Quillridge Solar Co.",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/solar/GOLD-solar-030__quillridge-solar-co.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-solar-031",
+      "industry": "solar",
+      "fictional_brand_name": "Tumbleshaw Solar Co.",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/solar/GOLD-solar-031__tumbleshaw-solar-co.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-solar-037",
+      "industry": "solar",
+      "fictional_brand_name": "Finchvale Solar Co.",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/solar/GOLD-solar-037__finchvale-solar-co.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-tutoring-childcare-047",
+      "industry": "tutoring-childcare",
+      "fictional_brand_name": "Merrowthorne Academies",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/tutoring-childcare/GOLD-tutoring-childcare-047__merrowthorne-academies.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-tutoring-childcare-049",
+      "industry": "tutoring-childcare",
+      "fictional_brand_name": "Mallowridge Learning Co.",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/tutoring-childcare/GOLD-tutoring-childcare-049__mallowridge-learning-co.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-vet-pet-029",
+      "industry": "vet-pet",
+      "fictional_brand_name": "Wrenshaw Veterinary",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/vet-pet/GOLD-vet-pet-029__wrenshaw-veterinary.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-vet-pet-031",
+      "industry": "vet-pet",
+      "fictional_brand_name": "Finchgate Vet Care",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/vet-pet/GOLD-vet-pet-031__finchgate-vet-care.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-vet-pet-112",
+      "industry": "vet-pet",
+      "fictional_brand_name": "Rowanfell Veterinary",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/vet-pet/GOLD-vet-pet-112__rowanfell-veterinary.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-windows-gutters-siding-053",
+      "industry": "windows-gutters-siding",
+      "fictional_brand_name": "Brackenmere Gutters & Windows",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/windows-gutters-siding/GOLD-windows-gutters-siding-053__brackenmere-gutters-windows.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-windows-gutters-siding-092",
+      "industry": "windows-gutters-siding",
+      "fictional_brand_name": "Sedgebury Gutters & Windows",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/windows-gutters-siding/GOLD-windows-gutters-siding-092__sedgebury-gutters-windows.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-windows-gutters-siding-097",
+      "industry": "windows-gutters-siding",
+      "fictional_brand_name": "Cobblewick Windows & Gutters",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/windows-gutters-siding/GOLD-windows-gutters-siding-097__cobblewick-windows-gutters.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-windows-gutters-siding-098",
+      "industry": "windows-gutters-siding",
+      "fictional_brand_name": "Sparrowgate Windows & Gutters",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/windows-gutters-siding/GOLD-windows-gutters-siding-098__sparrowgate-windows-gutters.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-plumbing-005",
+      "industry": "plumbing",
+      "fictional_brand_name": "Meridian Pipe Co.",
+      "name_risk": "LOW: appears only in an online name-generator list (as a smoke-shop name); 'pipe' reads as smoke-shop",
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/plumbing/GOLD-plumbing-005__meridian-pipe-co.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-pest-control-001",
+      "industry": "pest-control",
+      "fictional_brand_name": "Thistlewood Pest Care",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/pest-control/GOLD-pest-control-001__thistlewood-pest-care.jpg",
+      "width": 2528,
+      "height": 1696
+    },
+    {
+      "id": "MM-outdoor-living-041",
+      "industry": "outdoor-living",
+      "fictional_brand_name": "Hearthline Outdoor Co.",
+      "name_risk": null,
+      "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/outdoor-living/GOLD-outdoor-living-041__hearthline-outdoor-co.jpg",
+      "width": 2528,
+      "height": 1696
+    }
+  ]
+}

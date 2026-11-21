@@ -9,8 +9,8 @@ import type {
   CreativeRevision,
 } from "@/lib/campaign-creator/types"
 
+import { galleryIndustryLabel } from "./gallery-finished"
 import type { MailTemplate } from "./types"
-import { TEMPLATE_INDUSTRY_LABELS } from "./types"
 
 /**
  * Loads a catalog mailer into the existing Studio path.
@@ -42,7 +42,7 @@ export function applyTemplateStart(
     rationale: template.summary,
     oneLineDifference: template.summary,
     designedToDrive: spec.callToAction ?? template.summary,
-    tags: [TEMPLATE_INDUSTRY_LABELS[template.industry], "Template"],
+    tags: [galleryIndustryLabel(template.industry), "Template"],
     spec,
     recommended: true,
     createdAt: now,

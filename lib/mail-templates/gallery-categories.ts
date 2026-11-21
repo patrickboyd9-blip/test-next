@@ -1,37 +1,54 @@
+import { finishedGalleryPhotos, galleryIndustryLabel } from "./gallery-finished"
 import { galleryPhotoSrc } from "./gallery-photo-src"
 import { GALLERY_V1_INDUSTRIES } from "./gallery-v1"
 import { listMailTemplates } from "./query"
-import { isTemplateIndustry, TEMPLATE_INDUSTRY_LABELS, type TemplateIndustry } from "./types"
 
 export interface GalleryPhoto {
   id: string
   name: string
   summary: string
   src: string
-  industry: TemplateIndustry
+  industry: string
 }
 
 export interface GalleryCategory {
-  id: TemplateIndustry
+  id: string
   label: string
   photos: GalleryPhoto[]
 }
 
 /**
  * One group per industry that has a picture.
- * New catalog photos, including a later 18-scene set, show up here
- * as soon as the catalog and the photo manifest list them.
+ * Catalog photos show up here when the photo manifest lists them.
+ * Finished example mailers are appended in label order.
  */
 export function galleryCategories(): GalleryCategory[] {
-  return GALLERY_V1_INDUSTRIES.flatMap((id) => {
+  const categories: GalleryCategory[] = GALLERY_V1_INDUSTRIES.flatMap((id) => {
     const photos = listMailTemplates(id).flatMap((template) => {
       const src = galleryPhotoSrc(template.id)
       if (!src) return []
       return [{ id: template.id, name: template.name, summary: template.summary, src, industry: id }]
     })
     if (photos.length === 0) return []
-    return [{ id, label: TEMPLATE_INDUSTRY_LABELS[id], photos }]
+    return [{ id, label: galleryIndustryLabel(id), photos }]
   })
+  const known = new Set(categories.map((category) => category.id))
+  const extras = new Map<string, GalleryPhoto[]>()
+  for (const photo of finishedGalleryPhotos()) {
+    const existing = categories.find((category) => category.id === photo.industry)
+    if (existing) {
+      existing.photos.push(photo)
+      continue
+    }
+    const group = extras.get(photo.industry) ?? []
+    group.push(photo)
+    extras.set(photo.industry, group)
+  }
+  const added = [...extras.entries()]
+    .filter(([id]) => !known.has(id))
+    .map(([id, photos]) => ({ id, label: galleryIndustryLabel(id), photos }))
+    .sort((a, b) => a.label.localeCompare(b.label, "en"))
+  return [...categories, ...added]
 }
 
 /** "3 of 18" for the photo currently open in a category. */
@@ -40,7 +57,7 @@ export function photoCountLabel(index: number, total: number): string {
 }
 
 /** URL slug for an industry page, such as /app/templates/auto-repair. */
-export function galleryIndustrySlug(id: TemplateIndustry): string {
+export function galleryIndustrySlug(id: string): string {
   return id.replaceAll("_", "-")
 }
 
@@ -48,6 +65,5 @@ export function galleryIndustrySlug(id: TemplateIndustry): string {
 export function galleryCategoryBySlug(slug: string): GalleryCategory | null {
   if (!/^[a-z0-9-]+$/.test(slug)) return null
   const id = slug.replaceAll("-", "_")
-  if (!isTemplateIndustry(id)) return null
   return galleryCategories().find((category) => category.id === id) ?? null
 }

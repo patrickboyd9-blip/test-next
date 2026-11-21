@@ -43,7 +43,7 @@ test("gallery categories page through every photo, including a later set of 18",
   assert.ok(roofing)
   assert.equal(roofing.photos.length, 21)
   assert.ok(roofing.photos.some((photo) => photo.id === "roofing-scene-18"))
-  assert.equal(categories.reduce((count, category) => count + category.photos.length, 0), 168)
+  assert.equal(categories.reduce((count, category) => count + category.photos.length, 0), 317)
   assert.ok(roofing.photos.every((photo) => photo.src.startsWith("/gallery/")))
   assert.equal(photoCountLabel(2, 18), "3 of 18")
   assert.equal(photoCountLabel(0, roofing.photos.length), `1 of ${roofing.photos.length}`)
@@ -52,28 +52,28 @@ test("gallery categories page through every photo, including a later set of 18",
 test("each industry with photos has its own gallery page", () => {
   const categories = galleryCategories()
   assert.deepEqual(
-    categories.map((category) => category.label),
+    categories.slice(0, 8).map((category) => category.label),
     ["Roofing", "HVAC", "Restaurant", "Dental", "Real estate", "Landscaping", "Auto repair", "Cleaning"]
   )
+  assert.equal(categories.length, 39)
   assert.equal(galleryIndustrySlug("auto_repair"), "auto-repair")
+  assert.equal(galleryIndustrySlug("vet_pet"), "vet-pet")
   assert.equal(galleryCategoryBySlug("roofing")?.photos.length, 21)
   assert.equal(galleryCategoryBySlug("auto-repair")?.id, "auto_repair")
   assert.equal(galleryCategoryBySlug("real-estate")?.label, "Real estate")
-  assert.equal(galleryCategoryBySlug("plumbing"), null)
+  assert.equal(galleryCategoryBySlug("plumbing")?.photos.length, 5)
+  assert.equal(galleryCategoryBySlug("vet-pet")?.label, "Vet & Pet")
+  assert.equal(galleryCategoryBySlug("med-spa-chiro")?.label, "Med Spa & Chiro")
+  assert.equal(galleryCategoryBySlug("tutoring-childcare")?.label, "Tutoring & Childcare")
+  assert.equal(galleryCategoryBySlug("retail-grand-openings")?.label, "Retail & Grand Openings")
   assert.equal(galleryCategoryBySlug("../roofing"), null)
+  assert.equal(galleryCategoryBySlug("not-a-trade"), null)
   const index = readFileSync("components/mail-gallery/GalleryIndex.tsx", "utf8")
   const industry = readFileSync("app/app/templates/[industry]/page.tsx", "utf8")
   const alphabetical = [...categories].sort((a, b) => a.label.localeCompare(b.label, "en")).map((category) => category.label)
-  assert.deepEqual(alphabetical, [
-    "Auto repair",
-    "Cleaning",
-    "Dental",
-    "HVAC",
-    "Landscaping",
-    "Real estate",
-    "Restaurant",
-    "Roofing",
-  ])
+  assert.deepEqual(alphabetical.slice(0, 3), ["Auto insurance", "Auto repair", "Bakery"])
+  assert.ok(alphabetical.includes("Vet & Pet"))
+  assert.equal(alphabetical.length, categories.length)
   assert.match(index, /localeCompare/)
   assert.match(index, /flex-wrap/)
   assert.match(index, /\/app\/templates\//)
