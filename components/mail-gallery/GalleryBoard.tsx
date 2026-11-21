@@ -128,8 +128,10 @@ function PhotoViewer({
         <div className="min-w-0 flex-1">
           {editing && template ? (
             <GalleryProof
+              key={photo.id}
               layers={activeLayers}
               backgroundSrc={photo.src}
+              templateId={photo.id}
               onChange={setLayers}
             />
           ) : (

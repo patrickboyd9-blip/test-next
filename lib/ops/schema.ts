@@ -22,7 +22,16 @@ export const RATE_EVENTS_DDL = `CREATE TABLE IF NOT EXISTS rate_events (
   at_ms bigint NOT NULL
 )`
 
-export const OPS_DDL = [AUDIT_EVENTS_DDL, RATE_EVENTS_DDL] as const
+export const PHOTO_EDIT_SPEND_DDL = `CREATE TABLE IF NOT EXISTS photo_edit_spend (
+  id text PRIMARY KEY,
+  at timestamptz NOT NULL,
+  month text NOT NULL,
+  day text NOT NULL,
+  user_id text NOT NULL,
+  cents integer NOT NULL
+)`
+
+export const OPS_DDL = [AUDIT_EVENTS_DDL, RATE_EVENTS_DDL, PHOTO_EDIT_SPEND_DDL] as const
 
 const ready = new WeakMap<SqlExecutor, Promise<void>>()
 
@@ -37,7 +46,7 @@ async function applyOpsTables(sql: SqlExecutor): Promise<void> {
 }
 
 /**
- * Creates both tables when they are missing.
+ * Creates the ops tables when they are missing.
  * A concurrent create on Neon can raise 23505 even with IF NOT EXISTS.
  * That race is ignored. Any other error is retried on the next call.
  */
