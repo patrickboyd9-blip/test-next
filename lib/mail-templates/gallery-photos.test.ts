@@ -18,7 +18,7 @@ test("the gallery plans one photo for each of the 24 templates", () => {
   assert.equal(jobs.length, GALLERY_PHOTO_COUNT)
   assert.equal(new Set(jobs.map((job) => job.templateId)).size, GALLERY_PHOTO_COUNT)
   for (const job of jobs) {
-    assert.equal(job.publicPath, `/gallery/${job.templateId}.png`)
+    assert.equal(job.publicPath, `/gallery/${job.templateId}.jpg`)
     assert.match(job.prompt, /Do not crop a face/)
     assert.match(job.prompt, /No logos and no lettering/)
     assert.match(job.prompt, /\bno people\b/i)

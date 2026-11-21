@@ -158,7 +158,7 @@ export const BETA_IMAGERY_LIBRARY: readonly CuratedImageryAsset[] = [
     commercialPrintOk: false,
     tags: ["pizza", "slice", "restaurant"],
     attribution: "Labeled test drawing. Not a generated photograph and not a customer's food.",
-    previewSrc: "/creative-studio/imagery/pizza-slice-stand-in.png",
+    previewSrc: "/creative-studio/imagery/pizza-slice-stand-in.jpg",
   },
   {
     id: "pizza-slice-stand-in-crew",
@@ -167,7 +167,7 @@ export const BETA_IMAGERY_LIBRARY: readonly CuratedImageryAsset[] = [
     commercialPrintOk: false,
     tags: ["pizza", "slice", "restaurant"],
     attribution: "Labeled test drawing. Not a generated photograph and not a customer's food.",
-    previewSrc: "/creative-studio/imagery/pizza-slice-stand-in.png",
+    previewSrc: "/creative-studio/imagery/pizza-slice-stand-in.jpg",
   },
   {
     id: "pizza-slice-stand-in-consequence",
@@ -176,6 +176,6 @@ export const BETA_IMAGERY_LIBRARY: readonly CuratedImageryAsset[] = [
     commercialPrintOk: false,
     tags: ["pizza", "slice", "restaurant"],
     attribution: "Labeled test drawing. Not a generated photograph and not a customer's food.",
-    previewSrc: "/creative-studio/imagery/pizza-slice-stand-in.png",
+    previewSrc: "/creative-studio/imagery/pizza-slice-stand-in.jpg",
   },
 ]
