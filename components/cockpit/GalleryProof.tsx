@@ -32,7 +32,7 @@ export function GalleryProof({
     <div className="space-y-3" data-gallery-proof>
       <div className="relative overflow-hidden rounded-lg border bg-[#071018]" style={{ aspectRatio: `${width} / ${height}` }}>
         {backgroundSrc ? (
-          // The empty scene is the background. Words stay on their own layers.
+          // The chosen picture stays the hero. Words stay on their own layers.
           // eslint-disable-next-line @next/next/no-img-element
           <img src={backgroundSrc} alt="" className="absolute inset-0 h-full w-full object-cover" />
         ) : null}

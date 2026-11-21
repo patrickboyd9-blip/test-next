@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import {
   BarChart3,
   CreditCard,
+  FileDown,
   Images,
   LayoutDashboard,
   LifeBuoy,
@@ -34,23 +35,28 @@ interface NavItem {
   label: string
   href: string
   icon: React.ComponentType<{ className?: string }>
+  comet?: boolean
 }
 
 const itemClass =
   "min-h-11 text-[#A9B4C2] hover:text-[#f7fbff] data-active:text-[#f7fbff] [&_svg]:text-current"
 
-const NAV_ITEMS: NavItem[] = [
+const CREATE: NavItem[] = [
+  { label: "Gallery", href: "/app/templates", icon: Images },
+  { label: "Print Templates", href: "/app/print-templates", icon: FileDown },
+]
+
+const MANAGE: NavItem[] = [
   { label: "Command Center", href: "/app", icon: LayoutDashboard },
   { label: "Campaigns", href: "/app/campaigns", icon: Megaphone },
   { label: "Lists", href: "/app/lists", icon: List },
-  { label: "Mailer Gallery", href: "/app/templates", icon: Images },
   { label: "Reports", href: "/app/reports", icon: BarChart3 },
-  { label: "Billing", href: "/app/billing", icon: CreditCard },
-  { label: "Settings", href: "/app/settings", icon: Settings },
 ]
 
-const PINNED: NavItem[] = [
-  { label: "Ask Comet", href: "/app/help?ask=1", icon: Sparkles },
+const ACCOUNT: NavItem[] = [
+  { label: "Billing", href: "/app/billing", icon: CreditCard },
+  { label: "Settings", href: "/app/settings", icon: Settings },
+  { label: "Ask Comet", href: "/app/help?ask=1", icon: Sparkles, comet: true },
   { label: "Help", href: "/app/help", icon: LifeBuoy },
 ]
 
@@ -62,6 +68,7 @@ export function AppSidebar({
   brand: AppliedBrand
 }) {
   const pathname = usePathname()
+  const onMailer = pathname === "/app/mail" || pathname.startsWith("/app/mail/")
 
   return (
     <Sidebar
@@ -104,22 +111,25 @@ export function AppSidebar({
           <SidebarGroupContent>
             <Link
               href="/app/mail"
+              aria-current={onMailer ? "page" : undefined}
               className="mx-2 mb-3 inline-flex min-h-12 w-[calc(100%-1rem)] items-center justify-center rounded-xl px-3 text-sm font-semibold group-data-[collapsible=icon]:hidden"
               style={{ background: brand.accent, color: brand.ink }}
             >
-              New Mailer Campaign
+              New Mailer
             </Link>
+            <SidebarMenu className="mb-2 hidden group-data-[collapsible=icon]:flex">
+              <NavLink item={{ label: "New Mailer", href: "/app/mail", icon: Megaphone }} active={onMailer} />
+            </SidebarMenu>
+            <Section label="Create" />
             <SidebarMenu>
-              {NAV_ITEMS.map((item) => (
-                <NavLink
-                  key={item.href}
-                  item={item}
-                  active={
-                    item.href === "/app"
-                      ? pathname === "/app"
-                      : pathname === item.href || pathname.startsWith(`${item.href}/`)
-                  }
-                />
+              {CREATE.map((item) => (
+                <NavLink key={item.href} item={item} active={itemActive(item.href, pathname)} />
+              ))}
+            </SidebarMenu>
+            <Section label="Manage" />
+            <SidebarMenu>
+              {MANAGE.map((item) => (
+                <NavLink key={item.href} item={item} active={itemActive(item.href, pathname)} />
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
@@ -127,9 +137,10 @@ export function AppSidebar({
       </SidebarContent>
 
       <SidebarFooter>
+        <Section label="Account" />
         <SidebarMenu>
-          {PINNED.map((item) => (
-            <NavLink key={item.href} item={item} active={pathname === "/app/help" && item.href === "/app/help"} comet={item.label === "Ask Comet"} />
+          {ACCOUNT.map((item) => (
+            <NavLink key={item.label} item={item} active={itemActive(item.href, pathname)} comet={item.comet} />
           ))}
         </SidebarMenu>
         {brand.poweredBy ? (
@@ -164,6 +175,20 @@ export function AppSidebar({
       <SidebarRail />
     </Sidebar>
   )
+}
+
+function Section({ label }: { label: string }) {
+  return (
+    <p className="px-3 pb-1 pt-3 text-[10px] font-medium uppercase tracking-[0.16em] text-[#6d8294] group-data-[collapsible=icon]:hidden">
+      {label}
+    </p>
+  )
+}
+
+function itemActive(href: string, pathname: string): boolean {
+  if (href.includes("?")) return false
+  if (href === "/app") return pathname === "/app"
+  return pathname === href || pathname.startsWith(`${href}/`)
 }
 
 function NavLink({ item, active, comet = false }: { item: NavItem; active: boolean; comet?: boolean }) {

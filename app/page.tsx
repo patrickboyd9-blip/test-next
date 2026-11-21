@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Modern Mail",
     description: "Tell Comet your goal, approve the proof, and we print and mail the postcard. Nothing is mailed until you approve.",
-    images: [{ url: "/gallery/roofing-after-the-storm.png", alt: "A sample roofing postcard from the Mailer Gallery" }],
+    images: [{ url: "/gallery/roofing-after-the-storm.png", alt: "A sample roofing postcard from the Gallery" }],
   },
 }
 
@@ -96,7 +96,7 @@ export default async function Home() {
 
         <section aria-labelledby="samples">
           <h2 id="samples" className="text-2xl font-semibold">Sample designs</h2>
-          <p className="mt-2 text-sm text-[#8aa0b4]">From the Mailer Gallery. You replace the words with your own.</p>
+          <p className="mt-2 text-sm text-[#8aa0b4]">From the Gallery. You replace the words with your own.</p>
           <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
             {samples.map((sample) => (
               <li key={sample.id} className="overflow-hidden rounded-xl border border-[#1c3d52] bg-[#0c1424]">
