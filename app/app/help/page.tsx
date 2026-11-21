@@ -1,3 +1,5 @@
+import Link from "next/link"
+
 import { CockpitFrame, Eyebrow, Panel } from "@/components/cockpit/ui"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { getSession } from "@/lib/auth/session"
@@ -23,6 +25,9 @@ export default async function HelpPage() {
         <h1 className="text-3xl font-semibold">Help</h1>
         <Panel className="p-5 text-sm leading-6 text-[#d5e6f2]">
           <p>Ask Comet from the button on this screen, or from the bottom of the menu.</p>
+          <p className="mt-3">
+            <Link href="/app/help/plugins" className="underline">How to use our plugins</Link>
+          </p>
           <p className="mt-3">{support}</p>
           {brand.poweredBy ? <p className="mt-3 text-[#8aa0b4]">{brand.poweredBy}</p> : null}
         </Panel>
