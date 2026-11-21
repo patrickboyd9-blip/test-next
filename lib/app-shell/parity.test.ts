@@ -36,7 +36,7 @@ for (const feature of features) {
   })
 }
 
-test("Command Center sits above New Mailer and Reports stays in Manage", () => {
+test("New Mailer stays above Command Center and Reports stays in Manage", () => {
   const sidebar = source("components/layout/AppSidebar.tsx")
   const content = sidebar.slice(sidebar.indexOf("<SidebarContent>"))
   const mailer = content.indexOf("New Mailer")
@@ -44,8 +44,8 @@ test("Command Center sits above New Mailer and Reports stays in Manage", () => {
   const create = content.indexOf('label="Create"')
   const manage = content.indexOf('label="Manage"')
   const account = sidebar.indexOf('label="Account"')
-  assert.ok(center >= 0 && mailer > center)
-  assert.ok(create > mailer)
+  assert.ok(mailer >= 0 && center > mailer)
+  assert.ok(create > center)
   assert.ok(manage > create)
   assert.ok(account > manage)
   const manageItems = sidebar.slice(sidebar.indexOf("const MANAGE"), sidebar.indexOf("const ACCOUNT"))

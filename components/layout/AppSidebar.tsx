@@ -110,19 +110,19 @@ export function AppSidebar({
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
-              <NavLink item={COMMAND_CENTER} active={itemActive(COMMAND_CENTER.href, pathname)} />
-            </SidebarMenu>
             <Link
               href="/app/mail"
               aria-current={onMailer ? "page" : undefined}
-              className="mx-2 mb-3 mt-2 inline-flex min-h-12 w-[calc(100%-1rem)] items-center justify-center rounded-xl px-3 text-sm font-semibold group-data-[collapsible=icon]:hidden"
+              className="mx-2 mb-3 inline-flex min-h-12 w-[calc(100%-1rem)] items-center justify-center rounded-xl px-3 text-sm font-semibold group-data-[collapsible=icon]:hidden"
               style={{ background: brand.accent, color: brand.ink }}
             >
               New Mailer
             </Link>
             <SidebarMenu className="mb-2 hidden group-data-[collapsible=icon]:flex">
               <NavLink item={{ label: "New Mailer", href: "/app/mail", icon: Megaphone }} active={onMailer} />
+            </SidebarMenu>
+            <SidebarMenu>
+              <NavLink item={COMMAND_CENTER} active={itemActive(COMMAND_CENTER.href, pathname)} />
             </SidebarMenu>
             <Section label="Create" />
             <SidebarMenu>
