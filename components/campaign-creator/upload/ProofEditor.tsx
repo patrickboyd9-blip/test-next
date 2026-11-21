@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 
+import { PhotoAdjust } from "@/components/mail-gallery/PhotoAdjust"
 import { askComet } from "@/lib/image-edit/ask"
 import { nextLayerId, placeLayer, placementLimits } from "@/lib/image-edit/placement"
 import type { ProofFace, ProofLayer } from "@/lib/image-edit/types"
@@ -30,6 +31,8 @@ export function ProofEditor({
   const [ask, setAsk] = useState("")
   const [reply, setReply] = useState("")
   const [busy, setBusy] = useState(false)
+  const [shown, setShown] = useState(src)
+  const image = mediaType.startsWith("image/")
   const mine = layers.filter((layer) => layer.face === face).sort((a, b) => a.z - b.z)
 
   function commit(next: ProofLayer[]) {
@@ -59,7 +62,7 @@ export function ProofEditor({
 
   return (
     <div className="space-y-3" data-proof-editor={face}>
-      <ProofFrame src={src} mediaType={mediaType} face={face} label={label} size={size}>
+      <ProofFrame src={image ? shown : src} mediaType={mediaType} face={face} label={label} size={size}>
         {mine.map((layer) => (
           <LayerView
             key={layer.id}
@@ -134,6 +137,9 @@ export function ProofEditor({
         </button>
         {reply ? <p className="text-sm text-[#e7f2fb]">{reply}</p> : null}
       </form>
+      {image ? (
+        <PhotoAdjust imageSrc={src} onKept={setShown} onOriginal={() => setShown(src)} />
+      ) : null}
     </div>
   )
 }

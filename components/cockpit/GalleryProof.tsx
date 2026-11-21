@@ -6,19 +6,23 @@ import { askComet } from "@/lib/image-edit/ask"
 import { placeLayer, placementLimits } from "@/lib/image-edit/placement"
 import type { ProofLayer } from "@/lib/image-edit/types"
 import { geometryFor } from "@/lib/postcard-layouts/compose"
+import { PhotoAdjust } from "@/components/mail-gallery/PhotoAdjust"
 
 export function GalleryProof({
   layers,
   backgroundSrc,
+  templateId,
   onChange,
 }: {
   layers: ProofLayer[]
   backgroundSrc?: string | null
+  templateId?: string
   onChange: (layers: ProofLayer[]) => void
 }) {
   const [past, setPast] = useState<ProofLayer[][]>([])
   const [ask, setAsk] = useState("")
   const [reply, setReply] = useState("")
+  const [photoSrc, setPhotoSrc] = useState(backgroundSrc ?? "")
   const spec = geometryFor("5x8")
   const width = spec.artworkCanvasInches.widthInches
   const height = spec.artworkCanvasInches.heightInches
@@ -34,7 +38,7 @@ export function GalleryProof({
         {backgroundSrc ? (
           // The chosen picture stays the hero. Words stay on their own layers.
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={backgroundSrc} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          <img src={photoSrc || backgroundSrc} alt="" className="absolute inset-0 h-full w-full object-cover" />
         ) : null}
         {layers.map((layer) => (
           <div
@@ -115,6 +119,14 @@ export function GalleryProof({
         </button>
         {reply ? <p className="text-sm">{reply}</p> : null}
       </form>
+      {backgroundSrc ? (
+        <PhotoAdjust
+          templateId={templateId}
+          imageSrc={backgroundSrc}
+          onKept={setPhotoSrc}
+          onOriginal={() => setPhotoSrc(backgroundSrc)}
+        />
+      ) : null}
     </div>
   )
 }
