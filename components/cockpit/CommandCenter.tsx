@@ -20,7 +20,7 @@ export function CommandCenter({
         <Eyebrow>Command Center</Eyebrow>
         <h1 className="max-w-xl text-3xl font-semibold tracking-tight sm:text-5xl">Today at a glance</h1>
         <p className="max-w-xl text-base text-[#b7c9d8]">
-          {brand.appName}. {shop}. Counts below come from recorded mail, scans, and charges.
+          {brand.appName}. {shop}. Counts below are pieces, scans, page taps, and charges that were recorded.
         </p>
         {snapshot.sample ? (
           <p className="rounded-xl border border-[#f0a202] bg-[#f0a202]/15 px-3 py-2 text-sm text-[#f6d48a]">
@@ -29,25 +29,53 @@ export function CommandCenter({
         ) : null}
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
-        <Stat label="Printing" value={String(snapshot.printing)} />
-        <Stat label="Mailed" value={String(snapshot.mailed)} />
-        <Stat label="Delivered" value={String(snapshot.delivered)} />
-      </div>
+      {snapshot.stages.length > 0 ? (
+        <div className="grid gap-3 sm:grid-cols-3">
+          {snapshot.stages.map((stage) => (
+            <Stat key={stage.id} label={stage.label} value={String(stage.pieces)} detail="pieces" />
+          ))}
+        </div>
+      ) : null}
+      <p className="text-sm text-[#8aa0b4]">{snapshot.mailNote}</p>
 
-      <div className="grid gap-3 sm:grid-cols-3">
-        <Stat label="QR scans today" value={snapshot.scansToday == null ? "Not recorded" : String(snapshot.scansToday)} />
-        <Stat label="Tracking calls today" value={snapshot.callsToday == null ? "Not recorded" : String(snapshot.callsToday)} />
-        <Stat
-          label="Spend this month"
-          value={snapshot.spendThisMonthCents == null ? "No charges" : dollars(snapshot.spendThisMonthCents)}
-        />
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Stat label="QR scans" value={String(snapshot.scansTotal)} detail="Scans appear after your mail lands." />
+        {snapshot.callTaps != null ? (
+          <Stat label="Tap to call" value={String(snapshot.callTaps)} detail="Taps on the button. Not phone calls." />
+        ) : null}
+        {snapshot.bookingTaps != null ? (
+          <Stat label="Booking button taps" value={String(snapshot.bookingTaps)} detail="Taps only. Not a finished booking." />
+        ) : null}
+        {snapshot.leads != null ? (
+          <Stat label="Form leads" value={String(snapshot.leads)} detail="Forms saved from the page." />
+        ) : null}
       </div>
 
       <Panel className="p-4 sm:p-5">
-        <h2 className="text-lg font-medium">Mailer Campaigns in Progress</h2>
+        <h2 className="text-lg font-medium">Scans by day</h2>
+        {snapshot.scansByDay.length === 0 ? (
+          <p className="mt-2 text-sm text-[#8aa0b4]">Scans appear after your mail lands.</p>
+        ) : (
+          <ul className="mt-3 space-y-1 text-sm">
+            {snapshot.scansByDay.map((row) => (
+              <li key={row.day} className="flex justify-between gap-3">
+                <span>{row.day}</span>
+                <span>{row.count}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+        <p className="mt-3 text-sm text-[#8aa0b4]">
+          {snapshot.scanRate
+            ? `Scan rate ${snapshot.scanRate}, scans divided by pieces delivered.`
+            : "Scan rate needs a delivered piece count. Postal tracking has not supplied one."}
+        </p>
+      </Panel>
+
+      <Panel className="p-4 sm:p-5">
+        <h2 className="text-lg font-medium">Mail with a printer status</h2>
         {snapshot.inProgress.length === 0 ? (
-          <p className="mt-2 text-sm text-[#8aa0b4]">No campaigns are in progress on this account.</p>
+          <p className="mt-2 text-sm text-[#8aa0b4]">No campaign has a printer status yet.</p>
         ) : (
           <ul className="mt-3 divide-y divide-[#1c3d52]">
             {snapshot.inProgress.map((row) => (
@@ -63,7 +91,7 @@ export function CommandCenter({
       </Panel>
 
       <Panel className="p-4 sm:p-5">
-        <h2 className="text-lg font-medium">Comet suggestions</h2>
+        <h2 className="text-lg font-medium">Comet</h2>
         <ul className="mt-2 space-y-2">
           {snapshot.suggestions.map((line) => (
             <li key={line} className="text-sm leading-6 text-[#d5e6f2]">{line}</li>
@@ -72,25 +100,21 @@ export function CommandCenter({
       </Panel>
 
       <Panel className="p-4 sm:p-5">
-        <h2 className="text-lg font-medium">Headline analytics</h2>
-        <dl className="mt-3 grid gap-3 sm:grid-cols-3">
-          {snapshot.analytics.map((row) => (
-            <div key={row.label}>
-              <dt className="text-sm text-[#8aa0b4]">{row.label}</dt>
-              <dd className="text-lg">{row.value}</dd>
-            </div>
-          ))}
-        </dl>
+        <h2 className="text-lg font-medium">Charges this month</h2>
+        <p className="mt-2 text-2xl font-semibold">
+          {snapshot.spendThisMonthCents == null ? "No charges" : dollars(snapshot.spendThisMonthCents)}
+        </p>
       </Panel>
     </div>
   )
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value, detail }: { label: string; value: string; detail?: string }) {
   return (
     <Panel className="p-4">
       <p className="text-sm text-[#8aa0b4]">{label}</p>
       <p className="mt-1 text-2xl font-semibold">{value}</p>
+      {detail ? <p className="mt-1 text-xs leading-5 text-[#8aa0b4]">{detail}</p> : null}
     </Panel>
   )
 }

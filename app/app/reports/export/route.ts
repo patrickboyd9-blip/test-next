@@ -10,7 +10,7 @@ export async function GET() {
     return new Response("Sign in required.", { status: 401 })
   }
   const campaigns = await listOwnedCampaigns()
-  const body = resultsCsv(campaigns, session.userId)
+  const body = resultsCsv(campaigns)
   return new Response(body, {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
