@@ -1,5 +1,5 @@
 import { findQr, logTap } from "@/lib/analytics/store"
-import { limitPublic } from "@/lib/ops/public-rate"
+import { clientIp, limitPublic } from "@/lib/ops/public-rate"
 
 export const dynamic = "force-dynamic"
 
@@ -12,8 +12,8 @@ export async function GET(
   if (limited) return limited
   const { code } = await context.params
   const qr = findQr(code)
-  if (!qr?.phone) return new Response("No phone number is on this page.", { status: 404 })
-  logTap(code)
+  if (!qr?.parts.call || !qr.phone) return new Response("No phone number is on this page.", { status: 404 })
+  logTap(code, "call", new Date().toISOString(), { ip: clientIp(request) })
   const digits = qr.phone.replace(/[^\d+]/g, "")
   return Response.redirect(`tel:${digits}`, 302)
 }

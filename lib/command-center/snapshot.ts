@@ -16,8 +16,10 @@ export interface CommandSnapshot {
   scansTotal: number
   scansByDay: { day: string; count: number }[]
   scanRate: string | null
-  taps: number
-  leads: number
+  /** Null means this account has not turned that piece on. */
+  callTaps: number | null
+  bookingTaps: number | null
+  leads: number | null
   spendThisMonthCents: number | null
   inProgress: ProgressRow[]
   suggestions: string[]
@@ -36,8 +38,9 @@ export function labeledSampleSnapshot(): CommandSnapshot {
     scansTotal: 4,
     scansByDay: [{ day: "2026-11-21", count: 4 }],
     scanRate: null,
-    taps: 1,
-    leads: 0,
+    callTaps: null,
+    bookingTaps: null,
+    leads: null,
     spendThisMonthCents: 18600,
     inProgress: [{ id: "sample-heater", name: "Water heater check", status: "Printing" }],
     suggestions: ["Sample only. Approve a real proof before anything is mailed."],
@@ -49,7 +52,7 @@ export function snapshotFrom(
   charges: readonly AuditEvent[],
   nowIso: string,
   _ownerId?: string,
-  activity?: { scans: readonly ScanLog[]; taps: number; leads: number }
+  activity?: { scans: readonly ScanLog[]; callTaps: number | null; bookingTaps: number | null; leads: number | null }
 ): CommandSnapshot {
   const stageTotals = piecesByStage(campaigns)
   const stages = stageTotals
@@ -89,16 +92,18 @@ export function snapshotFrom(
     scansTotal: scans.length,
     scansByDay: [...byDay.entries()].map(([day, count]) => ({ day, count })),
     scanRate: deliveredPieces > 0 ? `${Math.round((scans.length / deliveredPieces) * 1000) / 10}%` : null,
-    taps: activity?.taps ?? 0,
-    leads: activity?.leads ?? 0,
+    callTaps: activity?.callTaps ?? null,
+    bookingTaps: activity?.bookingTaps ?? null,
+    leads: activity?.leads ?? null,
     spendThisMonthCents,
     inProgress,
     suggestions: cometSuggestions({
       stages,
       inProgress,
       scans: scans.length,
-      taps: activity?.taps ?? 0,
-      leads: activity?.leads ?? 0,
+      callTaps: activity?.callTaps ?? null,
+      bookingTaps: activity?.bookingTaps ?? null,
+      leads: activity?.leads ?? null,
       spendCents: spendThisMonthCents,
     }),
   }
@@ -120,8 +125,9 @@ export function cometSuggestions(input: {
   stages: { label: string; pieces: number }[]
   inProgress: readonly ProgressRow[]
   scans: number
-  taps: number
-  leads: number
+  callTaps: number | null
+  bookingTaps: number | null
+  leads: number | null
   spendCents: number | null
 }): string[] {
   const lines: string[] = []
@@ -131,8 +137,11 @@ export function cometSuggestions(input: {
     lines.push(input.inProgress.map((row) => `${row.name} is ${row.status.toLowerCase()}.`).join(" "))
   }
   lines.push(input.scans === 0 ? "Scans appear after your mail lands." : `${input.scans} QR scan${input.scans === 1 ? "" : "s"} are recorded.`)
-  if (input.taps > 0) lines.push(`${input.taps} tap${input.taps === 1 ? "" : "s"} to call on the page.`)
-  if (input.leads > 0) lines.push(`${input.leads} lead${input.leads === 1 ? "" : "s"} came in from the page.`)
+  if (input.callTaps != null && input.callTaps > 0) lines.push(`${input.callTaps} tap${input.callTaps === 1 ? "" : "s"} to call on the page.`)
+  if (input.bookingTaps != null && input.bookingTaps > 0) {
+    lines.push(`${input.bookingTaps} booking button tap${input.bookingTaps === 1 ? "" : "s"}. That does not mean a time was booked.`)
+  }
+  if (input.leads != null && input.leads > 0) lines.push(`${input.leads} lead${input.leads === 1 ? "" : "s"} came in from the page.`)
   lines.push(input.spendCents == null ? "No charges are recorded this month." : `Recorded charges this month: $${(input.spendCents / 100).toFixed(2)}.`)
   return lines
 }

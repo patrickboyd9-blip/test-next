@@ -7,7 +7,7 @@ import { addressKey, matchback, streetsFromCsv } from "./match"
 import { outcomeFigures } from "./money"
 import { coarsePlace, deviceFromAgent, visitorFromCookie } from "./read"
 import { piecesByStage, stageForJob } from "./stage"
-import { ensureCampaignQr, forwardTarget, issueRecipientQr, logScan, resetAnalytics, saveLead } from "./store"
+import { bookingPresentation, ensureCampaignQr, forwardTarget, issueRecipientQr, logScan, logTap, resetAnalytics, saveLead } from "./store"
 
 test("only ordered, printing, and mailed come from a job status", () => {
   assert.equal(stageForJob("MAILED", true), "mailed")
@@ -32,6 +32,7 @@ test("a campaign QR can later grow a per-address code, and the scan log keeps th
     phone: "6195550100",
     headline: "Free inspection",
     offer: "This week",
+    parts: { form: true },
   })
   assert.equal(qr.recipientId, null)
   assert.equal(forwardTarget(qr, "https://mail.example"), `https://mail.example/p/${qr.code}`)
@@ -57,6 +58,21 @@ test("a campaign QR can later grow a per-address code, and the scan log keeps th
   })
   assert.equal(scan?.recipientId, null)
   assert.equal(saveLead({ campaignId: "camp", name: "Ada", phone: "", email: "", message: "Call me" })?.name, "Ada")
+})
+
+test("a booking tap is counted and is not treated as a booked time", () => {
+  resetAnalytics()
+  const qr = ensureCampaignQr({
+    campaignId: "book",
+    ownerId: "ada",
+    destination: "hosted",
+    parts: { booking: true, bookingUrl: "https://calendly.com/ada/visit" },
+  })
+  assert.equal(bookingPresentation("https://calendly.com/ada/visit"), "calendly")
+  assert.equal(bookingPresentation("https://book.example/ada"), "button")
+  assert.equal(logTap(qr.code, "booking"), true)
+  assert.equal(logTap(qr.code, "call"), false)
+  assert.equal(saveLead({ campaignId: "book", name: "Ada", phone: "", email: "", message: "" }), null)
 })
 
 test("matchback ignores punctuation and counts each new customer once", () => {

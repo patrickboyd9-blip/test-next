@@ -1,6 +1,6 @@
 import Link from "next/link"
 
-import { qrForCampaign, scansFor } from "@/lib/analytics/store"
+import { leadsFor, qrForCampaign, scansFor, tapsFor } from "@/lib/analytics/store"
 import { CockpitFrame, Eyebrow, Panel } from "@/components/cockpit/ui"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { listOwnedCampaigns } from "@/lib/campaign-creator/actions"
@@ -35,7 +35,12 @@ export default async function ReportsPage() {
                 <Link href={`/app/campaigns/${campaign.id}/results`} className="font-medium underline">
                   {campaign.name || "Campaign"}
                 </Link>
-                <span>{scansFor(campaign.id).length} scans</span>
+                <span className="text-right text-[#b7c9d8]">
+                  {scansFor(campaign.id).length} scans
+                  {qrForCampaign(campaign.id)?.parts.call ? ` · ${tapsFor(campaign.id, "call")} call taps` : ""}
+                  {qrForCampaign(campaign.id)?.parts.form ? ` · ${leadsFor(campaign.id).length} form leads` : ""}
+                  {qrForCampaign(campaign.id)?.parts.booking ? ` · ${tapsFor(campaign.id, "booking")} booking button taps` : ""}
+                </span>
               </li>
             ))}
           </ul>

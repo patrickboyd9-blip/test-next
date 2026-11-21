@@ -1,6 +1,6 @@
 import { coarsePlace, deviceFromAgent, VISITOR_COOKIE, visitorFromCookie } from "@/lib/analytics/read"
 import { findQr, forwardTarget, logScan } from "@/lib/analytics/store"
-import { limitPublic } from "@/lib/ops/public-rate"
+import { clientIp, limitPublic } from "@/lib/ops/public-rate"
 
 export const dynamic = "force-dynamic"
 
@@ -21,6 +21,7 @@ export async function GET(
     place: coarsePlace(request.headers),
     visitor: visitor.id,
     repeat: visitor.repeat,
+    ip: clientIp(request),
   })
   const origin = new URL(request.url).origin
   const response = Response.redirect(forwardTarget(qr, origin), 302)

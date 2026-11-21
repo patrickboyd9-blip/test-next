@@ -38,10 +38,17 @@ export function CommandCenter({
       ) : null}
       <p className="text-sm text-[#8aa0b4]">{snapshot.mailNote}</p>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2">
         <Stat label="QR scans" value={String(snapshot.scansTotal)} detail="Scans appear after your mail lands." />
-        <Stat label="Tap to call" value={String(snapshot.taps)} detail="Taps on the page button. Not phone calls." />
-        <Stat label="Leads" value={String(snapshot.leads)} detail="Forms saved from the page." />
+        {snapshot.callTaps != null ? (
+          <Stat label="Tap to call" value={String(snapshot.callTaps)} detail="Taps on the button. Not phone calls." />
+        ) : null}
+        {snapshot.bookingTaps != null ? (
+          <Stat label="Booking button taps" value={String(snapshot.bookingTaps)} detail="Taps only. Not a finished booking." />
+        ) : null}
+        {snapshot.leads != null ? (
+          <Stat label="Form leads" value={String(snapshot.leads)} detail="Forms saved from the page." />
+        ) : null}
       </div>
 
       <Panel className="p-4 sm:p-5">

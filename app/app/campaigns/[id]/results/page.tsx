@@ -70,7 +70,11 @@ export default async function ResultsPage({ params }: { params: Promise<{ id: st
         <h1 className="text-2xl font-semibold tracking-tight">Results</h1>
       </header>
       <p className="text-sm text-muted-foreground">
-        {scans.length} QR scans. {tapsFor(id)} taps to call. {leads.length} form leads. Scans appear after your mail lands.
+        {scans.length} QR scans.
+        {qr.parts.call ? ` ${tapsFor(id, "call")} call taps.` : ""}
+        {qr.parts.form ? ` ${leads.length} form leads.` : ""}
+        {qr.parts.booking ? ` ${tapsFor(id, "booking")} booking button taps. A tap is not a booked time.` : ""}
+        {" "}Scans appear after your mail lands.
       </p>
 
       <section className="flex flex-col gap-3">
@@ -84,6 +88,8 @@ export default async function ResultsPage({ params }: { params: Promise<{ id: st
             choice={qr.destination === "website" ? "website" : "page"}
             website={qr.website ?? ""}
             campaignId={id}
+            parts={qr.parts}
+            phone={qr.phone}
           />
           <button type="submit" className="min-h-11 w-fit rounded-xl bg-neutral-950 px-4 text-sm font-semibold text-white">
             Save
@@ -167,9 +173,15 @@ async function saveDestination(form: FormData) {
     ownerId: campaign.ownerId,
     destination: form.get("destination") === "website" ? "website" : "hosted",
     website: String(form.get("website") ?? ""),
-    phone: campaign.brief.phone || campaign.brief.businessInfo?.phone || "",
+    phone: String(form.get("phone") ?? "") || campaign.brief.phone || campaign.brief.businessInfo?.phone || "",
     headline: campaign.name || campaign.brief.businessInfo?.name || "",
     offer: campaign.brief.offer || campaign.brief.goal || "",
+    parts: {
+      call: form.get("showCall") === "1",
+      form: form.get("showForm") === "1",
+      booking: form.get("showBooking") === "1",
+      bookingUrl: String(form.get("bookingUrl") ?? ""),
+    },
   })
   redirect(`/app/campaigns/${id}/results`)
 }
