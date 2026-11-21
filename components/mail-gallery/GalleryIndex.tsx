@@ -2,33 +2,26 @@ import Link from "next/link"
 
 import { galleryCategories, galleryIndustrySlug } from "@/lib/mail-templates/gallery-categories"
 
-/** One tile per industry that has a gallery photo. The photos themselves live on the industry page. */
+/** Compact industry labels. The photos live on each industry page. */
 export function GalleryIndex() {
-  const categories = galleryCategories()
+  const categories = [...galleryCategories()].sort((a, b) => a.label.localeCompare(b.label, "en"))
 
   if (categories.length === 0) {
     return <p className="text-sm text-muted-foreground">No pictures in this gallery yet.</p>
   }
 
   return (
-    <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <ul className="flex flex-wrap gap-2">
       {categories.map((category) => {
-        const cover = category.photos[0]
         const count = category.photos.length === 1 ? "1 photo" : `${category.photos.length} photos`
         return (
-          <li key={category.id}>
+          <li key={category.id} className="max-w-full">
             <Link
               href={`/app/templates/${galleryIndustrySlug(category.id)}`}
-              className="block overflow-hidden rounded-2xl border text-left"
+              className="inline-flex min-h-11 max-w-full items-center gap-2 whitespace-normal rounded-xl border px-3 py-2 text-left text-sm leading-5"
             >
-              {cover ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={cover.src} alt="" className="aspect-[8/5] w-full object-cover" />
-              ) : null}
-              <span className="flex items-baseline justify-between gap-3 px-3 py-3">
-                <span className="text-base font-semibold">{category.label}</span>
-                <span className="shrink-0 text-sm text-muted-foreground">{count}</span>
-              </span>
+              <span className="font-medium">{category.label}</span>
+              <span className="shrink-0 text-muted-foreground">{count}</span>
             </Link>
           </li>
         )

@@ -63,8 +63,22 @@ test("each industry with photos has its own gallery page", () => {
   assert.equal(galleryCategoryBySlug("../roofing"), null)
   const index = readFileSync("components/mail-gallery/GalleryIndex.tsx", "utf8")
   const industry = readFileSync("app/app/templates/[industry]/page.tsx", "utf8")
+  const alphabetical = [...categories].sort((a, b) => a.label.localeCompare(b.label, "en")).map((category) => category.label)
+  assert.deepEqual(alphabetical, [
+    "Auto repair",
+    "Cleaning",
+    "Dental",
+    "HVAC",
+    "Landscaping",
+    "Real estate",
+    "Restaurant",
+    "Roofing",
+  ])
+  assert.match(index, /localeCompare/)
+  assert.match(index, /flex-wrap/)
   assert.match(index, /\/app\/templates\//)
   assert.match(index, /photos/)
+  assert.doesNotMatch(index, /<img/)
   assert.match(industry, /\n {8}Back\n/)
   assert.match(industry, /href="\/app\/templates"/)
   assert.match(industry, /GalleryBoard/)
