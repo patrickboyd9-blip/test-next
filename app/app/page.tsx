@@ -6,6 +6,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { cometIntroSeen } from "@/lib/assistant/intro-action"
 import { getSession, previewDemoAllowed } from "@/lib/auth/session"
 import { listOwnedCampaigns } from "@/lib/campaign-creator/actions"
+import { activityFor } from "@/lib/analytics/store"
 import { emptySnapshot, labeledSampleSnapshot, snapshotFrom } from "@/lib/command-center/snapshot"
 import { SAMPLE_SHOP } from "@/lib/mailer-compose/flow"
 import { readAudit } from "@/lib/ops/audit"
@@ -60,7 +61,8 @@ async function liveSnapshot(ownerId: string | undefined) {
     const campaigns = await listOwnedCampaigns()
     const audit = await readAudit().catch(() => [])
     const charges = audit.filter((event) => event.actorId === ownerId)
-    return snapshotFrom(campaigns, charges, new Date().toISOString(), ownerId)
+    const activity = activityFor(campaigns.map((campaign) => campaign.id))
+    return snapshotFrom(campaigns, charges, new Date().toISOString(), ownerId, activity)
   } catch {
     return emptySnapshot()
   }

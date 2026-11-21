@@ -1,15 +1,13 @@
 import Link from "next/link"
 
+import { scansFor } from "@/lib/analytics/store"
 import { CockpitFrame, Eyebrow, Panel } from "@/components/cockpit/ui"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { listOwnedCampaigns } from "@/lib/campaign-creator/actions"
-import { getSession } from "@/lib/auth/session"
-import { resultsFor } from "@/lib/tracking/ledger"
 
 export const dynamic = "force-dynamic"
 
 export default async function ReportsPage() {
-  const session = await getSession()
   const campaigns = await listOwnedCampaigns()
   return (
     <CockpitFrame>
@@ -19,33 +17,20 @@ export default async function ReportsPage() {
           <Eyebrow>Reports</Eyebrow>
         </div>
         <h1 className="text-3xl font-semibold">Results across campaigns</h1>
-        <p className="text-sm text-[#b7c9d8]">Only recorded scans and numbers someone entered. Blank means not recorded.</p>
+        <p className="text-sm text-[#b7c9d8]">QR scans that were logged. Scans appear after your mail lands.</p>
         {campaigns.length === 0 ? (
           <Panel className="p-5 text-sm">No campaigns to report.</Panel>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="text-[#8aa0b4]">
-                <tr>
-                  <th className="py-2 pr-3">Campaign</th>
-                  <th className="py-2 pr-3">Scans</th>
-                  <th className="py-2">Calls</th>
-                </tr>
-              </thead>
-              <tbody>
-                {campaigns.map((campaign) => {
-                  const results = resultsFor(campaign.id, session?.userId)
-                  return (
-                    <tr key={campaign.id} className="border-t border-[#1c3d52]">
-                      <td className="py-3 pr-3">{campaign.name || "Untitled campaign"}</td>
-                      <td className="py-3 pr-3">{results.scans == null ? "Not recorded" : results.scans}</td>
-                      <td className="py-3">{results.calls == null ? "Not recorded" : results.calls}</td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+          <ul className="divide-y divide-[#1c3d52] text-sm">
+            {campaigns.map((campaign) => (
+              <li key={campaign.id} className="flex min-h-14 items-center justify-between gap-3 py-2">
+                <Link href={`/app/campaigns/${campaign.id}/results`} className="font-medium underline">
+                  {campaign.name || "Campaign"}
+                </Link>
+                <span>{scansFor(campaign.id).length} scans</span>
+              </li>
+            ))}
+          </ul>
         )}
         <Link href="/app/reports/export" className="inline-flex min-h-11 w-fit items-center rounded-xl bg-[#5ce1ff] px-4 text-sm font-semibold text-[#041018]">
           Download CSV

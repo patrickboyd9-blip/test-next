@@ -5,25 +5,24 @@ import { createEmptyCampaignCreative, type Campaign } from "@/lib/campaign-creat
 
 import { emptySnapshot, labeledSampleSnapshot, resultsCsv, snapshotFrom } from "./snapshot"
 
-test("an account with no mail shows empty counts and does not invent scans or spend", () => {
+test("an account with no mail explains the empty state and does not invent calls", () => {
   const snap = emptySnapshot()
   assert.equal(snap.sample, false)
-  assert.equal(snap.printing, 0)
-  assert.equal(snap.mailed, 0)
-  assert.equal(snap.delivered, 0)
-  assert.equal(snap.scansToday, null)
-  assert.equal(snap.callsToday, null)
+  assert.equal(snap.stages.length, 0)
+  assert.match(snap.mailNote, /after a job is sent to the printer/)
+  assert.equal(snap.scansTotal, 0)
+  assert.equal(snap.scanRate, null)
+  assert.equal(snap.taps, 0)
+  assert.equal(snap.leads, 0)
   assert.equal(snap.spendThisMonthCents, null)
-  assert.equal(snap.inProgress.length, 0)
-  assert.match(snap.suggestions[0] ?? "", /No campaigns are in progress/)
-  assert.match(snap.suggestions.join(" "), /No scans are recorded/)
-  assert.match(snap.suggestions.join(" "), /No charges are recorded/)
-  assert.equal(snap.analytics.every((row) => row.value === "Not recorded"), true)
+  assert.match(snap.suggestions.join(" "), /Scans appear after your mail lands/)
+  assert.doesNotMatch(snap.suggestions.join(" "), /call/i)
+  assert.equal(JSON.stringify(snap).includes("Not recorded"), false)
 })
 
-test("a submitted job counts as mailed, and an uncharged checkout is not spend", () => {
+test("a mailed job counts pieces, and an uncharged checkout is not spend", () => {
   const snap = snapshotFrom(
-    [draft("one", "Spring"), mailed("two", "Heater")],
+    [draft("one", "Spring"), mailed("two", "Heater", "MAILED", 10)],
     [
       {
         id: "a",
@@ -38,36 +37,37 @@ test("a submitted job counts as mailed, and an uncharged checkout is not spend",
     "2026-11-18T12:00:00.000Z"
   )
   assert.equal(snap.sample, false)
-  assert.equal(snap.mailed, 1)
-  assert.equal(snap.printing, 0)
+  assert.equal(snap.stages.find((row) => row.id === "mailed")?.pieces, 10)
   assert.equal(snap.spendThisMonthCents, null)
-  assert.equal(snap.inProgress.length, 2)
-  assert.match(resultsCsv([draft("one", "Spring")]), /"Spring",Designing,,/)
+  assert.deepEqual(snap.inProgress, [{ id: "two", name: "Heater", status: "Mailed" }])
+  assert.match(snap.suggestions.join(" "), /Heater is mailed/)
+  assert.doesNotMatch(snap.suggestions.join(" "), /Untitled campaign/)
+  assert.match(resultsCsv([draft("one", "Spring")]), /"Spring",,/)
 })
 
-test("the labeled sample is marked sample on every figure", () => {
+test("the labeled sample is marked sample and does not show calls", () => {
   const sample = labeledSampleSnapshot()
   assert.equal(sample.sample, true)
   assert.match(sample.suggestions[0] ?? "", /Sample/)
-  assert.match(sample.analytics[0]?.value ?? "", /sample/)
+  assert.equal(JSON.stringify(sample).includes("Calls"), false)
 })
 
 function draft(id: string, name: string): Campaign {
   return base(id, name, "draft")
 }
 
-function mailed(id: string, name: string): Campaign {
+function mailed(id: string, name: string, jobStatus: string, pieceCount: number): Campaign {
   return {
     ...base(id, name, "launched"),
     mailOrder: {
       id: "order",
       mode: "test",
       environment: "stage",
-      pieceCount: 10,
+      pieceCount,
       estimatedCostLabel: "Placeholder",
       artwork: "type-plate",
       submitted: true,
-      jobStatus: "In the mail",
+      jobStatus,
       product: {
         documentClass: "Postcard",
         layout: "Double Sided Postcard",
