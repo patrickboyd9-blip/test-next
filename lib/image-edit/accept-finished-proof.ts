@@ -14,6 +14,8 @@ export async function acceptFinishedProof(input: {
   headline: string
   phone: string
   website?: string
+  campaignName?: string
+  size?: "5x8" | "6x9"
   repository?: CampaignRepository
   store?: UploadedDesignStore
   saveFace?: (campaign: Campaign, bytes: Buffer) => Promise<UploadedDesign>
@@ -25,6 +27,8 @@ export async function acceptFinishedProof(input: {
     headline: input.headline,
     phone: input.phone,
     website: input.website ?? "",
+    campaignName: input.campaignName,
+    size: input.size,
   }
   if (details.businessName.trim().length < 2 || details.headline.trim().length < 2 || details.phone.trim().length < 7) {
     return { ok: false, message: PHOTO_SAVE_FAILED }

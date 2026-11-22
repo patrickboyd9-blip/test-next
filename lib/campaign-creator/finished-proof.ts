@@ -7,6 +7,9 @@ export interface FinishedProofDetails {
   headline: string
   phone: string
   website: string
+  /** The name from the gallery form. The business name is used when this is empty. */
+  campaignName?: string
+  size?: "5x8" | "6x9"
 }
 
 /**
@@ -20,10 +23,11 @@ export function applyFinishedProofStart(campaign: Campaign, input: FinishedProof
   const businessName = input.businessName.trim().slice(0, 80) || "Postcard"
   const phone = input.phone.trim().slice(0, 40)
   const website = input.website.trim().slice(0, 120)
-  campaign.name = businessName
+  const campaignName = input.campaignName?.trim().slice(0, 80)
+  campaign.name = campaignName || businessName
   campaign.entry = "upload"
   campaign.designSource = "upload"
-  campaign.postcardSize = "5x8"
+  campaign.postcardSize = input.size === "6x9" ? "6x9" : "5x8"
   campaign.brief = {
     ...campaign.brief,
     offer: input.headline.trim().slice(0, 120),

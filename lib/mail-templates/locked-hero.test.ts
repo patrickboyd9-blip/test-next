@@ -4,6 +4,8 @@ import { test } from "node:test"
 
 import { galleryCategories, galleryCategoryBySlug, galleryIndustrySlug, photoCountLabel } from "./gallery-categories"
 import { getMailTemplate } from "./query"
+import { HERO_NEED_CHANGES } from "@/lib/image-edit/messages"
+
 import { lockedHeroDesign, lockedHeroMissing, type LockedHeroInput } from "./locked-hero"
 
 const READY: LockedHeroInput = {
@@ -14,6 +16,7 @@ const READY: LockedHeroInput = {
   callToAction: "Call to book a visit",
   phone: "(619) 555-0148",
   website: "",
+  instructions: "Keep the roof photo. Use navy type and put the phone at the bottom.",
   logoName: null,
 }
 
@@ -26,6 +29,8 @@ test("a locked gallery picture keeps the customer's words and does not require a
   assert.equal(lockedHeroMissing({ ...READY, offer: "" }), "Add the offer.")
   assert.equal(lockedHeroMissing({ ...READY, callToAction: "" }), "Add the call to action.")
   assert.equal(lockedHeroMissing({ ...READY, phone: "" }), "Add a phone number.")
+  assert.equal(lockedHeroMissing({ ...READY, instructions: "   " }), HERO_NEED_CHANGES)
+  assert.equal(lockedHeroMissing({ ...READY, instructions: "shorter" }), HERO_NEED_CHANGES)
   assert.equal(lockedHeroMissing(READY), null)
   const design = lockedHeroDesign(template, READY)
   assert.equal(design.photoLocked, true)
@@ -141,4 +146,11 @@ test("the gallery viewer and the print downloads are separate pages", () => {
   assert.match(form, /Highly recommended/)
   assert.match(form, /Business name/)
   assert.match(form, /Call to action/)
+  assert.match(form, /Describe exactly what you want: wording, offer, colors, what to keep, what to change\. The more specific, the better the result\./)
+  assert.match(form, /HERO_DESIGNING/)
+  assert.match(readFileSync("lib/image-edit/messages.ts", "utf8"), /Comet is designing your card…/)
+  assert.match(form, /Request changes/)
+  assert.match(form, /Start over/)
+  assert.match(form, />\s*Approve\s*</)
+  assert.doesNotMatch(form, /setInput\(EMPTY\)/)
 })

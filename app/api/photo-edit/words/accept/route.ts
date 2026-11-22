@@ -15,6 +15,8 @@ export async function POST(request: Request): Promise<Response> {
     headline?: unknown
     phone?: unknown
     website?: unknown
+    campaignName?: unknown
+    size?: unknown
   }
   try {
     body = (await request.json()) as typeof body
@@ -29,6 +31,8 @@ export async function POST(request: Request): Promise<Response> {
     headline: typeof body.headline === "string" ? body.headline : "",
     phone: typeof body.phone === "string" ? body.phone : "",
     website: typeof body.website === "string" ? body.website : "",
+    campaignName: typeof body.campaignName === "string" ? body.campaignName : "",
+    size: body.size === "6x9" ? "6x9" : body.size === "5x8" ? "5x8" : undefined,
   })
   if (!result.ok) return Response.json({ ok: false, message: result.message }, { status: 400 })
   return Response.json({ ok: true, campaignId: result.campaignId })
