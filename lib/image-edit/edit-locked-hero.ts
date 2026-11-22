@@ -168,7 +168,7 @@ export async function editLockedHero(input: LockedHeroEditInput): Promise<Locked
           instruction,
           apiKey: key,
           model: GEMINI_EDIT_MODEL,
-          purpose: "lettering",
+          purpose: "design",
           logo: logo.bytes ?? undefined,
         })
     const front = await toPrintJpeg(edited)

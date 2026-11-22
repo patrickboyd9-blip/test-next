@@ -51,6 +51,44 @@ test("the design request keeps the customer's words and does not name a vendor",
   assert.match(text, /Spring checkups/)
   assert.match(text, /Make the phone larger/)
   assert.match(text, /attached logo/)
+  assert.match(text, /Required changes:/)
+  assert.match(text, /1\. Keep the roof photo/)
+  assert.match(text, /replace or redraw the main subject/i)
+  assert.match(text, /same pose, size, position, lighting, and photo style/)
+  assert.match(text, /Preserve everything that was not requested/)
+  assert.match(text, /text positions, font styles, sizes, and colors of untouched elements/)
+  assert.match(text, /same spot and at a similar size/)
+  assert.match(text, /top-corner logo stays a top-corner logo/)
+  assert.match(text, /Never move the business name into the headline/)
+  assert.match(text, /Replace the business name\/logo text with "Harbor Roofing" in the same location/)
+  assert.match(text, /bottom disclaimer bar/)
+  assert.doesNotMatch(text, /gemini|openai|anthropic|\$|prompt/i)
+})
+
+test("a numbered note is a must-do list and a named business stays in its spot", () => {
+  const text = lockedHeroInstruction({
+    campaignName: "Year-round care",
+    size: "5x8",
+    businessName: "JP Pets",
+    offer: "Year-round care",
+    callToAction: "Call the clinic",
+    phone: "(619) 555-0199",
+    website: "",
+    instructions:
+      "(1) change the dog to a German shepherd (2) change the top-left color from green to red (3) change the business name from Wrenshaw Veterinary to JP Pets",
+    changeNote: "Make the phone larger",
+    hasLogo: true,
+  })
+  assert.match(text, /1\. change the dog to a German shepherd/)
+  assert.match(text, /2\. change the top-left color from green to red/)
+  assert.match(text, /3\. change the business name from Wrenshaw Veterinary to JP Pets/)
+  assert.match(text, /4\. Make the phone larger/)
+  assert.match(text, /replace or redraw the main subject \(a person, an animal, or an object\)/)
+  assert.match(text, /Preserve everything that was not requested/)
+  assert.match(text, /overall layout, the composition/)
+  assert.match(text, /Replace the business name\/logo text "Wrenshaw Veterinary" with "JP Pets" in the same location/)
+  assert.match(text, /existing logo position/)
+  assert.doesNotMatch(text, /YEAR-ROUND CARE/)
   assert.doesNotMatch(text, /gemini|openai|anthropic|\$|prompt/i)
 })
 
