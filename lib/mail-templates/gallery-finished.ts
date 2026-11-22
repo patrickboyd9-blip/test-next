@@ -122,6 +122,16 @@ export function finishedGalleryPhoto(id: string): FinishedGalleryPhoto | null {
   return photosById.get(id) ?? null
 }
 
+const brandById = new Map(
+  records.map((record) => [record.id, record.fictional_brand_name.replace(/\s+/g, " ").trim()] as const)
+)
+
+/** Printed brand on a finished gallery card. For the edit request only. Not shown in the gallery. */
+export function finishedGalleryBrandName(id: string): string | null {
+  const name = brandById.get(id) ?? ""
+  return name.length >= 2 ? name : null
+}
+
 const spec: CreativeSpec = {
   layoutVariant: "image_grounded",
   headline: "Ready when you are",
