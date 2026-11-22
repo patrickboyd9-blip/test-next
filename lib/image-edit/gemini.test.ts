@@ -65,6 +65,18 @@ test("lettering rewrites words and can carry a logo, while a scene edit still re
   assert.equal((bodies[0] ?? "").includes(logo.toString("base64")), true)
   assert.match(bodies[1] ?? "", /Do not add words/)
   assert.doesNotMatch(bodies[1] ?? "", /Rewrite only the words/)
+
+  await requestGeminiEdit({
+    image: png,
+    mimeType: "image/png",
+    instruction: "Required changes:\n1. change the dog to a German shepherd",
+    apiKey: "secret-key",
+    purpose: "design",
+    fetchImpl,
+  })
+  assert.match(bodies[2] ?? "", /1\. change the dog to a German shepherd/)
+  assert.doesNotMatch(bodies[2] ?? "", /Rewrite only the words/)
+  assert.doesNotMatch(bodies[2] ?? "", /Keep the design, colors, photographs/)
 })
 
 test("a failed edit does not include the key in the error", async () => {

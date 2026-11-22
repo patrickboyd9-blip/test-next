@@ -21,8 +21,8 @@ export async function requestGeminiEdit(input: {
   apiKey: string
   model?: string
   fetchImpl?: typeof fetch
-  /** "lettering" rewrites words already printed on a finished postcard. */
-  purpose?: "scene" | "lettering"
+  /** "lettering" rewrites words on a finished postcard. "design" sends the instruction as written. */
+  purpose?: "scene" | "lettering" | "design"
   logo?: { bytes: Buffer; mimeType: "image/jpeg" | "image/png" }
 }): Promise<Buffer> {
   const key = input.apiKey.trim()
@@ -55,7 +55,8 @@ export async function requestGeminiEdit(input: {
   return bytes
 }
 
-function editText(purpose: "scene" | "lettering", instruction: string): string {
+function editText(purpose: "scene" | "lettering" | "design", instruction: string): string {
+  if (purpose === "design") return instruction
   if (purpose === "lettering") {
     return `Rewrite only the words already printed on this finished postcard. Keep the design, colors, photographs, and layout. Do not add a watermark.\n\n${instruction}`
   }
