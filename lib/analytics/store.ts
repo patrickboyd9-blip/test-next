@@ -140,6 +140,59 @@ export function findQr(code: string): CampaignQr | null {
   return qrs.get(code) ?? null
 }
 
+const PLACED_CODE = /^[abcdefghjkmnpqrstuvwxyz23456789]{8}$/
+
+/** Keeps a requested code when it is free. Otherwise mints a new one. */
+export function availablePlacedCode(preferred: string): string {
+  if (PLACED_CODE.test(preferred) && !qrs.has(preferred)) return preferred
+  return mintCode()
+}
+
+/**
+ * Saves one placed code on a campaign. A campaign can hold two of these.
+ * The original one-code helper still updates only the first.
+ */
+export function upsertPlacedQr(input: {
+  code?: string
+  campaignId: string
+  ownerId: string
+  destination: QrDestination
+  website?: string | null
+  phone?: string
+  headline?: string
+  offer?: string
+  businessName?: string
+  offerType?: string
+  industry?: string
+  parts?: Partial<PageParts>
+}): CampaignQr | null {
+  const owned = [...qrs.values()].filter((row) => row.campaignId === input.campaignId && row.recipientId == null)
+  const requested = input.code && PLACED_CODE.test(input.code) ? input.code : ""
+  const existing = requested ? qrs.get(requested) : undefined
+  if (existing && (existing.campaignId !== input.campaignId || existing.recipientId != null)) return null
+  if (!existing && owned.length >= 2) return null
+  const website = cleanWebsite(input.website)
+  const prior = existing?.parts ?? EMPTY_PARTS
+  const parts = normalizeParts({ ...prior, ...input.parts })
+  const next: CampaignQr = {
+    code: existing?.code ?? (requested || mintCode()),
+    campaignId: input.campaignId,
+    ownerId: input.ownerId,
+    recipientId: null,
+    destination: input.destination === "website" && website ? "website" : "hosted",
+    website,
+    phone: (input.phone ?? existing?.phone ?? "").trim(),
+    headline: (input.headline ?? existing?.headline ?? "").trim(),
+    offer: (input.offer ?? existing?.offer ?? "").trim(),
+    businessName: (input.businessName ?? existing?.businessName ?? "").trim(),
+    offerType: (input.offerType ?? existing?.offerType ?? "unspecified").trim() || "unspecified",
+    industry: (input.industry ?? existing?.industry ?? "unspecified").trim() || "unspecified",
+    parts,
+  }
+  qrs.set(next.code, next)
+  return next
+}
+
 export function qrForCampaign(campaignId: string): CampaignQr | null {
   return [...qrs.values()].find((row) => row.campaignId === campaignId && row.recipientId == null) ?? null
 }

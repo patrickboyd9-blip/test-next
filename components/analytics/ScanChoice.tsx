@@ -23,7 +23,7 @@ export function ScanChoice({
   parts?: PageParts
   phone?: string
   readOnly?: boolean
-  onChange?: (choice: "page" | "website", website: string) => void
+  onChange?: (choice: "page" | "website", website: string, parts?: PageParts, phone?: string) => void
 }) {
   const [picked, setPicked] = useState(choice)
   const [site, setSite] = useState(website)
@@ -36,7 +36,7 @@ export function ScanChoice({
     setSite(url)
     setPageParts(nextParts)
     setCallNumber(nextPhone)
-    onChange?.(next, url)
+    onChange?.(next, url, nextParts, nextPhone)
     if (campaignId) void saveScanChoice(campaignId, next, url, nextParts, nextPhone)
   }
 
