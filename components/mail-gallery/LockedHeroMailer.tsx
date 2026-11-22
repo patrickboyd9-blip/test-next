@@ -5,6 +5,8 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 
 import { ProofFrame } from "@/components/campaign-creator/upload/ProofFrame"
+import { QrFaceOverlay } from "@/components/qr-placement/QrFaceOverlay"
+import { QrPlacementPanel } from "@/components/qr-placement/QrPlacementPanel"
 import {
   CUSTOMER_PHOTO_MESSAGES,
   HERO_DESIGNING,
@@ -24,6 +26,15 @@ import {
   type LockedHeroProofState,
 } from "@/lib/mail-templates/locked-hero-proof"
 import type { MailTemplate } from "@/lib/mail-templates/types"
+import {
+  activeQrs,
+  initialQrPlacement,
+  moveQr,
+  normalizeScanUrl,
+  POSTAGE_BLOCKED_MESSAGE,
+  QR_WEBSITE_MISSING,
+  type QrPlacementValue,
+} from "@/lib/qr-placement/model"
 
 const known = new Set<string>(CUSTOMER_PHOTO_MESSAGES)
 
@@ -48,9 +59,12 @@ export function LockedHeroMailer({ template }: { template: MailTemplate }) {
   const [note, setNote] = useState("")
   const [code, setCode] = useState("")
   const [state, setState] = useState<LockedHeroProofState>(LOCKED_HERO_PROOF_START)
+  const [qr, setQr] = useState<QrPlacementValue>(() => initialQrPlacement("5x8", ""))
+  const qrSeed = useRef(false)
   const photo = galleryPhotoSrc(template.id)
   const busy = state.phase === "designing"
   const size = input.size === "6x9" ? "6x9" : "5x8"
+  const headline = [input.offer, input.callToAction].map((value) => value.replace(/\s+/g, " ").trim()).filter(Boolean).join(" · ")
 
   function set<K extends keyof LockedHeroInput>(key: K, value: LockedHeroInput[K]) {
     setInput((current) => ({ ...current, [key]: value }))
@@ -102,6 +116,10 @@ export function LockedHeroMailer({ template }: { template: MailTemplate }) {
         return
       }
       setNote("")
+      if (!qrSeed.current) {
+        qrSeed.current = true
+        setQr(initialQrPlacement(size, input.website, input.phone))
+      }
       setState((current) =>
         finishLockedHeroEdit(current, {
           ok: true,
@@ -131,6 +149,7 @@ export function LockedHeroMailer({ template }: { template: MailTemplate }) {
 
   function startOver() {
     ticket.current += 1
+    qrSeed.current = false
     setNote("")
     setCode("")
     setState(restartLockedHeroForm())
@@ -138,26 +157,36 @@ export function LockedHeroMailer({ template }: { template: MailTemplate }) {
 
   async function approve() {
     if (!state.frontSrc) return
+    if (qr.enabled && qr.codes.some((code) => code.destination === "website" && !normalizeScanUrl(code.website))) {
+      setState((current) => ({ ...current, message: QR_WEBSITE_MISSING }))
+      return
+    }
     const id = ++ticket.current
     setState((current) => ({ ...current, phase: "designing", message: "Opening your proof." }))
     try {
-      const response = await fetch("/api/photo-edit/words/accept", {
+      const response = await fetch("/api/photo-edit/design/accept", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           imageBase64: state.frontSrc,
+          backBase64: state.backSrc,
           businessName: input.businessName,
-          headline: [input.offer, input.callToAction].map((value) => value.replace(/\s+/g, " ").trim()).filter(Boolean).join(" · "),
+          headline,
+          offer: input.callToAction,
           phone: input.phone,
           website: input.website,
           campaignName: input.campaignName,
           size: input.size,
+          qrs: activeQrs(qr),
         }),
       })
       const data = (await response.json()) as { ok?: boolean; message?: string; campaignId?: string }
       if (id !== ticket.current) return
       if (!data.ok || !data.campaignId) {
-        const message = known.has(data.message ?? "") ? (data.message as string) : PHOTO_SAVE_FAILED
+        const returned = data.message ?? ""
+        const message = returned === QR_WEBSITE_MISSING || returned === POSTAGE_BLOCKED_MESSAGE || known.has(returned)
+          ? returned
+          : PHOTO_SAVE_FAILED
         setState((current) => finishLockedHeroEdit(current, { ok: false, message }))
         return
       }
@@ -287,15 +316,43 @@ export function LockedHeroMailer({ template }: { template: MailTemplate }) {
         <div className="grid gap-6">
           <figure className="flex flex-col gap-2">
             <figcaption className="text-sm font-medium">Front</figcaption>
-            <div className="relative overflow-hidden rounded-lg border bg-muted">
+            <div className={`relative overflow-hidden rounded-lg border bg-white ${size === "6x9" ? "aspect-[3/2]" : "aspect-[8/5]"}`}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={state.frontSrc} alt="Front of the postcard" className={`${size === "6x9" ? "aspect-[3/2]" : "aspect-[8/5]"} w-full object-contain bg-white`} />
+              <img src={state.frontSrc} alt="Front of the postcard" className="absolute inset-0 h-full w-full object-fill" />
+              {qr.enabled ? (
+                <QrFaceOverlay
+                  size={size}
+                  side="front"
+                  frame="trim"
+                  codes={qr.codes}
+                  onMove={(id, x, y) => setQr((current) => moveQr(current, size, id, x, y))}
+                />
+              ) : null}
               {state.proof ? <ProofMark tone="light" /> : null}
             </div>
           </figure>
           <ProofFrame src={state.backSrc} mediaType="image/jpeg" face="back" label="Back" size={size}>
+            {qr.enabled ? (
+              <QrFaceOverlay
+                size={size}
+                side="back"
+                frame="canvas"
+                codes={qr.codes}
+                onMove={(id, x, y) => setQr((current) => moveQr(current, size, id, x, y))}
+              />
+            ) : null}
             {state.proof ? <ProofMark tone="dark" /> : null}
           </ProofFrame>
+          {state.phase === "proof" ? (
+            <QrPlacementPanel
+              value={qr}
+              size={size}
+              businessName={input.businessName}
+              headline={headline}
+              offer={input.callToAction}
+              onChange={setQr}
+            />
+          ) : null}
           <p className="text-sm text-muted-foreground">The address side stays clear for postage.</p>
         </div>
       ) : null}
