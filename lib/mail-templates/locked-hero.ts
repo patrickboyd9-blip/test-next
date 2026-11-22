@@ -1,3 +1,5 @@
+import { HERO_NEED_CHANGES } from "@/lib/image-edit/messages"
+
 import type { MailTemplate } from "./types"
 
 export type LockedHeroSize = "5x8" | "6x9"
@@ -10,6 +12,8 @@ export interface LockedHeroInput {
   callToAction: string
   phone: string
   website: string
+  /** What the customer wants changed on the locked picture. Required. */
+  instructions: string
   logoName: string | null
 }
 
@@ -25,6 +29,7 @@ export function lockedHeroMissing(input: LockedHeroInput): string | null {
   if (clean(input.offer).length < 2) return "Add the offer."
   if (clean(input.callToAction).length < 2) return "Add the call to action."
   if (clean(input.phone).length < 7) return "Add a phone number."
+  if (clean(input.instructions).length < 8) return HERO_NEED_CHANGES
   return null
 }
 

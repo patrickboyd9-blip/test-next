@@ -1,10 +1,30 @@
 "use client"
 
-import { useState } from "react"
+import { useRef, useState } from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
 
+import { ProofFrame } from "@/components/campaign-creator/upload/ProofFrame"
+import {
+  CUSTOMER_PHOTO_MESSAGES,
+  HERO_DESIGNING,
+  HERO_EDIT_FAILED,
+  PHOTO_SAVE_FAILED,
+  WORD_CHANGE_LOGO,
+} from "@/lib/image-edit/messages"
 import { galleryPhotoSrc } from "@/lib/mail-templates/gallery-photo-src"
-import { lockedHeroDesign, lockedHeroMissing, type LockedHeroInput } from "@/lib/mail-templates/locked-hero"
+import { lockedHeroMissing, type LockedHeroInput } from "@/lib/mail-templates/locked-hero"
+import {
+  beginLockedHeroEdit,
+  finishLockedHeroEdit,
+  LOCKED_HERO_PROOF_START,
+  requestLockedHeroChanges,
+  restartLockedHeroForm,
+  type LockedHeroProofState,
+} from "@/lib/mail-templates/locked-hero-proof"
 import type { MailTemplate } from "@/lib/mail-templates/types"
+
+const known = new Set<string>(CUSTOMER_PHOTO_MESSAGES)
 
 const EMPTY: LockedHeroInput = {
   campaignName: "",
@@ -14,102 +34,316 @@ const EMPTY: LockedHeroInput = {
   callToAction: "",
   phone: "",
   website: "",
+  instructions: "",
   logoName: null,
 }
 
 export function LockedHeroMailer({ template }: { template: MailTemplate }) {
+  const router = useRouter()
+  const ticket = useRef(0)
   const [input, setInput] = useState<LockedHeroInput>(EMPTY)
-  const [message, setMessage] = useState("")
-  const [ready, setReady] = useState(false)
+  const [logoBase64, setLogoBase64] = useState<string | null>(null)
+  const [note, setNote] = useState("")
+  const [code, setCode] = useState("")
+  const [state, setState] = useState<LockedHeroProofState>(LOCKED_HERO_PROOF_START)
   const photo = galleryPhotoSrc(template.id)
-  const design = ready && !lockedHeroMissing(input) ? lockedHeroDesign(template, input) : null
+  const busy = state.phase === "designing"
+  const size = input.size === "6x9" ? "6x9" : "5x8"
 
   function set<K extends keyof LockedHeroInput>(key: K, value: LockedHeroInput[K]) {
     setInput((current) => ({ ...current, [key]: value }))
-    setMessage("")
+    setState((current) => (current.phase === "form" ? { ...current, message: "" } : current))
+  }
+
+  async function run(source: string | null, changeNote: string) {
+    const id = ++ticket.current
+    setCode("")
+    setState((current) => ({ ...current, phase: "designing", message: HERO_DESIGNING, editSource: source }))
+    try {
+      const response = await fetch("/api/photo-edit/design", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          templateId: template.id,
+          campaignName: input.campaignName,
+          size: input.size,
+          businessName: input.businessName,
+          offer: input.offer,
+          callToAction: input.callToAction,
+          phone: input.phone,
+          website: input.website,
+          instructions: input.instructions,
+          changeNote,
+          logoBase64: logoBase64 ?? undefined,
+          currentFrontBase64: source ?? undefined,
+        }),
+      })
+      const data = (await response.json()) as {
+        ok?: boolean
+        message?: string
+        frontSrc?: string
+        backSrc?: string
+        proof?: boolean
+        code?: string
+      }
+      if (id !== ticket.current) return
+      if (!data.ok || !data.frontSrc || !data.backSrc) {
+        setCode(data.code ?? "")
+        const message = known.has(data.message ?? "") ? (data.message as string) : HERO_EDIT_FAILED
+        setState((current) => finishLockedHeroEdit(current, { ok: false, message }))
+        return
+      }
+      setNote("")
+      setState((current) =>
+        finishLockedHeroEdit(current, {
+          ok: true,
+          frontSrc: data.frontSrc as string,
+          backSrc: data.backSrc as string,
+          proof: Boolean(data.proof),
+        })
+      )
+    } catch {
+      if (id !== ticket.current) return
+      setCode("failed")
+      setState((current) => finishLockedHeroEdit(current, { ok: false, message: HERO_EDIT_FAILED }))
+    }
+  }
+
+  function continueForm() {
+    const next = beginLockedHeroEdit(lockedHeroMissing(input))
+    setState(next.state)
+    if (next.run) void run(null, "")
+  }
+
+  function requestChanges() {
+    const next = requestLockedHeroChanges(state, note)
+    setState(next.state)
+    if (next.run) void run(next.state.editSource, next.note)
+  }
+
+  function startOver() {
+    ticket.current += 1
+    setNote("")
+    setCode("")
+    setState(restartLockedHeroForm())
+  }
+
+  async function approve() {
+    if (!state.frontSrc) return
+    const id = ++ticket.current
+    setState((current) => ({ ...current, phase: "designing", message: "Opening your proof." }))
+    try {
+      const response = await fetch("/api/photo-edit/words/accept", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          imageBase64: state.frontSrc,
+          businessName: input.businessName,
+          headline: [input.offer, input.callToAction].map((value) => value.replace(/\s+/g, " ").trim()).filter(Boolean).join(" · "),
+          phone: input.phone,
+          website: input.website,
+          campaignName: input.campaignName,
+          size: input.size,
+        }),
+      })
+      const data = (await response.json()) as { ok?: boolean; message?: string; campaignId?: string }
+      if (id !== ticket.current) return
+      if (!data.ok || !data.campaignId) {
+        const message = known.has(data.message ?? "") ? (data.message as string) : PHOTO_SAVE_FAILED
+        setState((current) => finishLockedHeroEdit(current, { ok: false, message }))
+        return
+      }
+      router.push(`/app/campaigns/${data.campaignId}`)
+    } catch {
+      if (id !== ticket.current) return
+      setState((current) => finishLockedHeroEdit(current, { ok: false, message: PHOTO_SAVE_FAILED }))
+    }
+  }
+
+  async function onLogo(file: File | undefined) {
+    if (!file) {
+      setLogoBase64(null)
+      set("logoName", null)
+      return
+    }
+    const type = file.type.toLowerCase()
+    if (type !== "image/png" && type !== "image/jpeg") {
+      setLogoBase64(null)
+      set("logoName", null)
+      setState((current) => ({ ...current, message: WORD_CHANGE_LOGO }))
+      return
+    }
+    const data = await fileToDataUrl(file)
+    setLogoBase64(data)
+    set("logoName", file.name)
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-6 py-10" data-locked-hero={template.id}>
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-6 py-10" data-locked-hero={template.id} data-locked-hero-phase={state.phase}>
       <div>
         <p className="text-xs tracking-wide text-muted-foreground">GALLERY</p>
         <h1 className="mt-2 text-xl font-semibold leading-snug sm:text-2xl">Use this and have the AI make edits for me</h1>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
-          This picture stays the hero. Add the same details as a new mailer. This is a sample. Nothing is mailed.
+          This picture stays the hero. Tell us what to change. Nothing is mailed from this page.
         </p>
       </div>
-      {photo ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={photo} alt="" className="aspect-[8/5] w-full rounded-2xl object-cover" />
-      ) : null}
 
-      {design ? (
-        <article className="space-y-3 rounded-2xl border p-4">
-          <p className="text-sm text-muted-foreground">{design.note}</p>
-          <h2 className="text-2xl font-semibold">{design.businessName}</h2>
-          <p className="text-lg">{design.headline}</p>
-          <p>{design.offer}</p>
-          <p className="text-sm text-muted-foreground">{design.phone}{design.website ? ` · ${design.website}` : ""}</p>
-          {design.logoName ? <p className="text-sm">Logo · {design.logoName}</p> : null}
-          <p className="text-sm text-muted-foreground">{design.back}</p>
-          <p className="text-sm">{design.campaignName} · {design.size === "6x9" ? "6×9" : "5×8"} · picture locked</p>
-        </article>
-      ) : (
-        <form
-          className="space-y-5"
-          onSubmit={(event) => {
-            event.preventDefault()
-            const missing = lockedHeroMissing(input)
-            if (missing) {
-              setMessage(missing)
-              return
-            }
-            setReady(true)
-          }}
-        >
-          <Field label="Campaign name" value={input.campaignName} placeholder="Spring tune-up" onChange={(value) => set("campaignName", value)} />
-          <fieldset className="space-y-3">
-            <legend className="text-sm font-medium">Postcard size</legend>
-            <p className="text-sm text-muted-foreground">Nothing is selected until you pick.</p>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {(["5x8", "6x9"] as const).map((choice) => (
-                <button
-                  key={choice}
-                  type="button"
-                  aria-pressed={input.size === choice}
-                  onClick={() => set("size", choice)}
-                  className={`min-h-24 rounded-2xl border p-4 text-left ${input.size === choice ? "border-foreground" : ""}`}
-                >
-                  {choice === "5x8" ? "5×8" : "6×9"}
-                </button>
-              ))}
-            </div>
-          </fieldset>
-          <Field label="Business name" value={input.businessName} placeholder="Harbor Roofing" onChange={(value) => set("businessName", value)} />
-          <Field label="Offer" value={input.offer} placeholder="Free roof inspection this week" onChange={(value) => set("offer", value)} />
-          <Field label="Call to action" value={input.callToAction} placeholder="Call to book a visit" onChange={(value) => set("callToAction", value)} />
-          <Field label="Phone" value={input.phone} placeholder="(619) 555-0148" onChange={(value) => set("phone", value)} />
-          <Field label="Website" value={input.website} placeholder="harbor.example" hint="Optional. Add it if you want it on the card." onChange={(value) => set("website", value)} />
-          <div className="space-y-2">
+      {state.phase === "form" ? (
+        <>
+          {photo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={photo} alt="" className="aspect-[8/5] w-full rounded-2xl object-cover" />
+          ) : null}
+          <form
+            className="space-y-5"
+            onSubmit={(event) => {
+              event.preventDefault()
+              continueForm()
+            }}
+          >
+            <Field label="Campaign name" value={input.campaignName} placeholder="Spring tune-up" onChange={(value) => set("campaignName", value)} />
+            <fieldset className="space-y-3">
+              <legend className="text-sm font-medium">Postcard size</legend>
+              <p className="text-sm text-muted-foreground">Nothing is selected until you pick.</p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {(["5x8", "6x9"] as const).map((choice) => (
+                  <button
+                    key={choice}
+                    type="button"
+                    aria-pressed={input.size === choice}
+                    onClick={() => set("size", choice)}
+                    className={`min-h-24 rounded-2xl border p-4 text-left ${input.size === choice ? "border-foreground" : ""}`}
+                  >
+                    {choice === "5x8" ? "5×8" : "6×9"}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+            <Field label="Business name" value={input.businessName} placeholder="Harbor Roofing" onChange={(value) => set("businessName", value)} />
+            <Field label="Offer" value={input.offer} placeholder="Free roof inspection this week" onChange={(value) => set("offer", value)} />
+            <Field label="Call to action" value={input.callToAction} placeholder="Call to book a visit" onChange={(value) => set("callToAction", value)} />
+            <Field label="Phone" value={input.phone} placeholder="(619) 555-0148" onChange={(value) => set("phone", value)} />
+            <Field label="Website" value={input.website} placeholder="harbor.example" hint="Optional. Add it if you want it on the card." onChange={(value) => set("website", value)} />
             <label className="block text-sm font-medium">
-              Logo
-              <span className="mt-1 block font-normal text-muted-foreground">Highly recommended. A logo makes the card yours. You can continue without one.</span>
-              <input
-                type="file"
-                accept="image/png,image/jpeg,image/svg+xml,.png,.jpg,.jpeg,.svg"
-                className="mt-2 block min-h-11 w-full text-sm"
-                onChange={(event) => set("logoName", event.target.files?.[0]?.name ?? null)}
+              What do you want changed?
+              <span className="mt-1 block font-normal text-muted-foreground">
+                Describe exactly what you want: wording, offer, colors, what to keep, what to change. The more specific, the better the result.
+              </span>
+              <textarea
+                rows={5}
+                value={input.instructions}
+                placeholder="Keep the dog photo. Change the headline to Spring checkups, use our navy and gold, and put the phone at the bottom."
+                onChange={(event) => set("instructions", event.target.value)}
+                className="mt-2 min-h-28 w-full rounded-xl border bg-background px-3 py-2 font-normal"
               />
             </label>
-            {input.logoName ? <p className="text-sm text-muted-foreground">{input.logoName}</p> : null}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium">
+                Logo
+                <span className="mt-1 block font-normal text-muted-foreground">Highly recommended. A PNG or JPEG logo makes the card yours. You can continue without one.</span>
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,.png,.jpg,.jpeg"
+                  className="mt-2 block min-h-11 w-full text-sm"
+                  onChange={(event) => void onLogo(event.target.files?.[0])}
+                />
+              </label>
+              {input.logoName ? <p className="text-sm text-muted-foreground">{input.logoName}</p> : null}
+            </div>
+            {state.message ? <p className="text-sm text-destructive" role="alert">{state.message}</p> : null}
+            <button type="submit" className="min-h-11 rounded-xl bg-foreground px-4 text-sm font-semibold text-background">
+              Continue
+            </button>
+          </form>
+        </>
+      ) : null}
+
+      {busy ? (
+        <div className="flex items-center gap-3 rounded-2xl border px-4 py-6" role="status" aria-busy="true">
+          <span className="inline-block size-5 animate-spin rounded-full border-2 border-muted-foreground border-t-foreground" aria-hidden="true" />
+          <p className="text-sm font-medium">{state.message}</p>
+        </div>
+      ) : null}
+
+      {state.frontSrc && state.backSrc && state.phase !== "designing" ? (
+        <div className="grid gap-6">
+          <figure className="flex flex-col gap-2">
+            <figcaption className="text-sm font-medium">Front</figcaption>
+            <div className="relative overflow-hidden rounded-lg border bg-muted">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={state.frontSrc} alt="Front of the postcard" className={`${size === "6x9" ? "aspect-[3/2]" : "aspect-[8/5]"} w-full object-contain bg-white`} />
+              {state.proof ? <ProofMark tone="light" /> : null}
+            </div>
+          </figure>
+          <ProofFrame src={state.backSrc} mediaType="image/jpeg" face="back" label="Back" size={size}>
+            {state.proof ? <ProofMark tone="dark" /> : null}
+          </ProofFrame>
+          <p className="text-sm text-muted-foreground">The address side stays clear for postage.</p>
+        </div>
+      ) : null}
+
+      {state.phase === "proof" ? (
+        <div className="space-y-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+            <button type="button" className="min-h-11 rounded-xl bg-foreground px-4 text-sm font-semibold text-background" onClick={() => void approve()}>
+              Approve
+            </button>
+            <button type="button" className="min-h-11 rounded-xl border px-4 text-sm" onClick={startOver}>
+              Start over
+            </button>
           </div>
-          {message ? <p className="text-sm text-destructive" role="alert">{message}</p> : null}
-          <button type="submit" className="min-h-11 rounded-xl bg-foreground px-4 text-sm font-semibold text-background">
-            Continue
+          <label className="block text-sm font-medium">
+            What should change?
+            <textarea
+              rows={3}
+              value={note}
+              placeholder="Make the headline shorter and move the phone to the bottom."
+              onChange={(event) => setNote(event.target.value)}
+              className="mt-1 min-h-20 w-full rounded-xl border bg-background px-3 py-2 font-normal"
+            />
+          </label>
+          <button type="button" className="min-h-11 rounded-xl border px-4 text-sm font-semibold" onClick={requestChanges}>
+            Request changes
           </button>
-        </form>
-      )}
+        </div>
+      ) : null}
+
+      {state.phase === "error" ? (
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <button type="button" className="min-h-11 rounded-xl bg-foreground px-4 text-sm font-semibold text-background" onClick={() => void run(state.editSource, note)}>
+            Try again
+          </button>
+          <button type="button" className="min-h-11 rounded-xl border px-4 text-sm" onClick={startOver}>
+            Start over
+          </button>
+        </div>
+      ) : null}
+
+      {state.phase !== "form" && state.phase !== "designing" && state.message ? (
+        <p className="text-sm" role="status">
+          {state.message}{" "}
+          {code === "allowance" ? (
+            <Link href="/app/billing" className="underline">
+              Add a card
+            </Link>
+          ) : null}
+          {code === "sign-in" ? (
+            <Link href="/sign-in" className="underline">
+              Sign in
+            </Link>
+          ) : null}
+        </p>
+      ) : null}
     </div>
+  )
+}
+
+function ProofMark({ tone }: { tone: "light" | "dark" }) {
+  const color = tone === "dark" ? "text-[#1c2430]/40" : "text-white/45"
+  return (
+    <span className={`pointer-events-none absolute inset-0 flex items-center justify-center text-4xl font-semibold tracking-[0.3em] sm:text-6xl ${color}`} aria-hidden="true">
+      PROOF
+    </span>
   )
 }
 
@@ -138,4 +372,13 @@ function Field({
       />
     </label>
   )
+}
+
+function fileToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : "")
+    reader.onerror = () => reject(new Error("logo"))
+    reader.readAsDataURL(file)
+  })
 }

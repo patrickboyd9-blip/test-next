@@ -18,6 +18,11 @@ export const WORD_CHANGE_PAUSED = "Word changes are paused for today. Try again 
 export const WORD_CHANGE_NEED_DETAILS = "Add the business name, the offer, and a phone number."
 export const WORD_CHANGE_NEED_PLACE = "Choose where the logo should go."
 export const WORD_CHANGE_LOGO = "That logo could not be used. Try a PNG or JPEG."
+export const HERO_DESIGNING = "Comet is designing your card…"
+export const HERO_PROOF_READY = "Here is your proof."
+export const HERO_NEED_CHANGES = "Describe exactly what you want changed."
+export const HERO_EDIT_FAILED = "That design did not finish. Try again."
+export const HERO_NEED_NOTE = "Tell us what to change on this proof."
 
 export const CUSTOMER_PHOTO_MESSAGES = [
   PHOTO_EDITING,
@@ -38,4 +43,9 @@ export const CUSTOMER_PHOTO_MESSAGES = [
   WORD_CHANGE_NEED_DETAILS,
   WORD_CHANGE_NEED_PLACE,
   WORD_CHANGE_LOGO,
+  HERO_DESIGNING,
+  HERO_PROOF_READY,
+  HERO_NEED_CHANGES,
+  HERO_EDIT_FAILED,
+  HERO_NEED_NOTE,
 ] as const
