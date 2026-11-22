@@ -73,7 +73,6 @@ function QrHandle({
   const box = qrBoxPercent(size, frame, qr)
   const label = qrShortLabel(qr)
   const sentence = scanDestinationLine(qr)
-  const above = box.top > 62
   const grab = useRef({ x: 0, y: 0 })
 
   function pointerToTrim(clientX: number, clientY: number): { x: number; y: number } | null {
@@ -107,11 +106,6 @@ function QrHandle({
       }}
     >
       <QrGraphic payload={payload} />
-      <span
-        className={`pointer-events-none absolute left-0 z-10 max-w-[11rem] rounded bg-white/95 px-1.5 py-0.5 text-left text-[11px] font-medium leading-4 text-neutral-800 shadow ${above ? "bottom-full mb-1" : "top-full mt-1"}`}
-      >
-        {sentence}
-      </span>
       <span className="sr-only">{label}</span>
     </button>
   )
