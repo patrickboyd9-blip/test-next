@@ -14,6 +14,7 @@ import {
 } from "@/lib/image-edit/messages"
 import { galleryPhotoSrc } from "@/lib/mail-templates/gallery-photo-src"
 import { lockedHeroMissing, type LockedHeroInput } from "@/lib/mail-templates/locked-hero"
+import { phoneFieldEmpty, phoneOnFrontAfterEdit } from "@/lib/mail-templates/phone-on-front"
 import {
   beginLockedHeroEdit,
   finishLockedHeroEdit,
@@ -42,6 +43,7 @@ export function LockedHeroMailer({ template }: { template: MailTemplate }) {
   const router = useRouter()
   const ticket = useRef(0)
   const [input, setInput] = useState<LockedHeroInput>(EMPTY)
+  const [phoneOnFront, setPhoneOnFront] = useState(false)
   const [logoBase64, setLogoBase64] = useState<string | null>(null)
   const [note, setNote] = useState("")
   const [code, setCode] = useState("")
@@ -53,6 +55,11 @@ export function LockedHeroMailer({ template }: { template: MailTemplate }) {
   function set<K extends keyof LockedHeroInput>(key: K, value: LockedHeroInput[K]) {
     setInput((current) => ({ ...current, [key]: value }))
     setState((current) => (current.phase === "form" ? { ...current, message: "" } : current))
+  }
+
+  function setPhone(value: string) {
+    setPhoneOnFront((checked) => phoneOnFrontAfterEdit(input.phone, value, checked))
+    set("phone", value)
   }
 
   async function run(source: string | null, changeNote: string) {
@@ -71,6 +78,7 @@ export function LockedHeroMailer({ template }: { template: MailTemplate }) {
           offer: input.offer,
           callToAction: input.callToAction,
           phone: input.phone,
+          phoneOnFront: phoneFieldEmpty(input.phone) ? false : phoneOnFront,
           website: input.website,
           instructions: input.instructions,
           changeNote,
@@ -222,7 +230,17 @@ export function LockedHeroMailer({ template }: { template: MailTemplate }) {
             <Field label="Business name" value={input.businessName} placeholder="Harbor Roofing" onChange={(value) => set("businessName", value)} />
             <Field label="Offer" value={input.offer} placeholder="Free roof inspection this week" onChange={(value) => set("offer", value)} />
             <Field label="Call to action" value={input.callToAction} placeholder="Call to book a visit" onChange={(value) => set("callToAction", value)} />
-            <Field label="Phone" value={input.phone} placeholder="(619) 555-0148" onChange={(value) => set("phone", value)} />
+            <Field label="Phone" value={input.phone} placeholder="(619) 555-0148" onChange={setPhone} />
+            <label className={`flex min-h-11 items-center gap-2 text-sm font-normal ${phoneFieldEmpty(input.phone) ? "text-muted-foreground" : ""}`}>
+              <input
+                type="checkbox"
+                className="size-4"
+                checked={!phoneFieldEmpty(input.phone) && phoneOnFront}
+                disabled={phoneFieldEmpty(input.phone)}
+                onChange={(event) => setPhoneOnFront(event.target.checked)}
+              />
+              Show my phone number on the front
+            </label>
             <Field label="Website" value={input.website} placeholder="harbor.example" hint="Optional. Add it if you want it on the card." onChange={(value) => set("website", value)} />
             <label className="block text-sm font-medium">
               What do you want changed?

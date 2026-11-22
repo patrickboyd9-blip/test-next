@@ -11,6 +11,10 @@ export interface LockedHeroInstructionInput {
   instructions: string
   changeNote: string
   hasLogo: boolean
+  /** When true, the front must show this phone number. When false, leave the front phone alone. */
+  phoneOnFront: boolean
+  /** Printed brand from gallery data, when we know it. */
+  originalBusinessName: string | null
 }
 
 const CHANGE_START =
@@ -18,18 +22,28 @@ const CHANGE_START =
 
 /** The edit request. Stays on the server. */
 export function lockedHeroInstruction(input: LockedHeroInstructionInput): string {
-  const note = [input.instructions, input.changeNote].filter(Boolean).join(" ")
-  const changes = requiredChanges(input.instructions, input.changeNote)
+  const phone = phoneOnFrontRule(input.phone, input.phoneOnFront)
+  const changes = [
+    ...listedChanges(input.instructions),
+    ...listedChanges(input.changeNote),
+    ...nameMustDo(input.businessName, input.originalBusinessName),
+    ...phone.changes,
+  ]
+  const required =
+    changes.length > 0
+      ? changes
+      : ["No separate change was written. Change nothing except the placement rules below."]
   const lines = [
     "Edit this postcard. Every change in the list below is required. Do each one. Do not skip any.",
     "Required changes:",
-    ...changes.map((change, index) => `${index + 1}. ${change}`),
+    ...required.map((change, index) => `${index + 1}. ${change}`),
+  ]
+  if (phone.hold) lines.push(phone.hold)
+  lines.push(
     "When a required change asks you to replace or redraw the main subject (a person, an animal, or an object), do that. Keep the same pose, size, position, lighting, and photo style.",
     "Preserve everything that was not requested. Keep the overall layout, the composition, and the text positions, font styles, sizes, and colors of untouched elements.",
-    "A new business name replaces the existing business name or logo in the same spot and at a similar size. A top-corner logo stays a top-corner logo. Never move the business name into the headline, and never replace the headline, unless a required change asks for that.",
-  ]
-  const rename = nameReplacement(note, input.businessName)
-  if (rename) lines.push(rename)
+    "When a required change replaces the business name, replace every mention, each in the same spot and at a similar size. A top-corner logo stays a top-corner logo. Never move the business name into the headline, and never replace the headline, unless a required change asks for that.",
+  )
   lines.push(
     input.hasLogo
       ? "Place the attached logo in the existing logo position, or in the position a required change names, at a similar size. Do not move the logo into the headline."
@@ -37,12 +51,14 @@ export function lockedHeroInstruction(input: LockedHeroInstructionInput): string
   )
   lines.push(
     "Keep text spelled exactly as given. Do not invent extra text. Keep the bottom disclaimer bar unless a required change asks to change it.",
-    "Use the offer, call to action, phone, and website below only as the exact spelling when a required change touches that line, or when that line is already printed. Do not replace the headline with them unless a required change says to."
+    phone.changes.length > 0
+      ? "Use the offer, call to action, phone, and website below only as the exact spelling when a required change touches that line, or when that line is already printed. Do not replace the headline with them unless a required change says to."
+      : "Use the offer, call to action, and website below only as the exact spelling when a required change touches that line, or when that line is already printed. Do not replace the headline with them unless a required change says to."
   )
   lines.push(
     `Campaign: ${input.campaignName}`,
     `Postcard size: ${input.size === "6x9" ? "6 by 9 inches" : "5 by 8 inches"}`,
-    `Business name, in the existing name or logo spot: ${input.businessName}`,
+    `Business name: ${input.businessName}`,
     `Offer: ${input.offer}`,
     `Call to action: ${input.callToAction}`,
     `Phone: ${input.phone}`
@@ -50,12 +66,6 @@ export function lockedHeroInstruction(input: LockedHeroInstructionInput): string
   if (input.website) lines.push(`Website: ${input.website}`)
   lines.push("Do not add a watermark. If a faint PROOF mark is already on the picture, leave it out. It is not part of the card.")
   return lines.join("\n")
-}
-
-function requiredChanges(instructions: string, changeNote: string): string[] {
-  const changes = [...listedChanges(instructions), ...listedChanges(changeNote)]
-  if (changes.length > 0) return changes
-  return ["No separate change was written. Change nothing except the placement rules below."]
 }
 
 function listedChanges(text: string): string[] {
@@ -89,35 +99,36 @@ function stripLead(value: string): string {
   return value.replace(/^and\s+/i, "").replace(/[;,]\s*$/, "").trim()
 }
 
-function nameReplacement(note: string, businessName: string): string | null {
+function nameMustDo(businessName: string, originalBusinessName: string | null): string[] {
   const next = businessName.replace(/\s+/g, " ").trim()
-  if (next.length < 2) return null
-  const old = previousBusinessName(note, next)
-  const quotedOld = old ? ` "${old}"` : ""
-  return `Replace the business name/logo text${quotedOld} with "${next}" in the same location.`
+  if (next.length < 2) return []
+  const old = (originalBusinessName ?? "").replace(/\s+/g, " ").trim()
+  if (old.length >= 2 && old.toLowerCase() === next.toLowerCase()) return []
+  if (old.length >= 2) {
+    return [
+      `Replace every mention of "${old}" on the front with "${next}". Include the logo text, logo subtitle or descriptor words that are part of "${old}" (including a subtitle that is only one word from that name), and any body or offer text that mentions it. Keep each in its same spot and style.`,
+    ]
+  }
+  return [
+    `Replace every mention of the existing business name and any words of it on the front with "${next}". Include the logo text, logo subtitle or descriptor words that are part of the existing business name, and any body or offer text that mentions it. Keep each in its same spot and style.`,
+  ]
 }
 
-function previousBusinessName(note: string, businessName: string): string | null {
-  const escaped = businessName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-  const patterns = [
-    new RegExp(
-      String.raw`(?:(?:business|company)\s+name|logo(?:\s+text)?)\s+from\s+["“']?(.+?)["”']?\s+to\s+["“']?${escaped}\b`,
-      "i"
-    ),
-    new RegExp(
-      String.raw`\b(?:change|replace|rename)\s+["“']([^"”']+?)["”']\s+to\s+["“']?${escaped}\b`,
-      "i"
-    ),
-    new RegExp(
-      String.raw`\b(?:change|replace|rename)\s+(?!the\s+(?:business|company|dog|color|colour|headline|photo|picture|name|logo|top|panel)\b)([A-Z][^.,;]{1,80}?)\s+to\s+["“']?${escaped}\b`,
-      "i"
-    ),
-  ]
-  for (const pattern of patterns) {
-    const found = pattern.exec(note)?.[1]?.replace(/\s+/g, " ").trim().replace(/^["“']+|["”']+$/g, "")
-    if (!found || found.length < 2 || found.length > 80) continue
-    if (found.toLowerCase() === businessName.toLowerCase()) continue
-    return found
+function phoneOnFrontRule(
+  phone: string,
+  phoneOnFront: boolean
+): { changes: string[]; hold: string | null } {
+  const typed = phone.replace(/\s+/g, " ").trim()
+  if (!phoneOnFront || typed.length === 0) {
+    return {
+      changes: [],
+      hold: "Do not add a phone number to the front. Do not remove or replace a phone number unless a required change asks for that.",
+    }
   }
-  return null
+  return {
+    changes: [
+      `Add the phone number exactly as typed, "${typed}", to the front, near the call to action (under or beside the call-to-action line), in a legible size and a font and color matching the design, without covering the main subject or the offer, and without moving other elements. If the original already shows a phone number, replace it in place instead.`,
+    ],
+    hold: null,
+  }
 }

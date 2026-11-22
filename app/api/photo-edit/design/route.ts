@@ -21,6 +21,7 @@ export async function POST(request: Request): Promise<Response> {
     website?: unknown
     instructions?: unknown
     changeNote?: unknown
+    phoneOnFront?: unknown
     logoBase64?: unknown
     currentFrontBase64?: unknown
   }
@@ -42,6 +43,7 @@ export async function POST(request: Request): Promise<Response> {
     website: typeof body.website === "string" ? body.website : "",
     instructions: typeof body.instructions === "string" ? body.instructions : "",
     changeNote: typeof body.changeNote === "string" ? body.changeNote : "",
+    phoneOnFront: body.phoneOnFront !== false,
     logoBase64: typeof body.logoBase64 === "string" ? body.logoBase64 : undefined,
     currentFrontBase64: typeof body.currentFrontBase64 === "string" ? body.currentFrontBase64 : undefined,
   })

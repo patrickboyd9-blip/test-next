@@ -46,6 +46,8 @@ test("the design request keeps the customer's words and does not name a vendor",
     size: "5x8",
     changeNote: "Make the phone larger",
     hasLogo: true,
+    phoneOnFront: false,
+    originalBusinessName: null,
   })
   assert.match(text, /Harbor Roofing/)
   assert.match(text, /Spring checkups/)
@@ -60,7 +62,8 @@ test("the design request keeps the customer's words and does not name a vendor",
   assert.match(text, /same spot and at a similar size/)
   assert.match(text, /top-corner logo stays a top-corner logo/)
   assert.match(text, /Never move the business name into the headline/)
-  assert.match(text, /Replace the business name\/logo text with "Harbor Roofing" in the same location/)
+  assert.match(text, /every mention of the existing business name and any words of it/)
+  assert.match(text, /Do not add a phone number to the front/)
   assert.match(text, /bottom disclaimer bar/)
   assert.doesNotMatch(text, /gemini|openai|anthropic|\$|prompt/i)
 })
@@ -78,6 +81,8 @@ test("a numbered note is a must-do list and a named business stays in its spot",
       "(1) change the dog to a German shepherd (2) change the top-left color from green to red (3) change the business name from Wrenshaw Veterinary to JP Pets",
     changeNote: "Make the phone larger",
     hasLogo: true,
+    phoneOnFront: false,
+    originalBusinessName: "Wrenshaw Veterinary",
   })
   assert.match(text, /1\. change the dog to a German shepherd/)
   assert.match(text, /2\. change the top-left color from green to red/)
@@ -86,7 +91,13 @@ test("a numbered note is a must-do list and a named business stays in its spot",
   assert.match(text, /replace or redraw the main subject \(a person, an animal, or an object\)/)
   assert.match(text, /Preserve everything that was not requested/)
   assert.match(text, /overall layout, the composition/)
-  assert.match(text, /Replace the business name\/logo text "Wrenshaw Veterinary" with "JP Pets" in the same location/)
+  assert.match(text, /every mention of "Wrenshaw Veterinary"/)
+  assert.match(text, /logo subtitle or descriptor words/)
+  assert.match(text, /body or offer text/)
+  assert.match(text, /"JP Pets"/)
+  assert.match(text, /same spot and style/)
+  assert.match(text, /Do not add a phone number to the front/)
+  assert.doesNotMatch(text, /Add the phone number exactly as typed/)
   assert.match(text, /existing logo position/)
   assert.doesNotMatch(text, /YEAR-ROUND CARE/)
   assert.doesNotMatch(text, /gemini|openai|anthropic|\$|prompt/i)
@@ -259,6 +270,89 @@ test("a design without the change note is refused before the editor runs", async
   if (result.ok) return
   assert.equal(result.message, HERO_NEED_CHANGES)
   assert.equal(calls, 0)
+})
+
+test("a checked phone is added on the front, and the same business name is left alone", () => {
+  const checked = lockedHeroInstruction({
+    ...form,
+    size: "5x8",
+    changeNote: "",
+    hasLogo: false,
+    phoneOnFront: true,
+    originalBusinessName: null,
+  })
+  assert.match(checked, /Add the phone number exactly as typed, "\(619\) 555-0148"/)
+  assert.match(checked, /near the call to action/)
+  assert.match(checked, /legible size/)
+  assert.match(checked, /font and color matching the design/)
+  assert.match(checked, /without covering the main subject or the offer/)
+  assert.match(checked, /without moving other elements/)
+  assert.match(checked, /replace it in place instead/)
+  assert.doesNotMatch(checked, /Do not add a phone number to the front/)
+  assert.match(checked, /every mention of the existing business name and any words of it/)
+
+  const same = lockedHeroInstruction({
+    ...form,
+    businessName: "wrenshaw veterinary",
+    size: "5x8",
+    changeNote: "",
+    hasLogo: false,
+    phoneOnFront: false,
+    originalBusinessName: "Wrenshaw Veterinary",
+  })
+  assert.doesNotMatch(same, /every mention of/i)
+  assert.match(same, /Do not add a phone number to the front/)
+  assert.match(same, /Do not remove or replace a phone number unless a required change asks/)
+  assert.doesNotMatch(same, /Add the phone number exactly as typed/)
+})
+
+test("a re-edit names the gallery brand and keeps the phone choice", async () => {
+  const front = `data:image/png;base64,${png.toString("base64")}`
+  let notes = ""
+  const added = await editLockedHero({
+    ...form,
+    templateId: "MM-vet-pet-029",
+    businessName: "JP Pets",
+    phoneOnFront: true,
+    changeNote: "Make the offer box shorter",
+    currentFrontBase64: front,
+    now,
+    env: openCaps,
+    ledger: memoryWordChangeLedger(),
+    editor: async (input: { instruction: string }) => {
+      notes = input.instruction
+      return png
+    },
+    loadImage: async () => png,
+  })
+  assert.equal(added.ok, true)
+  assert.match(notes, /Make the offer box shorter/)
+  assert.match(notes, /every mention of "Wrenshaw Veterinary"/)
+  assert.match(notes, /"JP Pets"/)
+  assert.match(notes, /Add the phone number exactly as typed, "\(619\) 555-0148"/)
+  assert.doesNotMatch(notes, /gemini|openai|anthropic|\$|prompt/i)
+
+  let held = ""
+  const skipped = await editLockedHero({
+    ...form,
+    templateId: "MM-vet-pet-029",
+    businessName: "JP Pets",
+    phoneOnFront: false,
+    changeNote: "Make the offer box shorter",
+    currentFrontBase64: front,
+    now,
+    env: openCaps,
+    ledger: memoryWordChangeLedger(),
+    editor: async (input: { instruction: string }) => {
+      held = input.instruction
+      return png
+    },
+    loadImage: async () => png,
+  })
+  assert.equal(skipped.ok, true)
+  assert.match(held, /every mention of "Wrenshaw Veterinary"/)
+  assert.match(held, /Do not add a phone number to the front/)
+  assert.doesNotMatch(held, /Add the phone number exactly as typed/)
 })
 
 test("customer copy for this design path does not name a vendor or a price", () => {

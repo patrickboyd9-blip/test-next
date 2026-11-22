@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises"
 import path from "node:path"
 
 import { lockedHeroMissing, type LockedHeroInput, type LockedHeroSize } from "@/lib/mail-templates/locked-hero"
-import { finishedGalleryPhoto } from "@/lib/mail-templates/gallery-finished"
+import { finishedGalleryBrandName, finishedGalleryPhoto } from "@/lib/mail-templates/gallery-finished"
 import { galleryPhotoSrc } from "@/lib/mail-templates/gallery-photo-src"
 import { getMailTemplate } from "@/lib/mail-templates/query"
 import { readRasterSize } from "@/lib/print-spec/raster"
@@ -65,6 +65,8 @@ export interface LockedHeroEditInput {
   instructions: string
   /** Extra note when the current proof is the picture to edit. */
   changeNote?: string
+  /** When false, the front edit must not add a phone number. Defaults to on. */
+  phoneOnFront?: boolean
   logoBase64?: string
   /** Data URL of the proof on screen. When set, this is the edit input. */
   currentFrontBase64?: string
@@ -159,6 +161,8 @@ export async function editLockedHero(input: LockedHeroEditInput): Promise<Locked
       instructions: clip(form.instructions, 800),
       changeNote,
       hasLogo: Boolean(logo.bytes),
+      phoneOnFront: input.phoneOnFront !== false,
+      originalBusinessName: finishedGalleryBrandName(input.templateId),
     })
     const edited = editor
       ? await editor({ image, mimeType, instruction, logo: logo.bytes })
