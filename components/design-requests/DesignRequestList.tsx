@@ -45,6 +45,14 @@ export function DesignRequestList({ requests }: DesignRequestListProps) {
                   {request.slogans ? <Detail label="Slogans or taglines" value={request.slogans} /> : null}
                   {request.notes ? <Detail label="Notes" value={request.notes} /> : null}
                 </dl>
+                {request.printFileKey ? (
+                  <a
+                    href={`/api/design-requests/${request.id}/${request.printFileKey}`}
+                    className="text-sm underline"
+                  >
+                    Print file
+                  </a>
+                ) : null}
                 {request.uploads.length > 0 && (
                   <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                     {request.uploads.map((upload) => (
@@ -104,6 +112,9 @@ function responseSummary(request: DesignRequest): string {
 
 function detailFor(method: ResponseMethod, request: DesignRequest): string {
   if (method === "qr" && request.qrUrl) return ` (${request.qrUrl})`
+  if (method === "qr" && request.qrCodes?.some((code) => code.destination === "page")) {
+    return " (a page we make for you)"
+  }
   if (method === "phone" && request.phone) return ` (${request.phone})`
   if (method === "website" && request.websiteUrl) return ` (${request.websiteUrl})`
   if (method === "other" && request.otherResponse) return ` (${request.otherResponse})`

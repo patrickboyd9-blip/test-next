@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, type ReactNode } from "react"
 
 import { PhotoAdjust } from "@/components/mail-gallery/PhotoAdjust"
 import { askComet } from "@/lib/image-edit/ask"
@@ -18,6 +18,7 @@ export function ProofEditor({
   size,
   layers,
   onChange,
+  overlay,
 }: {
   src: string
   mediaType: string
@@ -26,6 +27,7 @@ export function ProofEditor({
   size: PostcardSizeId
   layers: ProofLayer[]
   onChange: (layers: ProofLayer[]) => void
+  overlay?: ReactNode
 }) {
   const [past, setPast] = useState<ProofLayer[][]>([])
   const [ask, setAsk] = useState("")
@@ -71,6 +73,7 @@ export function ProofEditor({
             onChange={(next) => onChange(layers.map((item) => (item.id === next.id ? next : item)))}
           />
         ))}
+        {overlay}
       </ProofFrame>
       <div className="flex flex-wrap gap-2">
         <button type="button" onClick={addText} className="min-h-11 rounded-xl border border-[#245068] px-3 text-sm">

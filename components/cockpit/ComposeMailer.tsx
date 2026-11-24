@@ -43,6 +43,18 @@ import { TEMPLATE_INDUSTRIES, TEMPLATE_INDUSTRY_LABELS, type TemplateIndustry } 
 import { StartChoices, type StartPath } from "./StartChoices"
 
 import { ProofTray } from "./ProofCard"
+import { QrFaceOverlay } from "@/components/qr-placement/QrFaceOverlay"
+import { QrPlacementPanel } from "@/components/qr-placement/QrPlacementPanel"
+import { prepareCometPrint } from "@/lib/mailer-compose/comet-print"
+import {
+  activeQrs,
+  initialQrPlacement,
+  moveQr,
+  normalizeScanUrl,
+  QR_WEBSITE_MISSING,
+  refitQrPlacement,
+  type QrPlacementValue,
+} from "@/lib/qr-placement/model"
 import { ProofEditor } from "@/components/campaign-creator/upload/ProofEditor"
 import { GalleryProof } from "@/components/cockpit/GalleryProof"
 import { layersForGallery } from "@/lib/mail-templates/gallery-layers"
@@ -77,6 +89,7 @@ export function ComposeMailer({
   initialIndustry = null,
   sampleBeat = null,
   liveChat = false,
+  initialPastIntro = false,
 }: {
   shop: string
   initialStep?: ComposeStep
@@ -87,16 +100,22 @@ export function ComposeMailer({
   sampleBeat?: number | null
   /** True only when production can call the conversation engine. */
   liveChat?: boolean
+  /** Skips the size and name steps. Used when a flow is opened mid-way. */
+  initialPastIntro?: boolean
 }) {
   const router = useRouter()
   const brand = useBrand()
   const [step, setStep] = useState<ComposeStep>(initialStep)
   const [draft, setDraft] = useState<ComposeDraft>(initialDraft ?? emptyDraft())
   const [path, setPath] = useState<StartPath | null>(initialPath)
-  const [postcardSize, setPostcardSize] = useState<"5x8" | "6x9" | null>(null)
-  const [sizeConfirmed, setSizeConfirmed] = useState(false)
+  const [postcardSize, setPostcardSize] = useState<"5x8" | "6x9" | null>(initialPastIntro ? (initialDraft?.size ?? "5x8") : null)
+  const [sizeConfirmed, setSizeConfirmed] = useState(initialPastIntro)
   const [sizeMessage, setSizeMessage] = useState("")
-  const [namePicked, setNamePicked] = useState(false)
+  const [namePicked, setNamePicked] = useState(initialPastIntro)
+  const [qr, setQr] = useState<QrPlacementValue>(() =>
+    initialQrPlacement(initialDraft?.size ?? "5x8", initialDraft?.website ?? "", initialDraft?.phone ?? "")
+  )
+  const [qrMessage, setQrMessage] = useState("")
   const [quick, setQuick] = useState(initialQuick)
   const tony = sampleBeat == null ? null : tonySample(sampleBeat)
   const [chat, setChat] = useState(tony?.turns ?? [{ role: "assistant" as const, text: ACCOMPLISH_QUESTION, choices: EXAMPLE_PROMPTS }])
@@ -147,6 +166,7 @@ export function ComposeMailer({
       return
     }
     patch({ size: postcardSize })
+    setQr((current) => refitQrPlacement(current, postcardSize))
     setSizeConfirmed(true)
     setSizeMessage("")
   }
@@ -278,25 +298,64 @@ export function ComposeMailer({
     if (following) setStep(following)
   }
 
-  function approve() {
+  function movePlacedQr(id: string, xInches: number, yInches: number) {
+    setQr((current) => moveQr(current, draft.size, id, xInches, yInches))
+  }
+
+  async function approve() {
     if (!canApprove(draft)) return
+    if ((path === "ai" || path === "upload") && qr.enabled && qr.codes.some((code) => code.destination === "website" && !normalizeScanUrl(code.website))) {
+      setQrMessage(QR_WEBSITE_MISSING)
+      return
+    }
+    let printPdf = ""
+    if (path === "ai") {
+      const printed = await prepareCometPrint({
+        size: draft.size,
+        shop: proposal?.shop || shop,
+        line: proof.line,
+        phone: proof.phone,
+        qrs: activeQrs(qr),
+      })
+      if (!printed.ok) {
+        setQrMessage(printed.message)
+        return
+      }
+      printPdf = printed.pdfBase64
+    }
     const result = approvePreview()
     const id = `preview-${draft.listId ?? "upload"}`
-    sessionStorage.setItem(
-      `mailer-preview:${id}`,
-      JSON.stringify({
-        name: draft.brief.replace(/\s+/g, " ").trim().slice(0, 42),
-        listName: selectedListName(draft),
-        people,
-        status: result.status,
-        detail: "Preview only. Nothing was mailed and nothing was charged.",
-        line: proof.line,
-        shop,
-        phone: proof.phone,
-        qr: proof.qr,
-      })
-    )
+    const record = {
+      name: draft.brief.replace(/\s+/g, " ").trim().slice(0, 42),
+      listName: selectedListName(draft),
+      people,
+      status: result.status,
+      detail: "Preview only. Nothing was mailed and nothing was charged.",
+      line: proof.line,
+      shop,
+      phone: proof.phone,
+      qr: proof.qr,
+      qrs: activeQrs(qr),
+      printPdf,
+    }
+    try {
+      sessionStorage.setItem(`mailer-preview:${id}`, JSON.stringify(record))
+    } catch {
+      sessionStorage.setItem(`mailer-preview:${id}`, JSON.stringify({ ...record, printPdf: "" }))
+    }
     router.push(`/app/mail/${id}`)
+  }
+
+  const qrTray = {
+    size: draft.size,
+    enabled: qr.enabled,
+    codes: qr.codes,
+    onMove: movePlacedQr,
+  }
+
+  function qrOverlay(side: "front" | "back") {
+    if (!qr.enabled) return null
+    return <QrFaceOverlay size={draft.size} side={side} frame="canvas" codes={qr.codes} onMove={movePlacedQr} />
   }
 
   return (
@@ -486,16 +545,25 @@ export function ComposeMailer({
               <div className="space-y-3">
                 <ProofTray
                   brand={brand}
+                  qr={qrTray}
                   proof={{
                     shop: proposal.shop,
                     line: proposal.line,
                     to: proposal.audience,
                     people: 0,
-                    phone: "",
+                    phone: draft.phone,
                     website: "",
-                    logoName: null,
+                    logoName: draft.logoName,
                     qr: null,
                   }}
+                />
+                <QrPlacementPanel
+                  value={qr}
+                  size={draft.size}
+                  businessName={proposal.shop}
+                  headline={proposal.line}
+                  offer={draft.brief || proposal.line}
+                  onChange={setQr}
                 />
                 <div className="flex flex-wrap gap-2">
                   {["Make it more fun", "Different photo", "Bigger offer"].map((choice) => (
@@ -558,11 +626,21 @@ export function ComposeMailer({
             <label className="block text-sm">Front
               <input type="file" accept="image/png,image/jpeg,application/pdf,.png,.jpg,.jpeg,.pdf" className="mt-1 block min-h-12 w-full text-sm" onChange={(event) => void onDesign("front", event.target.files?.[0] ?? null)} />
             </label>
-            {frontFile ? <ProofEditor src={frontFile.url} mediaType={frontFile.mediaType} face="front" label={`Front · ${frontFile.name}`} size={draft.size} layers={layers} onChange={setLayers} /> : null}
+            <div data-qr-postcard>
+              {frontFile ? <ProofEditor src={frontFile.url} mediaType={frontFile.mediaType} face="front" label={`Front · ${frontFile.name}`} size={draft.size} layers={layers} onChange={setLayers} overlay={qrOverlay("front")} /> : null}
+            </div>
             <label className="block text-sm">Back
               <input type="file" accept="image/png,image/jpeg,application/pdf,.png,.jpg,.jpeg,.pdf" className="mt-1 block min-h-12 w-full text-sm" onChange={(event) => void onDesign("back", event.target.files?.[0] ?? null)} />
             </label>
-            {backFile ? <ProofEditor src={backFile.url} mediaType={backFile.mediaType} face="back" label={`Back · ${backFile.name}`} size={draft.size} layers={layers} onChange={setLayers} /> : null}
+            {backFile ? <ProofEditor src={backFile.url} mediaType={backFile.mediaType} face="back" label={`Back · ${backFile.name}`} size={draft.size} layers={layers} onChange={setLayers} overlay={qrOverlay("back")} /> : null}
+            <QrPlacementPanel
+              value={qr}
+              size={draft.size}
+              businessName={shop}
+              headline={draft.campaignName}
+              offer={draft.brief}
+              onChange={setQr}
+            />
             {designError ? <p role="alert" className="rounded-xl bg-[#3a1418] px-3 py-3 text-sm text-[#ffb4b4]">{designError}</p> : null}
             {frontFile && backFile ? <p className="text-sm">Both sides are ready. Continue to the proof.</p> : null}
           </Panel>
@@ -635,13 +713,47 @@ export function ComposeMailer({
               <Eyebrow>Proof</Eyebrow>
               <h1 className="text-2xl font-semibold">Does this look right?</h1>
               <p className="text-sm text-[#b7c9d8]">Your files, fitted inside the postcard. They stay in this browser. Nothing was stored or mailed.</p>
-              <ProofEditor src={frontFile.url} mediaType={frontFile.mediaType} face="front" label={`Front · ${frontFile.name}`} size={draft.size} layers={layers} onChange={setLayers} />
-              <ProofEditor src={backFile.url} mediaType={backFile.mediaType} face="back" label={`Back · ${backFile.name}`} size={draft.size} layers={layers} onChange={setLayers} />
+              <div data-qr-postcard>
+                <ProofEditor src={frontFile.url} mediaType={frontFile.mediaType} face="front" label={`Front · ${frontFile.name}`} size={draft.size} layers={layers} onChange={setLayers} overlay={qrOverlay("front")} />
+                <ProofEditor src={backFile.url} mediaType={backFile.mediaType} face="back" label={`Back · ${backFile.name}`} size={draft.size} layers={layers} onChange={setLayers} overlay={qrOverlay("back")} />
+              </div>
+              <QrPlacementPanel
+                value={qr}
+                size={draft.size}
+                businessName={shop}
+                headline={draft.campaignName}
+                offer={draft.brief}
+                onChange={setQr}
+              />
             </Panel>
           </div>
         ) : null}
 
-        {sizeConfirmed && step === "proof" && path !== "upload" ? (
+        {sizeConfirmed && step === "proof" && path === "ai" ? (
+          <div className="space-y-4">
+            <Panel className="space-y-3 p-4 sm:p-6">
+              <Eyebrow>Proof</Eyebrow>
+              <h1 className="text-2xl font-semibold">Does this look right?</h1>
+              {logoUrl ? (
+                // The mark is the customer's file. Keep its proportions.
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={logoUrl} alt={proof.logoName ?? "Logo"} className="h-14 w-24 rounded-md bg-white object-contain p-1" />
+              ) : null}
+              <ProofTray proof={proof} brand={brand} qr={qrTray} />
+              <p className="text-sm text-[#b7c9d8]">The address side stays clear for postage.</p>
+              <QrPlacementPanel
+                value={qr}
+                size={draft.size}
+                businessName={proposal?.shop || shop}
+                headline={proof.line}
+                offer={draft.brief || proof.line}
+                onChange={setQr}
+              />
+            </Panel>
+          </div>
+        ) : null}
+
+        {sizeConfirmed && step === "proof" && path !== "upload" && path !== "ai" ? (
           <div className="space-y-4">
             <Panel className="space-y-3 p-4 sm:p-6">
               <Eyebrow>Proof</Eyebrow>
@@ -664,6 +776,7 @@ export function ComposeMailer({
             <p className="rounded-xl bg-[#f0a202]/15 px-3 py-3 text-sm text-[#f6d48a]">
               This button only saves a preview. Nothing is mailed or charged.
             </p>
+            {qrMessage ? <p className="text-sm text-[#ffb4b4]" role="alert">{qrMessage}</p> : null}
             <button
               type="button"
               onClick={approve}

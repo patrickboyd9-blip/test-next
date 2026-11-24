@@ -16,6 +16,17 @@ import type { Campaign, DesignFaceName } from "@/lib/campaign-creator/types"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
+import { QrFaceOverlay } from "@/components/qr-placement/QrFaceOverlay"
+import {
+  activeQrs,
+  initialQrPlacement,
+  moveQr,
+  normalizeScanUrl,
+  QR_WEBSITE_MISSING,
+  type QrPlacementValue,
+} from "@/lib/qr-placement/model"
+import { QrPlacementPanel } from "@/components/qr-placement/QrPlacementPanel"
+
 import { IssueLine } from "./IssueLine"
 import { ProofFrame } from "./ProofFrame"
 import { UploadBasicsForm } from "./UploadBasicsForm"
@@ -60,6 +71,10 @@ export function UploadDesign({
   const [declining, setDeclining] = useState(false)
   const [localPreview, setLocalPreview] = useState<Partial<Record<DesignFaceName, { url: string; mediaType: string; name: string }>>>({})
   const [serverPreviewFailed, setServerPreviewFailed] = useState<Partial<Record<DesignFaceName, boolean>>>({})
+  const size = campaign.postcardSize === "6x9" ? "6x9" : "5x8"
+  const [qr, setQr] = useState<QrPlacementValue>(() =>
+    initialQrPlacement(size, campaign.brief.website ?? campaign.brief.businessInfo?.website ?? "", campaign.brief.phone ?? "")
+  )
 
   async function onFile(face: DesignFaceName, file: File | undefined) {
     if (!file) return
@@ -105,11 +120,16 @@ export function UploadDesign({
   }
 
   async function approve() {
+    if (qr.enabled && qr.codes.some((code) => code.destination === "website" && !normalizeScanUrl(code.website))) {
+      setUploadError(QR_WEBSITE_MISSING)
+      return
+    }
     setApproving(true)
     setUploadError(null)
     try {
       const updated = await approveUploadedDesign(campaign.id, {
         acceptAddressCover: addressCoverOk,
+        qrs: activeQrs(qr),
       })
       onCampaign(updated)
     } catch (error) {
@@ -292,11 +312,12 @@ export function UploadDesign({
               ? "This is the card we will print. The black line is where it is cut. On the back, the shaded box is the address, postage, and barcode."
               : "This preview stays on this screen. It is shown even if the file cannot be stored."}
           </p>
-          <div className="grid gap-6">
+          <div className="grid gap-6" data-qr-postcard>
             {(design?.front || localPreview.front) && (
               <ProofFrame
                 label="Front"
                 face="front"
+                size={size}
                 mediaType={
                   serverPreviewFailed.front
                     ? (localPreview.front?.mediaType ?? design?.front?.mediaType ?? "image/png")
@@ -304,12 +325,23 @@ export function UploadDesign({
                 }
                 src={facePreviewSrc(campaign.id, design?.front, localPreview.front, serverPreviewFailed.front)}
                 onError={() => setServerPreviewFailed((current) => ({ ...current, front: true }))}
-              />
+              >
+                {qr.enabled ? (
+                  <QrFaceOverlay
+                    size={size}
+                    side="front"
+                    frame="canvas"
+                    codes={qr.codes}
+                    onMove={(id, x, y) => setQr((current) => moveQr(current, size, id, x, y))}
+                  />
+                ) : null}
+              </ProofFrame>
             )}
             {(design?.back || localPreview.back) && (
               <ProofFrame
                 label="Back"
                 face="back"
+                size={size}
                 mediaType={
                   serverPreviewFailed.back
                     ? (localPreview.back?.mediaType ?? design?.back?.mediaType ?? "image/png")
@@ -317,9 +349,27 @@ export function UploadDesign({
                 }
                 src={facePreviewSrc(campaign.id, design?.back, localPreview.back, serverPreviewFailed.back)}
                 onError={() => setServerPreviewFailed((current) => ({ ...current, back: true }))}
-              />
+              >
+                {qr.enabled ? (
+                  <QrFaceOverlay
+                    size={size}
+                    side="back"
+                    frame="canvas"
+                    codes={qr.codes}
+                    onMove={(id, x, y) => setQr((current) => moveQr(current, size, id, x, y))}
+                  />
+                ) : null}
+              </ProofFrame>
             )}
           </div>
+          <QrPlacementPanel
+            value={qr}
+            size={size}
+            businessName={business?.name ?? campaign.name ?? ""}
+            headline={campaign.brief.offer ?? campaign.name ?? ""}
+            offer={campaign.brief.desiredRecipientAction ?? ""}
+            onChange={setQr}
+          />
         </div>
       )}
 

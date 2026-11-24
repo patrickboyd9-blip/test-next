@@ -1,5 +1,7 @@
 "use server"
 
+import { headers } from "next/headers"
+
 import { getSession, previewDemoAllowed } from "@/lib/auth/session"
 
 import { designRequestInputFromForm, imageTypeFor, parseDesignRequest } from "./parse"
@@ -34,7 +36,21 @@ export async function submitDesignRequest(formData: FormData): Promise<SaveDesig
     if (isImageError(image)) return { ok: false, error: image.error }
     if (image) images.push(image)
   }
-  return saveDesignRequest(designRequestInputFromForm(formData), { logo, images }, { ownerId: session.userId })
+  return saveDesignRequest(designRequestInputFromForm(formData), { logo, images }, {
+    ownerId: session.userId,
+    origin: await requestOrigin(),
+  })
+}
+
+async function requestOrigin(): Promise<string> {
+  try {
+    const headerList = await headers()
+    const host = headerList.get("x-forwarded-host") ?? headerList.get("host") ?? "localhost:3000"
+    const proto = headerList.get("x-forwarded-proto") ?? "http"
+    return `${proto}://${host}`
+  } catch {
+    return "http://localhost:3000"
+  }
 }
 
 export async function listDesignRequests(): Promise<DesignRequest[]> {

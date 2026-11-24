@@ -15,15 +15,17 @@ export async function readDesignRequestImage(
   const requests = options?.requests ?? getDesignRequestStore()
   const request = await requests.get(requestId)
   const upload = request?.uploads.find((item) => item.key === key)
-  if (!upload) return null
+  const print = !upload && request?.printFileKey === key
+  if (!upload && !print) return null
+  const mediaType = upload?.mediaType ?? "application/pdf"
 
   if (options?.uploads) {
     const opened = await options.uploads.get(requestId, key)
     if (!opened) return null
-    return { bytes: opened.bytes, mediaType: upload.mediaType }
+    return { bytes: opened.bytes, mediaType }
   }
 
   const opened = await openDesignRequestUpload(requestId, key)
   if (!opened) return null
-  return { bytes: opened.bytes, mediaType: upload.mediaType }
+  return { bytes: opened.bytes, mediaType }
 }

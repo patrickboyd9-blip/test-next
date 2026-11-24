@@ -23,7 +23,7 @@ import {
 
 /**
  * Shared controls for placing up to two QR codes.
- * The gallery design flow uses this. Other flows can mount the same panel.
+ * Design it for me, Comet, upload, and team design all mount this panel.
  */
 export function QrPlacementPanel({
   value,
@@ -166,6 +166,7 @@ function QrCard({
         <OfferPagePreview businessName={businessName} headline={headline} offer={offer} phone={qr.phone} parts={qr.parts} />
       ) : null}
       <ScanChoice
+        embed
         choice={qr.destination}
         website={qr.website}
         parts={toPageParts(qr.parts)}

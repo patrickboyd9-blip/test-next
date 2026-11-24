@@ -1,10 +1,15 @@
 "use server"
 
+import { headers } from "next/headers"
+
 import { requireOwnedCampaign } from "@/lib/auth/campaign-access"
 import { reviewUploadedArtwork } from "@/lib/campaign-creator/creative-engine-provider"
 import { getCampaignRepository } from "@/lib/campaign-creator/repository"
 import type { Campaign, DesignSource, UploadedDesignFile } from "@/lib/campaign-creator/types"
 import { buildPostcard5x8PrintSpec } from "@/lib/print-spec/postcard-5x8-print-spec"
+import { sanitizePlacedQrs } from "@/lib/qr-placement/model"
+import { compositeQrOntoUploadFace, geometryForQrSize, marksForCodes } from "@/lib/qr-placement/print-file"
+import { assignScanCodes, registerPlacedQrs } from "@/lib/qr-placement/register"
 
 import { normalizeDesignReview, uploadComplianceWarnings } from "./design-review"
 import { preflightBlocksApproval } from "./preflight"
@@ -85,7 +90,7 @@ export async function requestUploadedDesignReview(campaignId: string): Promise<C
 
 export async function approveUploadedDesign(
   campaignId: string,
-  options?: { acceptAddressCover?: boolean }
+  options?: { acceptAddressCover?: boolean; qrs?: unknown }
 ): Promise<Campaign> {
   const campaign = await owned(campaignId)
   if (!campaign) throw new Error(`Campaign ${campaignId} not found`)
@@ -101,20 +106,72 @@ export async function approveUploadedDesign(
     throw new Error("The address will cover part of the back. Confirm that before approving.")
   }
 
+  const size = campaign.postcardSize === "6x9" ? "6x9" : "5x8"
+  const sanitized = sanitizePlacedQrs(size, options?.qrs ?? [])
+  if (!sanitized.ok) throw new Error(sanitized.message)
+
   const front = await openPreparedFace(campaign.id, design.front)
   const back = await openPreparedFace(campaign.id, design.back)
   if (!front || !back) {
     throw new Error("The uploaded files could not be read. Upload them again.")
   }
 
+  const origin = await requestOrigin()
+  const codes = assignScanCodes(sanitized.codes)
+  if (codes.length > 0) {
+    const registered = registerPlacedQrs({
+      campaignId: campaign.id,
+      ownerId: campaign.ownerId,
+      origin,
+      businessName: campaign.brief.businessInfo?.name ?? campaign.name ?? "",
+      headline: campaign.brief.offer ?? campaign.name ?? "",
+      offer: campaign.brief.desiredRecipientAction ?? campaign.brief.offer ?? "",
+      phone: campaign.brief.phone ?? "",
+      codes,
+    })
+    if (registered.length !== codes.length) throw new Error("That QR code could not be saved. Try again.")
+    for (const code of codes) {
+      const row = registered.find((item) => item.id === code.id)
+      if (row) code.code = row.code
+    }
+  }
+
+  let printedFront = front
+  let printedBack = back
+  let frontMarks: ReturnType<typeof marksForCodes> = []
+  let backMarks: ReturnType<typeof marksForCodes> = []
+  try {
+    const frontPaint = await compositeQrOntoUploadFace(front, size, marksForCodes(codes, "front", origin))
+    const backPaint = await compositeQrOntoUploadFace(back, size, marksForCodes(codes, "back", origin))
+    printedFront = frontPaint.face
+    printedBack = backPaint.face
+    frontMarks = frontPaint.overlay
+    backMarks = backPaint.overlay
+  } catch {
+    throw new Error("The print file could not be prepared.")
+  }
+
   const pdf = await renderUploadedPostcardPdf({
-    geometry: buildPostcard5x8PrintSpec(),
-    front,
-    back,
+    geometry: size === "6x9" ? geometryForQrSize(size) : buildPostcard5x8PrintSpec(),
+    front: printedFront,
+    back: printedBack,
+    frontMarks,
+    backMarks,
   })
   const key = uploadedDesignKey("print", "application/pdf")
   await resolveUploadedDesignStore().put(campaign.id, key, Buffer.from(pdf), "application/pdf")
   return repository.approveUploadedDesign(campaign.id, key)
+}
+
+async function requestOrigin(): Promise<string> {
+  try {
+    const headerList = await headers()
+    const host = headerList.get("x-forwarded-host") ?? headerList.get("host") ?? "localhost:3000"
+    const proto = headerList.get("x-forwarded-proto") ?? "http"
+    return `${proto}://${host}`
+  } catch {
+    return "http://localhost:3000"
+  }
 }
 
 async function openPreparedFace(

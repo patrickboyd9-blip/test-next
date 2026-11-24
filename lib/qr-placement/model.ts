@@ -225,6 +225,15 @@ export function moveQr(value: QrPlacementValue, size: Click2MailSize, id: string
   return applyBox(value, id, code.side, placeQr(size, code.side, { xInches, yInches, sizeInches: code.sizeInches }))
 }
 
+/** Keeps each code on the card after the customer changes size. */
+export function refitQrPlacement(value: QrPlacementValue, size: Click2MailSize): QrPlacementValue {
+  let next = value
+  for (const code of value.codes) {
+    next = moveQr(next, size, code.id, code.xInches, code.yInches)
+  }
+  return next
+}
+
 export function resizeQr(value: QrPlacementValue, size: Click2MailSize, id: string, sizeInches: number): QrPlacementValue {
   const code = value.codes.find((item) => item.id === id)
   if (!code) return value

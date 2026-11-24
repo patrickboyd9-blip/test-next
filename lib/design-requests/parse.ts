@@ -1,3 +1,5 @@
+import { sanitizePlacedQrs, type SanitizedQr } from "@/lib/qr-placement/model"
+
 import type {
   DesignRequestInput,
   DesignRequestSize,
@@ -20,6 +22,7 @@ export interface ParsedDesignRequest {
   cardWords?: string
   slogans?: string
   size?: DesignRequestSize
+  qrCodes?: SanitizedQr[]
 }
 
 export type ParseDesignRequestResult =
@@ -70,10 +73,19 @@ export function parseDesignRequest(input: DesignRequestInput | undefined): Parse
   let phone: string | undefined
   let websiteUrl: string | undefined
 
+  let qrCodes: SanitizedQr[] | undefined
   if (methods.includes("qr")) {
-    const url = asHttpUrl(input?.qrUrl)
-    if (!url) return { ok: false, error: "Add the QR code link. Start it with https://." }
-    qrUrl = url
+    const placement = placementFrom(input?.qrs, sizeResultEarly(input?.size))
+    if (!placement.ok) return placement
+    if (placement.codes) {
+      if (placement.codes.length === 0) return { ok: false, error: "Add a QR code, or turn it off." }
+      qrCodes = placement.codes
+      qrUrl = placement.codes.find((code) => code.destination === "website")?.scanWebsite ?? undefined
+    } else {
+      const url = asHttpUrl(input?.qrUrl)
+      if (!url) return { ok: false, error: "Add the QR code link. Start it with https://." }
+      qrUrl = url
+    }
   }
   if (methods.includes("phone")) {
     const digits = (input?.phone ?? "").replace(/\D/g, "")
@@ -114,6 +126,7 @@ export function parseDesignRequest(input: DesignRequestInput | undefined): Parse
       cardWords: cardWords || undefined,
       slogans: slogans || undefined,
       size: sizeResult.size,
+      qrCodes,
     },
   }
 }
@@ -133,6 +146,7 @@ export function designRequestInputFromForm(formData: FormData): DesignRequestInp
     cardWords: stringField(formData, "cardWords"),
     slogans: stringField(formData, "slogans"),
     size: stringField(formData, "size"),
+    qrs: stringField(formData, "qrs"),
   }
 }
 
@@ -149,6 +163,28 @@ export function validateIncomingImage(image: IncomingImage, label: string): stri
   }
   if (!imageTypeFor(image.mediaType)) return "Use a PNG, JPEG, or WebP image."
   return null
+}
+
+function sizeResultEarly(value: string | undefined): DesignRequestSize {
+  const size = clean(value)
+  return size === "6x9" ? "6x9" : "5x8"
+}
+
+function placementFrom(
+  raw: string | undefined,
+  size: DesignRequestSize
+): { ok: true; codes: SanitizedQr[] | null } | { ok: false; error: string } {
+  const text = (raw ?? "").trim()
+  if (!text) return { ok: true, codes: null }
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(text) as unknown
+  } catch {
+    return { ok: false, error: "The QR placement could not be read." }
+  }
+  const sanitized = sanitizePlacedQrs(size, parsed)
+  if (!sanitized.ok) return { ok: false, error: sanitized.message }
+  return { ok: true, codes: sanitized.codes }
 }
 
 function parseSize(
