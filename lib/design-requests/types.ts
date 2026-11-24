@@ -1,3 +1,5 @@
+import type { SanitizedQr } from "@/lib/qr-placement/model"
+
 export const RESPONSE_METHODS = ["qr", "phone", "website", "other"] as const
 export type ResponseMethod = (typeof RESPONSE_METHODS)[number]
 
@@ -40,6 +42,10 @@ export interface DesignRequest {
   slogans?: string
   size?: DesignRequestSize
   uploads: DesignRequestUpload[]
+  /** Placed codes. Absent when the customer turned QR off, or on older requests. */
+  qrCodes?: SanitizedQr[]
+  /** Storage key of the print file that includes those codes. */
+  printFileKey?: string
   createdAt: string
   /**
    * Account that submitted the request. Missing on records saved before
@@ -62,6 +68,8 @@ export interface DesignRequestInput {
   cardWords?: string
   slogans?: string
   size?: string
+  /** JSON from the shared placement panel. Absent on the older link-only form. */
+  qrs?: string
 }
 
 export interface IncomingImage {

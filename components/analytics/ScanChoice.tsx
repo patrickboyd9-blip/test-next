@@ -15,6 +15,7 @@ export function ScanChoice({
   parts = OFF,
   phone = "",
   readOnly = false,
+  embed = false,
   onChange,
 }: {
   choice: "page" | "website"
@@ -23,6 +24,8 @@ export function ScanChoice({
   parts?: PageParts
   phone?: string
   readOnly?: boolean
+  /** Omit field names when this choice sits inside another form. */
+  embed?: boolean
   onChange?: (choice: "page" | "website", website: string, parts?: PageParts, phone?: string) => void
 }) {
   const [picked, setPicked] = useState(choice)
@@ -42,10 +45,10 @@ export function ScanChoice({
 
   return (
     <div className="flex flex-col gap-3" data-scan-choice>
-      <input type="hidden" name="destination" value={picked === "website" ? "website" : "page"} />
-      <input type="hidden" name="showCall" value={pageParts.call ? "1" : ""} />
-      <input type="hidden" name="showForm" value={pageParts.form ? "1" : ""} />
-      <input type="hidden" name="showBooking" value={pageParts.booking ? "1" : ""} />
+      <input type="hidden" name={embed ? undefined : "destination"} value={picked === "website" ? "website" : "page"} />
+      <input type="hidden" name={embed ? undefined : "showCall"} value={pageParts.call ? "1" : ""} />
+      <input type="hidden" name={embed ? undefined : "showForm"} value={pageParts.form ? "1" : ""} />
+      <input type="hidden" name={embed ? undefined : "showBooking"} value={pageParts.booking ? "1" : ""} />
       <button
         type="button"
         aria-pressed={picked === "page"}
@@ -73,7 +76,7 @@ export function ScanChoice({
             <label className="block text-sm">
               Your phone number
               <input
-                name="phone"
+                name={embed ? undefined : "phone"}
                 value={callNumber}
                 placeholder="(619) 555-0148"
                 onChange={(event) => persist("page", site, { ...pageParts, call: true }, event.target.value)}
@@ -103,7 +106,7 @@ export function ScanChoice({
             <label className="block text-sm">
               Your booking link
               <input
-                name="bookingUrl"
+                name={embed ? undefined : "bookingUrl"}
                 value={pageParts.bookingUrl ?? ""}
                 placeholder="https://calendly.com/your-name"
                 onChange={(event) =>
@@ -131,7 +134,7 @@ export function ScanChoice({
         <label className="mt-3 block text-sm">
           Your website
           <input
-            name="website"
+            name={embed ? undefined : "website"}
             value={site}
             disabled={readOnly}
             placeholder="https://yourbusiness.com"

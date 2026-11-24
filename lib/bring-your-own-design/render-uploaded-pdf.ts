@@ -1,6 +1,8 @@
 import { PDFDocument, rgb } from "pdf-lib"
 
 import type { PostcardGeometry } from "@/lib/print-spec/postcard-5x8-print-spec"
+import type { QrMark } from "@/lib/qr-placement/composite"
+import { drawQrMarks } from "@/lib/qr-placement/print-file"
 
 import { sniffDesignMedia } from "./decode-raster"
 
@@ -18,19 +20,27 @@ export async function renderUploadedPostcardPdf(input: {
   geometry: PostcardGeometry
   front: UploadedFaceBytes
   back: UploadedFaceBytes
+  /** Drawn after the customer's file. Empty on a card with no code. */
+  frontMarks?: readonly QrMark[]
+  backMarks?: readonly QrMark[]
 }): Promise<Uint8Array> {
   const doc = await PDFDocument.create()
   const width = input.geometry.pdfPagePoints.widthPoints
   const height = input.geometry.pdfPagePoints.heightPoints
   const trim = input.geometry.trimBox
+  const faces: Array<{ face: UploadedFaceBytes; marks: readonly QrMark[] }> = [
+    { face: input.front, marks: input.frontMarks ?? [] },
+    { face: input.back, marks: input.backMarks ?? [] },
+  ]
 
-  for (const face of [input.front, input.back]) {
+  for (const item of faces) {
     const page = doc.addPage([width, height])
     page.setMediaBox(0, 0, width, height)
     page.setBleedBox(0, 0, width, height)
     page.setTrimBox(trim[0], trim[1], trim[2] - trim[0], trim[3] - trim[1])
     page.drawRectangle({ x: 0, y: 0, width, height, color: rgb(1, 1, 1) })
-    await paintFace(doc, page, face, width, height)
+    await paintFace(doc, page, item.face, width, height)
+    if (item.marks.length > 0) await drawQrMarks(doc, page, input.geometry, item.marks)
   }
 
   doc.setTitle("Modern Mail postcard")

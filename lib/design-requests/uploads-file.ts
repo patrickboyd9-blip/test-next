@@ -4,7 +4,7 @@ import path from "path"
 import type { DesignRequestUploadStore } from "./uploads"
 
 const SAFE_ID = /^[A-Za-z0-9_-]{1,80}$/
-const SAFE_KEY = /^(logo|image-\d{1,2})\.(png|jpe?g|webp)$/
+const SAFE_KEY = /^(logo|image-\d{1,2})\.(png|jpe?g|webp)$|^print\.pdf$/
 
 /** Test and local override. The directory is chosen by the caller, not the app route. */
 export function createFileDesignRequestUploadStore(directory: string): DesignRequestUploadStore {

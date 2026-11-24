@@ -11,7 +11,8 @@ import { imageTypeFor } from "./parse"
 import type { DesignRequestUpload, IncomingImage } from "./types"
 
 const SAFE_ID = /^[A-Za-z0-9_-]{1,80}$/
-const SAFE_KEY = /^(logo|image-\d{1,2})\.(png|jpe?g|webp)$/
+export const DESIGN_REQUEST_PRINT_KEY = "print.pdf"
+const SAFE_KEY = /^(logo|image-\d{1,2})\.(png|jpe?g|webp)$|^print\.pdf$/
 
 export interface DesignRequestUploadStore {
   put(requestId: string, key: string, bytes: Buffer, contentType: string): Promise<void>

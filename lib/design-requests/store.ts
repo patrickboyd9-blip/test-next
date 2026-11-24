@@ -193,6 +193,8 @@ function parseRequest(value: unknown): DesignRequest | null {
     slogans: optionalText(record.slogans),
     size: record.size,
     uploads: record.uploads ?? [],
+    qrCodes: Array.isArray(record.qrCodes) ? record.qrCodes : undefined,
+    printFileKey: optionalText(record.printFileKey),
     createdAt: record.createdAt ?? new Date(0).toISOString(),
     ...(typeof record.ownerId === "string" && record.ownerId.trim() ? { ownerId: record.ownerId } : {}),
   }

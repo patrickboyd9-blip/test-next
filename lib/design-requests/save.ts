@@ -1,5 +1,8 @@
 import { randomUUID } from "crypto"
 
+import { renderTrackedPostcardPdf } from "@/lib/qr-placement/print-file"
+import { assignScanCodes, registerPlacedQrs } from "@/lib/qr-placement/register"
+
 import {
   MAX_DESIGN_REQUEST_IMAGES,
   parseDesignRequest,
@@ -9,6 +12,7 @@ import type { DesignRequestStore } from "./store"
 import { getDesignRequestStore } from "./store"
 import type { DesignRequest, DesignRequestFiles, DesignRequestInput } from "./types"
 import {
+  DESIGN_REQUEST_PRINT_KEY,
   extensionFor,
   resolveDesignRequestUploadStore,
   uploadRecord,
@@ -26,7 +30,7 @@ export type SaveDesignRequestResult =
 export async function saveDesignRequest(
   input: DesignRequestInput,
   files: DesignRequestFiles = {},
-  options?: { requests?: DesignRequestStore; uploads?: DesignRequestUploadStore; ownerId?: string }
+  options?: { requests?: DesignRequestStore; uploads?: DesignRequestUploadStore; ownerId?: string; origin?: string }
 ): Promise<SaveDesignRequestResult> {
   const parsed = parseDesignRequest(input)
   if (!parsed.ok) return parsed
@@ -65,9 +69,49 @@ export async function saveDesignRequest(
   }
 
   const ownerId = options?.ownerId?.trim() ?? ""
+  const placed = parsed.value.qrCodes ?? []
+  let qrCodes = placed
+  let printFileKey: string | undefined
+  if (placed.length > 0) {
+    const origin = options?.origin?.replace(/\/$/, "") || "http://localhost:3000"
+    const codes = assignScanCodes(placed)
+    const registered = registerPlacedQrs({
+      campaignId: id,
+      ownerId: ownerId || "team",
+      origin,
+      businessName: parsed.value.companyName,
+      headline: parsed.value.offer,
+      offer: parsed.value.offer,
+      phone: parsed.value.phone ?? "",
+      codes,
+    })
+    if (registered.length !== codes.length) {
+      return { ok: false, error: "That QR code could not be saved. Try again." }
+    }
+    qrCodes = codes.map((code) => {
+      const row = registered.find((item) => item.id === code.id)
+      return row ? { ...code, code: row.code } : code
+    })
+    try {
+      const printed = await renderTrackedPostcardPdf({
+        size: parsed.value.size === "6x9" ? "6x9" : "5x8",
+        origin,
+        codes: qrCodes,
+        frontLines: [parsed.value.companyName, parsed.value.offer],
+        backLines: [parsed.value.companyName, parsed.value.address],
+      })
+      await uploads.put(id, DESIGN_REQUEST_PRINT_KEY, Buffer.from(printed.pdf), "application/pdf")
+      printFileKey = DESIGN_REQUEST_PRINT_KEY
+    } catch {
+      return { ok: false, error: "The print file could not be prepared." }
+    }
+  }
+
   const request: DesignRequest = {
     id,
     ...parsed.value,
+    ...(qrCodes.length ? { qrCodes } : {}),
+    ...(printFileKey ? { printFileKey } : {}),
     uploads: stored,
     createdAt,
     ...(ownerId ? { ownerId } : {}),

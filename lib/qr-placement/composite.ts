@@ -76,6 +76,14 @@ export function qrPixelBox(
   return { left, top, width, height }
 }
 
+/** A PNG of one symbol, including the white quiet zone. */
+export async function qrMarkPng(payload: string, pixels: number): Promise<Buffer | null> {
+  const size = Math.max(32, Math.round(pixels))
+  const svg = qrSvg(payload, size, size)
+  if (!svg) return null
+  return sharp(svg).png().toBuffer()
+}
+
 function qrSvg(payload: string, width: number, height: number): Buffer | null {
   const matrix = buildQrMatrix(payload)
   if (!matrix) return null

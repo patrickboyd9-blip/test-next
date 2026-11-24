@@ -3,12 +3,22 @@
 import { useState, type FormEvent, type ReactNode } from "react"
 import { ChevronLeft } from "lucide-react"
 
+import { ProofFrame } from "@/components/campaign-creator/upload/ProofFrame"
+import { QrFaceOverlay } from "@/components/qr-placement/QrFaceOverlay"
+import { QrPlacementPanel } from "@/components/qr-placement/QrPlacementPanel"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { submitDesignRequest } from "@/lib/design-requests/actions"
 import type { DesignRequest } from "@/lib/design-requests/types"
 import { RESPONSE_METHODS, RESPONSE_METHOD_LABELS, type ResponseMethod } from "@/lib/design-requests/types"
+import {
+  activeQrs,
+  initialQrPlacement,
+  moveQr,
+  refitQrPlacement,
+  type QrPlacementValue,
+} from "@/lib/qr-placement/model"
 
 interface DesignRequestFormProps {
   onBack: () => void
@@ -23,13 +33,17 @@ const METHOD_HINT: Record<ResponseMethod, string> = {
   other: "Something else you will describe",
 }
 
+const BLANK_CARD =
+  "data:image/svg+xml;charset=utf-8," +
+  encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="85" height="55"><rect width="85" height="55" fill="#ffffff"/></svg>')
+
 export function DesignRequestForm({ onBack, postcardSize, campaignName }: DesignRequestFormProps) {
   const [companyName, setCompanyName] = useState(campaignName ?? "")
   const [address, setAddress] = useState("")
   const [vibe, setVibe] = useState("")
   const [offer, setOffer] = useState("")
   const [methods, setMethods] = useState<ResponseMethod[]>([])
-  const [qrUrl, setQrUrl] = useState("")
+  const [qr, setQr] = useState<QrPlacementValue>(() => initialQrPlacement(postcardSize ?? "5x8", "", ""))
   const [phone, setPhone] = useState("")
   const [websiteUrl, setWebsiteUrl] = useState("")
   const [otherResponse, setOtherResponse] = useState("")
@@ -77,6 +91,11 @@ export function DesignRequestForm({ onBack, postcardSize, campaignName }: Design
             ? `Preview only. Nothing was saved, mailed, or charged. ${saved.companyName} stays on this screen.`
             : `A designer will build a custom postcard for ${saved.companyName} from the logo, offer, and style you shared. Nothing was emailed.`}
         </p>
+        {saved.printFileKey ? (
+          <p className="text-sm leading-6 text-muted-foreground">
+            The QR code is on the print file. A scan is counted whether it opens a page we make or your website.
+          </p>
+        ) : null}
         <Button type="button" variant="outline" className="w-fit" onClick={onBack}>
           Back to choices
         </Button>
@@ -147,9 +166,38 @@ export function DesignRequestForm({ onBack, postcardSize, campaignName }: Design
         />
       </Field>
 
+      <div data-qr-postcard className="grid gap-4">
+        {(["front", "back"] as const).map((side) => (
+          <ProofFrame key={side} src={BLANK_CARD} mediaType="image/svg+xml" face={side} label={side === "front" ? "Front" : "Back"} size={postcardSize ?? (size === "6x9" ? "6x9" : "5x8")}>
+            {qr.enabled ? (
+              <QrFaceOverlay
+                size={postcardSize ?? (size === "6x9" ? "6x9" : "5x8")}
+                side={side}
+                frame="canvas"
+                codes={qr.codes}
+                onMove={(id, x, y) =>
+                  setQr((current) => moveQr(current, postcardSize ?? (size === "6x9" ? "6x9" : "5x8"), id, x, y))
+                }
+              />
+            ) : null}
+          </ProofFrame>
+        ))}
+      </div>
+      <p className="text-sm leading-6 text-muted-foreground">The address side stays clear for postage. Drag a code out of the shaded box if it snaps back.</p>
+      <QrPlacementPanel
+        value={qr}
+        size={postcardSize ?? (size === "6x9" ? "6x9" : "5x8")}
+        businessName={companyName}
+        headline={offer}
+        offer={offer}
+        onChange={setQr}
+      />
+      {qr.enabled ? <input type="hidden" name="responseMethod" value="qr" /> : null}
+      <input type="hidden" name="qrs" value={qr.enabled ? JSON.stringify(activeQrs(qr)) : ""} />
+
       <fieldset className="flex flex-col gap-3">
-        <legend className="text-xs text-muted-foreground">How should people respond?</legend>
-        {RESPONSE_METHODS.map((method) => {
+        <legend className="text-xs text-muted-foreground">How else should people respond?</legend>
+        {RESPONSE_METHODS.filter((method) => method !== "qr").map((method) => {
           const checked = methods.includes(method)
           return (
             <label key={method} className="flex items-start gap-2 text-sm">
@@ -169,21 +217,6 @@ export function DesignRequestForm({ onBack, postcardSize, campaignName }: Design
           )
         })}
       </fieldset>
-
-      {methods.includes("qr") && (
-        <Field id="qr-url" label="QR code link" required>
-          <Input
-            id="qr-url"
-            name="qrUrl"
-            type="url"
-            inputMode="url"
-            value={qrUrl}
-            placeholder="https://"
-            required
-            onChange={(event) => setQrUrl(event.target.value)}
-          />
-        </Field>
-      )}
       {methods.includes("phone") && (
         <Field id="phone" label="Phone number" required>
           <Input
@@ -272,7 +305,11 @@ export function DesignRequestForm({ onBack, postcardSize, campaignName }: Design
             id="size"
             name="size"
             value={size}
-            onChange={(event) => setSize(event.target.value)}
+            onChange={(event) => {
+              const next = event.target.value
+              setSize(next)
+              if (next === "5x8" || next === "6x9") setQr((current) => refitQrPlacement(current, next))
+            }}
             className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             <option value="">No preference</option>
