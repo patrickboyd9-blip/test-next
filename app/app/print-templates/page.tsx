@@ -112,6 +112,9 @@ export default function PrintTemplatesPage() {
             Figma, Canva, Adobe Express, Photoshop, and InDesign can send the front and the back straight into a campaign.
           </p>
           <p className="text-sm text-muted-foreground">Coming soon.</p>
+          <Link href="/app/help/plugins" className="text-sm underline-offset-4 hover:underline">
+            How to use our plugins
+          </Link>
         </section>
         <p className="text-sm">
           <Link href="/app/campaigns/new?path=upload" className="underline-offset-4 hover:underline">
