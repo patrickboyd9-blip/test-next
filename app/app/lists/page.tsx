@@ -1,16 +1,22 @@
-import { CockpitFrame, Eyebrow, Panel } from "@/components/cockpit/ui"
+import { AddressBook } from "@/components/address-book/AddressBook"
+import { CockpitFrame, Eyebrow } from "@/components/cockpit/ui"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { listOwnedCampaigns } from "@/lib/campaign-creator/actions"
+import { listAddressLists, readAddressEntries } from "@/lib/address-book/store"
+import { getSession } from "@/lib/auth/session"
 
 export const dynamic = "force-dynamic"
 
-export default async function ListsPage() {
-  const campaigns = await listOwnedCampaigns()
-  const lists = campaigns.flatMap((campaign) => {
-    const description = campaign.brief.audience?.description?.trim()
-    if (!description) return []
-    return [{ id: campaign.id, name: campaign.name || "Untitled campaign", description, quantity: campaign.brief.audience?.quantity }]
-  })
+export default async function ListsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ list?: string }>
+}) {
+  const session = await getSession()
+  const { list } = await searchParams
+  const lists = session ? await listAddressLists(session.userId) : []
+  const selected = lists.find((item) => item.id === list) ?? lists[0] ?? null
+  const entries = session && selected ? await readAddressEntries(session.userId, selected.id) : []
+
   return (
     <CockpitFrame>
       <div className="mx-auto flex max-w-3xl flex-col gap-5 px-4 py-8 sm:px-6">
@@ -18,21 +24,16 @@ export default async function ListsPage() {
           <SidebarTrigger className="text-[#e7f2fb]" />
           <Eyebrow>Lists</Eyebrow>
         </div>
-        <h1 className="text-3xl font-semibold">Lists</h1>
-        {lists.length === 0 ? (
-          <Panel className="p-5 text-sm text-[#b7c9d8]">No lists on this account. A list appears here after a campaign names who it is for.</Panel>
+        <div>
+          <h1 className="text-3xl font-semibold">Who are you mailing?</h1>
+          <p className="mt-2 text-sm text-[#b7c9d8]">
+            Save the people you already do business with. Use a list again on the next mailer. Nothing is mailed from here.
+          </p>
+        </div>
+        {session ? (
+          <AddressBook tone="cockpit" lists={lists} selectedId={selected?.id ?? null} entries={entries} />
         ) : (
-          <ul className="space-y-3">
-            {lists.map((list) => (
-              <li key={list.id}>
-                <Panel className="p-4">
-                  <p className="font-medium">{list.name}</p>
-                  <p className="text-sm text-[#b7c9d8]">{list.description}</p>
-                  <p className="mt-1 text-sm text-[#8aa0b4]">{list.quantity ? `${list.quantity} people named` : "No count recorded"}</p>
-                </Panel>
-              </li>
-            ))}
-          </ul>
+          <p className="text-sm text-[#b7c9d8]">Sign in to see the addresses on this account.</p>
         )}
       </div>
     </CockpitFrame>

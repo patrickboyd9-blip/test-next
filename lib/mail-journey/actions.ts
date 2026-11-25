@@ -6,6 +6,8 @@ import { redirect } from "next/navigation"
 import { CampaignAccessError, requireOwnedCampaign } from "@/lib/auth/campaign-access"
 import { getSession } from "@/lib/auth/session"
 
+import { asRecipient } from "@/lib/address-book/types"
+import { attachListToCampaign, readCampaignList, rememberCampaignJob, saveCustomerList } from "@/lib/address-book/store"
 import { noteForSession } from "@/lib/ledger/note"
 
 import { finishMailAction, startApprovedCheckout } from "@/lib/ops/mail-flow"
@@ -23,12 +25,8 @@ export async function reviewListAction(formData: FormData): Promise<void> {
   const campaignId = String(formData.get("campaignId") ?? "")
   await requireOwnedCampaign(campaignId)
   const csv = String(formData.get("csv") ?? "")
-  await getJourneyStore().saveListReview({
-    campaignId,
-    ownerId: session.userId,
-    csv,
-    createdAt: new Date().toISOString(),
-  })
+  const saved = await saveCustomerList({ ownerId: session.userId, name: "Order list", csv })
+  await attachListToCampaign({ ownerId: session.userId, campaignId, listId: saved.id })
   const reviewed = reviewCustomerList(csv)
   const identity = listIdentity(reviewed.accepted)
   await noteForSession({
@@ -50,10 +48,10 @@ export async function startCheckoutAction(formData: FormData): Promise<void> {
   if (!session) throw new CampaignAccessError(401, "Sign in required.")
   const campaignId = String(formData.get("campaignId") ?? "")
   const campaign = await requireOwnedCampaign(campaignId)
-  const stored = await getJourneyStore().getListReview(campaignId, session.userId)
-  const review = reviewCustomerList(stored?.csv ?? "")
+  const attached = await readCampaignList(session.userId, campaignId)
+  const recipients = (attached?.entries ?? []).map(asRecipient)
   const proof = freezeProof(campaign)
-  const identity = listIdentity(review.accepted)
+  const identity = listIdentity(recipients)
   const now = new Date().toISOString()
   const quote = buildQuote(readApprovedSchedule(), identity.count, now)
   if (quote.ok) {
@@ -69,7 +67,7 @@ export async function startCheckoutAction(formData: FormData): Promise<void> {
       redirect(`/app/campaigns/${campaignId}/order?cap=over`)
     }
   }
-  if (!proof.ok || review.headerError || review.invalid.length > 0 || !quote.ok) {
+  if (!proof.ok || recipients.length === 0 || !quote.ok) {
     await noteForSession({
       campaignId,
       type: "checkout_blocked",
@@ -104,13 +102,7 @@ export async function startCheckoutAction(formData: FormData): Promise<void> {
   await store.saveApproval(approval)
   const idempotencyKey = `checkout-${approval.id.slice(0, 24)}`
   const opened = await store.createJob(jobFromApproval(approval, idempotencyKey, now))
-  await store.saveListReview({
-    campaignId,
-    ownerId: session.userId,
-    csv: stored?.csv ?? "",
-    createdAt: stored?.createdAt ?? now,
-    jobId: opened.job.id,
-  })
+  await rememberCampaignJob({ ownerId: session.userId, campaignId, jobId: opened.job.id })
   await noteForSession({
     campaignId,
     type: "checkout_opened",

@@ -1,35 +1,32 @@
-import { payFullPriceAction, reviewListAction, startCheckoutAction } from "@/lib/mail-journey/actions"
-import type { ListReview } from "@/lib/mail-journey/list-import"
+import { AddressBook, type AddressListChoice } from "@/components/address-book/AddressBook"
+import { payFullPriceAction, startCheckoutAction } from "@/lib/mail-journey/actions"
 import type { MailJob } from "@/lib/mail-journey/job"
 import type { QuoteResult } from "@/lib/mail-journey/pricing"
 import type { ProofFreeze } from "@/lib/mail-journey/proof"
+import type { AddressEntry } from "@/lib/address-book/types"
 
 export function MailJourneyReview(props: {
   campaignId: string
   proof: ProofFreeze
-  review: ListReview | null
   quote: QuoteResult
+  priceLabel: string
+  priceDetail: string
+  lists: AddressListChoice[]
+  selectedId: string | null
+  entries: AddressEntry[]
   job: MailJob | null
   mailMessage: string
-  csv?: string
 }) {
-  const review = props.review
-  const ready =
-    props.proof.ok &&
-    review !== null &&
-    review.headerError === null &&
-    review.invalid.length === 0 &&
-    review.acceptedCount > 0 &&
-    props.quote.ok &&
-    props.job === null
+  const count = props.entries.length
+  const ready = props.proof.ok && count > 0 && props.quote.ok && props.job === null
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 p-6 lg:p-8">
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold tracking-tight">Review before anything is sent</h1>
         <p className="text-sm text-muted-foreground">
-          Checkout stays closed until the front, the back, the accepted addresses, and an approved
-          price all match. Coming back from the payment page does not mark this order paid, and nothing is mailed from here.
+          Checkout stays closed until the front, the back, the saved addresses, and an approved full price all match.
+          Coming back from the payment page does not mark this order paid, and nothing is mailed from here.
         </p>
       </div>
 
@@ -45,66 +42,21 @@ export function MailJourneyReview(props: {
         )}
       </section>
 
-      <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-medium">Your address list</h2>
-        <form action={reviewListAction} className="flex flex-col gap-3">
-          <input type="hidden" name="campaignId" value={props.campaignId} />
-          <label className="text-sm" htmlFor="csv">
-            Paste a CSV. Use columns such as First Name, Last Name, Street, Apt, City, State, and ZIP.
-          </label>
-          <textarea
-            id="csv"
-            name="csv"
-            rows={6}
-            className="rounded-md border bg-background p-3 font-mono text-sm"
-            defaultValue={props.csv ?? ""}
-            placeholder="First Name,Last Name,Street,Apt,City,State,ZIP"
-          />
-          <button type="submit" className="w-fit rounded-md border px-3 py-2 text-sm">
-            Check this list
-          </button>
-        </form>
-        {review ? (
-          <div className="flex flex-col gap-2 text-sm">
-            <p>{review.validationNote}</p>
-            {review.headerError ? <p>{review.headerError}</p> : null}
-            <p>
-              {review.acceptedCount} accepted, {review.invalid.length}{" "}
-              {review.invalid.length === 1 ? "needs" : "need"} a correction,{" "}
-              {review.duplicates.length} duplicate{review.duplicates.length === 1 ? "" : "s"} removed.
-            </p>
-            {review.invalid.map((row) => (
-              <p key={row.row}>{row.messages.join(" ")}</p>
-            ))}
-            {review.duplicates.map((row) => (
-              <p key={row.row}>
-                Row {row.row} repeats row {row.matchesRow}. The first copy was kept.
-              </p>
-            ))}
-            {review.accepted.length > 0 ? (
-              <ul>
-                {review.accepted.map((recipient) => (
-                  <li key={`${recipient.address1}-${recipient.address2}-${recipient.zip}`}>
-                    {recipient.first} {recipient.last}, {recipient.address1}
-                    {recipient.address2 ? `, ${recipient.address2}` : ""}, {recipient.city} {recipient.state}{" "}
-                    {recipient.zip}
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">No list has been checked for this campaign yet.</p>
-        )}
-      </section>
+      <AddressBook
+        tone="paper"
+        lists={props.lists}
+        selectedId={props.selectedId}
+        entries={props.entries}
+        campaignId={props.campaignId}
+      />
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-medium">Total and checkout</h2>
+        <h2 className="text-lg font-medium">Full price</h2>
+        <p className="text-3xl font-semibold tracking-tight">{props.priceLabel}</p>
+        <p className="text-sm text-muted-foreground">{props.priceDetail}</p>
         {props.quote.ok ? (
           <p className="text-sm">
-            {props.quote.quote.pieceCount} pieces, {props.quote.quote.currency.toUpperCase()}{" "}
-            {(props.quote.quote.totalCents / 100).toFixed(2)}, terms {props.quote.quote.termsVersion}, good
-            through {props.quote.quote.expiresAt}.
+            {props.quote.quote.pieceCount} {props.quote.quote.pieceCount === 1 ? "piece" : "pieces"}. Terms {props.quote.quote.termsVersion}. Good through {props.quote.quote.expiresAt}.
           </p>
         ) : (
           <p className="text-sm">{props.quote.message}</p>
@@ -117,7 +69,7 @@ export function MailJourneyReview(props: {
         {ready ? (
           <form action={startCheckoutAction}>
             <input type="hidden" name="campaignId" value={props.campaignId} />
-            <button type="submit" className="rounded-md border px-3 py-2 text-sm">
+            <button type="submit" className="min-h-12 rounded-md border px-3 py-2 text-sm">
               Record this approval
             </button>
           </form>
@@ -126,7 +78,7 @@ export function MailJourneyReview(props: {
           <form action={payFullPriceAction}>
             <input type="hidden" name="campaignId" value={props.campaignId} />
             <input type="hidden" name="jobId" value={props.job.id} />
-            <button type="submit" className="rounded-md border px-3 py-2 text-sm">
+            <button type="submit" className="min-h-12 rounded-md border px-3 py-2 text-sm">
               Pay the full price, {(props.quote.quote.totalCents / 100).toFixed(2)} {props.quote.quote.currency.toUpperCase()}, by card or US bank
             </button>
           </form>
