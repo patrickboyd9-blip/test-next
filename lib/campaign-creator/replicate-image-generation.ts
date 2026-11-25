@@ -36,6 +36,50 @@ export function imagenAspectFor(slotAspect?: number): string {
 
 const FULL_BLEED_NOTE = " Full-bleed photograph that fills the entire frame edge to edge. No border, no frame, no mat, no white or gray margin, not a printed photo."
 
+/** google/imagen-4 on Replicate. About $0.04 per image. */
+export const IMAGEN4_IMAGE_MODEL = "google/imagen-4"
+export const IMAGEN4_ESTIMATED_USD = 0.04
+
+export async function generateImagen4Jpeg(
+  prompt: string,
+  options: { token: string; aspectRatio: string; fetch?: typeof fetch }
+): Promise<Buffer> {
+  const fetchImpl = options.fetch ?? fetch
+  const headers = {
+    Authorization: `Bearer ${options.token}`,
+    "Content-Type": "application/json",
+    Prefer: "wait=60",
+  }
+  const res = await fetchImpl(`https://api.replicate.com/v1/models/${IMAGEN4_IMAGE_MODEL}/predictions`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      input: {
+        prompt,
+        aspect_ratio: options.aspectRatio,
+        output_format: "jpg",
+        safety_filter_level: "block_only_high",
+      },
+    }),
+  })
+  if (!res.ok) throw imageModelHttpError(res.status, IMAGEN4_IMAGE_MODEL)
+  let pred = (await res.json()) as { id?: string; status: string; output?: string | string[]; urls?: { get?: string }; error?: string }
+  for (let i = 0; i < 60 && !["succeeded", "failed", "canceled"].includes(pred.status); i++) {
+    await new Promise((r) => setTimeout(r, 2000))
+    const next = pred.urls?.get
+    if (!next) break
+    pred = (await (await fetchImpl(next, { headers: { Authorization: headers.Authorization } })).json()) as typeof pred
+  }
+  const url = Array.isArray(pred.output) ? pred.output[0] : pred.output
+  if (pred.status !== "succeeded" || !url) {
+    throw new Error(`Image generation ${pred.status}. No photograph was saved.`)
+  }
+  const img = await fetchImpl(url)
+  if (!img.ok) throw new Error(`Image download failed with status ${img.status}. No photograph was saved.`)
+  console.log("[image-generation]", JSON.stringify({ provider: IMAGEN_IMAGE_PROVIDER, model: IMAGEN4_IMAGE_MODEL, prediction: pred.id ?? "", estimatedUsd: IMAGEN4_ESTIMATED_USD }))
+  return Buffer.from(await img.arrayBuffer())
+}
+
 export function imageModelHttpError(status: number, model: string): Error {
   if (status === 410) {
     return new Error(`The image model ${model} is retired. Replicate returned 410, so no photograph was saved.`)

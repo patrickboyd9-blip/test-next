@@ -1,6 +1,7 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
 
+import { isListedBackgroundPhoto } from "./gallery-curation"
 import { galleryPhotoSrc } from "./gallery-photo-src"
 import {
   GALLERY_PHOTO_COUNT,
@@ -24,7 +25,7 @@ test("the gallery plans one photo for each of the 24 templates", () => {
     assert.match(job.prompt, /\bno people\b/i)
     assert.match(job.prompt, /single photograph, one scene, not a collage, no split screen/i)
     assert.doesNotMatch(job.prompt, /Sample\./)
-    assert.equal(galleryPhotoSrc(job.templateId), job.publicPath)
+    assert.equal(galleryPhotoSrc(job.templateId), isListedBackgroundPhoto(job.templateId) ? job.publicPath : null)
   }
   assert.equal(galleryPhotoSrc("not-a-template"), null)
 })

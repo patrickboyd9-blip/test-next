@@ -86,7 +86,7 @@ test("finished photos join the gallery by industry and hide internal fields", ()
     ["Postcard 1", "Postcard 2", "Postcard 3"],
   )
 
-  const catalogLabels = ["Roofing", "HVAC", "Restaurant", "Dental", "Real estate", "Landscaping", "Auto repair", "Cleaning"]
+  const catalogLabels = ["HVAC", "Restaurant", "Dental", "Real estate", "Auto repair"]
   const expected = [...new Set([...catalogLabels, ...Object.values(FINISHED_INDUSTRY_LABELS)])].sort((a, b) =>
     a.localeCompare(b, "en"),
   )

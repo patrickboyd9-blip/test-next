@@ -5,6 +5,7 @@ import type { ImageGenerationAdapter } from "@/lib/campaign-creator/image-genera
 import { POSTCARD_SLOT_ASPECT } from "@/lib/campaign-creator/image-generation"
 import { IMAGEN_IMAGE_MODEL } from "@/lib/campaign-creator/replicate-image-generation"
 
+import { isListedBackgroundPhoto } from "./gallery-curation"
 import {
   CENTS_PER_IMAGE,
   EXPANSION_HARD_CAP_CENTS,
@@ -75,6 +76,7 @@ export async function runGalleryExpansion(options: ExpansionRunOptions = {}): Pr
 
   await mkdir(photoDir, { recursive: true })
   for (const job of jobs) {
+    if (isListedBackgroundPhoto(job.id)) continue
     const already = spend.entries.some((entry) => entry.templateId === job.id && entry.status === "saved")
     if (already) continue
     if (expansionSpendDecision(spent, CENTS_PER_IMAGE) !== "ok") {

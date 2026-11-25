@@ -4,6 +4,7 @@ import type { CreativeSpec } from "@/lib/campaign-creator/types"
 import { RESEARCH_TASTE_PACK } from "@/lib/reference-corpus/taste-pack"
 import type { ReferenceCard } from "@/lib/reference-corpus/reference-card"
 
+import { galleryRedoCopy } from "./gallery-curation"
 import { EXPANSION_SCENES } from "./gallery-expansion-scenes"
 import type { MailTemplate } from "./types"
 
@@ -145,13 +146,14 @@ export function expansionTemplates(): MailTemplate[] {
 }
 
 function expansionTemplate(item: GalleryExpansionSlot): MailTemplate {
+  const copy = galleryRedoCopy(item.id)
   const spec: CreativeSpec = {
     layoutVariant: "image_grounded",
-    headline: item.headline,
-    subheadline: "A plain offer for a neighbor.",
-    body: "The words sit on their own layer. The picture has none.",
-    callToAction: "Ask for a visit",
-    offer: item.headline,
+    headline: copy?.headline ?? item.headline,
+    subheadline: copy?.subheadline ?? "A plain offer for a neighbor.",
+    body: copy?.body ?? "The words sit on their own layer. The picture has none.",
+    callToAction: copy?.callToAction ?? "Ask for a visit",
+    offer: copy?.offer ?? item.headline,
     phone: "(555) 010-0199",
     website: "https://local.example/visit",
     qrDestination: "https://local.example/visit",
@@ -166,8 +168,8 @@ function expansionTemplate(item: GalleryExpansionSlot): MailTemplate {
   return {
     id: item.id,
     industry: item.vertical,
-    name: item.name,
-    summary: "An original empty scene. The words are a separate layer.",
+    name: copy?.name ?? item.name,
+    summary: copy?.summary ?? "An original empty scene. The words are a separate layer.",
     sampleBusinessName: SHOP[item.vertical],
     size: "5x8",
     spec,

@@ -1,3 +1,4 @@
+import { isListedBackgroundPhoto } from "./gallery-curation"
 import { finishedGalleryPhotos, galleryIndustryLabel } from "./gallery-finished"
 import { galleryPhotoSrc } from "./gallery-photo-src"
 import { GALLERY_V1_INDUSTRIES } from "./gallery-v1"
@@ -32,6 +33,7 @@ export interface GalleryCategory {
 export function galleryCategories(): GalleryCategory[] {
   const categories: GalleryCategory[] = GALLERY_V1_INDUSTRIES.flatMap((id) => {
     const photos = listMailTemplates(id).flatMap((template) => {
+      if (!isListedBackgroundPhoto(template.id)) return []
       const src = galleryPhotoSrc(template.id)
       if (!src) return []
       return [{ id: template.id, name: template.name, summary: template.summary, src, industry: id, kind: "photo" as const }]
@@ -72,5 +74,10 @@ export function galleryIndustrySlug(id: string): string {
 export function galleryCategoryBySlug(slug: string): GalleryCategory | null {
   if (!/^[a-z0-9-]+$/.test(slug)) return null
   const id = slug.replaceAll("-", "_")
-  return galleryCategories().find((category) => category.id === id) ?? null
+  const found = galleryCategories().find((category) => category.id === id)
+  if (found) return found
+  if ((GALLERY_V1_INDUSTRIES as readonly string[]).includes(id)) {
+    return { id, label: galleryIndustryLabel(id), photos: [] }
+  }
+  return null
 }

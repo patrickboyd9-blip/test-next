@@ -26,11 +26,15 @@ export default async function IndustryGalleryPage({
       </Link>
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold tracking-tight">{category.label}</h1>
-        <p className="text-sm text-muted-foreground">
-          {category.photos.length === 1 ? "1 photo" : `${category.photos.length} photos`}
-        </p>
+        {category.photos.length === 0 ? (
+          <p className="text-sm text-muted-foreground">More coming soon.</p>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            {category.photos.length === 1 ? "1 photo" : `${category.photos.length} photos`}
+          </p>
+        )}
       </div>
-      <GalleryBoard category={category} />
+      {category.photos.length === 0 ? null : <GalleryBoard category={category} />}
     </>
   )
 }

@@ -3,12 +3,12 @@ import { getMailTemplate, listMailTemplates } from "@/lib/mail-templates/query"
 import { buildQuote, readApprovedSchedule } from "@/lib/mail-journey/pricing"
 
 export const HOME_SAMPLE_IDS = [
-  "roofing-after-the-storm",
-  "hvac-before-the-heat",
   "dental-first-visit",
-  "restaurant-weeknight",
-  "landscaping-spring-cleanup",
-  "cleaning-first-visit",
+  "restaurant-grand-opening",
+  "auto-repair-brake-check",
+  "hvac-scene-01",
+  "realestate-home-value",
+  "restaurant-scene-04",
 ] as const
 
 export interface HomeSample {
