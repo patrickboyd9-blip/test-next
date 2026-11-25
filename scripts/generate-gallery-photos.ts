@@ -3,6 +3,7 @@ import path from "node:path"
 
 import { POSTCARD_SLOT_ASPECT } from "@/lib/campaign-creator/image-generation"
 import { createImagenImageGenerationAdapter } from "@/lib/campaign-creator/replicate-image-generation"
+import { isListedBackgroundPhoto } from "@/lib/mail-templates/gallery-curation"
 import {
   centsFromUsd,
   emptyGallerySpendLog,
@@ -66,6 +67,10 @@ async function main(): Promise<void> {
   await mkdir(PHOTO_DIR, { recursive: true })
 
   for (const job of jobs) {
+    if (isListedBackgroundPhoto(job.templateId)) {
+      console.log(`${job.templateId} is curated. Leaving the file alone.`)
+      continue
+    }
     const existing = await readFile(path.join(PHOTO_DIR, job.fileName)).then(() => true).catch(() => false)
     const saved = spend.entries.some((entry) => entry.templateId === job.templateId && entry.status === "saved")
     if (existing && saved) {

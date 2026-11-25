@@ -42,28 +42,38 @@ test("a locked gallery picture keeps the customer's words and does not require a
   assert.doesNotMatch(JSON.stringify(design), /gemini|openai|replicate|flux|anthropic/i)
 })
 
-test("gallery categories page through every photo, including a later set of 18", () => {
+test("gallery categories keep the reviewed photos and hide empty trades", () => {
   const categories = galleryCategories()
-  const roofing = categories.find((category) => category.id === "roofing")
-  assert.ok(roofing)
-  assert.equal(roofing.photos.length, 21)
-  assert.ok(roofing.photos.some((photo) => photo.id === "roofing-scene-18"))
-  assert.equal(categories.reduce((count, category) => count + category.photos.length, 0), 317)
-  assert.ok(roofing.photos.every((photo) => photo.src.startsWith("/gallery/")))
+  assert.equal(categories.some((category) => category.id === "roofing"), false)
+  assert.equal(categories.some((category) => category.id === "landscaping"), false)
+  assert.equal(categories.some((category) => category.id === "cleaning"), false)
+  const dental = categories.find((category) => category.id === "dental")
+  assert.ok(dental)
+  assert.deepEqual(
+    dental.photos.map((photo) => photo.id).sort(),
+    ["dental-first-visit", "dental-scene-12", "dental-scene-13", "dental-scene-18"]
+  )
+  const auto = categories.find((category) => category.id === "auto_repair")
+  assert.equal(auto?.photos.length, 4)
+  assert.equal(categories.reduce((count, category) => count + category.photos.length, 0), 161)
+  assert.ok(dental.photos.every((photo) => photo.src.startsWith("/gallery/")))
   assert.equal(photoCountLabel(2, 18), "3 of 18")
-  assert.equal(photoCountLabel(0, roofing.photos.length), `1 of ${roofing.photos.length}`)
+  assert.equal(photoCountLabel(0, dental.photos.length), "1 of 4")
 })
 
 test("each industry with photos has its own gallery page", () => {
   const categories = galleryCategories()
   assert.deepEqual(
-    categories.slice(0, 8).map((category) => category.label),
-    ["Roofing", "HVAC", "Restaurant", "Dental", "Real estate", "Landscaping", "Auto repair", "Cleaning"]
+    categories.slice(0, 5).map((category) => category.label),
+    ["HVAC", "Restaurant", "Dental", "Real estate", "Auto repair"]
   )
-  assert.equal(categories.length, 39)
+  assert.equal(categories.length, 36)
   assert.equal(galleryIndustrySlug("auto_repair"), "auto-repair")
   assert.equal(galleryIndustrySlug("vet_pet"), "vet-pet")
-  assert.equal(galleryCategoryBySlug("roofing")?.photos.length, 21)
+  assert.equal(galleryCategoryBySlug("roofing")?.photos.length, 0)
+  assert.equal(galleryCategoryBySlug("roofing")?.label, "Roofing")
+  assert.equal(galleryCategoryBySlug("landscaping")?.photos.length, 0)
+  assert.equal(galleryCategoryBySlug("cleaning")?.photos.length, 0)
   assert.equal(galleryCategoryBySlug("auto-repair")?.id, "auto_repair")
   assert.equal(galleryCategoryBySlug("real-estate")?.label, "Real estate")
   assert.equal(galleryCategoryBySlug("plumbing")?.photos.length, 5)
@@ -98,14 +108,14 @@ test("the gallery viewer and the print downloads are separate pages", () => {
   assert.match(gallery, /<h1[^>]*>Gallery<\/h1>/)
   assert.match(
     gallery,
-    /We've already hand-picked hundreds of standout mailer photos for every industry, so your next postcard is a few clicks away instead of a blank page\./
+    /A short, hand-picked set of mailers you can be proud to send\. Pick a photo, then make it yours\. More industries are on the way\./
   )
   assert.match(gallery, /How It Works/)
   assert.match(
     gallery,
     /You have two options\. Pick a photo and edit it yourself, or pick a photo and have us design the mailer for you\. Nothing is mailed from this page\./
   )
-  assert.ok(gallery.indexOf("hand-picked hundreds") < gallery.indexOf("How It Works"))
+  assert.ok(gallery.indexOf("hand-picked set") < gallery.indexOf("How It Works"))
   assert.ok(gallery.indexOf("How It Works") < gallery.indexOf("You have two options"))
   assert.match(gallery, /GalleryIndex/)
   assert.doesNotMatch(gallery, /GalleryBoard/)
