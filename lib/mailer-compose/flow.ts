@@ -210,13 +210,13 @@ export interface MailerProof {
   qr: string | null
 }
 
-export function proofFromDraft(draft: ComposeDraft, shop = SAMPLE_SHOP): MailerProof {
+export function proofFromDraft(draft: ComposeDraft, shop = SAMPLE_SHOP, lists: SavedList[] = SAVED_LISTS): MailerProof {
   const website = draft.website.replace(/\s+/g, "").trim()
   return {
     shop,
     line: draft.brief.replace(/\s+/g, " ").trim(),
-    to: selectedListName(draft),
-    people: selectedPeople(draft),
+    to: selectedListName(draft, lists),
+    people: selectedPeople(draft, lists),
     phone: draft.phone.replace(/\s+/g, " ").trim(),
     website,
     logoName: draft.logoName,

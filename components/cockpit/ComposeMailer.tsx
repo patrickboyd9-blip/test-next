@@ -20,12 +20,15 @@ import {
   previousStep,
   SIZE_REQUIRED_MESSAGE,
   proofFromDraft,
-  SAVED_LISTS,
   selectedListName,
   selectedPeople,
   type ComposeDraft,
   type ComposeStep,
+  type SavedList,
 } from "@/lib/mailer-compose/flow"
+import { AddressBook } from "@/components/address-book/AddressBook"
+import type { AddressEntry } from "@/lib/address-book/types"
+import { formatFullPrice } from "@/lib/address-book/price"
 import {
   ACCOMPLISH_QUESTION,
   EXAMPLE_PROMPTS,
@@ -90,6 +93,9 @@ export function ComposeMailer({
   sampleBeat = null,
   liveChat = false,
   initialPastIntro = false,
+  savedLists = [],
+  savedEntries = [],
+  approvedPerPieceCents = null,
 }: {
   shop: string
   initialStep?: ComposeStep
@@ -102,11 +108,22 @@ export function ComposeMailer({
   liveChat?: boolean
   /** Skips the size and name steps. Used when a flow is opened mid-way. */
   initialPastIntro?: boolean
+  savedLists?: SavedList[]
+  savedEntries?: AddressEntry[]
+  /** Approved full price per piece, in cents. Null keeps the placeholder. */
+  approvedPerPieceCents?: number | null
 }) {
   const router = useRouter()
   const brand = useBrand()
   const [step, setStep] = useState<ComposeStep>(initialStep)
   const [draft, setDraft] = useState<ComposeDraft>(initialDraft ?? emptyDraft())
+  const [pendingLists, setPendingLists] = useState<SavedList[]>([])
+  const lists = useMemo(() => {
+    return [
+      ...savedLists.map((list) => pendingLists.find((item) => item.id === list.id) ?? list),
+      ...pendingLists.filter((item) => !savedLists.some((list) => list.id === item.id)),
+    ]
+  }, [savedLists, pendingLists])
   const [path, setPath] = useState<StartPath | null>(initialPath)
   const [postcardSize, setPostcardSize] = useState<"5x8" | "6x9" | null>(initialPastIntro ? (initialDraft?.size ?? "5x8") : null)
   const [sizeConfirmed, setSizeConfirmed] = useState(initialPastIntro)
@@ -130,13 +147,13 @@ export function ComposeMailer({
   const [templateId, setTemplateId] = useState<string | null>(null)
   const [galleryLayers, setGalleryLayers] = useState<ProofLayer[] | null>(null)
   const [advanced, setAdvanced] = useState(false)
-  const [listError, setListError] = useState("")
   const steps = composeSteps(LIST_BEFORE_PROOF)
   const proof = useMemo(
-    () => proofFromDraft(draft, proposal?.shop || shop),
-    [draft, proposal?.shop, shop]
+    () => proofFromDraft(draft, proposal?.shop || shop, lists),
+    [draft, proposal?.shop, shop, lists]
   )
-  const people = selectedPeople(draft)
+  const people = selectedPeople(draft, lists)
+  const fullPrice = formatFullPrice(people, approvedPerPieceCents)
   const stepOneReady =
     path === "upload"
       ? Boolean(frontFile && backFile)
@@ -217,14 +234,6 @@ export function ComposeMailer({
       if (current) URL.revokeObjectURL(current.url)
       return { name: file.name, url, mediaType: classified.mediaType }
     })
-  }
-
-  async function onFile(file: File | null) {
-    if (!file) return
-    const text = await file.text()
-    const count = countAddresses(text)
-    setListError(count > 0 ? "" : "That file needs a header row and at least one person.")
-    patch({ uploadedName: file.name, uploadedPeople: count, listId: null })
   }
 
   async function answer(text: string) {
@@ -327,7 +336,7 @@ export function ComposeMailer({
     const id = `preview-${draft.listId ?? "upload"}`
     const record = {
       name: draft.brief.replace(/\s+/g, " ").trim().slice(0, 42),
-      listName: selectedListName(draft),
+      listName: selectedListName(draft, lists),
       people,
       status: result.status,
       detail: "Preview only. Nothing was mailed and nothing was charged.",
@@ -390,47 +399,25 @@ export function ComposeMailer({
         </ol> : null}
 
         {sizeConfirmed && step === "to" ? (
-          <Panel className="space-y-4 p-4 sm:p-6">
+          <div className="space-y-4">
             <div>
               <Eyebrow>To</Eyebrow>
               <h1 className="mt-2 text-2xl font-semibold">Who should get it?</h1>
-              <p className="mt-1 text-sm text-[#8aa0b4]">Sample lists. Or upload your own. The file stays on this screen.</p>
+              <p className="mt-1 text-sm text-[#8aa0b4]">Pick a saved list, add a customer, or upload a spreadsheet. Addresses stay in your address book.</p>
             </div>
-            <ul className="space-y-2">
-              {SAVED_LISTS.map((list) => {
-                const selected = draft.listId === list.id && draft.uploadedPeople === 0
-                return (
-                  <li key={list.id}>
-                    <button
-                      type="button"
-                      onClick={() => patch({ listId: list.id, uploadedName: null, uploadedPeople: 0 })}
-                      className={`flex min-h-14 w-full items-center justify-between rounded-xl border px-4 text-left ${
-                        selected ? "border-[#5ce1ff] bg-[#102433]" : "border-[#245068]"
-                      }`}
-                    >
-                      <span className="text-base">{list.name}</span>
-                      <span className="text-sm text-[#8aa0b4]">{list.people} people</span>
-                    </button>
-                  </li>
-                )
-              })}
-            </ul>
-            <label className="block">
-              <span className="mb-2 block text-sm text-[#b7c9d8]">Or upload a list (CSV)</span>
-              <input
-                type="file"
-                accept=".csv,text/csv"
-                className="block min-h-12 w-full text-sm file:mr-3 file:min-h-10 file:rounded-lg file:border-0 file:bg-[#5ce1ff] file:px-3 file:font-semibold file:text-[#041018]"
-                onChange={(event) => void onFile(event.target.files?.[0] ?? null)}
-              />
-            </label>
-            {listError ? <p className="text-sm text-[#f0a202]">{listError}</p> : null}
-            {draft.uploadedPeople > 0 ? (
-              <p className="text-sm text-[#b7c9d8]">
-                {draft.uploadedName}: {draft.uploadedPeople} people. The file stays on this screen.
-              </p>
-            ) : null}
-          </Panel>
+            <AddressBook
+              tone="cockpit"
+              lists={lists.map((list) => ({ id: list.id, name: list.name, count: list.people }))}
+              selectedId={draft.listId}
+              entries={savedEntries}
+              onSelect={(list) => {
+                const next = { id: list.id, name: list.name, people: list.count }
+                setPendingLists((current) => [...current.filter((item) => item.id !== list.id), next])
+                patch({ listId: list.id, uploadedName: null, uploadedPeople: 0 })
+              }}
+              prepareFile={(text) => (countAddresses(text) === 0 ? "That file needs a header row and at least one person." : null)}
+            />
+          </div>
         ) : null}
 
         {step === "what" && path === null ? (
@@ -771,8 +758,8 @@ export function ComposeMailer({
         {lastStep ? (
           <Panel className="space-y-3 p-4 sm:p-6">
             <Eyebrow>Full price</Eyebrow>
-            <p className="text-4xl font-semibold tracking-tight">{PLACEHOLDER_FULL_PRICE.label}</p>
-            <p className="text-sm leading-relaxed text-[#b7c9d8]">{PLACEHOLDER_FULL_PRICE.detail}</p>
+            <p className="text-4xl font-semibold tracking-tight">{approvedPerPieceCents == null ? PLACEHOLDER_FULL_PRICE.label : fullPrice.label}</p>
+            <p className="text-sm leading-relaxed text-[#b7c9d8]">{fullPrice.detail}</p>
             <p className="rounded-xl bg-[#f0a202]/15 px-3 py-3 text-sm text-[#f6d48a]">
               This button only saves a preview. Nothing is mailed or charged.
             </p>

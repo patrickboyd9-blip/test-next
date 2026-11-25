@@ -18,6 +18,8 @@ import { buildPostcard6x9PrintSpec } from "@/lib/print-spec/postcard-6x9-print-s
 import { resultsFor as ledgerFor } from "@/lib/tracking/ledger"
 import { presentResults } from "@/lib/tracking/present"
 
+import { attachListToCampaign, readCampaignRecipientCount } from "@/lib/address-book/store"
+
 import { listCustomerLists, readOwnedList, saveCustomerList } from "./lists"
 import { leaksInternalText, toPublic } from "./public"
 
@@ -367,8 +369,8 @@ async function uploadList(args: Record<string, unknown>, ctx: McpContext): Promi
   if (!csv || csv.length > 1_000_000) throw new Error("Add a CSV address list under 1 MB.")
   const review = reviewCustomerList(csv)
   if (review.headerError) throw new Error(review.headerError)
-  const saved = await saveCustomerList({ ownerId: ctx.userId, name: text(args, "name"), csv })
-  await attachList(ctx, campaign.id, csv)
+  const saved = await saveCustomerList({ ownerId: ctx.userId, name: text(args, "name"), csv, env: ctx.env })
+  await attachList(ctx, campaign.id, saved.id)
   return listSummary(saved.id, saved.name, review)
 }
 
@@ -387,7 +389,7 @@ async function chooseList(args: Record<string, unknown>, ctx: McpContext): Promi
   const list = await readOwnedList(ctx.userId, text(args, "listId"))
   if (!list) throw new Error("That list was not found on this account.")
   const review = reviewCustomerList(list.csv)
-  await attachList(ctx, campaign.id, list.csv)
+  await attachList(ctx, campaign.id, list.id)
   return listSummary(list.id, list.name, review)
 }
 
@@ -493,9 +495,7 @@ async function mailerStatus(args: Record<string, unknown>, ctx: McpContext): Pro
 async function priceBlock(ctx: McpContext, campaign: Campaign): Promise<Record<string, unknown>> {
   const env = ctx.env ?? process.env
   const priced = await priceMailer(ctx.userId, campaign.id, env)
-  const stored = await ctx.journey.getListReview(campaign.id, ctx.userId)
-  const review = stored ? reviewCustomerList(stored.csv) : null
-  const pieceCount = review?.acceptedCount ?? 0
+  const pieceCount = await readCampaignRecipientCount(ctx.userId, campaign.id, env)
   const proof = freezeProof(campaign)
   const quote = buildQuote(readApprovedSchedule(env), pieceCount, new Date().toISOString())
   const ready = quote.ok && priced.configured
@@ -503,7 +503,7 @@ async function priceBlock(ctx: McpContext, campaign: Campaign): Promise<Record<s
     proofReady: proof.ok,
     proofNote: proof.ok ? "The front and the back are ready to review." : "Add a front and a back before this can be approved.",
     pieceCount,
-    listReady: Boolean(review && !review.headerError && review.invalid.length === 0 && pieceCount > 0),
+    listReady: pieceCount > 0,
     label: ready ? formatDollars(quote.quote.totalCents) : PLACEHOLDER_FULL_PRICE.label,
     total: ready ? formatDollars(quote.quote.totalCents) : null,
     detail: ready ? FULL_PRICE_DETAIL : PLACEHOLDER_FULL_PRICE.detail,
@@ -514,13 +514,9 @@ async function priceBlock(ctx: McpContext, campaign: Campaign): Promise<Record<s
   }
 }
 
-async function attachList(ctx: McpContext, campaignId: string, csv: string): Promise<void> {
-  await ctx.journey.saveListReview({
-    campaignId,
-    ownerId: ctx.userId,
-    csv,
-    createdAt: new Date().toISOString(),
-  })
+async function attachList(ctx: McpContext, campaignId: string, listId: string): Promise<void> {
+  const attached = await attachListToCampaign({ ownerId: ctx.userId, campaignId, listId, env: ctx.env })
+  if (!attached) throw new Error("That list was not found on this account.")
 }
 
 function listSummary(

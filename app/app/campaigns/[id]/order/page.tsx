@@ -2,10 +2,11 @@ import { notFound } from "next/navigation"
 
 import { MailJourneyReview } from "@/components/mail-journey/MailJourneyReview"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { formatFullPrice } from "@/lib/address-book/price"
+import { listAddressLists, readCampaignList } from "@/lib/address-book/store"
 import { requireOwnedCampaign } from "@/lib/auth/campaign-access"
 import { getSession } from "@/lib/auth/session"
 import { getJourneyStore } from "@/lib/mail-journey/job"
-import { reviewCustomerList } from "@/lib/mail-journey/list-import"
 import { attemptMail, readLiveGate } from "@/lib/mail-journey/mail-gate"
 import { buildQuote, readApprovedSchedule } from "@/lib/mail-journey/pricing"
 import { freezeProof } from "@/lib/mail-journey/proof"
@@ -49,12 +50,16 @@ export default async function OrderReviewPage({
     notFound()
   }
 
-  const stored = await getJourneyStore().getListReview(id, session.userId)
-  const review = stored ? reviewCustomerList(stored.csv) : null
+  const [lists, attached] = await Promise.all([
+    listAddressLists(session.userId),
+    readCampaignList(session.userId, id),
+  ])
+  const entries = attached?.entries ?? []
   const proof = freezeProof(campaign)
-  const count = review?.acceptedCount ?? 0
-  const quote = buildQuote(readApprovedSchedule(), count, new Date().toISOString())
-  const job = stored?.jobId ? await getJourneyStore().getJob(stored.jobId) : null
+  const now = new Date().toISOString()
+  const quote = buildQuote(readApprovedSchedule(), entries.length, now)
+  const price = formatFullPrice(entries.length, quote.ok ? quote.quote.perPieceCents : null)
+  const job = attached?.jobId ? await getJourneyStore().getJob(attached.jobId) : null
   const mailMessage = job ? attemptMail(job, readLiveGate()).message : "Nothing is mailed from this page."
   if (job && job.ownerId !== session.userId) notFound()
 
@@ -68,11 +73,14 @@ export default async function OrderReviewPage({
       <MailJourneyReview
         campaignId={id}
         proof={proof}
-        review={review}
         quote={quote}
+        priceLabel={price.label}
+        priceDetail={price.detail}
+        lists={lists}
+        selectedId={attached?.list.id ?? null}
+        entries={entries}
         job={job}
         mailMessage={mailMessage}
-        csv={stored?.csv}
       />
     </div>
   )
