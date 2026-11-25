@@ -17,6 +17,10 @@ Answer from [Perpetual Adaptability](../docs/PERPETUAL_ADAPTABILITY.md):
 
 Name any conflict and the tradeoff.
 
+## Customer experience
+
+Start with the customer experience and work backwards to the technology. Write one or two plain-English sentences naming the specific customer moment this change improves — for example, "A roofer approves a proof from Claude in two minutes." Pure internal changes (CI, refactors, tests) still fill this in, explaining which customer experience they protect, or write `Internal: <customer outcome it protects>`.
+
 ## Notes
 
 What changed, and how it was checked.

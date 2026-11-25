@@ -19,16 +19,17 @@ jobs:
       - run: npx tsc --noEmit
       - run: npm run lint
       - name: tests
-        run: npx tsx --test $(find lib components -name '*.test.ts' -o -name '*.test.tsx')
+        run: |
+          npx tsx --test $(find lib components -name '*.test.ts' -o -name '*.test.tsx')
+          node --test scripts/check-pr-body.test.mjs
       - run: npm run build
 
   pull-request-notes:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - name: Requirement served and Manifesto check
+      - uses: actions/checkout@v4
+      - name: Requirement served, Manifesto check, and Customer experience
         env:
           BODY: ${{ github.event.pull_request.body }}
-        run: |
-          printf '%s\n' "$BODY" | grep -q "Requirement served"
-          printf '%s\n' "$BODY" | grep -q "Manifesto check"
+        run: node scripts/check-pr-body.mjs
