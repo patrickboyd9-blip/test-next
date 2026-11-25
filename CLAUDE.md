@@ -39,6 +39,10 @@ These rules govern *how* to work in this repo, not just what's in it. They apply
 15. **Explain dependency changes before making them.** State why a version pin or new package is needed; then verify with a clean install, build, and dev smoke test.
 16. **Every milestone ends with:** `npm run lint`, `npm run build`, `npm run dev`, browser verification of `/` and `/app` (plus new feature paths), and a `git status` review.
 
+## Pull requests
+
+Every pull request body needs a Requirement served section, a Manifesto check section, and a Customer experience section. CI reads them as markdown headings (any level, or a Setext underline) or as label lines such as `Customer experience: ...`, ignoring case, and rejects a Customer experience section that is missing or empty. Start with the customer experience and work backwards to the technology: under Customer experience, write one or two plain-English sentences naming the specific customer moment this change improves (for example, "A roofer approves a proof from Claude in two minutes"). Pure internal changes — CI, refactors, tests — still fill it in, explaining which customer experience they protect, or write `Internal: <customer outcome it protects>`.
+
 ## Commands
 
 ```bash
