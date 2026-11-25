@@ -55,7 +55,7 @@ test("gallery categories keep the reviewed photos and hide empty trades", () => 
   )
   const auto = categories.find((category) => category.id === "auto_repair")
   assert.equal(auto?.photos.length, 4)
-  assert.equal(categories.reduce((count, category) => count + category.photos.length, 0), 161)
+  assert.equal(categories.reduce((count, category) => count + category.photos.length, 0), 164)
   assert.ok(dental.photos.every((photo) => photo.src.startsWith("/gallery/")))
   assert.equal(photoCountLabel(2, 18), "3 of 18")
   assert.equal(photoCountLabel(0, dental.photos.length), "1 of 4")
