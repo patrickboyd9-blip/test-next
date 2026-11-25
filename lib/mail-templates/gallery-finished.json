@@ -1341,6 +1341,42 @@
       "url": "https://o1at7qxja3v9ya7m.public.blob.vercel-storage.com/gallery/v2/outdoor-living/GOLD-outdoor-living-041__hearthline-outdoor-co.jpg",
       "width": 2528,
       "height": 1696
+    },
+    {
+      "id": "MM-optometry-see-clearly",
+      "industry": "optometry",
+      "fictional_brand_name": "Lumen Eye Co.",
+      "name_risk": null,
+      "name": "See Clearly",
+      "summary": "A dark eye-care card for an annual exam and new frames.",
+      "url": "/gallery/optometry-see-clearly.jpg",
+      "back_url": "/gallery/optometry-see-clearly-back.jpg",
+      "width": 1152,
+      "height": 864
+    },
+    {
+      "id": "MM-gyms-fitness-stronger-together",
+      "industry": "gyms-fitness",
+      "fictional_brand_name": "Ironcrest Fitness",
+      "name_risk": null,
+      "name": "Stronger Together",
+      "summary": "A dark gym card for a free first month.",
+      "url": "/gallery/gyms-fitness-stronger-together.jpg",
+      "back_url": "/gallery/gyms-fitness-stronger-together-back.jpg",
+      "width": 1152,
+      "height": 864
+    },
+    {
+      "id": "MM-consumer-products-made-for-home",
+      "industry": "consumer-products",
+      "fictional_brand_name": "Hearthline Goods",
+      "name_risk": null,
+      "name": "Made for Home",
+      "summary": "A dark retail card for a home-goods offer.",
+      "url": "/gallery/consumer-products-made-for-home.jpg",
+      "back_url": "/gallery/consumer-products-made-for-home-back.jpg",
+      "width": 1152,
+      "height": 864
     }
   ]
 }

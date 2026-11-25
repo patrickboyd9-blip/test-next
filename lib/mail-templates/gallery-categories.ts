@@ -11,6 +11,8 @@ export interface GalleryPhoto {
   name: string
   summary: string
   src: string
+  /** Address side, when the example includes one. The card itself stays the front. */
+  backSrc?: string
   industry: string
   /**
    * "photo" is an empty scene the customer can letter themselves.

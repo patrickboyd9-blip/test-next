@@ -30,7 +30,10 @@ export function GalleryBoard({ category }: { category: GalleryCategory }) {
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={photo.src} alt="" className="aspect-[8/5] w-full object-cover" />
-              <span className="block px-3 py-3 text-sm font-medium">{photo.name}</span>
+              <span className={`block px-3 text-sm font-medium ${photo.backSrc ? "pt-3" : "py-3"}`}>{photo.name}</span>
+              {photo.backSrc ? (
+                <span className="block px-3 pb-3 text-sm text-muted-foreground">{photo.summary}</span>
+              ) : null}
             </button>
           </li>
         ))}
@@ -140,10 +143,20 @@ function PhotoViewer({
           ) : mode === "words" && actions.changeWords ? (
             <ChangeTheWords key={photo.id} templateId={photo.id} imageSrc={photo.src} onBack={() => setMode("view")} />
           ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={photo.src} alt="" className="mx-auto max-h-[46vh] w-full rounded-2xl object-contain sm:max-h-[68vh]" />
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={photo.src} alt="" className="mx-auto max-h-[46vh] w-full rounded-2xl object-contain sm:max-h-[68vh]" />
+              {photo.backSrc ? (
+                <>
+                  <p className="mt-4 text-sm text-white/70">Back</p>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={photo.backSrc} alt="" className="mx-auto mt-2 max-h-[46vh] w-full rounded-2xl object-contain sm:max-h-[68vh]" />
+                </>
+              ) : null}
+            </>
           )}
           <p className="mt-3 text-sm text-white/80">{photo.name}</p>
+          {photo.backSrc ? <p className="mt-1 text-sm text-white/60">{photo.summary}</p> : null}
         </div>
         <button type="button" aria-label="Next photo" className="hidden min-h-12 min-w-12 rounded-full border border-white/30 text-xl sm:inline-flex sm:items-center sm:justify-center" onClick={() => step(1)}>
           ›

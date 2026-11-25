@@ -13,7 +13,13 @@ export interface FinishedGalleryRecord {
   industry: string
   fictional_brand_name: string
   name_risk: string | null
+  /** Card title when this example has its own line. Otherwise the gallery numbers it. */
+  name?: string
+  /** One sentence when this example has its own line. */
+  summary?: string
   url: string
+  /** Address side, when this example includes one. */
+  back_url?: string
   width: number
   height: number
 }
@@ -88,6 +94,8 @@ export interface FinishedGalleryPhoto {
   name: string
   summary: string
   src: string
+  /** Address side. Omitted when the example has no separate back. */
+  backSrc?: string
   industry: string
   /** Flat finished art. The words are already in the picture. */
   kind: typeof FINISHED_GALLERY_KIND
@@ -105,14 +113,16 @@ export function finishedGalleryPhotos(): FinishedGalleryPhoto[] {
     const industry = finishedIndustryId(record.industry)
     const number = (seen.get(industry) ?? 0) + 1
     seen.set(industry, number)
-    return {
+    const photo: FinishedGalleryPhoto = {
       id: record.id,
-      name: `Postcard ${number}`,
-      summary: SUMMARY,
+      name: record.name ?? `Postcard ${number}`,
+      summary: record.summary ?? SUMMARY,
       src: record.url,
       industry,
       kind: FINISHED_GALLERY_KIND,
     }
+    if (record.back_url) photo.backSrc = record.back_url
+    return photo
   })
 }
 
