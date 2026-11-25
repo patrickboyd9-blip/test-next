@@ -36,9 +36,10 @@ export function imagenAspectFor(slotAspect?: number): string {
 
 const FULL_BLEED_NOTE = " Full-bleed photograph that fills the entire frame edge to edge. No border, no frame, no mat, no white or gray margin, not a printed photo."
 
-/** google/imagen-4 on Replicate. About $0.04 per image. */
-export const IMAGEN4_IMAGE_MODEL = "google/imagen-4"
-export const IMAGEN4_ESTIMATED_USD = 0.04
+/** google/nano-banana-2.1 on Replicate, the live replacement for retired google/imagen-4. 2K is about $0.05 per image. */
+export const IMAGEN4_IMAGE_MODEL = "google/nano-banana-2.1"
+export const IMAGEN4_ESTIMATED_USD = 0.0504
+export const IMAGEN4_RESOLUTION = "2K"
 
 export async function generateImagen4Jpeg(
   prompt: string,
@@ -58,7 +59,7 @@ export async function generateImagen4Jpeg(
         prompt,
         aspect_ratio: options.aspectRatio,
         output_format: "jpg",
-        safety_filter_level: "block_only_high",
+        resolution: IMAGEN4_RESOLUTION,
       },
     }),
   })

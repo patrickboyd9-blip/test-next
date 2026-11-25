@@ -58,9 +58,9 @@ function splitSvg(redo: GalleryRedoCopy): string {
   const headline = redo.lines.find((line) => line.role === "headline")?.text ?? redo.headline
   const support = redo.lines.find((line) => line.role === "support")?.text ?? redo.subheadline
   const offer = redo.lines.find((line) => line.role === "offer")?.text ?? redo.offer
+  // The postcard base is already paper-colored. Do not fill this overlay, or the photo disappears.
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="${GALLERY_CARD_WIDTH}" height="${GALLERY_CARD_HEIGHT}" viewBox="0 0 ${GALLERY_CARD_WIDTH} ${GALLERY_CARD_HEIGHT}" xmlns="http://www.w3.org/2000/svg">
-  <rect width="${GALLERY_CARD_WIDTH}" height="${GALLERY_CARD_HEIGHT}" fill="${redo.paper}"/>
   <rect x="18" y="18" width="${GALLERY_CARD_WIDTH - 36}" height="${GALLERY_CARD_HEIGHT - 36}" fill="none" stroke="${redo.accent}" stroke-width="28"/>
   <rect x="1320" y="46" width="1034" height="1408" fill="${redo.paper}"/>
   ${text("A local story", 1400, 280, 32, redo.accent, 650)}

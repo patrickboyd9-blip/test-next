@@ -6,14 +6,14 @@ import { GALLERY_REDOS, galleryRedoPromptFailures, type GalleryRedoCopy } from "
 import { composeGalleryRedo } from "@/lib/mail-templates/gallery-redo-compose"
 
 /**
- * Regenerates the nine reviewed gallery mailers with google/imagen-4.
+ * Regenerates the nine reviewed gallery mailers with google/nano-banana-2.1 (Imagen 4's live replacement).
  * Reads REPLICATE_API_TOKEN from the environment. Does not print it.
  *
  *   npx tsx scripts/generate-gallery-redos.ts --dry-run
  *   npx tsx scripts/generate-gallery-redos.ts
  *   npx tsx scripts/generate-gallery-redos.ts --only restaurant-grand-opening
  *
- * Hard cap: 27 image requests (3 per mailer). About $0.04 each.
+ * Hard cap: 27 image requests (3 per mailer). About $0.05 each at 2K.
  */
 
 const MAX_GENERATIONS = 27
