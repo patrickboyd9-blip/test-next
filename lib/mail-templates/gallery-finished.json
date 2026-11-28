@@ -1377,6 +1377,54 @@
       "back_url": "/gallery/consumer-products-made-for-home-back.jpg",
       "width": 1152,
       "height": 864
+    },
+    {
+      "id": "MM-med-spa-free-laser-facial",
+      "industry": "med-spa",
+      "fictional_brand_name": "Marenwood Skin Studio",
+      "name_risk": null,
+      "name": "Free Laser Facial",
+      "summary": "A light med-spa card for a free laser facial.",
+      "url": "/gallery/med-spa-free-laser-facial.jpg",
+      "back_url": "/gallery/med-spa-free-laser-facial-back.jpg",
+      "width": 1152,
+      "height": 864
+    },
+    {
+      "id": "MM-beauty-up-to-45-off",
+      "industry": "beauty",
+      "fictional_brand_name": "Dusklark",
+      "name_risk": null,
+      "name": "Up to 45% Off",
+      "summary": "A beauty card for a Black Friday sale, up to 45% off.",
+      "url": "/gallery/beauty-up-to-45-off.jpg",
+      "back_url": "/gallery/beauty-up-to-45-off-back.jpg",
+      "width": 1152,
+      "height": 864
+    },
+    {
+      "id": "MM-auto-parts-sell-unused-parts",
+      "industry": "auto-parts",
+      "fictional_brand_name": "PartLoft Pro",
+      "name_risk": null,
+      "name": "Sell Unused Parts",
+      "summary": "A wide auto-parts card for two free months to sell unused parts.",
+      "url": "/gallery/auto-parts-sell-unused-parts.jpg",
+      "back_url": "/gallery/auto-parts-sell-unused-parts-back.jpg",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "id": "MM-skincare-free-night-serum",
+      "industry": "skincare",
+      "fictional_brand_name": "Ashwyck",
+      "name_risk": null,
+      "name": "Free Night Serum",
+      "summary": "A dark skincare card for a free night serum with every Glow Set or Night Ritual.",
+      "url": "/gallery/skincare-free-night-serum.jpg",
+      "back_url": "/gallery/skincare-free-night-serum-back.jpg",
+      "width": 1152,
+      "height": 864
     }
   ]
 }
