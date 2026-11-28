@@ -27,8 +27,8 @@ function assertGalleryPicture(url: string) {
 
 test("finished gallery records load with an industry label and an https picture", () => {
   const records = finishedGalleryRecords()
-  assert.equal(records.length, 152)
-  assert.equal(new Set(records.map((record) => record.id)).size, 152)
+  assert.equal(records.length, 156)
+  assert.equal(new Set(records.map((record) => record.id)).size, 156)
   assert.equal(listMailTemplates().some((template) => template.id.startsWith("MM-")), false)
 
   for (const record of records) {
@@ -67,7 +67,7 @@ test("finished gallery records load with an industry label and an https picture"
 test("finished photos join the gallery by industry and hide internal fields", () => {
   const records = finishedGalleryRecords()
   const photos = finishedGalleryPhotos()
-  assert.equal(photos.length, 152)
+  assert.equal(photos.length, 156)
   const categories = galleryCategories()
   const listed = new Set(categories.map((category) => category.id))
   const byId = new Map(photos.map((photo) => [photo.id, photo]))
@@ -104,6 +104,10 @@ test("finished photos join the gallery by industry and hide internal fields", ()
       keys.push("backSrc")
       assert.equal(photo.backSrc, record.back_url)
     }
+    if (record.width / record.height > 8 / 5) {
+      keys.push("aspect")
+      assert.equal(photo.aspect, `${record.width} / ${record.height}`)
+    }
     assert.deepEqual(Object.keys(photo).sort(), keys.sort())
   }
 
@@ -118,6 +122,31 @@ test("finished photos join the gallery by industry and hide internal fields", ()
   const retail = galleryCategoryBySlug("consumer-products")?.photos.find((photo) => photo.id === "MM-consumer-products-made-for-home")
   assert.equal(retail?.name, "Made for Home")
   assert.equal(retail?.backSrc, "/gallery/consumer-products-made-for-home-back.jpg")
+  const medSpa = galleryCategoryBySlug("med-spa")?.photos.find((photo) => photo.id === "MM-med-spa-free-laser-facial")
+  assert.equal(medSpa?.name, "Free Laser Facial")
+  assert.equal(medSpa?.summary, "A light med-spa card for a free laser facial.")
+  assert.equal(medSpa?.src, "/gallery/med-spa-free-laser-facial.jpg")
+  assert.equal(medSpa?.backSrc, "/gallery/med-spa-free-laser-facial-back.jpg")
+  assert.equal(medSpa?.aspect, undefined)
+  const beauty = galleryCategoryBySlug("beauty")?.photos.find((photo) => photo.id === "MM-beauty-up-to-45-off")
+  assert.equal(beauty?.name, "Up to 45% Off")
+  assert.equal(beauty?.summary, "A beauty card for a Black Friday sale, up to 45% off.")
+  assert.equal(beauty?.src, "/gallery/beauty-up-to-45-off.jpg")
+  assert.equal(beauty?.backSrc, "/gallery/beauty-up-to-45-off-back.jpg")
+  const parts = galleryCategoryBySlug("auto-parts")?.photos.find((photo) => photo.id === "MM-auto-parts-sell-unused-parts")
+  assert.equal(parts?.name, "Sell Unused Parts")
+  assert.equal(parts?.summary, "A wide auto-parts card for two free months to sell unused parts.")
+  assert.equal(parts?.src, "/gallery/auto-parts-sell-unused-parts.jpg")
+  assert.equal(parts?.backSrc, "/gallery/auto-parts-sell-unused-parts-back.jpg")
+  assert.equal(parts?.aspect, "1280 / 720")
+  const skincare = galleryCategoryBySlug("skincare")?.photos.find((photo) => photo.id === "MM-skincare-free-night-serum")
+  assert.equal(skincare?.name, "Free Night Serum")
+  assert.equal(skincare?.summary, "A dark skincare card for a free night serum with every Glow Set or Night Ritual.")
+  assert.equal(skincare?.src, "/gallery/skincare-free-night-serum.jpg")
+  assert.equal(skincare?.backSrc, "/gallery/skincare-free-night-serum-back.jpg")
+  assert.equal(skincare?.aspect, undefined)
+  const board = readFileSync("components/mail-gallery/GalleryBoard.tsx", "utf8")
+  assert.match(board, /photo\.aspect \? "w-full object-contain" : "aspect-\[8\/5\] w-full object-cover"/)
 
   const vet = galleryCategoryBySlug("vet-pet")
   assert.equal(vet?.label, "Vet & Pet")

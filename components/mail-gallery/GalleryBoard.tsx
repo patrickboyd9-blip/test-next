@@ -29,7 +29,12 @@ export function GalleryBoard({ category }: { category: GalleryCategory }) {
               onClick={() => setOpen(index)}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={photo.src} alt="" className="aspect-[8/5] w-full object-cover" />
+              <img
+                src={photo.src}
+                alt=""
+                className={photo.aspect ? "w-full object-contain" : "aspect-[8/5] w-full object-cover"}
+                style={photo.aspect ? { aspectRatio: photo.aspect } : undefined}
+              />
               <span className={`block px-3 text-sm font-medium ${photo.backSrc ? "pt-3" : "py-3"}`}>{photo.name}</span>
               {photo.backSrc ? (
                 <span className="block px-3 pb-3 text-sm text-muted-foreground">{photo.summary}</span>

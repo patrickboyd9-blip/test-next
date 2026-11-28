@@ -30,7 +30,9 @@ export interface FinishedGalleryRecord {
  */
 export const FINISHED_INDUSTRY_LABELS: Record<string, string> = {
   "auto-insurance": "Auto insurance",
+  "auto-parts": "Auto parts",
   bakery: "Bakery",
+  beauty: "Beauty",
   "churches-community": "Churches & Community",
   "consumer-products": "Consumer Products",
   "garage-doors": "Garage Doors",
@@ -44,6 +46,7 @@ export const FINISHED_INDUSTRY_LABELS: Record<string, string> = {
   "junk-removal": "Junk Removal",
   laundromat: "Laundromat",
   "life-insurance": "Life Insurance",
+  "med-spa": "Med Spa",
   "med-spa-chiro": "Med Spa & Chiro",
   medicare: "Medicare",
   "mortgage-financial": "Mortgage & Financial",
@@ -55,6 +58,7 @@ export const FINISHED_INDUSTRY_LABELS: Record<string, string> = {
   "precious-metals": "Precious Metals",
   "retail-grand-openings": "Retail & Grand Openings",
   sauna: "Sauna",
+  skincare: "Skincare",
   "senior-living": "Senior Living",
   solar: "Solar",
   "tutoring-childcare": "Tutoring & Childcare",
@@ -96,12 +100,19 @@ export interface FinishedGalleryPhoto {
   src: string
   /** Address side. Omitted when the example has no separate back. */
   backSrc?: string
+  /**
+   * CSS aspect ratio when the picture is wider than the 8×5 card frame.
+   * The gallery uses it so a wide card is not cropped.
+   */
+  aspect?: string
   industry: string
   /** Flat finished art. The words are already in the picture. */
   kind: typeof FINISHED_GALLERY_KIND
 }
 
 const SUMMARY = "A finished postcard in this industry."
+/** Gallery thumbnails use an 8×5 frame. Wider art keeps its own ratio. */
+const CARD_FRAME = 8 / 5
 
 /**
  * Customer-facing photos. The brand stays on the record, the same way other
@@ -122,6 +133,7 @@ export function finishedGalleryPhotos(): FinishedGalleryPhoto[] {
       kind: FINISHED_GALLERY_KIND,
     }
     if (record.back_url) photo.backSrc = record.back_url
+    if (record.width / record.height > CARD_FRAME) photo.aspect = `${record.width} / ${record.height}`
     return photo
   })
 }

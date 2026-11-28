@@ -13,6 +13,8 @@ export interface GalleryPhoto {
   src: string
   /** Address side, when the example includes one. The card itself stays the front. */
   backSrc?: string
+  /** CSS aspect ratio when the picture is wider than the 8×5 card frame. */
+  aspect?: string
   industry: string
   /**
    * "photo" is an empty scene the customer can letter themselves.
